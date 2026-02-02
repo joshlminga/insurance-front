@@ -39,19 +39,20 @@ export const AboutSection = () => {
                             ensuring that our clients receive the highest level of service and most innovative strategies.
                         </p>
 
-                        <div className="bg-slate-50 rounded-2xl p-10 flex flex-col md:flex-row items-center justify-between border border-slate-100 shadow-sm mt-32">
+                        <hr className='border-t border-black/[0.27] mb-0' />
+                        <div className="flex flex-col md:flex-row items-center justify-between">
                             <div className="flex-1 text-center py-4">
-                                <h4 className="text-4xl font-extrabold text-slate-900 mb-2">200,000+</h4>
+                                <h4 className="text-[20px] font-bold text-black mb-2 leading-[100%]">200,000+</h4>
                                 <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Customer</p>
                             </div>
-                            <div className="hidden md:block w-px h-16 bg-red-600"></div>
+                            <div className="hidden md:block w-px h-[115px] bg-[#C20C0C]"></div>
                             <div className="flex-1 text-center py-4">
-                                <h4 className="text-4xl font-extrabold text-slate-900 mb-2">150,000+</h4>
+                                <h4 className="text-[20px] font-bold text-black mb-2 leading-[100%]">150,000+</h4>
                                 <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Quote Generated</p>
                             </div>
-                            <div className="hidden md:block w-px h-16 bg-red-600"></div>
+                            <div className="hidden md:block w-px h-[115px] bg-[#C20C0C]"></div>
                             <div className="flex-1 text-center py-4">
-                                <h4 className="text-4xl font-extrabold text-slate-900 mb-2">12+</h4>
+                                <h4 className="text-[20px] font-bold text-black mb-2 leading-[100%]">12+</h4>
                                 <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Years in Business</p>
                             </div>
                         </div>
