@@ -1,4 +1,3 @@
-
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
@@ -6,87 +5,104 @@ import { MapPin, Phone, Mail, Clock } from 'lucide-react'
 
 export const ContactSection = () => {
     return (
-        <section id="contact" className="relative py-32 overflow-hidden">
-            {/* Background with overlay */}
-            <div className="absolute inset-0 z-0">
-                <img 
-                    src="https://images.unsplash.com/photo-1521791136064-7986c2920216?q=80&w=2069&auto=format&fit=crop" 
-                    alt="Team joined hands" 
-                    className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0  backdrop-blur-[2px]"></div>
-            </div>
-            <div className="container mx-auto px-6 max-w-7xl relative z-10">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-                    <div className="text-white">
-                        <h2 className="text-4xl md:text-6xl font-bold mb-8 uppercase tracking-wider">Get in Touch</h2>
-                        <p className="text-slate-200 text-lg mb-12 leading-relaxed max-w-lg">
-                            Whether you're looking to capitalize on new opportunities, enhance financial performance, 
-                            or embrace digital transformation, we are here to guide you every step of the way.
-                        </p>
-                        
-                        <div className="space-y-8">
-                            <div className="flex gap-6 items-start">
-                                <div className="w-14 h-14 bg-red-600 rounded-2xl flex items-center justify-center shrink-0 shadow-lg">
-                                    <MapPin size={26} />
-                                </div>
-                                <div>
-                                    <h4 className="font-bold text-xl mb-1 uppercase tracking-wide">Address</h4>
-                                    <p className="text-slate-300">Acentria House, Westlands Avenue, Nairobi</p>
-                                </div>
+        <section id="contact" className="relative py-20 overflow-hidden">
+            <div className="container mx-auto px-6 max-w-7xl justify-center items-center">
+                <div className="text-center mb-16">
+                    <h2 className="text-4xl font-bold text-slate-900 mb-4 uppercase tracking-wider">Contact</h2>
+                    <div className="w-20 h-1 bg-red-600 mx-auto"></div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                    <div className="space-y-8">
+                        <div className="flex gap-6 items-start">
+                            <div className="w-[45px] h-[45px] bg-white rounded-[10px] border-t border-[#FF9A9A] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] flex items-center justify-center shrink-0">
+                                <MapPin size={20} className="text-red-600" />
                             </div>
-                            <div className="flex gap-6 items-start">
-                                <div className="w-14 h-14 bg-red-600 rounded-2xl flex items-center justify-center shrink-0 shadow-lg">
-                                    <Phone size={26} />
-                                </div>
-                                <div>
-                                    <h4 className="font-bold text-xl mb-1 uppercase tracking-wide">Phone</h4>
-                                    <p className="text-slate-300">+254 700 000 000 / +254 20 444 000</p>
-                                </div>
+                            <div>
+                                <h4 className="font-bold text-xl mb-2 uppercase tracking-wide text-slate-900">Address</h4>
+                                <p className="text-slate-600">Acentria House, Westlands Avenue, Nairobi</p>
                             </div>
-                            <div className="flex gap-6 items-start">
-                                <div className="w-14 h-14 bg-red-600 rounded-2xl flex items-center justify-center shrink-0 shadow-lg">
-                                    <Mail size={26} />
-                                </div>
-                                <div>
-                                    <h4 className="font-bold text-xl mb-1 uppercase tracking-wide">Email</h4>
-                                    <p className="text-slate-300">info@acentriagroup.com</p>
-                                </div>
+                        </div>
+
+                        <div className="flex gap-6 items-start">
+                            <div className="w-[45px] h-[45px] bg-white rounded-[10px] border-t border-[#FF9A9A] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] flex items-center justify-center shrink-0">
+                                <Phone size={20} className="text-red-600" />
                             </div>
-                            <div className="flex gap-6 items-start">
-                                <div className="w-14 h-14 bg-red-600 rounded-2xl flex items-center justify-center shrink-0 shadow-lg">
-                                    <Clock size={26} />
-                                </div>
-                                <div>
-                                    <h4 className="font-bold text-xl mb-1 uppercase tracking-wide">Working Hours</h4>
-                                    <p className="text-slate-300">Mon - Fri: 8:00 AM - 5:00 PM</p>
-                                </div>
+                            <div>
+                                <h4 className="font-bold text-xl mb-2 uppercase tracking-wide text-slate-900">Phone</h4>
+                                <p className="text-slate-600">+254 700 000 000 / +254 20 444 000</p>
+                            </div>
+                        </div>
+
+                        <div className="flex gap-6 items-start">
+                            <div className="w-[45px] h-[45px] bg-white rounded-[10px] border-t border-[#FF9A9A] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] flex items-center justify-center shrink-0">
+                                <Mail size={20} className="text-red-600" />
+                            </div>
+                            <div>
+                                <h4 className="font-bold text-xl mb-2 uppercase tracking-wide text-slate-900">Email</h4>
+                                <p className="text-slate-600">info@acentriagroup.com</p>
+                            </div>
+                        </div>
+
+                        <div className="flex gap-6 items-start">
+                            <div className="w-[45px] h-[45px] bg-white rounded-[10px] border-t border-[#FF9A9A] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] flex items-center justify-center shrink-0">
+                                <Clock size={20} className="text-red-600" />
+                            </div>
+                            <div>
+                                <h4 className="font-bold text-xl mb-2 uppercase tracking-wide text-slate-900">Working Hours</h4>
+                                <p className="text-slate-600">Mon - Fri: 8:00 AM - 5:00 PM</p>
                             </div>
                         </div>
                     </div>
-                    
-                    <div className="bg-white/10 backdrop-blur-md p-10 rounded-[2.5rem] border border-white/20 shadow-2xl">
-                        <form className="space-y-6">
-                            <div className="space-y-2">
-                                <label className="text-sm font-bold text-white uppercase tracking-widest pl-1">Full Name</label>
-                                <Input placeholder="Enter your name" className="bg-white/10 border-white/20 h-14 text-white placeholder:text-slate-400 focus-visible:ring-red-500 rounded-xl" />
+
+                    {/* Contact Form */}
+                    <div className="w-full max-w-[601px] mx-auto">
+                        <div className="relative rounded-[10px] border border-[#D9D9D9] shadow-[0px_4px_4px_0px_#FF9A9A] overflow-hidden">
+                            <div className="absolute inset-0 z-0">
+                                <img
+                                    src="contact.jpg"
+                                    alt="Team joined hands"
+                                    className="w-full h-full object-cover"
+                                />
+                                <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px]"></div>
                             </div>
-                            <div className="space-y-2">
-                                <label className="text-sm font-bold text-white uppercase tracking-widest pl-1">Email Address</label>
-                                <Input placeholder="Enter your email" type="email" className="bg-white/10 border-white/20 h-14 text-white placeholder:text-slate-400 focus-visible:ring-red-500 rounded-xl" />
+                            <div className="relative z-10 p-12">
+                                <form className="space-y-6">
+                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                                        <div className="space-y-2">
+                                            <Input
+                                                placeholder="Enter your name"
+                                                className="h-12 bg-white/75 border border-[#D9D9D9] rounded-[10px] placeholder:text-slate-400 focus-visible:ring-red-500"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Input
+                                                placeholder="Enter your email"
+                                                type="email"
+                                                className="h-12 bg-white/75 border border-[#D9D9D9] rounded-[10px] placeholder:text-slate-400 focus-visible:ring-red-500"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Input
+                                            placeholder="What is this about?"
+                                            className="h-12 bg-white/75 border border-[#D9D9D9] rounded-[10px] placeholder:text-slate-400 focus-visible:ring-red-500"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Textarea
+                                            placeholder="How can we help you?"
+                                            className="min-h-[170px] bg-white/75 border border-[#D9D9D9] rounded-[10px] placeholder:text-slate-400 focus-visible:ring-red-500 resize-none"
+                                        />
+                                    </div>
+                                    <div className="flex justify-center pt-4">
+                                        <Button className="w-[222px] h-[37px] bg-[#C20C0C] hover:bg-[#B40404] border border-[#B40404] font-bold rounded-[100px] shadow-lg transition-all hover:scale-[1.02] active:scale-95 text-sm uppercase tracking-widest text-white">
+                                            Send Message
+                                        </Button>
+                                    </div>
+                                </form>
                             </div>
-                            <div className="space-y-2">
-                                <label className="text-sm font-bold text-white uppercase tracking-widest pl-1">Subject</label>
-                                <Input placeholder="What is this about?" className="bg-white/10 border-white/20 h-14 text-white placeholder:text-slate-400 focus-visible:ring-red-500 rounded-xl" />
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-sm font-bold text-white uppercase tracking-widest pl-1">Message</label>
-                                <Textarea placeholder="How can we help you?" className="bg-white/10 border-white/20 min-h-[150px] text-white placeholder:text-slate-400 focus-visible:ring-red-500 rounded-2xl" />
-                            </div>
-                            <Button className="w-full bg-red-600 hover:bg-red-700 text-white font-extrabold h-16 rounded-2xl shadow-xl transition-all hover:scale-[1.02] active:scale-95 text-lg uppercase tracking-widest">
-                                Send Message
-                            </Button>
-                        </form>
+                        </div>
                     </div>
                 </div>
             </div>
