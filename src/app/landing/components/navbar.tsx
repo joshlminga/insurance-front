@@ -1,32 +1,108 @@
-import React from 'react'
-import { Button } from '@/components/ui/button'
-import { Link } from 'react-router-dom'
+
+
+const Dropdown = ({
+    label,
+    items,
+}: {
+    label: string
+    items: { name: string; href: string }[]
+}) => {
+    return (
+        <div className="relative group">
+            <button className="uppercase tracking-wider text-sm font-semibold text-white/90 hover:text-red-500 transition">
+                {label}
+            </button>
+
+            <div className="absolute left-0 top-full mt-3 w-48 rounded-xl bg-white/80 backdrop-blur-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
+                <ul className="py-2">
+                    {items.map((item) => (
+                        <li key={item.name}>
+                            <a
+                                href={item.href}
+                                className="block px-4 py-2 text-sm text-gray-800 hover:bg-red-500/10 hover:text-red-600 transition"
+                            >
+                                {item.name}
+                            </a>
+                        </li>
+                    ))}
+                </ul>
+            </div>
+        </div>
+    )
+}
 
 export const Navbar = () => {
     return (
-        <nav className="fixed top-0 left-0 w-full z-50 bg-transparent py-6 border-b border-white/10">
-            <div className="container mx-auto px-6 flex items-center justify-between">
-                {/* Logo */}
-                <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-red-600 rounded-md flex items-center justify-center">
-                        <span className="text-white font-bold text-xl italic">A</span>
+       <nav className="absolute top-[58px] left-1/2 -translate-x-1/2 z-50 w-[80vw]">
+
+            <div
+                className="
+                    w-[1305px] h-[175px]
+                    rounded-2xl
+                    bg-white/40
+                   backdrop-blur-[10px]
+                    shadow-[0_8.45px_16.9px_rgba(0,0,0,0.12)]
+                    px-[37px]
+                    flex flex-col
+                    ">
+                <div className="h-[50px] mt-6 flex items-center justify-between">
+                    <div className="flex items-center gap-3 w-[158px] h-[50px]">
+                        <img src="logo1.png" alt="" />
                     </div>
-                    <span className="text-xl font-bold tracking-tight text-white uppercase">Accenture</span>
+                    <div className="flex items-center gap-10 text-sm font-semibold text-white/90">
+                        <a className="hover:text-red-500 transition uppercase">Home</a>
+                        <a className="hover:text-red-500 transition uppercase">About</a>
+                        <a className="hover:text-red-500 transition uppercase">Services</a>
+                        <a className="hover:text-red-500 transition uppercase">Contact</a>
+                    </div>
                 </div>
+                <div
+                    className="
+                    absolute
+                    top-[101px]
+                    left-1/2
+                    -translate-x-1/2
+                    w-7xl
+                    h-px
+                    border-t
+                    border-[#F91520]
+                    "
+                />
+                <div className="mt-auto mb-6 flex justify-center">
+                    <div className="flex gap-6 w-[460px]">
+                        <Dropdown
+                            label="Generate Quote"
+                            items={[
+                                { name: "Auto", href: "#" },
+                                { name: "Health", href: "#" },
+                                { name: "Property", href: "#" },
+                            ]}
+                        />
 
-                {/* Centered Menu */}
-                <div className="hidden md:flex items-center gap-10 text-sm font-semibold text-white/90">
-                    <a href="#home" className="hover:text-red-500 transition-colors uppercase tracking-wider">Home</a>
-                    <a href="#about" className="hover:text-red-500 transition-colors uppercase tracking-wider">About</a>
-                    <a href="#services" className="hover:text-red-500 transition-colors uppercase tracking-wider">Services</a>
-                    <a href="#contact" className="hover:text-red-500 transition-colors uppercase tracking-wider">Contact Us</a>
-                </div>
+                        <Dropdown
+                            label="Claims"
+                            items={[
+                                { name: "File Claim", href: "#" },
+                                { name: "Track Claim", href: "#" },
+                            ]}
+                        />
 
-                {/* Login Button */}
-                <div className="flex items-center gap-4">
-                    <Button className="bg-red-600 hover:bg-red-700 text-white rounded-md px-8 py-6 text-base font-bold" asChild>
-                        <Link to="/login">Log In</Link>
-                    </Button>
+                        <Dropdown
+                            label="Resources"
+                            items={[
+                                { name: "Blog", href: "#" },
+                                { name: "Guides", href: "#" },
+                            ]}
+                        />
+
+                        <Dropdown
+                            label="Service"
+                            items={[
+                                { name: "Support", href: "#" },
+                                { name: "Contact Agent", href: "#" },
+                            ]}
+                        />
+                    </div>
                 </div>
             </div>
         </nav>

@@ -1,4 +1,3 @@
-import React from 'react'
 import { Navbar } from './components/navbar'
 import { HeroSection } from './components/hero'
 import { AboutSection } from './components/about'
@@ -9,21 +8,19 @@ import { PartnersSection } from './components/partners'
 import { Footer } from './components/footer'
 
 export const Landingpage = () => {
-  return (
-    <div className="min-h-screen ">
-        <Navbar />
-        <main>
-            <HeroSection />
-            <AboutSection />
-            <ServicesSection />
-            <AgentBanner />
-            <ContactSection />
-
-            <PartnersSection />
-        </main>
-        <Footer />
-    </div>
-  )
+    return (
+        <div className="min-h-screen">
+            <Navbar />
+            <main>
+                <HeroSection />
+                <AboutSection />
+                <ServicesSection />
+                <AgentBanner />
+                <ContactSection />
+                <PartnersSection />
+            </main>
+            <Footer />
+        </div>
+    )
 }
 
-export default Landingpage
