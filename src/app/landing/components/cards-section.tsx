@@ -1,7 +1,6 @@
-import React from 'react'
-import { Shield, Car, Heart, Plane, ChevronLeft, ChevronRight, MoveUpRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, MoveUpRight } from 'lucide-react'
 
-const InsuranceCard = ({ icon: Icon, title, description, image, url }: { icon: any, title: string, description: string, image: string, url?:string }) => (
+const InsuranceCard = ({ title, description, image, url }: { title: string, description: string, image: string, url?:string }) => (
   <div className="w-[220px] h-[201px] rounded-tl-[20px] rounded-tr-[20px] rounded-br-[20px] border border-[#D9D9D9]/20 overflow-hidden transition-transform hover:scale-105 bg-black">
     <div className="w-[220px] h-[93px] rounded-tl-[20px] rounded-tr-[20px] relative overflow-hidden">
       <img src={image} alt={title} className="w-full h-full object-cover" />
@@ -31,28 +30,24 @@ export const Cards = () => {
         </button>
         <div className="absolute bottom-0 flex gap-6 items-end justify-center">
           <InsuranceCard
-            icon={Car}
             title="Motor Insurance"
             description="Comprehensive coverage for your vehicles against all types of risks."
             image="motor.jpg"
             url='#'
           />
           <InsuranceCard
-            icon={Plane}
             title="Travel Insurance"
             description="Travel with peace of mind knowing you're covered worldwide."
             image="travel.jpg"
             url='#'
           />
           <InsuranceCard
-            icon={Shield}
             title="Marine Insurance"
             description="Protect your cargo and vessels across international waters."
             image="marine.jpg"
             url='#'
           />
           <InsuranceCard
-            icon={Heart}
             title="Health Insurance"
             description="Health insurance provides comprehensive coverage for medical expenses."
             image="life.jpg"
