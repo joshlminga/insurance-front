@@ -26,7 +26,7 @@ const ServiceCard = ({ title, image }: { title: string, image: string }) => (
 
 export const ServicesSection = () => {
     return (
-        <section id="services" className="py-32 bg-white">
+        <section id="services" className="py-2 bg-white">
             <div className="container mx-auto px-6 max-w-7xl">
                 <div className="text-center mb-20">
                     <h2 className="text-4xl font-bold text-slate-900 mb-4 uppercase tracking-wider">Our Core Services</h2>

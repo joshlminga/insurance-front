@@ -16,7 +16,7 @@ export const Landingpage = () => {
                 <HeroSection />
                 <Cards />
                 <AboutSection />
-                {/* <ServicesSection /> */}
+                <ServicesSection />
                 <AgentBanner />
                 <ContactSection />
                 <PartnersSection />
