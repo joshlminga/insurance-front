@@ -38,7 +38,6 @@ export const AboutSection = () => {
                             Our team of seasoned experts brings decades of collective experience across various industries,
                             ensuring that our clients receive the highest level of service and most innovative strategies.
                         </p>
-
                         <hr className='border-t border-black/[0.27] mb-0' />
                         <div className="flex flex-col md:flex-row items-center justify-between">
                             <div className="flex-1 text-center py-4">
