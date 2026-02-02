@@ -12,10 +12,10 @@ export const ContactSection = () => {
                     <div className="w-20 h-1 bg-red-600 mx-auto"></div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-                    <div className="space-y-8">
+                <div className="flex gap-16 items-center">
+                    <div className="flex-1 space-y-8">
                         <div className="flex gap-6 items-start">
-                            <div className="w-[45px] h-[45px] bg-white rounded-[10px] border-t border-[#FF9A9A] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] flex items-center justify-center shrink-0">
+                            <div className="w-[45px] h-[45px] bg-white rounded-[10px] border border-[#FF9A9A] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] flex items-center justify-center shrink-0">
                                 <MapPin size={20} className="text-red-600" />
                             </div>
                             <div>
@@ -25,7 +25,7 @@ export const ContactSection = () => {
                         </div>
 
                         <div className="flex gap-6 items-start">
-                            <div className="w-[45px] h-[45px] bg-white rounded-[10px] border-t border-[#FF9A9A] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] flex items-center justify-center shrink-0">
+                            <div className="w-[45px] h-[45px] bg-white rounded-[10px] border border-[#FF9A9A] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] flex items-center justify-center shrink-0">
                                 <Phone size={20} className="text-red-600" />
                             </div>
                             <div>
@@ -35,7 +35,7 @@ export const ContactSection = () => {
                         </div>
 
                         <div className="flex gap-6 items-start">
-                            <div className="w-[45px] h-[45px] bg-white rounded-[10px] border-t border-[#FF9A9A] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] flex items-center justify-center shrink-0">
+                            <div className="w-[45px] h-[45px] bg-white rounded-[10px] border border-[#FF9A9A] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] flex items-center justify-center shrink-0">
                                 <Mail size={20} className="text-red-600" />
                             </div>
                             <div>
@@ -45,7 +45,7 @@ export const ContactSection = () => {
                         </div>
 
                         <div className="flex gap-6 items-start">
-                            <div className="w-[45px] h-[45px] bg-white rounded-[10px] border-t border-[#FF9A9A] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] flex items-center justify-center shrink-0">
+                            <div className="w-[45px] h-[45px] bg-white rounded-[10px] border border-[#FF9A9A] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] flex items-center justify-center shrink-0">
                                 <Clock size={20} className="text-red-600" />
                             </div>
                             <div>
@@ -54,8 +54,6 @@ export const ContactSection = () => {
                             </div>
                         </div>
                     </div>
-
-                    {/* Contact Form */}
                     <div className="w-full max-w-[601px] mx-auto">
                         <div className="relative rounded-[10px] border border-[#D9D9D9] shadow-[0px_4px_4px_0px_#FF9A9A] overflow-hidden">
                             <div className="absolute inset-0 z-0">
