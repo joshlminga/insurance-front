@@ -23,25 +23,32 @@ const ServiceCard = ({ title, image }: { title: string, image: string }) => (
 
 export const ServicesSection = () => {
     const [currentIndex, setCurrentIndex] = useState(0)
-    
     const services = [
         {
             title: "Risk & Insurance Consulting",
             image: "insuarance.jpg"
         },
         {
-            title: "Reinsurance Solutions",
+            title: "Reinsurance",
             image: "reinsuarance.png"
         },
         {
             title: "Actuarial Services",
+            image: "acturial.jpg"
+        },
+        {
+            title: "Insurance Broking",
+            image: "acturial.jpg"
+        },
+        {
+            title: "Investment Banking",
             image: "acturial.jpg"
         }
     ]
     useEffect(() => {
         const timer = setInterval(() => {
             setCurrentIndex((prev) => (prev + 1) % services.length)
-        }, 10000)
+        }, 1000)
 
         return () => clearInterval(timer)
     }, [services.length])
@@ -54,10 +61,9 @@ export const ServicesSection = () => {
                     <div className="w-20 h-1 bg-red-600 mx-auto"></div>
                 </div>
                 <div className="relative overflow-hidden">
-                    <div 
+                    <div
                         className="flex gap-10 transition-transform duration-700 ease-in-out"
-                        style={{ transform: `translateX(-${currentIndex * (100 / 3)}%)` }}
-                    >
+                        style={{ transform: `translateX(-${currentIndex * (100 / 3)}%)` }}>
                         {services.map((service, index) => (
                             <ServiceCard
                                 key={index}
@@ -72,11 +78,10 @@ export const ServicesSection = () => {
                         <button
                             key={index}
                             onClick={() => setCurrentIndex(index)}
-                            className={`w-[70px] h-2.5 rounded-[20px] transition-all ${
-                                currentIndex === index 
-                                    ? 'bg-[#C20C0C]' 
+                            className={`w-[70px] h-2.5 rounded-[20px] transition-all ${currentIndex === index
+                                    ? 'bg-[#C20C0C]'
                                     : 'bg-[#B7B7B9]/[0.55]'
-                            }`}
+                                }`}
                         />
                     ))}
                 </div>
