@@ -32,11 +32,13 @@ import StaffDetailPage from "./app/staff/[id]/page"
 
 // Settings
 import SettingsPage from "./app/settings/page"
+import { Landingpage } from "./app/landing/page"
 
 export function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<Layout><DashboardPage /></Layout>} />
+      <Route path="/" element={<Landingpage />} />
+      <Route path="/dashboard" element={<Layout><DashboardPage /></Layout>} />
 
       {/* Members */}
       <Route path="/members" element={<Layout><MembersPage /></Layout>} />
