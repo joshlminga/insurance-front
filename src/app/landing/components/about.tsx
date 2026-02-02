@@ -4,11 +4,7 @@ export const AboutSection = () => {
     return (
         <section id="about" className="py-24 bg-white">
             <div className="container mx-auto px-6 max-w-7xl">
-                {/* Centered Headline */}
-
-
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center mb-20">
-                    {/* Image Collage */}
                     <div className="relative">
                         <div className="rounded-3xl overflow-hidden shadow-2xl">
                             <img
@@ -38,7 +34,7 @@ export const AboutSection = () => {
                             Our team of seasoned experts brings decades of collective experience across various industries,
                             ensuring that our clients receive the highest level of service and most innovative strategies.
                         </p>
-                        <hr className='border-t border-black/[0.27] mb-0' />
+                        <hr className='border-t border-black/27 mb-0' />
                         <div className="flex flex-col md:flex-row items-center justify-between">
                             <div className="flex-1 text-center py-4">
                                 <h4 className="text-[20px] font-bold text-black mb-2 leading-[100%]">200,000+</h4>

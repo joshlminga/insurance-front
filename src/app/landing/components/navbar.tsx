@@ -34,10 +34,9 @@ const Dropdown = ({
 export const Navbar = () => {
     return (
        <nav className="absolute top-[58px] left-1/2 -translate-x-1/2 z-50 w-[80vw]">
-
             <div
                 className="
-                    w-[1305px] h-[175px]
+                    w-full h-[175px]
                     rounded-2xl
                     bg-white/40
                    backdrop-blur-[10px]

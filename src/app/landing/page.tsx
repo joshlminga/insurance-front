@@ -6,6 +6,7 @@ import { AgentBanner } from './components/agent-banner'
 import { ContactSection } from './components/contact'
 import { PartnersSection } from './components/partners'
 import { Footer } from './components/footer'
+import { Cards } from './components/cards-section'
 
 export const Landingpage = () => {
     return (
@@ -13,8 +14,9 @@ export const Landingpage = () => {
             <Navbar />
             <main>
                 <HeroSection />
+                <Cards />
                 <AboutSection />
-                <ServicesSection />
+                {/* <ServicesSection /> */}
                 <AgentBanner />
                 <ContactSection />
                 <PartnersSection />
@@ -23,4 +25,3 @@ export const Landingpage = () => {
         </div>
     )
 }
-
