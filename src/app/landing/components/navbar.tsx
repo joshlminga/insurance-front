@@ -33,7 +33,6 @@ const Dropdown = ({
         </div>
     )
 }
-
 export const Navbar = (
     {
         className = "w-full h-[175px] rounded-2xl bg-white/40 backdrop-blur-[10px]",
