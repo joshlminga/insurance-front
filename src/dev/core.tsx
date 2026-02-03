@@ -166,6 +166,7 @@ export function ReuseableInput<T extends FieldValues>({
     type = "text",
     autoComplete = "off",
     required = false,
+    className
 }: RHFInputProps<T>) {
     return (
         <Controller
@@ -183,6 +184,7 @@ export function ReuseableInput<T extends FieldValues>({
                         aria-invalid={fieldState.invalid}
                         required={required}
                         className={cn(
+                            className,
                             fieldState.invalid && "border-red-500 focus-visible:ring-red-500"
                         )}
                     />

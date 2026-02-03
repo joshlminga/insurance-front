@@ -69,6 +69,7 @@ export type RHFInputProps<T extends FieldValues> = {
   type?: string
   autoComplete?: string
   required?: boolean
+  className?:string
 }
 
 export interface AuthProviderState {
