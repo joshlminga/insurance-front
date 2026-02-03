@@ -3,6 +3,8 @@ import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { Button as ShadButton } from "@/components/ui/button"
 import type { Control, FieldValues, Path } from "react-hook-form";
+import { type AxiosRequestConfig, type Method } from 'axios'
+import type { UseMutationOptions, UseQueryOptions } from "@tanstack/react-query";
 
 export type T = {
   [key: string]: any;
@@ -26,6 +28,9 @@ export interface PageHeaderAction {
     variant?: "default" | "outline" | "secondary" | "ghost"
 }
 
+export interface ProtectedRouteProps {
+  children: React.ReactNode
+}
 export interface PageHeaderProps {
     title: string
     description?: string
@@ -87,4 +92,19 @@ export const initialState: AuthProviderState = {
   login: () => null,
   logout: () => null,
   updateUser: () => null,
+}
+
+export interface UseApiQueryOptions<TData = unknown> {
+  url: string
+  params?: Record<string, any>
+  config?: AxiosRequestConfig
+  queryOptions?: Omit<UseQueryOptions<TData>, 'queryKey' | 'queryFn'>
+}
+
+export interface UseApiMutationOptions<TData = unknown, TVariables = unknown, TContext = unknown> {
+  url: string | ((variables: TVariables) => string)
+  method?: Method
+  config?: AxiosRequestConfig
+  invalidateQueries?: string[]
+  mutationOptions?: Omit<UseMutationOptions<TData, Error, TVariables, TContext>, 'mutationFn'>
 }

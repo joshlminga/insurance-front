@@ -1,11 +1,12 @@
-// import { UseAuth } from "@/components/auth-provider"
-// import type { ProtectedRouteProps, UseApiMutationOptions, UseApiQueryOptions } from "@/types/types"
-// import { EROUTES } from "@/utils/enums"
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import axios from 'axios'
-// import { Navigate } from "react-router-dom"
 import apiClient from '@/lib/api-client'
 import { EMETHODS } from '@/utils/constatnts'
+import { UseAuth } from '@/components/auth-provider'
+import { EROUTES } from '@/utils/enums'
+import { Navigate } from 'react-router-dom'
+import type { ProtectedRouteProps, UseApiMutationOptions, UseApiQueryOptions } from '@/types/types'
 
 export function UseApiQuery<TData = unknown>({
   url,
@@ -67,14 +68,14 @@ export function UseApiMutation<TData = unknown, TVariables = unknown, TContext =
   })
 }
 
-// export function ProtectedRoute({ children }: ProtectedRouteProps) {
-//   const { isAuthenticated, isLoading } = UseAuth()
+export function ProtectedRoute({ children }: ProtectedRouteProps) {
+  const { isAuthenticated, isLoading } = UseAuth()
 
-//   if (isLoading) {
-//     return <div>Loading...</div>
-//   }
-//   if (!isAuthenticated) {
-//     return <Navigate to={EROUTES.LANDING} replace />
-//   }
-//   return <>{children}</>
-// }
+  if (isLoading) {
+    return <div>Loading...</div>
+  }
+  if (!isAuthenticated) {
+    return <Navigate to={EROUTES.LANDING} replace />
+  }
+  return <>{children}</>
+}
