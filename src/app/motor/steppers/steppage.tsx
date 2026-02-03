@@ -1,6 +1,6 @@
 import { ReusableStepper } from '@/dev/core'
 import React from 'react'
-import { CaptureDetails } from './capture-details'
+import { UserDetails } from './capture-details'
 
 export const StepPage = () => {
     return (
@@ -9,7 +9,7 @@ export const StepPage = () => {
             steps={[
                 {
                     title: "Customer Details",
-                    content: <CaptureDetails />,
+                    content: <UserDetails />,
                 },
             ]}
         />
