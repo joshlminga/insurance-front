@@ -1,7 +1,9 @@
+// AppRoutes.tsx
 import { Routes, Route, Navigate } from "react-router-dom"
 import Layout from "./Layout"
+import { EPREFIX, EROUTES } from "./utils/enums"
 
-// Dashboard
+// Pages
 import DashboardPage from "./app/dashboard"
 
 // Members
@@ -32,45 +34,100 @@ import StaffDetailPage from "./app/staff/[id]/page"
 
 // Settings
 import SettingsPage from "./app/settings/page"
+
+// Landing
 import { Landingpage } from "./app/landing/page"
+import { MotorLandingPage } from "./app/motor/page"
 
 export function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<Landingpage />} />
-      <Route path="/dashboard" element={<Layout><DashboardPage /></Layout>} />
+      {/* Public */}
+      <Route path={EROUTES.LANDING} element={<Landingpage />} />
+      <Route path={`${EPREFIX.CUSTOMER} ${EROUTES.MOTOR}`} element={<MotorLandingPage />} />
+
+      {/* Admin */}
+      <Route
+        path={EROUTES.DASHBOARD}
+        element={<Layout><DashboardPage /></Layout>}
+      />
 
       {/* Members */}
-      <Route path="/members" element={<Layout><MembersPage /></Layout>} />
-      <Route path="/members/new" element={<Layout><MemberNewPage /></Layout>} />
-      <Route path="/members/:id" element={<Layout><MemberDetailPage /></Layout>} />
+      <Route
+        path={EROUTES.MEMBERS}
+        element={<Layout><MembersPage /></Layout>}
+      />
+      <Route
+        path={EROUTES.MEMBERS_NEW}
+        element={<Layout><MemberNewPage /></Layout>}
+      />
+      <Route
+        path={EROUTES.MEMBERS_DETAIL}
+        element={<Layout><MemberDetailPage /></Layout>}
+      />
 
       {/* Savings */}
-      <Route path="/savings" element={<Layout><SavingsPage /></Layout>} />
-      <Route path="/savings/products" element={<Layout><SavingsProductsPage /></Layout>} />
-      <Route path="/savings/:id" element={<Layout><SavingAccensureuntDetailPage /></Layout>} />
+      <Route
+        path={EROUTES.SAVINGS}
+        element={<Layout><SavingsPage /></Layout>}
+      />
+      <Route
+        path={EROUTES.SAVINGS_PRODUCTS}
+        element={<Layout><SavingsProductsPage /></Layout>}
+      />
+      <Route
+        path={EROUTES.SAVINGS_DETAIL}
+        element={<Layout><SavingAccensureuntDetailPage /></Layout>}
+      />
 
       {/* Loans */}
-      <Route path="/loans" element={<Layout><LoansPage /></Layout>} />
-      <Route path="/loans/apply" element={<Layout><LoanApplicationPage /></Layout>} />
-      <Route path="/loans/products" element={<Layout><LoanProductsPage /></Layout>} />
-      <Route path="/loans/:id" element={<Layout><LoanDetailPage /></Layout>} />
+      <Route
+        path={EROUTES.LOANS}
+        element={<Layout><LoansPage /></Layout>}
+      />
+      <Route
+        path={EROUTES.LOANS_APPLY}
+        element={<Layout><LoanApplicationPage /></Layout>}
+      />
+      <Route
+        path={EROUTES.LOANS_PRODUCTS}
+        element={<Layout><LoanProductsPage /></Layout>}
+      />
+      <Route
+        path={EROUTES.LOANS_DETAIL}
+        element={<Layout><LoanDetailPage /></Layout>}
+      />
 
       {/* Transactions */}
-      <Route path="/transactions" element={<Layout><TransactionsPage /></Layout>} />
+      <Route
+        path={EROUTES.TRANSACTIONS}
+        element={<Layout><TransactionsPage /></Layout>}
+      />
 
       {/* Reports */}
-      <Route path="/reports" element={<Layout><ReportsPage /></Layout>} />
+      <Route
+        path={EROUTES.REPORTS}
+        element={<Layout><ReportsPage /></Layout>}
+      />
 
       {/* Staff */}
-      <Route path="/staff" element={<Layout><StaffPage /></Layout>} />
-      <Route path="/staff/:id" element={<Layout><StaffDetailPage /></Layout>} />
+      <Route
+        path={EROUTES.STAFF}
+        element={<Layout><StaffPage /></Layout>}
+      />
+      <Route
+        path={EROUTES.STAFF_DETAIL}
+        element={<Layout><StaffDetailPage /></Layout>}
+      />
 
       {/* Settings */}
-      <Route path="/settings" element={<Layout><SettingsPage /></Layout>} />
+      <Route
+        path={EROUTES.SETTINGS}
+        element={<Layout><SettingsPage /></Layout>}
+      />
 
-      {/* Catch-all redirect */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      {/* Fallback */}
+      <Route path="*" element={<Navigate to={EROUTES.LANDING} replace />} />
     </Routes>
   )
 }

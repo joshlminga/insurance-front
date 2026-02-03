@@ -1,5 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
+
+export type T = {
+  [key: string]: any;
+  ReactNode?: ReactNode;
+}
 
 export type TNodeChildrentType<T = ReactNode> = {
     children: T;

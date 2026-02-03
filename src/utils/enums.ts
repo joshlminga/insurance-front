@@ -1,5 +1,53 @@
+
 export const CURRENTUSER = {
   name: "Admin",
   email: "admin@accensure.com",
   avatar: "",
 }
+
+export const EPREFIX = {
+  ADMIN_PREFIX: 'admin',
+  AGENT_PREFIX: 'agent',
+  CUSTOMER: 'customer'
+};
+
+export const EROUTES = {
+  // Public
+  LANDING: "/",
+  MOTOR: "/motor",
+  TRAVEL: "/travel",
+  MARINE: "/marine",
+  LIFE: "/life",
+
+  // Admin / Dashboard
+  DASHBOARD: "/dashboard",
+
+  // Members
+  MEMBERS: "/members",
+  MEMBERS_NEW: "/members/new",
+  MEMBERS_DETAIL: "/members/:id",
+
+  // Savings
+  SAVINGS: "/savings",
+  SAVINGS_PRODUCTS: "/savings/products",
+  SAVINGS_DETAIL: "/savings/:id",
+
+  // Loans
+  LOANS: "/loans",
+  LOANS_APPLY: "/loans/apply",
+  LOANS_PRODUCTS: "/loans/products",
+  LOANS_DETAIL: "/loans/:id",
+
+  // Transactions
+  TRANSACTIONS: "/transactions",
+
+  // Reports
+  REPORTS: "/reports",
+
+  // Staff
+  STAFF: "/staff",
+  STAFF_DETAIL: "/staff/:id",
+
+  // Settings
+  SETTINGS: "/settings",
+} as const;

@@ -1,4 +1,4 @@
-
+import { cn } from "@/lib/utils";
 
 const Dropdown = ({
     label,
@@ -31,44 +31,35 @@ const Dropdown = ({
     )
 }
 
-export const Navbar = () => {
+export const Navbar = (
+    { className = "w-full h-[175px] rounded-2xl bg-white/40 backdrop-blur-[10px]",
+        textStyle = "text-white/90" }:
+        {
+            className?: string,
+            textStyle?: string
+        }) => {
     return (
-       <nav className="absolute top-[58px] left-1/2 -translate-x-1/2 z-50 w-[80vw]">
+        <nav className="absolute top-[58px] left-1/2 -translate-x-1/2 z-50 w-[80vw]">
             <div
-                className="
-                    w-full h-[175px]
-                    rounded-2xl
-                    bg-white/40
-                   backdrop-blur-[10px]
-                    shadow-[0_8.45px_16.9px_rgba(0,0,0,0.12)]
-                    px-[37px]
-                    flex flex-col
-                    ">
+                className={cn(className,
+                    "shadow-[0_8.45px_16.9px_rgba(0,0,0,0.12)] px-[37px] flex flex-col"
+                )}>
                 <div className="h-[50px] mt-6 flex items-center justify-between">
                     <div className="flex items-center gap-3 w-[158px] h-[50px]">
                         <img src="logo1.png" alt="" />
                     </div>
-                    <div className="flex items-center gap-10 text-sm font-semibold text-white/90">
+                    <div className={cn(`flex items-center gap-10 text-sm font-semibold cursor-pointer ${textStyle}`)}>
                         <a className="hover:text-red-500 transition uppercase">Home</a>
                         <a className="hover:text-red-500 transition uppercase">About</a>
                         <a className="hover:text-red-500 transition uppercase">Services</a>
                         <a className="hover:text-red-500 transition uppercase">Contact</a>
                     </div>
                 </div>
-                <div
-                    className="
-                    absolute
-                    top-[101px]
-                    left-1/2
-                    -translate-x-1/2
-                    w-7xl
-                    h-px
-                    border-t
-                    border-[#F91520]
-                    "
-                />
+
+                <div className="absolute top-[101px] left-1/2 -translate-x-1/2 w-7xl h-px border-t border-[#F91520]" />
+
                 <div className="mt-auto mb-6 flex justify-center">
-                    <div className="flex gap-6 w-[460px]">
+                    <div className="flex gap-6 w-[460px] cursor-pointer">
                         <Dropdown
                             label="Generate Quote"
                             items={[
