@@ -108,3 +108,7 @@ export interface UseApiMutationOptions<TData = unknown, TVariables = unknown, TC
   invalidateQueries?: string[]
   mutationOptions?: Omit<UseMutationOptions<TData, Error, TVariables, TContext>, 'mutationFn'>
 }
+export interface ToastOptions {
+  position?: "top-left" | "top-right" | "bottom-left" | "bottom-right" | "top-center" | "bottom-center"
+  duration?: number
+}
