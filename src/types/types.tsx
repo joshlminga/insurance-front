@@ -65,3 +65,26 @@ export type RHFInputProps<T extends FieldValues> = {
   autoComplete?: string
   required?: boolean
 }
+
+export interface AuthProviderState {
+  user: Tuser | null
+  token: string | null
+  isAuthenticated: boolean
+  isLoading: boolean
+  login: (user: Tuser, token: string) => void
+  logout: () => void
+  updateUser: (user: Partial<Tuser>) => void
+}
+export interface AuthProviderProps {
+  children: ReactNode
+  storageKey?: string
+}
+export const initialState: AuthProviderState = {
+  user: null,
+  token: null,
+  isAuthenticated: false,
+  isLoading: true,
+  login: () => null,
+  logout: () => null,
+  updateUser: () => null,
+}

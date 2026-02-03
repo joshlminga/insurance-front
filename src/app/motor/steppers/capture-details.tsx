@@ -1,7 +1,4 @@
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button, ReuseableInput } from "@/dev/core"
 import { ArrowLeft, ArrowRight } from "lucide-react"
 import { useForm } from "react-hook-form"
