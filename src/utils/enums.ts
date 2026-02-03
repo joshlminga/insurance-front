@@ -6,18 +6,18 @@ export const CURRENTUSER = {
 }
 
 export const EPREFIX = {
-  ADMIN_PREFIX: 'admin',
-  AGENT_PREFIX: 'agent',
-  CUSTOMER: 'customer'
-};
+  ADMIN: "admin",
+  AGENT: "agent",
+  CUSTOMER: "customer",
+} as const
 
 export const EROUTES = {
   // Public
-  LANDING: "/",
-  MOTOR: "/motor",
-  TRAVEL: "/travel",
-  MARINE: "/marine",
-  LIFE: "/life",
+  LANDING: '/',
+  MOTOR: '/motor',
+  TRAVEL: '/travel',
+  MARINE: '/marine',
+  LIFE: '/life',
 
   // Admin / Dashboard
   DASHBOARD: "/dashboard",

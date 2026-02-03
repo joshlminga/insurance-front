@@ -44,7 +44,7 @@ export function AppRoutes() {
     <Routes>
       {/* Public */}
       <Route path={EROUTES.LANDING} element={<Landingpage />} />
-      <Route path={`${EPREFIX.CUSTOMER} ${EROUTES.MOTOR}`} element={<MotorLandingPage />} />
+     <Route path={`${EPREFIX.CUSTOMER}${EROUTES.MOTOR}`} element={<MotorLandingPage />}/>
 
       {/* Admin */}
       <Route

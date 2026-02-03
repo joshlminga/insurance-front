@@ -35,25 +35,25 @@ export const Cards = () => {
             title="Motor Insurance"
             description="Comprehensive coverage for your vehicles against all types of risks."
             image="motor.jpg"
-            url={`${EPREFIX.CUSTOMER} ${EROUTES.MOTOR}`}
+            url={`${EPREFIX.CUSTOMER}${EROUTES.MOTOR}`}
           />
           <InsuranceCard
             title="Travel Insurance"
             description="Travel with peace of mind knowing you're covered worldwide."
             image="travel.jpg"
-            url={`${EPREFIX.CUSTOMER} ${EROUTES.TRAVEL}`}
+            url={`${EPREFIX.CUSTOMER}${EROUTES.TRAVEL}`}
           />
           <InsuranceCard
             title="Marine Insurance"
             description="Protect your cargo and vessels across international waters."
             image="marine.jpg"
-            url={`${EPREFIX.CUSTOMER} ${EROUTES.MARINE}`}
+            url={`${EPREFIX.CUSTOMER}${EROUTES.MARINE}`}
           />
           <InsuranceCard
             title="Health Insurance"
             description="Health insurance provides comprehensive coverage for medical expenses."
             image="life.jpg"
-            url={`${EPREFIX.CUSTOMER} ${EROUTES.LIFE}`}
+            url={`${EPREFIX.CUSTOMER}${EROUTES.LIFE}`}
           />
         </div>
         <button className="absolute right-[403px] w-[30px] h-[30px] bg-white border border-[#FF9A9A] rounded-full flex items-center justify-center hover:bg-gray-50 transition-all z-10">
