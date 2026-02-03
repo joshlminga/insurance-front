@@ -1,4 +1,6 @@
 import { cn } from "@/lib/utils";
+import { ELOGO, EROUTES } from "@/utils/enums";
+import { Link } from "react-router-dom";
 
 const Dropdown = ({
     label,
@@ -50,10 +52,10 @@ export const Navbar = (
                 )}>
                 <div className="h-[50px] mt-6 flex items-center justify-between">
                     <div className="flex items-center gap-3 w-[158px] h-[50px]">
-                        <img src="logo1.png" alt="logo" />
+                        <img src={ELOGO.NAVBARLOGO} alt="logo" />
                     </div>
                     <div className={cn(`flex items-center gap-10 text-sm font-semibold cursor-pointer ${textStyle}`)}>
-                        <a className="hover:text-red-500 transition uppercase">Home</a>
+                        <Link to={EROUTES.LANDING} className="hover:text-red-500 transition uppercase">Home</Link>
                         <a className="hover:text-red-500 transition uppercase">About</a>
                         <a className="hover:text-red-500 transition uppercase">Services</a>
                         <a className="hover:text-red-500 transition uppercase">Contact</a>

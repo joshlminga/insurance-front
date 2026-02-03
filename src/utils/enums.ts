@@ -1,3 +1,6 @@
+export const ELOGO = {
+  NAVBARLOGO: '/logo/logo1.png'
+}
 
 export const CURRENTUSER = {
   name: "Admin",
