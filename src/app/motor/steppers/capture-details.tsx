@@ -3,22 +3,42 @@ import { Button, ReuseableInput } from "@/dev/core"
 import { ArrowLeft, ArrowRight } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { FieldGroup } from "@/components/ui/field"
+import { ShowToast } from "@/utils/utils"
+import { CustomerDetailsSchema } from "@/types/form-schema"
+import type { CustomerFormValues } from "@/types/schema"
+import { EMETHODS } from "@/utils/constatnts"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { UseApiMutation } from "@/hooks/hooks"
+import type { SubmitResponse } from "@/types/types"
 
 export const UserDetails = () => {
 
-  const form = useForm<LoginFormValues>({
-    resolver: zodResolver(LoginSchema),
+  const form = useForm<CustomerFormValues>({
+    resolver: zodResolver(CustomerDetailsSchema),
     defaultValues: {
       email: "",
-      password: "",
     },
   })
-  const onSubmit = async (data: LoginFormValues) => {
+  const submitMutation = UseApiMutation<SubmitResponse, CustomerFormValues>({
+    url: 'verify/account',
+    method: EMETHODS.POST,
+    mutationOptions: {
+      onSuccess: (data: SubmitResponse) => {
+        ShowToast.success(data.message || "Submitted successful!")
+      },
+      onError: (error: any) => {
+        const errorMessage = error.response?.data?.message || error.message || "Login failed!"
+        ShowToast.error(errorMessage)
+      }
+    }
+  })
+
+  const onSubmit = async (data: CustomerFormValues) => {
     try {
-      loginMutation.mutate(data)
+      submitMutation.mutate(data)
     } catch (error) {
       console.log(error);
-      // ShowToast.error("Login failed!")
+      ShowToast.error("Login failed!")
     }
   }
 
