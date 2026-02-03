@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
+import { Button as ShadButton } from "@/components/ui/button"
 
 export type T = {
   [key: string]: any;
@@ -34,4 +35,21 @@ export interface Tuser {
     name: string
     email: string
     avatar?: string
+}
+
+export type StepItem = {
+  title?: string
+  content: ReactNode
+}
+
+export type ReusableStepperProps = {
+  steps: StepItem[]
+  defaultStep?: number
+  className?: string
+}
+export interface ButtonProps extends React.ComponentProps<typeof ShadButton> {
+  loading?: boolean
+  leftIcon?: React.ReactNode
+  rightIcon?: React.ReactNode
+  fullWidth?: boolean
 }

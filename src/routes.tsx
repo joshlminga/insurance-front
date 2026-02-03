@@ -37,6 +37,7 @@ import SettingsPage from "./app/settings/page"
 
 // Landing
 import { Landingpage } from "./app/landing/page"
+import { StepPage } from "./app/motor/steppers/steppage"
 import { MotorLandingPage } from "./app/motor/page"
 
 export function AppRoutes() {
@@ -44,7 +45,10 @@ export function AppRoutes() {
     <Routes>
       {/* Public */}
       <Route path={EROUTES.LANDING} element={<Landingpage />} />
-     <Route path={`${EPREFIX.CUSTOMER}${EROUTES.MOTOR}`} element={<MotorLandingPage />}/>
+      {/* <Route path={`${EPREFIX.CUSTOMER}${EROUTES.MOTOR}`} element={<StepPage/>}/> */}
+      <Route path={EPREFIX.CUSTOMER} element={<MotorLandingPage />}>
+        <Route path={EROUTES.MOTOR.slice(1)} element={<StepPage />} />
+      </Route>
 
       {/* Admin */}
       <Route
