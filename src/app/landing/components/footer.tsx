@@ -8,7 +8,7 @@ export const Footer = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-16 mb-20">
                     <div className="space-y-8">
                         <div className="flex items-center gap-3 w-[158px] h-[50px]">
-                            <img src="logo.png" alt="" />
+                            <img src="/logo/logo.png" alt="" />
                         </div>
                         <div className="flex gap-4">
                             <a href="#" className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center hover:bg-red-600 transition-all border border-white/10">

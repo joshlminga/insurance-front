@@ -7,7 +7,7 @@ export const StepPage = () => {
             defaultStep={1}
             steps={[
                 {
-                    title: "Customer Details",
+                    title: "",
                     content: <CustomerVerificationDetails />,
                 },
             ]}

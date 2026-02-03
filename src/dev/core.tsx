@@ -109,10 +109,9 @@ export function ReusableStepper({
                         <StepperItem
                             key={stepNumber}
                             step={stepNumber}
-                            className="relative flex-1 items-start"
-                        >
+                            className="relative flex-1 items-start">
                             <StepperTrigger className="flex flex-col items-start justify-center gap-3.5 grow">
-                                <StepperIndicator className="bg-border rounded-full h-1 w-full data-[state=active]:bg-primary" />
+                                <StepperIndicator className={cn("h-[17px] w-[124px] rounded-[10px] transition-all","bg-gray-300 data-[state=active]:bg-linear-to-r from-[#FFB3B3] via-[#FF8383] to-[#FF4545]")}/>
                                 <StepperTitle className="text-start font-semibold group-data-[state=inactive]/step:text-muted-foreground">
                                     {step.title}
                                 </StepperTitle>
