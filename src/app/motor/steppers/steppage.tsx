@@ -1,5 +1,6 @@
 import { ReusableStepper } from '@/dev/core'
 import { CustomerVerificationDetails } from './capture-details'
+import OTPVerificationPage from './otp-verification'
 
 export const StepPage = () => {
     return (
@@ -9,6 +10,10 @@ export const StepPage = () => {
                 {
                     title: "",
                     content: <CustomerVerificationDetails />,
+                },
+                {
+                    title: "",
+                    content: <OTPVerificationPage />,
                 },
             ]}
         />

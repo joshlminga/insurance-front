@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/stepper';
 import { Link, useLocation } from "react-router-dom";
 import { Fragment } from "react/jsx-runtime";
-import React from "react";
+import React, { useState } from "react";
 import { Button as ShadButton } from "@/components/ui/button"
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -100,8 +100,12 @@ export function ReusableStepper({
     defaultStep = 1,
     className,
 }: ReusableStepperProps) {
+    const [currentStep, setCurrentStep] = useState(defaultStep)
+
+    const goToStep = (step: number) => setCurrentStep(step)
+
     return (
-        <Stepper defaultValue={defaultStep} className={className}>
+        <Stepper value={currentStep} onValueChange={setCurrentStep} className={className}>
             <StepperNav className="gap-3.5 mb-15">
                 {steps.map((step, index) => {
                     const stepNumber = index + 1
@@ -111,7 +115,7 @@ export function ReusableStepper({
                             step={stepNumber}
                             className="relative flex-1 items-start">
                             <StepperTrigger className="flex flex-col items-start justify-center gap-3.5 grow">
-                                <StepperIndicator className={cn("h-[17px] w-[124px] rounded-[10px] transition-all","bg-gray-300 data-[state=active]:bg-linear-to-r from-[#FFB3B3] via-[#FF8383] to-[#FF4545]")}/>
+                                <StepperIndicator className={cn("h-[17px] w-[124px] rounded-[10px] transition-all", "bg-gray-300 data-[state=active]:bg-linear-to-r from-[#FFB3B3] via-[#FF8383] to-[#FF4545]")} />
                                 <StepperTitle className="text-start font-semibold group-data-[state=inactive]/step:text-muted-foreground">
                                     {step.title}
                                 </StepperTitle>
@@ -124,12 +128,11 @@ export function ReusableStepper({
                 {steps.map((step, index) => {
                     const stepNumber = index + 1
                     return (
-                        <StepperContent
-                            key={stepNumber}
-                            value={stepNumber}
-                            className="w-full"
-                        >
-                            {step.content}
+                        <StepperContent key={stepNumber} value={stepNumber} className="w-full">
+                            {React.cloneElement(step.content as React.ReactElement<any>, {
+                                goToNextStep: () => goToStep(currentStep + 1),
+                                goToPrevStep: () => goToStep(currentStep - 1),
+                            })}
                         </StepperContent>
                     )
                 })}

@@ -117,3 +117,8 @@ export interface ToastOptions {
 export interface SubmitResponse {
     message:string
 }
+
+export interface CustomerVerificationDetailsProps {
+  goToNextStep?: () => void
+  goToPrevStep?: () => void
+}

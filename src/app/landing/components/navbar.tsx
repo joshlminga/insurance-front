@@ -61,7 +61,7 @@ export const Navbar = (
                     </div>
                 </div>
                 <div className="absolute top-[101px] left-1/2 -translate-x-1/2 w-7xl h-px border-t border-[#F91520]" />
-                <div className="mt-auto mb-6 flex justify-center">
+                <div className="mt-auto ml-4 mb-6 flex left-2/4 w-7xl ">
                     <div className="flex gap-6 w-[460px] cursor-pointer">
                         <Dropdown
                             text="text-[#C20C0C]"

@@ -10,11 +10,11 @@ import type { CustomerFormValues } from "@/types/schema"
 import { EMETHODS } from "@/utils/constatnts"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { UseApiMutation } from "@/hooks/hooks"
-import type { SubmitResponse } from "@/types/types"
+import type { CustomerVerificationDetailsProps, SubmitResponse } from "@/types/types"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Link } from "react-router-dom"
 
-export const CustomerVerificationDetails = () => {
+export const CustomerVerificationDetails = ({ goToNextStep, goToPrevStep }: CustomerVerificationDetailsProps) => {
   const form = useForm<CustomerFormValues>({
     resolver: zodResolver(CustomerDetailsSchema),
     defaultValues: {
@@ -30,6 +30,7 @@ export const CustomerVerificationDetails = () => {
     method: EMETHODS.POST,
     mutationOptions: {
       onSuccess: (data) => {
+         goToNextStep?.()
         ShowToast.success(data.message || "Submitted successfully!")
       },
       onError: (error: any) => {
@@ -41,14 +42,16 @@ export const CustomerVerificationDetails = () => {
       },
     },
   })
+
   const onSubmit = (data: CustomerFormValues) => {
     submitMutation.mutate(data)
   }
+
   return (
     <div className="max-w-full mx-auto border-0 bg-transparent">
       <form onSubmit={form.handleSubmit(onSubmit)}>
-        <div className="grid grid-cols-1 md:grid-cols-2 items-center">
-          <div className="flex flex-col items-center justify-center w-[581px] h-[359px]">
+        <div className="grid grid-cols-1 md:grid-cols-2 items-center gap-10">
+          <div className="flex flex-col items-center justify-center w-full max-w-[580px] h-auto aspect-video">
             <h1 className="text-[32px] font-bold leading-none text-black">
               Get Motor Insurance
             </h1>
@@ -61,26 +64,26 @@ export const CustomerVerificationDetails = () => {
             </h1>
             <div className="grid grid-cols-2 gap-4">
               <ReuseableInput
-                className="w-[320px] h-[51px] rounded-[5px] border border-[#ADABAB]"
+                className="w-full max-w-[320px] h-[51px] rounded-[5px] border border-[#ADABAB]"
                 control={form.control}
                 name="first_name"
                 label="First Name"
               />
               <ReuseableInput
-                className="w-[320px] h-[51px] rounded-[5px] border border-[#ADABAB]"
+                className="w-full max-w-[320px] h-[51px] rounded-[5px] border border-[#ADABAB]"
                 control={form.control}
                 name="last_name"
                 label="Last Name"
               />
               <ReuseableInput
-                className="w-[320px] h-[51px] rounded-[5px] border border-[#ADABAB]"
+                className="w-full max-w-[320px] h-[51px] rounded-[5px] border border-[#ADABAB]"
                 control={form.control}
                 name="email"
                 label="Email"
                 type="email"
               />
               <ReuseableInput
-                className="w-[320px] h-[51px] rounded-[5px] border border-[#ADABAB]"
+                className="w-full max-w-[320px] h-[51px] rounded-[5px] border border-[#ADABAB]"
                 control={form.control}
                 name="mobile_number"
                 label="Mobile Number"
@@ -92,15 +95,26 @@ export const CustomerVerificationDetails = () => {
             <Button
               type="button"
               className="rounded-full border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
-              leftIcon={<ArrowLeftCircle />}>
+              leftIcon={<ArrowLeftCircle />}
+              onClick={() => goToPrevStep?.()}
+              >
               Previous
             </Button>
 
-            <Button
+            {/* <Button
               type="submit"
               className="bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
               rightIcon={<ArrowRightCircle />}
               loading={submitMutation.isPending}>
+              Next
+            </Button> */}
+            <Button
+              type="button"
+              className="bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
+              rightIcon={<ArrowRightCircle />}
+              // loading={submitMutation.isPending}
+              onClick={()=>(goToNextStep?.())}
+              >
               Next
             </Button>
           </CardFooter>
