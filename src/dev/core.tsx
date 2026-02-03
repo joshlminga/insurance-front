@@ -1,5 +1,5 @@
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
-import type { ButtonProps, ReusableStepperProps, TReusablePageProps } from "@/types/types";
+import type { ButtonProps, ReusableStepperProps, RHFInputProps, TReusablePageProps } from "@/types/types";
 import {
     Stepper,
     StepperContent,
@@ -16,6 +16,9 @@ import React from "react";
 import { Button as ShadButton } from "@/components/ui/button"
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
+import { Controller, type FieldValues } from "react-hook-form";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 
 const formatSegment = (segment: string) => {
     return segment
@@ -136,21 +139,59 @@ export function ReusableStepper({
     )
 }
 
-
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ children, loading, leftIcon, rightIcon, fullWidth, className, ...props }, ref) => {
-    return (
-      <ShadButton
-        ref={ref}
-        disabled={props.disabled || loading}
-        className={cn(fullWidth && "w-full", className)}
-        aria-busy={loading}
-        {...props} >
-        {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-        {!loading && leftIcon && <span className="mr-2">{leftIcon}</span>}
-        <span>{children}</span>
-        {!loading && rightIcon && <span className="ml-2">{rightIcon}</span>}
-      </ShadButton>
-    )
-  }
+    ({ children, loading, leftIcon, rightIcon, fullWidth, className, ...props }, ref) => {
+        return (
+            <ShadButton
+                ref={ref}
+                disabled={props.disabled || loading}
+                className={cn(fullWidth && "w-full", className)}
+                aria-busy={loading}
+                {...props} >
+                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {!loading && leftIcon && <span className="mr-2">{leftIcon}</span>}
+                <span>{children}</span>
+                {!loading && rightIcon && <span className="ml-2">{rightIcon}</span>}
+            </ShadButton>
+        )
+    }
 )
+export function ReuseableInput<T extends FieldValues>({
+    control,
+    name,
+    label,
+    id,
+    placeholder,
+    type = "text",
+    autoComplete = "off",
+    required = false,
+}: RHFInputProps<T>) {
+    return (
+        <Controller
+            name={name}
+            control={control}
+            render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={id}>{label}</FieldLabel>
+                    <Input
+                        {...field}
+                        id={id}
+                        type={type}
+                        placeholder={placeholder}
+                        autoComplete={autoComplete}
+                        aria-invalid={fieldState.invalid}
+                        required={required}
+                        className={cn(
+                            fieldState.invalid && "border-red-500 focus-visible:ring-red-500"
+                        )}
+                    />
+                    {fieldState.invalid && fieldState.error && (
+                        <FieldError className="text-red-500 text-sm mt-1">
+                            {fieldState.error.message}
+                        </FieldError>
+                    )}
+                </Field>
+            )}
+        />
+    )
+}
