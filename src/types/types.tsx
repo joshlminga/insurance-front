@@ -138,6 +138,8 @@ export type TTabItem = {
 export type TTabsProps = {
   tabs: TTabItem[]
   defaultValue?: string
+  value?: string
+  onValueChange?: (value: string) => void
   className?: string
   tabsListClassName?: string
   triggerClassName?: string

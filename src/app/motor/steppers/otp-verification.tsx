@@ -46,7 +46,7 @@ export default function OTPVerificationPage({ goToNextStep, goToPrevStep }: Cust
 
   return (
     <FormProvider {...methods}>
-      <form onSubmit={methods.handleSubmit(onSubmit)} className="flex flex-col items-center justify-center min-h-[500px] w-full">
+      <form onSubmit={methods.handleSubmit(onSubmit)} className="flex flex-col items-center justify-start min-h-[500px] w-full">
         <div className="w-full max-w-xl border border-[#D9D9D9] rounded-2xl p-8 bg-white shadow-sm">
           <div className="flex flex-col gap-6">
             <OTPForm className="border-0 shadow-none bg-transparent" showFooter={false} />

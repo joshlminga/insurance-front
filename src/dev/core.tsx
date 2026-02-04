@@ -287,6 +287,8 @@ export function ReusableSelect<T extends FieldValues>({
 export function ReusableTabs({
     tabs,
     defaultValue,
+    value,
+    onValueChange,
     className,
     tabsListClassName,
     triggerClassName,
@@ -297,6 +299,8 @@ export function ReusableTabs({
     return (
         <Tabs
             defaultValue={defaultValue ?? tabs[0]?.value}
+            value={value}
+            onValueChange={onValueChange}
             className={cn("w-full", className)}>
             <TabsList
                 className={cn(
