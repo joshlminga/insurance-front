@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
@@ -18,7 +17,7 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp"
 
-export function OTPForm({ showFooter = true, ...props }: React.ComponentProps<typeof Card> & { showFooter?: boolean }) {
+export function OTPForm({ ...props }: React.ComponentProps<typeof Card> & { showFooter?: boolean }) {
   return (
     <Card {...props}>
       <CardHeader>
@@ -42,14 +41,6 @@ export function OTPForm({ showFooter = true, ...props }: React.ComponentProps<ty
                 Enter the 6-digit code sent to your email.
               </FieldDescription>
             </Field>
-            {showFooter && (
-              <FieldGroup>
-                <Button type="submit">Verify</Button>
-                <FieldDescription className="text-center">
-                  Didn&apos;t receive the code? <a href="#">Resend</a>
-                </FieldDescription>
-              </FieldGroup>
-            )}
           </FieldGroup>
         </form>
       </CardContent>

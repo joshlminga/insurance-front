@@ -91,23 +91,14 @@ export const CustomerVerificationDetails = ({ goToNextStep, goToPrevStep }: Cust
               />
             </div>
           </FieldGroup>
-          <CardFooter className="md:col-span-2 flex justify-between mt-1">
+          <CardFooter className=" md:col-span-2 flex justify-between mt-1">
             <Button
               type="button"
               className="rounded-full border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
               leftIcon={<ArrowLeftCircle />}
-              onClick={() => goToPrevStep?.()}
-              >
+              onClick={() => goToPrevStep?.()}>
               Previous
             </Button>
-
-            {/* <Button
-              type="submit"
-              className="bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
-              rightIcon={<ArrowRightCircle />}
-              loading={submitMutation.isPending}>
-              Next
-            </Button> */}
             <Button
               type="button"
               className="bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
