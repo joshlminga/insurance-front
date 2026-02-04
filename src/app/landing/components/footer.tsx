@@ -3,12 +3,21 @@ import { Facebook, Twitter, Linkedin } from 'lucide-react'
 
 export const Footer = () => {
     return (
-        <footer className="bg-slate-950 text-white py-24">
+        <footer className="bg-white/40 backdrop-blur-[20px] py-24">
             <div className="container mx-auto px-6 max-w-7xl">
+                <div className="absolute inset-0 -z-10">
+                <img
+                    src="/footer.jpg"
+                    alt=""
+                    className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-linear-to-r from-slate-900/60 to-slate-900/40" />
+            </div>
+            
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-16 mb-20">
                     <div className="space-y-8">
                         <div className="flex items-center gap-3 w-[158px] h-[50px]">
-                            <img src="logo.png" alt="" />
+                            <img src="/logo/logo.png" alt="" />
                         </div>
                         <div className="flex gap-4">
                             <a href="#" className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center hover:bg-red-600 transition-all border border-white/10">
@@ -33,7 +42,7 @@ export const Footer = () => {
                     </div>
                     <div>
                         <h4 className="font-bold text-xl mb-8 uppercase tracking-widest text-red-600">Services</h4>
-                        <ul className="space-y-4 text-slate-300 text-sm font-medium">
+                        <ul className="space-y-4 text-white text-sm font-medium">
                             <li><a href="#" className="hover:text-red-500 transition-colors uppercase">Risk Consulting</a></li>
                             <li><a href="#" className="hover:text-red-500 transition-colors uppercase">Reinsurance</a></li>
                             <li><a href="#" className="hover:text-red-500 transition-colors uppercase">Actuarial Services</a></li>
@@ -41,7 +50,6 @@ export const Footer = () => {
                         </ul>
                     </div>
                 </div>
-
                 <div className="pt-10 py-6 border-t border-red-500 w-full justify-center items-center gap-6 text-xs font-bold uppercase tracking-widest text-center">
                     <p>© Copyright 2025 Acensure. All Rights Reserved.</p>
 
