@@ -129,8 +129,9 @@ export interface CustomerVerificationDetailsProps {
 export type TTabItem = {
   value: string
   label: string
-  icon?: ReactNode
-  component: ReactNode
+  icon?: React.ComponentType<{ className?: string; size?: number }>
+  iconSize?: number
+  component: React.ComponentType<any>
   disabled?: boolean
 }
 
@@ -141,4 +142,21 @@ export type TTabsProps = {
   tabsListClassName?: string
   triggerClassName?: string
   contentClassName?: string
+} & Record<string, any>
+
+export type TSelectOption = {
+  label: string
+  value: string
+  disabled?: boolean
+}
+export type TRHFSelectProps<T extends FieldValues> = {
+  control: any
+  name: Path<T>
+  label?: string
+  placeholder?: string
+  options: TSelectOption[]
+  required?: boolean
+  disabled?: boolean
+  className?: string
+  triggerClassName?: string
 }

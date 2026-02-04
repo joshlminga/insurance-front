@@ -11,6 +11,7 @@ import type {
     ReusableStepperProps,
     RHFInputProps,
     TReusablePageProps,
+    TRHFSelectProps,
     TTabsProps
 } from "@/types/types";
 import {
@@ -38,6 +39,7 @@ import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Controller, type FieldValues } from "react-hook-form";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const formatSegment = (segment: string) => {
     return segment
@@ -224,6 +226,64 @@ export function ReuseableInput<T extends FieldValues>({
     )
 }
 
+export function ReusableSelect<T extends FieldValues>({
+    control,
+    name,
+    label,
+    placeholder = "Select an option",
+    options,
+    required = false,
+    disabled = false,
+    className,
+    triggerClassName,
+}: TRHFSelectProps<T>) {
+    return (
+        <Controller
+            name={name}
+            control={control}
+            render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid} className={className}>
+                    {label && (
+                        <FieldLabel>
+                            {label}
+                            {required && <span className="text-red-500 ml-1">*</span>}
+                        </FieldLabel>
+                    )}
+                    <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        disabled={disabled}>
+                        <SelectTrigger
+                            aria-invalid={fieldState.invalid}
+                            className={cn(
+                                fieldState.invalid &&
+                                "border-red-500 focus:ring-red-500",
+                                triggerClassName
+                            )}>
+                            <SelectValue placeholder={placeholder} />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {options.map((option) => (
+                                <SelectItem
+                                    key={option.value}
+                                    value={option.value}
+                                    disabled={option.disabled}>
+                                    {option.label}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    {fieldState.error && (
+                        <FieldError className="text-red-500 text-sm mt-1">
+                            {fieldState.error.message}
+                        </FieldError>
+                    )}
+                </Field>
+            )}
+        />
+    )
+}
+
 export function ReusableTabs({
     tabs,
     defaultValue,
@@ -231,32 +291,50 @@ export function ReusableTabs({
     tabsListClassName,
     triggerClassName,
     contentClassName,
+    ...props
 }: TTabsProps) {
+
     return (
         <Tabs
             defaultValue={defaultValue ?? tabs[0]?.value}
-            className={cn("w-[509px]", className)}>
+            className={cn("w-full", className)}>
             <TabsList
-                className={cn(`h-25 w-full rounded-[20px] border border-[#ADABAB] bg-white p-0`, tabsListClassName)}>
-                {tabs.map((tab) => (
-                    <TabsTrigger
+                className={cn(
+                    "h-[70px] w-[509px] rounded-[20px] border border-[#ADABAB] bg-white p-0 flex",
+                    tabsListClassName
+                )}>
+                {tabs.map((tab) => {
+                    const Icon = tab.icon
+                    return (
+                        <TabsTrigger
+                            key={tab.value}
+                            value={tab.value}
+                            disabled={tab.disabled}
+                            className={cn(` h-full rounded-none first:rounded-l-[20px] last:rounded-r-[20px] border-r border-[#ADABAB] data-[state=active]:bg-[#C20C0C] data-[state=active]:text-white data-[state=inactive]:bg-white data-[state=inactive]:text-black flex items-center justify-center gap-2 text-lg font-medium`,
+                                triggerClassName)}>
+                            {Icon && (
+                                <Icon
+                                    size={tab.iconSize ?? 16}
+                                    className="shrink-0"
+                                />
+                            )}
+                            {tab.label}
+                        </TabsTrigger>
+                    )
+                })}
+            </TabsList>
+            {tabs.map((tab) => {
+                const TabComponent = tab.component
+
+                return (
+                    <TabsContent
                         key={tab.value}
                         value={tab.value}
-                        disabled={tab.disabled}
-                        className={cn(`h-full w-[146px] rounded-none first:rounded-l-[20px] last:rounded-r-[20px] border-r border-[#ADABAB] data-[state=active]:bg-[#C20C0C] data-[state=active]:text-white data-[state=inactive]:bg-white data-[state=inactive]:text-black flex items-center justify-center gap-2 text-lg font-medium `, triggerClassName)}>
-                        {tab.icon && <span className="h-4 w-4">{tab.icon}</span>}
-                        {tab.label}
-                    </TabsTrigger>
-                ))}
-            </TabsList>
-            {tabs.map((tab) => (
-                <TabsContent
-                    key={tab.value}
-                    value={tab.value}
-                    className={cn("mt-6", contentClassName)}>
-                    {tab.component}
-                </TabsContent>
-            ))}
+                        className={cn("mt-6 w-full", contentClassName)}>
+                        <TabComponent {...props} />
+                    </TabsContent>
+                )
+            })}
         </Tabs>
     )
 }

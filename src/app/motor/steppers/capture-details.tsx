@@ -91,7 +91,7 @@ export const CustomerVerificationDetails = ({ goToNextStep, goToPrevStep }: Cust
               />
             </div>
           </FieldGroup>
-          <CardFooter className=" md:col-span-2 flex justify-between mt-1">
+          <CardFooter className="md:col-span-2 flex justify-between mt-1">
             <Button
               type="button"
               className="rounded-full border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
