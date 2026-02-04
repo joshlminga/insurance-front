@@ -1,3 +1,7 @@
+import { CustomerVerificationDetails } from "@/app/motor/steppers/capture-details";
+import OTPVerificationPage from "@/app/motor/steppers/otp-verification";
+import { VehicleDetailsPage } from "@/app/motor/steppers/vehicle-details";
+
 export const ELOGO = {
   NAVBARLOGO: '/logo/logo1.png'
 }
@@ -54,3 +58,22 @@ export const EROUTES = {
   // Settings
   SETTINGS: "/settings",
 } as const;
+
+export const ESTEPS = [
+  {
+    title: "",
+    content: CustomerVerificationDetails,
+  },
+  {
+    title: "",
+    content: OTPVerificationPage,
+  },
+  {
+    title: "",
+    content: VehicleDetailsPage,
+  },
+]
+
+const enum EMOTORTABS {
+
+}

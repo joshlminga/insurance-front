@@ -64,11 +64,11 @@ export default function OTPVerificationPage({ goToNextStep, goToPrevStep }: Cust
             Previous
           </Button>
           <Button
-            type="submit"
+            type="button"
             className="bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
             rightIcon={<ArrowRightCircle />}
-            loading={submitMutation.isPending}
-          >
+            // loading={submitMutation.isPending}
+         onClick={() => goToNextStep?.()}>
             Verify & Proceed
           </Button>
         </CardFooter>

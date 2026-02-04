@@ -1,21 +1,11 @@
 import { ReusableStepper } from '@/dev/core'
-import { CustomerVerificationDetails } from './capture-details'
-import OTPVerificationPage from './otp-verification'
+import { ESTEPS } from '@/utils/enums'
 
-export const StepPage = () => {
+export const StepPage: React.FC = () => {
     return (
         <ReusableStepper
             defaultStep={1}
-            steps={[
-                {
-                    title: "",
-                    content: <CustomerVerificationDetails />,
-                },
-                {
-                    title: "",
-                    content: <OTPVerificationPage />,
-                },
-            ]}
+           steps={ESTEPS}
         />
     )
 }

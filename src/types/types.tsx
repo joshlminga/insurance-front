@@ -45,7 +45,10 @@ export interface Tuser {
 
 export type StepItem = {
   title?: string
-  content: ReactNode
+  content: React.ComponentType<{
+    goToNextStep: () => void
+    goToPrevStep: () => void
+  }>
 }
 
 export type ReusableStepperProps = {
@@ -85,6 +88,7 @@ export interface AuthProviderProps {
   children: ReactNode
   storageKey?: string
 }
+
 export const initialState: AuthProviderState = {
   user: null,
   token: null,
@@ -117,8 +121,24 @@ export interface ToastOptions {
 export interface SubmitResponse {
     message:string
 }
-
 export interface CustomerVerificationDetailsProps {
   goToNextStep?: () => void
   goToPrevStep?: () => void
+}
+
+export type TTabItem = {
+  value: string
+  label: string
+  icon?: ReactNode
+  component: ReactNode
+  disabled?: boolean
+}
+
+export type TTabsProps = {
+  tabs: TTabItem[]
+  defaultValue?: string
+  className?: string
+  tabsListClassName?: string
+  triggerClassName?: string
+  contentClassName?: string
 }

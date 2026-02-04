@@ -1,5 +1,18 @@
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
-import type { ButtonProps, ReusableStepperProps, RHFInputProps, TReusablePageProps } from "@/types/types";
+import {
+    Breadcrumb,
+    BreadcrumbItem,
+    BreadcrumbLink,
+    BreadcrumbList,
+    BreadcrumbPage,
+    BreadcrumbSeparator
+} from "@/components/ui/breadcrumb";
+import type {
+    ButtonProps,
+    ReusableStepperProps,
+    RHFInputProps,
+    TReusablePageProps,
+    TTabsProps
+} from "@/types/types";
 import {
     Stepper,
     StepperContent,
@@ -10,6 +23,12 @@ import {
     StepperTitle,
     StepperTrigger,
 } from '@/components/ui/stepper';
+import {
+    Tabs,
+    TabsContent,
+    TabsList,
+    TabsTrigger,
+} from "@/components/ui/tabs"
 import { Link, useLocation } from "react-router-dom";
 import { Fragment } from "react/jsx-runtime";
 import React, { useState } from "react";
@@ -85,7 +104,7 @@ export const ReusablePageTitle = ({
                             {description}
                         </p>
                     </div>
-                    <div className="flex-shrink-0">
+                    <div className="shrink-0">
                         <BreadCrumbComponent />
                     </div>
                 </div>
@@ -94,16 +113,13 @@ export const ReusablePageTitle = ({
         </>
     );
 };
-
 export function ReusableStepper({
     steps,
     defaultStep = 1,
     className,
 }: ReusableStepperProps) {
     const [currentStep, setCurrentStep] = useState(defaultStep)
-
     const goToStep = (step: number) => setCurrentStep(step)
-
     return (
         <Stepper value={currentStep} onValueChange={setCurrentStep} className={className}>
             <StepperNav className="gap-3.5 mb-15">
@@ -114,8 +130,10 @@ export function ReusableStepper({
                             key={stepNumber}
                             step={stepNumber}
                             className="relative flex-1 items-start">
-                            <StepperTrigger className="flex flex-col items-start justify-center gap-3.5 grow">
-                                <StepperIndicator className={cn("h-[17px] w-[124px] rounded-[10px] transition-all", "bg-gray-300 data-[state=active]:bg-linear-to-r from-[#FFB3B3] via-[#FF8383] to-[#FF4545]")} />
+                            <StepperTrigger className="flex flex-col items-center justify-center gap-1 grow">
+                                <StepperIndicator
+                                    className={cn("h-[17px] w-[124px] rounded-[10px] transition-all",
+                                        "bg-gray-300 data-[state=active]:bg-linear-to-r from-[#FFB3B3] via-[#FF8383] to-[#FF4545]")} />
                                 <StepperTitle className="text-start font-semibold group-data-[state=inactive]/step:text-muted-foreground">
                                     {step.title}
                                 </StepperTitle>
@@ -127,12 +145,17 @@ export function ReusableStepper({
             <StepperPanel className="text-sm">
                 {steps.map((step, index) => {
                     const stepNumber = index + 1
+                    const StepComponent = step.content
+
                     return (
-                        <StepperContent key={stepNumber} value={stepNumber} className="w-full">
-                            {React.cloneElement(step.content as React.ReactElement<any>, {
-                                goToNextStep: () => goToStep(currentStep + 1),
-                                goToPrevStep: () => goToStep(currentStep - 1),
-                            })}
+                        <StepperContent
+                            key={stepNumber}
+                            value={stepNumber}
+                            className="w-full">
+                            <StepComponent
+                                goToNextStep={() => goToStep(currentStep + 1)}
+                                goToPrevStep={() => goToStep(currentStep - 1)}
+                            />
                         </StepperContent>
                     )
                 })}
@@ -198,5 +221,42 @@ export function ReuseableInput<T extends FieldValues>({
                 </Field>
             )}
         />
+    )
+}
+
+export function ReusableTabs({
+    tabs,
+    defaultValue,
+    className,
+    tabsListClassName,
+    triggerClassName,
+    contentClassName,
+}: TTabsProps) {
+    return (
+        <Tabs
+            defaultValue={defaultValue ?? tabs[0]?.value}
+            className={cn("w-[509px]", className)}>
+            <TabsList
+                className={cn(`h-25 w-full rounded-[20px] border border-[#ADABAB] bg-white p-0`, tabsListClassName)}>
+                {tabs.map((tab) => (
+                    <TabsTrigger
+                        key={tab.value}
+                        value={tab.value}
+                        disabled={tab.disabled}
+                        className={cn(`h-full w-[146px] rounded-none first:rounded-l-[20px] last:rounded-r-[20px] border-r border-[#ADABAB] data-[state=active]:bg-[#C20C0C] data-[state=active]:text-white data-[state=inactive]:bg-white data-[state=inactive]:text-black flex items-center justify-center gap-2 text-lg font-medium `, triggerClassName)}>
+                        {tab.icon && <span className="h-4 w-4">{tab.icon}</span>}
+                        {tab.label}
+                    </TabsTrigger>
+                ))}
+            </TabsList>
+            {tabs.map((tab) => (
+                <TabsContent
+                    key={tab.value}
+                    value={tab.value}
+                    className={cn("mt-6", contentClassName)}>
+                    {tab.component}
+                </TabsContent>
+            ))}
+        </Tabs>
     )
 }
