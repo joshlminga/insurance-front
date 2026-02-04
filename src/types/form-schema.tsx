@@ -19,3 +19,7 @@ export const CustomerDetailsSchema = z.object({
     .string()
     .min(7, "Invalid phone number"),
 })
+
+export const OTPVerificationSchema = z.object({
+  otp: z.string().length(6, "OTP must be exactly 4 digits"),
+})
