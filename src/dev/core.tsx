@@ -115,6 +115,7 @@ export const ReusablePageTitle = ({
         </>
     );
 };
+
 export function ReusableStepper({
     steps,
     defaultStep = 1,
@@ -124,7 +125,7 @@ export function ReusableStepper({
     const goToStep = (step: number) => setCurrentStep(step)
     return (
         <Stepper value={currentStep} onValueChange={setCurrentStep} className={className}>
-            <StepperNav className="gap-3.5 mb-15">
+            <StepperNav className="flex items-start gap-2 mb-6">
                 {steps.map((step, index) => {
                     const stepNumber = index + 1
                     return (
@@ -148,7 +149,6 @@ export function ReusableStepper({
                 {steps.map((step, index) => {
                     const stepNumber = index + 1
                     const StepComponent = step.content
-
                     return (
                         <StepperContent
                             key={stepNumber}
@@ -225,6 +225,7 @@ export function ReuseableInput<T extends FieldValues>({
         />
     )
 }
+
 export function ReusableSelect<T extends FieldValues>({
     control,
     name,
@@ -243,29 +244,25 @@ export function ReusableSelect<T extends FieldValues>({
             render={({ field, fieldState }) => (
                 <Field
                     data-invalid={fieldState.invalid}
-                    className={cn("w-full", className)}
-                >
+                    className={cn("w-full", className)}>
                     {label && (
                         <FieldLabel>
                             {label}
                             {required && <span className="ml-1 text-red-500">*</span>}
                         </FieldLabel>
                     )}
-
                     <Select
                         value={field.value}
                         onValueChange={field.onChange}
-                        disabled={disabled}
-                    >
+                        disabled={disabled}>
                         <SelectTrigger
                             aria-invalid={fieldState.invalid}
                             className={cn(
                                 "w-full",
                                 fieldState.invalid &&
-                                    "border-red-500 focus:ring-red-500",
+                                "border-red-500 focus:ring-red-500",
                                 triggerClassName
-                            )}
-                        >
+                            )}>
                             <SelectValue placeholder={placeholder} />
                         </SelectTrigger>
                         <SelectContent className="">
@@ -273,14 +270,12 @@ export function ReusableSelect<T extends FieldValues>({
                                 <SelectItem
                                     key={option.value}
                                     value={option.value}
-                                    disabled={option.disabled}
-                                >
+                                    disabled={option.disabled}>
                                     {option.label}
                                 </SelectItem>
                             ))}
                         </SelectContent>
                     </Select>
-
                     {fieldState.error && (
                         <FieldError className="mt-1 text-sm text-red-500">
                             {fieldState.error.message}

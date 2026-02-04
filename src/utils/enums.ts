@@ -1,5 +1,6 @@
 import { CustomerVerificationDetails } from "@/app/motor/steppers/capture-details";
 import OTPVerificationPage from "@/app/motor/steppers/otp-verification";
+import { QuotationsPage } from "@/app/motor/steppers/quotations";
 import { MotorCommercialPage } from "@/app/motor/steppers/tabs/motor-commercial";
 import { MotorPrivatePage } from "@/app/motor/steppers/tabs/motor-private";
 import { MotorPsvPage } from "@/app/motor/steppers/tabs/motor-psv";
@@ -75,6 +76,10 @@ export const ESTEPS = [
   {
     title: "",
     content: VehicleDetailsPage,
+  },
+   {
+    title: "",
+    content: QuotationsPage,
   },
 ]
 

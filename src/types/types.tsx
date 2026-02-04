@@ -64,7 +64,7 @@ export interface ButtonProps extends React.ComponentProps<typeof ShadButton> {
 }
 
 export type RHFInputProps<T extends FieldValues> = {
-  control: Control<T>
+  control?: Control<T>
   name: Path<T>
   label: string
   id?: string

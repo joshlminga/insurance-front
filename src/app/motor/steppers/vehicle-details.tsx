@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button, ReusableTabs } from '@/dev/core'
 import React, { useState } from 'react'
@@ -54,12 +53,13 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
             <form onSubmit={form.handleSubmit(onSubmit)} className="w-full mx-auto bg-transparent">
                 <div className='items-center justify-center border p-4'>
                     <div className="w-full py-3">
-                        <h1 className="text-3xl font-bold leading-none mb-4">Proceed to add your <span className='text-[#C20C0C]'>Vehicle Details</span></h1>
+                        <h1 className="text-2xl font-bold leading-none mb-4">Proceed to add your <span className='text-[#C20C0C]'>Vehicle Details</span></h1>
                         <h6 className='text-lg font-bold'>Select type of cover</h6>
                     </div>
                     <ReusableTabs
                         tabs={EMOTORTABS}
                         form={form}
+                        onTabChange={setCurrent_Tab}
                     />
                 </div>
                 <CardFooter className="w-full md:col-span-2 flex justify-between mt-3 px-0">
