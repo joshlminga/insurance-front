@@ -314,7 +314,7 @@ export function ReusableTabs({
                             key={tab.value}
                             value={tab.value}
                             disabled={tab.disabled}
-                            className={cn(` h-full rounded-none first:rounded-l-[20px] last:rounded-r-[20px] border-r border-[#ADABAB] data-[state=active]:bg-[#C20C0C] data-[state=active]:text-white data-[state=inactive]:bg-white data-[state=inactive]:text-black flex items-center justify-center gap-2 text-lg font-medium`,
+                            className={cn(` h-full rounded-none first:rounded-l-[20px] last:rounded-r-[20px]  data-[state=active]:bg-[#C20C0C] data-[state=active]:text-white data-[state=inactive]:bg-white data-[state=inactive]:text-black flex items-center justify-center gap-2 text-lg font-medium`,
                                 triggerClassName)}>
                             {Icon && (
                                 <Icon

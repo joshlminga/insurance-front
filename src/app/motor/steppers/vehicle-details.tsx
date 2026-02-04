@@ -53,14 +53,14 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
         <FormProvider {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="w-full mx-auto bg-transparent">
                 <div className='items-center justify-center border p-4'>
-                <div className="w-full py-3">
-                    <h1 className="text-3xl font-bold leading-none mb-4">Proceed to add your <span className='text-[#C20C0C]'>Vehicle Details</span></h1>
-                    <h6 className='text-lg font-bold'>Select type of cover</h6>
-                </div>
-                <ReusableTabs
-                    tabs={EMOTORTABS}
-                    form={form}
-                />
+                    <div className="w-full py-3">
+                        <h1 className="text-3xl font-bold leading-none mb-4">Proceed to add your <span className='text-[#C20C0C]'>Vehicle Details</span></h1>
+                        <h6 className='text-lg font-bold'>Select type of cover</h6>
+                    </div>
+                    <ReusableTabs
+                        tabs={EMOTORTABS}
+                        form={form}
+                    />
                 </div>
                 <CardFooter className="w-full md:col-span-2 flex justify-between mt-3 px-0">
                     <Button
@@ -74,8 +74,9 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
                         type="button"
                         className="bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
                         rightIcon={<ArrowRightCircle />}
-                        // loading={submitMutation.isPending}
-                        >
+                        onClick={() => goToNextStep?.()}
+                    // loading={submitMutation.isPending}
+                    >
                         Next
                     </Button>
                 </CardFooter>
