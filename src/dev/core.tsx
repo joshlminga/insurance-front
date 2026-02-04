@@ -225,7 +225,6 @@ export function ReuseableInput<T extends FieldValues>({
         />
     )
 }
-
 export function ReusableSelect<T extends FieldValues>({
     control,
     name,
@@ -242,39 +241,48 @@ export function ReusableSelect<T extends FieldValues>({
             name={name}
             control={control}
             render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid} className={className}>
+                <Field
+                    data-invalid={fieldState.invalid}
+                    className={cn("w-full", className)}
+                >
                     {label && (
                         <FieldLabel>
                             {label}
-                            {required && <span className="text-red-500 ml-1">*</span>}
+                            {required && <span className="ml-1 text-red-500">*</span>}
                         </FieldLabel>
                     )}
+
                     <Select
                         value={field.value}
                         onValueChange={field.onChange}
-                        disabled={disabled}>
+                        disabled={disabled}
+                    >
                         <SelectTrigger
                             aria-invalid={fieldState.invalid}
                             className={cn(
+                                "w-full",
                                 fieldState.invalid &&
-                                "border-red-500 focus:ring-red-500",
+                                    "border-red-500 focus:ring-red-500",
                                 triggerClassName
-                            )}>
+                            )}
+                        >
                             <SelectValue placeholder={placeholder} />
                         </SelectTrigger>
-                        <SelectContent>
-                            {options.map((option) => (
+                        <SelectContent className="">
+                            {options.map(option => (
                                 <SelectItem
                                     key={option.value}
                                     value={option.value}
-                                    disabled={option.disabled}>
+                                    disabled={option.disabled}
+                                >
                                     {option.label}
                                 </SelectItem>
                             ))}
                         </SelectContent>
                     </Select>
+
                     {fieldState.error && (
-                        <FieldError className="text-red-500 text-sm mt-1">
+                        <FieldError className="mt-1 text-sm text-red-500">
                             {fieldState.error.message}
                         </FieldError>
                     )}
@@ -283,6 +291,7 @@ export function ReusableSelect<T extends FieldValues>({
         />
     )
 }
+
 
 export function ReusableTabs({
     tabs,

@@ -5,32 +5,32 @@ import { useFormContext } from 'react-hook-form'
 
 export const MotorPrivatePage: React.FC = () => {
     const { control } = useFormContext()
-   
+
     return (
         <div className='justify-center items-center'>
             <div className="justify-between">
                 <FieldGroup>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-2 gap-x-5 gap-2">
                         <ReuseableInput
-                            className="w-full max-w-[320px] h-[51px] rounded-[5px] border border-[#ADABAB]"
+                            className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
                             control={control}
                             name="registration_number"
                             label="Registration Number"
                         />
                         <ReuseableInput
-                            className="w-full max-w-[320px] h-[51px] rounded-[5px] border border-[#ADABAB]"
+                            className="w-full  h-[51px] rounded-[5px] border border-[#ADABAB]"
                             control={control}
                             name="vehicle_model"
                             label="Model for the vehicle"
                         />
                         <ReuseableInput
-                            className="w-full max-w-[320px] h-[51px] rounded-[5px] border border-[#ADABAB]"
+                            className="w-full  h-[51px] rounded-[5px] border border-[#ADABAB]"
                             control={control}
                             name="vehicle_make"
                             label="Make of the Vehicle"
                         />
                         <ReuseableInput
-                            className="w-full max-w-[320px] h-[51px] rounded-[5px] border border-[#ADABAB]"
+                            className="w-full  h-[51px] rounded-[5px] border border-[#ADABAB]"
                             control={control}
                             name="yom"
                             label="Year of Manufacture"
@@ -43,6 +43,7 @@ export const MotorPrivatePage: React.FC = () => {
                             name="insurance_type"
                             label="Type of Insurance"
                             placeholder="Select type of Insurance"
+                            // disabled
                             options={[
                                 { label: "Commercial", value: "commercial" },
                                 { label: "Third Party", value: "third_party" },
