@@ -1,12 +1,13 @@
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
-import { Button, ReusableCheckboxGrid, ReuseableInput } from '@/dev/core'
+import { Button, ReusableCheckboxGrid, ReusablePagination, ReuseableInput } from '@/dev/core'
 import type { CustomerVerificationDetailsProps } from '@/types/types'
 import { QUOTATIONCHECKBOX } from '@/utils/enums'
 import { ArrowLeftCircle, ArrowRightCircle, Plus } from 'lucide-react'
-import React from 'react'
+import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goToNextStep, goToPrevStep }) => {
+    const [page, setPage] = useState(1)
     const form = useForm();
     return (
         <div className="max-w-full mx-auto border-0 bg-transparent">
@@ -58,18 +59,29 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                         <Card
                             key={index}
                             className="rounded-lg flex items-center justify-center">
-                            <CardContent className="flex items-center justify-center">
+                            <CardContent className="items-center justify-center">
                                 <img
                                     src="/britam.png"
                                     alt="Britam"
                                     className="h-10 w-10 object-contain"
                                 />
                             </CardContent>
+                            <CardFooter className='flex justify-between gap-4'>
+                                <Button
+                                    type="button"
+                                    className="text-sm bg-[#C20C0C]/80 hover:bg-[#C20C0C]">
+                                    Get Quote
+                                </Button>
+                                <Button
+                                    type="button"
+                                    className="text-sm bg-[#0CC258]/80 rounded- hover:bg-[#0CC258]">
+                                    Purchase Cover
+                                </Button>
+                            </CardFooter>
                         </Card>
                     ))}
                 </div>
             </div>
-
             <CardFooter className="md:col-span-2 flex justify-between mt-1">
                 <Button
                     type="button"
@@ -78,6 +90,11 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                     onClick={() => goToPrevStep?.()}>
                     Previous
                 </Button>
+                <ReusablePagination
+                    currentPage={page}
+                    totalPages={10}
+                    onPageChange={setPage}
+                />
                 <Button
                     type="button"
                     className="bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"

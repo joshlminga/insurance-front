@@ -175,3 +175,11 @@ export type ReusableCheckboxGridProps = {
   columns?: number
   className?: string
 }
+
+export type ReusablePaginationProps = {
+    currentPage: number
+    totalPages: number
+    onPageChange: (page: number) => void
+    siblingCount?: number
+    disabled?: boolean
+}

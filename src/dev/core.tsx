@@ -9,6 +9,7 @@ import {
 import type {
     ButtonProps,
     ReusableCheckboxGridProps,
+    ReusablePaginationProps,
     ReusableStepperProps,
     RHFInputProps,
     TReusablePageProps,
@@ -42,6 +43,7 @@ import { Controller, type FieldValues } from "react-hook-form";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 
 const formatSegment = (segment: string) => {
     return segment
@@ -290,33 +292,33 @@ export function ReusableSelect<T extends FieldValues>({
 }
 
 export const ReusableCheckboxGrid = ({
-  options,
-  columns = 3,
-  className = '',
+    options,
+    columns = 3,
+    className = '',
 }: ReusableCheckboxGridProps) => {
-  return (
-    <div
-      className={`grid gap-8 grid-cols-${columns} ${className}`}>
-      {options.map((option) => (
+    return (
         <div
-          key={option.id}
-          className="flex items-start gap-2 mt-2">
-          <Checkbox
-            checked={option.checked}
-            onCheckedChange={(val) =>
-              option.onChange?.(Boolean(val))
-            }
-            className="w-[15px] h-[15px] rounded-[3px] border border-[#D9D9D9]
+            className={`grid gap-8 grid-cols-${columns} ${className}`}>
+            {options.map((option) => (
+                <div
+                    key={option.id}
+                    className="flex items-start gap-2 mt-2">
+                    <Checkbox
+                        checked={option.checked}
+                        onCheckedChange={(val) =>
+                            option.onChange?.(Boolean(val))
+                        }
+                        className="w-[15px] h-[15px] rounded-[3px] border border-[#D9D9D9]
                        data-[state=checked]:bg-[#C20C0C]
                        data-[state=checked]:border-[#C20C0C]"
-          />
-          <label className="cursor-pointer max-w-[449px]">
-            {option.label}
-          </label>
+                    />
+                    <label className="cursor-pointer max-w-[449px]">
+                        {option.label}
+                    </label>
+                </div>
+            ))}
         </div>
-      ))}
-    </div>
-  )
+    )
 }
 
 export function ReusableTabs({
@@ -375,5 +377,82 @@ export function ReusableTabs({
                 )
             })}
         </Tabs>
+    )
+}
+
+export const ReusablePagination = ({
+    currentPage,
+    totalPages,
+    onPageChange,
+    siblingCount = 1,
+    disabled = false,
+}: ReusablePaginationProps) => {
+    if (totalPages <= 1) return null
+
+    const range = (start: number, end: number) =>
+        Array.from({ length: end - start + 1 }, (_, i) => start + i)
+    const leftSibling = Math.max(currentPage - siblingCount, 1)
+    const rightSibling = Math.min(currentPage + siblingCount, totalPages)
+    const showLeftEllipsis = leftSibling > 2
+    const showRightEllipsis = rightSibling < totalPages - 1
+    const pages: (number | "ellipsis")[] = []
+    pages.push(1)
+    if (showLeftEllipsis) pages.push("ellipsis")
+    pages.push(...range(leftSibling, rightSibling).filter(p => p !== 1 && p !== totalPages))
+
+    if (showRightEllipsis) pages.push("ellipsis")
+
+    if (totalPages > 1) pages.push(totalPages)
+
+    const goToPage = (page: number) => {
+        if (page < 1 || page > totalPages || page === currentPage) return
+        onPageChange(page)
+    }
+
+    return (
+        <Pagination>
+            <PaginationContent>
+                <PaginationItem>
+                    <PaginationPrevious
+                        href="#"
+                        onClick={(e) => {
+                            e.preventDefault()
+                            goToPage(currentPage - 1)
+                        }}
+                        aria-disabled={disabled || currentPage === 1}
+                    />
+                </PaginationItem>
+
+                {pages.map((page, index) => (
+                    <PaginationItem key={index}>
+                        {page === "ellipsis" ? (
+                            <PaginationEllipsis />
+                        ) : (
+                            <PaginationLink
+                                href="#"
+                                isActive={page === currentPage}
+                                onClick={(e) => {
+                                    e.preventDefault()
+                                    goToPage(page)
+                                }}
+                            >
+                                {page}
+                            </PaginationLink>
+                        )}
+                    </PaginationItem>
+                ))}
+
+                <PaginationItem>
+                    <PaginationNext
+                        href="#"
+                        onClick={(e) => {
+                            e.preventDefault()
+                            goToPage(currentPage + 1)
+                        }}
+                        aria-disabled={disabled || currentPage === totalPages}
+                    />
+                </PaginationItem>
+            </PaginationContent>
+        </Pagination>
     )
 }
