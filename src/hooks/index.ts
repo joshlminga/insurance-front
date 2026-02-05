@@ -18,18 +18,18 @@ export const useCustomDialogContextFactory = <T = TKeyValueAnyType>() => {
 		Component,
 		state,
 	}: TCustomDialogPropsContextProps<T>) => {
-		if (Component) {
-			dialogContentDispatcher({
+		Component
+			? dialogContentDispatcher({
 				payload: {
 					...(componentProps ? { componentProps } : {}),
 					Component,
 				},
 				type: 'componentProps',
-			});
-		}
+			})
+			: null;
+
 		toggleDialog(state);
 	};
-
 	return {
 		handleDialogContextSwitch,
 		dialogContent,
