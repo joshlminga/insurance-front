@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { CardFooter, } from '@/components/ui/card'
 import { Button, ReusableCard, ReusableCheckboxGrid, ReusablePagination, ReuseableInput } from '@/dev/core'
 import type { CustomerVerificationDetailsProps } from '@/types/types'
@@ -57,7 +58,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                     {EQUOTATIONSAMPLEDATA.map((item) => (
                         <ReusableCard
                             key={item.id}
-                            header={item.header}
+                            header={item.header as any}
                             footerClassName="flex justify-between w-full"
                             footer={
                                 <>
