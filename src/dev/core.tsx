@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import type {
     ButtonProps,
+    ReusableCardProps,
     ReusableCheckboxGridProps,
     ReusablePaginationProps,
     ReusableStepperProps,
@@ -44,6 +45,7 @@ import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 
 const formatSegment = (segment: string) => {
     return segment
@@ -454,5 +456,54 @@ export const ReusablePagination = ({
                 </PaginationItem>
             </PaginationContent>
         </Pagination>
+    )
+}
+export const ReusableCard = ({
+    header,
+    children,
+    footer,
+    rootClassName,
+    headerClassName,
+    contentClassName,
+    footerClassName,
+}: ReusableCardProps) => {
+    return (
+        <Card className={cn(`rounded-[10px] border border-[#ADABAB] bg-white shadow-[0px_4px_4px_0px_#00000040] flex flex-col`, rootClassName)}>
+            {header && (
+                <CardHeader className={cn('flex items-center justify-center p-3 text-center', headerClassName)}>
+                    {header.type === 'image' && (
+                        <img
+                            src={header.src}
+                            alt={header.alt ?? ''}
+                            className={cn(
+                                'w-[109px] h-[41px] object-contain',
+                                header.className
+                            )}
+                        />
+                    )}
+                    {header.type === 'text' && (
+                        <div className={cn('flex flex-col gap-1', header.className)}>
+                            <h3 className="text-sm font-semibold">
+                                {header.title}
+                            </h3>
+                            {header.description && (
+                                <p className="text-xs text-muted-foreground">
+                                    {header.description}
+                                </p>
+                            )}
+                        </div>
+                    )}
+                    {header.type === 'custom' && header.node}
+                </CardHeader>
+            )}
+            <CardContent className={cn('flex flex-col gap-2 px-4 py-2', contentClassName)}>
+                {children}
+            </CardContent>
+            {footer && (
+                <CardFooter className={cn(footerClassName, 'mt-auto px-4 pb-3')}>
+                    {footer}
+                </CardFooter>
+            )}
+        </Card>
     )
 }

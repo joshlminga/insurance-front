@@ -112,3 +112,5 @@ export const QUOTATIONCHECKBOX = [
   { id: 'pvt', label: 'Political Violence & Terrorism' },
   { id: 'pa', label: 'Personal Accident' },
 ]
+
+export const EQUOTATIONSAMPLEDATA=[];

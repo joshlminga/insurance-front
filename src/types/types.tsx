@@ -183,3 +183,18 @@ export type ReusablePaginationProps = {
     siblingCount?: number
     disabled?: boolean
 }
+
+export type CardHeaderContent =
+  | { type: 'image'; src: string; alt?: string; className?: string }
+  | { type: 'text'; title: string; description?: string; className?: string }
+  | { type: 'custom'; node: ReactNode }
+
+export type ReusableCardProps = {
+  header?: CardHeaderContent
+  children: ReactNode
+  footer?: ReactNode
+  rootClassName?: string
+  headerClassName?: string
+  contentClassName?: string
+  footerClassName?: string
+}
