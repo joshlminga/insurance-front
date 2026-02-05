@@ -1,4 +1,4 @@
-import { Card, CardContent, CardFooter } from '@/components/ui/card'
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Button, ReusableCheckboxGrid, ReusablePagination, ReuseableInput } from '@/dev/core'
 import type { CustomerVerificationDetailsProps } from '@/types/types'
 import { QUOTATIONCHECKBOX } from '@/utils/enums'
@@ -54,27 +54,46 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                     Quote Comparison
                 </h1>
 
-                <div className='grid grid-cols-4 gap-4'>
+                <div className='grid grid-cols-4 gap-6'>
                     {Array.from({ length: 20 }).map((_, index) => (
                         <Card
                             key={index}
-                            className="rounded-lg flex items-center justify-center">
-                            <CardContent className="items-center justify-center">
+                            className="max-h-fit rounded-[10px] border border-[#ADABAB] bg-white shadow-[0px_4px_4px_0px_#00000040] flex flex-col">
+                            <CardHeader className="flex items-center justify-center p-3">
                                 <img
                                     src="/britam.png"
                                     alt="Britam"
-                                    className="h-10 w-10 object-contain"
+                                    className="w-[109px] h-[41px] object-contain"
                                 />
+                            </CardHeader>
+                            <CardContent className="flex flex-col gap-2 px-4 py-2">
+                                <div className="flex justify-between">
+                                    <span className="text-[10px] font-medium leading-2.5 text-black">
+                                        Basic Premium
+                                    </span>
+                                    <span className="text-[10px] font-medium leading-2.5 text-black">
+                                        Kes. 1,200,000
+                                    </span>
+                                </div>
+
+                                <div className="flex justify-between">
+                                    <span className="text-[10px] font-medium leading-2.5 text-black">
+                                        Total Premium
+                                    </span>
+                                    <span className="text-[10px] font-medium leading-2.5 text-black">
+                                        Kes. 1,205,440
+                                    </span>
+                                </div>
                             </CardContent>
-                            <CardFooter className='flex justify-between gap-4'>
+                            <CardFooter className="mt-auto flex justify-between px-4 pb-3">
                                 <Button
                                     type="button"
-                                    className="text-sm bg-[#C20C0C]/80 hover:bg-[#C20C0C]">
+                                    className="h-[17px] rounded-[3px] border border-[#D9D9D9] bg-[#C20C0C] hover:bg-[#C20C0C]/90 text-[8px] font-medium leading-2 text-white px-1">
                                     Get Quote
                                 </Button>
                                 <Button
                                     type="button"
-                                    className="text-sm bg-[#0CC258]/80 rounded- hover:bg-[#0CC258]">
+                                    className="h-[17px] rounded-[3px] border border-[#D9D9D9] bg-[#C20C0C] hover:bg-[#C20C0C]/90 text-[8px] font-medium leading-2 text-white px-1">
                                     Purchase Cover
                                 </Button>
                             </CardFooter>
@@ -82,6 +101,8 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                     ))}
                 </div>
             </div>
+
+
             <CardFooter className="md:col-span-2 flex justify-between mt-1">
                 <Button
                     type="button"

@@ -21,7 +21,7 @@ export default function OTPVerificationPage({ goToNextStep, goToPrevStep }: Cust
         otp: "",
       },
     })
-  
+
     const submitMutation = UseApiMutation<SubmitResponse, OTPFormValues>({
       url: "verify/otp",
       method: EMETHODS.POST,
@@ -38,12 +38,10 @@ export default function OTPVerificationPage({ goToNextStep, goToPrevStep }: Cust
           )
         },
       },
-    })
-  
+    })  
     const onSubmit = (data: OTPFormValues) => {
       submitMutation.mutate(data)
     }
-
   return (
     <FormProvider {...methods}>
       <form onSubmit={methods.handleSubmit(onSubmit)} className="flex flex-col items-center justify-start min-h-[500px] w-full">
