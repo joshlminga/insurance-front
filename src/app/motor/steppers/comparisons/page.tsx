@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { CardFooter } from '@/components/ui/card'
 import { Button, ReusableCard } from '@/dev/core'
 import { ECOMPARISONSAMPLEDATA } from '@/utils/enums'

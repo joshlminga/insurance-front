@@ -513,36 +513,35 @@ export const ReusableCard = ({
     )
 }
 
-
-export const CustomDialogComponent = <T =TKeyValueStringType, >({
-  handleDialogContextSwitch,
-  dialogOpen,
-  className,
-  children,
+export const CustomDialogComponent = <T = TKeyValueStringType,>({
+    handleDialogContextSwitch,
+    dialogOpen,
+    className,
+    children,
 }: Pick<
-  TCustomDialogProps<T>,
-  "children" | "dialogOpen" | "handleDialogContextSwitch" | "className"
+    TCustomDialogProps<T>,
+    "children" | "dialogOpen" | "handleDialogContextSwitch" | "className"
 >) => {
-  return (
-    <Dialog
-      {...{
-        onOpenChange: () => handleDialogContextSwitch({}),
-        open: dialogOpen,
-        modal: true,
-      }}>
-      <DialogContent
-        onOpenAutoFocus={(e) => e.preventDefault()}
-        className={cn(
-          "select-none max-h-[80dvh] flex flex-col overflow-hidden p-0! m-0!",
-          className ?? ""
-        )}>
-        <div
-          {...{
-            className: `relative w-full flex-1 h-full overflow-y-auto py-5! px-5`,
-          }}>
-          {children}
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
+    return (
+        <Dialog
+            {...{
+                onOpenChange: () => handleDialogContextSwitch({}),
+                open: dialogOpen,
+                modal: true,
+            }}>
+            <DialogContent
+                onOpenAutoFocus={(e) => e.preventDefault()}
+                className={cn(
+                    "select-none max-h-[80dvh] flex flex-col overflow-hidden p-0! m-0!",
+                    className ?? ""
+                )}>
+                <div
+                    {...{
+                        className: `relative w-full flex-1 h-full overflow-y-auto py-5! px-5`,
+                    }}>
+                    {children}
+                </div>
+            </DialogContent>
+        </Dialog>
+    );
 };
