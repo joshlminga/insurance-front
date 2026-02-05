@@ -187,4 +187,76 @@ export const EQUOTATIONSAMPLEDATA = [
       },
     ],
   },
+  {
+    id: 1,
+    header: { type: 'image', src: '/britam.png' },
+    content: [
+      { label: 'Basic Premium', value: 'Kes. 1,200,000' },
+      { label: 'Total Premium', value: 'Kes. 1,205,440' },
+    ],
+    footer: [
+      {
+        label: 'Get Quote',
+        className: 'rounded-md border border-[#D9D9D9] bg-[#C20C0C] hover:bg-[#C20C0C]/90 font-medium text-white px-6',
+      },
+      {
+        label: 'Purchase Cover',
+        className: 'rounded-md border border-[#D9D9D9] bg-[#0CC258] hover:bg-[#0CC258]/90 font-medium text-white px-6',
+      },
+    ],
+  },
+  {
+    id: 2,
+    header: { type: 'image', src: '/cic.png' },
+    content: [
+      { label: 'Basic Premium', value: 'Kes. 900,000' },
+      { label: 'Total Premium', value: 'Kes. 950,000' },
+    ],
+    footer: [
+      {
+        label: 'Get Quote',
+        className: 'rounded-md border border-[#D9D9D9] bg-[#C20C0C] hover:bg-[#C20C0C]/90 font-medium text-white px-6',
+      },
+      {
+        label: 'Purchase Cover',
+        className: 'rounded-md border border-[#D9D9D9] bg-[#0CC258] hover:bg-[#0CC258]/90 font-medium text-white px-6',
+      },
+    ],
+  },
+  {
+    id: 3,
+    header: { type: 'image', src: '/sanlam.png' },
+    content: [
+      { label: 'Basic Premium', value: 'Kes. 1,550,000' },
+      { label: 'Total Premium', value: 'Kes. 1,505,000' },
+    ],
+    footer: [
+      {
+        label: 'Get Quote',
+        className: 'rounded-md border border-[#D9D9D9] bg-[#C20C0C] hover:bg-[#C20C0C]/90 font-medium text-white px-6',
+      },
+      {
+        label: 'Purchase Cover',
+        className: 'rounded-md border border-[#D9D9D9] bg-[#0CC258] hover:bg-[#0CC258]/90 font-medium text-white px-6',
+      },
+    ],
+  },
+  {
+    id: 4,
+    header: { type: 'image', src: '/madison.png' },
+    content: [
+      { label: 'Basic Premium', value: 'Kes. 1,500,000' },
+      { label: 'Total Premium', value: 'Kes. 1,505,000' },
+    ],
+    footer: [
+      {
+        label: 'Get Quote',
+        className: 'rounded-md border border-[#D9D9D9] bg-[#C20C0C] hover:bg-[#C20C0C]/90 font-medium text-white px-6',
+      },
+      {
+        label: 'Purchase Cover',
+        className: 'rounded-md border border-[#D9D9D9] bg-[#0CC258] hover:bg-[#0CC258]/90 font-medium text-white px-6',
+      },
+    ],
+  },
 ]

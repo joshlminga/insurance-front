@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CardFooter, } from '@/components/ui/card'
-import { Button, ReusableCard, ReusableCheckboxGrid, ReusablePagination, ReuseableInput } from '@/dev/core'
+import { Button, CustomDialogComponent, ReusableCard, ReusableCheckboxGrid, ReusablePagination, ReuseableInput } from '@/dev/core'
 import type { CustomerVerificationDetailsProps } from '@/types/types'
 import { EQUOTATIONSAMPLEDATA, QUOTATIONCHECKBOX } from '@/utils/enums'
 import { ArrowLeftCircle, ArrowRightCircle, Plus } from 'lucide-react'
@@ -10,6 +10,16 @@ import { useForm } from 'react-hook-form'
 export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goToNextStep, goToPrevStep }) => {
     const [page, setPage] = useState(1)
     const form = useForm();
+
+    const { handleDialogContextSwitch, dialogContent, dialogOpen } =
+		useCustomDialogContextFactory<{
+			refetch?: () => Promise<any>;
+			data?: any;
+		}>();
+const optionsDispatcherDebounce = useDebounce({
+		debounceCallback: optionsDispatcher,
+	});
+
     return (
         <div className="max-w-full mx-auto border-0 bg-transparent">
             <form className='w-full py-4'>
@@ -106,6 +116,19 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                     Next
                 </Button>
             </CardFooter>
+
+            <CustomDialogComponent
+				{...{ handleDialogContextSwitch, dialogOpen }}
+				className='sm:max-w-[425px]'>
+				{dialogContent?.Component && (
+					<dialogContent.Component
+						{...{
+							componentProps: dialogContent.componentProps,
+							handleDialogContextSwitch,
+						}}
+					/>
+				)}
+			</CustomDialogComponent>
         </div>
     )
 }

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { LucideIcon } from "lucide-react";
-import type { ReactNode } from "react";
+import type { ComponentType, ReactNode } from "react";
 import { Button as ShadButton } from "@/components/ui/button"
 import type { Control, FieldValues, Path } from "react-hook-form";
 import { type AxiosRequestConfig, type Method } from 'axios'
@@ -198,3 +198,45 @@ export type ReusableCardProps = {
   contentClassName?: string
   footerClassName?: string
 }
+
+export type TNavBarUrlType = {
+	child_urls?: Pick<
+		TNavBarUrlType,
+		'Icon' | 'child_urls' | 'is_enabled' | 'label' | 'url'
+	>[];
+	// user_info: TOKEN_USER_INFO;
+	Icon?: React.FC<LucideIcon>;
+	current_path: string;
+	is_enabled: boolean;
+	label: string;
+	url?: string;
+};
+
+export type TComponent<T = TKeyValueStringType> = {
+	Component?: ComponentType<
+		Pick<TCustomDialogProps<T>, 'handleDialogContextSwitch'>
+	>;
+};
+
+export type TKeyValueStringType = Record<string, string>;
+export type TClassType = { className: string };
+export type TProfileMenuItems = {
+	shortcut?: string;
+	state?: boolean;
+	url?: string;
+} & Required<Pick<TNavBarUrlType, 'Icon' | 'label'>> &
+	TComponent;
+
+export type TCustomDialogPropsContextProps<T = TKeyValueStringType> = {
+	componentProps?: T;
+} & TComponent<T> &
+	Pick<TProfileMenuItems, 'state'>;
+
+export type TCustomDialogProps<T = TKeyValueStringType> = {
+	handleDialogContextSwitch: (
+		context: TCustomDialogPropsContextProps<T>
+	) => void;
+	children: ReactNode;
+	toggleDialog: () => any;
+	dialogOpen: boolean;
+} & Partial<TClassType>;

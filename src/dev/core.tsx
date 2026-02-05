@@ -13,6 +13,8 @@ import type {
     ReusablePaginationProps,
     ReusableStepperProps,
     RHFInputProps,
+    TCustomDialogProps,
+    TKeyValueStringType,
     TReusablePageProps,
     TRHFSelectProps,
     TTabsProps
@@ -46,6 +48,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 const formatSegment = (segment: string) => {
     return segment
@@ -509,3 +512,37 @@ export const ReusableCard = ({
         </Card>
     )
 }
+
+
+export const CustomDialogComponent = <T =TKeyValueStringType, >({
+  handleDialogContextSwitch,
+  dialogOpen,
+  className,
+  children,
+}: Pick<
+  TCustomDialogProps<T>,
+  "children" | "dialogOpen" | "handleDialogContextSwitch" | "className"
+>) => {
+  return (
+    <Dialog
+      {...{
+        onOpenChange: () => handleDialogContextSwitch({}),
+        open: dialogOpen,
+        modal: true,
+      }}>
+      <DialogContent
+        onOpenAutoFocus={(e) => e.preventDefault()}
+        className={cn(
+          "select-none max-h-[80dvh] flex flex-col overflow-hidden p-0! m-0!",
+          className ?? ""
+        )}>
+        <div
+          {...{
+            className: `relative w-full flex-1 h-full overflow-y-auto py-5 px-4`,
+          }}>
+          {children}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
