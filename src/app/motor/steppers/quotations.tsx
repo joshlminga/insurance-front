@@ -104,8 +104,8 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                         {item.content.map((row, idx) => (
                                             <div key={idx}>
                                                 <div  className="flex flex-wrap justify-between gap-1 min-w-0">
-                                                    <span className="text-xs sm:text-sm break-words max-w-[65%]">{row.label}</span>
-                                                    <span className="text-xs sm:text-sm break-words max-w-[65%]">{row.value}</span>
+                                                    <span className="text-xs sm:text-sm wrap-break-word max-w-[65%]">{row.label}</span>
+                                                    <span className="text-xs sm:text-sm wrap-break-word max-w-[65%]">{row.value}</span>
                                                 </div>
                                             </div>
                                         ))}
@@ -137,7 +137,6 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                     </Button>
                 </CardFooter>
             </div>
-
             <CustomDialogComponent
                 {...{ handleDialogContextSwitch, dialogOpen }}
                 className='sm:max-w-fit w-auto p-6'>

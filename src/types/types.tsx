@@ -212,7 +212,10 @@ export type ReusableCardProps = {
   rootClassName?: string
   headerClassName?: string
   contentClassName?: string
-  footerClassName?: string
+  footerClassName?: string,
+  onClick?: () => void;
+  disabled?: boolean;
+  selected?: boolean;
 }
 
 export type TNavBarUrlType = {

@@ -472,9 +472,33 @@ export const ReusableCard = ({
     headerClassName,
     contentClassName,
     footerClassName,
+    onClick,
+    disabled,
+    selected,
 }: ReusableCardProps) => {
+    const isClickable = Boolean(onClick) && !disabled;
     return (
-        <Card className={cn(`flex flex-col w-full min-w-0 overflow-hidden rounded-[10px] border border-[#ADABAB] bg-white shadow-[0px_4px_4px_0px_#00000040]`, rootClassName)}>
+        <Card
+            role={isClickable ? "button" : undefined}
+            tabIndex={isClickable ? 0 : -1}
+            aria-disabled={disabled}
+            onClick={disabled ? undefined : onClick}
+            onKeyDown={(e) => {
+                if (!isClickable) return;
+                if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    onClick?.();
+                }
+            }}
+          className={cn("flex flex-col w-full min-w-0 overflow-hidden rounded-[10px] border bg-white",
+        "border-[#ADABAB]",
+        isClickable &&
+          "cursor-pointer transition-all hover:border-[#FF9A9A] hover:-translate-y-px focus-visible:ring-2 focus-visible:ring-[#FF9A9A]",
+        selected && "ring-2 ring-primary",
+        disabled && "opacity-50 cursor-not-allowed",
+        rootClassName
+      )}
+    >
             {header && (
                 <CardHeader className={cn('flex items-center justify-center p-3 text-center', headerClassName)}>
                     {header.type === 'image' && (

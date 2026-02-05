@@ -282,3 +282,54 @@ export const ECOMPARISONSAMPLEDATA = [
     ],
   },
 ]
+
+export const POST_COMPARISON_DATA = [
+  {
+    id: 1,
+    logo: "/britam.png",
+    premiums: {
+      basic: "Kes 130,000",
+      duties: "Kes 625",
+      total: "Kes 130,625",
+    },
+    coverages: [
+      { label: "Excess Protector", status: "Optional", color: "#209BFF" },
+      { label: "Political Violence & Terrorism", status: "Inclusive", color: "#0CC258" },
+      { label: "Personal Accident (Insured)", status: "Covered", color: "#0CC258" },
+      { label: "Courtesy Car (10 days)", status: "Covered", color: "#0CC258" },
+      { label: "Road Rescue – AA", status: "Covered", color: "#0CC258" },
+    ],
+  },
+  {
+    id: 2,
+    logo: "/britam.png",
+    premiums: {
+      basic: "Kes 128,500",
+      duties: "Kes 600",
+      total: "Kes 129,100",
+    },
+    coverages: [
+      { label: "Excess Protector", status: "Optional", color: "#209BFF" },
+      { label: "Political Violence & Terrorism", status: "Inclusive", color: "#0CC258" },
+      { label: "Personal Accident (Insured)", status: "Covered", color: "#0CC258" },
+      { label: "Courtesy Car (7 days)", status: "Covered", color: "#0CC258" },
+      { label: "Road Rescue – AA", status: "Covered", color: "#0CC258" },
+    ],
+  },
+  {
+    id: 3,
+    logo: "/britam.png",
+    premiums: {
+      basic: "Kes 135,000",
+      duties: "Kes 650",
+      total: "Kes 135,650",
+    },
+    coverages: [
+      { label: "Excess Protector", status: "Inclusive", color: "#0CC258" },
+      { label: "Political Violence & Terrorism", status: "Inclusive", color: "#0CC258" },
+      { label: "Personal Accident (Insured)", status: "Covered", color: "#0CC258" },
+      { label: "Courtesy Car (14 days)", status: "Covered", color: "#0CC258" },
+      { label: "Road Rescue – AA", status: "Covered", color: "#0CC258" },
+    ],
+  },
+];
