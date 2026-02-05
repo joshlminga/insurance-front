@@ -107,6 +107,11 @@ export const EMOTORTABS = [
   },
 ]
 
+export enum SORT_ORDER {
+  Descending = 'DESC',
+  Ascending = 'ASC',
+}
+
 export const QUOTATIONCHECKBOX = [
   { id: 'excess', label: 'Excess Protector' },
   { id: 'pvt', label: 'Political Violence & Terrorism' },

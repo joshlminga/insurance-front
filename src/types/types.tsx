@@ -5,6 +5,7 @@ import { Button as ShadButton } from "@/components/ui/button"
 import type { Control, FieldValues, Path } from "react-hook-form";
 import { type AxiosRequestConfig, type Method } from 'axios'
 import type { UseMutationOptions, UseQueryOptions } from "@tanstack/react-query";
+import type { SORT_ORDER } from "@/utils/enums";
 
 export type T = {
   [key: string]: any;
@@ -14,6 +15,21 @@ export type T = {
 export type TNodeChildrentType<T = ReactNode> = {
     children: T;
 };
+export type TPaginationFilters = { page: number; pageSize: number };
+
+export type TActionType<S> = {
+	payload: Partial<S>;
+	type: keyof S;
+};
+
+export type TFilterOptions = {
+	order: {
+		direction: SORT_ORDER;
+		orderField: string;
+	};
+	date: Date[];
+	term: string;
+} & Record<string, any>;
 
 export type TReusablePageProps = {
     description?: string;
@@ -220,6 +236,8 @@ export type TComponent<T = TKeyValueStringType> = {
 
 export type TKeyValueStringType = Record<string, string>;
 export type TClassType = { className: string };
+export type TKeyValueAnyType = Record<string, any>;
+
 export type TProfileMenuItems = {
 	shortcut?: string;
 	state?: boolean;
@@ -240,3 +258,8 @@ export type TCustomDialogProps<T = TKeyValueStringType> = {
 	toggleDialog: () => any;
 	dialogOpen: boolean;
 } & Partial<TClassType>;
+
+export type TDebounceprops<TDebounceCallBackArgs> = {
+	debounceCallback: (props: TDebounceCallBackArgs) => any;
+	debounceTimeOut?: number;
+};
