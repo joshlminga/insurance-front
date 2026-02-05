@@ -472,14 +472,16 @@ export const ReusableCard = ({
             {header && (
                 <CardHeader className={cn('flex items-center justify-center p-3 text-center', headerClassName)}>
                     {header.type === 'image' && (
-                        <img
-                            src={header.src}
-                            alt={header.alt ?? ''}
-                            className={cn(
-                                'w-[109px] h-[41px] object-contain',
-                                header.className
-                            )}
-                        />
+                        <div className="w-[109px] h-[60px] overflow-hidden flex items-center justify-center">
+                            <img
+                                src={header.src}
+                                alt={header.alt ?? ''}
+                                className={cn(
+                                    'w-full h-full object-contain object-center',
+                                    header.className
+                                )}
+                            />
+                        </div>
                     )}
                     {header.type === 'text' && (
                         <div className={cn('flex flex-col gap-1', header.className)}>

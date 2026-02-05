@@ -1,7 +1,7 @@
 import { CardFooter, } from '@/components/ui/card'
 import { Button, ReusableCard, ReusableCheckboxGrid, ReusablePagination, ReuseableInput } from '@/dev/core'
 import type { CustomerVerificationDetailsProps } from '@/types/types'
-import { QUOTATIONCHECKBOX } from '@/utils/enums'
+import { EQUOTATIONSAMPLEDATA, QUOTATIONCHECKBOX } from '@/utils/enums'
 import { ArrowLeftCircle, ArrowRightCircle, Plus } from 'lucide-react'
 import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -54,38 +54,30 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                     Quote Comparison
                 </h1>
                 <div className='grid grid-cols-4 gap-8'>
-                    {Array.from({ length: 8 }).map((_, index) => (
+                    {EQUOTATIONSAMPLEDATA.map((item) => (
                         <ReusableCard
-                            key={index}
-                            header={{
-                                type: 'image',
-                                src: '/britam.png',
-                            }}
+                            key={item.id}
+                            header={item.header}
                             footerClassName="flex justify-between w-full"
                             footer={
                                 <>
-                                    <Button
-                                        type="button"
-                                        className="rounded-md border border-[#D9D9D9] bg-[#C20C0C] hover:bg-[#C20C0C]/90 font-medium text-white px-6">
-                                        Get Quote
-                                    </Button>
-                                    <Button
-                                        type="button"
-                                        className="rounded-md border border-[#D9D9D9] bg-[#0CC258] hover:bg-[#0CC258]/90 font-medium text-white px-6">
-                                        Purchase Cover
-                                    </Button>
+                                    {item.footer.map((btn, idx) => (
+                                        <Button key={idx} type="button" className={btn.className}>
+                                            {btn.label}
+                                        </Button>
+                                    ))}
                                 </>
                             }
                             children={
                                 <>
-                                    <div className="flex justify-between">
-                                        <span>Basic Premium</span>
-                                        <span>Kes. 1,200,000</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span>Total Premium</span>
-                                        <span>Kes. 1,205,440</span>
-                                    </div>
+                                    {item.content.map((row, idx) => (
+                                        <div key={idx}>
+                                            <div className="flex justify-between">
+                                                <span>{row.label}</span>
+                                                <span>{row.value}</span>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </>
                             } />
                     ))}
