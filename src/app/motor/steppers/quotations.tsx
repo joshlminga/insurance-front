@@ -72,12 +72,13 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                     <h1 className="text-2xl font-bold mb-4">
                         Quote Comparison
                     </h1>
-                    <div className='grid grid-cols-4 gap-8'>
+                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
                         {EQUOTATIONSAMPLEDATA.map((item) => (
                             <ReusableCard
                                 key={item.id}
                                 header={item.header as any}
-                                footerClassName="flex justify-between w-full"
+                                rootClassName=""
+                                footerClassName="flex flex-col gap-2 sm:flex-row sm:justify-between w-full"
                                 footer={
                                     <>
                                         <Button
@@ -102,9 +103,9 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                     <>
                                         {item.content.map((row, idx) => (
                                             <div key={idx}>
-                                                <div className="flex justify-between">
-                                                    <span>{row.label}</span>
-                                                    <span>{row.value}</span>
+                                                <div  className="flex flex-wrap justify-between gap-1 min-w-0">
+                                                    <span className="text-xs sm:text-sm break-words max-w-[65%]">{row.label}</span>
+                                                    <span className="text-xs sm:text-sm break-words max-w-[65%]">{row.value}</span>
                                                 </div>
                                             </div>
                                         ))}

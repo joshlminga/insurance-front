@@ -461,6 +461,7 @@ export const ReusablePagination = ({
         </Pagination>
     )
 }
+
 export const ReusableCard = ({
     header,
     children,
@@ -471,7 +472,7 @@ export const ReusableCard = ({
     footerClassName,
 }: ReusableCardProps) => {
     return (
-        <Card className={cn(`rounded-[10px] border border-[#ADABAB] bg-white shadow-[0px_4px_4px_0px_#00000040] flex flex-col`, rootClassName)}>
+        <Card className={cn(`flex flex-col w-full min-w-0 overflow-hidden rounded-[10px] border border-[#ADABAB] bg-white shadow-[0px_4px_4px_0px_#00000040]`, rootClassName)}>
             {header && (
                 <CardHeader className={cn('flex items-center justify-center p-3 text-center', headerClassName)}>
                     {header.type === 'image' && (
