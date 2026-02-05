@@ -7,11 +7,12 @@ import { EQUOTATIONSAMPLEDATA, QUOTATIONCHECKBOX } from '@/utils/enums'
 import { ArrowLeftCircle, ArrowRightCircle, Plus } from 'lucide-react'
 import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { ComparisonPage } from './comparisons/page'
 
 export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goToNextStep, goToPrevStep }) => {
     const [page, setPage] = useState(1)
     const form = useForm();
-    
+
     const { handleDialogContextSwitch, dialogContent, dialogOpen } =
 		useCustomDialogContextFactory<{
 			refetch?: () => Promise<any>;
@@ -20,6 +21,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
 
 
     return (
+        <>
         <div className="max-w-full mx-auto border-0 bg-transparent">
             <form className='w-full py-4'>
                 <div className="w-full border rounded-0 px-6 py-6">
@@ -58,7 +60,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                     className="ml-auto mt-4 flex items-center font-bold bg-[#C20C0C]/80 hover:bg-[#C20C0C]"
                     onClick={() =>
                         handleDialogContextSwitch({
-                            // Component: console.log('wewe') ,
+                            Component: ComparisonPage,
                             // componentProps: ,
                         })
                     }>
@@ -121,10 +123,11 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                     Next
                 </Button>
             </CardFooter>
+        </div>
 
-            <CustomDialogComponent
+         <CustomDialogComponent
 				{...{ handleDialogContextSwitch, dialogOpen }}
-				className='sm:max-w-[425px]'>
+				className='sm:max-w-fit w-auto p-6'>
 				{dialogContent?.Component && (
 					<dialogContent.Component
 						{...{
@@ -134,6 +137,6 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
 					/>
 				)}
 			</CustomDialogComponent>
-        </div>
+            </>
     )
 }

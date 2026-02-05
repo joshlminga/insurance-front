@@ -475,12 +475,12 @@ export const ReusableCard = ({
             {header && (
                 <CardHeader className={cn('flex items-center justify-center p-3 text-center', headerClassName)}>
                     {header.type === 'image' && (
-                        <div className="w-[109px] h-[60px] overflow-hidden flex items-center justify-center">
+                        <div className="w-[109px] h-[60px] flex items-center justify-center">
                             <img
                                 src={header.src}
                                 alt={header.alt ?? ''}
                                 className={cn(
-                                    'w-full h-full object-contain object-center',
+                                    'max-w-full max-h-full object-contain',
                                     header.className
                                 )}
                             />
@@ -538,7 +538,7 @@ export const CustomDialogComponent = <T =TKeyValueStringType, >({
         )}>
         <div
           {...{
-            className: `relative w-full flex-1 h-full overflow-y-auto py-5 px-4`,
+            className: `relative w-full flex-1 h-full overflow-y-auto py-5! px-5`,
           }}>
           {children}
         </div>

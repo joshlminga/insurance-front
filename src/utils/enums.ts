@@ -69,7 +69,6 @@ export const QUOTATIONCHECKBOX = [
   { id: 'pa', label: 'Personal Accident' },
 ]
 
-// sample-data.ts
 export const EQUOTATIONSAMPLEDATA = [
   {
     id: 1,
@@ -213,6 +212,73 @@ export const EQUOTATIONSAMPLEDATA = [
         label: 'Purchase Cover',
         className: 'rounded-md border border-[#D9D9D9] bg-[#0CC258] hover:bg-[#0CC258]/90 font-medium text-white px-6',
       },
+    ],
+  },
+]
+
+export const ECOMPARISONSAMPLEDATA = [
+  {
+    id: 1,
+    header: { type: 'image', src: '/britam.png' },
+    content: [
+      { label: 'Britam Insurance' },
+      { label: 'Kes. 1,200,000' },
+    ],
+  },
+  {
+    id: 2,
+    header: { type: 'image', src: '/cic.png' },
+    content: [
+      { label: 'CIC GROUP Insurance' },
+      { label: 'Kes. 1,200,000' },
+    ],
+  },
+  {
+    id: 3,
+    header: { type: 'image', src: '/sanlam.png' },
+    content: [
+      { label: 'Sanlam Insurance' },
+      { label: 'Kes. 1,200,000' },
+    ],
+  },
+  {
+    id: 4,
+    header: { type: 'image', src: '/madison.png' },
+    content: [
+      { label: 'Madison Insurance' },
+      { label: 'Kes. 1,200,000' },
+    ],
+  },
+  {
+    id: 5,
+    header: { type: 'image', src: '/britam.png' },
+    content: [
+      { label: 'Britam Insurance' },
+      { label: 'Kes. 1,200,000' },
+    ],
+  },
+  {
+    id: 6,
+    header: { type: 'image', src: '/cic.png' },
+    content: [
+      { label: 'CIC GROUP Insurance' },
+      { label: 'Kes. 1,200,000' },
+    ],
+  },
+  {
+    id: 7,
+    header: { type: 'image', src: '/sanlam.png' },
+    content: [
+      { label: 'Sanlam Insurance' },
+      { label: 'Kes. 1,200,000' },
+    ],
+  },
+  {
+    id: 8,
+    header: { type: 'image', src: '/madison.png' },
+    content: [
+      { label: 'Madison Insurance' },
+      { label: 'Kes. 1,200,000' },
     ],
   },
 ]
