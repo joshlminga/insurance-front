@@ -1,32 +1,23 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CardFooter, } from '@/components/ui/card'
 import { Button, CustomDialogComponent, ReusableCard, ReusableCheckboxGrid, ReusablePagination, ReuseableInput } from '@/dev/core'
-import { useCustomDialogContextFactory, useDebounce } from '@/hooks'
-import type { CustomerVerificationDetailsProps, TFilterOptions, TPaginationFilters } from '@/types/types'
-import { FILTERS_DEFAULTS, ReusableReducer } from '@/utils/constatnts'
+import { useCustomDialogContextFactory, } from '@/hooks'
+import type { CustomerVerificationDetailsProps } from '@/types/types'
 import { EQUOTATIONSAMPLEDATA, QUOTATIONCHECKBOX } from '@/utils/enums'
 import { ArrowLeftCircle, ArrowRightCircle, Plus } from 'lucide-react'
-import React, { useReducer, useState } from 'react'
+import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goToNextStep, goToPrevStep }) => {
     const [page, setPage] = useState(1)
     const form = useForm();
-
-const [filters, optionsDispatcher] = useReducer(
-		ReusableReducer<TPaginationFilters & TFilterOptions>,
-		{ ...FILTERS_DEFAULTS, page: 1, pageSize: 25 }
-	);
-
+    
     const { handleDialogContextSwitch, dialogContent, dialogOpen } =
 		useCustomDialogContextFactory<{
 			refetch?: () => Promise<any>;
 			data?: any;
 		}>();
 
-const optionsDispatcherDebounce = useDebounce({
-		debounceCallback: optionsDispatcher,
-	});
 
     return (
         <div className="max-w-full mx-auto border-0 bg-transparent">
@@ -63,7 +54,7 @@ const optionsDispatcherDebounce = useDebounce({
                     </Button>
                 </div>
                 <Button
-                    type='submit'
+                    type='button'
                     className="ml-auto mt-4 flex items-center font-bold bg-[#C20C0C]/80 hover:bg-[#C20C0C]"
                     onClick={() =>
                         handleDialogContextSwitch({

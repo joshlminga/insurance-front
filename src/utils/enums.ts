@@ -1,11 +1,3 @@
-import { CustomerVerificationDetails } from "@/app/motor/steppers/capture-details";
-import OTPVerificationPage from "@/app/motor/steppers/otp-verification";
-import { QuotationsPage } from "@/app/motor/steppers/quotations";
-import { MotorCommercialPage } from "@/app/motor/steppers/tabs/motor-commercial";
-import { MotorPrivatePage } from "@/app/motor/steppers/tabs/motor-private";
-import { MotorPsvPage } from "@/app/motor/steppers/tabs/motor-psv";
-import { VehicleDetailsPage } from "@/app/motor/steppers/vehicle-details";
-import { Car, Truck, Van } from "lucide-react";
 
 export const ELOGO = {
   NAVBARLOGO: '/logo/logo1.png'
@@ -64,53 +56,12 @@ export const EROUTES = {
   SETTINGS: "/settings",
 } as const;
 
-export const ESTEPS = [
-  {
-    title: "",
-    content: CustomerVerificationDetails,
-  },
-  {
-    title: "",
-    content: OTPVerificationPage,
-  },
-  {
-    title: "",
-    content: VehicleDetailsPage,
-  },
-  {
-    title: "",
-    content: QuotationsPage,
-  },
-]
+export const SORT_ORDER = {
+  Descending: 'DESC',
+  Ascending: 'ASC',
+} as const;
 
-export const EMOTORTABS = [
-  {
-    value: "private",
-    label: "Private",
-    icon: Car,
-    iconSize: 18,
-    component: MotorPrivatePage,
-  },
-  {
-    value: "commercial",
-    label: "Commercial",
-    icon: Truck,
-    iconSize: 20,
-    component: MotorCommercialPage,
-  },
-  {
-    value: "psv",
-    label: "PSV",
-    icon: Van,
-    iconSize: 16,
-    component: MotorPsvPage,
-  },
-]
-
-export enum SORT_ORDER {
-  Descending = 'DESC',
-  Ascending = 'ASC',
-}
+export type SORT_ORDER = typeof SORT_ORDER[keyof typeof SORT_ORDER];
 
 export const QUOTATIONCHECKBOX = [
   { id: 'excess', label: 'Excess Protector' },
@@ -193,7 +144,7 @@ export const EQUOTATIONSAMPLEDATA = [
     ],
   },
   {
-    id: 1,
+    id: 5,
     header: { type: 'image', src: '/britam.png' },
     content: [
       { label: 'Basic Premium', value: 'Kes. 1,200,000' },
@@ -211,7 +162,7 @@ export const EQUOTATIONSAMPLEDATA = [
     ],
   },
   {
-    id: 2,
+    id: 6,
     header: { type: 'image', src: '/cic.png' },
     content: [
       { label: 'Basic Premium', value: 'Kes. 900,000' },
@@ -229,7 +180,7 @@ export const EQUOTATIONSAMPLEDATA = [
     ],
   },
   {
-    id: 3,
+    id: 7,
     header: { type: 'image', src: '/sanlam.png' },
     content: [
       { label: 'Basic Premium', value: 'Kes. 1,550,000' },
@@ -247,7 +198,7 @@ export const EQUOTATIONSAMPLEDATA = [
     ],
   },
   {
-    id: 4,
+    id: 8,
     header: { type: 'image', src: '/madison.png' },
     content: [
       { label: 'Basic Premium', value: 'Kes. 1,500,000' },

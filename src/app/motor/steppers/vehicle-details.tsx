@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button, ReusableTabs } from '@/dev/core'
 import React, { useState } from 'react'
-import { EMOTORTABS } from '@/utils/enums'
+import { EMOTORTABS } from '@/utils/steps-config'
 import type { CustomerVerificationDetailsProps, SubmitResponse, TTabItem } from '@/types/types'
 import { CardFooter } from '@/components/ui/card'
 import { ArrowLeftCircle, ArrowRightCircle } from 'lucide-react'
