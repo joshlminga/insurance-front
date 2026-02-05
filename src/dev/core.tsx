@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import type {
     ButtonProps,
+    ReusableCheckboxGridProps,
     ReusableStepperProps,
     RHFInputProps,
     TReusablePageProps,
@@ -40,6 +41,7 @@ import { Input } from "@/components/ui/input";
 import { Controller, type FieldValues } from "react-hook-form";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const formatSegment = (segment: string) => {
     return segment
@@ -287,6 +289,35 @@ export function ReusableSelect<T extends FieldValues>({
     )
 }
 
+export const ReusableCheckboxGrid = ({
+  options,
+  columns = 3,
+  className = '',
+}: ReusableCheckboxGridProps) => {
+  return (
+    <div
+      className={`grid gap-8 grid-cols-${columns} ${className}`}>
+      {options.map((option) => (
+        <div
+          key={option.id}
+          className="flex items-start gap-2 mt-2">
+          <Checkbox
+            checked={option.checked}
+            onCheckedChange={(val) =>
+              option.onChange?.(Boolean(val))
+            }
+            className="w-[15px] h-[15px] rounded-[3px] border border-[#D9D9D9]
+                       data-[state=checked]:bg-[#C20C0C]
+                       data-[state=checked]:border-[#C20C0C]"
+          />
+          <label className="cursor-pointer max-w-[449px]">
+            {option.label}
+          </label>
+        </div>
+      ))}
+    </div>
+  )
+}
 
 export function ReusableTabs({
     tabs,

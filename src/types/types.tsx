@@ -162,3 +162,16 @@ export type TRHFSelectProps<T extends FieldValues> = {
   className?: string
   triggerClassName?: string
 }
+
+export type CheckboxOption = {
+  id: string
+  label: string
+  checked?: boolean
+  onChange?: (checked: boolean) => void
+}
+
+export type ReusableCheckboxGridProps = {
+  options: CheckboxOption[]
+  columns?: number
+  className?: string
+}

@@ -77,7 +77,7 @@ export const ESTEPS = [
     title: "",
     content: VehicleDetailsPage,
   },
-   {
+  {
     title: "",
     content: QuotationsPage,
   },
@@ -105,4 +105,10 @@ export const EMOTORTABS = [
     iconSize: 16,
     component: MotorPsvPage,
   },
+]
+
+export const QUOTATIONCHECKBOX = [
+  { id: 'excess', label: 'Excess Protector' },
+  { id: 'pvt', label: 'Political Violence & Terrorism' },
+  { id: 'pa', label: 'Personal Accident' },
 ]

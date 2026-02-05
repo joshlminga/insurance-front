@@ -1,7 +1,8 @@
-import { CardFooter } from '@/components/ui/card'
-import { Button, ReuseableInput } from '@/dev/core'
+import { Card, CardContent, CardFooter } from '@/components/ui/card'
+import { Button, ReusableCheckboxGrid, ReuseableInput } from '@/dev/core'
 import type { CustomerVerificationDetailsProps } from '@/types/types'
-import { ArrowLeftCircle, ArrowRightCircle } from 'lucide-react'
+import { QUOTATIONCHECKBOX } from '@/utils/enums'
+import { ArrowLeftCircle, ArrowRightCircle, Plus } from 'lucide-react'
 import React from 'react'
 import { useForm } from 'react-hook-form'
 
@@ -9,16 +10,17 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
     const form = useForm();
     return (
         <div className="max-w-full mx-auto border-0 bg-transparent">
-
-            <div className="w-full border rounded-2xl px-6 py-6">
-                <h1 className="text-2xl font-bold mb-4">
-                    Additional Benefits:
-                </h1>
-                <hr className="mb-6" />
-                 <div className="grid grid-cols-2 gap-8">
-                    
-                 </div>
-                <form>
+            <form className='w-full py-4'>
+                <div className="w-full border rounded-0 px-6 py-6">
+                    <h1 className="text-2xl font-bold mb-4">
+                        Additional Benefits:
+                    </h1>
+                    <hr className="mb-6" />
+                    <ReusableCheckboxGrid
+                        options={QUOTATIONCHECKBOX}
+                        columns={3}
+                    />
+                    <hr className="mb-6" />
                     <div className="grid grid-cols-2 gap-8">
                         <ReuseableInput
                             className="h-[51px] rounded-[5px] border border-[#ADABAB] justify-self-start"
@@ -33,11 +35,40 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                             label="Road Rescue"
                         />
                     </div>
-                </form>
+                    <Button
+                        type='button'
+                        className="ml-auto mt-4 flex items-center rounded-[3px] border border-[#0CC2581F] bg-[#C7EED5] hover:bg-[#C7EED5]/90 text-[#43A047]"
+                        leftIcon={<Plus className='h-8 w-8' />}>
+                        Add
+                    </Button>
+                </div>
+                <Button
+                    type='submit'
+                    className="ml-auto mt-4 flex items-center font-bold bg-[#C20C0C]/80 hover:bg-[#C20C0C]">
+                    Generate Comparison
+                </Button>
+            </form>
+            <div className='w-full m-3'>
+                <h1 className="text-2xl font-bold mb-4">
+                    Quote Comparison
+                </h1>
 
+                <div className='grid grid-cols-4 gap-4'>
+                    {Array.from({ length: 20 }).map((_, index) => (
+                        <Card
+                            key={index}
+                            className="rounded-lg flex items-center justify-center">
+                            <CardContent className="flex items-center justify-center">
+                                <img
+                                    src="/britam.png"
+                                    alt="Britam"
+                                    className="h-10 w-10 object-contain"
+                                />
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
             </div>
-
-
 
             <CardFooter className="md:col-span-2 flex justify-between mt-1">
                 <Button
@@ -52,8 +83,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                     className="bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
                     rightIcon={<ArrowRightCircle />}
                     // loading={submitMutation.isPending}
-                    onClick={() => (goToNextStep?.())}
-                >
+                    onClick={() => (goToNextStep?.())}>
                     Next
                 </Button>
             </CardFooter>
