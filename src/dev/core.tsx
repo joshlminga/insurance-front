@@ -10,6 +10,7 @@ import type {
     ButtonProps,
     ReusableCardProps,
     ReusableCheckboxGridProps,
+    ReusableDropdownProps,
     ReusablePaginationProps,
     ReusableStepperProps,
     RHFInputProps,
@@ -49,6 +50,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 const formatSegment = (segment: string) => {
     return segment
@@ -544,5 +546,43 @@ export const CustomDialogComponent = <T = TKeyValueStringType,>({
                 </div>
             </DialogContent>
         </Dialog>
+    );
+};
+
+export const ReusableDropdown = ({
+    trigger,
+    items,
+    side = "right",
+    align = "center",
+    contentClassName,
+}: ReusableDropdownProps) => {
+    return (
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                {trigger}
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+                side={side}
+                align={align}
+                className={cn("min-w-[180px] p-1", contentClassName)}>
+                {items.map((item, index) =>
+                    item.separator ? (
+                        <DropdownMenuSeparator key={index} />
+                    ) : (
+                        <DropdownMenuItem
+                            key={index}
+                            onClick={item.onClick}
+                            disabled={item.disabled}
+                            className={cn(
+                                "flex items-center gap-2 cursor-pointer",
+                                item.className
+                            )}>
+                            {item.icon && <span className="w-4 h-4">{item.icon}</span>}
+                            <span>{item.label}</span>
+                        </DropdownMenuItem>
+                    )
+                )}
+            </DropdownMenuContent>
+        </DropdownMenu>
     );
 };

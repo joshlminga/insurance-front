@@ -263,3 +263,20 @@ export type TDebounceprops<TDebounceCallBackArgs> = {
 	debounceCallback: (props: TDebounceCallBackArgs) => any;
 	debounceTimeOut?: number;
 };
+
+export type DropdownActionItem = {
+  label: string;
+  icon?: React.ReactNode;
+  onClick?: () => void;
+  disabled?: boolean;
+  separator?: boolean;
+  className?: string;
+};
+
+export type ReusableDropdownProps = {
+  trigger: React.ReactNode;
+  items: DropdownActionItem[];
+  side?: "top" | "right" | "bottom" | "left";
+  align?: "start" | "center" | "end";
+  contentClassName?: string;
+};

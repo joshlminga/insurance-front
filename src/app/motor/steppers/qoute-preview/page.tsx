@@ -1,8 +1,8 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Button } from "@/dev/core";
-import { ArrowLeft, Download, Forward } from "lucide-react";
+import { Button, ReusableDropdown } from "@/dev/core";
+import { ArrowLeft, Download, Forward, Mail, Share2 } from "lucide-react";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export const QoutePreviewPage = ({ componentProps }: { componentProps: any }) => {
@@ -46,27 +46,40 @@ export const QoutePreviewPage = ({ componentProps }: { componentProps: any }) =>
                     </div>
                 </CardContent>
             </Card>
-            <Card>
-                <CardFooter className="flex flex-col gap-3 sm:flex-row sm:justify-between">
-                    <Button
-                        variant="outline"
-                        leftIcon={<ArrowLeft />}
-                        className="w-full sm:w-auto">
-                        Go Back
-                    </Button>
-                    <Button
-                        variant="outline"
-                        leftIcon={<Download />}
-                        className="w-full sm:w-auto">
-                        Download
-                    </Button>
-                    <Button
-                        className="w-full sm:w-auto bg-[#0CC258] hover:bg-[#0CC258]/80"
-                        leftIcon={<Forward />}>
-                        Share
-                    </Button>
-                </CardFooter>
-            </Card>
+            <CardFooter className="w-full flex flex-col gap-3 sm:flex-row sm:justify-between">
+                <Button
+                    variant="outline"
+                    leftIcon={<ArrowLeft />}
+                    className="w-full sm:w-auto">
+                    Go Back
+                </Button>
+                <Button
+                    variant="outline"
+                    leftIcon={<Download />}
+                    className="w-full sm:w-auto">
+                    Download
+                </Button>
+                <ReusableDropdown
+                    trigger={
+                        <Button
+                            className="w-full sm:w-auto bg-[#0CC258] hover:bg-[#0CC258]/80"
+                            leftIcon={<Forward />}>
+                            Share
+                        </Button>
+                    }
+                    items={[
+                        {
+                            label: "Email",
+                            icon: <Mail className="w-4 h-4" />,
+                            onClick: () => console.log("Email"),
+                        },
+                        {
+                            label: "WhatsApp",
+                            icon: <Share2 className="w-4 h-4" />,
+                            onClick: () => console.log("WhatsApp"),
+                        },
+                    ]} />
+            </CardFooter>
         </div>
     );
 };
