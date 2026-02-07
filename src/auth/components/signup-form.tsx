@@ -12,6 +12,8 @@ import { UseApiMutation } from "@/hooks/hooks";
 import { ShowToast } from "@/utils/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { EMETHODS } from "@/utils/constatnts";
+import { ReuseableInput } from "@/dev/core";
+import { EPREFIX, EROUTES } from "@/utils/enums";
 
 export function SignupForm({
   className,
@@ -31,10 +33,10 @@ export function SignupForm({
     method: EMETHODS.POST,
     mutationOptions: {
       onSuccess: (data: any) => {
-        ShowToast.success(data.message || "Login successful!")
+        ShowToast.success(data.message || "Signup successful!")
       },
       onError: (error: any) => {
-        const errorMessage = error.response?.data?.message || error.message || "Login failed!"
+        const errorMessage = error.response?.data?.message || error.message || "Signup failed!"
         ShowToast.error(errorMessage)
       }
     }
@@ -45,7 +47,7 @@ export function SignupForm({
       loginMutation.mutate(data)
     } catch (error) {
       console.log(error);
-      ShowToast.error("Login failed!")
+      ShowToast.error("Signup failed!")
     }
   }
 
@@ -77,22 +79,61 @@ export function SignupForm({
           </Field>
           <FieldSeparator>Or</FieldSeparator>
           <Field>
-            {/* <FieldLabel htmlFor="email">Email</FieldLabel>
-            <Input
-              id="email"
-              type="email"
-              placeholder="Your email address"
-              required
-            /> */}
+            <div className="grid grid-cols-2 gap-2">
+              <ReuseableInput
+                className="w-full max-w-[320px] h-[51px] rounded-[5px] border border-[#ADABAB]"
+                control={form.control}
+                name="first_name"
+                label="First Name"
+              />
+              <ReuseableInput
+                className="w-full max-w-[320px] h-[51px] rounded-[5px] border border-[#ADABAB]"
+                control={form.control}
+                name="last_name"
+                label="Last Name"
+              />
+              <ReuseableInput
+                className="w-full max-w-[320px] h-[51px] rounded-[5px] border border-[#ADABAB]"
+                control={form.control}
+                name="email"
+                label="Email"
+                type="email"
+              />
+              <ReuseableInput
+                className="w-full max-w-[320px] h-[51px] rounded-[5px] border border-[#ADABAB]"
+                control={form.control}
+                name="mobile_number"
+                label="Mobile Number"
+                type="tel"
+              />
+              <ReuseableInput
+                className="w-full max-w-[320px] h-[51px] rounded-[5px] border border-[#ADABAB]"
+                control={form.control}
+                name="password"
+                label="Password"
+                type="password"
+              />
+              <ReuseableInput
+                className="w-full max-w-[320px] h-[51px] rounded-[5px] border border-[#ADABAB]"
+                control={form.control}
+                name="confirm_password"
+                label="Confirm Password"
+                type="password"
+              />
+            </div>
           </Field>
           <Field>
-            <Button className="bg-[#C20C0C] hover:bg-[#C20C0C]/70" type="submit">Create Account</Button>
+            <Button
+              className="bg-[#C20C0C] hover:bg-[#C20C0C]/70"
+              type="submit">
+              <p className='font-bold leading-6 text-sm'>Create Account</p>
+            </Button>
+
           </Field>
         </FieldGroup>
       </form>
-      <FieldDescription className="px-6 text-center">
-        By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
-        and <a href="#">Privacy Policy</a>.
+      <FieldDescription>
+        Already have an account? <a href={`/${EPREFIX.AUTH}${EROUTES.SIGNIN}`}>Sign In</a>
       </FieldDescription>
     </div>
   )

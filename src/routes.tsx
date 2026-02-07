@@ -41,6 +41,7 @@ import { StepPage } from "./app/motor/steppers/steppage"
 import { MotorLandingPage } from "./app/motor/page"
 import AuthLayoutPage from "./auth/layout"
 import { SignupForm } from "./auth/components/signup-form"
+import { LoginForm } from "./auth/components/login-form"
 
 export function AppRoutes() {
   return (
@@ -54,7 +55,7 @@ export function AppRoutes() {
 
       <Route path={EPREFIX.AUTH} element={<AuthLayoutPage />}>
         {/* <Route index element={<Navigate to="login" replace />} /> */}
-        {/* <Route path="login" element={<LoginPage />} /> */}
+        <Route path={EROUTES.SIGNIN.slice(1)} element={<LoginForm />} />
         <Route path={EROUTES.SIGNUP.slice(1)} element={<SignupForm />} />
         {/* <Route path="forgot-password" element={<ForgotPasswordPage />} /> */}
       </Route>
