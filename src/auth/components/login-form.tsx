@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -13,8 +14,11 @@ import { EMETHODS } from "@/utils/constatnts"
 import { UseAuth } from "@/components/auth-provider"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { LoginSchema } from "@/types/form-schema"
+import { type LoginFormValues } from "@/types/schema"
 import { UseApiMutation } from "@/hooks/hooks"
 import { ShowToast } from "@/utils/utils"
+import type { LoginResponse } from "@/types/types"
 
 export function LoginForm({
   className,
@@ -55,7 +59,7 @@ export function LoginForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <form>
+      <form onSubmit={form.handleSubmit(onSubmit)}>
         <FieldGroup>
           <div className="flex flex-col items-center gap-2 text-center">
             <div className="flex flex-col items-center gap-2 font-bold text-xl text-[#C20C0C]">
@@ -82,14 +86,14 @@ export function LoginForm({
           <FieldSeparator>Or</FieldSeparator>
           <Field>
             <ReuseableInput
-              className="w-full max-w-[320px] h-[51px] rounded-[5px] border border-[#ADABAB]"
+              className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
               control={form.control}
               name="email"
               label="Email"
               type="email"
             />
             <ReuseableInput
-              className="w-full max-w-[320px] h-[51px] rounded-[5px] border border-[#ADABAB]"
+              className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
               control={form.control}
               name="password"
               label="Password"

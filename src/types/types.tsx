@@ -12,6 +12,12 @@ export type T = {
   ReactNode?: ReactNode;
 }
 
+export interface LoginResponse {
+  message: string
+  user: any
+  access_token: string
+}
+
 export type TNodeChildrentType<T = ReactNode> = {
   children: T;
 };

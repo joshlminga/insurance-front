@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { cn } from "@/lib/utils"
 import {
   Field,
@@ -14,6 +15,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { EMETHODS } from "@/utils/constatnts";
 import { ReuseableInput } from "@/dev/core";
 import { EPREFIX, EROUTES } from "@/utils/enums";
+import { SignUpSchema } from "@/types/form-schema";
+import { type SignUpFormValues } from "@/types/schema";
 
 export function SignupForm({
   className,
@@ -53,7 +56,7 @@ export function SignupForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <form>
+      <form onSubmit={form.handleSubmit(onSubmit)}>
         <FieldGroup>
           <div className="flex flex-col items-center gap-2 text-center">
             <div className="flex flex-col items-center gap-2 font-bold text-xl text-[#C20C0C]">
@@ -79,42 +82,23 @@ export function SignupForm({
           </Field>
           <FieldSeparator>Or</FieldSeparator>
           <Field>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="">
               <ReuseableInput
-                className="w-full max-w-[320px] h-[51px] rounded-[5px] border border-[#ADABAB]"
-                control={form.control}
-                name="first_name"
-                label="First Name"
-              />
-              <ReuseableInput
-                className="w-full max-w-[320px] h-[51px] rounded-[5px] border border-[#ADABAB]"
-                control={form.control}
-                name="last_name"
-                label="Last Name"
-              />
-              <ReuseableInput
-                className="w-full max-w-[320px] h-[51px] rounded-[5px] border border-[#ADABAB]"
+                className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
                 control={form.control}
                 name="email"
                 label="Email"
                 type="email"
               />
               <ReuseableInput
-                className="w-full max-w-[320px] h-[51px] rounded-[5px] border border-[#ADABAB]"
-                control={form.control}
-                name="mobile_number"
-                label="Mobile Number"
-                type="tel"
-              />
-              <ReuseableInput
-                className="w-full max-w-[320px] h-[51px] rounded-[5px] border border-[#ADABAB]"
+                className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
                 control={form.control}
                 name="password"
                 label="Password"
                 type="password"
               />
               <ReuseableInput
-                className="w-full max-w-[320px] h-[51px] rounded-[5px] border border-[#ADABAB]"
+                className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
                 control={form.control}
                 name="confirm_password"
                 label="Confirm Password"
