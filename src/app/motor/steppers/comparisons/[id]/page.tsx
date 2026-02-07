@@ -74,8 +74,7 @@ export const PostComparisonPage = () => {
         <Button
           type="button"
           className="bg-[#C20C0C] hover:bg-[#C20C0C]/70"
-          leftIcon={<ArrowDown />}
-        >
+          leftIcon={<ArrowDown />}>
           Download Comparison
         </Button>
       </CardFooter>

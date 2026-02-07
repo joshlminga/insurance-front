@@ -497,8 +497,7 @@ export const ReusableCard = ({
         selected && "ring-2 ring-primary",
         disabled && "opacity-50 cursor-not-allowed",
         rootClassName
-      )}
-    >
+      )}>
             {header && (
                 <CardHeader className={cn('flex items-center justify-center p-3 text-center', headerClassName)}>
                     {header.type === 'image' && (

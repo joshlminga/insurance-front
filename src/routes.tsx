@@ -39,15 +39,24 @@ import SettingsPage from "./app/settings/page"
 import { Landingpage } from "./app/landing/page"
 import { StepPage } from "./app/motor/steppers/steppage"
 import { MotorLandingPage } from "./app/motor/page"
+import AuthLayoutPage from "./auth/layout"
+import { SignupForm } from "./auth/components/signup-form"
 
 export function AppRoutes() {
   return (
     <Routes>
       {/* Public */}
       <Route path={EROUTES.LANDING} element={<Landingpage />} />
-      {/* <Route path={`${EPREFIX.CUSTOMER}${EROUTES.MOTOR}`} element={<StepPage/>}/> */}
+
       <Route path={EPREFIX.CUSTOMER} element={<MotorLandingPage />}>
         <Route path={EROUTES.MOTOR.slice(1)} element={<StepPage />} />
+      </Route>
+
+      <Route path={EPREFIX.AUTH} element={<AuthLayoutPage />}>
+        {/* <Route index element={<Navigate to="login" replace />} /> */}
+        {/* <Route path="login" element={<LoginPage />} /> */}
+        <Route path={EROUTES.SIGNUP.slice(1)} element={<SignupForm />} />
+        {/* <Route path="forgot-password" element={<ForgotPasswordPage />} /> */}
       </Route>
 
       {/* Admin */}

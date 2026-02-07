@@ -10,6 +10,7 @@ export const CURRENTUSER = {
 }
 
 export const EPREFIX = {
+  AUTH:"auth",
   ADMIN: "admin",
   AGENT: "agent",
   CUSTOMER: "customer",
@@ -22,6 +23,9 @@ export const EROUTES = {
   TRAVEL: '/travel',
   MARINE: '/marine',
   LIFE: '/life',
+
+  // Auth
+  SIGNUP:'/signup',
 
   // Admin / Dashboard
   DASHBOARD: "/dashboard",

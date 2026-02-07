@@ -20,7 +20,6 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
             data?: any;
         }>();
 
-
     return (
         <>
             <div className="max-w-full mx-auto border-0 bg-transparent">
@@ -94,6 +93,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                         </Button>
                                         <Button
                                             type="button"
+                                            onClick={()=>}
                                             className='rounded-md border border-[#D9D9D9] bg-[#0CC258] hover:bg-[#0CC258]/90 font-medium text-white px-6'>
                                             Purchase Cover
                                         </Button>
