@@ -131,11 +131,22 @@ export function ReusableStepper({
     steps,
     defaultStep = 1,
     className,
+    value,
+    onValueChange,
 }: ReusableStepperProps) {
-    const [currentStep, setCurrentStep] = useState(defaultStep)
-    const goToStep = (step: number) => setCurrentStep(step)
+    const [internalStep, setInternalStep] = useState(defaultStep)
+    const isControlled = value !== undefined
+    const currentStep = isControlled ? value : internalStep
+    const handleStepChange = (step: number) => {
+        if (isControlled) {
+            onValueChange?.(step)
+        } else {
+            setInternalStep(step)
+        }
+    }
+    const goToStep = (step: number) => handleStepChange(step)
     return (
-        <Stepper value={currentStep} onValueChange={setCurrentStep} className={className}>
+        <Stepper value={currentStep} onValueChange={handleStepChange} className={className}>
             <StepperNav className="flex items-start gap-2 mb-6">
                 {steps.map((step, index) => {
                     const stepNumber = index + 1
