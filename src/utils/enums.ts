@@ -1,11 +1,3 @@
-import { CustomerVerificationDetails } from "@/app/motor/steppers/capture-details";
-import OTPVerificationPage from "@/app/motor/steppers/otp-verification";
-import { QuotationsPage } from "@/app/motor/steppers/quotations";
-import { MotorCommercialPage } from "@/app/motor/steppers/tabs/motor-commercial";
-import { MotorPrivatePage } from "@/app/motor/steppers/tabs/motor-private";
-import { MotorPsvPage } from "@/app/motor/steppers/tabs/motor-psv";
-import { VehicleDetailsPage } from "@/app/motor/steppers/vehicle-details";
-import { Car, Truck, Van } from "lucide-react";
 
 export const ELOGO = {
   NAVBARLOGO: '/logo/logo1.png'
@@ -18,6 +10,7 @@ export const CURRENTUSER = {
 }
 
 export const EPREFIX = {
+  AUTH:"auth",
   ADMIN: "admin",
   AGENT: "agent",
   CUSTOMER: "customer",
@@ -30,6 +23,9 @@ export const EROUTES = {
   TRAVEL: '/travel',
   MARINE: '/marine',
   LIFE: '/life',
+
+  // Auth
+  SIGNUP:'/signup',
 
   // Admin / Dashboard
   DASHBOARD: "/dashboard",
@@ -64,45 +60,280 @@ export const EROUTES = {
   SETTINGS: "/settings",
 } as const;
 
-export const ESTEPS = [
+export const SORT_ORDER = {
+  Descending: 'DESC',
+  Ascending: 'ASC',
+} as const;
+
+export type SORT_ORDER = typeof SORT_ORDER[keyof typeof SORT_ORDER];
+
+export const QUOTATIONCHECKBOX = [
+  { id: 'excess', label: 'Excess Protector' },
+  { id: 'pvt', label: 'Political Violence & Terrorism' },
+  { id: 'pa', label: 'Personal Accident' },
+]
+
+export const EQUOTATIONSAMPLEDATA = [
   {
-    title: "",
-    content: CustomerVerificationDetails,
+    id: 1,
+    header: { type: 'image', src: '/britam.png' },
+    content: [
+      { label: 'Basic Premium', value: 'Kes. 1,200,000' },
+      { label: 'Total Premium', value: 'Kes. 1,205,440' },
+    ],
+    footer: [
+      {
+        label: 'Get Quote',
+        className: 'rounded-md border border-[#D9D9D9] bg-[#C20C0C] hover:bg-[#C20C0C]/90 font-medium text-white px-6',
+      },
+      {
+        label: 'Purchase Cover',
+        className: 'rounded-md border border-[#D9D9D9] bg-[#0CC258] hover:bg-[#0CC258]/90 font-medium text-white px-6',
+      },
+    ],
   },
   {
-    title: "",
-    content: OTPVerificationPage,
+    id: 2,
+    header: { type: 'image', src: '/cic.png' },
+    content: [
+      { label: 'Basic Premium', value: 'Kes. 900,000' },
+      { label: 'Total Premium', value: 'Kes. 950,000' },
+    ],
+    footer: [
+      {
+        label: 'Get Quote',
+        className: 'rounded-md border border-[#D9D9D9] bg-[#C20C0C] hover:bg-[#C20C0C]/90 font-medium text-white px-6',
+      },
+      {
+        label: 'Purchase Cover',
+        className: 'rounded-md border border-[#D9D9D9] bg-[#0CC258] hover:bg-[#0CC258]/90 font-medium text-white px-6',
+      },
+    ],
   },
   {
-    title: "",
-    content: VehicleDetailsPage,
+    id: 3,
+    header: { type: 'image', src: '/sanlam.png' },
+    content: [
+      { label: 'Basic Premium', value: 'Kes. 1,550,000' },
+      { label: 'Total Premium', value: 'Kes. 1,505,000' },
+    ],
+    footer: [
+      {
+        label: 'Get Quote',
+        className: 'rounded-md border border-[#D9D9D9] bg-[#C20C0C] hover:bg-[#C20C0C]/90 font-medium text-white px-6',
+      },
+      {
+        label: 'Purchase Cover',
+        className: 'rounded-md border border-[#D9D9D9] bg-[#0CC258] hover:bg-[#0CC258]/90 font-medium text-white px-6',
+      },
+    ],
   },
-   {
-    title: "",
-    content: QuotationsPage,
+  {
+    id: 4,
+    header: { type: 'image', src: '/madison.png' },
+    content: [
+      { label: 'Basic Premium', value: 'Kes. 1,500,000' },
+      { label: 'Total Premium', value: 'Kes. 1,505,000' },
+    ],
+    footer: [
+      {
+        label: 'Get Quote',
+        className: 'rounded-md border border-[#D9D9D9] bg-[#C20C0C] hover:bg-[#C20C0C]/90 font-medium text-white px-6',
+      },
+      {
+        label: 'Purchase Cover',
+        className: 'rounded-md border border-[#D9D9D9] bg-[#0CC258] hover:bg-[#0CC258]/90 font-medium text-white px-6',
+      },
+    ],
+  },
+  {
+    id: 5,
+    header: { type: 'image', src: '/britam.png' },
+    content: [
+      { label: 'Basic Premium', value: 'Kes. 1,200,000' },
+      { label: 'Total Premium', value: 'Kes. 1,205,440' },
+    ],
+    footer: [
+      {
+        label: 'Get Quote',
+        className: 'rounded-md border border-[#D9D9D9] bg-[#C20C0C] hover:bg-[#C20C0C]/90 font-medium text-white px-6',
+      },
+      {
+        label: 'Purchase Cover',
+        className: 'rounded-md border border-[#D9D9D9] bg-[#0CC258] hover:bg-[#0CC258]/90 font-medium text-white px-6',
+      },
+    ],
+  },
+  {
+    id: 6,
+    header: { type: 'image', src: '/cic.png' },
+    content: [
+      { label: 'Basic Premium', value: 'Kes. 900,000' },
+      { label: 'Total Premium', value: 'Kes. 950,000' },
+    ],
+    footer: [
+      {
+        label: 'Get Quote',
+        className: 'rounded-md border border-[#D9D9D9] bg-[#C20C0C] hover:bg-[#C20C0C]/90 font-medium text-white px-6',
+      },
+      {
+        label: 'Purchase Cover',
+        className: 'rounded-md border border-[#D9D9D9] bg-[#0CC258] hover:bg-[#0CC258]/90 font-medium text-white px-6',
+      },
+    ],
+  },
+  {
+    id: 7,
+    header: { type: 'image', src: '/sanlam.png' },
+    content: [
+      { label: 'Basic Premium', value: 'Kes. 1,550,000' },
+      { label: 'Total Premium', value: 'Kes. 1,505,000' },
+    ],
+    footer: [
+      {
+        label: 'Get Quote',
+        className: 'rounded-md border border-[#D9D9D9] bg-[#C20C0C] hover:bg-[#C20C0C]/90 font-medium text-white px-6',
+      },
+      {
+        label: 'Purchase Cover',
+        className: 'rounded-md border border-[#D9D9D9] bg-[#0CC258] hover:bg-[#0CC258]/90 font-medium text-white px-6',
+      },
+    ],
+  },
+  {
+    id: 8,
+    header: { type: 'image', src: '/madison.png' },
+    content: [
+      { label: 'Basic Premium', value: 'Kes. 1,500,000' },
+      { label: 'Total Premium', value: 'Kes. 1,505,000' },
+    ],
+    footer: [
+      {
+        label: 'Get Quote',
+        className: 'rounded-md border border-[#D9D9D9] bg-[#C20C0C] hover:bg-[#C20C0C]/90 font-medium text-white px-6',
+      },
+      {
+        label: 'Purchase Cover',
+        className: 'rounded-md border border-[#D9D9D9] bg-[#0CC258] hover:bg-[#0CC258]/90 font-medium text-white px-6',
+      },
+    ],
   },
 ]
 
-export const EMOTORTABS = [
+export const ECOMPARISONSAMPLEDATA = [
   {
-    value: "private",
-    label: "Private",
-    icon: Car,
-    iconSize: 18,
-    component: MotorPrivatePage,
+    id: 1,
+    header: { type: 'image', src: '/britam.png' },
+    content: [
+      { label: 'Britam Insurance' },
+      { label: 'Kes. 1,200,000' },
+    ],
   },
   {
-    value: "commercial",
-    label: "Commercial",
-    icon: Truck,
-    iconSize: 20,
-    component: MotorCommercialPage,
+    id: 2,
+    header: { type: 'image', src: '/cic.png' },
+    content: [
+      { label: 'CIC GROUP Insurance' },
+      { label: 'Kes. 1,200,000' },
+    ],
   },
   {
-    value: "psv",
-    label: "PSV",
-    icon: Van,
-    iconSize: 16,
-    component: MotorPsvPage,
+    id: 3,
+    header: { type: 'image', src: '/sanlam.png' },
+    content: [
+      { label: 'Sanlam Insurance' },
+      { label: 'Kes. 1,200,000' },
+    ],
+  },
+  {
+    id: 4,
+    header: { type: 'image', src: '/madison.png' },
+    content: [
+      { label: 'Madison Insurance' },
+      { label: 'Kes. 1,200,000' },
+    ],
+  },
+  {
+    id: 5,
+    header: { type: 'image', src: '/britam.png' },
+    content: [
+      { label: 'Britam Insurance' },
+      { label: 'Kes. 1,200,000' },
+    ],
+  },
+  {
+    id: 6,
+    header: { type: 'image', src: '/cic.png' },
+    content: [
+      { label: 'CIC GROUP Insurance' },
+      { label: 'Kes. 1,200,000' },
+    ],
+  },
+  {
+    id: 7,
+    header: { type: 'image', src: '/sanlam.png' },
+    content: [
+      { label: 'Sanlam Insurance' },
+      { label: 'Kes. 1,200,000' },
+    ],
+  },
+  {
+    id: 8,
+    header: { type: 'image', src: '/madison.png' },
+    content: [
+      { label: 'Madison Insurance' },
+      { label: 'Kes. 1,200,000' },
+    ],
   },
 ]
+
+export const POST_COMPARISON_DATA = [
+  {
+    id: 1,
+    logo: "/britam.png",
+    premiums: {
+      basic: "Kes 130,000",
+      duties: "Kes 625",
+      total: "Kes 130,625",
+    },
+    coverages: [
+      { label: "Excess Protector", status: "Optional", color: "#209BFF" },
+      { label: "Political Violence & Terrorism", status: "Inclusive", color: "#0CC258" },
+      { label: "Personal Accident (Insured)", status: "Covered", color: "#0CC258" },
+      { label: "Courtesy Car (10 days)", status: "Covered", color: "#0CC258" },
+      { label: "Road Rescue – AA", status: "Covered", color: "#0CC258" },
+    ],
+  },
+  {
+    id: 2,
+    logo: "/britam.png",
+    premiums: {
+      basic: "Kes 128,500",
+      duties: "Kes 600",
+      total: "Kes 129,100",
+    },
+    coverages: [
+      { label: "Excess Protector", status: "Optional", color: "#209BFF" },
+      { label: "Political Violence & Terrorism", status: "Inclusive", color: "#0CC258" },
+      { label: "Personal Accident (Insured)", status: "Covered", color: "#0CC258" },
+      { label: "Courtesy Car (7 days)", status: "Covered", color: "#0CC258" },
+      { label: "Road Rescue – AA", status: "Covered", color: "#0CC258" },
+    ],
+  },
+  {
+    id: 3,
+    logo: "/britam.png",
+    premiums: {
+      basic: "Kes 135,000",
+      duties: "Kes 650",
+      total: "Kes 135,650",
+    },
+    coverages: [
+      { label: "Excess Protector", status: "Inclusive", color: "#0CC258" },
+      { label: "Political Violence & Terrorism", status: "Inclusive", color: "#0CC258" },
+      { label: "Personal Accident (Insured)", status: "Covered", color: "#0CC258" },
+      { label: "Courtesy Car (14 days)", status: "Covered", color: "#0CC258" },
+      { label: "Road Rescue – AA", status: "Covered", color: "#0CC258" },
+    ],
+  },
+];

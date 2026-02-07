@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import type { TActionType, TFilterOptions } from "@/types/types";
+import { SORT_ORDER } from "./enums";
 
 
 export const EMETHODS = {
@@ -9,3 +12,21 @@ export const EMETHODS = {
 } as const
 
 export type EMETHODS = typeof EMETHODS[keyof typeof EMETHODS]
+
+export const baseFactoryReducer = <S>(state: S, action: TActionType<S>): S => ({
+	...state,
+	...action.payload,
+});
+
+export function ReusableReducer<T = TFilterOptions>(
+	state: T,
+	action: TActionType<T>
+): T {
+	return { ...state, ...action.payload };
+}
+
+export const FILTERS_DEFAULTS: TFilterOptions & Record<string, any> = {
+  order: { direction: SORT_ORDER.Ascending, orderField: '' },
+  date: [],
+  term: '',
+};

@@ -8,8 +8,14 @@ import {
 } from "@/components/ui/breadcrumb";
 import type {
     ButtonProps,
+    ReusableCardProps,
+    ReusableCheckboxGridProps,
+    ReusableDropdownProps,
+    ReusablePaginationProps,
     ReusableStepperProps,
     RHFInputProps,
+    TCustomDialogProps,
+    TKeyValueStringType,
     TReusablePageProps,
     TRHFSelectProps,
     TTabsProps
@@ -40,6 +46,11 @@ import { Input } from "@/components/ui/input";
 import { Controller, type FieldValues } from "react-hook-form";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 const formatSegment = (segment: string) => {
     return segment
@@ -287,6 +298,35 @@ export function ReusableSelect<T extends FieldValues>({
     )
 }
 
+export const ReusableCheckboxGrid = ({
+    options,
+    columns = 3,
+    className = '',
+}: ReusableCheckboxGridProps) => {
+    return (
+        <div
+            className={`grid gap-8 grid-cols-${columns} ${className}`}>
+            {options.map((option) => (
+                <div
+                    key={option.id}
+                    className="flex items-start gap-2 mt-2">
+                    <Checkbox
+                        checked={option.checked}
+                        onCheckedChange={(val) =>
+                            option.onChange?.(Boolean(val))
+                        }
+                        className="w-[15px] h-[15px] rounded-[3px] border border-[#D9D9D9]
+                       data-[state=checked]:bg-[#C20C0C]
+                       data-[state=checked]:border-[#C20C0C]"
+                    />
+                    <label className="cursor-pointer max-w-[449px]">
+                        {option.label}
+                    </label>
+                </div>
+            ))}
+        </div>
+    )
+}
 
 export function ReusableTabs({
     tabs,
@@ -346,3 +386,226 @@ export function ReusableTabs({
         </Tabs>
     )
 }
+
+export const ReusablePagination = ({
+    currentPage,
+    totalPages,
+    onPageChange,
+    siblingCount = 1,
+    disabled = false,
+}: ReusablePaginationProps) => {
+    if (totalPages <= 1) return null
+
+    const range = (start: number, end: number) =>
+        Array.from({ length: end - start + 1 }, (_, i) => start + i)
+    const leftSibling = Math.max(currentPage - siblingCount, 1)
+    const rightSibling = Math.min(currentPage + siblingCount, totalPages)
+    const showLeftEllipsis = leftSibling > 2
+    const showRightEllipsis = rightSibling < totalPages - 1
+    const pages: (number | "ellipsis")[] = []
+    pages.push(1)
+    if (showLeftEllipsis) pages.push("ellipsis")
+    pages.push(...range(leftSibling, rightSibling).filter(p => p !== 1 && p !== totalPages))
+
+    if (showRightEllipsis) pages.push("ellipsis")
+
+    if (totalPages > 1) pages.push(totalPages)
+
+    const goToPage = (page: number) => {
+        if (page < 1 || page > totalPages || page === currentPage) return
+        onPageChange(page)
+    }
+
+    return (
+        <Pagination>
+            <PaginationContent>
+                <PaginationItem>
+                    <PaginationPrevious
+                        href="#"
+                        onClick={(e) => {
+                            e.preventDefault()
+                            goToPage(currentPage - 1)
+                        }}
+                        aria-disabled={disabled || currentPage === 1}
+                    />
+                </PaginationItem>
+
+                {pages.map((page, index) => (
+                    <PaginationItem key={index}>
+                        {page === "ellipsis" ? (
+                            <PaginationEllipsis />
+                        ) : (
+                            <PaginationLink
+                                href="#"
+                                isActive={page === currentPage}
+                                onClick={(e) => {
+                                    e.preventDefault()
+                                    goToPage(page)
+                                }}
+                            >
+                                {page}
+                            </PaginationLink>
+                        )}
+                    </PaginationItem>
+                ))}
+
+                <PaginationItem>
+                    <PaginationNext
+                        href="#"
+                        onClick={(e) => {
+                            e.preventDefault()
+                            goToPage(currentPage + 1)
+                        }}
+                        aria-disabled={disabled || currentPage === totalPages}
+                    />
+                </PaginationItem>
+            </PaginationContent>
+        </Pagination>
+    )
+}
+
+export const ReusableCard = ({
+    header,
+    children,
+    footer,
+    rootClassName,
+    headerClassName,
+    contentClassName,
+    footerClassName,
+    onClick,
+    disabled,
+    selected,
+}: ReusableCardProps) => {
+    const isClickable = Boolean(onClick) && !disabled;
+    return (
+        <Card
+            role={isClickable ? "button" : undefined}
+            tabIndex={isClickable ? 0 : -1}
+            aria-disabled={disabled}
+            onClick={disabled ? undefined : onClick}
+            onKeyDown={(e) => {
+                if (!isClickable) return;
+                if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    onClick?.();
+                }
+            }}
+          className={cn("flex flex-col w-full min-w-0 overflow-hidden rounded-[10px] border bg-white",
+        "border-[#ADABAB]",
+        isClickable &&
+          "cursor-pointer transition-all hover:border-[#FF9A9A] hover:-translate-y-px focus-visible:ring-2 focus-visible:ring-[#FF9A9A]",
+        selected && "ring-2 ring-primary",
+        disabled && "opacity-50 cursor-not-allowed",
+        rootClassName
+      )}>
+            {header && (
+                <CardHeader className={cn('flex items-center justify-center p-3 text-center', headerClassName)}>
+                    {header.type === 'image' && (
+                        <div className="w-[109px] h-[60px] flex items-center justify-center">
+                            <img
+                                src={header.src}
+                                alt={header.alt ?? ''}
+                                className={cn(
+                                    'max-w-full max-h-full object-contain',
+                                    header.className
+                                )}
+                            />
+                        </div>
+                    )}
+                    {header.type === 'text' && (
+                        <div className={cn('flex flex-col gap-1', header.className)}>
+                            <h3 className="text-sm font-semibold">
+                                {header.title}
+                            </h3>
+                            {header.description && (
+                                <p className="text-xs text-muted-foreground">
+                                    {header.description}
+                                </p>
+                            )}
+                        </div>
+                    )}
+                    {header.type === 'custom' && header.node}
+                </CardHeader>
+            )}
+            <CardContent className={cn('flex flex-col gap-2 px-4 py-2', contentClassName)}>
+                {children}
+            </CardContent>
+            {footer && (
+                <CardFooter className={cn(footerClassName, 'mt-auto px-4 pb-3')}>
+                    {footer}
+                </CardFooter>
+            )}
+        </Card>
+    )
+}
+
+export const CustomDialogComponent = <T = TKeyValueStringType,>({
+    handleDialogContextSwitch,
+    dialogOpen,
+    className,
+    children,
+}: Pick<
+    TCustomDialogProps<T>,
+    "children" | "dialogOpen" | "handleDialogContextSwitch" | "className"
+>) => {
+    return (
+        <Dialog
+            {...{
+                onOpenChange: () => handleDialogContextSwitch({}),
+                open: dialogOpen,
+                modal: true,
+            }}>
+            <DialogContent
+                onOpenAutoFocus={(e) => e.preventDefault()}
+                className={cn(
+                    "select-none max-h-[80dvh] flex flex-col overflow-hidden p-0! m-0!",
+                    className ?? ""
+                )}>
+                <div
+                    {...{
+                        className: `relative w-full flex-1 h-full overflow-y-auto py-5! px-5`,
+                    }}>
+                    {children}
+                </div>
+            </DialogContent>
+        </Dialog>
+    );
+};
+
+export const ReusableDropdown = ({
+    trigger,
+    items,
+    side = "right",
+    align = "center",
+    contentClassName,
+}: ReusableDropdownProps) => {
+    return (
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                {trigger}
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+                side={side}
+                align={align}
+                className={cn("min-w-[180px] p-1", contentClassName)}>
+                {items.map((item, index) =>
+                    item.separator ? (
+                        <DropdownMenuSeparator key={index} />
+                    ) : (
+                        <DropdownMenuItem
+                            key={index}
+                            onClick={item.onClick}
+                            disabled={item.disabled}
+                            className={cn(
+                                "flex items-center gap-2 cursor-pointer",
+                                item.className
+                            )}>
+                            {item.icon && <span className="w-4 h-4">{item.icon}</span>}
+                            <span>{item.label}</span>
+                        </DropdownMenuItem>
+                    )
+                )}
+            </DropdownMenuContent>
+        </DropdownMenu>
+    );
+};
