@@ -54,14 +54,12 @@ export function AppRoutes() {
       </Route>
 
       <Route path={EPREFIX.AUTH} element={<Outlet />}>
-        {/* <Route index element={<Navigate to="login" replace />} /> */}
         <Route 
           path={EROUTES.SIGNIN.slice(1)} 
           element={
             <AuthLayoutPage 
               title="Please sign in or register" 
-              description="to purchase your cover"
-            >
+              description="to purchase your cover">
               <LoginForm />
             </AuthLayoutPage>
           } 
@@ -71,8 +69,7 @@ export function AppRoutes() {
           element={
             <AuthLayoutPage 
               title="Please sign in or register" 
-              description="to purchase your cover"
-            >
+              description="to purchase your cover">
               <SignupForm />
             </AuthLayoutPage>
           } 

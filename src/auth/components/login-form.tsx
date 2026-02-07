@@ -90,7 +90,7 @@ export function LoginForm({
         </FieldGroup>
       </form>
       <FieldDescription>
-        Don&apos;t have an account?  <a href={`/${EPREFIX.AUTH}${EROUTES.SIGNUP}`}>Sign UP</a>
+        Don&apos;t have an account?  <a href={`/${EPREFIX.AUTH}${EROUTES.SIGNUP}`}>Sign Up</a>
       </FieldDescription>
     </div>
   )
