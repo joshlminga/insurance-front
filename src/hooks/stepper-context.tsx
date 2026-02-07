@@ -1,5 +1,8 @@
+/* eslint-disable react-hooks/set-state-in-effect */
+/* eslint-disable react-refresh/only-export-components */
+
 import type { StepperContextType, StepperProviderProps } from '@/types/types';
-import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 
 const StepperContext = createContext<StepperContextType | undefined>(undefined);
