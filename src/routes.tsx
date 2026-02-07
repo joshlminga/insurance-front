@@ -1,5 +1,5 @@
 // AppRoutes.tsx
-import { Routes, Route, Navigate } from "react-router-dom"
+import { Routes, Route, Navigate, Outlet } from "react-router-dom"
 import Layout from "./Layout"
 import { EPREFIX, EROUTES } from "./utils/enums"
 
@@ -53,10 +53,30 @@ export function AppRoutes() {
         <Route path={EROUTES.MOTOR.slice(1)} element={<StepPage />} />
       </Route>
 
-      <Route path={EPREFIX.AUTH} element={<AuthLayoutPage />}>
+      <Route path={EPREFIX.AUTH} element={<Outlet />}>
         {/* <Route index element={<Navigate to="login" replace />} /> */}
-        <Route path={EROUTES.SIGNIN.slice(1)} element={<LoginForm />} />
-        <Route path={EROUTES.SIGNUP.slice(1)} element={<SignupForm />} />
+        <Route 
+          path={EROUTES.SIGNIN.slice(1)} 
+          element={
+            <AuthLayoutPage 
+              title="Please sign in or register" 
+              description="to purchase your cover"
+            >
+              <LoginForm />
+            </AuthLayoutPage>
+          } 
+        />
+        <Route 
+          path={EROUTES.SIGNUP.slice(1)} 
+          element={
+            <AuthLayoutPage 
+              title="Please sign in or register" 
+              description="to purchase your cover"
+            >
+              <SignupForm />
+            </AuthLayoutPage>
+          } 
+        />
         {/* <Route path="forgot-password" element={<ForgotPasswordPage />} /> */}
       </Route>
 

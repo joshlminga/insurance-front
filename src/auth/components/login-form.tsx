@@ -5,10 +5,9 @@ import {
   Field,
   FieldDescription,
   FieldGroup,
-  FieldSeparator,
 } from "@/components/ui/field"
 import { EPREFIX, EROUTES } from "@/utils/enums"
-import { FcGoogle } from "react-icons/fc"
+
 import { ReuseableInput } from "@/dev/core"
 import { EMETHODS } from "@/utils/constatnts"
 import { UseAuth } from "@/components/auth-provider"
@@ -61,29 +60,6 @@ export function LoginForm({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <FieldGroup>
-          <div className="flex flex-col items-center gap-2 text-center">
-            <div className="flex flex-col items-center gap-2 font-bold text-xl text-[#C20C0C]">
-              <span>Please sign in or register</span>
-            </div>
-            <h1 className="text-xl font-bold">to purchase your cover </h1>
-          </div>
-          <Field className="grid gap-4 sm:grid-cols-1">
-            <Button
-              {...{
-                onClick: () =>
-                  console.log()
-              }}
-              type="button"
-              variant="outline">
-              <FcGoogle
-                {...{
-                  size: 20,
-                }}
-              />
-              <p className='font-bold leading-6 text-sm'>Continue with Google</p>
-            </Button>
-          </Field>
-          <FieldSeparator>Or</FieldSeparator>
           <Field>
             <ReuseableInput
               className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
