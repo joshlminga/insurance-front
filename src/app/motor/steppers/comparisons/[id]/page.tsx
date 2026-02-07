@@ -17,8 +17,6 @@ export const PostComparisonPage = () => {
         />
         Click preferred Insurers to Compare
       </h1>
-
-      {/* GRID OF 3 */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {POST_COMPARISON_DATA.map((item) => (
           <Card key={item.id} className="flex flex-col">
@@ -29,7 +27,6 @@ export const PostComparisonPage = () => {
                 className="w-36 h-16 object-contain"
               />
             </CardHeader>
-
             <CardContent className="space-y-4 text-sm">
               <div className="grid grid-cols-2 gap-y-3">
                 <span className="text-muted-foreground">Basic Premium</span>
