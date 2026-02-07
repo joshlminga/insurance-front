@@ -13,50 +13,50 @@ export type T = {
 }
 
 export type TNodeChildrentType<T = ReactNode> = {
-    children: T;
+  children: T;
 };
 export type TPaginationFilters = { page: number; pageSize: number };
 
 export type TActionType<S> = {
-	payload: Partial<S>;
-	type: keyof S;
+  payload: Partial<S>;
+  type: keyof S;
 };
 
 export type TFilterOptions = {
-	order: {
-		direction: SORT_ORDER;
-		orderField: string;
-	};
-	date: Date[];
-	term: string;
+  order: {
+    direction: SORT_ORDER;
+    orderField: string;
+  };
+  date: Date[];
+  term: string;
 } & Record<string, any>;
 
 export type TReusablePageProps = {
-    description?: string;
-    title: string;
+  description?: string;
+  title: string;
 } & Partial<TNodeChildrentType>;
 
 export interface PageHeaderAction {
-    label: string
-    icon?: LucideIcon
-    href?: string
-    onClick?: () => void
-    variant?: "default" | "outline" | "secondary" | "ghost"
+  label: string
+  icon?: LucideIcon
+  href?: string
+  onClick?: () => void
+  variant?: "default" | "outline" | "secondary" | "ghost"
 }
 
 export interface ProtectedRouteProps {
   children: React.ReactNode
 }
 export interface PageHeaderProps {
-    title: string
-    description?: string
-    actions?: PageHeaderAction[]
-    children?: React.ReactNode
+  title: string
+  description?: string
+  actions?: PageHeaderAction[]
+  children?: React.ReactNode
 }
 export interface Tuser {
-    name: string
-    email: string
-    avatar?: string
+  name: string
+  email: string
+  avatar?: string
 }
 
 export type StepItem = {
@@ -88,7 +88,7 @@ export type RHFInputProps<T extends FieldValues> = {
   type?: string
   autoComplete?: string
   required?: boolean
-  className?:string
+  className?: string
 }
 
 export interface AuthProviderState {
@@ -135,7 +135,7 @@ export interface ToastOptions {
 }
 
 export interface SubmitResponse {
-    message:string
+  message: string
 }
 export interface CustomerVerificationDetailsProps {
   goToNextStep?: () => void
@@ -193,11 +193,11 @@ export type ReusableCheckboxGridProps = {
 }
 
 export type ReusablePaginationProps = {
-    currentPage: number
-    totalPages: number
-    onPageChange: (page: number) => void
-    siblingCount?: number
-    disabled?: boolean
+  currentPage: number
+  totalPages: number
+  onPageChange: (page: number) => void
+  siblingCount?: number
+  disabled?: boolean
 }
 
 export type CardHeaderContent =
@@ -219,22 +219,23 @@ export type ReusableCardProps = {
 }
 
 export type TNavBarUrlType = {
-	child_urls?: Pick<
-		TNavBarUrlType,
-		'Icon' | 'child_urls' | 'is_enabled' | 'label' | 'url'
-	>[];
-	// user_info: TOKEN_USER_INFO;
-	Icon?: React.FC<LucideIcon>;
-	current_path: string;
-	is_enabled: boolean;
-	label: string;
-	url?: string;
+  child_urls?: Pick<
+    TNavBarUrlType,
+    'Icon' | 'child_urls' | 'is_enabled' | 'label' | 'url'
+  >[];
+  // user_info: TOKEN_USER_INFO;
+  Icon?: React.FC<LucideIcon>;
+  current_path: string;
+  is_enabled: boolean;
+  label: string;
+  url?: string;
 };
 
 export type TComponent<T = TKeyValueStringType> = {
-	Component?: ComponentType<
-		Pick<TCustomDialogProps<T>, 'handleDialogContextSwitch'>
-	>;
+  Component?: ComponentType<
+    Pick<TCustomDialogProps<T>,
+      'handleDialogContextSwitch'>
+  >;
 };
 
 export type TKeyValueStringType = Record<string, string>;
@@ -242,29 +243,29 @@ export type TClassType = { className: string };
 export type TKeyValueAnyType = Record<string, any>;
 
 export type TProfileMenuItems = {
-	shortcut?: string;
-	state?: boolean;
-	url?: string;
+  shortcut?: string;
+  state?: boolean;
+  url?: string;
 } & Required<Pick<TNavBarUrlType, 'Icon' | 'label'>> &
-	TComponent;
+  TComponent;
 
 export type TCustomDialogPropsContextProps<T = TKeyValueStringType> = {
-	componentProps?: T;
+  componentProps?: T;
 } & TComponent<T> &
-	Pick<TProfileMenuItems, 'state'>;
+  Pick<TProfileMenuItems, 'state'>;
 
 export type TCustomDialogProps<T = TKeyValueStringType> = {
-	handleDialogContextSwitch: (
-		context: TCustomDialogPropsContextProps<T>
-	) => void;
-	children: ReactNode;
-	toggleDialog: () => any;
-	dialogOpen: boolean;
+  handleDialogContextSwitch: (
+    context: TCustomDialogPropsContextProps<T>
+  ) => void;
+  children: ReactNode;
+  toggleDialog: () => any;
+  dialogOpen: boolean;
 } & Partial<TClassType>;
 
 export type TDebounceprops<TDebounceCallBackArgs> = {
-	debounceCallback: (props: TDebounceCallBackArgs) => any;
-	debounceTimeOut?: number;
+  debounceCallback: (props: TDebounceCallBackArgs) => any;
+  debounceTimeOut?: number;
 };
 
 export type DropdownActionItem = {
@@ -283,3 +284,10 @@ export type ReusableDropdownProps = {
   align?: "start" | "center" | "end";
   contentClassName?: string;
 };
+
+export interface QuotePreviewProps {
+  componentProps: any
+  handleDialogContextSwitch: (
+    data?: any
+  ) => void;
+}

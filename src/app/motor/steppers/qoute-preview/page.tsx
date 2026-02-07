@@ -1,11 +1,16 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Button, ReusableDropdown } from "@/dev/core";
 import { ArrowLeft, Download, Forward, Mail, Share2 } from "lucide-react";
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-export const QoutePreviewPage = ({ componentProps }: { componentProps: any }) => {
+
+export const QuotePreviewPage = ({ componentProps }:{
+    componentProps: any,
+    handleDialogContextSwitch: any
+}) => {
+
     return (
         <div className="mx-auto max-w-3xl px-4 space-y-6">
             <h1 className="text-2xl font-bold">
@@ -13,8 +18,8 @@ export const QoutePreviewPage = ({ componentProps }: { componentProps: any }) =>
             </h1>
             <Card className="flex items-center justify-center py-6">
                 <img
-                    src={componentProps?.item?.header?.src}
-                    alt={componentProps?.item?.header?.alt ?? ''}
+                    src={componentProps?.data?.header?.src}
+                    alt={componentProps?.data?.header?.alt ?? ''}
                     className="w-36 h-16 object-contain"
                 />
             </Card>
