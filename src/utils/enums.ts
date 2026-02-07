@@ -26,6 +26,7 @@ export const EROUTES = {
 
   // Auth
   SIGNUP:'/signup',
+  SIGNIN:'/signin',
 
   // Admin / Dashboard
   DASHBOARD: "/dashboard",

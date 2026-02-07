@@ -3,12 +3,13 @@ import { CardFooter, } from '@/components/ui/card'
 import { Button, CustomDialogComponent, ReusableCard, ReusableCheckboxGrid, ReusablePagination, ReuseableInput } from '@/dev/core'
 import { useCustomDialogContextFactory, } from '@/hooks'
 import type { CustomerVerificationDetailsProps } from '@/types/types'
-import { EQUOTATIONSAMPLEDATA, QUOTATIONCHECKBOX } from '@/utils/enums'
+import { EPREFIX, EQUOTATIONSAMPLEDATA, EROUTES, QUOTATIONCHECKBOX } from '@/utils/enums'
 import { ArrowLeftCircle, ArrowRightCircle, Plus } from 'lucide-react'
 import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { ComparisonPage } from './comparisons/page'
-import { QoutePreviewPage } from './qoute-preview/page'
+import { Link } from 'react-router-dom'
+import { QuotePreviewPage } from './qoute-preview/page'
 
 export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goToNextStep, goToPrevStep }) => {
     const [page, setPage] = useState(1)
@@ -71,7 +72,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                     <h1 className="text-2xl font-bold mb-4">
                         Quote Comparison
                     </h1>
-                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
                         {EQUOTATIONSAMPLEDATA.map((item) => (
                             <ReusableCard
                                 key={item.id}
@@ -84,26 +85,29 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                             type="button"
                                             onClick={() =>
                                                 handleDialogContextSwitch({
-                                                    componentProps: { item },
-                                                    Component: QoutePreviewPage,
+                                                    componentProps: { 
+                                                        data: item
+                                                    },
+                                                    Component: QuotePreviewPage,
                                                 })
                                             }
                                             className='rounded-md border border-[#D9D9D9] bg-[#C20C0C] hover:bg-[#C20C0C]/90 font-medium text-white px-6'>
                                             Get Quote
                                         </Button>
-                                        <Button
-                                            type="button"
-                                            onClick={()=>}
-                                            className='rounded-md border border-[#D9D9D9] bg-[#0CC258] hover:bg-[#0CC258]/90 font-medium text-white px-6'>
-                                            Purchase Cover
-                                        </Button>
+                                        <Link to={`/${EPREFIX?.AUTH}${EROUTES.SIGNUP}`}>
+                                            <Button
+                                                type="button"
+                                                className="rounded-md border border-[#D9D9D9] bg-[#0CC258] hover:bg-[#0CC258]/90 font-medium text-white px-6">
+                                                Purchase Cover
+                                            </Button>
+                                        </Link>
                                     </>
                                 }
                                 children={
                                     <>
                                         {item.content.map((row, idx) => (
                                             <div key={idx}>
-                                                <div  className="flex flex-wrap justify-between gap-1 min-w-0">
+                                                <div className="flex flex-wrap justify-between gap-1 min-w-0">
                                                     <span className="text-xs sm:text-sm wrap-break-word max-w-[65%]">{row.label}</span>
                                                     <span className="text-xs sm:text-sm wrap-break-word max-w-[65%]">{row.value}</span>
                                                 </div>
