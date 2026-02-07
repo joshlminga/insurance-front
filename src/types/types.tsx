@@ -12,6 +12,25 @@ export type T = {
   ReactNode?: ReactNode;
 }
 
+export interface StepperContextType {
+  currentStep: number;
+  setCurrentStep: (step: number) => void;
+  goToNextStep: () => void;
+  goToPrevStep: () => void;
+}
+export interface StepperProviderProps {
+  children: ReactNode;
+}
+export interface ReusableStepperProps {
+    steps: {
+        title: string
+        content: React.FC<{ goToNextStep: () => void; goToPrevStep: () => void }>
+    }[]
+    defaultStep?: number
+    className?: string
+    value?: number
+    onValueChange?: (value: number) => void
+}
 export interface LoginResponse {
   message: string
   user: any
@@ -73,11 +92,6 @@ export type StepItem = {
   }>
 }
 
-export type ReusableStepperProps = {
-  steps: StepItem[]
-  defaultStep?: number
-  className?: string
-}
 export interface ButtonProps extends React.ComponentProps<typeof ShadButton> {
   loading?: boolean
   leftIcon?: React.ReactNode
