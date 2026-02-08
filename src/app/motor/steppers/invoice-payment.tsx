@@ -104,7 +104,10 @@ export const InvoicePayment: React.FC<CustomerVerificationDetailsProps> = ({ goT
                     />
                 </div>
             </div>
-            <CardFooter className="w-full md:col-span-2 flex justify-between mt-3 px-0">
+            <CardFooter className="w-full md:col-span-2 flex items-center justify-between mt-3 px-0">
+
+                {/* Left Side */}
+
                 <Button
                     type="button"
                     className="rounded-full border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
@@ -112,15 +115,28 @@ export const InvoicePayment: React.FC<CustomerVerificationDetailsProps> = ({ goT
                     onClick={() => goToPrevStep?.()}>
                     Previous
                 </Button>
-                <Button
-                    type="button"
-                    className="bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
-                    rightIcon={<ArrowRightCircle />}
-                    onClick={() => goToNextStep?.()}
-                    loading={submitMutation.isPending}>
-                    Complete Payment
-                </Button>
+                <div className="flex items-center gap-3">
+                    <Button
+                        type="button"
+                        className="rounded-lg border bg-[#0CC258]/80 text-[#FFFFFF] hover:bg-[#0CC258]"
+                        onClick={() => console.log('wewe')}>
+                        Generate Invoice
+                    </Button>
+
+                    <Button
+                        type="button"
+                        className="bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
+                        rightIcon={<ArrowRightCircle />}
+                        onClick={() => goToNextStep?.()}
+                        // loading={submitMutation.isPending}
+                        >
+                        Complete Payment
+                    </Button>
+
+                </div>
+
             </CardFooter>
+
         </form>
     )
 }
