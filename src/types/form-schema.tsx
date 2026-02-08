@@ -75,3 +75,66 @@ export const InvoicePaymentSchema = z.object({
   cover_startdate: z.string().min(1, "Cover Start Date is required"),
   total_payable: z.string().min(1, "Total payable is required"),
 })
+
+// Base payment schema with common fields
+const BasePaymentSchema = z.object({
+  payment_plans: z.string().optional(),
+  first_installment: z.string().optional(),
+  second_installment: z.string().optional(),
+  third_installment: z.string().optional(),
+  payment_method: z.enum(["mpesa", "card", "pesapal"]),
+})
+
+// Mpesa specific fields
+const MpesaPaymentSchema = BasePaymentSchema.extend({
+  payment_method: z.literal("mpesa"),
+  phone_number: z.string()
+    .min(10, "Phone number must be at least 10 digits")
+    .regex(/^(?:\+254|254|0)?[17]\d{8}$/, "Invalid Kenyan phone number"),
+})
+
+// Card specific fields with validation
+const CardPaymentSchema = BasePaymentSchema.extend({
+  payment_method: z.literal("card"),
+  card_number: z.string()
+    .min(16, "Card number must be 16 digits")
+    .max(19, "Card number too long")
+    .regex(/^[\d\s]+$/, "Card number must contain only digits")
+    .refine((val) => {
+      // Luhn algorithm validation
+      const digits = val.replace(/\s/g, '').split('').reverse().map(Number)
+      const sum = digits.reduce((acc, digit, idx) => {
+        if (idx % 2 === 1) {
+          const doubled = digit * 2
+          return acc + (doubled > 9 ? doubled - 9 : doubled)
+        }
+        return acc + digit
+      }, 0)
+      return sum % 10 === 0
+    }, "Invalid card number"),
+  expiry_date: z.string()
+    .regex(/^(0[1-9]|1[0-2])\/\d{2}$/, "Expiry date must be in MM/YY format")
+    .refine((val) => {
+      const [month, year] = val.split('/').map(Number)
+      const now = new Date()
+      const currentYear = now.getFullYear() % 100
+      const currentMonth = now.getMonth() + 1
+      return year > currentYear || (year === currentYear && month >= currentMonth)
+    }, "Card has expired"),
+  cvv: z.string()
+    .min(3, "CVV must be 3-4 digits")
+    .max(4, "CVV must be 3-4 digits")
+    .regex(/^\d{3,4}$/, "CVV must be numeric"),
+})
+
+// Pesapal specific fields
+const PesapalPaymentSchema = BasePaymentSchema.extend({
+  payment_method: z.literal("pesapal"),
+})
+
+// Discriminated union for payment methods
+export const PaymentDetailsSchema = z.discriminatedUnion("payment_method", [
+  MpesaPaymentSchema,
+  CardPaymentSchema,
+  PesapalPaymentSchema,
+])

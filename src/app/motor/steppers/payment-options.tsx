@@ -10,14 +10,27 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowLeftCircle, ArrowRightCircle } from 'lucide-react'
 import React from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
+import { PaymentDetailsSchema } from '@/types/form-schema'
+import type { PaymentFormValues } from '@/types/schema'
 
 export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goToNextStep, goToPrevStep }) => {
+    const [selectedPaymentMethod, setSelectedPaymentMethod] = React.useState<string>('mpesa')
+    
     const form = useForm<PaymentFormValues>({
         resolver: zodResolver(PaymentDetailsSchema),
         defaultValues: {
-           
+            payment_method: 'mpesa',
+            payment_plans: '',
+            first_installment: '',
+            second_installment: '',
+            third_installment: '',
         },
     })
+    const handlePaymentMethodChange = (value: string) => {
+        setSelectedPaymentMethod(value)
+        form.setValue('payment_method', value as 'mpesa' | 'card' | 'pesapal')
+        form.clearErrors()
+    }
     
     const submitMutation = UseApiMutation<SubmitResponse, PaymentFormValues>({
         url: '',
@@ -36,9 +49,13 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
             },
         },
     })
+    
     const onSubmit = (data: PaymentFormValues) => {
+        console.log(data);
+        
         submitMutation.mutate(data)
     }
+    
     return (
         <FormProvider {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="w-full mx-auto bg-transparent">
@@ -55,7 +72,7 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                     name="payment_plans"
                                     label=""
                                     options={PAYMENTPLANS}
-                                    control={undefined}
+                                    control={form.control}
                                 />
                             </div>
                         </div>
@@ -63,19 +80,19 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
                             <ReuseableInput
                                 className="w-full max-w-[320px] h-[51px] rounded-[5px] border border-[#ADABAB] bg-white"
                                 control={form.control}
-                                name="1st_installment"
+                                name="first_installment"
                                 label="1st Installment 40%"
                             />
                             <ReuseableInput
                                 className="w-full max-w-[320px] h-[51px] rounded-[5px] border border-[#ADABAB] bg-white"
                                 control={form.control}
-                                name="2nd_installment"
-                                label="2st Installment 30%"
+                                name="second_installment"
+                                label="2nd Installment 30%"
                             />
                              <ReuseableInput
                                 className="w-full max-w-[320px] h-[51px] rounded-[5px] border border-[#ADABAB] bg-white"
                                 control={form.control}
-                                name="3st Installment 30%"
+                                name="third_installment"
                                 label="3rd Installment 30%"
                             />
                         </div>
@@ -90,7 +107,8 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
                         activeColor="#D3EDFF"
                         selectorPosition="left"
                         showSelector={true}
-                        defaultValue="mpesa"
+                        value={selectedPaymentMethod}
+                        onValueChange={handlePaymentMethodChange}
                         items={EPAYMENTTABS}
                     />
                 </div>
@@ -103,11 +121,10 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
                         Previous
                     </Button>
                     <Button
-                        type="button"
+                        type="submit"
                         className="bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
                         rightIcon={<ArrowRightCircle />}
-                        onClick={() => goToNextStep?.()}
-                    // loading={submitMutation.isPending}
+                        loading={submitMutation.isPending}
                     >
                         Proceed To Payment
                     </Button>
