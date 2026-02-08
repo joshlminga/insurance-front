@@ -115,7 +115,7 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
                         onClick={() => goToNextStep?.()}
                     // loading={submitMutation.isPending}
                     >
-                        Submit
+                        Proceed To Payment
                     </Button>
                 </CardFooter>
             </form>
