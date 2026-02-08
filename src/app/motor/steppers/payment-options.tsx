@@ -59,7 +59,7 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
     return (
         <FormProvider {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="w-full mx-auto bg-transparent">
-                <div className='items-center justify-center p-4'>
+                 <div className='w-full items-center justify-center p-4'>
                     <div className="w-full h-[182px] rounded-[3px] bg-[#D9D9D95E] shadow-[0px_4px_4px_0px_#00000040] m-2">
                         <div className="w-[117px] relative mt-[37px] ml-11 py-2">
                             <label htmlFor="payment_plans" className="font-medium text-[15px] text-black block mb-1">
