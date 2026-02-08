@@ -1,5 +1,6 @@
 
 import { CustomerVerificationDetails } from "@/app/motor/steppers/capture-details";
+import { InvoicePayment } from "@/app/motor/steppers/invoice-payment";
 import { KycInfo } from "@/app/motor/steppers/kyc-info";
 import OTPVerificationPage from "@/app/motor/steppers/otp-verification";
 import { QuotationsPage } from "@/app/motor/steppers/quotations";
@@ -26,9 +27,13 @@ export const ESTEPS = [
         title: "",
         content: QuotationsPage,
     },
-     {
+    {
         title: "",
         content: KycInfo,
+    },
+     {
+        title: "",
+        content: InvoicePayment,
     },
 ]
 

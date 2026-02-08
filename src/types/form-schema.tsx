@@ -68,3 +68,14 @@ export const KycSchema = z.object({
     .any()
     .refine((file) => file instanceof File, "Attach ID/Passport"),
 })
+
+
+export const InvoicePaymentSchema = z.object({
+  customer_name: z.string().min(1, "Customer Name is required"),
+  email: z.email().min(1, "Email is required"),
+  phone_number: z.string().min(1, "Phone number is required"),
+  covering: z.string().min(1, "Covering is required"),
+  provider: z.string().min(1, "Provider is required"),
+  cover_startdate: z.string().min(1, "Cover Start Date is required"),
+  total_payable: z.string().min(1, "Total payable is required"),
+})
