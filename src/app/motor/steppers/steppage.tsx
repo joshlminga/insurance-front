@@ -4,7 +4,6 @@ import { useStepperContext } from '@/hooks/stepper-context'
 
 export const StepPage: React.FC = () => {
     const { currentStep, setCurrentStep } = useStepperContext()
-
     return (
         <ReusableStepper
             steps={ESTEPS}

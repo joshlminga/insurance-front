@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import type {
     ButtonProps,
+    RadioChoiceGroupProps,
     ReusableCardProps,
     ReusableCheckboxGridProps,
     ReusableDropdownProps,
@@ -51,6 +52,7 @@ import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, Pagi
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 const formatSegment = (segment: string) => {
     return segment
@@ -147,21 +149,25 @@ export function ReusableStepper({
     const goToStep = (step: number) => handleStepChange(step)
     return (
         <Stepper value={currentStep} onValueChange={handleStepChange} className={className}>
-            <StepperNav className="flex items-start gap-2 mb-6">
+            <StepperNav className="flex items-start gap-1 sm:gap-2 mb-4 sm:mb-6 overflow-x-auto pb-2 scrollbar-hide">
                 {steps.map((step, index) => {
                     const stepNumber = index + 1
                     return (
                         <StepperItem
                             key={stepNumber}
                             step={stepNumber}
-                            className="relative flex-1 items-start">
-                            <StepperTrigger className="flex flex-col items-center justify-center gap-1 grow">
+                            className="relative flex-1 min-w-[60px] sm:min-w-0 items-start">
+                            <StepperTrigger className="flex flex-col items-center justify-center gap-0.5 sm:gap-1 grow">
                                 <StepperIndicator
-                                    className={cn("h-[17px] w-[124px] rounded-[10px] transition-all",
+                                    className={cn("h-[12px] sm:h-[17px] w-full max-w-[80px] sm:max-w-[124px] rounded-[10px] transition-all",
                                         "bg-gray-300 data-[state=active]:bg-linear-to-r from-[#FFB3B3] via-[#FF8383] to-[#FF4545]")} />
-                                <StepperTitle className="text-start font-semibold group-data-[state=inactive]/step:text-muted-foreground">
+                                <StepperTitle className="hidden sm:block text-start text-xs lg:text-sm font-semibold group-data-[state=inactive]/step:text-muted-foreground truncate max-w-[100px] lg:max-w-none">
                                     {step.title}
                                 </StepperTitle>
+                                {/* Mobile: show step number only */}
+                                <span className="sm:hidden text-[10px] font-medium text-muted-foreground">
+                                    {stepNumber}
+                                </span>
                             </StepperTrigger>
                         </StepperItem>
                     )
@@ -205,7 +211,6 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         )
     }
 )
-
 export function ReuseableInput<T extends FieldValues>({
     control,
     name,
@@ -215,35 +220,48 @@ export function ReuseableInput<T extends FieldValues>({
     type = "text",
     autoComplete = "off",
     required = false,
-    className
+    className,
 }: RHFInputProps<T>) {
     return (
         <Controller
             name={name}
             control={control}
-            render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor={id}>{label}</FieldLabel>
-                    <Input
-                        {...field}
-                        id={id}
-                        type={type}
-                        placeholder={placeholder}
-                        autoComplete={autoComplete}
-                        aria-invalid={fieldState.invalid}
-                        required={required}
-                        className={cn(
-                            className,
-                            fieldState.invalid && "border-red-500 focus-visible:ring-red-500"
+            render={({ field, fieldState }) => {
+                const isFile = type === "file"
+
+                return (
+                    <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel htmlFor={id}>{label}</FieldLabel>
+                        <Input
+                            {...(!isFile ? field : {})}
+                            id={id}
+                            type={type}
+                            placeholder={placeholder}
+                            autoComplete={autoComplete}
+                            aria-invalid={fieldState.invalid}
+                            required={required}
+                            className={cn(
+                                className,
+                                fieldState.invalid &&
+                                "border-red-500 focus-visible:ring-red-500"
+                            )}
+                            onChange={(e) => {
+                                if (isFile) {
+                                    const file = (e.target as HTMLInputElement).files?.[0]
+                                    field.onChange(file)
+                                } else {
+                                    field.onChange(e)
+                                }
+                            }}
+                        />
+                        {fieldState.invalid && fieldState.error && (
+                            <FieldError className="text-red-500 text-sm mt-1">
+                                {fieldState.error.message}
+                            </FieldError>
                         )}
-                    />
-                    {fieldState.invalid && fieldState.error && (
-                        <FieldError className="text-red-500 text-sm mt-1">
-                            {fieldState.error.message}
-                        </FieldError>
-                    )}
-                </Field>
-            )}
+                    </Field>
+                )
+            }}
         />
     )
 }
@@ -359,7 +377,7 @@ export function ReusableTabs({
             className={cn("w-full", className)}>
             <TabsList
                 className={cn(
-                    "h-[70px] w-[509px] rounded-[20px] border border-[#ADABAB] bg-white p-0 flex",
+                    "h-auto min-h-[50px] sm:min-h-[60px] lg:h-[70px] w-full max-w-full lg:max-w-[509px] rounded-[12px] sm:rounded-[20px] border border-[#ADABAB] bg-white p-0 flex flex-wrap sm:flex-nowrap",
                     tabsListClassName
                 )}>
                 {tabs.map((tab) => {
@@ -369,15 +387,22 @@ export function ReusableTabs({
                             key={tab.value}
                             value={tab.value}
                             disabled={tab.disabled}
-                            className={cn(` h-full rounded-none first:rounded-l-[20px] last:rounded-r-[20px]  data-[state=active]:bg-[#C20C0C] data-[state=active]:text-white data-[state=inactive]:bg-white data-[state=inactive]:text-black flex items-center justify-center gap-2 text-lg font-medium`,
-                                triggerClassName)}>
+                            className={cn(
+                                "flex-1 h-[48px] sm:h-full min-w-0 rounded-none",
+                                "first:rounded-tl-[12px] first:rounded-bl-[12px] sm:first:rounded-l-[20px]",
+                                "last:rounded-tr-[12px] last:rounded-br-[12px] sm:last:rounded-r-[20px]",
+                                "data-[state=active]:bg-[#C20C0C] data-[state=active]:text-white",
+                                "data-[state=inactive]:bg-white data-[state=inactive]:text-black",
+                                "flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm lg:text-lg font-medium px-2 sm:px-4",
+                                triggerClassName
+                            )}>
                             {Icon && (
                                 <Icon
                                     size={tab.iconSize ?? 16}
-                                    className="shrink-0"
+                                    className="shrink-0 w-4 h-4 sm:w-5 sm:h-5"
                                 />
                             )}
-                            {tab.label}
+                            <span className="truncate">{tab.label}</span>
                         </TabsTrigger>
                     )
                 })}
@@ -501,14 +526,14 @@ export const ReusableCard = ({
                     onClick?.();
                 }
             }}
-          className={cn("flex flex-col w-full min-w-0 overflow-hidden rounded-[10px] border bg-white",
-        "border-[#ADABAB]",
-        isClickable &&
-          "cursor-pointer transition-all hover:border-[#FF9A9A] hover:-translate-y-px focus-visible:ring-2 focus-visible:ring-[#FF9A9A]",
-        selected && "ring-2 ring-primary",
-        disabled && "opacity-50 cursor-not-allowed",
-        rootClassName
-      )}>
+            className={cn("flex flex-col w-full min-w-0 overflow-hidden rounded-[10px] border bg-white",
+                "border-[#ADABAB]",
+                isClickable &&
+                "cursor-pointer transition-all hover:border-[#FF9A9A] hover:-translate-y-px focus-visible:ring-2 focus-visible:ring-[#FF9A9A]",
+                selected && "ring-2 ring-primary",
+                disabled && "opacity-50 cursor-not-allowed",
+                rootClassName
+            )}>
             {header && (
                 <CardHeader className={cn('flex items-center justify-center p-3 text-center', headerClassName)}>
                     {header.type === 'image' && (
@@ -620,3 +645,139 @@ export const ReusableDropdown = ({
         </DropdownMenu>
     );
 };
+
+export const ReuseableRadioChoiceGroup: React.FC<
+    RadioChoiceGroupProps
+> = ({
+    items,
+    value,
+    defaultValue,
+    onValueChange,
+    variant = "radio",
+    layout = "vertical",
+    contentPosition = "inline",
+    activeColor = "#3771C8",
+    showSelector = true,
+    selectorPosition = "right",
+    className,
+}) => {
+        const [internalValue, setInternalValue] =
+            React.useState(defaultValue)
+        const selected = value ?? internalValue
+        const handleChange = (val: string) => {
+            if (!value) setInternalValue(val)
+            onValueChange?.(val)
+        }
+        return (
+            <>
+                <RadioGroup
+                    value={selected}
+                    defaultValue={defaultValue}
+                    onValueChange={handleChange}
+                    className={cn(
+                        layout === "horizontal"
+                            ? "flex gap-6"
+                            : "flex flex-col gap-3",
+                        className
+                    )}>
+                    {items.map((item) => {
+                        const isActive = selected === item.value
+                        const Icon = item.icon
+                        return (
+                            <label
+                                key={item.value}
+                                className={cn(
+                                    "cursor-pointer rounded-lg border p-4 transition-all",
+                                    contentPosition === "inline"
+                                        ? "flex items-center justify-between gap-4"
+                                        : "flex flex-col gap-3",
+                                    item.disabled &&
+                                    "opacity-50 cursor-not-allowed"
+                                )}
+                                style={{
+                                    borderColor: isActive ? activeColor : undefined,
+                                    backgroundColor: isActive
+                                        ? `${activeColor}10`
+                                        : undefined,
+                                }}>
+                                {showSelector && selectorPosition === "left" && (
+                                    <RadioGroupItem
+                                        value={item.value}
+                                        disabled={item.disabled}
+                                        className="mr-3"
+                                        style={{
+                                            borderColor: isActive
+                                                ? activeColor
+                                                : undefined,
+                                        }}
+                                    />
+                                )}
+                                <div className="flex items-center gap-3 flex-1">
+                                    {item.image && (
+                                        <img
+                                            src={item.image}
+                                            alt={item.label}
+                                            className="h-8 w-10 object-contain"
+                                        />
+                                    )}
+
+                                    {Icon && (
+                                        <Icon
+                                            size={item.iconSize ?? 18}
+                                            color={
+                                                isActive ? activeColor : undefined
+                                            }
+                                        />
+                                    )}
+
+                                    <div>
+                                        <div
+                                            className="font-semibold"
+                                            style={{
+                                                color: isActive
+                                                    ? activeColor
+                                                    : undefined,
+                                            }}
+                                        >
+                                            {item.label}
+                                        </div>
+
+                                        {item.description && (
+                                            <div className="text-sm text-muted-foreground">
+                                                {item.description}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                                {showSelector &&
+                                    selectorPosition === "right" && (
+                                        <RadioGroupItem
+                                            value={item.value}
+                                            disabled={item.disabled}
+                                            style={{
+                                                borderColor: isActive
+                                                    ? activeColor
+                                                    : undefined,
+                                            }}
+                                        />
+                                    )}
+                            </label>
+                        )
+                    })}
+                </RadioGroup>
+                {variant === "tabs" && (
+                    <div className="mt-6">
+                        {(() => {
+                            const SelectedComponent = items.find(
+                                (i) => i.value === selected
+                            )?.component
+
+                            return SelectedComponent ? (
+                                <SelectedComponent />
+                            ) : null
+                        })()}
+                    </div>
+                )}
+            </>
+        )
+    }

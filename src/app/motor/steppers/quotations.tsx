@@ -24,61 +24,73 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
     return (
         <>
             <div className="max-w-full mx-auto border-0 bg-transparent">
-                <form className='w-full py-4'>
-                    <div className="w-full border rounded-0 px-6 py-6">
-                        <h1 className="text-2xl font-bold mb-4">
+                <form className='w-full py-2 sm:py-4'>
+                    <div className="w-full border rounded-0 px-3 sm:px-6 py-4 sm:py-6">
+                        <h1 className="text-xl sm:text-2xl font-bold mb-4">
                             Additional Benefits:
                         </h1>
-                        <hr className="mb-6" />
-                        <ReusableCheckboxGrid
-                            options={QUOTATIONCHECKBOX}
-                            columns={3}
-                        />
-                        <hr className="mb-6" />
-                        <div className="grid grid-cols-2 gap-8">
+                        <hr className="mb-4 sm:mb-6" />
+                        
+                        {/* Checkbox Grid - responsive columns handled by component */}
+                        <div className="overflow-x-auto">
+                            <ReusableCheckboxGrid
+                                options={QUOTATIONCHECKBOX}
+                                columns={3}
+                            />
+                        </div>
+                        
+                        <hr className="my-4 sm:mb-6" />
+                        
+                        {/* Additional Inputs - 1 col mobile, 2 col sm+ */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8">
                             <ReuseableInput
-                                className="h-[51px] rounded-[5px] border border-[#ADABAB] justify-self-start"
+                                className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
                                 control={form.control}
                                 name="courtesy_car"
                                 label="Courtesy Car"
                             />
                             <ReuseableInput
-                                className="h-[51px] rounded-[5px] border border-[#ADABAB] justify-self-end"
+                                className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
                                 control={form.control}
                                 name="road_rescue"
                                 label="Road Rescue"
                             />
                         </div>
+                        
                         <Button
                             type='button'
                             className="ml-auto mt-4 flex items-center rounded-[3px] border border-[#0CC2581F] bg-[#C7EED5] hover:bg-[#C7EED5]/90 text-[#43A047]"
-                            leftIcon={<Plus className='h-8 w-8' />}>
+                            leftIcon={<Plus className='h-6 w-6 sm:h-8 sm:w-8' />}>
                             Add
                         </Button>
                     </div>
+                    
                     <Button
                         type='button'
-                        className="ml-auto mt-4 flex items-center font-bold bg-[#C20C0C]/80 hover:bg-[#C20C0C]"
+                        className="w-full sm:w-auto sm:ml-auto mt-4 flex items-center justify-center font-bold bg-[#C20C0C]/80 hover:bg-[#C20C0C]"
                         onClick={() =>
                             handleDialogContextSwitch({
                                 Component: ComparisonPage,
-                                // componentProps: ,
                             })
                         }>
                         Generate Comparison
                     </Button>
                 </form>
-                <div className='w-full m-3'>
-                    <h1 className="text-2xl font-bold mb-4">
+                
+                {/* Quote Comparison Section */}
+                <div className='w-full py-3'>
+                    <h1 className="text-xl sm:text-2xl font-bold mb-4">
                         Quote Comparison
                     </h1>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+                    
+                    {/* Quote Cards Grid - 1 col mobile, 2 col sm, 3 col lg, 4 col xl */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                         {EQUOTATIONSAMPLEDATA.map((item) => (
                             <ReusableCard
                                 key={item.id}
                                 header={item.header as any}
                                 rootClassName=""
-                                footerClassName="flex flex-col gap-2 sm:flex-row sm:justify-between w-full"
+                                footerClassName="flex flex-col gap-2 w-full"
                                 footer={
                                     <>
                                         <Button
@@ -91,13 +103,13 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                                     Component: QuotePreviewPage,
                                                 })
                                             }
-                                            className='rounded-md border border-[#D9D9D9] bg-[#C20C0C] hover:bg-[#C20C0C]/90 font-medium text-white px-6'>
+                                            className='w-full rounded-md border border-[#D9D9D9] bg-[#C20C0C] hover:bg-[#C20C0C]/90 font-medium text-white'>
                                             Get Quote
                                         </Button>
-                                        <Link to={`/${EPREFIX?.AUTH}${EROUTES.SIGNUP}`}>
+                                        <Link to={`/${EPREFIX?.AUTH}${EROUTES.SIGNUP}`} className="w-full">
                                             <Button
                                                 type="button"
-                                                className="rounded-md border border-[#D9D9D9] bg-[#0CC258] hover:bg-[#0CC258]/90 font-medium text-white px-6">
+                                                className="w-full rounded-md border border-[#D9D9D9] bg-[#0CC258] hover:bg-[#0CC258]/90 font-medium text-white">
                                                 Purchase Cover
                                             </Button>
                                         </Link>
@@ -108,8 +120,8 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                         {item.content.map((row, idx) => (
                                             <div key={idx}>
                                                 <div className="flex flex-wrap justify-between gap-1 min-w-0">
-                                                    <span className="text-xs sm:text-sm wrap-break-word max-w-[65%]">{row.label}</span>
-                                                    <span className="text-xs sm:text-sm wrap-break-word max-w-[65%]">{row.value}</span>
+                                                    <span className="text-xs sm:text-sm break-words max-w-[60%]">{row.label}</span>
+                                                    <span className="text-xs sm:text-sm break-words max-w-[35%] text-right">{row.value}</span>
                                                 </div>
                                             </div>
                                         ))}
@@ -118,32 +130,38 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                         ))}
                     </div>
                 </div>
-                <CardFooter className="md:col-span-2 flex justify-between mt-1">
+                
+                {/* Navigation Footer - stack on mobile */}
+                <CardFooter className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-4 px-0">
                     <Button
                         type="button"
-                        className="rounded-full border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
+                        className="w-full sm:w-auto rounded-full border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
                         leftIcon={<ArrowLeftCircle />}
                         onClick={() => goToPrevStep?.()}>
                         Previous
                     </Button>
-                    <ReusablePagination
-                        currentPage={page}
-                        totalPages={10}
-                        onPageChange={setPage}
-                    />
+                    
+                    <div className="order-first sm:order-none">
+                        <ReusablePagination
+                            currentPage={page}
+                            totalPages={10}
+                            onPageChange={setPage}
+                        />
+                    </div>
+                    
                     <Button
                         type="button"
-                        className="bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
+                        className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
                         rightIcon={<ArrowRightCircle />}
-                        // loading={submitMutation.isPending}
                         onClick={() => (goToNextStep?.())}>
                         Next
                     </Button>
                 </CardFooter>
             </div>
+            
             <CustomDialogComponent
                 {...{ handleDialogContextSwitch, dialogOpen }}
-                className='sm:max-w-fit w-auto p-6'>
+                className='sm:max-w-fit w-[95vw] sm:w-auto p-4 sm:p-6'>
                 {dialogContent?.Component && (
                     <dialogContent.Component
                         {...{

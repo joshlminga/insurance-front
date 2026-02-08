@@ -25,7 +25,6 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
             insurance_type: "",
         },
     })
-
     const submitMutation = UseApiMutation<SubmitResponse, VehicleFormValues>({
         url: `vehicle/details/${current_tab}`,
         method: EMETHODS.POST,
@@ -43,39 +42,42 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
             },
         },
     })
-
     const onSubmit = (data: VehicleFormValues) => {
         submitMutation.mutate(data)
     }
-
     return (
         <FormProvider {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="w-full mx-auto bg-transparent">
-                <div className='items-center justify-center border p-4'>
+                <div className='items-center justify-center border p-3 sm:p-4'>
                     <div className="w-full py-3">
-                        <h1 className="text-2xl font-bold leading-none mb-4">Proceed to add your <span className='text-[#C20C0C]'>Vehicle Details</span></h1>
-                        <h6 className='text-lg font-bold'>Select type of cover</h6>
+                        <h1 className="text-xl sm:text-2xl font-bold leading-none mb-2 sm:mb-4">
+                            Proceed to add your <span className='text-[#C20C0C]'>Vehicle Details</span>
+                        </h1>
+                        <h6 className='text-base sm:text-lg font-bold'>Select type of cover</h6>
                     </div>
-                    <ReusableTabs
-                        tabs={EMOTORTABS}
-                        form={form}
-                        onTabChange={setCurrent_Tab}
-                    />
+                    <div className="w-full overflow-x-auto">
+                        <ReusableTabs
+                            tabs={EMOTORTABS}
+                            form={form}
+                            onTabChange={setCurrent_Tab}
+                        />
+                    </div>
                 </div>
-                <CardFooter className="w-full md:col-span-2 flex justify-between mt-3 px-0">
+                
+                {/* Navigation Buttons - stack on mobile */}
+                <CardFooter className="w-full flex flex-col sm:flex-row justify-between gap-3 mt-3 px-0">
                     <Button
                         type="button"
-                        className="rounded-full border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
+                        className="w-full sm:w-auto rounded-full border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
                         leftIcon={<ArrowLeftCircle />}
                         onClick={() => goToPrevStep?.()}>
                         Previous
                     </Button>
                     <Button
                         type="button"
-                        className="bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
+                        className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
                         rightIcon={<ArrowRightCircle />}
                         onClick={() => goToNextStep?.()}
-                    // loading={submitMutation.isPending}
                     >
                         Next
                     </Button>

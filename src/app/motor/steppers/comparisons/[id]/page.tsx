@@ -39,8 +39,7 @@ export const PostComparisonPage = () => {
                     <span className="text-muted-foreground">{cov.label}</span>
                     <Badge
                       className="justify-self-end"
-                      style={{ backgroundColor: cov.color }}
-                    >
+                      style={{ backgroundColor: cov.color }}>
                       {cov.status}
                     </Badge>
                   </React.Fragment>

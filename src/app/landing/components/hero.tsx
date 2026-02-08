@@ -1,4 +1,5 @@
-
+import { Button } from "@/dev/core"
+import { EPREFIX, EROUTES } from "@/utils/enums"
 
 export const HeroSection = () => {
     return (
@@ -12,9 +13,12 @@ export const HeroSection = () => {
                 {/* <div className="absolute inset-0 bg-gradient-to-r from-slate-900/80 to-transparent" /> */}
                 <div className="absolute inset-0 bg-linear-to-r from-slate-900/60 to-slate-900/40" />
             </div>
-            <button className='absolute top-[19px] right-[88px] w-[82px] h-[26px] rounded-[20px] bg-white border border-[#C20C0C] text-sm font-semibold text-slate-900'>
-                Login
-            </button>
+            <a href={`${EPREFIX.AUTH}${EROUTES.SIGNIN}`}>
+                <Button type="button" className='absolute top-[19px] right-[88px] w-[82px] 
+                h-[26px] rounded-[20px] bg-white border border-[#C20C0C] text-sm font-semibold text-slate-900 cursor-pointer'>
+                    Login
+                </Button>
+            </a>
             <div className="relative w-full h-full">
                 <div className="absolute top-[278px] left-1/2 -translate-x-1/2 z-50 w-[70vw]">
                     <h1
