@@ -8,6 +8,7 @@ import { CardsTabPage } from "@/app/motor/steppers/payment-tabs/card";
 import { MpesaPageTab } from "@/app/motor/steppers/payment-tabs/mpesa";
 import { PesapalTabPage } from "@/app/motor/steppers/payment-tabs/pesapal";
 import { QuotationsPage } from "@/app/motor/steppers/quotations";
+import { SuccessPurchase } from "@/app/motor/steppers/success-purchase";
 import { MotorCommercialPage } from "@/app/motor/steppers/tabs/motor-commercial";
 import { MotorPrivatePage } from "@/app/motor/steppers/tabs/motor-private";
 import { MotorPsvPage } from "@/app/motor/steppers/tabs/motor-psv";
@@ -42,6 +43,10 @@ export const ESTEPS = [
     {
         title: "",
         content: PaymentOptions,
+    },
+    {
+        title: "",
+        content: SuccessPurchase,
     },
 ]
 

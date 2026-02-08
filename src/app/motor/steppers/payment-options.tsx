@@ -52,7 +52,7 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
     
     const onSubmit = (data: PaymentFormValues) => {
         console.log(data);
-        
+
         submitMutation.mutate(data)
     }
     
@@ -121,10 +121,11 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
                         Previous
                     </Button>
                     <Button
-                        type="submit"
+                        type="button"
                         className="bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
                         rightIcon={<ArrowRightCircle />}
-                        loading={submitMutation.isPending}
+                        // loading={submitMutation.isPending}
+                        onClick={()=>goToNextStep?.()}
                     >
                         Proceed To Payment
                     </Button>
