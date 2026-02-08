@@ -32,7 +32,7 @@ export const SuccessPurchase: React.FC<CustomerVerificationDetailsProps> = ({ go
                     </Card>
                 </div>
 
-                <Card className='items-center justify-center border-0 border-[#C20C0C] bg-[#C20C0C1A]'>
+                <Card className='items-center justify-center border-0 border-[#C20C0C] bg-[#C20C0C1A] p-8'>
                     <div className='w-full grid grid-cols-3 gap-4 p-3'>
                         <Card className='items-center justify-center border-primary/20 shadow-0'>
                             <TrendingUp className='h-8 w-8' />
