@@ -44,7 +44,6 @@ export const InvoicePayment: React.FC<CustomerVerificationDetailsProps> = ({ goT
             },
         },
     })
-
     const onSubmit = (data: InvoicePaymentFormValues) => {
         console.log(data);
 
@@ -134,12 +133,12 @@ export const InvoicePayment: React.FC<CustomerVerificationDetailsProps> = ({ goT
                             {
                                 label: "View Online",
                                 icon: <Eye className="w-4 h-4" />,
-                                onClick: () => console.log("Email"),
+                                onClick: () => console.log("view online"),
                             },
                             {
                                 label: "Select All",
                                 icon: <Eye className="w-4 h-4" />,
-                                onClick: () => console.log("Email"),
+                                onClick: () => console.log("select all"),
                             },
                         ]} />
                     <Button
@@ -151,11 +150,8 @@ export const InvoicePayment: React.FC<CustomerVerificationDetailsProps> = ({ goT
                     >
                         Complete Payment
                     </Button>
-
                 </div>
-
             </CardFooter>
-
         </form>
     )
 }

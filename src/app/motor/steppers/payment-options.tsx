@@ -1,19 +1,19 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Button, ReusableTabs } from '@/dev/core'
-import React, { useState } from 'react'
-import { EMOTORTABS } from '@/utils/steps-config'
-import type { CustomerVerificationDetailsProps, SubmitResponse, TTabItem } from '@/types/types'
 import { CardFooter } from '@/components/ui/card'
-import { ArrowLeftCircle, ArrowRightCircle } from 'lucide-react'
-import { useForm, FormProvider } from 'react-hook-form'
-import type { VehicleFormValues } from '@/types/schema'
+import { Button, ReusableTabs } from '@/dev/core'
 import { UseApiMutation } from '@/hooks/hooks'
-import { zodResolver } from '@hookform/resolvers/zod'
 import { VehicleDetailsSchema } from '@/types/form-schema'
+import type { VehicleFormValues } from '@/types/schema'
+import type { CustomerVerificationDetailsProps, SubmitResponse, TTabItem } from '@/types/types'
 import { EMETHODS } from '@/utils/constatnts'
+import { EPAYMENTTABS } from '@/utils/steps-config'
 import { ShowToast } from '@/utils/utils'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { ArrowLeftCircle, ArrowRightCircle } from 'lucide-react'
+import React, { useState } from 'react'
+import { FormProvider, useForm } from 'react-hook-form'
 
-export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({ goToNextStep, goToPrevStep }) => {
+export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goToNextStep, goToPrevStep }) => {
     const [current_tab, setCurrent_Tab] = useState<TTabItem>();
     const form = useForm<VehicleFormValues>({
         resolver: zodResolver(VehicleDetailsSchema),
@@ -25,6 +25,7 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
             insurance_type: "",
         },
     })
+
     const submitMutation = UseApiMutation<SubmitResponse, VehicleFormValues>({
         url: `vehicle/details/${current_tab}`,
         method: EMETHODS.POST,
@@ -42,9 +43,11 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
             },
         },
     })
+
     const onSubmit = (data: VehicleFormValues) => {
         submitMutation.mutate(data)
     }
+
     return (
         <FormProvider {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="w-full mx-auto bg-transparent">
@@ -54,7 +57,7 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
                         <h6 className='text-lg font-bold'>Select type of cover</h6>
                     </div>
                     <ReusableTabs
-                        tabs={EMOTORTABS}
+                        tabs={EPAYMENTTABS}
                         form={form}
                         onTabChange={setCurrent_Tab}
                     />

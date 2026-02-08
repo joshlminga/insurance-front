@@ -55,15 +55,12 @@ export const KycSchema = z.object({
   engine_number: z.string().min(1, "Engine number is required"),
   total_seats: z.string().min(1, "Number of seats is required"),
   tonage_capacity: z.string().min(1, "Vehicle tonage capacity is required"),
-
   log_book_attachment: z
     .any()
     .refine((file) => file instanceof File, "Attach a logbook"),
-
   tax_certificate: z
     .any()
     .refine((file) => file instanceof File, "Attach a tax certificate"),
-
   passport_attachment: z
     .any()
     .refine((file) => file instanceof File, "Attach ID/Passport"),

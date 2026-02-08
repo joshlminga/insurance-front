@@ -3,6 +3,7 @@ import { CustomerVerificationDetails } from "@/app/motor/steppers/capture-detail
 import { InvoicePayment } from "@/app/motor/steppers/invoice-payment";
 import { KycInfo } from "@/app/motor/steppers/kyc-info";
 import OTPVerificationPage from "@/app/motor/steppers/otp-verification";
+import { PaymentOptions } from "@/app/motor/steppers/payment-options";
 import { QuotationsPage } from "@/app/motor/steppers/quotations";
 import { MotorCommercialPage } from "@/app/motor/steppers/tabs/motor-commercial";
 import { MotorPrivatePage } from "@/app/motor/steppers/tabs/motor-private";
@@ -31,9 +32,13 @@ export const ESTEPS = [
         title: "",
         content: KycInfo,
     },
-     {
+    {
         title: "",
         content: InvoicePayment,
+    },
+    {
+        title: "",
+        content: PaymentOptions,
     },
 ]
 
@@ -55,6 +60,30 @@ export const EMOTORTABS = [
     {
         value: "psv",
         label: "PSV",
+        icon: Van,
+        iconSize: 16,
+        component: MotorPsvPage,
+    },
+]
+
+export const EPAYMENTTABS = [
+    {
+        value: "mpesa",
+        label: "Mpesa",
+        icon: Car,
+        iconSize: 18,
+        component: MotorPrivatePage,
+    },
+    {
+        value: "card",
+        label: "Card",
+        icon: Truck,
+        iconSize: 20,
+        component: MotorCommercialPage,
+    },
+    {
+        value: "pesapal",
+        label: "PesaPal",
         icon: Van,
         iconSize: 16,
         component: MotorPsvPage,
