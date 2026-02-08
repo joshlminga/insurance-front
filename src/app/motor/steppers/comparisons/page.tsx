@@ -8,7 +8,6 @@ import React from 'react'
 import { PostComparisonPage } from './[id]/page'
 
 export const ComparisonPage: React.FC = () => {
-
     const { handleDialogContextSwitch, dialogContent, dialogOpen } =
         useCustomDialogContextFactory<{
             refetch?: () => Promise<any>;

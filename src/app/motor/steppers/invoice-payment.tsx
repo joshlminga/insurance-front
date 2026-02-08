@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CardFooter } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
-import { Button, ReuseableInput } from '@/dev/core'
+import { Button, ReusableDropdown, ReuseableInput } from '@/dev/core'
 import { UseApiMutation } from '@/hooks/hooks'
 import { InvoicePaymentSchema } from '@/types/form-schema'
 import type { InvoicePaymentFormValues } from '@/types/schema'
@@ -9,7 +9,7 @@ import type { CustomerVerificationDetailsProps, SubmitResponse } from '@/types/t
 import { EMETHODS } from '@/utils/constatnts'
 import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ArrowLeftCircle, ArrowRightCircle } from 'lucide-react'
+import { ArrowLeftCircle, ArrowRightCircle, Eye, Mail, Share2 } from 'lucide-react'
 import React from 'react'
 import { useForm } from 'react-hook-form'
 
@@ -105,9 +105,6 @@ export const InvoicePayment: React.FC<CustomerVerificationDetailsProps> = ({ goT
                 </div>
             </div>
             <CardFooter className="w-full md:col-span-2 flex items-center justify-between mt-3 px-0">
-
-                {/* Left Side */}
-
                 <Button
                     type="button"
                     className="rounded-full border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
@@ -116,20 +113,42 @@ export const InvoicePayment: React.FC<CustomerVerificationDetailsProps> = ({ goT
                     Previous
                 </Button>
                 <div className="flex items-center gap-3">
-                    <Button
-                        type="button"
-                        className="rounded-lg border bg-[#0CC258]/80 text-[#FFFFFF] hover:bg-[#0CC258]"
-                        onClick={() => console.log('wewe')}>
-                        Generate Invoice
-                    </Button>
-
+                    <ReusableDropdown
+                        trigger={
+                            <Button
+                                className="w-full sm:w-auto bg-[#0CC258] hover:bg-[#0CC258]/80">
+                                Generate Invoice
+                            </Button>
+                        }
+                        items={[
+                            {
+                                label: "WhatsApp",
+                                icon: <Share2 className="w-4 h-4" />,
+                                onClick: () => console.log("WhatsApp"),
+                            },
+                            {
+                                label: "Email",
+                                icon: <Mail className="w-4 h-4" />,
+                                onClick: () => console.log("Email"),
+                            },
+                            {
+                                label: "View Online",
+                                icon: <Eye className="w-4 h-4" />,
+                                onClick: () => console.log("Email"),
+                            },
+                            {
+                                label: "Select All",
+                                icon: <Eye className="w-4 h-4" />,
+                                onClick: () => console.log("Email"),
+                            },
+                        ]} />
                     <Button
                         type="button"
                         className="bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
                         rightIcon={<ArrowRightCircle />}
                         onClick={() => goToNextStep?.()}
-                        // loading={submitMutation.isPending}
-                        >
+                    // loading={submitMutation.isPending}
+                    >
                         Complete Payment
                     </Button>
 
