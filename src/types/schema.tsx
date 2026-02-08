@@ -1,8 +1,16 @@
 import type z from "zod";
-import { CustomerDetailsSchema, OTPVerificationSchema, VehicleDetailsSchema, LoginSchema, SignUpSchema } from "./form-schema";
+import {
+    CustomerDetailsSchema,
+    OTPVerificationSchema,
+    VehicleDetailsSchema,
+    LoginSchema,
+    SignUpSchema,
+    KycSchema
+} from "./form-schema";
 
 export type CustomerFormValues = z.infer<typeof CustomerDetailsSchema>
 export type OTPFormValues = z.infer<typeof OTPVerificationSchema>
 export type VehicleFormValues = z.infer<typeof VehicleDetailsSchema>
 export type LoginFormValues = z.infer<typeof LoginSchema>
 export type SignUpFormValues = z.infer<typeof SignUpSchema>
+export type KycFormValues = z.infer<typeof KycSchema>

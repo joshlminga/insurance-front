@@ -94,6 +94,7 @@ export const CustomerVerificationDetails = ({ goToNextStep, goToPrevStep }: Cust
           <CardFooter className="md:col-span-2 flex justify-between mt-1">
             <Button
               type="button"
+              disabled
               className="rounded-full border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
               leftIcon={<ArrowLeftCircle />}
               onClick={() => goToPrevStep?.()}>
