@@ -51,51 +51,53 @@ export const InvoicePayment: React.FC<CustomerVerificationDetailsProps> = ({ goT
     }
     return (
         <form onSubmit={form.handleSubmit(onSubmit)} className="w-full mx-auto bg-transparent">
-            <div className='items-center justify-center border p-4'>
+            <div className='items-center justify-center border p-3 sm:p-4'>
                 <div className="w-full py-3">
-                    <h1 className="text-2xl font-bold leading-none mb-4">Process Invoice & Payment</h1>
+                    <h1 className="text-xl sm:text-2xl font-bold leading-none mb-4">Process Invoice & Payment</h1>
                 </div>
                 <Separator className='my-4' />
-                <div className='grid grid-cols-3 gap-5'>
+                
+                {/* Form Fields Grid - 1 col mobile, 2 col sm, 3 col lg */}
+                <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5'>
                     <ReuseableInput
-                        className="h-[51px] rounded-[5px] border border-[#ADABAB] justify-self-start"
+                        className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
                         control={form.control}
                         name="customer_name"
                         label="Customer Name"
                     />
                     <ReuseableInput
-                        className="h-[51px] rounded-[5px] border border-[#ADABAB] justify-self-start"
+                        className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
                         control={form.control}
                         name="email"
                         label="Email Address"
                     />
                     <ReuseableInput
-                        className="h-[51px] rounded-[5px] border border-[#ADABAB] justify-self-start"
+                        className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
                         control={form.control}
                         name="phone_number"
                         label="Phone Number"
                     />
                     <ReuseableInput
-                        className="h-[51px] rounded-[5px] border border-[#ADABAB] justify-self-start"
+                        className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
                         control={form.control}
                         name="covering"
                         label="Covering"
                     />
                     <ReuseableInput
-                        className="h-[51px] rounded-[5px] border border-[#ADABAB] justify-self-start"
+                        className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
                         control={form.control}
                         name="provider"
                         label="Provider"
                     />
                     <ReuseableInput
-                        className="h-[51px] rounded-[5px] border border-[#ADABAB] justify-self-start"
+                        className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
                         control={form.control}
                         type='date'
                         name="cover_startdate"
                         label="Cover Start Date"
                     />
                     <ReuseableInput
-                        className="h-[51px] rounded-[5px] border border-[#ADABAB] justify-self-start"
+                        className="w-full h-[51px] rounded-[5px] border border-[#ADABAB] sm:col-span-2 lg:col-span-1"
                         control={form.control}
                         type='number'
                         name="total_payable"
@@ -103,15 +105,18 @@ export const InvoicePayment: React.FC<CustomerVerificationDetailsProps> = ({ goT
                     />
                 </div>
             </div>
-            <CardFooter className="w-full md:col-span-2 flex items-center justify-between mt-3 px-0">
+            
+            {/* Navigation Buttons - stack on mobile, row on sm+ */}
+            <CardFooter className="w-full flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mt-3 px-0">
                 <Button
                     type="button"
-                    className="rounded-full border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
+                    className="w-full sm:w-auto rounded-full border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
                     leftIcon={<ArrowLeftCircle />}
                     onClick={() => goToPrevStep?.()}>
                     Previous
                 </Button>
-                <div className="flex items-center gap-3">
+                
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                     <ReusableDropdown
                         trigger={
                             <Button
@@ -143,10 +148,9 @@ export const InvoicePayment: React.FC<CustomerVerificationDetailsProps> = ({ goT
                         ]} />
                     <Button
                         type="button"
-                        className="bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
+                        className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
                         rightIcon={<ArrowRightCircle />}
                         onClick={() => goToNextStep?.()}
-                    // loading={submitMutation.isPending}
                     >
                         Complete Payment
                     </Button>

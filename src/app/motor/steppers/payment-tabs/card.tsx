@@ -54,15 +54,19 @@ export const CardsTabPage: React.FC = () => {
     }
 
     return (
-        <div className='justify-center items-center'>
-            <div className="justify-between">
+        <div className='w-full flex justify-center items-center'>
+            <div className="w-full max-w-5xl mx-auto">
                 <FieldGroup>
-                    <div className="w-full p-4 h-[74px] rounded-[20px] border border-[#ADABAB]/70 bg-white">
-                        <span>You will Pay:</span>
-                        <h1 className='text-[#0CC258] font-bold text-xl'>Kshs 904,090</h1>
+                    {/* Payment Amount Display */}
+                    <div className="w-full p-4 h-auto min-h-[74px] rounded-[20px] border border-[#ADABAB]/70 bg-white">
+                        <span className="text-sm text-muted-foreground">You will Pay:</span>
+                        <h1 className='text-[#0CC258] font-bold text-xl sm:text-2xl'>Kshs 904,090</h1>
                     </div>
-                    <div className='grid grid-cols-2 gap-4 mt-4'>
-                        <div className="col-span-2">
+                    
+                    {/* Card Inputs - 2 columns on sm+, 1 column on mobile */}
+                    <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4'>
+                        {/* Card Number - spans full width */}
+                        <div className="col-span-1 sm:col-span-2">
                             <Controller
                                 name="card_number"
                                 control={control}
@@ -90,6 +94,8 @@ export const CardsTabPage: React.FC = () => {
                                 )}
                             />
                         </div>
+                        
+                        {/* Expiry Date */}
                         <Controller
                             name="expiry_date"
                             control={control}
@@ -117,6 +123,8 @@ export const CardsTabPage: React.FC = () => {
                                 </Field>
                             )}
                         />
+                        
+                        {/* CVV */}
                         <Controller
                             name="cvv"
                             control={control}

@@ -59,13 +59,14 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
     return (
         <FormProvider {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="w-full mx-auto bg-transparent">
-                 <div className='w-full items-center justify-center p-4'>
-                    <div className="w-full h-[182px] rounded-[3px] bg-[#D9D9D95E] shadow-[0px_4px_4px_0px_#00000040] m-2">
-                        <div className="w-[117px] relative mt-[37px] ml-11 py-2">
-                            <label htmlFor="payment_plans" className="font-medium text-[15px] text-black block mb-1">
+                <div className='w-full items-center justify-center p-2 sm:p-4'>
+                    {/* Payment Plans Section */}
+                    <div className="w-full min-h-[182px] h-auto rounded-[3px] bg-[#D9D9D95E] shadow-[0px_4px_4px_0px_#00000040] p-4 sm:p-6 mb-4">
+                        <div className="w-full sm:w-auto mb-4">
+                            <label htmlFor="payment_plans" className="font-medium text-[15px] text-black block mb-2">
                                 Payment Plans:
                             </label>
-                            <div className="w-fit min-w-2xl h-auto">
+                            <div className="w-full sm:w-fit sm:min-w-[200px] h-auto">
                                 <ReusableSelect
                                     className="w-full"
                                     triggerClassName="h-full rounded-[3px] border border-[#ADABAB] bg-white text-sm"
@@ -76,31 +77,36 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                 />
                             </div>
                         </div>
-                        <div className='grid grid-cols-3 gap-2 ml-11'>
+                        
+                        {/* Installments Grid - 1 col mobile, 2 col sm, 3 col lg */}
+                        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4'>
                             <ReuseableInput
-                                className="w-full max-w-[320px] h-[51px] rounded-[5px] border border-[#ADABAB] bg-white"
+                                className="w-full h-[51px] rounded-[5px] border border-[#ADABAB] bg-white"
                                 control={form.control}
                                 name="first_installment"
                                 label="1st Installment 40%"
                             />
                             <ReuseableInput
-                                className="w-full max-w-[320px] h-[51px] rounded-[5px] border border-[#ADABAB] bg-white"
+                                className="w-full h-[51px] rounded-[5px] border border-[#ADABAB] bg-white"
                                 control={form.control}
                                 name="second_installment"
                                 label="2nd Installment 30%"
                             />
-                             <ReuseableInput
-                                className="w-full max-w-[320px] h-[51px] rounded-[5px] border border-[#ADABAB] bg-white"
+                            <ReuseableInput
+                                className="w-full h-[51px] rounded-[5px] border border-[#ADABAB] bg-white sm:col-span-2 lg:col-span-1"
                                 control={form.control}
                                 name="third_installment"
                                 label="3rd Installment 30%"
                             />
                         </div>
-
                     </div>
+                    
+                    {/* Payment Options Header */}
                     <div className="w-full py-3">
-                        <h6 className='text-lg font-bold'>Please Select Your Preferred Payment Option</h6>
+                        <h6 className='text-base sm:text-lg font-bold'>Please Select Your Preferred Payment Option</h6>
                     </div>
+                    
+                    {/* Payment Method Radio Group */}
                     <ReuseableRadioChoiceGroup
                         variant="tabs"
                         layout="horizontal"
@@ -112,19 +118,20 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
                         items={EPAYMENTTABS}
                     />
                 </div>
-                <CardFooter className="w-full md:col-span-2 flex justify-between mt-3 px-0">
+                
+                {/* Navigation Buttons */}
+                <CardFooter className="w-full flex flex-col sm:flex-row justify-between gap-3 mt-3 px-2 sm:px-0">
                     <Button
                         type="button"
-                        className="rounded-full border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
+                        className="w-full sm:w-auto rounded-full border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
                         leftIcon={<ArrowLeftCircle />}
                         onClick={() => goToPrevStep?.()}>
                         Previous
                     </Button>
                     <Button
                         type="button"
-                        className="bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
+                        className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
                         rightIcon={<ArrowRightCircle />}
-                        // loading={submitMutation.isPending}
                         onClick={()=>goToNextStep?.()}
                     >
                         Proceed To Payment
