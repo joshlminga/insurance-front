@@ -9,12 +9,12 @@ export const SuccessPurchase: React.FC<CustomerVerificationDetailsProps> = ({ go
     return (
         <>
             <div className='w-full justify-center items-center p-4'>
-                <Card className='items-center justify-center bg-[#0CC2581F] text-[#22C55E]'>
+                <Card className='items-center justify-center bg-[#0CC2581F] text-[#22C55E] border-0 shadow-0'>
                     <CircleCheckBig className='h-16 w-16' />
                     <h1 className='text-2xl font-bold'>Payment Competed Successfully </h1>
                 </Card>
                 <div className='grid grid-cols-2 gap-6 m-4'>
-                    <Card className='items-center justify-center'>
+                    <Card className='items-center justify-center border-primary/20 shadow-0'>
                         <FileText className='h-8 w-8' />
                         <h1 className='text-lg font-bold'>Certificate </h1>
                         <span>Ready to dowload</span>
@@ -22,7 +22,7 @@ export const SuccessPurchase: React.FC<CustomerVerificationDetailsProps> = ({ go
                             Download Certificate
                         </Button>
                     </Card>
-                    <Card className='items-center justify-center'>
+                    <Card className='items-center justify-center border-primary/20 shadow-0'>
                         <ReceiptText className='h-8 w-8' />
                         <h1 className='text-lg font-bold'>Receipt </h1>
                         <span>Ready to dowload</span>
@@ -34,7 +34,7 @@ export const SuccessPurchase: React.FC<CustomerVerificationDetailsProps> = ({ go
 
                 <Card className='items-center justify-center border-0 border-[#C20C0C] bg-[#C20C0C1A]'>
                     <div className='w-full grid grid-cols-3 gap-4 p-3'>
-                        <Card className='items-center justify-center'>
+                        <Card className='items-center justify-center border-primary/20 shadow-0'>
                             <TrendingUp className='h-8 w-8' />
                             <h1 className='text-sm font-bold'>Certificate </h1>
                             <span>Ready to dowload</span>
@@ -42,7 +42,7 @@ export const SuccessPurchase: React.FC<CustomerVerificationDetailsProps> = ({ go
                                 Download Receipt
                             </Button>
                         </Card>
-                        <Card className='items-center justify-center'>
+                        <Card className='items-center justify-center border-primary/20 shadow-0'>
                             <TrendingUp className='h-8 w-8' />
                             <h1 className='text-sm font-bold'>Certificate </h1>
                             <span>Ready to dowload</span>
@@ -50,7 +50,7 @@ export const SuccessPurchase: React.FC<CustomerVerificationDetailsProps> = ({ go
                                 Download Receipt
                             </Button>
                         </Card>
-                        <Card className='items-center justify-center'>
+                        <Card className='items-center justify-center border-primary/20 shadow-0'>
                             <TrendingUp className='h-8 w-8' />
                             <h1 className='text-sm font-bold'>Certificate </h1>
                             <span>Ready to dowload</span>
