@@ -149,7 +149,7 @@ export function ReusableStepper({
     const goToStep = (step: number) => handleStepChange(step)
     return (
         <Stepper value={currentStep} onValueChange={handleStepChange} className={className}>
-            <StepperNav className="flex items-start gap-1 sm:gap-2 mb-4 sm:mb-6 overflow-x-auto pb-2 scrollbar-hide">
+            <StepperNav className="flex items-start gap-1 sm:gap-1 mb-2 sm:mb-3 overflow-x-auto pb-1 scrollbar-hide">
                 {steps.map((step, index) => {
                     const stepNumber = index + 1
                     return (
@@ -159,12 +159,11 @@ export function ReusableStepper({
                             className="relative flex-1 min-w-[60px] sm:min-w-0 items-start">
                             <StepperTrigger className="flex flex-col items-center justify-center gap-0.5 sm:gap-1 grow">
                                 <StepperIndicator
-                                    className={cn("h-[12px] sm:h-[17px] w-full max-w-[80px] sm:max-w-[124px] rounded-[10px] transition-all",
+                                    className={cn("h-2 sm:h-[17px] w-full max-w-20 sm:max-w-[124px] rounded-[10px] transition-all",
                                         "bg-gray-300 data-[state=active]:bg-linear-to-r from-[#FFB3B3] via-[#FF8383] to-[#FF4545]")} />
                                 <StepperTitle className="hidden sm:block text-start text-xs lg:text-sm font-semibold group-data-[state=inactive]/step:text-muted-foreground truncate max-w-[100px] lg:max-w-none">
                                     {step.title}
                                 </StepperTitle>
-                                {/* Mobile: show step number only */}
                                 <span className="sm:hidden text-[10px] font-medium text-muted-foreground">
                                     {stepNumber}
                                 </span>
