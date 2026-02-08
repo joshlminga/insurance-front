@@ -117,8 +117,6 @@ export const CardsTabPage: React.FC = () => {
                                 </Field>
                             )}
                         />
-                        
-                        {/* CVV - 1 column */}
                         <Controller
                             name="cvv"
                             control={control}

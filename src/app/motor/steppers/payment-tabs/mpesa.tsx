@@ -54,7 +54,6 @@ export const MpesaPageTab: React.FC = () => {
                             </Field>
                         )}
                     />
-                    
                     <span className="block mt-3 text-sm">
                         You will shortly receive an M-pesa prompt on your phone requesting you to enter your M-PESA PIN to complete your payment
                     </span>
