@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import type {
     ButtonProps,
+    RadioChoiceGroupProps,
     ReusableCardProps,
     ReusableCheckboxGridProps,
     ReusableDropdownProps,
@@ -51,6 +52,7 @@ import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, Pagi
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 const formatSegment = (segment: string) => {
     return segment
@@ -206,58 +208,58 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     }
 )
 export function ReuseableInput<T extends FieldValues>({
-  control,
-  name,
-  label,
-  id,
-  placeholder,
-  type = "text",
-  autoComplete = "off",
-  required = false,
-  className,
+    control,
+    name,
+    label,
+    id,
+    placeholder,
+    type = "text",
+    autoComplete = "off",
+    required = false,
+    className,
 }: RHFInputProps<T>) {
-  return (
-    <Controller
-      name={name}
-      control={control}
-      render={({ field, fieldState }) => {
-        const isFile = type === "file"
+    return (
+        <Controller
+            name={name}
+            control={control}
+            render={({ field, fieldState }) => {
+                const isFile = type === "file"
 
-        return (
-          <Field data-invalid={fieldState.invalid}>
-            <FieldLabel htmlFor={id}>{label}</FieldLabel>
-            <Input
-              {...(!isFile ? field : {})}
-              id={id}
-              type={type}
-              placeholder={placeholder}
-              autoComplete={autoComplete}
-              aria-invalid={fieldState.invalid}
-              required={required}
-              className={cn(
-                className,
-                fieldState.invalid &&
-                  "border-red-500 focus-visible:ring-red-500"
-              )}
-              onChange={(e) => {
-                if (isFile) {
-                  const file = (e.target as HTMLInputElement).files?.[0]
-                  field.onChange(file)
-                } else {
-                  field.onChange(e)
-                }
-              }}
-            />
-            {fieldState.invalid && fieldState.error && (
-              <FieldError className="text-red-500 text-sm mt-1">
-                {fieldState.error.message}
-              </FieldError>
-            )}
-          </Field>
-        )
-      }}
-    />
-  )
+                return (
+                    <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel htmlFor={id}>{label}</FieldLabel>
+                        <Input
+                            {...(!isFile ? field : {})}
+                            id={id}
+                            type={type}
+                            placeholder={placeholder}
+                            autoComplete={autoComplete}
+                            aria-invalid={fieldState.invalid}
+                            required={required}
+                            className={cn(
+                                className,
+                                fieldState.invalid &&
+                                "border-red-500 focus-visible:ring-red-500"
+                            )}
+                            onChange={(e) => {
+                                if (isFile) {
+                                    const file = (e.target as HTMLInputElement).files?.[0]
+                                    field.onChange(file)
+                                } else {
+                                    field.onChange(e)
+                                }
+                            }}
+                        />
+                        {fieldState.invalid && fieldState.error && (
+                            <FieldError className="text-red-500 text-sm mt-1">
+                                {fieldState.error.message}
+                            </FieldError>
+                        )}
+                    </Field>
+                )
+            }}
+        />
+    )
 }
 export function ReusableSelect<T extends FieldValues>({
     control,
@@ -631,3 +633,139 @@ export const ReusableDropdown = ({
         </DropdownMenu>
     );
 };
+
+export const ReuseableRadioChoiceGroup: React.FC<
+    RadioChoiceGroupProps
+> = ({
+    items,
+    value,
+    defaultValue,
+    onValueChange,
+    variant = "radio",
+    layout = "vertical",
+    contentPosition = "inline",
+    activeColor = "#3771C8",
+    showSelector = true,
+    selectorPosition = "right",
+    className,
+}) => {
+        const [internalValue, setInternalValue] =
+            React.useState(defaultValue)
+        const selected = value ?? internalValue
+        const handleChange = (val: string) => {
+            if (!value) setInternalValue(val)
+            onValueChange?.(val)
+        }
+        return (
+            <>
+                <RadioGroup
+                    value={selected}
+                    defaultValue={defaultValue}
+                    onValueChange={handleChange}
+                    className={cn(
+                        layout === "horizontal"
+                            ? "flex gap-6"
+                            : "flex flex-col gap-3",
+                        className
+                    )}>
+                    {items.map((item) => {
+                        const isActive = selected === item.value
+                        const Icon = item.icon
+                        return (
+                            <label
+                                key={item.value}
+                                className={cn(
+                                    "cursor-pointer rounded-lg border p-4 transition-all",
+                                    contentPosition === "inline"
+                                        ? "flex items-center justify-between gap-4"
+                                        : "flex flex-col gap-3",
+                                    item.disabled &&
+                                    "opacity-50 cursor-not-allowed"
+                                )}
+                                style={{
+                                    borderColor: isActive ? activeColor : undefined,
+                                    backgroundColor: isActive
+                                        ? `${activeColor}10`
+                                        : undefined,
+                                }}>
+                                {showSelector && selectorPosition === "left" && (
+                                    <RadioGroupItem
+                                        value={item.value}
+                                        disabled={item.disabled}
+                                        className="mr-3"
+                                        style={{
+                                            borderColor: isActive
+                                                ? activeColor
+                                                : undefined,
+                                        }}
+                                    />
+                                )}
+                                <div className="flex items-center gap-3 flex-1">
+                                    {item.image && (
+                                        <img
+                                            src={item.image}
+                                            alt={item.label}
+                                            className="h-8 w-10 object-contain"
+                                        />
+                                    )}
+
+                                    {Icon && (
+                                        <Icon
+                                            size={item.iconSize ?? 18}
+                                            color={
+                                                isActive ? activeColor : undefined
+                                            }
+                                        />
+                                    )}
+
+                                    <div>
+                                        <div
+                                            className="font-semibold"
+                                            style={{
+                                                color: isActive
+                                                    ? activeColor
+                                                    : undefined,
+                                            }}
+                                        >
+                                            {item.label}
+                                        </div>
+
+                                        {item.description && (
+                                            <div className="text-sm text-muted-foreground">
+                                                {item.description}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                                {showSelector &&
+                                    selectorPosition === "right" && (
+                                        <RadioGroupItem
+                                            value={item.value}
+                                            disabled={item.disabled}
+                                            style={{
+                                                borderColor: isActive
+                                                    ? activeColor
+                                                    : undefined,
+                                            }}
+                                        />
+                                    )}
+                            </label>
+                        )
+                    })}
+                </RadioGroup>
+                {variant === "tabs" && (
+                    <div className="mt-6">
+                        {(() => {
+                            const SelectedComponent = items.find(
+                                (i) => i.value === selected
+                            )?.component
+
+                            return SelectedComponent ? (
+                                <SelectedComponent />
+                            ) : null
+                        })()}
+                    </div>
+                )}
+            </>
+        )
+    }

@@ -311,3 +311,31 @@ export interface QuotePreviewProps {
     data?: any
   ) => void;
 }
+export type RadioChoiceItem = {
+  value: string
+  label?: string
+  description?: string
+  icon?: LucideIcon
+  iconSize?: number
+  image?: string
+  component?: ComponentType
+  disabled?: boolean
+}
+
+export type RadioChoiceGroupProps = {
+  items: RadioChoiceItem[]
+
+  value?: string
+  defaultValue?: string
+  onValueChange?: (value: string) => void
+
+  variant?: "radio" | "tabs"
+  layout?: "horizontal" | "vertical"
+  contentPosition?: "inline" | "stacked"
+
+  activeColor?: string
+  showSelector?: boolean
+  selectorPosition?: "left" | "right"
+
+  className?: string
+}

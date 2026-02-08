@@ -1,20 +1,19 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CardFooter } from '@/components/ui/card'
-import { Button, ReusableTabs } from '@/dev/core'
+import { Button, ReuseableRadioChoiceGroup } from '@/dev/core'
 import { UseApiMutation } from '@/hooks/hooks'
 import { VehicleDetailsSchema } from '@/types/form-schema'
 import type { VehicleFormValues } from '@/types/schema'
-import type { CustomerVerificationDetailsProps, SubmitResponse, TTabItem } from '@/types/types'
+import type { CustomerVerificationDetailsProps, SubmitResponse } from '@/types/types'
 import { EMETHODS } from '@/utils/constatnts'
 import { EPAYMENTTABS } from '@/utils/steps-config'
 import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowLeftCircle, ArrowRightCircle } from 'lucide-react'
-import React, { useState } from 'react'
+import React from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 
 export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goToNextStep, goToPrevStep }) => {
-    const [current_tab, setCurrent_Tab] = useState<TTabItem>();
     const form = useForm<VehicleFormValues>({
         resolver: zodResolver(VehicleDetailsSchema),
         defaultValues: {
@@ -27,7 +26,7 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
     })
 
     const submitMutation = UseApiMutation<SubmitResponse, VehicleFormValues>({
-        url: `vehicle/details/${current_tab}`,
+        url: '',
         method: EMETHODS.POST,
         mutationOptions: {
             onSuccess: (data) => {
@@ -43,23 +42,24 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
             },
         },
     })
-
     const onSubmit = (data: VehicleFormValues) => {
         submitMutation.mutate(data)
     }
-
     return (
         <FormProvider {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="w-full mx-auto bg-transparent">
-                <div className='items-center justify-center border p-4'>
+                <div className='items-center justify-center p-4'>
                     <div className="w-full py-3">
-                        <h1 className="text-2xl font-bold leading-none mb-4">Proceed to add your <span className='text-[#C20C0C]'>Vehicle Details</span></h1>
-                        <h6 className='text-lg font-bold'>Select type of cover</h6>
+                        <h6 className='text-lg font-bold'>Please Select Your Preferred Payment Option</h6>
                     </div>
-                    <ReusableTabs
-                        tabs={EPAYMENTTABS}
-                        form={form}
-                        onTabChange={setCurrent_Tab}
+                    <ReuseableRadioChoiceGroup
+                        variant="tabs"
+                        layout="horizontal"
+                        activeColor="#D3EDFF"
+                        selectorPosition="left"
+                        showSelector={true}
+                        defaultValue="mpesa"
+                        items={EPAYMENTTABS}
                     />
                 </div>
                 <CardFooter className="w-full md:col-span-2 flex justify-between mt-3 px-0">
@@ -77,7 +77,7 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
                         onClick={() => goToNextStep?.()}
                     // loading={submitMutation.isPending}
                     >
-                        Next
+                        Submit
                     </Button>
                 </CardFooter>
             </form>
