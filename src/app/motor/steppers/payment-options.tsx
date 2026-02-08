@@ -2,8 +2,6 @@
 import { CardFooter } from '@/components/ui/card'
 import { Button, ReusableSelect, ReuseableInput, ReuseableRadioChoiceGroup } from '@/dev/core'
 import { UseApiMutation } from '@/hooks/hooks'
-import { VehicleDetailsSchema } from '@/types/form-schema'
-import type { VehicleFormValues } from '@/types/schema'
 import type { CustomerVerificationDetailsProps, SubmitResponse } from '@/types/types'
 import { EMETHODS, PAYMENTPLANS } from '@/utils/constatnts'
 import { EPAYMENTTABS } from '@/utils/steps-config'
@@ -14,18 +12,14 @@ import React from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 
 export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goToNextStep, goToPrevStep }) => {
-    const form = useForm<VehicleFormValues>({
-        resolver: zodResolver(VehicleDetailsSchema),
+    const form = useForm<PaymentFormValues>({
+        resolver: zodResolver(PaymentDetailsSchema),
         defaultValues: {
-            registration_number: "",
-            vehicle_model: "",
-            vehicle_make: "",
-            yom: "",
-            insurance_type: "",
+           
         },
     })
-
-    const submitMutation = UseApiMutation<SubmitResponse, VehicleFormValues>({
+    
+    const submitMutation = UseApiMutation<SubmitResponse, PaymentFormValues>({
         url: '',
         method: EMETHODS.POST,
         mutationOptions: {
@@ -42,7 +36,7 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
             },
         },
     })
-    const onSubmit = (data: VehicleFormValues) => {
+    const onSubmit = (data: PaymentFormValues) => {
         submitMutation.mutate(data)
     }
     return (
