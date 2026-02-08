@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CardFooter } from '@/components/ui/card'
+import { Separator } from '@/components/ui/separator'
 import { Button, ReuseableInput } from '@/dev/core'
 import { UseApiMutation } from '@/hooks/hooks'
 import { KycSchema } from '@/types/form-schema'
@@ -21,10 +22,11 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToNextSt
             engine_number: "",
             total_seats: "",
             tonage_capacity: "",
-            log_book_attachment: "",
-            tax_certificate: "",
-            passport_attachment: "",
+            log_book_attachment: undefined,
+            tax_certificate: undefined,
+            passport_attachment: undefined,
         },
+
     })
 
     const submitMutation = UseApiMutation<SubmitResponse, KycFormValues>({
@@ -46,6 +48,8 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToNextSt
     })
 
     const onSubmit = (data: KycFormValues) => {
+        console.log(data);
+
         submitMutation.mutate(data)
     }
     return (
@@ -54,7 +58,7 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToNextSt
                 <div className="w-full py-3">
                     <h1 className="text-2xl font-bold leading-none mb-4">KYC Info</h1>
                 </div>
-                <hr />
+                <Separator className='my-4' />
                 <div className='grid grid-cols-3 gap-5'>
                     <ReuseableInput
                         className="h-[51px] rounded-[5px] border border-[#ADABAB] justify-self-start"
@@ -74,17 +78,48 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToNextSt
                         name="chassis_number"
                         label="Vehicle Chassis Number"
                     />
-                     <ReuseableInput
+                    <ReuseableInput
                         className="h-[51px] rounded-[5px] border border-[#ADABAB] justify-self-start"
                         control={form.control}
                         name="engine_number"
                         label="Vehicle Engine Number"
                     />
-                     <ReuseableInput
+                    <ReuseableInput
                         className="h-[51px] rounded-[5px] border border-[#ADABAB] justify-self-start"
                         control={form.control}
                         name="total_seats"
                         label="Vehicle Total Seat Number"
+                    />
+                    <ReuseableInput
+                        className="h-[51px] rounded-[5px] border border-[#ADABAB] justify-self-start"
+                        control={form.control}
+                        type='number'
+                        name="tonage_capacity"
+                        label="Vehicle Tonage Capacity"
+                    />
+                </div>
+                <Separator className='my-4' />
+                <div className='grid grid-cols-3 gap-5'>
+                    <ReuseableInput
+                        className="h-[51px] rounded-[5px] border border-[#ADABAB] justify-self-start"
+                        control={form.control}
+                        type='file'
+                        name="log_book_attachment"
+                        label="Attach Logbook"
+                    />
+                    <ReuseableInput
+                        className="h-[51px] rounded-[5px] border border-[#ADABAB] justify-self-start"
+                        control={form.control}
+                        type='file'
+                        name="tax_certificate"
+                        label="Attach Tax Certificate"
+                    />
+                    <ReuseableInput
+                        className="h-[51px] rounded-[5px] border border-[#ADABAB] justify-self-start"
+                        control={form.control}
+                        type='file'
+                        name="passport_attachment"
+                        label="Attach ID/Passport"
                     />
                 </div>
 
@@ -103,9 +138,9 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToNextSt
                     className="bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
                     rightIcon={<ArrowRightCircle />}
                     onClick={() => goToNextStep?.()}
-                // loading={submitMutation.isPending}
+                    // loading={submitMutation.isPending}
                 >
-                    Next
+                    Invoice Cover Quotation
                 </Button>
             </CardFooter>
         </form>

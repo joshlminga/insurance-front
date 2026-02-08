@@ -48,7 +48,6 @@ export const SignUpSchema = z
     path: ["confirm_password"],
   })
 
-
 export const KycSchema = z.object({
   passport_number: z.string().min(1, "Passport/ID No number is required"),
   tax_number: z.string().min(1, "Tax Number is required"),
@@ -56,7 +55,16 @@ export const KycSchema = z.object({
   engine_number: z.string().min(1, "Engine number is required"),
   total_seats: z.string().min(1, "Number of seats is required"),
   tonage_capacity: z.string().min(1, "Vehicle tonage capacity is required"),
-   log_book_attachment: z.string().min(1, "Attach a notebook"),
-   tax_certificate: z.string().min(1, "Attach a tax certificate"),
-   passport_attachment: z.string().min(1, "Attach ID/Passport"),
+
+  log_book_attachment: z
+    .any()
+    .refine((file) => file instanceof File, "Attach a logbook"),
+
+  tax_certificate: z
+    .any()
+    .refine((file) => file instanceof File, "Attach a tax certificate"),
+
+  passport_attachment: z
+    .any()
+    .refine((file) => file instanceof File, "Attach ID/Passport"),
 })

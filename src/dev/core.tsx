@@ -205,49 +205,60 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         )
     }
 )
-
 export function ReuseableInput<T extends FieldValues>({
-    control,
-    name,
-    label,
-    id,
-    placeholder,
-    type = "text",
-    autoComplete = "off",
-    required = false,
-    className
+  control,
+  name,
+  label,
+  id,
+  placeholder,
+  type = "text",
+  autoComplete = "off",
+  required = false,
+  className,
 }: RHFInputProps<T>) {
-    return (
-        <Controller
-            name={name}
-            control={control}
-            render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor={id}>{label}</FieldLabel>
-                    <Input
-                        {...field}
-                        id={id}
-                        type={type}
-                        placeholder={placeholder}
-                        autoComplete={autoComplete}
-                        aria-invalid={fieldState.invalid}
-                        required={required}
-                        className={cn(
-                            className,
-                            fieldState.invalid && "border-red-500 focus-visible:ring-red-500"
-                        )}
-                    />
-                    {fieldState.invalid && fieldState.error && (
-                        <FieldError className="text-red-500 text-sm mt-1">
-                            {fieldState.error.message}
-                        </FieldError>
-                    )}
-                </Field>
-            )}
-        />
-    )
-}
+  return (
+    <Controller
+      name={name}
+      control={control}
+      render={({ field, fieldState }) => {
+        const isFile = type === "file"
 
+        return (
+          <Field data-invalid={fieldState.invalid}>
+            <FieldLabel htmlFor={id}>{label}</FieldLabel>
+            <Input
+              {...(!isFile ? field : {})}
+              id={id}
+              type={type}
+              placeholder={placeholder}
+              autoComplete={autoComplete}
+              aria-invalid={fieldState.invalid}
+              required={required}
+              className={cn(
+                className,
+                fieldState.invalid &&
+                  "border-red-500 focus-visible:ring-red-500"
+              )}
+              onChange={(e) => {
+                if (isFile) {
+                  const file = (e.target as HTMLInputElement).files?.[0]
+                  field.onChange(file)
+                } else {
+                  field.onChange(e)
+                }
+              }}
+            />
+            {fieldState.invalid && fieldState.error && (
+              <FieldError className="text-red-500 text-sm mt-1">
+                {fieldState.error.message}
+              </FieldError>
+            )}
+          </Field>
+        )
+      }}
+    />
+  )
+}
 export function ReusableSelect<T extends FieldValues>({
     control,
     name,
@@ -501,14 +512,14 @@ export const ReusableCard = ({
                     onClick?.();
                 }
             }}
-          className={cn("flex flex-col w-full min-w-0 overflow-hidden rounded-[10px] border bg-white",
-        "border-[#ADABAB]",
-        isClickable &&
-          "cursor-pointer transition-all hover:border-[#FF9A9A] hover:-translate-y-px focus-visible:ring-2 focus-visible:ring-[#FF9A9A]",
-        selected && "ring-2 ring-primary",
-        disabled && "opacity-50 cursor-not-allowed",
-        rootClassName
-      )}>
+            className={cn("flex flex-col w-full min-w-0 overflow-hidden rounded-[10px] border bg-white",
+                "border-[#ADABAB]",
+                isClickable &&
+                "cursor-pointer transition-all hover:border-[#FF9A9A] hover:-translate-y-px focus-visible:ring-2 focus-visible:ring-[#FF9A9A]",
+                selected && "ring-2 ring-primary",
+                disabled && "opacity-50 cursor-not-allowed",
+                rootClassName
+            )}>
             {header && (
                 <CardHeader className={cn('flex items-center justify-center p-3 text-center', headerClassName)}>
                     {header.type === 'image' && (
