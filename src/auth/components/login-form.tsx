@@ -60,7 +60,7 @@ export function LoginForm({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <FieldGroup>
-          <Field>
+          <Field className="py-4">
             <ReuseableInput
               className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
               control={form.control}

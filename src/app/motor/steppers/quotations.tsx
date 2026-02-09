@@ -30,7 +30,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                             Additional Benefits:
                         </h1>
                         <hr className="mb-4 sm:mb-6" />
-                        
+
                         {/* Checkbox Grid - responsive columns handled by component */}
                         <div className="overflow-x-auto">
                             <ReusableCheckboxGrid
@@ -38,9 +38,9 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                 columns={3}
                             />
                         </div>
-                        
+
                         <hr className="my-4 sm:mb-6" />
-                        
+
                         {/* Additional Inputs - 1 col mobile, 2 col sm+ */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8">
                             <ReuseableInput
@@ -56,7 +56,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                 label="Road Rescue"
                             />
                         </div>
-                        
+
                         <Button
                             type='button'
                             className="ml-auto mt-4 flex items-center rounded-[3px] border border-[#0CC2581F] bg-[#C7EED5] hover:bg-[#C7EED5]/90 text-[#43A047]"
@@ -64,7 +64,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                             Add
                         </Button>
                     </div>
-                    
+
                     <Button
                         type='button'
                         className="w-full sm:w-auto sm:ml-auto mt-4 flex items-center justify-center font-bold bg-[#C20C0C]/80 hover:bg-[#C20C0C]"
@@ -76,52 +76,47 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                         Generate Comparison
                     </Button>
                 </form>
-                
-                {/* Quote Comparison Section */}
                 <div className='w-full py-3'>
                     <h1 className="text-xl sm:text-2xl font-bold mb-4">
                         Quote Comparison
                     </h1>
-                    
-                    {/* Quote Cards Grid - 1 col mobile, 2 col sm, 3 col lg, 4 col xl */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                         {EQUOTATIONSAMPLEDATA.map((item) => (
                             <ReusableCard
                                 key={item.id}
                                 header={item.header as any}
                                 rootClassName=""
-                                footerClassName="flex flex-col gap-2 w-full"
+                                footerClassName="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between"
                                 footer={
                                     <>
                                         <Button
                                             type="button"
                                             onClick={() =>
                                                 handleDialogContextSwitch({
-                                                    componentProps: { 
-                                                        data: item
-                                                    },
+                                                    componentProps: { data: item },
                                                     Component: QuotePreviewPage,
                                                 })
-                                            }
-                                            className='w-full rounded-md border border-[#D9D9D9] bg-[#C20C0C] hover:bg-[#C20C0C]/90 font-medium text-white'>
+                                            } className="w-full lg:w-auto rounded-md border border-[#D9D9D9] bg-[#C20C0C] hover:bg-[#C20C0C]/90 font-medium text-white">
                                             Get Quote
                                         </Button>
-                                        <Link to={`/${EPREFIX?.AUTH}${EROUTES.SIGNUP}`} className="w-full">
-                                            <Button
-                                                type="button"
-                                                className="w-full rounded-md border border-[#D9D9D9] bg-[#0CC258] hover:bg-[#0CC258]/90 font-medium text-white">
+
+                                        <Link
+                                            to={`/${EPREFIX?.AUTH}${EROUTES.SIGNUP}`}
+                                            className="w-full lg:w-auto">
+                                            <Button type="button" className="w-full lg:w-auto rounded-md border border-[#D9D9D9] bg-[#0CC258] hover:bg-[#0CC258]/90 font-medium text-white">
                                                 Purchase Cover
                                             </Button>
                                         </Link>
                                     </>
                                 }
+
                                 children={
                                     <>
                                         {item.content.map((row, idx) => (
                                             <div key={idx}>
                                                 <div className="flex flex-wrap justify-between gap-1 min-w-0">
-                                                    <span className="text-xs sm:text-sm break-words max-w-[60%]">{row.label}</span>
-                                                    <span className="text-xs sm:text-sm break-words max-w-[35%] text-right">{row.value}</span>
+                                                    <span className="text-xs sm:text-sm wrap-break-word max-w-[60%]">{row.label}</span>
+                                                    <span className="text-xs sm:text-sm wrap-break-word max-w-[35%] text-right">{row.value}</span>
                                                 </div>
                                             </div>
                                         ))}
@@ -130,8 +125,6 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                         ))}
                     </div>
                 </div>
-                
-                {/* Navigation Footer - stack on mobile */}
                 <CardFooter className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-4 px-0">
                     <Button
                         type="button"
@@ -140,15 +133,15 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                         onClick={() => goToPrevStep?.()}>
                         Previous
                     </Button>
-                    
-                    <div className="order-first sm:order-none">
+
+                    <div className="order-first sm:order-0">
                         <ReusablePagination
                             currentPage={page}
                             totalPages={10}
                             onPageChange={setPage}
                         />
                     </div>
-                    
+
                     <Button
                         type="button"
                         className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
@@ -158,7 +151,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                     </Button>
                 </CardFooter>
             </div>
-            
+
             <CustomDialogComponent
                 {...{ handleDialogContextSwitch, dialogOpen }}
                 className='sm:max-w-fit w-[95vw] sm:w-auto p-4 sm:p-6'>
