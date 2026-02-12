@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button, ReusableTabs } from '@/dev/core'
 import React, { useState } from 'react'
-import { EMOTORTABS } from '@/utils/steps-config'
+import { EMARINETABS } from '@/utils/steps-config'
 import type { CustomerVerificationDetailsProps, SubmitResponse, TTabItem } from '@/types/types'
 import { CardFooter } from '@/components/ui/card'
 import { ArrowLeftCircle, ArrowRightCircle } from 'lucide-react'
@@ -13,7 +13,7 @@ import { VehicleDetailsSchema } from '@/types/form-schema'
 import { EMETHODS } from '@/utils/constatnts'
 import { ShowToast } from '@/utils/utils'
 
-export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({ goToNextStep, goToPrevStep }) => {
+export const MarineDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({ goToNextStep, goToPrevStep }) => {
     const [current_tab, setCurrent_Tab] = useState<TTabItem>();
     const form = useForm<VehicleFormValues>({
         resolver: zodResolver(VehicleDetailsSchema),
@@ -25,6 +25,7 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
             insurance_type: "",
         },
     })
+
     const submitMutation = UseApiMutation<SubmitResponse, VehicleFormValues>({
         url: `vehicle/details/${current_tab}`,
         method: EMETHODS.POST,
@@ -51,13 +52,13 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
                 <div className='items-center justify-center border p-3 sm:p-4'>
                     <div className="w-full py-3">
                         <h1 className="text-xl sm:text-2xl font-bold leading-none mb-2 sm:mb-4">
-                            Proceed to add your <span className='text-[#C20C0C]'>Vehicle Details</span>
+                            Proceed to add your <span className='text-[#C20C0C]'>Marine Details</span>
                         </h1>
-                        <h6 className='text-base sm:text-lg font-bold'>Select type of cover</h6>
+                        <h6 className='text-base sm:text-lg font-bold'>Select Marine Type</h6>
                     </div>
-                    <div className="w-full overflow-x-auto">
+                    <div className="w-full overflow-x-auto p-2">
                         <ReusableTabs
-                            tabs={EMOTORTABS}
+                            tabs={EMARINETABS}
                             form={form}
                             onTabChange={setCurrent_Tab}
                         />

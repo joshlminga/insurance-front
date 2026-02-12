@@ -1,5 +1,10 @@
 
 import { MarineCustomerVerificationDetails } from "@/app/marine/steppers/capture-details";
+import { MarineDetailsPage } from "@/app/marine/steppers/marine-details";
+import OTPVerificationMarinePage from "@/app/marine/steppers/otp-verification";
+import { MarineQuotationsPage } from "@/app/marine/steppers/quotations";
+import { MarineExportPage } from "@/app/marine/steppers/tabs/export-tab";
+import { MarineImportPage } from "@/app/marine/steppers/tabs/import-tab";
 import { CustomerVerificationDetails } from "@/app/motor/steppers/capture-details";
 import { InvoicePayment } from "@/app/motor/steppers/invoice-payment";
 import { KycInfo } from "@/app/motor/steppers/kyc-info";
@@ -14,7 +19,7 @@ import { MotorCommercialPage } from "@/app/motor/steppers/tabs/motor-commercial"
 import { MotorPrivatePage } from "@/app/motor/steppers/tabs/motor-private";
 import { MotorPsvPage } from "@/app/motor/steppers/tabs/motor-psv";
 import { VehicleDetailsPage } from "@/app/motor/steppers/vehicle-details";
-import { Car, Truck, Van } from "lucide-react";
+import { ArrowUpToLine, Car, Download, Truck, Van } from "lucide-react";
 
 export const ESTEPS = [
     {
@@ -59,15 +64,15 @@ export const EMARINESTEPS = [
     },
     {
         title: "",
-        content: OTPVerificationPage,
+        content: OTPVerificationMarinePage,
     },
     {
         title: "",
-        content: VehicleDetailsPage,
+        content: MarineDetailsPage,
     },
     {
         title: "",
-        content: QuotationsPage,
+        content: MarineQuotationsPage,
     },
     {
         title: "",
@@ -108,6 +113,23 @@ export const EMOTORTABS = [
         icon: Van,
         iconSize: 16,
         component: MotorPsvPage,
+    },
+]
+
+export const EMARINETABS = [
+    {
+        value: "import",
+        label: "Imports",
+        icon: Download,
+        iconSize: 20,
+        component: MarineImportPage,
+    },
+    {
+        value: "export",
+        label: "Exports",
+        icon: ArrowUpToLine,
+        iconSize: 20,
+        component: MarineExportPage,
     },
 ]
 

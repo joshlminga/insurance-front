@@ -24,7 +24,6 @@ export const MarineCustomerVerificationDetails = ({ goToNextStep, goToPrevStep }
       mobile_number: "",
     },
   })
-
   const submitMutation = UseApiMutation<SubmitResponse, CustomerFormValues>({
     url: "verify/account",
     method: EMETHODS.POST,
@@ -42,7 +41,6 @@ export const MarineCustomerVerificationDetails = ({ goToNextStep, goToPrevStep }
       },
     },
   })
-
   const onSubmit = (data: CustomerFormValues) => {
     submitMutation.mutate(data)
   }

@@ -13,7 +13,7 @@ import { UseApiMutation } from "@/hooks/hooks";
 import { OTPVerificationSchema } from "@/types/form-schema";
 import type { OTPFormValues } from "@/types/schema";
 
-export default function OTPVerificationPage({ goToNextStep, goToPrevStep }: CustomerVerificationDetailsProps) {
+export default function OTPVerificationMarinePage({ goToNextStep, goToPrevStep }: CustomerVerificationDetailsProps) {
   
     const methods = useForm<OTPFormValues>({
       resolver: zodResolver(OTPVerificationSchema),

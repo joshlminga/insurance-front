@@ -11,7 +11,7 @@ import { ComparisonPage } from './comparisons/page'
 import { Link } from 'react-router-dom'
 import { QuotePreviewPage } from './qoute-preview/page'
 
-export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goToNextStep, goToPrevStep }) => {
+export const MarineQuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goToNextStep, goToPrevStep }) => {
     const [page, setPage] = useState(1)
     const form = useForm();
 
