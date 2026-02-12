@@ -42,6 +42,7 @@ import { MotorLandingPage } from "./app/motor/page"
 import AuthLayoutPage from "./auth/layout"
 import { SignupForm } from "./auth/components/signup-form"
 import { LoginForm } from "./auth/components/login-form"
+import { MarineLandingPage } from "./app/marine/page"
 
 export const router = createBrowserRouter([
   // Public
@@ -62,6 +63,17 @@ export const router = createBrowserRouter([
     ],
   },
 
+  // marine
+   {
+    path: EPREFIX.CUSTOMER,
+    element: <MarineLandingPage />,
+    children: [
+      {
+        path: EROUTES.MARINE.slice(1),
+        element: <StepPage />,
+      },
+    ],
+  },
   // Auth
   {
     path: EPREFIX.AUTH,

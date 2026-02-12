@@ -1,7 +1,7 @@
-import { Button } from "@/dev/core"
 import { EPREFIX, EROUTES } from "@/utils/enums"
 
 export const HeroSection = () => {
+
     return (
         <section className="relative w-full h-[920px] mx-auto overflow-hidden">
             <div className="absolute inset-0 -z-10">
@@ -10,14 +10,11 @@ export const HeroSection = () => {
                     alt=""
                     className="w-full h-full object-cover"
                 />
-                {/* <div className="absolute inset-0 bg-gradient-to-r from-slate-900/80 to-transparent" /> */}
                 <div className="absolute inset-0 bg-linear-to-r from-slate-900/60 to-slate-900/40" />
             </div>
-            <a href={`${EPREFIX.AUTH}${EROUTES.SIGNIN}`}>
-                <Button type="button" className='absolute top-[19px] right-[88px] w-[82px] 
-                h-[26px] rounded-[20px] bg-white border border-[#C20C0C] text-sm font-semibold text-slate-900 cursor-pointer'>
-                    Login
-                </Button>
+            <a href={`/${EPREFIX.AUTH}${EROUTES.SIGNIN}`}
+                className="fixed z-10 top-[19px] right-[88px] w-[82px] h-[26px] flex items-center justify-center rounded-[20px] bg-white border border-[#C20C0C] text-sm font-semibold text-slate-900">
+                Login
             </a>
             <div className="relative w-full h-full">
                 <div className="absolute top-[278px] left-1/2 -translate-x-1/2 z-50 w-[70vw]">
@@ -43,7 +40,8 @@ export const HeroSection = () => {
                     </h1>
 
                     <p className="w-[765px] font-['Poppins'] font-semibold text-[20px] leading-[100%] text-white/74 mb-10">
-                        Acensure is committed to empowering organizations with strategies that inspire confidence and drive growth. Whether you're looking to optimize risk management, enhance financial performance, or embrace digital transformation, we are here to guide you every step of the way.
+                        Acensure is committed to empowering organizations with strategies that inspire confidence and drive growth.
+                        Whether you're looking to optimize risk management, enhance financial performance, or embrace digital transformation, we are here to guide you every step of the way.
                     </p>
 
                     <div className="flex items-center gap-4 mb-12">

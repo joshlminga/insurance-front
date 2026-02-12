@@ -50,8 +50,7 @@ const MobileDropdown = ({
         <div className="w-full">
             <button 
                 onClick={() => setIsOpen(!isOpen)}
-                className="w-full text-left uppercase tracking-wider text-sm font-semibold hover:text-red-500 transition py-2"
-            >
+                className="w-full text-left uppercase tracking-wider text-sm font-semibold hover:text-red-500 transition py-2">
                 {label}
             </button>
             {isOpen && (
@@ -110,26 +109,20 @@ export const Navbar = (
                 className={cn(className,
                     "shadow-[0_8.45px_16.9px_rgba(0,0,0,0.12)] px-4 sm:px-[37px] flex flex-col"
                 )}>
-                {/* Top Row: Logo + Nav Links + Mobile Menu Button */}
                 <div className="h-[60px] lg:h-[50px] mt-4 lg:mt-6 flex items-center justify-between">
-                    <div className="flex items-center gap-3 w-[120px] sm:w-[158px] h-[40px] sm:h-[50px]">
+                    <div className="flex items-center gap-3 w-[120px] sm:w-[158px] h-10 sm:h-[50px]">
                         <img src={ELOGO.NAVBARLOGO} alt="logo" className="h-full w-auto object-contain" />
                     </div>
-                    
-                    {/* Desktop Nav Links */}
                     <div className={cn(`hidden lg:flex items-center gap-6 xl:gap-10 text-sm font-semibold cursor-pointer ${textStyle}`)}>
                         <Link to={EROUTES.LANDING} className="hover:text-red-500 transition uppercase">Home</Link>
                         <a className="hover:text-red-500 transition uppercase">About</a>
                         <a className="hover:text-red-500 transition uppercase">Services</a>
                         <a className="hover:text-red-500 transition uppercase">Contact</a>
                     </div>
-                    
-                    {/* Mobile Menu Button */}
                     <button 
                         className="lg:hidden p-2 hover:bg-black/5 rounded-lg transition"
                         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                        aria-label="Toggle menu"
-                    >
+                        aria-label="Toggle menu">
                         {mobileMenuOpen ? (
                             <X className="w-6 h-6" />
                         ) : (
@@ -137,11 +130,9 @@ export const Navbar = (
                         )}
                     </button>
                 </div>
-                
-                {/* Desktop: Red Divider & Bottom Dropdowns */}
                 <div className="hidden lg:block">
                     <div className="absolute top-[101px] left-1/2 -translate-x-1/2 w-full max-w-7xl h-px border-t border-[#F91520]" />
-                    <div className="mt-auto ml-4 mb-6 flex left-2/4 w-full max-w-7xl pt-6">
+                    <div className="ml-4 mb-6 flex left-2/4 w-full max-w-7xl pt-6 mt-3">
                         <div className="flex gap-4 xl:gap-6 w-auto cursor-pointer flex-wrap">
                             <Dropdown
                                 text="text-[#C20C0C]"
@@ -166,19 +157,14 @@ export const Navbar = (
                         </div>
                     </div>
                 </div>
-                
-                {/* Mobile Menu */}
                 {mobileMenuOpen && (
                     <div className="lg:hidden flex flex-col py-4 border-t border-gray-200 mt-2">
-                        {/* Mobile Nav Links */}
                         <div className={cn(`flex flex-col space-y-3 mb-4 ${textStyle}`)}>
                             <Link to={EROUTES.LANDING} className="hover:text-red-500 transition uppercase text-sm font-semibold py-2">Home</Link>
                             <a className="hover:text-red-500 transition uppercase text-sm font-semibold py-2 cursor-pointer">About</a>
                             <a className="hover:text-red-500 transition uppercase text-sm font-semibold py-2 cursor-pointer">Services</a>
                             <a className="hover:text-red-500 transition uppercase text-sm font-semibold py-2 cursor-pointer">Contact</a>
                         </div>
-                        
-                        {/* Mobile Dropdowns */}
                         <div className="border-t border-gray-200 pt-4 space-y-2">
                             <MobileDropdown label="Generate Quote" items={dropdownItems.generateQuote} />
                             <MobileDropdown label="Claims" items={dropdownItems.claims} />
