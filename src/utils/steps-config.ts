@@ -1,4 +1,5 @@
 
+import { MarineCustomerVerificationDetails } from "@/app/marine/steppers/capture-details";
 import { CustomerVerificationDetails } from "@/app/motor/steppers/capture-details";
 import { InvoicePayment } from "@/app/motor/steppers/invoice-payment";
 import { KycInfo } from "@/app/motor/steppers/kyc-info";
@@ -19,6 +20,42 @@ export const ESTEPS = [
     {
         title: "",
         content: CustomerVerificationDetails,
+    },
+    {
+        title: "",
+        content: OTPVerificationPage,
+    },
+    {
+        title: "",
+        content: VehicleDetailsPage,
+    },
+    {
+        title: "",
+        content: QuotationsPage,
+    },
+    {
+        title: "",
+        content: KycInfo,
+    },
+    {
+        title: "",
+        content: InvoicePayment,
+    },
+    {
+        title: "",
+        content: PaymentOptions,
+    },
+    {
+        title: "",
+        content: SuccessPurchase,
+    },
+]
+
+
+export const EMARINESTEPS = [
+    {
+        title: "",
+        content: MarineCustomerVerificationDetails,
     },
     {
         title: "",

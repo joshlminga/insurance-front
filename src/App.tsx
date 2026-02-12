@@ -43,6 +43,7 @@ import AuthLayoutPage from "./auth/layout"
 import { SignupForm } from "./auth/components/signup-form"
 import { LoginForm } from "./auth/components/login-form"
 import { MarineLandingPage } from "./app/marine/page"
+import { MarineStepPage } from "./app/marine/steppers/steppage"
 
 export const router = createBrowserRouter([
   // Public
@@ -70,7 +71,7 @@ export const router = createBrowserRouter([
     children: [
       {
         path: EROUTES.MARINE.slice(1),
-        element: <StepPage />,
+        element: <MarineStepPage />,
       },
     ],
   },
