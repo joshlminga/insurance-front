@@ -15,13 +15,15 @@ export const CustomerDetailsSchema = z.object({
     .email("Invalid email address")
     .min(5)
     .max(32),
-  mobile_number: z
+  phone: z
     .string()
     .min(7, "Invalid phone number"),
 })
 
 export const OTPVerificationSchema = z.object({
-  otp: z.string().length(4, "OTP must be exactly 4 digits"),
+  token: z.string().length(4, "OTP must be exactly 4 digits"),
+  token_type: z.string().optional(),
+  token_name: z.string().optional(),
 })
 
 export const VehicleDetailsSchema = z.object({

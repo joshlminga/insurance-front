@@ -34,14 +34,14 @@ export function OTPForm({ ...props }: React.ComponentProps<typeof Card> & { show
           <Field>
             <FieldLabel htmlFor="otp">Enter Verification code</FieldLabel>
             <Controller
-              name="otp"
+              name="token"
               control={control}
               render={({ field }) => (
                 <div className="flex flex-col gap-2">
                   <InputOTP
                     {...field}
                     maxLength={4}
-                    id="otp"
+                    id="token"
                     onChange={(value) => field.onChange(value)}>
                     <InputOTPGroup className="gap-2.5 *:data-[slot=input-otp-slot]:rounded-md *:data-[slot=input-otp-slot]:border">
                       <InputOTPSlot index={0} aria-invalid={hasError} />
@@ -50,7 +50,7 @@ export function OTPForm({ ...props }: React.ComponentProps<typeof Card> & { show
                       <InputOTPSlot index={3} aria-invalid={hasError} />
                     </InputOTPGroup>
                   </InputOTP>
-                  <FieldError errors={[errors.otp as any]} />
+                  <FieldError errors={[errors.token as any]} />
                 </div>
               )}
             />

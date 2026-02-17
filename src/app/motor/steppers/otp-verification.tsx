@@ -12,36 +12,36 @@ import { ShowToast } from "@/utils/utils";
 import { UseApiMutation } from "@/hooks/hooks";
 import { OTPVerificationSchema } from "@/types/form-schema";
 import type { OTPFormValues } from "@/types/schema";
+import { extractErrorMessage } from "@/utils/helpers";
 
 export default function OTPVerificationPage({ goToNextStep, goToPrevStep }: CustomerVerificationDetailsProps) {
-  
-    const methods = useForm<OTPFormValues>({
-      resolver: zodResolver(OTPVerificationSchema),
-      defaultValues: {
-        otp: "",
-      },
-    })
 
-    const submitMutation = UseApiMutation<SubmitResponse, OTPFormValues>({
-      url: "verify/otp",
-      method: EMETHODS.POST,
-      mutationOptions: {
-        onSuccess: (data) => {
-          goToNextStep?.()
-          ShowToast.success(data.message || "Verified successfully!")
-        },
-        onError: (error: any) => {
-          ShowToast.error(
-            error.response?.data?.message ||
-            error.message ||
-            "Verification failed!"
-          )
-        },
+  const methods = useForm<OTPFormValues>({
+    resolver: zodResolver(OTPVerificationSchema),
+    defaultValues: {
+      token: "",
+      token_type: "phone_verification",
+      token_name: "register"
+    },
+  })
+
+  const submitMutation = UseApiMutation<SubmitResponse, OTPFormValues>({
+    url: "auth/account-verification",
+    method: EMETHODS.POST,
+    mutationOptions: {
+      onSuccess: (data) => {
+        goToNextStep?.()
+        ShowToast.success(data.message || "Verified successfully!")
       },
-    })  
-    const onSubmit = (data: OTPFormValues) => {
-      submitMutation.mutate(data)
-    }
+      onError: (error: any) => {
+        const message = extractErrorMessage(error);
+        ShowToast.error(message || "Submission failed!")
+      },
+    },
+  })
+  const onSubmit = (data: OTPFormValues) => {
+    submitMutation.mutate(data)
+  }
   return (
     <FormProvider {...methods}>
       <form onSubmit={methods.handleSubmit(onSubmit)} className="flex flex-col items-center justify-start min-h-[500px] w-full">
@@ -62,11 +62,12 @@ export default function OTPVerificationPage({ goToNextStep, goToPrevStep }: Cust
             Previous
           </Button>
           <Button
-            type="button"
+            type="submit"
             className="bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
             rightIcon={<ArrowRightCircle />}
-            // loading={submitMutation.isPending}
-         onClick={() => goToNextStep?.()}>
+            loading={submitMutation.isPending}
+          //  onClick={() => goToNextStep?.()}
+          >
             Verify & Proceed
           </Button>
         </CardFooter>

@@ -65,7 +65,7 @@ export const router = createBrowserRouter([
   },
 
   // marine
-   {
+  {
     path: EPREFIX.CUSTOMER,
     element: <MarineLandingPage />,
     children: [
@@ -101,7 +101,7 @@ export const router = createBrowserRouter([
       },
     ],
   },
-  
+
 
   // Admin - Dashboard
   {
