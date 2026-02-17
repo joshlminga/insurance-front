@@ -84,6 +84,23 @@ export interface Tuser {
   avatar?: string
 }
 
+export interface VerificationToken {
+  verification_url?: string
+  verification_token: string
+  verification_token_type: string
+  verification_token_name: string
+}
+
+export interface VerificationData {
+  email?: VerificationToken
+  phone?: VerificationToken
+}
+
+export interface Guest {
+  guestId: number
+  verification: VerificationData
+}
+
 export type StepItem = {
   title?: string
   content: React.ComponentType<{
@@ -114,11 +131,13 @@ export type RHFInputProps<T extends FieldValues> = {
 export interface AuthProviderState {
   user: Tuser | null
   token: string | null
+  guest: Guest | null
   isAuthenticated: boolean
   isLoading: boolean
   login: (user: Tuser, token: string) => void
   logout: () => void
   updateUser: (user: Partial<Tuser>) => void
+  setGuest: (guest: Guest | null) => void
 }
 export interface AuthProviderProps {
   children: ReactNode
@@ -128,11 +147,13 @@ export interface AuthProviderProps {
 export const initialState: AuthProviderState = {
   user: null,
   token: null,
+  guest: null,
   isAuthenticated: false,
   isLoading: true,
   login: () => null,
   logout: () => null,
   updateUser: () => null,
+  setGuest: () => null,
 }
 
 export interface UseApiQueryOptions<TData = unknown> {
@@ -155,7 +176,8 @@ export interface ToastOptions {
 }
 
 export interface SubmitResponse {
-  message: string
+  message: string,
+  data:any
 }
 export interface CustomerVerificationDetailsProps {
   goToNextStep?: () => void

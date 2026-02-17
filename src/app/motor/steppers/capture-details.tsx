@@ -14,8 +14,10 @@ import type { CustomerVerificationDetailsProps, SubmitResponse } from "@/types/t
 import { Checkbox } from "@/components/ui/checkbox"
 import { Link } from "react-router-dom"
 import { extractErrorMessage } from "@/utils/helpers"
+import { UseAuth } from "@/components/auth-provider"
 
 export const CustomerVerificationDetails = ({ goToNextStep, goToPrevStep }: CustomerVerificationDetailsProps) => {
+  const { setGuest } = UseAuth();
   const form = useForm<CustomerFormValues>({
     resolver: zodResolver(CustomerDetailsSchema),
     defaultValues: {
@@ -31,11 +33,12 @@ export const CustomerVerificationDetails = ({ goToNextStep, goToPrevStep }: Cust
     method: EMETHODS.POST,
     mutationOptions: {
       onSuccess: (data) => {
-         goToNextStep?.()
+        setGuest(data?.data);
+        goToNextStep?.()
         ShowToast.success(data.message || "Submitted successfully!")
       },
       onError: (error: any) => {
-       const message = extractErrorMessage(error);
+        const message = extractErrorMessage(error);
         ShowToast.error(message || "Submission failed!")
       },
     },
@@ -58,7 +61,7 @@ export const CustomerVerificationDetails = ({ goToNextStep, goToPrevStep }: Cust
           <FieldGroup className="w-full">
             <h1 className="lg:hidden text-xl sm:text-2xl font-bold leading-none text-black mb-4">
               Get Motor Insurance
-            </h1>            
+            </h1>
             <h2 className="flex gap-1 flex-wrap font-poppins text-base sm:text-[20px] font-medium leading-none tracking-normal text-[#141414]">
               <span>Proceed to add your</span>
               <span className="text-[#C20C0C]">Details</span>
@@ -106,8 +109,8 @@ export const CustomerVerificationDetails = ({ goToNextStep, goToPrevStep }: Cust
               className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
               rightIcon={<ArrowRightCircle />}
               loading={submitMutation.isPending}
-              // onClick={()=>(goToNextStep?.())}
-              >
+            // onClick={()=>(goToNextStep?.())}
+            >
               Next
             </Button>
           </CardFooter>
