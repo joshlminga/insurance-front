@@ -26,6 +26,13 @@ export const OTPVerificationSchema = z.object({
   token_name: z.string().optional(),
 })
 
+export const ResendOtpPayloadSchema = z.object({
+  type: z.string().min(1),
+  id: z.number(),
+  token_type: z.string().min(1),
+  token_name: z.string().min(1),
+})
+
 export const VehicleDetailsSchema = z.object({
   registration_number: z.string().min(1, "Registration number is required"),
   vehicle_model: z.string().min(1, "Vehicle model is required"),
