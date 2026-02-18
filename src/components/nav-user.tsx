@@ -8,6 +8,7 @@ import {
   Settings,
 } from "lucide-react"
 import { Link } from "react-router-dom"
+import { UseAuth } from "./auth-provider"
 
 import {
   Avatar,
@@ -38,6 +39,7 @@ export function NavUser({
   user: Tuser
 }) {
   const { isMobile } = useSidebar()
+  const { logout } = UseAuth()
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -98,7 +100,7 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={logout}>
               <LogOut />
               Log out
             </DropdownMenuItem>

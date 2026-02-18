@@ -3,6 +3,7 @@ import { ELOGO, EROUTES } from "@/utils/enums";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { UseAuth } from "@/components/auth-provider";
 
 const Dropdown = ({
     label,
@@ -82,6 +83,7 @@ export const Navbar = (
         navTextStyle?: string
     }) => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const { isAuthenticated, isGeneral, logout } = UseAuth();
     
     const dropdownItems = {
         generateQuote: [
@@ -118,6 +120,19 @@ export const Navbar = (
                         <a className="hover:text-red-500 transition uppercase">About</a>
                         <a className="hover:text-red-500 transition uppercase">Services</a>
                         <a className="hover:text-red-500 transition uppercase">Contact</a>
+                        {isAuthenticated ? (
+                            <>
+                                {isGeneral === false && (
+                                    <Link to={EROUTES.DASHBOARD} className="hover:text-red-500 transition uppercase">Dashboard</Link>
+                                )}
+                                <button onClick={logout} className="hover:text-red-500 transition uppercase">Logout</button>
+                            </>
+                        ) : (
+                            <>
+                                <Link to={EROUTES.SIGNIN} className="hover:text-red-500 transition uppercase">Login</Link>
+                                <Link to={EROUTES.SIGNUP} className="hover:text-red-500 transition uppercase">Sign Up</Link>
+                            </>
+                        )}
                     </div>
                     <button 
                         className="lg:hidden p-2 hover:bg-black/5 rounded-lg transition"
@@ -162,8 +177,21 @@ export const Navbar = (
                         <div className={cn(`flex flex-col space-y-3 mb-4 ${textStyle}`)}>
                             <Link to={EROUTES.LANDING} className="hover:text-red-500 transition uppercase text-sm font-semibold py-2">Home</Link>
                             <a className="hover:text-red-500 transition uppercase text-sm font-semibold py-2 cursor-pointer">About</a>
-                            <a className="hover:text-red-500 transition uppercase text-sm font-semibold py-2 cursor-pointer">Services</a>
+                             <a className="hover:text-red-500 transition uppercase text-sm font-semibold py-2 cursor-pointer">Services</a>
                             <a className="hover:text-red-500 transition uppercase text-sm font-semibold py-2 cursor-pointer">Contact</a>
+                            {isAuthenticated ? (
+                                <>
+                                    {isGeneral === false && (
+                                        <Link to={EROUTES.DASHBOARD} className="hover:text-red-500 transition uppercase text-sm font-semibold py-2">Dashboard</Link>
+                                    )}
+                                    <button onClick={logout} className="text-left hover:text-red-500 transition uppercase text-sm font-semibold py-2">Logout</button>
+                                </>
+                            ) : (
+                                <>
+                                    <Link to={EROUTES.SIGNIN} className="hover:text-red-500 transition uppercase text-sm font-semibold py-2">Login</Link>
+                                    <Link to={EROUTES.SIGNUP} className="hover:text-red-500 transition uppercase text-sm font-semibold py-2">Sign Up</Link>
+                                </>
+                            )}
                         </div>
                         <div className="border-t border-gray-200 pt-4 space-y-2">
                             <MobileDropdown label="Generate Quote" items={dropdownItems.generateQuote} />
