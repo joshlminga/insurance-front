@@ -20,7 +20,7 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar"
-import { EPREFIX, EROUTES } from "@/utils/enums"
+import { EROUTES } from "@/utils/enums"
 import AppLogo from "./ui/app-logo"
 import { UseAuth } from "./auth-provider"
 
@@ -29,7 +29,7 @@ const navData = {
   navMain: [
     {
       title: "Dashboard",
-      url: EPREFIX.DASHBOARD,
+      url: EROUTES.DASHBOARD,
       icon: LayoutDashboard,
       isActive: true,
     },

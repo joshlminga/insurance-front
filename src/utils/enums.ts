@@ -29,6 +29,8 @@ export const EROUTES = {
   SIGNUP: '/signup',
   SIGNIN: '/signin',
 
+  // dashbaord
+  DASHBOARD: `/${EPREFIX.DASHBOARD}`,
   // Members
   MEMBERS: `/${EPREFIX.DASHBOARD}/members`,
   MEMBERS_NEW: `/${EPREFIX.DASHBOARD}/members/new`,

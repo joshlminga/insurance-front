@@ -93,8 +93,6 @@ export const router = createBrowserRouter([
   },
   // END-USERGENERAL = TRUE
 
-
-
   // Auth
   {
     path: EPREFIX.AUTH,
@@ -129,7 +127,7 @@ export const router = createBrowserRouter([
   // START-USERGENERAL = FALSE
   // Admin - Dashboard & Nested Routes
   {
-    path: EPREFIX.DASHBOARD,
+    path: EROUTES.DASHBOARD,
     element: (
       <ProtectedRoute requireGeneral={false}>
         <Layout />
