@@ -10,10 +10,11 @@ export const CURRENTUSER = {
 }
 
 export const EPREFIX = {
-  AUTH:"auth",
+  AUTH: "auth",
   ADMIN: "admin",
   AGENT: "agent",
   CUSTOMER: "customer",
+  DASHBOARD: "dashboard"
 } as const
 
 export const EROUTES = {
@@ -25,41 +26,38 @@ export const EROUTES = {
   LIFE: '/life',
 
   // Auth
-  SIGNUP:'/signup',
-  SIGNIN:'/signin',
-
-  // Admin / Dashboard
-  DASHBOARD: "/dashboard",
+  SIGNUP: '/signup',
+  SIGNIN: '/signin',
 
   // Members
-  MEMBERS: "/members",
-  MEMBERS_NEW: "/members/new",
-  MEMBERS_DETAIL: "/members/:id",
+  MEMBERS: `/${EPREFIX.DASHBOARD}/members`,
+  MEMBERS_NEW: `/${EPREFIX.DASHBOARD}/members/new`,
+  MEMBERS_DETAIL: `/${EPREFIX.DASHBOARD}/members/:id`,
 
   // Savings
-  SAVINGS: "/savings",
-  SAVINGS_PRODUCTS: "/savings/products",
-  SAVINGS_DETAIL: "/savings/:id",
+  SAVINGS: `/${EPREFIX.DASHBOARD}/savings`,
+  SAVINGS_PRODUCTS: `/${EPREFIX.DASHBOARD}/savings/products`,
+  SAVINGS_DETAIL: `/${EPREFIX.DASHBOARD}/savings/:id`,
 
   // Loans
-  LOANS: "/loans",
-  LOANS_APPLY: "/loans/apply",
-  LOANS_PRODUCTS: "/loans/products",
-  LOANS_DETAIL: "/loans/:id",
+  LOANS: `/${EPREFIX.DASHBOARD}/loans`,
+  LOANS_APPLY: `/${EPREFIX.DASHBOARD}/loans/apply`,
+  LOANS_PRODUCTS: `/${EPREFIX.DASHBOARD}/loans/products`,
+  LOANS_DETAIL: `/${EPREFIX.DASHBOARD}/loans/:id`,
 
   // Transactions
-  TRANSACTIONS: "/transactions",
+  TRANSACTIONS: `/${EPREFIX.DASHBOARD}/transactions`,
 
   // Reports
-  REPORTS: "/reports",
+  REPORTS: `/${EPREFIX.DASHBOARD}/reports`,
 
   // Staff
-  STAFF: "/staff",
-  STAFF_DETAIL: "/staff/:id",
+  STAFF: `/${EPREFIX.DASHBOARD}/staff`,
+  STAFF_DETAIL: `/${EPREFIX.DASHBOARD}/staff/:id`,
 
   // Settings
-  SETTINGS: "/settings",
-} as const;
+  SETTINGS: `/${EPREFIX.DASHBOARD}/settings`,
+} as const
 
 export const SORT_ORDER = {
   Descending: 'DESC',

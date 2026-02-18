@@ -1,6 +1,5 @@
 // routes.tsx
 import { createBrowserRouter, Navigate } from "react-router-dom"
-import Layout from "./Layout"
 import { EPREFIX, EROUTES } from "./utils/enums"
 
 // Pages
@@ -46,6 +45,7 @@ import { MarineLandingPage } from "./app/marine/page"
 import { MarineStepPage } from "./app/marine/steppers/steppage"
 
 import { ProtectedRoute, PublicRoute, CustomerPublicRoute } from "./hooks/hooks"
+import Layout from "./Layout"
 
 export const router = createBrowserRouter([
 
@@ -127,180 +127,87 @@ export const router = createBrowserRouter([
   },
 
   // START-USERGENERAL = FALSE
-  // Admin - Dashboard
+  // Admin - Dashboard & Nested Routes
   {
-    path: EROUTES.DASHBOARD,
+    path: EPREFIX.DASHBOARD,
     element: (
       <ProtectedRoute requireGeneral={false}>
-        <Layout>
-          <DashboardPage />
-        </Layout>
+        <Layout />
       </ProtectedRoute>
     ),
-  },
-
-  // Members
-  {
-    path: EROUTES.MEMBERS,
-    element: (
-      <ProtectedRoute requireGeneral={false}>
-        <Layout>
-          <MembersPage />
-        </Layout>
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: EROUTES.MEMBERS_NEW,
-    element: (
-      <ProtectedRoute requireGeneral={false}>
-        <Layout>
-          <MemberNewPage />
-        </Layout>
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: EROUTES.MEMBERS_DETAIL,
-    element: (
-      <ProtectedRoute requireGeneral={false}>
-        <Layout>
-          <MemberDetailPage />
-        </Layout>
-      </ProtectedRoute>
-    ),
-  },
-
-  // Savings
-  {
-    path: EROUTES.SAVINGS,
-    element: (
-      <ProtectedRoute requireGeneral={false}>
-        <Layout>
-          <SavingsPage />
-        </Layout>
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: EROUTES.SAVINGS_PRODUCTS,
-    element: (
-      <ProtectedRoute requireGeneral={false}>
-        <Layout>
-          <SavingsProductsPage />
-        </Layout>
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: EROUTES.SAVINGS_DETAIL,
-    element: (
-      <ProtectedRoute requireGeneral={false}>
-        <Layout>
-          <SavingAccensureuntDetailPage />
-        </Layout>
-      </ProtectedRoute>
-    ),
-  },
-
-  // Loans
-  {
-    path: EROUTES.LOANS,
-    element: (
-      <ProtectedRoute requireGeneral={false}>
-        <Layout>
-          <LoansPage />
-        </Layout>
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: EROUTES.LOANS_APPLY,
-    element: (
-      <ProtectedRoute requireGeneral={false}>
-        <Layout>
-          <LoanApplicationPage />
-        </Layout>
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: EROUTES.LOANS_PRODUCTS,
-    element: (
-      <ProtectedRoute requireGeneral={false}>
-        <Layout>
-          <LoanProductsPage />
-        </Layout>
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: EROUTES.LOANS_DETAIL,
-    element: (
-      <ProtectedRoute requireGeneral={false}>
-        <Layout>
-          <LoanDetailPage />
-        </Layout>
-      </ProtectedRoute>
-    ),
-  },
-
-  // Transactions
-  {
-    path: EROUTES.TRANSACTIONS,
-    element: (
-      <ProtectedRoute requireGeneral={false}>
-        <Layout>
-          <TransactionsPage />
-        </Layout>
-      </ProtectedRoute>
-    ),
-  },
-
-  // Reports
-  {
-    path: EROUTES.REPORTS,
-    element: (
-      <ProtectedRoute requireGeneral={false}>
-        <Layout>
-          <ReportsPage />
-        </Layout>
-      </ProtectedRoute>
-    ),
-  },
-
-  // Staff
-  {
-    path: EROUTES.STAFF,
-    element: (
-      <ProtectedRoute requireGeneral={false}>
-        <Layout>
-          <StaffPage />
-        </Layout>
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: EROUTES.STAFF_DETAIL,
-    element: (
-      <ProtectedRoute requireGeneral={false}>
-        <Layout>
-          <StaffDetailPage />
-        </Layout>
-      </ProtectedRoute>
-    ),
-  },
-
-  // Settings
-  {
-    path: EROUTES.SETTINGS,
-    element: (
-      <ProtectedRoute requireGeneral={false}>
-        <Layout>
-          <SettingsPage />
-        </Layout>
-      </ProtectedRoute>
-    ),
+    children: [
+      {
+        index: true,
+        element: <DashboardPage />,
+      },
+      // Members
+      {
+        path: "members",
+        element: <MembersPage />,
+      },
+      {
+        path: "members/new",
+        element: <MemberNewPage />,
+      },
+      {
+        path: "members/:id",
+        element: <MemberDetailPage />,
+      },
+      // Savings
+      {
+        path: "savings",
+        element: <SavingsPage />,
+      },
+      {
+        path: "savings/products",
+        element: <SavingsProductsPage />,
+      },
+      {
+        path: "savings/:id",
+        element: <SavingAccensureuntDetailPage />,
+      },
+      // Loans
+      {
+        path: "loans",
+        element: <LoansPage />,
+      },
+      {
+        path: "loans/apply",
+        element: <LoanApplicationPage />,
+      },
+      {
+        path: "loans/products",
+        element: <LoanProductsPage />,
+      },
+      {
+        path: "loans/:id",
+        element: <LoanDetailPage />,
+      },
+      // Transactions
+      {
+        path: "transactions",
+        element: <TransactionsPage />,
+      },
+      // Reports
+      {
+        path: "reports",
+        element: <ReportsPage />,
+      },
+      // Staff
+      {
+        path: "staff",
+        element: <StaffPage />,
+      },
+      {
+        path: "staff/:id",
+        element: <StaffDetailPage />,
+      },
+      // Settings
+      {
+        path: "settings",
+        element: <SettingsPage />,
+      },
+    ],
   },
   // END-USERGENERAL = FALSE
 
