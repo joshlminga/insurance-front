@@ -45,17 +45,29 @@ import { LoginForm } from "./auth/components/login-form"
 import { MarineLandingPage } from "./app/marine/page"
 import { MarineStepPage } from "./app/marine/steppers/steppage"
 
+import { ProtectedRoute, PublicRoute, CustomerPublicRoute } from "./hooks/hooks"
+
 export const router = createBrowserRouter([
+
   // Public
   {
     path: EROUTES.LANDING,
-    element: <Landingpage />,
+    element: (
+      <PublicRoute>
+        <Landingpage />
+      </PublicRoute>
+    ),
   },
 
+  // START-USERGENERAL = TRUE
   // Motor / Customer
   {
     path: EPREFIX.CUSTOMER,
-    element: <MotorLandingPage />,
+    element: (
+      <CustomerPublicRoute>
+        <MotorLandingPage />
+      </CustomerPublicRoute>
+    ),
     children: [
       {
         path: EROUTES.MOTOR.slice(1),
@@ -67,7 +79,11 @@ export const router = createBrowserRouter([
   // marine
   {
     path: EPREFIX.CUSTOMER,
-    element: <MarineLandingPage />,
+    element: (
+      <CustomerPublicRoute>
+        <MarineLandingPage />
+      </CustomerPublicRoute>
+    ),
     children: [
       {
         path: EROUTES.MARINE.slice(1),
@@ -75,6 +91,10 @@ export const router = createBrowserRouter([
       },
     ],
   },
+  // END-USERGENERAL = TRUE
+
+
+
   // Auth
   {
     path: EPREFIX.AUTH,
@@ -82,106 +102,207 @@ export const router = createBrowserRouter([
       {
         path: EROUTES.SIGNIN.slice(1),
         element: (
-          <AuthLayoutPage
-            title="Please sign in or register"
-            description="to purchase your cover">
-            <LoginForm />
-          </AuthLayoutPage>
+          <PublicRoute>
+            <AuthLayoutPage
+              title="Please sign in"
+              description="to purchase your cover">
+              <LoginForm />
+            </AuthLayoutPage>
+          </PublicRoute>
         ),
       },
       {
         path: EROUTES.SIGNUP.slice(1),
         element: (
-          <AuthLayoutPage
-            title="Please sign in or register"
-            description="to purchase your cover">
-            <SignupForm />
-          </AuthLayoutPage>
+          <PublicRoute>
+            <AuthLayoutPage
+              title="Please or register"
+              description="to purchase your cover">
+              <SignupForm />
+            </AuthLayoutPage>
+          </PublicRoute>
         ),
       },
     ],
   },
 
-
+  // START-USERGENERAL = FALSE
   // Admin - Dashboard
   {
     path: EROUTES.DASHBOARD,
-    element: <Layout><DashboardPage /></Layout>,
+    element: (
+      <ProtectedRoute requireGeneral={false}>
+        <Layout>
+          <DashboardPage />
+        </Layout>
+      </ProtectedRoute>
+    ),
   },
 
   // Members
   {
     path: EROUTES.MEMBERS,
-    element: <Layout><MembersPage /></Layout>,
+    element: (
+      <ProtectedRoute requireGeneral={false}>
+        <Layout>
+          <MembersPage />
+        </Layout>
+      </ProtectedRoute>
+    ),
   },
   {
     path: EROUTES.MEMBERS_NEW,
-    element: <Layout><MemberNewPage /></Layout>,
+    element: (
+      <ProtectedRoute requireGeneral={false}>
+        <Layout>
+          <MemberNewPage />
+        </Layout>
+      </ProtectedRoute>
+    ),
   },
   {
     path: EROUTES.MEMBERS_DETAIL,
-    element: <Layout><MemberDetailPage /></Layout>,
+    element: (
+      <ProtectedRoute requireGeneral={false}>
+        <Layout>
+          <MemberDetailPage />
+        </Layout>
+      </ProtectedRoute>
+    ),
   },
 
   // Savings
   {
     path: EROUTES.SAVINGS,
-    element: <Layout><SavingsPage /></Layout>,
+    element: (
+      <ProtectedRoute requireGeneral={false}>
+        <Layout>
+          <SavingsPage />
+        </Layout>
+      </ProtectedRoute>
+    ),
   },
   {
     path: EROUTES.SAVINGS_PRODUCTS,
-    element: <Layout><SavingsProductsPage /></Layout>,
+    element: (
+      <ProtectedRoute requireGeneral={false}>
+        <Layout>
+          <SavingsProductsPage />
+        </Layout>
+      </ProtectedRoute>
+    ),
   },
   {
     path: EROUTES.SAVINGS_DETAIL,
-    element: <Layout><SavingAccensureuntDetailPage /></Layout>,
+    element: (
+      <ProtectedRoute requireGeneral={false}>
+        <Layout>
+          <SavingAccensureuntDetailPage />
+        </Layout>
+      </ProtectedRoute>
+    ),
   },
 
   // Loans
   {
     path: EROUTES.LOANS,
-    element: <Layout><LoansPage /></Layout>,
+    element: (
+      <ProtectedRoute requireGeneral={false}>
+        <Layout>
+          <LoansPage />
+        </Layout>
+      </ProtectedRoute>
+    ),
   },
   {
     path: EROUTES.LOANS_APPLY,
-    element: <Layout><LoanApplicationPage /></Layout>,
+    element: (
+      <ProtectedRoute requireGeneral={false}>
+        <Layout>
+          <LoanApplicationPage />
+        </Layout>
+      </ProtectedRoute>
+    ),
   },
   {
     path: EROUTES.LOANS_PRODUCTS,
-    element: <Layout><LoanProductsPage /></Layout>,
+    element: (
+      <ProtectedRoute requireGeneral={false}>
+        <Layout>
+          <LoanProductsPage />
+        </Layout>
+      </ProtectedRoute>
+    ),
   },
   {
     path: EROUTES.LOANS_DETAIL,
-    element: <Layout><LoanDetailPage /></Layout>,
+    element: (
+      <ProtectedRoute requireGeneral={false}>
+        <Layout>
+          <LoanDetailPage />
+        </Layout>
+      </ProtectedRoute>
+    ),
   },
 
   // Transactions
   {
     path: EROUTES.TRANSACTIONS,
-    element: <Layout><TransactionsPage /></Layout>,
+    element: (
+      <ProtectedRoute requireGeneral={false}>
+        <Layout>
+          <TransactionsPage />
+        </Layout>
+      </ProtectedRoute>
+    ),
   },
 
   // Reports
   {
     path: EROUTES.REPORTS,
-    element: <Layout><ReportsPage /></Layout>,
+    element: (
+      <ProtectedRoute requireGeneral={false}>
+        <Layout>
+          <ReportsPage />
+        </Layout>
+      </ProtectedRoute>
+    ),
   },
 
   // Staff
   {
     path: EROUTES.STAFF,
-    element: <Layout><StaffPage /></Layout>,
+    element: (
+      <ProtectedRoute requireGeneral={false}>
+        <Layout>
+          <StaffPage />
+        </Layout>
+      </ProtectedRoute>
+    ),
   },
   {
     path: EROUTES.STAFF_DETAIL,
-    element: <Layout><StaffDetailPage /></Layout>,
+    element: (
+      <ProtectedRoute requireGeneral={false}>
+        <Layout>
+          <StaffDetailPage />
+        </Layout>
+      </ProtectedRoute>
+    ),
   },
 
   // Settings
   {
     path: EROUTES.SETTINGS,
-    element: <Layout><SettingsPage /></Layout>,
+    element: (
+      <ProtectedRoute requireGeneral={false}>
+        <Layout>
+          <SettingsPage />
+        </Layout>
+      </ProtectedRoute>
+    ),
   },
+  // END-USERGENERAL = FALSE
 
   // Fallback
   {

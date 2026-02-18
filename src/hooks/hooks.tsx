@@ -5,7 +5,7 @@ import apiClient from '@/lib/api-client'
 import { EMETHODS } from '@/utils/constatnts'
 import { UseAuth } from '@/components/auth-provider'
 import { EROUTES } from '@/utils/enums'
-import { Navigate } from 'react-router-dom'
+import { Navigate, useLocation } from 'react-router-dom'
 import type { ProtectedRouteProps, UseApiMutationOptions, UseApiQueryOptions } from '@/types/types'
 
 export function UseApiQuery<TData = unknown>({
@@ -68,14 +68,57 @@ export function UseApiMutation<TData = unknown, TVariables = unknown, TContext =
   })
 }
 
-export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { isAuthenticated, isLoading } = UseAuth()
+export function ProtectedRoute({ children, requireGeneral }: ProtectedRouteProps) {
+  const { isAuthenticated, isLoading, isGeneral } = UseAuth()
 
   if (isLoading) {
     return <div>Loading...</div>
   }
-  if (!isAuthenticated) {
-    return <Navigate to={EROUTES.LANDING} replace />
+  if (requireGeneral !== undefined && isGeneral !== null) {
+    if (requireGeneral && isGeneral === false) {
+      return <Navigate to={EROUTES.DASHBOARD} replace />
+    }
+    if (!requireGeneral && isGeneral === true) {
+      return <Navigate to={EROUTES.LANDING} replace />
+    }
   }
+
+  if (!isAuthenticated) {
+    return <Navigate to={EROUTES.SIGNIN} replace />
+  }
+
+  return <>{children}</>
+}
+
+export function CustomerPublicRoute({ children }: ProtectedRouteProps) {
+  const { isAuthenticated, isLoading, isGeneral } = UseAuth()
+
+  if (isLoading) {
+    return <div>Loading...</div>
+  }
+  if (isAuthenticated && isGeneral === false) {
+    return <Navigate to={EROUTES.DASHBOARD} replace />
+  }
+
+  return <>{children}</>
+}
+
+export function PublicRoute({ children }: ProtectedRouteProps) {
+  const { isAuthenticated, isLoading, isGeneral } = UseAuth()
+  const location = useLocation()
+
+  if (isLoading) {
+    return <div>Loading...</div>
+  }
+  if (isAuthenticated && isGeneral !== null) {
+    if (isGeneral === false) {
+      return <Navigate to={EROUTES.DASHBOARD} replace />
+    }
+    // Only redirect to landing if not already there to avoid infinite loop
+    if (location.pathname !== EROUTES.LANDING) {
+      return <Navigate to={EROUTES.LANDING} replace />
+    }
+  }
+
   return <>{children}</>
 }

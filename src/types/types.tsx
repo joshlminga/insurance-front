@@ -35,6 +35,7 @@ export interface LoginResponse {
   message: string
   user: any
   access_token: string
+  is_general: boolean
 }
 
 export type TNodeChildrentType<T = ReactNode> = {
@@ -71,6 +72,7 @@ export interface PageHeaderAction {
 
 export interface ProtectedRouteProps {
   children: React.ReactNode
+  requireGeneral?: boolean
 }
 export interface PageHeaderProps {
   title: string
@@ -82,6 +84,7 @@ export interface Tuser {
   name: string
   email: string
   avatar?: string
+  is_general: boolean
 }
 
 export interface VerificationToken {
@@ -132,9 +135,10 @@ export interface AuthProviderState {
   user: Tuser | null
   token: string | null
   guest: Guest | null
+  isGeneral: boolean | null
   isAuthenticated: boolean
   isLoading: boolean
-  login: (user: Tuser, token: string) => void
+  login: (user: Tuser, token: string, isGeneral: boolean) => void
   logout: () => void
   updateUser: (user: Partial<Tuser>) => void
   setGuest: (guest: Guest | null) => void
@@ -148,6 +152,7 @@ export const initialState: AuthProviderState = {
   user: null,
   token: null,
   guest: null,
+  isGeneral: null,
   isAuthenticated: false,
   isLoading: true,
   login: () => null,
