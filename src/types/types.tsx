@@ -183,6 +183,7 @@ export interface ToastOptions {
 
 export interface SubmitResponse {
   message: string,
+  success:string,
   data: any
 }
 export interface CustomerVerificationDetailsProps {
@@ -402,29 +403,46 @@ export type TSearchToolProps = {
 export type TQueryFieldProps = {} & Partial<TClassType> & TSearchToolProps;
 
 export interface StatusPillProps {
-    status: string;
-    label: string;
+  status: string;
+  label: string;
 }
 
 export type SingleActionsHandler<T = string> = {
-    conditional?: (payload: T) => boolean;
-    condition?: any;
+  conditional?: (payload: T) => boolean;
+  condition?: any;
 } & TCommandOption<T> &
-    Pick<TDropDownProps<T>, 'onSelect'>;
+  Pick<TDropDownProps<T>, 'onSelect'>;
 
-    export type TDropDownProps<T = string> = {
-    commandOptions: TCommandOption[];
-    onSelect: (val: T) => void;
-    selectedOption?: string;
-    includeSearch?: boolean;
-    triggerEl: ReactNode;
+export type TDropDownProps<T = string> = {
+  commandOptions: TCommandOption[];
+  onSelect: (val: T) => void;
+  selectedOption?: string;
+  includeSearch?: boolean;
+  triggerEl: ReactNode;
 } & Partial<TClassType>;
 
 export type TActionColumnGenProps<T = string> = {
-    ActionsHandlerMapping: SingleActionsHandler<T>[];
+  ActionsHandlerMapping: SingleActionsHandler<T>[];
 };
 
 export type TReusableDropdownProp<T> = {
-    className?: string;
+  className?: string;
 } & Pick<TDropDownProps<T>, "triggerEl"> &
-    TActionColumnGenProps<T>;
+  TActionColumnGenProps<T>;
+
+export interface TCountry {
+  id: number
+  name: string
+}
+
+export interface TCountryResponse {
+  data: TCountry[]
+}
+export interface TCountriesInputMultiselectProps {
+  value?: string[]
+  onChange?: (value: string[]) => void
+  placeholder?: string
+  label?: string
+  required?: boolean
+  className?: string
+}

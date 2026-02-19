@@ -12,6 +12,20 @@ export const EMETHODS = {
   DELETE: "delete",
 } as const
 
+export const ORGANIZATIONTYPES = [
+  { label: "Agent", value: "Agent" },
+  { label: "Insurer", value: "Insurer" },
+  { label: "Partner", value: "Partner" },
+  { label: "Company", value: "Company" },
+]
+
+export const ACCEPTED_IMAGE_TYPES = [
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+]
+
 export type EMETHODS = typeof EMETHODS[keyof typeof EMETHODS]
 
 export const baseFactoryReducer = <S>(state: S, action: TActionType<S>): S => ({

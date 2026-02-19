@@ -18,7 +18,7 @@ export function UseApiQuery<TData = unknown>({
   config,
   queryOptions,
 }: UseApiQueryOptions<TData>) {
-  return useQuery<TData>({
+  const query = useQuery<TData>({
     queryKey: [url, params],
     queryFn: ({ signal }) => {
       const CancelToken = axios.CancelToken
@@ -31,11 +31,15 @@ export function UseApiQuery<TData = unknown>({
       signal?.addEventListener('abort', () => {
         source.cancel('Query was cancelled by TanStack Query')
       })
-
-      return promise.then(res => res.data)
+      return promise.then(res => res?.data)
     },
     ...queryOptions,
   })
+  return {
+    ...query,
+    isLoading: query.isPending || query.isFetching,
+    refetch: query.refetch,
+  }
 }
 
 export function UseApiMutation<TData = unknown, TVariables = unknown, TContext = unknown>({

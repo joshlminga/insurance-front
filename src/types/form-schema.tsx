@@ -1,4 +1,5 @@
 // form-schema.ts
+import { ACCEPTED_IMAGE_TYPES } from "@/utils/constatnts"
 import { z } from "zod"
 
 export const CustomerDetailsSchema = z.object({
@@ -147,3 +148,38 @@ export const PaymentDetailsSchema = z.discriminatedUnion("payment_method", [
   CardPaymentSchema,
   PesapalPaymentSchema,
 ])
+
+export const OrganizationSchema = z.object({
+  name: z
+    .string()
+    .min(2, "Organization name must be at least 2 characters")
+    .max(100, "Organization name is too long"),
+  organization_type: z
+    .string()
+    .min(2, "Organization type must be at least 2 characters")
+    .max(100, "Organization type is too long"),
+  domain: z
+    .string()
+    .min(2, "Domain is required"),
+  admin_id: z
+    .string()
+    .min(1, "Admin ID is required"),
+  initials: z
+    .string()
+    .min(2, "Initials must be at least 2 characters")
+    .max(10, "Initials cannot exceed 10 characters"),
+  logo: z
+    .any()
+    .refine((file) => file instanceof File, "Attach a Logo")
+    .refine(
+      (file) => ACCEPTED_IMAGE_TYPES.includes(file.type),
+      "Logo must be jpeg, png, jpg, or webp"
+    )
+    .refine(
+      (file) => file.size <= 5 * 1024 * 1024,
+      "Logo must be less than 5MB"
+    ),
+  locations: z
+    .array(z.string())
+    .min(1, "At least one location must be selected"),
+})

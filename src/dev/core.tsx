@@ -16,6 +16,8 @@ import type {
     ReusablePaginationProps,
     ReusableStepperProps,
     RHFInputProps,
+    TCountriesInputMultiselectProps,
+    TCountryResponse,
     TCustomDialogProps,
     TKeyValueStringType,
     TNodeChildrentType,
@@ -57,6 +59,9 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { MultiSelect, MultiSelectContent, MultiSelectGroup, MultiSelectItem, MultiSelectTrigger, MultiSelectValue } from "@/components/ui/multi-select";
+import { UseApiQuery } from "@/hooks/hooks";
+import { Label } from "@/components/ui/label";
 
 const formatSegment = (segment: string) => {
     return segment
@@ -213,6 +218,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         )
     }
 )
+
 export function ReuseableInput<T extends FieldValues>({
     control,
     name,
@@ -280,6 +286,7 @@ export function ReusableSelect<T extends FieldValues>({
     triggerClassName,
 }: TRHFSelectProps<T>) {
     return (
+        <div>
         <Controller
             name={name}
             control={control}
@@ -300,7 +307,7 @@ export function ReusableSelect<T extends FieldValues>({
                         <SelectTrigger
                             aria-invalid={fieldState.invalid}
                             className={cn(
-                                "w-full",
+                                "w-full h-[51px] rounded-[5px] border border-[#ADABAB]",
                                 fieldState.invalid &&
                                 "border-red-500 focus:ring-red-500",
                                 triggerClassName
@@ -326,6 +333,7 @@ export function ReusableSelect<T extends FieldValues>({
                 </Field>
             )}
         />
+        </div>
     )
 }
 
@@ -390,7 +398,7 @@ export function ReusableTabs({
                             value={tab.value}
                             disabled={tab.disabled}
                             className={cn(
-                                "flex-1 h-[48px] sm:h-full min-w-0 rounded-none",
+                                "flex-1 h-12 sm:h-full min-w-0 rounded-none",
                                 "first:rounded-tl-[12px] first:rounded-bl-[12px] sm:first:rounded-l-[20px]",
                                 "last:rounded-tr-[12px] last:rounded-br-[12px] sm:last:rounded-r-[20px]",
                                 "data-[state=active]:bg-[#C20C0C] data-[state=active]:text-white",
@@ -792,7 +800,6 @@ export const TableComponentHeadings = ({ children }: TNodeChildrentType) => {
     );
 };
 
-
 export const PageForPagination = ({
     active = false,
     content,
@@ -802,7 +809,7 @@ export const PageForPagination = ({
     content: string;
     active?: boolean;
 }) => (
-    <div className={`rounded-[8px] selection:bg-inherit flex items-center justify-center leading-[24px] hover:bg-[#F9F5FF] text-[14px] font-medium text-center cursor-pointer w-[40px] h-[40px] ${active ? 'bg-[#F9F5FF] text-[#7F56D9]' : 'text-main-orange'
+    <div className={`rounded-xl selection:bg-inherit flex items-center justify-center leading-6 hover:bg-[#F9F5FF] text-[14px] font-medium text-center cursor-pointer w-10 h-10 ${active ? 'bg-[#F9F5FF] text-[#7F56D9]' : 'text-main-orange'
         }`}
         onClick={handler}>
         {content}
@@ -899,3 +906,56 @@ export const ReusableDropDownComponent = <T,>({
         </DropdownMenu>
     );
 };
+export const ReusableCountriesInputMultiselect = ({
+  value,
+  onChange,
+  placeholder = 'Select countries...',
+  label,
+  required = false,
+}: TCountriesInputMultiselectProps) => {
+
+  const { data, isLoading } = UseApiQuery<TCountryResponse>({
+    url: 'taxonomies/general/countries',
+    params: { direction: 'ASC' },
+    queryOptions: { enabled: true },
+  })
+
+  const countries = data?.data ?? []
+
+  return (
+    <div className="space-y-2 w-full">
+      {label && (
+        <Label>
+          {label}
+          {required && (
+            <span className="text-red-500 ml-1">*</span>
+          )}
+        </Label>
+      )}
+      <MultiSelect
+        values={value ?? []}
+        onValuesChange={(vals) => onChange?.(vals)} >
+        <MultiSelectTrigger  className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]">
+          <MultiSelectValue placeholder={placeholder} />
+        </MultiSelectTrigger>
+        <MultiSelectContent>
+          <MultiSelectGroup>
+            {!isLoading && countries.length === 0 && (
+              <div className="px-3 py-2 text-sm text-muted-foreground">
+                No countries found.
+              </div>
+            )}
+            {countries.map((country) => (
+              <MultiSelectItem
+                key={country.id}
+                value={String(country.id)}
+              >
+                {country.name}
+              </MultiSelectItem>
+            ))}
+          </MultiSelectGroup>
+        </MultiSelectContent>
+      </MultiSelect>
+    </div>
+  )
+}
