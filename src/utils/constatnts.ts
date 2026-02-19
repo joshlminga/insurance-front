@@ -32,6 +32,12 @@ export const FILTERS_DEFAULTS: TFilterOptions & Record<string, any> = {
   term: '',
 };
 
+export const FILTEROPTIONS: TFilterOptions & Record<string, any> = {
+	order: { direction: SORT_ORDER.Ascending, orderField: '' },
+	date: [],
+	term: '',
+};
+
 export const PAYMENTPLANS = [
   { label: "1", value: "1" },
   { label: "2", value: "2" },

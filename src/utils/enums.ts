@@ -3,12 +3,6 @@ export const ELOGO = {
   NAVBARLOGO: '/logo/logo1.png'
 }
 
-export const CURRENTUSER = {
-  name: "Admin",
-  email: "admin@accensure.com",
-  avatar: "",
-}
-
 export const EPREFIX = {
   AUTH: "auth",
   ADMIN: "admin",
@@ -59,6 +53,8 @@ export const EROUTES = {
 
   // Settings
   SETTINGS: `/${EPREFIX.DASHBOARD}/settings`,
+
+  ORGANIZATION: `/${EPREFIX.DASHBOARD}/organization`,
 } as const
 
 export const SORT_ORDER = {

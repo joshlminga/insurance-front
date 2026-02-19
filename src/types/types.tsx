@@ -6,6 +6,7 @@ import type { Control, FieldValues, Path } from "react-hook-form";
 import { type AxiosRequestConfig, type Method } from 'axios'
 import type { UseMutationOptions, UseQueryOptions } from "@tanstack/react-query";
 import type { SORT_ORDER } from "@/utils/enums";
+import { ColumnDef, OnChangeFn, Row, RowSelectionState } from "@tanstack/table-core";
 
 export type T = {
   [key: string]: any;
@@ -22,14 +23,14 @@ export interface StepperProviderProps {
   children: ReactNode;
 }
 export interface ReusableStepperProps {
-    steps: {
-        title: string
-        content: React.FC<{ goToNextStep: () => void; goToPrevStep: () => void }>
-    }[]
-    defaultStep?: number
-    className?: string
-    value?: number
-    onValueChange?: (value: number) => void
+  steps: {
+    title: string
+    content: React.FC<{ goToNextStep: () => void; goToPrevStep: () => void }>
+  }[]
+  defaultStep?: number
+  className?: string
+  value?: number
+  onValueChange?: (value: number) => void
 }
 export interface LoginResponse {
   message: string
@@ -182,7 +183,7 @@ export interface ToastOptions {
 
 export interface SubmitResponse {
   message: string,
-  data:any
+  data: any
 }
 export interface CustomerVerificationDetailsProps {
   goToNextStep?: () => void
@@ -366,3 +367,64 @@ export type RadioChoiceGroupProps = {
 
   className?: string
 }
+
+export type TTableReusableComponent<T = any> = {
+  OtherTools?: React.ComponentType<Partial<TClassType> & TSearchToolProps>;
+  onRowSelectionChange?: OnChangeFn<RowSelectionState>;
+  OtherToolsProps: Partial<TSearchToolProps>;
+  setPageSize: (page: number) => void;
+
+  onPageChange: (page: number) => void;
+  rowSelection?: RowSelectionState;
+  onClick?: (row: Row<T>) => void;
+  columns: ColumnDef<any, any>[];
+  showPagination?: boolean;
+  title?: string | ReactNode;
+  pageCount: number;
+  isLoading?: boolean;
+  pageSize: number;
+  isError?: boolean;
+  page?: number;
+  data: T[];
+};
+
+export type TCommandOption<T = string> = { label: string; value?: T };
+
+export type TSearchToolProps = {
+  onChange: (value: string) => void;
+  advancedHandler?: () => any;
+  includeFilter?: boolean;
+  placeholder?: string;
+  title?: string;
+} & Partial<TClassType> &
+  Pick<TNavBarUrlType, 'Icon'>;
+
+export type TQueryFieldProps = {} & Partial<TClassType> & TSearchToolProps;
+
+export interface StatusPillProps {
+    status: string;
+    label: string;
+}
+
+export type SingleActionsHandler<T = string> = {
+    conditional?: (payload: T) => boolean;
+    condition?: any;
+} & TCommandOption<T> &
+    Pick<TDropDownProps<T>, 'onSelect'>;
+
+    export type TDropDownProps<T = string> = {
+    commandOptions: TCommandOption[];
+    onSelect: (val: T) => void;
+    selectedOption?: string;
+    includeSearch?: boolean;
+    triggerEl: ReactNode;
+} & Partial<TClassType>;
+
+export type TActionColumnGenProps<T = string> = {
+    ActionsHandlerMapping: SingleActionsHandler<T>[];
+};
+
+export type TReusableDropdownProp<T> = {
+    className?: string;
+} & Pick<TDropDownProps<T>, "triggerEl"> &
+    TActionColumnGenProps<T>;

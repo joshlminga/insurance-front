@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
     Breadcrumb,
     BreadcrumbItem,
@@ -17,8 +18,11 @@ import type {
     RHFInputProps,
     TCustomDialogProps,
     TKeyValueStringType,
+    TNodeChildrentType,
+    TReusableDropdownProp,
     TReusablePageProps,
     TRHFSelectProps,
+    TTableReusableComponent,
     TTabsProps
 } from "@/types/types";
 import {
@@ -78,7 +82,6 @@ export const BreadCrumbComponent = () => {
                         const href = '/' + pathSegments.slice(0, index + 1).join('/');
                         const isLast = index === pathSegments.length - 1;
                         const title = formatSegment(segment);
-
                         return (
                             <Fragment key={href}>
                                 <BreadcrumbSeparator />
@@ -780,3 +783,119 @@ export const ReuseableRadioChoiceGroup: React.FC<
             </>
         )
     }
+
+export const TableComponentHeadings = ({ children }: TNodeChildrentType) => {
+    return (
+        <div className='flex flex-col justify-between items-center w-full gap-6 flex-wrap px-6 py-2.5'>
+            {children}
+        </div>
+    );
+};
+
+
+export const PageForPagination = ({
+    active = false,
+    content,
+    handler,
+}: {
+    handler: (data: any) => void;
+    content: string;
+    active?: boolean;
+}) => (
+    <div className={`rounded-[8px] selection:bg-inherit flex items-center justify-center leading-[24px] hover:bg-[#F9F5FF] text-[14px] font-medium text-center cursor-pointer w-[40px] h-[40px] ${active ? 'bg-[#F9F5FF] text-[#7F56D9]' : 'text-main-orange'
+        }`}
+        onClick={handler}>
+        {content}
+    </div>
+);
+
+
+export const TReusablePagination = ({
+    onPageChange,
+    pageCount,
+    page,
+}: Pick<TTableReusableComponent, 'onPageChange' | 'pageCount'> &
+    Required<Pick<TTableReusableComponent, 'page'>>) => {
+    return (
+        <div className='flex flex-col items-center'>
+            <div className='flex items-center justify-center'>
+                {pageCount > 6 ? (
+                    <>
+                        {new Array(3).fill(0).map((_, index) => (
+                            <PageForPagination
+                                {...{
+                                    handler: () => onPageChange(1 + index),
+                                    active: page === index + 1,
+                                    content: `${1 + index}`,
+                                }}
+                                key={index}
+                            />
+                        ))}
+
+                        <PageForPagination
+                            {...{
+                                handler: () => { },
+                                active: false,
+                                content: '...',
+                            }}
+                        />
+
+                        {new Array(3).fill(0).map((_, index) => (
+                            <PageForPagination
+                                {...{
+                                    handler: () => onPageChange(pageCount - (3 - index)),
+                                    active: page === pageCount + (3 - index),
+                                    content: `${3 - index}`,
+                                }}
+                                key={index}
+                            />
+                        ))}
+                    </>
+                ) : (
+                    <>
+                        {new Array(pageCount).fill(0).map((_, index) => (
+                            <PageForPagination
+                                {...{
+                                    content: `${index + 1}`,
+                                    handler: () => onPageChange(index + 1),
+                                    active: page === index + 1,
+                                }}
+                                key={index}
+                            />
+                        ))}
+                    </>
+                )}
+            </div>
+        </div>
+    );
+};
+
+export const ReusableDropDownComponent = <T,>({
+    className = "w-fit max-w-20",
+    ActionsHandlerMapping,
+    triggerEl,
+}: TReusableDropdownProp<T>) => {
+    return (
+        <DropdownMenu
+            {...{
+                modal: true,
+            }}>
+            <DropdownMenuTrigger asChild>{triggerEl}</DropdownMenuTrigger>
+            <DropdownMenuContent className={cn(className)}>
+                {ActionsHandlerMapping.map(({ label, value, onSelect }, index) => {
+                    return (
+                        <DropdownMenuItem
+                            className='w-full capitalize'
+                            {...{
+                                onSelect: () => value && onSelect(value),
+                                align: 'end',
+                            }}
+                            key={index}>
+                            {label}
+                        </DropdownMenuItem>
+                    );
+                })}
+            </DropdownMenuContent>
+        </DropdownMenu>
+    );
+};

@@ -46,6 +46,7 @@ import { MarineStepPage } from "./app/marine/steppers/steppage"
 
 import { ProtectedRoute, PublicRoute, CustomerPublicRoute } from "./hooks/hooks"
 import Layout from "./Layout"
+import OrganizationsPage from "./app/admin/organizations/page"
 
 export const router = createBrowserRouter([
 
@@ -197,8 +198,18 @@ export const router = createBrowserRouter([
         element: <StaffPage />,
       },
       {
+        path: "staff",
+        element: <StaffPage />,
+      },
+      {
         path: "staff/:id",
         element: <StaffDetailPage />,
+      },
+
+      // Organizations
+      {
+        path: "organization",
+        element: <OrganizationsPage />,
       },
       // Settings
       {

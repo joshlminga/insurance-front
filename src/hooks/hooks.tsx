@@ -4,7 +4,7 @@ import axios from 'axios'
 import apiClient from '@/lib/api-client'
 import { EMETHODS } from '@/utils/constatnts'
 import { UseAuth } from '@/components/auth-provider'
-import { EPREFIX, EROUTES } from '@/utils/enums'
+import { EROUTES } from '@/utils/enums'
 import { Navigate, useLocation } from 'react-router-dom'
 import type { 
   ProtectedRouteProps, 
