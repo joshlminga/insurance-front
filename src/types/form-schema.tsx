@@ -176,10 +176,6 @@ export const OrganizationSchema = z.object({
     .refine(
       (file) => ACCEPTED_IMAGE_TYPES.includes(file.type),
       "Logo must be jpeg, png, jpg, or webp"
-    )
-    .refine(
-      (file) => file.size <= 5 * 1024 * 1024,
-      "Logo must be less than 5MB"
     ),
   locations: z
     .array(z.string())
