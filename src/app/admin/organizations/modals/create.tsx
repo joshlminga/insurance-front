@@ -69,6 +69,7 @@ export const CreateOrganizationModal = ({ handleDialogContextSwitch,  componentP
         }
         submitMutation.mutate(formData)
     }
+    
     return (
         <div className="w-full min-w-[600px] max-w-[600px] p-6 space-y-6">
             <div className="border-b pb-3">

@@ -446,3 +446,14 @@ export interface TCountriesInputMultiselectProps {
   required?: boolean
   className?: string
 }
+
+export type ReuseableSingleSelectCountriesInputProps<T extends FieldValues> = {
+  value?: string
+   name?: Path<T>
+  onChange: (value: string) => void
+  placeholder?: string
+  label?: string
+  required?: boolean
+  disabled?: boolean
+  className?: string
+}

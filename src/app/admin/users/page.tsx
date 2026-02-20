@@ -37,8 +37,6 @@ export const UsersPage = () => {
             enabled: true,
         },
     })
-    console.log("Users data:", data?.data?.users);
-
     const ActionsHandlerMapping: SingleActionsHandler<any>[] = []
 
     return (
@@ -52,7 +50,7 @@ export const UsersPage = () => {
                         variant: 'default',
                         onClick: () => {
                             handleDialogContextSwitch({
-                                // componentProps: { refetch },
+                                componentProps: { refetch },
                                 Component: CreateUserModal,
                             })
                         },
@@ -93,7 +91,7 @@ export const UsersPage = () => {
                             }),
                         pageSize: 10,
                         page: 1,
-                        // isLoading: isLoading,
+                        isLoading: isLoading,
                     }}
                 />
             </div>

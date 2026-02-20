@@ -185,3 +185,22 @@ export const OrganizationSchema = z.object({
     .array(z.string())
     .min(1, "At least one location must be selected"),
 })
+
+export const UsersSchema = z.object({
+  name: z
+    .string()
+    .min(2, "user name must be at least 2 characters")
+    .max(100, "user name is too long"),
+  email: z
+    .string()
+    .email("Invalid email address")
+    .min(2, "Email must be at least 2 characters")
+    .max(100, "Email is too long"),
+    // all countries phone number
+  phone: z
+    .string()
+    .min(10, "Phone number must be at least 10 digits")
+    .regex(/^\+?[1-9]\d{1,14}$/, "Invalid phone number format"),
+  country: z.string()
+    .min(1, "At least one country must be selected"),
+})
