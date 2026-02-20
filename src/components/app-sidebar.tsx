@@ -102,6 +102,11 @@ const navData = {
       url: EROUTES.ORGANIZATION,
       icon: UserCog,
     },
+     {
+      title: "Users",
+      url: EROUTES.USERS,
+      icon: Users,
+    },
     {
       title: "Settings",
       url: EROUTES.SETTINGS,

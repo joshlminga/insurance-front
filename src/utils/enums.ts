@@ -55,6 +55,7 @@ export const EROUTES = {
   SETTINGS: `/${EPREFIX.DASHBOARD}/settings`,
 
   ORGANIZATION: `/${EPREFIX.DASHBOARD}/organization`,
+  USERS: `/${EPREFIX.DASHBOARD}/users`,
 } as const
 
 export const SORT_ORDER = {

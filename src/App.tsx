@@ -47,6 +47,7 @@ import { MarineStepPage } from "./app/marine/steppers/steppage"
 import { ProtectedRoute, PublicRoute, CustomerPublicRoute } from "./hooks/hooks"
 import Layout from "./Layout"
 import OrganizationsPage from "./app/admin/organizations/page"
+import { UsersPage } from "./app/admin/users/page"
 
 export const router = createBrowserRouter([
 
@@ -210,6 +211,11 @@ export const router = createBrowserRouter([
       {
         path: "organization",
         element: <OrganizationsPage />,
+      },
+      // Users
+       {
+        path: "users",
+        element: <UsersPage />,
       },
       // Settings
       {

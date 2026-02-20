@@ -16,41 +16,42 @@ import { ReuseableInput } from "@/dev/core";
 import { EPREFIX, EROUTES } from "@/utils/enums";
 import { SignUpSchema } from "@/types/form-schema";
 import { type SignUpFormValues } from "@/types/schema";
+import { extractErrorMessage } from "@/utils/helpers";
+import { useNavigate } from "react-router-dom";
 
 export function SignupForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
 
+  const navigate = useNavigate()
   const form = useForm<SignUpFormValues>({
     resolver: zodResolver(SignUpSchema),
     defaultValues: {
+      first_name: "",
+      last_name: "",
       email: "",
       password: "",
     },
   })
 
   const loginMutation = UseApiMutation<SignUpFormValues>({
-    url: 'signup',
+    url: 'guest/register',
     method: EMETHODS.POST,
     mutationOptions: {
       onSuccess: (data: any) => {
         ShowToast.success(data.message || "Signup successful!")
+         navigate(EROUTES.LANDING)
       },
       onError: (error: any) => {
-        const errorMessage = error.response?.data?.message || error.message || "Signup failed!"
-        ShowToast.error(errorMessage)
+        const message = extractErrorMessage(error);
+        ShowToast.error(message || "Signup failed!")
       }
     }
   })
 
   const onSubmit = async (data: SignUpFormValues) => {
-    try {
-      loginMutation.mutate(data)
-    } catch (error) {
-      console.log(error);
-      ShowToast.error("Signup failed!")
-    }
+    loginMutation.mutate(data)
   }
 
   return (
@@ -58,6 +59,20 @@ export function SignupForm({
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <FieldGroup>
           <Field className="py-4">
+            <div className="grid grid-cols-2 gap-3">
+              <ReuseableInput
+                className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                control={form.control}
+                name="first_name"
+                label="First Name"
+              />
+              <ReuseableInput
+                className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                control={form.control}
+                name="last_name"
+                label="Last Name"
+              />
+            </div>
             <ReuseableInput
               className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
               control={form.control}
