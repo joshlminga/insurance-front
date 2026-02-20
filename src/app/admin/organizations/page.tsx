@@ -18,7 +18,6 @@ import { extractErrorMessage } from '@/utils/helpers';
 import { ViewOrganizationModal } from './modals/view';
 
 const OrganizationsPage = () => {
-
   const [filter, optionsDispatcher] = useReducer(
     ReusableReducer<TPaginationFilters & TFilterOptions>,
     { ...FILTEROPTIONS, page: 1, pageSize: 10 }

@@ -1,22 +1,29 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { DetailGrid, DetailItem } from '@/components/shared'
 import { Badge } from '@/components/ui/badge'
-import { CardFooter } from '@/components/ui/card'
-import { Button } from '@/dev/core'
+import { Button, CustomDialogComponent } from '@/dev/core'
 import { UseApiQuery } from '@/hooks/hooks'
 import { SubmitResponse } from '@/types/types'
+import { ViewMemberLocationModal } from './members-location'
+import { useCustomDialogContextFactory } from '@/hooks'
 
 const getOrganizationName = (organization: Record<string, any>) =>
     organization?.organization_name ?? organization?.name ?? 'N/A'
 
 export const ViewOrganizationModal = ({
     componentProps,
-    handleDialogContextSwitch,
 }: {
-    componentProps?: any
     handleDialogContextSwitch: (context?: any) => void
+    componentProps?: any
 }) => {
     const orgId = componentProps?.data?.organization_id ?? componentProps?.data?.id
+
+
+    const { handleDialogContextSwitch, dialogContent, dialogOpen } =
+        useCustomDialogContextFactory<{
+            refetch?: () => Promise<any>;
+            data?: any;
+        }>();
 
     const { data, isLoading } = UseApiQuery<SubmitResponse>({
         url: `organization/${orgId}`,
@@ -24,10 +31,8 @@ export const ViewOrganizationModal = ({
             enabled: Boolean(orgId),
         },
     })
-
     const organization = data?.data ?? componentProps?.data ?? {}
     const locations: any[] = organization?.organization_location ?? []
-
     return (
         <div className="w-full min-w-[600px] max-w-[800px] p-6 space-y-6">
             <div className="border-b pb-3">
@@ -68,16 +73,25 @@ export const ViewOrganizationModal = ({
                                     const country = location?.country ?? {}
                                     const meta = location?.meta ?? {}
                                     const logoUrl = meta?.logo
-
                                     return (
                                         <div
                                             key={location?.organization_location_id ?? index}
                                             className="rounded-lg border p-4 space-y-3">
                                             <div className="flex items-center justify-between gap-3">
                                                 <p className="text-sm font-medium">Location #{index + 1}</p>
-                                                <Badge variant="outline">
-                                                    {location?.is_default ? 'Default' : 'Secondary'}
-                                                </Badge>
+                                                <Button
+                                                    variant="default"
+                                                    size="sm"
+                                                    onClick={() =>
+                                                        handleDialogContextSwitch({
+                                                            componentProps: {
+                                                                data: location?.organization_location_id
+                                                            },
+                                                            Component: ViewMemberLocationModal,
+                                                        })
+                                                    }>
+                                                    View Members
+                                                </Button>
                                             </div>
                                             <DetailGrid columns={2}>
                                                 <DetailItem label="Country Name" value={country?.name ?? 'N/A'} />
@@ -103,14 +117,19 @@ export const ViewOrganizationModal = ({
                 </div>
             )}
 
-            <CardFooter className="px-0 pt-2">
-                <Button
-                    type="button"
-                    className="rounded-full border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
-                    onClick={() => handleDialogContextSwitch({})}>
-                    Close
-                </Button>
-            </CardFooter>
+            <CustomDialogComponent
+                {...{ handleDialogContextSwitch, dialogOpen }}
+                className='sm:max-w-fit w-[95vw] sm:w-auto p-4 sm:p-6'>
+                {dialogContent?.Component && (
+                    <dialogContent.Component
+                        {...{
+                            componentProps: dialogContent.componentProps,
+                            handleDialogContextSwitch,
+                        }}
+                    />
+                )}
+            </CustomDialogComponent>
+
         </div>
     )
 }
