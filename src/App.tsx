@@ -1,6 +1,5 @@
 // routes.tsx
 import { createBrowserRouter, Navigate } from "react-router-dom"
-import Layout from "./Layout"
 import { EPREFIX, EROUTES } from "./utils/enums"
 
 // Pages
@@ -42,18 +41,35 @@ import { MotorLandingPage } from "./app/motor/page"
 import AuthLayoutPage from "./auth/layout"
 import { SignupForm } from "./auth/components/signup-form"
 import { LoginForm } from "./auth/components/login-form"
+import { MarineLandingPage } from "./app/marine/page"
+import { MarineStepPage } from "./app/marine/steppers/steppage"
+
+import { ProtectedRoute, PublicRoute, CustomerPublicRoute } from "./hooks/hooks"
+import Layout from "./Layout"
+import OrganizationsPage from "./app/admin/organizations/page"
+import { UsersPage } from "./app/admin/users/page"
 
 export const router = createBrowserRouter([
+
   // Public
   {
     path: EROUTES.LANDING,
-    element: <Landingpage />,
+    element: (
+      <PublicRoute>
+        <Landingpage />
+      </PublicRoute>
+    ),
   },
 
+  // START-USERGENERAL = TRUE
   // Motor / Customer
   {
     path: EPREFIX.CUSTOMER,
-    element: <MotorLandingPage />,
+    element: (
+      <CustomerPublicRoute>
+        <MotorLandingPage />
+      </CustomerPublicRoute>
+    ),
     children: [
       {
         path: EROUTES.MOTOR.slice(1),
@@ -62,6 +78,23 @@ export const router = createBrowserRouter([
     ],
   },
 
+  // marine
+  {
+    path: EPREFIX.CUSTOMER,
+    element: (
+      <CustomerPublicRoute>
+        <MarineLandingPage />
+      </CustomerPublicRoute>
+    ),
+    children: [
+      {
+        path: EROUTES.MARINE.slice(1),
+        element: <MarineStepPage />,
+      },
+    ],
+  },
+  // END-USERGENERAL = TRUE
+
   // Auth
   {
     path: EPREFIX.AUTH,
@@ -69,106 +102,129 @@ export const router = createBrowserRouter([
       {
         path: EROUTES.SIGNIN.slice(1),
         element: (
-          <AuthLayoutPage
-            title="Please sign in or register"
-            description="to purchase your cover">
-            <LoginForm />
-          </AuthLayoutPage>
+          <PublicRoute>
+            <AuthLayoutPage
+              title="Please sign in"
+              description="to purchase your cover">
+              <LoginForm />
+            </AuthLayoutPage>
+          </PublicRoute>
         ),
       },
       {
         path: EROUTES.SIGNUP.slice(1),
         element: (
-          <AuthLayoutPage
-            title="Please sign in or register"
-            description="to purchase your cover">
-            <SignupForm />
-          </AuthLayoutPage>
+          <PublicRoute>
+            <AuthLayoutPage
+              title="Please or register"
+              description="to purchase your cover">
+              <SignupForm />
+            </AuthLayoutPage>
+          </PublicRoute>
         ),
       },
     ],
   },
-  
 
-  // Admin - Dashboard
+  // START-USERGENERAL = FALSE
+  // Admin - Dashboard & Nested Routes
   {
     path: EROUTES.DASHBOARD,
-    element: <Layout><DashboardPage /></Layout>,
-  },
+    element: (
+      <ProtectedRoute requireGeneral={false}>
+        <Layout />
+      </ProtectedRoute>
+    ),
+    children: [
+      {
+        index: true,
+        element: <DashboardPage />,
+      },
+      // Members
+      {
+        path: "members",
+        element: <MembersPage />,
+      },
+      {
+        path: "members/new",
+        element: <MemberNewPage />,
+      },
+      {
+        path: "members/:id",
+        element: <MemberDetailPage />,
+      },
+      // Savings
+      {
+        path: "savings",
+        element: <SavingsPage />,
+      },
+      {
+        path: "savings/products",
+        element: <SavingsProductsPage />,
+      },
+      {
+        path: "savings/:id",
+        element: <SavingAccensureuntDetailPage />,
+      },
+      // Loans
+      {
+        path: "loans",
+        element: <LoansPage />,
+      },
+      {
+        path: "loans/apply",
+        element: <LoanApplicationPage />,
+      },
+      {
+        path: "loans/products",
+        element: <LoanProductsPage />,
+      },
+      {
+        path: "loans/:id",
+        element: <LoanDetailPage />,
+      },
+      // Transactions
+      {
+        path: "transactions",
+        element: <TransactionsPage />,
+      },
+      // Reports
+      {
+        path: "reports",
+        element: <ReportsPage />,
+      },
+      // Staff
+      {
+        path: "staff",
+        element: <StaffPage />,
+      },
+      {
+        path: "staff",
+        element: <StaffPage />,
+      },
+      {
+        path: "staff/:id",
+        element: <StaffDetailPage />,
+      },
 
-  // Members
-  {
-    path: EROUTES.MEMBERS,
-    element: <Layout><MembersPage /></Layout>,
+      // Organizations
+      {
+        path: "organization",
+        element: <OrganizationsPage />,
+      },
+      // Users
+       {
+        path: "users",
+        element: <UsersPage />,
+      },
+      // Settings
+      {
+        path: "settings",
+        element: <SettingsPage />,
+      },
+    ],
   },
-  {
-    path: EROUTES.MEMBERS_NEW,
-    element: <Layout><MemberNewPage /></Layout>,
-  },
-  {
-    path: EROUTES.MEMBERS_DETAIL,
-    element: <Layout><MemberDetailPage /></Layout>,
-  },
-
-  // Savings
-  {
-    path: EROUTES.SAVINGS,
-    element: <Layout><SavingsPage /></Layout>,
-  },
-  {
-    path: EROUTES.SAVINGS_PRODUCTS,
-    element: <Layout><SavingsProductsPage /></Layout>,
-  },
-  {
-    path: EROUTES.SAVINGS_DETAIL,
-    element: <Layout><SavingAccensureuntDetailPage /></Layout>,
-  },
-
-  // Loans
-  {
-    path: EROUTES.LOANS,
-    element: <Layout><LoansPage /></Layout>,
-  },
-  {
-    path: EROUTES.LOANS_APPLY,
-    element: <Layout><LoanApplicationPage /></Layout>,
-  },
-  {
-    path: EROUTES.LOANS_PRODUCTS,
-    element: <Layout><LoanProductsPage /></Layout>,
-  },
-  {
-    path: EROUTES.LOANS_DETAIL,
-    element: <Layout><LoanDetailPage /></Layout>,
-  },
-
-  // Transactions
-  {
-    path: EROUTES.TRANSACTIONS,
-    element: <Layout><TransactionsPage /></Layout>,
-  },
-
-  // Reports
-  {
-    path: EROUTES.REPORTS,
-    element: <Layout><ReportsPage /></Layout>,
-  },
-
-  // Staff
-  {
-    path: EROUTES.STAFF,
-    element: <Layout><StaffPage /></Layout>,
-  },
-  {
-    path: EROUTES.STAFF_DETAIL,
-    element: <Layout><StaffDetailPage /></Layout>,
-  },
-
-  // Settings
-  {
-    path: EROUTES.SETTINGS,
-    element: <Layout><SettingsPage /></Layout>,
-  },
+  // END-USERGENERAL = FALSE
 
   // Fallback
   {

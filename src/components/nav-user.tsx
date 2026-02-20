@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import {
@@ -8,6 +9,8 @@ import {
   Settings,
 } from "lucide-react"
 import { Link } from "react-router-dom"
+import { UseAuth } from "./auth-provider"
+import { EROUTES } from "@/utils/enums"
 
 import {
   Avatar,
@@ -35,20 +38,22 @@ import type { Tuser } from "@/types/types"
 export function NavUser({
   user,
 }: {
-  user: Tuser
+ user: Tuser | any
 }) {
   const { isMobile } = useSidebar()
+  const { logout } = UseAuth()
   return (
     <SidebarMenu>
       <SidebarMenuItem>
         <DropdownMenu>
+
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
               <Avatar className="h-8 w-8 rounded-lg">
-                {user.avatar && <AvatarImage src={user.avatar} alt={user.name} />}
-                <AvatarFallback className="rounded-lg bg-primary/10 text-primary text-xs">
+                {user.avatar && <AvatarImage src={user?.avatar} alt={user?.name} />}
+                <AvatarFallback className="rounded-lg text-primary text-xs">
                   {getInitials(user.name)}
                 </AvatarFallback>
               </Avatar>
@@ -59,6 +64,7 @@ export function NavUser({
               <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
+          
           <DropdownMenuContent
             className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
             side={isMobile ? "bottom" : "right"}
@@ -68,7 +74,7 @@ export function NavUser({
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
                   {user.avatar && <AvatarImage src={user.avatar} alt={user.name} />}
-                  <AvatarFallback className="rounded-lg bg-primary/10 text-primary text-xs">
+                  <AvatarFallback className="rounded-lg text-primary text-xs">
                     {getInitials(user.name)}
                   </AvatarFallback>
                 </Avatar>
@@ -81,13 +87,13 @@ export function NavUser({
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
-                <Link to="/settings">
+                <Link to={EROUTES.SETTINGS}>
                   <BadgeCheck />
                   Account
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link to="/settings">
+                <Link to={EROUTES.SETTINGS}>
                   <Settings />
                   Settings
                 </Link>
@@ -98,7 +104,7 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={logout}>
               <LogOut />
               Log out
             </DropdownMenuItem>

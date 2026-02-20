@@ -96,7 +96,8 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                                     componentProps: { data: item },
                                                     Component: QuotePreviewPage,
                                                 })
-                                            } className="w-full lg:w-auto rounded-md border border-[#D9D9D9] bg-[#C20C0C] hover:bg-[#C20C0C]/90 font-medium text-white">
+                                            } 
+                                            className="w-full lg:w-auto rounded-md border border-[#D9D9D9] bg-[#C20C0C] hover:bg-[#C20C0C]/90 font-medium text-white">
                                             Get Quote
                                         </Button>
 

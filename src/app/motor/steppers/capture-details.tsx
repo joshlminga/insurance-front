@@ -13,32 +13,33 @@ import { UseApiMutation } from "@/hooks/hooks"
 import type { CustomerVerificationDetailsProps, SubmitResponse } from "@/types/types"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Link } from "react-router-dom"
+import { extractErrorMessage } from "@/utils/helpers"
+import { UseAuth } from "@/components/auth-provider"
 
 export const CustomerVerificationDetails = ({ goToNextStep, goToPrevStep }: CustomerVerificationDetailsProps) => {
+  const { setGuest } = UseAuth();
   const form = useForm<CustomerFormValues>({
     resolver: zodResolver(CustomerDetailsSchema),
     defaultValues: {
       first_name: "",
       last_name: "",
       email: "",
-      mobile_number: "",
+      phone: "",
     },
   })
 
   const submitMutation = UseApiMutation<SubmitResponse, CustomerFormValues>({
-    url: "verify/account",
+    url: "guest/register",
     method: EMETHODS.POST,
     mutationOptions: {
       onSuccess: (data) => {
-         goToNextStep?.()
+        setGuest(data?.data);
+        goToNextStep?.()
         ShowToast.success(data.message || "Submitted successfully!")
       },
       onError: (error: any) => {
-        ShowToast.error(
-          error.response?.data?.message ||
-          error.message ||
-          "Submission failed!"
-        )
+        const message = extractErrorMessage(error);
+        ShowToast.error(message || "Submission failed!")
       },
     },
   })
@@ -50,29 +51,21 @@ export const CustomerVerificationDetails = ({ goToNextStep, goToPrevStep }: Cust
   return (
     <div className="max-w-full mx-auto border-0 bg-transparent">
       <form onSubmit={form.handleSubmit(onSubmit)}>
-        {/* Main Content - stack on mobile, side by side on md+ */}
         <div className="grid grid-cols-1 lg:grid-cols-2 items-center gap-6 lg:gap-10">
-          {/* Car Image Section - hidden on mobile, visible on lg+ */}
           <div className="hidden lg:flex flex-col items-center justify-center w-full max-w-[580px] h-auto aspect-video">
             <h1 className="text-2xl xl:text-[32px] font-bold leading-none text-black text-center">
               Get Motor Insurance
             </h1>
             <img src="/car.png" alt="Car" className="w-full h-full object-contain rounded-xl" />
           </div>
-          
-          {/* Form Section */}
           <FieldGroup className="w-full">
-            {/* Mobile Header - only visible on mobile */}
             <h1 className="lg:hidden text-xl sm:text-2xl font-bold leading-none text-black mb-4">
               Get Motor Insurance
             </h1>
-            
             <h2 className="flex gap-1 flex-wrap font-poppins text-base sm:text-[20px] font-medium leading-none tracking-normal text-[#141414]">
               <span>Proceed to add your</span>
               <span className="text-[#C20C0C]">Details</span>
             </h2>
-            
-            {/* Form Fields - 1 col mobile, 2 col sm+ */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
               <ReuseableInput
                 className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
@@ -96,14 +89,12 @@ export const CustomerVerificationDetails = ({ goToNextStep, goToPrevStep }: Cust
               <ReuseableInput
                 className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
                 control={form.control}
-                name="mobile_number"
+                name="phone"
                 label="Mobile Number"
                 type="tel"
               />
             </div>
           </FieldGroup>
-          
-          {/* Navigation Buttons - full width on both columns */}
           <CardFooter className="col-span-1 lg:col-span-2 flex flex-col sm:flex-row justify-between gap-3 mt-1 px-0">
             <Button
               type="button"
@@ -114,17 +105,16 @@ export const CustomerVerificationDetails = ({ goToNextStep, goToPrevStep }: Cust
               Previous
             </Button>
             <Button
-              type="button"
+              type="submit"
               className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
               rightIcon={<ArrowRightCircle />}
-              onClick={()=>(goToNextStep?.())}
-              >
+              loading={submitMutation.isPending}
+            // onClick={()=>(goToNextStep?.())}
+            >
               Next
             </Button>
           </CardFooter>
         </div>
-        
-        {/* Info Cards Section - stack on mobile, side by side on sm+ */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-stretch mt-6">
           <Card className="h-auto sm:h-[178px] rounded-[10px] border border-[#D9D9D9] bg-[#DCFCE733]">
             <CardContent className="flex flex-col sm:flex-row gap-4 p-4 h-full">

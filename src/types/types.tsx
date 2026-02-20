@@ -6,6 +6,7 @@ import type { Control, FieldValues, Path } from "react-hook-form";
 import { type AxiosRequestConfig, type Method } from 'axios'
 import type { UseMutationOptions, UseQueryOptions } from "@tanstack/react-query";
 import type { SORT_ORDER } from "@/utils/enums";
+import { ColumnDef, OnChangeFn, Row, RowSelectionState } from "@tanstack/table-core";
 
 export type T = {
   [key: string]: any;
@@ -22,19 +23,20 @@ export interface StepperProviderProps {
   children: ReactNode;
 }
 export interface ReusableStepperProps {
-    steps: {
-        title: string
-        content: React.FC<{ goToNextStep: () => void; goToPrevStep: () => void }>
-    }[]
-    defaultStep?: number
-    className?: string
-    value?: number
-    onValueChange?: (value: number) => void
+  steps: {
+    title: string
+    content: React.FC<{ goToNextStep: () => void; goToPrevStep: () => void }>
+  }[]
+  defaultStep?: number
+  className?: string
+  value?: number
+  onValueChange?: (value: number) => void
 }
 export interface LoginResponse {
   message: string
   user: any
   access_token: string
+  is_general: boolean
 }
 
 export type TNodeChildrentType<T = ReactNode> = {
@@ -71,6 +73,7 @@ export interface PageHeaderAction {
 
 export interface ProtectedRouteProps {
   children: React.ReactNode
+  requireGeneral?: boolean
 }
 export interface PageHeaderProps {
   title: string
@@ -82,6 +85,24 @@ export interface Tuser {
   name: string
   email: string
   avatar?: string
+  is_general: boolean
+}
+
+export interface VerificationToken {
+  verification_url?: string
+  verification_token: string
+  verification_token_type: string
+  verification_token_name: string
+}
+
+export interface VerificationData {
+  email?: VerificationToken
+  phone?: VerificationToken
+}
+
+export interface Guest {
+  guestId: number
+  verification: VerificationData
 }
 
 export type StepItem = {
@@ -114,11 +135,14 @@ export type RHFInputProps<T extends FieldValues> = {
 export interface AuthProviderState {
   user: Tuser | null
   token: string | null
+  guest: Guest | null
+  isGeneral: boolean | null
   isAuthenticated: boolean
   isLoading: boolean
-  login: (user: Tuser, token: string) => void
+  login: (user: Tuser, token: string, isGeneral: boolean) => void
   logout: () => void
   updateUser: (user: Partial<Tuser>) => void
+  setGuest: (guest: Guest | null) => void
 }
 export interface AuthProviderProps {
   children: ReactNode
@@ -128,11 +152,14 @@ export interface AuthProviderProps {
 export const initialState: AuthProviderState = {
   user: null,
   token: null,
+  guest: null,
+  isGeneral: null,
   isAuthenticated: false,
   isLoading: true,
   login: () => null,
   logout: () => null,
   updateUser: () => null,
+  setGuest: () => null,
 }
 
 export interface UseApiQueryOptions<TData = unknown> {
@@ -155,7 +182,9 @@ export interface ToastOptions {
 }
 
 export interface SubmitResponse {
-  message: string
+  message: string,
+  success:string,
+  data: any
 }
 export interface CustomerVerificationDetailsProps {
   goToNextStep?: () => void
@@ -337,5 +366,83 @@ export type RadioChoiceGroupProps = {
   showSelector?: boolean
   selectorPosition?: "left" | "right"
 
+  className?: string
+}
+
+export type TTableReusableComponent<T = any> = {
+  OtherTools?: React.ComponentType<Partial<TClassType> & TSearchToolProps>;
+  onRowSelectionChange?: OnChangeFn<RowSelectionState>;
+  OtherToolsProps: Partial<TSearchToolProps>;
+  setPageSize: (page: number) => void;
+
+  onPageChange: (page: number) => void;
+  rowSelection?: RowSelectionState;
+  onClick?: (row: Row<T>) => void;
+  columns: ColumnDef<any, any>[];
+  showPagination?: boolean;
+  title?: string | ReactNode;
+  pageCount: number;
+  isLoading?: boolean;
+  pageSize: number;
+  isError?: boolean;
+  page?: number;
+  data: T[];
+};
+
+export type TCommandOption<T = string> = { label: string; value?: T };
+
+export type TSearchToolProps = {
+  onChange: (value: string) => void;
+  advancedHandler?: () => any;
+  includeFilter?: boolean;
+  placeholder?: string;
+  title?: string;
+} & Partial<TClassType> &
+  Pick<TNavBarUrlType, 'Icon'>;
+
+export type TQueryFieldProps = {} & Partial<TClassType> & TSearchToolProps;
+
+export interface StatusPillProps {
+  status: string;
+  label: string;
+}
+
+export type SingleActionsHandler<T = string> = {
+  conditional?: (payload: T) => boolean;
+  condition?: any;
+} & TCommandOption<T> &
+  Pick<TDropDownProps<T>, 'onSelect'>;
+
+export type TDropDownProps<T = string> = {
+  commandOptions: TCommandOption[];
+  onSelect: (val: T) => void;
+  selectedOption?: string;
+  includeSearch?: boolean;
+  triggerEl: ReactNode;
+} & Partial<TClassType>;
+
+export type TActionColumnGenProps<T = string> = {
+  ActionsHandlerMapping: SingleActionsHandler<T>[];
+};
+
+export type TReusableDropdownProp<T> = {
+  className?: string;
+} & Pick<TDropDownProps<T>, "triggerEl"> &
+  TActionColumnGenProps<T>;
+
+export interface TCountry {
+  id: number
+  name: string
+}
+
+export interface TCountryResponse {
+  data: TCountry[]
+}
+export interface TCountriesInputMultiselectProps {
+  value?: string[]
+  onChange?: (value: string[]) => void
+  placeholder?: string
+  label?: string
+  required?: boolean
   className?: string
 }

@@ -101,8 +101,6 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToNextSt
                 </div>
                 
                 <Separator className='my-4' />
-                
-                {/* File Attachments - 1 col mobile, 2 col sm, 3 col lg */}
                 <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5'>
                     <ReuseableInput
                         className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
@@ -127,8 +125,6 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToNextSt
                     />
                 </div>
             </div>
-            
-            {/* Navigation Buttons - stack on mobile */}
             <CardFooter className="w-full flex flex-col sm:flex-row justify-between gap-3 mt-3 px-0">
                 <Button
                     type="button"

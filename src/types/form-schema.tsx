@@ -1,4 +1,5 @@
 // form-schema.ts
+import { ACCEPTED_IMAGE_TYPES } from "@/utils/constatnts"
 import { z } from "zod"
 
 export const CustomerDetailsSchema = z.object({
@@ -15,13 +16,22 @@ export const CustomerDetailsSchema = z.object({
     .email("Invalid email address")
     .min(5)
     .max(32),
-  mobile_number: z
+  phone: z
     .string()
     .min(7, "Invalid phone number"),
 })
 
 export const OTPVerificationSchema = z.object({
-  otp: z.string().length(4, "OTP must be exactly 4 digits"),
+  token: z.string().length(4, "OTP must be exactly 4 digits"),
+  token_type: z.string().optional(),
+  token_name: z.string().optional(),
+})
+
+export const ResendOtpPayloadSchema = z.object({
+  type: z.string().min(1),
+  id: z.number(),
+  token_type: z.string().min(1),
+  token_name: z.string().min(1),
 })
 
 export const VehicleDetailsSchema = z.object({
@@ -39,6 +49,8 @@ export const LoginSchema = z.object({
 
 export const SignUpSchema = z
   .object({
+    first_name: z.string().min(2, "First name is required").max(50),
+    last_name: z.string().min(2, "Last name is required").max(50),
     email: z.string().email("Invalid email address"),
     password: z.string().min(6, "Password must be at least 6 characters"),
     confirm_password: z.string().min(6, "Confirm password must be at least 6 characters"),
@@ -138,3 +150,38 @@ export const PaymentDetailsSchema = z.discriminatedUnion("payment_method", [
   CardPaymentSchema,
   PesapalPaymentSchema,
 ])
+
+export const OrganizationSchema = z.object({
+  name: z
+    .string()
+    .min(2, "Organization name must be at least 2 characters")
+    .max(100, "Organization name is too long"),
+  organization_type: z
+    .string()
+    .min(2, "Organization type must be at least 2 characters")
+    .max(100, "Organization type is too long"),
+  domain: z
+    .string()
+    .min(2, "Domain is required"),
+  admin_id: z
+    .string()
+    .min(1, "Admin ID is required"),
+  initials: z
+    .string()
+    .min(2, "Initials must be at least 2 characters")
+    .max(10, "Initials cannot exceed 10 characters"),
+  logo: z
+    .any()
+    .refine((file) => file instanceof File, "Attach a Logo")
+    .refine(
+      (file) => ACCEPTED_IMAGE_TYPES.includes(file.type),
+      "Logo must be jpeg, png, jpg, or webp"
+    )
+    .refine(
+      (file) => file.size <= 5 * 1024 * 1024,
+      "Logo must be less than 5MB"
+    ),
+  locations: z
+    .array(z.string())
+    .min(1, "At least one location must be selected"),
+})

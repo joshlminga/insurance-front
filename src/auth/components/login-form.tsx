@@ -7,6 +7,7 @@ import {
   FieldGroup,
 } from "@/components/ui/field"
 import { EPREFIX, EROUTES } from "@/utils/enums"
+import { useNavigate } from "react-router-dom"
 
 import { ReuseableInput } from "@/dev/core"
 import { EMETHODS } from "@/utils/constatnts"
@@ -18,6 +19,7 @@ import { type LoginFormValues } from "@/types/schema"
 import { UseApiMutation } from "@/hooks/hooks"
 import { ShowToast } from "@/utils/utils"
 import type { LoginResponse } from "@/types/types"
+import { extractErrorMessage } from "@/utils/helpers"
 
 export function LoginForm({
   className,
@@ -25,6 +27,7 @@ export function LoginForm({
 }: React.ComponentProps<"div">) {
 
   const { login } = UseAuth()
+  const navigate = useNavigate()
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(LoginSchema),
     defaultValues: {
@@ -33,16 +36,21 @@ export function LoginForm({
     },
   })
   const loginMutation = UseApiMutation<LoginResponse, LoginFormValues>({
-    url: 'login',
+    url: 'auth/login',
     method: EMETHODS.POST,
     mutationOptions: {
       onSuccess: (data: LoginResponse) => {
         ShowToast.success(data.message || "Login successful!")
-        login(data.user, data.access_token)
+        login(data.user, data.access_token, data.is_general)
+        if (data.is_general) {
+          navigate(EROUTES.LANDING)
+        } else {
+          navigate(EROUTES.DASHBOARD)
+        }
       },
       onError: (error: any) => {
-        const errorMessage = error.response?.data?.message || error.message || "Login failed!"
-        ShowToast.error(errorMessage)
+        const message = extractErrorMessage(error);
+        ShowToast.error(message || "Login failed!")
       }
     }
   })
@@ -78,10 +86,10 @@ export function LoginForm({
           </Field>
           <Field>
             <Button
-              {...{
-                onClick: () =>
-                  console.log()
-              }}
+              // {...{
+              //   onClick: () =>
+              //     console.log()
+              // }}
               className="bg-[#C20C0C] hover:bg-[#C20C0C]/70"
               type="submit">
               <p className='font-bold leading-6 text-sm'>Login</p>

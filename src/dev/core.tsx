@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
     Breadcrumb,
     BreadcrumbItem,
@@ -15,10 +16,15 @@ import type {
     ReusablePaginationProps,
     ReusableStepperProps,
     RHFInputProps,
+    TCountriesInputMultiselectProps,
+    TCountryResponse,
     TCustomDialogProps,
     TKeyValueStringType,
+    TNodeChildrentType,
+    TReusableDropdownProp,
     TReusablePageProps,
     TRHFSelectProps,
+    TTableReusableComponent,
     TTabsProps
 } from "@/types/types";
 import {
@@ -53,6 +59,9 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { MultiSelect, MultiSelectContent, MultiSelectGroup, MultiSelectItem, MultiSelectTrigger, MultiSelectValue } from "@/components/ui/multi-select";
+import { UseApiQuery } from "@/hooks/hooks";
+import { Label } from "@/components/ui/label";
 
 const formatSegment = (segment: string) => {
     return segment
@@ -78,7 +87,6 @@ export const BreadCrumbComponent = () => {
                         const href = '/' + pathSegments.slice(0, index + 1).join('/');
                         const isLast = index === pathSegments.length - 1;
                         const title = formatSegment(segment);
-
                         return (
                             <Fragment key={href}>
                                 <BreadcrumbSeparator />
@@ -210,6 +218,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         )
     }
 )
+
 export function ReuseableInput<T extends FieldValues>({
     control,
     name,
@@ -277,6 +286,7 @@ export function ReusableSelect<T extends FieldValues>({
     triggerClassName,
 }: TRHFSelectProps<T>) {
     return (
+        <div>
         <Controller
             name={name}
             control={control}
@@ -297,7 +307,7 @@ export function ReusableSelect<T extends FieldValues>({
                         <SelectTrigger
                             aria-invalid={fieldState.invalid}
                             className={cn(
-                                "w-full",
+                                "w-full h-[51px] rounded-[5px] border border-[#ADABAB]",
                                 fieldState.invalid &&
                                 "border-red-500 focus:ring-red-500",
                                 triggerClassName
@@ -323,6 +333,7 @@ export function ReusableSelect<T extends FieldValues>({
                 </Field>
             )}
         />
+        </div>
     )
 }
 
@@ -387,7 +398,7 @@ export function ReusableTabs({
                             value={tab.value}
                             disabled={tab.disabled}
                             className={cn(
-                                "flex-1 h-[48px] sm:h-full min-w-0 rounded-none",
+                                "flex-1 h-12 sm:h-full min-w-0 rounded-none",
                                 "first:rounded-tl-[12px] first:rounded-bl-[12px] sm:first:rounded-l-[20px]",
                                 "last:rounded-tr-[12px] last:rounded-br-[12px] sm:last:rounded-r-[20px]",
                                 "data-[state=active]:bg-[#C20C0C] data-[state=active]:text-white",
@@ -780,3 +791,171 @@ export const ReuseableRadioChoiceGroup: React.FC<
             </>
         )
     }
+
+export const TableComponentHeadings = ({ children }: TNodeChildrentType) => {
+    return (
+        <div className='flex flex-col justify-between items-center w-full gap-6 flex-wrap px-6 py-2.5'>
+            {children}
+        </div>
+    );
+};
+
+export const PageForPagination = ({
+    active = false,
+    content,
+    handler,
+}: {
+    handler: (data: any) => void;
+    content: string;
+    active?: boolean;
+}) => (
+    <div className={`rounded-xl selection:bg-inherit flex items-center justify-center leading-6 hover:bg-[#F9F5FF] text-[14px] font-medium text-center cursor-pointer w-10 h-10 ${active ? 'bg-[#F9F5FF] text-[#7F56D9]' : 'text-main-orange'
+        }`}
+        onClick={handler}>
+        {content}
+    </div>
+);
+
+
+export const TReusablePagination = ({
+    onPageChange,
+    pageCount,
+    page,
+}: Pick<TTableReusableComponent, 'onPageChange' | 'pageCount'> &
+    Required<Pick<TTableReusableComponent, 'page'>>) => {
+    return (
+        <div className='flex flex-col items-center'>
+            <div className='flex items-center justify-center'>
+                {pageCount > 6 ? (
+                    <>
+                        {new Array(3).fill(0).map((_, index) => (
+                            <PageForPagination
+                                {...{
+                                    handler: () => onPageChange(1 + index),
+                                    active: page === index + 1,
+                                    content: `${1 + index}`,
+                                }}
+                                key={index}
+                            />
+                        ))}
+
+                        <PageForPagination
+                            {...{
+                                handler: () => { },
+                                active: false,
+                                content: '...',
+                            }}
+                        />
+
+                        {new Array(3).fill(0).map((_, index) => (
+                            <PageForPagination
+                                {...{
+                                    handler: () => onPageChange(pageCount - (3 - index)),
+                                    active: page === pageCount + (3 - index),
+                                    content: `${3 - index}`,
+                                }}
+                                key={index}
+                            />
+                        ))}
+                    </>
+                ) : (
+                    <>
+                        {new Array(pageCount).fill(0).map((_, index) => (
+                            <PageForPagination
+                                {...{
+                                    content: `${index + 1}`,
+                                    handler: () => onPageChange(index + 1),
+                                    active: page === index + 1,
+                                }}
+                                key={index}
+                            />
+                        ))}
+                    </>
+                )}
+            </div>
+        </div>
+    );
+};
+
+export const ReusableDropDownComponent = <T,>({
+    className = "w-fit max-w-20",
+    ActionsHandlerMapping,
+    triggerEl,
+}: TReusableDropdownProp<T>) => {
+    return (
+        <DropdownMenu
+            {...{
+                modal: true,
+            }}>
+            <DropdownMenuTrigger asChild>{triggerEl}</DropdownMenuTrigger>
+            <DropdownMenuContent className={cn(className)}>
+                {ActionsHandlerMapping.map(({ label, value, onSelect }, index) => {
+                    return (
+                        <DropdownMenuItem
+                            className='w-full capitalize'
+                            {...{
+                                onSelect: () => value && onSelect(value),
+                                align: 'end',
+                            }}
+                            key={index}>
+                            {label}
+                        </DropdownMenuItem>
+                    );
+                })}
+            </DropdownMenuContent>
+        </DropdownMenu>
+    );
+};
+export const ReusableCountriesInputMultiselect = ({
+  value,
+  onChange,
+  placeholder = 'Select countries...',
+  label,
+  required = false,
+}: TCountriesInputMultiselectProps) => {
+
+  const { data, isLoading } = UseApiQuery<TCountryResponse>({
+    url: 'taxonomies/general/countries',
+    params: { direction: 'ASC' },
+    queryOptions: { enabled: true },
+  })
+
+  const countries = data?.data ?? []
+
+  return (
+    <div className="space-y-2 w-full">
+      {label && (
+        <Label>
+          {label}
+          {required && (
+            <span className="text-red-500 ml-1">*</span>
+          )}
+        </Label>
+      )}
+      <MultiSelect
+        values={value ?? []}
+        onValuesChange={(vals) => onChange?.(vals)} >
+        <MultiSelectTrigger  className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]">
+          <MultiSelectValue placeholder={placeholder} />
+        </MultiSelectTrigger>
+        <MultiSelectContent>
+          <MultiSelectGroup>
+            {!isLoading && countries.length === 0 && (
+              <div className="px-3 py-2 text-sm text-muted-foreground">
+                No countries found.
+              </div>
+            )}
+            {countries.map((country) => (
+              <MultiSelectItem
+                key={country.id}
+                value={String(country.id)}
+              >
+                {country.name}
+              </MultiSelectItem>
+            ))}
+          </MultiSelectGroup>
+        </MultiSelectContent>
+      </MultiSelect>
+    </div>
+  )
+}

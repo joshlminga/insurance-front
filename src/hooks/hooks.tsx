@@ -5,8 +5,12 @@ import apiClient from '@/lib/api-client'
 import { EMETHODS } from '@/utils/constatnts'
 import { UseAuth } from '@/components/auth-provider'
 import { EROUTES } from '@/utils/enums'
-import { Navigate } from 'react-router-dom'
-import type { ProtectedRouteProps, UseApiMutationOptions, UseApiQueryOptions } from '@/types/types'
+import { Navigate, useLocation } from 'react-router-dom'
+import type { 
+  ProtectedRouteProps, 
+  UseApiMutationOptions, 
+  UseApiQueryOptions 
+} from '@/types/types'
 
 export function UseApiQuery<TData = unknown>({
   url,
@@ -14,7 +18,7 @@ export function UseApiQuery<TData = unknown>({
   config,
   queryOptions,
 }: UseApiQueryOptions<TData>) {
-  return useQuery<TData>({
+  const query = useQuery<TData>({
     queryKey: [url, params],
     queryFn: ({ signal }) => {
       const CancelToken = axios.CancelToken
@@ -27,11 +31,15 @@ export function UseApiQuery<TData = unknown>({
       signal?.addEventListener('abort', () => {
         source.cancel('Query was cancelled by TanStack Query')
       })
-
-      return promise.then(res => res.data)
+      return promise.then(res => res?.data)
     },
     ...queryOptions,
   })
+  return {
+    ...query,
+    isLoading: query.isPending || query.isFetching,
+    refetch: query.refetch,
+  }
 }
 
 export function UseApiMutation<TData = unknown, TVariables = unknown, TContext = unknown>({
@@ -68,14 +76,56 @@ export function UseApiMutation<TData = unknown, TVariables = unknown, TContext =
   })
 }
 
-export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { isAuthenticated, isLoading } = UseAuth()
+export function ProtectedRoute({ children, requireGeneral }: ProtectedRouteProps) {
+  const { isAuthenticated, isLoading, isGeneral } = UseAuth()
 
   if (isLoading) {
     return <div>Loading...</div>
   }
-  if (!isAuthenticated) {
-    return <Navigate to={EROUTES.LANDING} replace />
+  if (requireGeneral !== undefined && isGeneral !== null) {
+    if (requireGeneral && isGeneral === false) {
+      return <Navigate to={EROUTES.DASHBOARD} replace />
+    }
+    if (!requireGeneral && isGeneral === true) {
+      return <Navigate to={EROUTES.LANDING} replace />
+    }
   }
+
+  if (!isAuthenticated) {
+    return <Navigate to={EROUTES.SIGNIN} replace />
+  }
+
+  return <>{children}</>
+}
+
+export function CustomerPublicRoute({ children }: ProtectedRouteProps) {
+  const { isAuthenticated, isLoading, isGeneral } = UseAuth()
+
+  if (isLoading) {
+    return <div>Loading...</div>
+  }
+  if (isAuthenticated && isGeneral === false) {
+    return <Navigate to={EROUTES.DASHBOARD} replace />
+  }
+
+  return <>{children}</>
+}
+
+export function PublicRoute({ children }: ProtectedRouteProps) {
+  const { isAuthenticated, isLoading, isGeneral } = UseAuth()
+  const location = useLocation()
+
+  if (isLoading) {
+    return <div>Loading...</div>
+  }
+  if (isAuthenticated && isGeneral !== null) {
+    if (isGeneral === false) {
+      return <Navigate to={EROUTES.DASHBOARD} replace />
+    }
+    if (location.pathname !== EROUTES.LANDING) {
+      return <Navigate to={EROUTES.LANDING} replace />
+    }
+  }
+
   return <>{children}</>
 }

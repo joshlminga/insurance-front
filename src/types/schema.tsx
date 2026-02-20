@@ -7,14 +7,20 @@ import {
     SignUpSchema,
     KycSchema,
     InvoicePaymentSchema,
-    PaymentDetailsSchema
+    PaymentDetailsSchema,
+    ResendOtpPayloadSchema,
+    OrganizationSchema
 } from "./form-schema";
 
 export type CustomerFormValues = z.infer<typeof CustomerDetailsSchema>
 export type OTPFormValues = z.infer<typeof OTPVerificationSchema>
+export type ResendOTPFormValues = z.infer<typeof ResendOtpPayloadSchema>
 export type VehicleFormValues = z.infer<typeof VehicleDetailsSchema>
 export type LoginFormValues = z.infer<typeof LoginSchema>
 export type SignUpFormValues = z.infer<typeof SignUpSchema>
 export type KycFormValues = z.infer<typeof KycSchema>
 export type InvoicePaymentFormValues = z.infer<typeof InvoicePaymentSchema>
 export type PaymentFormValues = z.infer<typeof PaymentDetailsSchema>
+
+
+export type OrganizationFormValues = z.infer<typeof OrganizationSchema>

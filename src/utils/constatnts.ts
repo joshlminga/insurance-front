@@ -2,6 +2,7 @@
 import type { TActionType, TFilterOptions } from "@/types/types";
 import { SORT_ORDER } from "./enums";
 
+// export 
 
 export const EMETHODS = {
   GET: "get",
@@ -10,6 +11,21 @@ export const EMETHODS = {
   PATCH: "patch",
   DELETE: "delete",
 } as const
+
+export const ORGANIZATIONTYPES = [
+  { label: "Agent", value: "Agent" },
+  { label: "Insurer", value: "Insurer" },
+  { label: "Partner", value: "Partner" },
+  { label: "Company", value: "Company" },
+  { label: "Organization", value: "Organization" },
+]
+
+export const ACCEPTED_IMAGE_TYPES = [
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+]
 
 export type EMETHODS = typeof EMETHODS[keyof typeof EMETHODS]
 
@@ -29,6 +45,12 @@ export const FILTERS_DEFAULTS: TFilterOptions & Record<string, any> = {
   order: { direction: SORT_ORDER.Ascending, orderField: '' },
   date: [],
   term: '',
+};
+
+export const FILTEROPTIONS: TFilterOptions & Record<string, any> = {
+	order: { direction: SORT_ORDER.Ascending, orderField: '' },
+	date: [],
+	term: '',
 };
 
 export const PAYMENTPLANS = [
