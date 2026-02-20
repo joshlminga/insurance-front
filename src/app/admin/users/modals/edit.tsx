@@ -1,6 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CardFooter } from '@/components/ui/card'
-import { Button, ReuseableInput, ReuseableSingleSelectCountriesInput } from '@/dev/core'
+import { 
+    Button, 
+    ReuseableInput, 
+    ReuseableSingleSelectCountriesInput 
+} from '@/dev/core'
 import { UseApiMutation } from '@/hooks/hooks'
 import { UsersSchema } from '@/types/form-schema'
 import { UsersFormValues } from '@/types/schema'
@@ -19,7 +23,6 @@ export const EditUserModal = ({
     componentProps?: {
         data?: Record<string, any>
         refetch?: () => Promise<any>
-        readOnly?: boolean
     }
 }) => {
     const user = componentProps?.data ?? {}

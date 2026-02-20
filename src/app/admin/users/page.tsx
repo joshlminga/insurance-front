@@ -15,6 +15,7 @@ import { EMETHODS } from '@/utils/constatnts'
 import { ShowToast } from '@/utils/utils'
 import { extractErrorMessage } from '@/utils/helpers'
 import { EditUserModal } from './modals/edit'
+import { ViewUserModal } from './modals/view'
 
 export const UsersPage = () => {
     const [filter, optionsDispatcher] = useReducer(
@@ -77,7 +78,7 @@ export const UsersPage = () => {
             onSelect: (data) => {
                 handleDialogContextSwitch({
                     componentProps: { data, refetch },
-                    Component: EditUserModal,
+                    Component: ViewUserModal,
                 })
             },
         },
