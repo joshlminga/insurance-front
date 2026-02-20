@@ -5,6 +5,7 @@ import {
     ReusableCountriesInputMultiselect,
     ReusableSelect,
     ReuseableInput,
+    ReuseableSingleSelectAdminInput,
 } from '@/dev/core'
 import { UseApiMutation } from '@/hooks/hooks'
 import { OrganizationSchema } from '@/types/form-schema'
@@ -59,13 +60,18 @@ export const EditOrganizationModal = ({
             domain: organization?.domain ?? '',
             admin_id: organization?.organization_admin_id ? String(organization?.organization_admin_id) : '',
             initials: organization?.initials ?? '',
-            logo: undefined,
+            logo: organization?.logo ?? undefined,
             locations: mapLocationsToIds(organization?.organization_location) ?? [],
         },
     })
 
     const updateMutation = UseApiMutation<SubmitResponse, FormData>({
         url: `organization/${organization?.organization_id}`,
+        config: {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        },
         method: EMETHODS.PATCH,
         mutationOptions: {
             onSuccess: (response) => {
@@ -84,7 +90,6 @@ export const EditOrganizationModal = ({
             ShowToast.error('Unable to update organization: missing organization id')
             return
         }
-
         const formData = new FormData()
         formData.append("name", data.name)
         formData.append("organization_type", data.organization_type)
@@ -95,7 +100,6 @@ export const EditOrganizationModal = ({
         data.locations.forEach((location) => {
             formData.append("locations[]", location)
         })
-
         if (data.logo instanceof File) {
             formData.append("logo", data.logo)
         }
@@ -130,11 +134,17 @@ export const EditOrganizationModal = ({
                     label="Domain"
                     className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
                 />
-                <ReuseableInput
+                <Controller
                     control={form.control}
                     name="admin_id"
-                    label="Owner/Admin"
-                    className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                    render={({ field }) => (
+                        <ReuseableSingleSelectAdminInput
+                            label="Admin"
+                            required
+                            value={field.value}
+                            onChange={field.onChange}
+                        />
+                    )}
                 />
                 <ReuseableInput
                     control={form.control}

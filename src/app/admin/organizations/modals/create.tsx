@@ -5,6 +5,7 @@ import {
     ReusableCountriesInputMultiselect,
     ReusableSelect,
     ReuseableInput,
+    ReuseableSingleSelectAdminInput,
 } from '@/dev/core'
 import { UseApiMutation } from '@/hooks/hooks'
 import { OrganizationSchema } from '@/types/form-schema'
@@ -16,7 +17,7 @@ import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm, Controller } from 'react-hook-form'
 
-export const CreateOrganizationModal = ({ handleDialogContextSwitch,  componentProps }: {
+export const CreateOrganizationModal = ({ handleDialogContextSwitch, componentProps }: {
     handleDialogContextSwitch: (context?: any) => void
     componentProps?: any
 }) => {
@@ -45,7 +46,7 @@ export const CreateOrganizationModal = ({ handleDialogContextSwitch,  componentP
             onSuccess: (data) => {
                 ShowToast.success(data.message || "Submitted successfully!")
                 form.reset()
-                 componentProps?.refetch?.()
+                componentProps?.refetch?.()
                 handleDialogContextSwitch({ refetch: true })
             },
             onError: (error: unknown) => {
@@ -69,6 +70,7 @@ export const CreateOrganizationModal = ({ handleDialogContextSwitch,  componentP
         }
         submitMutation.mutate(formData)
     }
+
     return (
         <div className="w-full min-w-[600px] max-w-[600px] p-6 space-y-6">
             <div className="border-b pb-3">
@@ -101,14 +103,18 @@ export const CreateOrganizationModal = ({ handleDialogContextSwitch,  componentP
                     label="Domain"
                     className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
                 />
-
-                <ReuseableInput
+                <Controller
                     control={form.control}
                     name="admin_id"
-                    label="Owner/Admin"
-                    className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                    render={({ field }) => (
+                        <ReuseableSingleSelectAdminInput
+                            label="Admin"
+                            required
+                            value={field.value}
+                            onChange={field.onChange}
+                        />
+                    )}
                 />
-
                 <ReuseableInput
                     control={form.control}
                     name="initials"

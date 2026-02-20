@@ -15,12 +15,12 @@ import { EditOrganizationModal } from './modals/edit';
 import { EMETHODS } from '@/utils/constatnts';
 import { ShowToast } from '@/utils/utils';
 import { extractErrorMessage } from '@/utils/helpers';
+import { ViewOrganizationModal } from './modals/view';
 
 const OrganizationsPage = () => {
-
   const [filter, optionsDispatcher] = useReducer(
     ReusableReducer<TPaginationFilters & TFilterOptions>,
-    { ...FILTEROPTIONS, page: 1, pageSize: 10 }
+    { ...FILTEROPTIONS, page: 1, pageSize: 100 }
   );
   const optionsDispatcherDebounce = useDebounce({
     debounceCallback: optionsDispatcher,
@@ -72,6 +72,15 @@ const OrganizationsPage = () => {
   })
 
   const ActionsHandlerMapping: SingleActionsHandler<any>[] = [
+    {
+      label: 'View',
+      onSelect: (data) => {
+        handleDialogContextSwitch({
+          componentProps: { data, refetch },
+          Component: ViewOrganizationModal,
+        })
+      }
+    },
     {
       label: 'Edit',
       onSelect: (data) => {
@@ -163,8 +172,8 @@ const OrganizationsPage = () => {
                 payload: { pageSize },
                 type: 'pageSize',
               }),
-            pageSize: 10,
-            page: 1,
+            pageSize: filter.pageSize ?? 10,
+            page: filter?.page ?? 1,
             isLoading: isLoading,
           }}
         />

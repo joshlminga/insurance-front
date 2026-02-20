@@ -9,7 +9,8 @@ import {
     InvoicePaymentSchema,
     PaymentDetailsSchema,
     ResendOtpPayloadSchema,
-    OrganizationSchema
+    OrganizationSchema,
+    UsersSchema
 } from "./form-schema";
 
 export type CustomerFormValues = z.infer<typeof CustomerDetailsSchema>
@@ -22,5 +23,5 @@ export type KycFormValues = z.infer<typeof KycSchema>
 export type InvoicePaymentFormValues = z.infer<typeof InvoicePaymentSchema>
 export type PaymentFormValues = z.infer<typeof PaymentDetailsSchema>
 
-
 export type OrganizationFormValues = z.infer<typeof OrganizationSchema>
+export type UsersFormValues = z.infer<typeof UsersSchema>

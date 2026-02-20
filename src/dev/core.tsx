@@ -15,9 +15,9 @@ import type {
     ReusableDropdownProps,
     ReusablePaginationProps,
     ReusableStepperProps,
+    ReuseableSingleSelectCountriesInputProps,
     RHFInputProps,
     TCountriesInputMultiselectProps,
-    TCountryResponse,
     TCustomDialogProps,
     TKeyValueStringType,
     TNodeChildrentType,
@@ -25,7 +25,9 @@ import type {
     TReusablePageProps,
     TRHFSelectProps,
     TTableReusableComponent,
-    TTabsProps
+    TTabsProps,
+    TCountryResponse,
+    SubmitResponse
 } from "@/types/types";
 import {
     Stepper,
@@ -287,52 +289,52 @@ export function ReusableSelect<T extends FieldValues>({
 }: TRHFSelectProps<T>) {
     return (
         <div>
-        <Controller
-            name={name}
-            control={control}
-            render={({ field, fieldState }) => (
-                <Field
-                    data-invalid={fieldState.invalid}
-                    className={cn("w-full", className)}>
-                    {label && (
-                        <FieldLabel>
-                            {label}
-                            {required && <span className="ml-1 text-red-500">*</span>}
-                        </FieldLabel>
-                    )}
-                    <Select
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        disabled={disabled}>
-                        <SelectTrigger
-                            aria-invalid={fieldState.invalid}
-                            className={cn(
-                                "w-full h-[51px] rounded-[5px] border border-[#ADABAB]",
-                                fieldState.invalid &&
-                                "border-red-500 focus:ring-red-500",
-                                triggerClassName
-                            )}>
-                            <SelectValue placeholder={placeholder} />
-                        </SelectTrigger>
-                        <SelectContent className="">
-                            {options.map(option => (
-                                <SelectItem
-                                    key={option.value}
-                                    value={option.value}
-                                    disabled={option.disabled}>
-                                    {option.label}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                    {fieldState.error && (
-                        <FieldError className="mt-1 text-sm text-red-500">
-                            {fieldState.error.message}
-                        </FieldError>
-                    )}
-                </Field>
-            )}
-        />
+            <Controller
+                name={name}
+                control={control}
+                render={({ field, fieldState }) => (
+                    <Field
+                        data-invalid={fieldState.invalid}
+                        className={cn("w-full", className)}>
+                        {label && (
+                            <FieldLabel>
+                                {label}
+                                {required && <span className="ml-1 text-red-500">*</span>}
+                            </FieldLabel>
+                        )}
+                        <Select
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            disabled={disabled}>
+                            <SelectTrigger
+                                aria-invalid={fieldState.invalid}
+                                className={cn(
+                                    "w-full h-[51px] rounded-[5px] border border-[#ADABAB]",
+                                    fieldState.invalid &&
+                                    "border-red-500 focus:ring-red-500",
+                                    triggerClassName
+                                )}>
+                                <SelectValue placeholder={placeholder} />
+                            </SelectTrigger>
+                            <SelectContent className="">
+                                {options.map(option => (
+                                    <SelectItem
+                                        key={option.value}
+                                        value={option.value}
+                                        disabled={option.disabled}>
+                                        {option.label}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        {fieldState.error && (
+                            <FieldError className="mt-1 text-sm text-red-500">
+                                {fieldState.error.message}
+                            </FieldError>
+                        )}
+                    </Field>
+                )}
+            />
         </div>
     )
 }
@@ -907,55 +909,157 @@ export const ReusableDropDownComponent = <T,>({
     );
 };
 export const ReusableCountriesInputMultiselect = ({
-  value,
-  onChange,
-  placeholder = 'Select countries...',
-  label,
-  required = false,
+    value,
+    onChange,
+    placeholder = 'Select countries...',
+    label,
+    required = false,
 }: TCountriesInputMultiselectProps) => {
 
-  const { data, isLoading } = UseApiQuery<TCountryResponse>({
-    url: 'taxonomies/general/countries',
-    params: { direction: 'ASC' },
-    queryOptions: { enabled: true },
-  })
+    const { data, isLoading } = UseApiQuery<TCountryResponse>({
+        url: 'taxonomies/general/countries',
+        params: { direction: 'ASC' },
+        queryOptions: { enabled: true },
+    })
 
-  const countries = data?.data ?? []
+    const countries = data?.data ?? []
 
-  return (
-    <div className="space-y-2 w-full">
-      {label && (
-        <Label>
-          {label}
-          {required && (
-            <span className="text-red-500 ml-1">*</span>
-          )}
-        </Label>
-      )}
-      <MultiSelect
-        values={value ?? []}
-        onValuesChange={(vals) => onChange?.(vals)} >
-        <MultiSelectTrigger  className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]">
-          <MultiSelectValue placeholder={placeholder} />
-        </MultiSelectTrigger>
-        <MultiSelectContent>
-          <MultiSelectGroup>
-            {!isLoading && countries.length === 0 && (
-              <div className="px-3 py-2 text-sm text-muted-foreground">
-                No countries found.
-              </div>
+    return (
+        <div className="space-y-2 w-full">
+            {label && (
+                <Label>
+                    {label}
+                    {required && (
+                        <span className="text-red-500 ml-1">*</span>
+                    )}
+                </Label>
             )}
-            {countries.map((country) => (
-              <MultiSelectItem
-                key={country.id}
-                value={String(country.id)}
-              >
-                {country.name}
-              </MultiSelectItem>
-            ))}
-          </MultiSelectGroup>
-        </MultiSelectContent>
-      </MultiSelect>
-    </div>
-  )
+            <MultiSelect
+                values={value ?? []}
+                onValuesChange={(vals) => onChange?.(vals)} >
+                <MultiSelectTrigger className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]">
+                    <MultiSelectValue placeholder={placeholder} />
+                </MultiSelectTrigger>
+                <MultiSelectContent>
+                    <MultiSelectGroup>
+                        {!isLoading && countries.length === 0 && (
+                            <div className="px-3 py-2 text-sm text-muted-foreground">
+                                No countries found.
+                            </div>
+                        )}
+                        {countries.map((country) => (
+                            <MultiSelectItem
+                                key={country.id}
+                                value={String(country.id)}
+                            >
+                                {country.name}
+                            </MultiSelectItem>
+                        ))}
+                    </MultiSelectGroup>
+                </MultiSelectContent>
+            </MultiSelect>
+        </div>
+    )
+}
+
+export function ReuseableSingleSelectCountriesInput<T extends FieldValues>({
+    value,
+    onChange,
+    placeholder = "Select country...",
+    label,
+    required = false,
+    disabled = false,
+    className,
+
+}: ReuseableSingleSelectCountriesInputProps<T>) {
+    const { data, isLoading } = UseApiQuery<TCountryResponse>({
+        url: "taxonomies/general/countries",
+        params: { direction: "ASC" },
+        queryOptions: { enabled: true },
+    })
+
+    const countries = data?.data ?? []
+
+    return (
+        <div className={`space-y-2 ${className ?? ""}`}>
+            {label && (
+                <Label>
+                    {label}
+                    {required && <span className="text-destructive ml-1">*</span>}
+                </Label>
+            )}
+            <Select
+                value={value}
+                onValueChange={onChange}
+                disabled={disabled || isLoading}>
+                <SelectTrigger className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]">
+                    <SelectValue
+                        placeholder={isLoading ? "Loading countries..." : placeholder}
+                    />
+                </SelectTrigger>
+                <SelectContent>
+                    {countries.map((country) => (
+                        <SelectItem key={country.id} value={String(country.id)}>
+                            {country?.name}
+                        </SelectItem>
+                    ))}
+                    {!isLoading && countries.length === 0 && (
+                        <div className="px-3 py-2 text-sm text-muted-foreground">
+                            No countries found
+                        </div>
+                    )}
+                </SelectContent>
+            </Select>
+        </div>
+    )
+}
+
+export function ReuseableSingleSelectAdminInput<T extends FieldValues>({
+    value,
+    onChange,
+    placeholder = "Select users...",
+    label,
+    required = false,
+    disabled = false,
+    className,
+
+}: ReuseableSingleSelectCountriesInputProps<T>) {
+    const { data, isLoading } = UseApiQuery<SubmitResponse>({
+        url: "admin/user",
+        params: { direction: "ASC" },
+        queryOptions: { enabled: true },
+    })
+    const users = data?.data?.users ?? []
+    return (
+        <div className={`space-y-2 ${className ?? ""}`}>
+            {label && (
+                <Label>
+                    {label}
+                    {required && <span className="text-destructive ml-1">*</span>}
+                </Label>
+            )}
+            <Select
+                value={value}
+                onValueChange={onChange}
+                disabled={disabled || isLoading}>
+                <SelectTrigger className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]">
+                    <SelectValue
+                        placeholder={isLoading ? "Loading users..." : placeholder}
+                    />
+                </SelectTrigger>
+                <SelectContent>
+                    {users.map((user: any) => (
+                        <SelectItem key={user.id} value={String(user.id)}>
+                            {user?.name}
+                        </SelectItem>
+                    ))}
+                    {!isLoading && users.length === 0 && (
+                        <div className="px-3 py-2 text-sm text-muted-foreground">
+                            No users found
+                        </div>
+                    )}
+                </SelectContent>
+            </Select>
+        </div>
+    )
 }

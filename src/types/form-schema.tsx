@@ -176,12 +176,30 @@ export const OrganizationSchema = z.object({
     .refine(
       (file) => ACCEPTED_IMAGE_TYPES.includes(file.type),
       "Logo must be jpeg, png, jpg, or webp"
-    )
-    .refine(
-      (file) => file.size <= 5 * 1024 * 1024,
-      "Logo must be less than 5MB"
     ),
   locations: z
     .array(z.string())
     .min(1, "At least one location must be selected"),
+})
+
+export const UsersSchema = z.object({
+  name: z
+    .string()
+    .min(2, "user name must be at least 2 characters")
+    .max(100, "user name is too long"),
+  email: z
+    .string()
+    .email("Invalid email address")
+    .min(2, "Email must be at least 2 characters")
+    .max(100, "Email is too long"),
+  // all countries phone number
+  phone: z
+    .string()
+    .min(10, "Phone number must be at least 10 digits")
+    .regex(
+      /^(?:\+?\d{1,3})?[ -]?\d{6,14}$/,
+      "Invalid phone number format"
+    ),
+  country: z.string()
+    .min(1, "At least one country must be selected"),
 })

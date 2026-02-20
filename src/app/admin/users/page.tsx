@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable no-extra-boolean-cast */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { PageHeader } from '@/components/shared'
 import { ActionColumn } from '@/dev/columns'
@@ -9,8 +9,13 @@ import { SingleActionsHandler, SubmitResponse, TFilterOptions, TPaginationFilter
 import { FILTEROPTIONS, ReusableReducer } from '@/utils/constatnts'
 import { useReducer } from 'react'
 import { CreateUserModal } from './modals/create'
-import { UseApiQuery } from '@/hooks/hooks'
+import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
 import { UsersColumns } from '@/dev/columns/admin/users'
+import { EMETHODS } from '@/utils/constatnts'
+import { ShowToast } from '@/utils/utils'
+import { extractErrorMessage } from '@/utils/helpers'
+import { EditUserModal } from './modals/edit'
+import { ViewUserModal } from './modals/view'
 
 export const UsersPage = () => {
     const [filter, optionsDispatcher] = useReducer(
@@ -32,14 +37,96 @@ export const UsersPage = () => {
         params: {
             page: filter.page,
             pageSize: filter.pageSize,
+            term: filter.term,
         },
         queryOptions: {
             enabled: true,
         },
     })
-    console.log("Users data:", data?.data?.users);
 
-    const ActionsHandlerMapping: SingleActionsHandler<any>[] = []
+    const deleteUserMutation = UseApiMutation<SubmitResponse, { id: number | string }>({
+        url: ({ id }) => `user/${id}`,
+        method: EMETHODS.DELETE,
+        mutationOptions: {
+            onSuccess: (response) => {
+                ShowToast.success(response?.message || 'User deleted successfully')
+                refetch()
+            },
+            onError: (error) => {
+                ShowToast.error(extractErrorMessage(error))
+            },
+        },
+    })
+
+    const toggleUserStatusMutation = UseApiMutation<SubmitResponse, { id: number | string; is_active: boolean }>({
+        url: ({ id }) => `user/${id}/status`,
+        method: EMETHODS.PATCH,
+        mutationOptions: {
+            onSuccess: (response) => {
+                ShowToast.success(response?.message || 'User status updated successfully')
+                refetch()
+            },
+            onError: (error) => {
+                ShowToast.error(extractErrorMessage(error))
+            },
+        },
+    })
+
+    const ActionsHandlerMapping: SingleActionsHandler<any>[] = [
+        {
+            label: "View Details",
+            onSelect: (data) => {
+                handleDialogContextSwitch({
+                    componentProps: { data, refetch },
+                    Component: ViewUserModal,
+                })
+            },
+        },
+        {
+            label: "Edit",
+            onSelect: (data) => {
+                handleDialogContextSwitch({
+                    componentProps: { data, refetch },
+                    Component: EditUserModal,
+                })
+            },
+        },
+        {
+            label: "Delete",
+            onSelect: (data) => {
+                const id = data?.user_id ?? data?.id
+                if (!id) return
+                deleteUserMutation.mutate({
+                    id,
+                })
+            },
+            conditional: (data) => Boolean(data?.user_id ?? data?.id),
+        },
+        {
+            label: "Deactivate",
+            onSelect: (data) => {
+                const id = data?.user_id ?? data?.id
+                if (!id) return
+                toggleUserStatusMutation.mutate({
+                    id,
+                    is_active: false,
+                })
+            },
+            conditional: (data) => Boolean(data?.user_id ?? data?.id) && Boolean(data?.is_active),
+        },
+        {
+            label: "Activate",
+            onSelect: (data) => {
+                const id = data?.user_id ?? data?.id
+                if (!id) return
+                toggleUserStatusMutation.mutate({
+                    id,
+                    is_active: true,
+                })
+            },
+            conditional: (data) => Boolean(data?.user_id ?? data?.id) && !Boolean(data?.is_active),
+        }
+    ]
 
     return (
         <div>
@@ -52,7 +139,7 @@ export const UsersPage = () => {
                         variant: 'default',
                         onClick: () => {
                             handleDialogContextSwitch({
-                                // componentProps: { refetch },
+                                componentProps: { refetch },
                                 Component: CreateUserModal,
                             })
                         },
@@ -78,12 +165,17 @@ export const UsersPage = () => {
                             includeFilter: true,
                         },
                         columns: [
-                              ...UsersColumns,
+                            ...UsersColumns,
                             ActionColumn({ ActionsHandlerMapping }),
                         ],
                         OtherTools: SearchTools,
                         data: data?.data?.users ?? [],
-                        pageCount: 1,
+                        pageCount:
+                            data?.data?.totalPages ??
+                            data?.data?.total_pages ??
+                            data?.data?.pagination?.totalPages ??
+                            data?.data?.pagination?.total_pages ??
+                            1,
                         title: 'Users',
                         showPagination: true,
                         setPageSize: (pageSize) =>
@@ -91,9 +183,9 @@ export const UsersPage = () => {
                                 payload: { pageSize },
                                 type: 'pageSize',
                             }),
-                        pageSize: 10,
-                        page: 1,
-                        // isLoading: isLoading,
+                        pageSize: filter.pageSize,
+                        page: filter.page,
+                        isLoading: isLoading,
                     }}
                 />
             </div>
