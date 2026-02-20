@@ -15,7 +15,6 @@ export const ViewUserModal = ({
     handleDialogContextSwitch: (context?: any) => void
 }) => {
     const userId = componentProps?.data?.user_id ?? componentProps?.data?.id
-
     const { data, isLoading } = UseApiQuery<SubmitResponse>({
         url: `user/${userId}`,
         queryOptions: {

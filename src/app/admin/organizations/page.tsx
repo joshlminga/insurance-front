@@ -15,6 +15,7 @@ import { EditOrganizationModal } from './modals/edit';
 import { EMETHODS } from '@/utils/constatnts';
 import { ShowToast } from '@/utils/utils';
 import { extractErrorMessage } from '@/utils/helpers';
+import { ViewOrganizationModal } from './modals/view';
 
 const OrganizationsPage = () => {
 
@@ -72,6 +73,15 @@ const OrganizationsPage = () => {
   })
 
   const ActionsHandlerMapping: SingleActionsHandler<any>[] = [
+    {
+      label: 'View',
+      onSelect: (data) => {
+        handleDialogContextSwitch({
+          componentProps: { data, refetch },
+          Component: ViewOrganizationModal,
+        })
+      }
+    },
     {
       label: 'Edit',
       onSelect: (data) => {
