@@ -196,11 +196,14 @@ export const UsersSchema = z.object({
     .email("Invalid email address")
     .min(2, "Email must be at least 2 characters")
     .max(100, "Email is too long"),
-    // all countries phone number
+  // all countries phone number
   phone: z
     .string()
     .min(10, "Phone number must be at least 10 digits")
-    .regex(/^\+?[1-9]\d{1,14}$/, "Invalid phone number format"),
+    .regex(
+      /^(?:\+?\d{1,3})?[ -]?\d{6,14}$/,
+      "Invalid phone number format"
+    ),
   country: z.string()
     .min(1, "At least one country must be selected"),
 })
