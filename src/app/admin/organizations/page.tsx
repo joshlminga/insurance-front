@@ -20,7 +20,7 @@ import { ViewOrganizationModal } from './modals/view';
 const OrganizationsPage = () => {
   const [filter, optionsDispatcher] = useReducer(
     ReusableReducer<TPaginationFilters & TFilterOptions>,
-    { ...FILTEROPTIONS, page: 1, pageSize: 10 }
+    { ...FILTEROPTIONS, page: 1, pageSize: 100 }
   );
   const optionsDispatcherDebounce = useDebounce({
     debounceCallback: optionsDispatcher,
