@@ -17,6 +17,7 @@ export const ORGANIZATIONTYPES = [
   { label: "Insurer", value: "Insurer" },
   { label: "Partner", value: "Partner" },
   { label: "Company", value: "Company" },
+  { label: "Organization", value: "Organization" },
 ]
 
 export const ACCEPTED_IMAGE_TYPES = [

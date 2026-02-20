@@ -57,7 +57,7 @@ const OrganizationsPage = () => {
     },
   })
 
-  const toggleOrganizationStatusMutation = UseApiMutation<SubmitResponse, { id: number | string }>({
+  const toggleOrganizationStatusMutation = UseApiMutation<SubmitResponse, { id: number | string, is_active: boolean }>({
     url: ({ id }) => `organization/${id}/status`,
     method: EMETHODS.PATCH,
     mutationOptions: {
@@ -95,6 +95,7 @@ const OrganizationsPage = () => {
       label: 'Deactivate',
       onSelect: (data) => {
         toggleOrganizationStatusMutation.mutate({
+          is_active: false,
           id: data?.organization_id,
         })
       },
@@ -104,6 +105,7 @@ const OrganizationsPage = () => {
       label: 'Activate',
       onSelect: (data) => {
         toggleOrganizationStatusMutation.mutate({
+           is_active: true,
           id: data?.organization_id,
         })
       },
@@ -117,22 +119,12 @@ const OrganizationsPage = () => {
         title="Organizations"
         description="Manage organizations, their details, and associated users"
         actions={[
-          // {
-          //   label: 'Add Organization',
-          //   variant: 'secondary',
-          //   onClick: () => {
-          //     handleDialogContextSwitch({
-          //       componentProps: { data: item },
-          //       Component: CreateOrganizationModal,
-          //     })
-          //   },
-          // },
           {
             label: 'Add Organization',
             variant: 'default',
             onClick: () => {
               handleDialogContextSwitch({
-                // componentProps: { data: item },
+                componentProps: { refetch },
                 Component: CreateOrganizationModal,
               })
             },

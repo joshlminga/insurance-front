@@ -16,8 +16,9 @@ import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm, Controller } from 'react-hook-form'
 
-export const CreateOrganizationModal = ({ handleDialogContextSwitch }: {
+export const CreateOrganizationModal = ({ handleDialogContextSwitch,  componentProps }: {
     handleDialogContextSwitch: (context?: any) => void
+    componentProps?: any
 }) => {
     const form = useForm<OrganizationFormValues>({
         resolver: zodResolver(OrganizationSchema),
@@ -44,6 +45,7 @@ export const CreateOrganizationModal = ({ handleDialogContextSwitch }: {
             onSuccess: (data) => {
                 ShowToast.success(data.message || "Submitted successfully!")
                 form.reset()
+                 componentProps?.refetch?.()
                 handleDialogContextSwitch({ refetch: true })
             },
             onError: (error: unknown) => {
@@ -59,11 +61,9 @@ export const CreateOrganizationModal = ({ handleDialogContextSwitch }: {
         formData.append("domain", data.domain)
         formData.append("admin_id", data.admin_id)
         formData.append("initials", data.initials)
-
         data.locations.forEach((location) => {
             formData.append("locations[]", location)
         })
-
         if (data.logo instanceof File) {
             formData.append("logo", data.logo)
         }
