@@ -18,7 +18,6 @@ import type {
     ReuseableSingleSelectCountriesInputProps,
     RHFInputProps,
     TCountriesInputMultiselectProps,
-    TCountryResponse,
     TCustomDialogProps,
     TKeyValueStringType,
     TNodeChildrentType,
@@ -26,7 +25,9 @@ import type {
     TReusablePageProps,
     TRHFSelectProps,
     TTableReusableComponent,
-    TTabsProps
+    TTabsProps,
+    TCountryResponse,
+    SubmitResponse
 } from "@/types/types";
 import {
     Stepper,
@@ -1005,6 +1006,56 @@ export function ReuseableSingleSelectCountriesInput<T extends FieldValues>({
                     {!isLoading && countries.length === 0 && (
                         <div className="px-3 py-2 text-sm text-muted-foreground">
                             No countries found
+                        </div>
+                    )}
+                </SelectContent>
+            </Select>
+        </div>
+    )
+}
+
+export function ReuseableSingleSelectAdminInput<T extends FieldValues>({
+    value,
+    onChange,
+    placeholder = "Select users...",
+    label,
+    required = false,
+    disabled = false,
+    className,
+
+}: ReuseableSingleSelectCountriesInputProps<T>) {
+    const { data, isLoading } = UseApiQuery<SubmitResponse>({
+        url: "admin/user",
+        params: { direction: "ASC" },
+        queryOptions: { enabled: true },
+    })
+    const users = data?.data?.users ?? []
+    return (
+        <div className={`space-y-2 ${className ?? ""}`}>
+            {label && (
+                <Label>
+                    {label}
+                    {required && <span className="text-destructive ml-1">*</span>}
+                </Label>
+            )}
+            <Select
+                value={value}
+                onValueChange={onChange}
+                disabled={disabled || isLoading}>
+                <SelectTrigger className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]">
+                    <SelectValue
+                        placeholder={isLoading ? "Loading users..." : placeholder}
+                    />
+                </SelectTrigger>
+                <SelectContent>
+                    {users.map((user: any) => (
+                        <SelectItem key={user.id} value={String(user.id)}>
+                            {user?.name}
+                        </SelectItem>
+                    ))}
+                    {!isLoading && users.length === 0 && (
+                        <div className="px-3 py-2 text-sm text-muted-foreground">
+                            No users found
                         </div>
                     )}
                 </SelectContent>

@@ -163,8 +163,8 @@ const OrganizationsPage = () => {
                 payload: { pageSize },
                 type: 'pageSize',
               }),
-            pageSize: 10,
-            page: 1,
+            pageSize: filter.pageSize ?? 10,
+            page: filter?.page ?? 1,
             isLoading: isLoading,
           }}
         />

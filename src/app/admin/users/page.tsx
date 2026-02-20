@@ -71,7 +71,7 @@ export const UsersPage = () => {
             },
         },
     })
-    
+
     const ActionsHandlerMapping: SingleActionsHandler<any>[] = [
         {
             label: "View Details",
@@ -87,11 +87,11 @@ export const UsersPage = () => {
             onSelect: (data) => {
                 handleDialogContextSwitch({
                     componentProps: { data, refetch },
-                     Component: EditUserModal,
+                    Component: EditUserModal,
                 })
             },
         },
-         {
+        {
             label: "Delete",
             onSelect: (data) => {
                 const id = data?.user_id ?? data?.id
@@ -100,7 +100,7 @@ export const UsersPage = () => {
                     id,
                 })
             },
-            conditional:(data) => Boolean(data?.user_id ?? data?.id),
+            conditional: (data) => Boolean(data?.user_id ?? data?.id),
         },
         {
             label: "Deactivate",
@@ -112,7 +112,7 @@ export const UsersPage = () => {
                     is_active: false,
                 })
             },
-            conditional:(data) => Boolean(data?.user_id ?? data?.id) && Boolean(data?.is_active),
+            conditional: (data) => Boolean(data?.user_id ?? data?.id) && Boolean(data?.is_active),
         },
         {
             label: "Activate",
@@ -124,7 +124,7 @@ export const UsersPage = () => {
                     is_active: true,
                 })
             },
-            conditional:(data) => Boolean(data?.user_id ?? data?.id) && !Boolean(data?.is_active),
+            conditional: (data) => Boolean(data?.user_id ?? data?.id) && !Boolean(data?.is_active),
         }
     ]
 
@@ -165,7 +165,7 @@ export const UsersPage = () => {
                             includeFilter: true,
                         },
                         columns: [
-                              ...UsersColumns,
+                            ...UsersColumns,
                             ActionColumn({ ActionsHandlerMapping }),
                         ],
                         OtherTools: SearchTools,

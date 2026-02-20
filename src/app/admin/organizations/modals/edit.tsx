@@ -5,6 +5,7 @@ import {
     ReusableCountriesInputMultiselect,
     ReusableSelect,
     ReuseableInput,
+    ReuseableSingleSelectAdminInput,
 } from '@/dev/core'
 import { UseApiMutation } from '@/hooks/hooks'
 import { OrganizationSchema } from '@/types/form-schema'
@@ -130,12 +131,24 @@ export const EditOrganizationModal = ({
                     label="Domain"
                     className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
                 />
-                <ReuseableInput
+                {/* <ReuseableInput
                     control={form.control}
                     name="admin_id"
                     label="Owner/Admin"
                     className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
-                />
+                /> */}
+                <Controller
+                                    control={form.control}
+                                    name="admin_id"
+                                    render={({ field }) => (
+                                        <ReuseableSingleSelectAdminInput
+                                            label="Admin"
+                                            required
+                                            value={field.value}
+                                            onChange={field.onChange}
+                                        />
+                                    )}
+                                />
                 <ReuseableInput
                     control={form.control}
                     name="initials"

@@ -34,7 +34,7 @@ export const OrganizationsColumns: ColumnDef<any>[] = [
             const isActive: boolean = row.getValue("is_active");
             return (
                 <Badge
-                    className={`rounded-full text-white font-semibold ${isActive ? "bg-green-500" : "bg-red-500"
+                    className={`rounded-lg text-white font-semibold ${isActive ? "bg-green-400" : "bg-red-500"
                         }`}>
                     {isActive ? "Active" : "Inactive"}
                 </Badge>
