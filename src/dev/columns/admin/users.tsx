@@ -20,6 +20,14 @@ export const UsersColumns: ColumnDef<any>[] = [
             return <div>{email}</div>;
         },
     },
+     {
+        accessorKey: "country",
+        header: () => <div>Country</div>,
+        cell: ({ row }) => {
+            const country: any = row.getValue("country");
+            return <div>{country?.name}</div>;
+        },
+    },
     {
         accessorKey: "phone",
         header: () => <div>Phone</div>,

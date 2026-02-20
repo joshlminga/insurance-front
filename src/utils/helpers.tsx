@@ -26,3 +26,15 @@ export const extractErrorMessage = (error: any): string => {
   }
   return error?.message || "Submission failed!";
 };
+
+export const formatDate = (value?: string) => {
+    if (!value) return 'N/A'
+    const parsedDate = new Date(value)
+    if (Number.isNaN(parsedDate.getTime())) return 'N/A'
+
+    return parsedDate.toLocaleString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+    })
+}

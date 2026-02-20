@@ -16,7 +16,6 @@ export const CreateUserModal = ({ handleDialogContextSwitch, componentProps }: {
     componentProps?: any
 }
 ) => {
-
     const form = useForm<UsersFormValues>({
         resolver: zodResolver(UsersSchema),
         defaultValues: {
