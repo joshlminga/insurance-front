@@ -85,7 +85,6 @@ const OrganizationsPage = () => {
     {
       label: 'Edit',
       onSelect: (data) => {
-        console.log(data);
         handleDialogContextSwitch({
           componentProps: { data, refetch },
           Component: EditOrganizationModal,

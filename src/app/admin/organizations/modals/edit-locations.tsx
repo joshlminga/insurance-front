@@ -15,9 +15,6 @@ export const EditLocationsModal = ({ handleDialogContextSwitch, componentProps }
     handleDialogContextSwitch: (context?: any) => void
     componentProps?: any
 }) => {
-
-    console.log("componentProps?.data", componentProps?.data)
-
     const form = useForm<EditLocationFormValues>({
         resolver: zodResolver(EditLocationSchema),
         defaultValues: {

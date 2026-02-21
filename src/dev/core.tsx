@@ -1127,10 +1127,7 @@ export const ReusableOrganizationsInputMultiselect = ({
         params: { direction: 'ASC' },
         queryOptions: { enabled: true },
     })
-
-    const organizations = data?.data ?? []
-    console.log("Organizations for multiselect:", organizations)
-
+    const organizations = data?.data ?? [];
     return (
         <div className="space-y-2 w-full">
             {label && (

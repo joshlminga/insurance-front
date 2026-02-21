@@ -87,6 +87,26 @@ export const MotorProductPage = () => {
 
     const ActionsHandlerMapping: SingleActionsHandler<any>[] = [
         {
+            label: 'View Details',
+            onSelect: (data) => {
+                console.log('View details for:', data)
+                // handleDialogContextSwitch({
+                //     componentProps: { data, refetch },
+                //     Component: ViewProductDetailsModal,
+                // })
+            },
+        },
+        {
+            label: 'Edit',
+            onSelect: (data) => {
+                console.log('Edit product:', data)
+                // handleDialogContextSwitch({
+                //     componentProps: { data, refetch },
+                //     Component: EditProductModal,
+                // })
+            },
+        },
+        {
             label: 'Delete',
             onSelect: (data) => {
                 deleteMotorProductMutation.mutate({
