@@ -278,8 +278,7 @@ const isValidBrochureFile = (file: File) => {
   return hasAllowedExtension || hasAllowedMimeType
 }
 
-export const CreateProductSchema = z
-  .object({
+export const CreateProductSchema = z.object({
     organization_location_id: z.string().min(1, "Organization location is required"),
     name: z
       .string()
@@ -309,6 +308,45 @@ export const CreateProductSchema = z
     organization_location_ids: z
       .array(z.string().min(1))
       .min(1, "At least one organization location is required"),
+  })
+  .refine(
+    (data) => new Date(data.expiry_date) >= new Date(data.start_date),
+    {
+      message: "Expiry date must be after or equal to start date",
+      path: ["expiry_date"],
+    }
+  )
+
+export const EditProductSchema = z.object({
+    organization_location_id: z.string().min(1, "Organization location is required"),
+    name: z
+      .string()
+      .min(2, "Product name must be at least 2 characters")
+      .max(100, "Product name is too long"),
+    officename: z
+      .string()
+      .min(2, "Office name must be at least 2 characters")
+      .max(100, "Office name is too long"),
+    description: z
+      .string()
+      .min(5, "Description must be at least 5 characters")
+      .max(1000, "Description is too long"),
+    access: z.string().min(1, "Access level is required"),
+    for_public: z
+      .string()
+      .refine((value) => value === "true" || value === "false", "Target audience is required"),
+    start_date: z.string().min(1, "Start date is required"),
+    expiry_date: z.string().min(1, "Expiry date is required"),
+    brochure: z
+      .array(z.instanceof(File))
+      .refine(
+        (files) => files.every(isValidBrochureFile),
+        "Brochure files must be PDF, CSV, XLS, XLSX, or DOCX"
+      )
+      .default([]),
+    organization_location_ids: z
+      .array(z.string().min(1))
+      .default([]),
   })
   .refine(
     (data) => new Date(data.expiry_date) >= new Date(data.start_date),

@@ -79,3 +79,8 @@ export const ACCESSLEVELSOPTIONS = [
   { label: "Personal Owned", value: 'personal-owned' },
    { label: "Company Owned", value: 'company-owned' },
 ]
+
+export const TARGET_AUDIENCE_OPTIONS = [
+    { label: "Yes", value: "true" },
+    { label: "No", value: "false" },
+]

@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { PageHeader } from '@/components/shared'
 import { Plus } from 'lucide-react'
-import { CreateProductModal } from './modals/create'
+import { CreateProductModal } from './modals/create-product'
 import { useCustomDialogContextFactory, useDebounce } from '@/hooks'
 import { CustomDialogComponent } from '@/dev/core'
 import { CustomBaseTable, SearchTools } from '@/dev/table'
@@ -14,6 +14,7 @@ import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
 import { MotorProductsColumns } from '@/dev/columns/admin/products'
 import { ShowToast } from '@/utils/utils'
 import { extractErrorMessage } from '@/utils/helpers'
+import { EditProductModal } from './modals/edit-product'
 
 export const MotorProductPage = () => {
 
@@ -100,10 +101,10 @@ export const MotorProductPage = () => {
             label: 'Edit',
             onSelect: (data) => {
                 console.log('Edit product:', data)
-                // handleDialogContextSwitch({
-                //     componentProps: { data, refetch },
-                //     Component: EditProductModal,
-                // })
+                handleDialogContextSwitch({
+                    componentProps: { data, refetch },
+                    Component: EditProductModal,
+                })
             },
         },
         {

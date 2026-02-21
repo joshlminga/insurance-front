@@ -13,7 +13,8 @@ import {
     UsersSchema,
     AddLocationSchema,
     EditLocationSchema,
-    CreateProductSchema
+    CreateProductSchema,
+    EditProductSchema
 } from "./form-schema";
 
 export type CustomerFormValues = z.infer<typeof CustomerDetailsSchema>
@@ -31,3 +32,4 @@ export type UsersFormValues = z.infer<typeof UsersSchema>
 export type AddLocationFormValues = z.infer<typeof AddLocationSchema>
 export type EditLocationFormValues = z.infer<typeof EditLocationSchema>
 export type CreateProductFormValues = z.infer<typeof CreateProductSchema>
+export type EditProductFormValues = z.infer<typeof EditProductSchema>

@@ -1,23 +1,29 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CardFooter } from "@/components/ui/card"
-import { Button, ReusableOrganizationsInputMultiselect, ReusableSelect, ReuseableInput, ReuseableSelectInsurerInput } from "@/dev/core"
+import { 
+    Button, 
+    ReusableOrganizationsInputMultiselect, 
+    ReusableSelect, 
+    ReuseableInput, 
+    ReuseableSelectInsurerInput 
+} from "@/dev/core"
 import { UseApiMutation } from "@/hooks/hooks"
 import { CreateProductSchema } from "@/types/form-schema"
 import { SubmitResponse } from "@/types/types"
-import { ACCESSLEVELSOPTIONS, EMETHODS } from "@/utils/constatnts"
+import { 
+    ACCESSLEVELSOPTIONS, 
+    EMETHODS, 
+    TARGET_AUDIENCE_OPTIONS 
+} from "@/utils/constatnts"
 import { extractErrorMessage } from "@/utils/helpers"
 import { ShowToast } from "@/utils/utils"
 import { zodResolver } from "@hookform/resolvers/zod"
-import type z from "zod"
 import { useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { Input } from "@/components/ui/input"
+import { CreateProductFormValues } from "@/types/schema"
 
-const TARGET_AUDIENCE_OPTIONS = [
-    { label: "Yes", value: "true" },
-    { label: "No", value: "false" },
-]
-type CreateProductFormValues = z.input<typeof CreateProductSchema>
+
 
 export const CreateProductModal = ({ handleDialogContextSwitch, componentProps }: {
     handleDialogContextSwitch: (context?: any) => void

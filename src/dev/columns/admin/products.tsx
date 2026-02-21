@@ -19,6 +19,14 @@ export const MotorProductsColumns: ColumnDef<any>[] = [
             return <div>{type}</div>;
         },
     },
+     {
+        accessorKey: "access",
+        header: () => <div>Access</div>,
+        cell: ({ row }) => {
+            const type: string = row.getValue("access");
+            return <div>{type}</div>;
+        },
+    },
     {
         accessorKey: "targets",
         header: () => <div>Targeted Organizations</div>,
