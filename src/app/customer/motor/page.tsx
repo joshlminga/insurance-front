@@ -1,8 +1,8 @@
 
-import { Navbar } from '../landing/components/navbar'
 import { Outlet } from 'react-router-dom'
-import { Footer } from '../landing/components/footer'
 import { StepperProvider } from '@/hooks/stepper-context'
+import { Navbar } from '@/app/landing/components/navbar'
+import { Footer } from '@/app/landing/components/footer'
 
 export const MotorLandingPage = () => {
     return (
