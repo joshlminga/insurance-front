@@ -14,8 +14,7 @@ import { Controller, useForm } from 'react-hook-form'
 export const CreateUserModal = ({ handleDialogContextSwitch, componentProps }: {
     handleDialogContextSwitch: (context?: any) => void
     componentProps?: any
-}
-) => {
+}) => {
     const form = useForm<UsersFormValues>({
         resolver: zodResolver(UsersSchema),
         defaultValues: {
@@ -48,18 +47,6 @@ export const CreateUserModal = ({ handleDialogContextSwitch, componentProps }: {
         },
     })
     const onSubmit = (data: UsersFormValues) => {
-        // const formData = new FormData()
-        // formData.append("name", data.name)
-        // formData.append("organization_type", data.organization_type)
-        // formData.append("domain", data.domain)
-        // formData.append("admin_id", data.admin_id)
-        // formData.append("initials", data.initials)
-        // data.locations.forEach((location) => {
-        //     formData.append("locations[]", location)
-        // })
-        // if (data.logo instanceof File) {
-        //     formData.append("logo", data.logo)
-        // }
         submitMutation.mutate(data)
     }
 
