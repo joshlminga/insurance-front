@@ -16,6 +16,7 @@ import { ShowToast } from '@/utils/utils'
 import { extractErrorMessage } from '@/utils/helpers'
 import { EditUserModal } from './modals/edit'
 import { ViewUserModal } from './modals/view'
+import { Plus } from 'lucide-react'
 
 export const UsersPage = () => {
     const [filter, optionsDispatcher] = useReducer(
@@ -135,6 +136,7 @@ export const UsersPage = () => {
                 description="Manage users, their details, and associated users"
                 actions={[
                     {
+                        icon: Plus,
                         label: 'Add User',
                         variant: 'default',
                         onClick: () => {
