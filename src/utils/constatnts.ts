@@ -20,6 +20,16 @@ export const ORGANIZATIONTYPES = [
   { label: "Organization", value: "Organization" },
 ]
 
+export const EORGANIZATIONTYPES = {
+  AGENT: "Agent",
+  INSURER: "Insurer",
+  PARTNER: "Partner",
+  COMPANY: "Company",
+  ORGANIZATION: "Organization",
+} as const;
+
+export type EORGANIZATIONTYPES = typeof EORGANIZATIONTYPES[keyof typeof EORGANIZATIONTYPES];
+
 export const ACCEPTED_IMAGE_TYPES = [
   "image/jpeg",
   "image/jpg",

@@ -251,3 +251,69 @@ export const EditLocationSchema = z.object({
       "Logo must be jpeg, png, jpg, or webp"
     ),
 })
+
+const ACCEPTED_BROCHURE_MIME_TYPES = [
+  "application/pdf",
+  "text/csv",
+  "application/csv",
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+]
+
+const ACCEPTED_BROCHURE_EXTENSIONS = [
+  ".pdf",
+  ".csv",
+  ".xls",
+  ".xlsx",
+  ".docx",
+]
+
+const isValidBrochureFile = (file: File) => {
+  const fileName = file.name.toLowerCase()
+  const hasAllowedExtension = ACCEPTED_BROCHURE_EXTENSIONS.some((ext) =>
+    fileName.endsWith(ext)
+  )
+  const hasAllowedMimeType = ACCEPTED_BROCHURE_MIME_TYPES.includes(file.type)
+  return hasAllowedExtension || hasAllowedMimeType
+}
+
+export const CreateProductSchema = z
+  .object({
+    organization_location_id: z.string().min(1, "Organization location is required"),
+    name: z
+      .string()
+      .min(2, "Product name must be at least 2 characters")
+      .max(100, "Product name is too long"),
+    officename: z
+      .string()
+      .min(2, "Office name must be at least 2 characters")
+      .max(100, "Office name is too long"),
+    description: z
+      .string()
+      .min(5, "Description must be at least 5 characters")
+      .max(1000, "Description is too long"),
+    access: z.string().min(1, "Access level is required"),
+    for_public: z
+      .string()
+      .refine((value) => value === "true" || value === "false", "Target audience is required"),
+    start_date: z.string().min(1, "Start date is required"),
+    expiry_date: z.string().min(1, "Expiry date is required"),
+    brochure: z
+      .array(z.instanceof(File))
+      .min(1, "At least one brochure file is required")
+      .refine(
+        (files) => files.every(isValidBrochureFile),
+        "Brochure files must be PDF, CSV, XLS, XLSX, or DOCX"
+      ),
+    organization_location_ids: z
+      .array(z.string().min(1))
+      .min(1, "At least one organization location is required"),
+  })
+  .refine(
+    (data) => new Date(data.expiry_date) >= new Date(data.start_date),
+    {
+      message: "Expiry date must be after or equal to start date",
+      path: ["expiry_date"],
+    }
+  )

@@ -1,3 +1,4 @@
+/* eslint-disable no-extra-boolean-cast */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { PageHeader } from '@/components/shared'
 import { Plus } from 'lucide-react'
@@ -56,6 +57,34 @@ export const MotorProductPage = () => {
         },
     })
 
+    const toggleMotorProductActivateMutation = UseApiMutation<SubmitResponse, { id: number | string, is_active: boolean }>({
+        url: ({ id }) => `products/motor/${id}/activate`,
+        method: EMETHODS.PATCH,
+        mutationOptions: {
+            onSuccess: (response) => {
+                ShowToast.success(response?.message || 'Motor product status updated successfully')
+                refetch()
+            },
+            onError: (error) => {
+                ShowToast.error(extractErrorMessage(error))
+            },
+        },
+    })
+
+     const toggleMotorProductDeactivateMutation = UseApiMutation<SubmitResponse, { id: number | string, is_active: boolean }>({
+        url: ({ id }) => `products/motor/${id}/deactivate`,
+        method: EMETHODS.PATCH,
+        mutationOptions: {
+            onSuccess: (response) => {
+                ShowToast.success(response?.message || 'Motor product status updated successfully')
+                refetch()
+            },
+            onError: (error) => {
+                ShowToast.error(extractErrorMessage(error))
+            },
+        },
+    })
+
     const ActionsHandlerMapping: SingleActionsHandler<any>[] = [
         {
             label: 'Delete',
@@ -65,6 +94,26 @@ export const MotorProductPage = () => {
                 })
             },
             conditional: (data) => Boolean(data?.id),
+        },
+        {
+            label: 'Deactivate',
+            onSelect: (data) => {
+                toggleMotorProductDeactivateMutation.mutate({
+                    is_active: false,
+                    id: data?.id,
+                })
+            },
+            conditional: (data) => Boolean(data?.id) && Boolean(data?.is_active),
+        },
+        {
+            label: 'Activate',
+            onSelect: (data) => {
+                toggleMotorProductActivateMutation.mutate({
+                    is_active: true,
+                    id: data?.id,
+                })
+            },
+            conditional: (data) => Boolean(data?.id) && !Boolean(data?.is_active),
         },
     ];
 
@@ -125,7 +174,6 @@ export const MotorProductPage = () => {
                     }}
                 />
             </div>
-
             <CustomDialogComponent
                 {...{ handleDialogContextSwitch, dialogOpen }}
                 className='sm:max-w-fit w-[95vw] sm:w-auto p-4 sm:p-6'>

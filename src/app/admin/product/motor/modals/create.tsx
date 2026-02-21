@@ -1,61 +1,120 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { CardFooter } from "@/components/ui/card"
-import { Button, ReusableCountriesInputMultiselect, ReusableSelect, ReuseableInput } from "@/dev/core"
+import { Button, ReusableOrganizationsInputMultiselect, ReusableSelect, ReuseableInput, ReuseableSelectInsurerInput } from "@/dev/core"
 import { UseApiMutation } from "@/hooks/hooks"
-import { OrganizationSchema } from "@/types/form-schema"
-import { OrganizationFormValues } from "@/types/schema"
+import { CreateProductSchema } from "@/types/form-schema"
 import { SubmitResponse } from "@/types/types"
-import { ACCESSLEVELSOPTIONS, BOOLEANOPTIONS, EMETHODS } from "@/utils/constatnts"
+import { ACCESSLEVELSOPTIONS, EMETHODS } from "@/utils/constatnts"
 import { extractErrorMessage } from "@/utils/helpers"
 import { ShowToast } from "@/utils/utils"
 import { zodResolver } from "@hookform/resolvers/zod"
+import type z from "zod"
+import { useState } from "react"
 import { Controller, useForm } from "react-hook-form"
+import { Input } from "@/components/ui/input"
 
+const TARGET_AUDIENCE_OPTIONS = [
+    { label: "Yes", value: "true" },
+    { label: "No", value: "false" },
+]
+type CreateProductFormValues = z.input<typeof CreateProductSchema>
 
-export const CreateProductModal =  ({ handleDialogContextSwitch, componentProps }: {
+export const CreateProductModal = ({ handleDialogContextSwitch, componentProps }: {
     handleDialogContextSwitch: (context?: any) => void
     componentProps?: any
 }) => {
+    const [brochureInputs, setBrochureInputs] = useState<Array<{ id: number, file?: File }>>([
+        { id: Date.now() },
+    ])
 
-  const form = useForm<OrganizationFormValues>({
-          resolver: zodResolver(OrganizationSchema),
-          defaultValues: {
-              name: "",
-              organization_type: "",
-              domain: "",
-              admin_id: "",
-              initials: "",
-              logo: undefined,
-              locations: [],
-          },
-      })
-  
-      const submitMutation = UseApiMutation<SubmitResponse, FormData>({
-          url: "products/motor",
-          method: EMETHODS.POST,
-          // config: {
-          //     headers: {
-          //         "Content-Type": "multipart/form-data",
-          //     },
-          // },
-          mutationOptions: {
-              onSuccess: (data) => {
-                  ShowToast.success(data.message || "Submitted successfully!")
-                  form.reset()
-                  componentProps?.refetch?.()
-                  handleDialogContextSwitch({ refetch: true })
-              },
-              onError: (error: unknown) => {
-                  const message = extractErrorMessage(error)
-                  ShowToast.error(message || "Submission failed!")
-              },
-          },
-      })
-      const onSubmit = (data: OrganizationFormValues) => {
-          submitMutation.mutate(data)
-      }
+    const form = useForm<CreateProductFormValues>({
+        resolver: zodResolver(CreateProductSchema),
+        defaultValues: {
+            organization_location_id: '',
+            name: "",
+            officename: "",
+            description: "",
+            access: "",
+            for_public: "false",
+            start_date: "",
+            expiry_date: "",
+            brochure: [],
+            organization_location_ids: [],
+        },
+    })
 
-  return (
-   <div className="w-full min-w-[600px] max-w-[600px] p-6 space-y-6">
+    const syncBrochures = (inputs: Array<{ id: number, file?: File }>) => {
+        const files = inputs
+            .map((item) => item.file)
+            .filter((file): file is File => Boolean(file))
+        form.setValue("brochure", files, { shouldValidate: true })
+    }
+
+    const handleAddBrochureInput = () => {
+        setBrochureInputs((prev) => [...prev, { id: Date.now() + Math.random() }])
+    }
+
+    const handleRemoveBrochureInput = (id: number) => {
+        setBrochureInputs((prev) => {
+            const next = prev.filter((item) => item.id !== id)
+            const safeNext = next.length ? next : [{ id: Date.now() + Math.random() }]
+            syncBrochures(safeNext)
+            return safeNext
+        })
+    }
+
+    const handleBrochureFileChange = (id: number, file?: File) => {
+        setBrochureInputs((prev) => {
+            const next = prev.map((item) => item.id === id ? { ...item, file } : item)
+            syncBrochures(next)
+            return next
+        })
+    }
+
+    const submitMutation = UseApiMutation<SubmitResponse, FormData>({
+        url: "products/motor",
+        method: EMETHODS.POST,
+        config: {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        },
+        mutationOptions: {
+            onSuccess: (data) => {
+                ShowToast.success(data.message || "Submitted successfully!")
+                form.reset()
+                setBrochureInputs([{ id: Date.now() }])
+                componentProps?.refetch?.()
+                handleDialogContextSwitch({ refetch: true })
+            },
+            onError: (error: unknown) => {
+                const message = extractErrorMessage(error)
+                ShowToast.error(message || "Submission failed!")
+            },
+        },
+    })
+    const onSubmit = (data: CreateProductFormValues) => {
+        const formData = new FormData()
+        formData.append("organization_location_id", data.organization_location_id)
+        formData.append("name", data.name)
+        formData.append("officename", data.officename)
+        formData.append("description", data.description)
+        formData.append("access", data.access)
+        formData.append("for_public", data.for_public)
+        formData.append("start_date", data.start_date)
+        formData.append("expiry_date", data.expiry_date)
+        data.organization_location_ids.forEach((id) => {
+            formData.append("organization_location_ids[]", id)
+        })
+        data.brochure.forEach((file) => {
+            formData.append("brochure[]", file)
+        })
+
+        submitMutation.mutate(formData)
+    }
+
+    return (
+        <div className="w-full min-w-[600px] max-w-[600px] p-6 space-y-6">
             <div className="border-b pb-3">
                 <h2 className="text-xl font-semibold">
                     Create Motor Product
@@ -65,9 +124,19 @@ export const CreateProductModal =  ({ handleDialogContextSwitch, componentProps 
                 </p>
             </div>
 
-            <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="grid gap-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
+                <Controller
+                    control={form.control}
+                    name="organization_location_id"
+                    render={({ field }) => (
+                        <ReuseableSelectInsurerInput
+                            label="Organization Location"
+                            required
+                            value={field.value}
+                            onChange={field.onChange}
+                        />
+                    )}
+                />
                 <ReuseableInput
                     control={form.control}
                     name="name"
@@ -80,7 +149,7 @@ export const CreateProductModal =  ({ handleDialogContextSwitch, componentProps 
                     label="Office Name"
                     className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
                 />
-                 <ReuseableInput
+                <ReuseableInput
                     control={form.control}
                     name="description"
                     type="textarea"
@@ -96,8 +165,8 @@ export const CreateProductModal =  ({ handleDialogContextSwitch, componentProps 
                 <ReusableSelect
                     control={form.control}
                     name="for_public"
-                    label="Target Audience"
-                    options={BOOLEANOPTIONS}
+                    label="Target Audience (public or private)"
+                    options={TARGET_AUDIENCE_OPTIONS}
                 />
                 <ReuseableInput
                     control={form.control}
@@ -113,37 +182,56 @@ export const CreateProductModal =  ({ handleDialogContextSwitch, componentProps 
                     type="date"
                     className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
                 />
-                {/* <Controller
-                    control={form.control}
-                    name="admin_id"
-                    render={({ field }) => (
-                        <ReuseableSingleSelectAdminInput
-                            label="Admin"
-                            required
-                            value={field.value}
-                            onChange={field.onChange}
-                        />
-                    )}
-                /> */}
-                <ReuseableInput
-                    control={form.control}
-                    name="initials"
-                    label="Initials"
-                    className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
-                />
-                <ReuseableInput
-                    className="w-full h-[51px] rounded-[5px] border border-[#ADABAB] sm:col-span-2 lg:col-span-1"
-                    control={form.control}
-                    type='file'
-                    name="logo"
-                    label="Attach Logo"
-                />
+                <div className="space-y-2">
+                    <label className="text-sm font-medium">Attach Brochures</label>
+                    {brochureInputs.map((item) => (
+                        <div key={item.id} className="flex items-center gap-2">
+                            <Input
+                                type="file"
+                                accept=".pdf,.csv,.xls,.xlsx,.docx,application/pdf,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                                className="flex h-[51px] w-full 
+                                rounded-[5px] border border-[#ADABAB] 
+                                bg-transparent px-3 py-2 text-sm file:mr-3 
+                                file:rounded file:border-0 file:bg-muted file:px-3 file:py-1"
+                                onChange={(e) => {
+                                    const file = e.target.files?.[0]
+                                    handleBrochureFileChange(item.id, file)
+                                }}
+                            />
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                className="h-10 w-10 p-0"
+                                onClick={handleAddBrochureInput}>
+                                +
+                            </Button>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                disabled={brochureInputs.length === 1}
+                                 className="h-10 w-10 p-0"
+                                onClick={() => handleRemoveBrochureInput(item.id)}>
+                                -
+                            </Button>
+                        </div>
+                    ))}
+                    {form.watch("brochure")?.length ? (
+                        <p className="text-xs text-muted-foreground">
+                            {form.watch("brochure").length} file{form.watch("brochure").length === 1 ? "" : "s"} selected
+                        </p>
+                    ) : null}
+                    {form.formState.errors.brochure?.message ? (
+                        <p className="text-sm text-red-500">{form.formState.errors.brochure?.message}</p>
+                    ) : null}
+                </div>
                 <Controller
                     control={form.control}
-                    name="locations"
+                    name="organization_location_ids"
                     render={({ field }) => (
-                        <ReusableCountriesInputMultiselect
-                            label="Locations"
+                        <ReusableOrganizationsInputMultiselect
+                            label="Organization Locations"
                             required
                             value={field.value}
                             onChange={field.onChange}
@@ -167,5 +255,5 @@ export const CreateProductModal =  ({ handleDialogContextSwitch, componentProps 
                 </CardFooter>
             </form>
         </div>
-  )
+    )
 }
