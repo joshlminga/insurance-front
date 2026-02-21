@@ -108,17 +108,12 @@ const navData = {
         },
       ],
     },
-    // {
-    //   title: "Products",
-    //   url: EROUTES.PRODUCTS,
-    //   icon: LayoutDashboard,
-    // },
-     {
+    {
       title: "Organizations",
       url: EROUTES.ORGANIZATION,
       icon: UserCog,
     },
-     {
+    {
       title: "Users",
       url: EROUTES.USERS,
       icon: Users,
@@ -133,7 +128,7 @@ const navData = {
 
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const {user} = UseAuth()
+  const { user } = UseAuth()
 
   return (
     <Sidebar collapsible="icon" {...props}>

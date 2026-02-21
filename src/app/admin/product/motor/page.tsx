@@ -157,7 +157,6 @@ export const MotorProductPage = () => {
                     },
                 ]}
             />
-
             <div className='w-full'>
                 <CustomBaseTable
                     {...{
