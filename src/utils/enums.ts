@@ -8,7 +8,8 @@ export const EPREFIX = {
   ADMIN: "admin",
   AGENT: "agent",
   CUSTOMER: "customer",
-  DASHBOARD: "dashboard"
+  DASHBOARD: "dashboard",
+  PRODUCTS: "products",
 } as const
 
 export const EROUTES = {
@@ -54,7 +55,9 @@ export const EROUTES = {
   // Settings
   SETTINGS: `/${EPREFIX.DASHBOARD}/settings`,
 
-  PRODUCTS: `/${EPREFIX.DASHBOARD}/products`,
+  // products
+  PRODUCTS: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor`,
+  
   ORGANIZATION: `/${EPREFIX.DASHBOARD}/organization`,
   USERS: `/${EPREFIX.DASHBOARD}/users`,
 } as const

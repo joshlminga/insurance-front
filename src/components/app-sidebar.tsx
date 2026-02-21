@@ -20,7 +20,7 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar"
-import { EROUTES } from "@/utils/enums"
+import { EPREFIX, EROUTES } from "@/utils/enums"
 import AppLogo from "./ui/app-logo"
 import { UseAuth } from "./auth-provider"
 
@@ -101,7 +101,18 @@ const navData = {
       title: "Products",
       url: EROUTES.PRODUCTS,
       icon: LayoutDashboard,
+      items: [
+        {
+          title: "Motor",
+          url: `${EROUTES.DASHBOARD}/${EPREFIX.PRODUCTS}/motor`,
+        },
+      ],
     },
+    // {
+    //   title: "Products",
+    //   url: EROUTES.PRODUCTS,
+    //   icon: LayoutDashboard,
+    // },
      {
       title: "Organizations",
       url: EROUTES.ORGANIZATION,

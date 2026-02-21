@@ -48,7 +48,7 @@ import { ProtectedRoute, PublicRoute, CustomerPublicRoute } from "./hooks/hooks"
 import Layout from "./Layout"
 import OrganizationsPage from "./app/admin/organizations/page"
 import { UsersPage } from "./app/admin/users/page"
-import { ProductPage } from "./app/admin/product/page"
+import { MotorProductPage } from "./app/admin/product/motor/page"
 
 export const router = createBrowserRouter([
 
@@ -210,8 +210,8 @@ export const router = createBrowserRouter([
 
       // products
       {
-        path: "products",
-        element: <ProductPage />,
+        path: "products/motor",
+        element: <MotorProductPage />,
       },
 
       // Organizations
