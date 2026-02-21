@@ -97,6 +97,11 @@ const navData = {
       url: EROUTES.STAFF,
       icon: UserCog,
     },
+    {
+      title: "Products",
+      url: EROUTES.PRODUCTS,
+      icon: LayoutDashboard,
+    },
      {
       title: "Organizations",
       url: EROUTES.ORGANIZATION,

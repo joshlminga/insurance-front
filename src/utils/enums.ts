@@ -54,6 +54,7 @@ export const EROUTES = {
   // Settings
   SETTINGS: `/${EPREFIX.DASHBOARD}/settings`,
 
+  PRODUCTS: `/${EPREFIX.DASHBOARD}/products`,
   ORGANIZATION: `/${EPREFIX.DASHBOARD}/organization`,
   USERS: `/${EPREFIX.DASHBOARD}/users`,
 } as const

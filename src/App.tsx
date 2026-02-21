@@ -48,6 +48,7 @@ import { ProtectedRoute, PublicRoute, CustomerPublicRoute } from "./hooks/hooks"
 import Layout from "./Layout"
 import OrganizationsPage from "./app/admin/organizations/page"
 import { UsersPage } from "./app/admin/users/page"
+import { ProductPage } from "./app/admin/product/page"
 
 export const router = createBrowserRouter([
 
@@ -207,13 +208,19 @@ export const router = createBrowserRouter([
         element: <StaffDetailPage />,
       },
 
+      // products
+      {
+        path: "products",
+        element: <ProductPage />,
+      },
+
       // Organizations
       {
         path: "organization",
         element: <OrganizationsPage />,
       },
       // Users
-       {
+      {
         path: "users",
         element: <UsersPage />,
       },

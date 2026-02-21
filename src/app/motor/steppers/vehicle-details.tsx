@@ -77,8 +77,7 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
                         type="button"
                         className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
                         rightIcon={<ArrowRightCircle />}
-                        onClick={() => goToNextStep?.()}
-                    >
+                        onClick={() => goToNextStep?.()}>
                         Next
                     </Button>
                 </CardFooter>

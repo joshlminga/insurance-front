@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
 import {
   Field,
   FieldDescription,
@@ -9,7 +8,7 @@ import {
 import { EPREFIX, EROUTES } from "@/utils/enums"
 import { useNavigate } from "react-router-dom"
 
-import { ReuseableInput } from "@/dev/core"
+import { Button, ReuseableInput } from "@/dev/core"
 import { EMETHODS } from "@/utils/constatnts"
 import { UseAuth } from "@/components/auth-provider"
 import { useForm } from "react-hook-form"
@@ -86,12 +85,9 @@ export function LoginForm({
           </Field>
           <Field>
             <Button
-              // {...{
-              //   onClick: () =>
-              //     console.log()
-              // }}
               className="bg-[#C20C0C] hover:bg-[#C20C0C]/70"
-              type="submit">
+              type="submit"
+              loading={loginMutation.isPending}>
               <p className='font-bold leading-6 text-sm'>Login</p>
             </Button>
           </Field>
