@@ -16,50 +16,50 @@ export const AddLocationModal = ({ handleDialogContextSwitch, componentProps }: 
     componentProps?: any
 }) => {
 
-     const form = useForm<AddLocationFormValues>({
-            resolver: zodResolver(AddLocationSchema),
-            defaultValues: {
-                organization_id: componentProps?.data?.organization_id ?? componentProps?.data?.id ?? '',
-                initials: "",
-                logo: undefined,
-                country_id: "",
-            },
-        })
-    
-        const submitMutation = UseApiMutation<SubmitResponse, FormData>({
-            url: "organization-location",
-            method: EMETHODS.POST,
-            config: {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-            },
-            mutationOptions: {
-                onSuccess: (data) => {
-                    ShowToast.success(data.message || "Submitted successfully!")
-                    form.reset()
-                    componentProps?.refetch?.()
-                    handleDialogContextSwitch({ refetch: true })
-                },
-                onError: (error: unknown) => {
-                    const message = extractErrorMessage(error)
-                    ShowToast.error(message || "Submission failed!")
-                },
-            },
-        })
-        const onSubmit = (data: AddLocationFormValues) => {
-            const formData = new FormData()
-            formData.append("organization_id", String(data.organization_id))
-            formData.append("initials", data.initials)
-            formData.append("country_id", data.country_id)
-            if (data.logo instanceof File) {
-                formData.append("logo", data.logo)
-            }
-            submitMutation.mutate(formData)
-        }
+    const form = useForm<AddLocationFormValues>({
+        resolver: zodResolver(AddLocationSchema),
+        defaultValues: {
+            organization_id: componentProps?.data?.organization_id ?? componentProps?.data?.id ?? '',
+            initials: "",
+            logo: undefined,
+            country_id: "",
+        },
+    })
 
-  return (
-    <div className="w-full min-w-[600px] max-w-[600px] p-6 space-y-6">
+    const submitMutation = UseApiMutation<SubmitResponse, FormData>({
+        url: "organization-location",
+        method: EMETHODS.POST,
+        config: {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        },
+        mutationOptions: {
+            onSuccess: (data) => {
+                ShowToast.success(data.message || "Submitted successfully!")
+                form.reset()
+                componentProps?.refetch?.()
+                handleDialogContextSwitch({ refetch: true })
+            },
+            onError: (error: unknown) => {
+                const message = extractErrorMessage(error)
+                ShowToast.error(message || "Submission failed!")
+            },
+        },
+    })
+    const onSubmit = (data: AddLocationFormValues) => {
+        const formData = new FormData()
+        formData.append("organization_id", String(data.organization_id))
+        formData.append("initials", data.initials)
+        formData.append("country_id", data.country_id)
+        if (data.logo instanceof File) {
+            formData.append("logo", data.logo)
+        }
+        submitMutation.mutate(formData)
+    }
+
+    return (
+        <div className="w-full min-w-[600px] max-w-[600px] p-6 space-y-6">
             <div className="border-b pb-3">
                 <h2 className="text-xl font-semibold">
                     Add Location
@@ -113,5 +113,5 @@ export const AddLocationModal = ({ handleDialogContextSwitch, componentProps }: 
                 </CardFooter>
             </form>
         </div>
-  )
+    )
 }

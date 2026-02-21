@@ -11,7 +11,8 @@ import {
     ResendOtpPayloadSchema,
     OrganizationSchema,
     UsersSchema,
-    AddLocationSchema
+    AddLocationSchema,
+    EditLocationSchema
 } from "./form-schema";
 
 export type CustomerFormValues = z.infer<typeof CustomerDetailsSchema>
@@ -27,3 +28,4 @@ export type PaymentFormValues = z.infer<typeof PaymentDetailsSchema>
 export type OrganizationFormValues = z.infer<typeof OrganizationSchema>
 export type UsersFormValues = z.infer<typeof UsersSchema>
 export type AddLocationFormValues = z.infer<typeof AddLocationSchema>
+export type EditLocationFormValues = z.infer<typeof EditLocationSchema>

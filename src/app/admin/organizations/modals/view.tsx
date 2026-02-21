@@ -11,6 +11,7 @@ import { EMETHODS } from '@/utils/constatnts'
 import { ShowToast } from '@/utils/utils'
 import { extractErrorMessage } from '@/utils/helpers'
 import { AddLocationModal } from './add-location'
+import { EditLocationsModal } from './edit-locations'
 
 const getOrganizationName = (organization: Record<string, any>) =>
     organization?.organization_name ?? organization?.name ?? 'N/A'
@@ -162,19 +163,35 @@ export const ViewOrganizationModal = ({
                                             <CardHeader className="border-b px-5 py-4">
                                                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                                                     <CardTitle className="text-base">Location #{index + 1}</CardTitle>
-                                                    <Button
-                                                        variant="outline"
-                                                        size="sm"
-                                                        onClick={() =>
-                                                            handleDialogContextSwitch({
-                                                                componentProps: {
-                                                                    data: locationId,
-                                                                },
-                                                                Component: ViewMemberLocationModal,
-                                                            })
-                                                        }>
-                                                        View Members
-                                                    </Button>
+                                                    <div className='justify-end flex gap-2'>
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            onClick={() =>
+                                                                handleDialogContextSwitch({
+                                                                    componentProps: {
+                                                                        data: location,
+                                                                        refetch,
+                                                                    },
+                                                                    Component: EditLocationsModal,
+                                                                })
+                                                            }>
+                                                            Edit
+                                                        </Button>
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            onClick={() =>
+                                                                handleDialogContextSwitch({
+                                                                    componentProps: {
+                                                                        data: locationId,
+                                                                    },
+                                                                    Component: ViewMemberLocationModal,
+                                                                })
+                                                            }>
+                                                            View Members
+                                                        </Button>
+                                                    </div>
                                                 </div>
                                             </CardHeader>
 
