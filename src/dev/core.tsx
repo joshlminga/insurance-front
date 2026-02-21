@@ -64,6 +64,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { MultiSelect, MultiSelectContent, MultiSelectGroup, MultiSelectItem, MultiSelectTrigger, MultiSelectValue } from "@/components/ui/multi-select";
 import { UseApiQuery } from "@/hooks/hooks";
 import { Label } from "@/components/ui/label";
+import { EORGANIZATIONTYPES } from "@/utils/constatnts";
 
 const formatSegment = (segment: string) => {
     return segment
@@ -1060,6 +1061,106 @@ export function ReuseableSingleSelectAdminInput<T extends FieldValues>({
                     )}
                 </SelectContent>
             </Select>
+        </div>
+    )
+}
+
+export const ReuseableSelectInsurerInput = <T extends FieldValues>({
+    value,
+    onChange,
+    placeholder = "Select insurer...",
+    label,
+    required = false,
+    disabled = false,
+    className,
+
+}: ReuseableSingleSelectCountriesInputProps<T>) => {
+    const { data, isLoading } = UseApiQuery<SubmitResponse>({
+        url: `organization-location?organization_type=${EORGANIZATIONTYPES.INSURER}`,
+        params: { direction: "ASC" },
+        queryOptions: { enabled: true },
+    })
+    const insurers = data?.data ?? []
+    return (
+        <div className={`space-y-2 ${className ?? ""}`}>
+            {label && (
+                <Label>
+                    {label}
+                    {required && <span className="text-destructive ml-1">*</span>}
+                </Label>
+            )}
+            <Select
+                value={value}
+                onValueChange={onChange}
+                disabled={disabled || isLoading}>
+                <SelectTrigger className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]">
+                    <SelectValue
+                        placeholder={isLoading ? "Loading users..." : placeholder}
+                    />
+                </SelectTrigger>
+                <SelectContent>
+                    {insurers.map((insurer: any) => (
+                        <SelectItem key={insurer?.location?.organization_location_id} value={String(insurer?.location?.organization_location_id)}>
+                            {insurer?.location?.organization_name} - {insurer?.location?.country?.name}
+                        </SelectItem>
+                    ))}
+                    {!isLoading && insurers.length === 0 && (
+                        <div className="px-3 py-2 text-sm text-muted-foreground">
+                            No insurers found
+                        </div>
+                    )}
+                </SelectContent>
+            </Select>
+        </div>
+    )
+}
+
+export const ReusableOrganizationsInputMultiselect = ({
+    value,
+    onChange,
+    placeholder = 'Select organizations...',
+    label,
+    required = false,
+}: TCountriesInputMultiselectProps) => {
+    const { data, isLoading } = UseApiQuery<SubmitResponse>({
+        url: `organization-location?exclude_organization_type=${EORGANIZATIONTYPES.INSURER}`,
+        params: { direction: 'ASC' },
+        queryOptions: { enabled: true },
+    })
+    const organizations = data?.data ?? [];
+    return (
+        <div className="space-y-2 w-full">
+            {label && (
+                <Label>
+                    {label}
+                    {required && (
+                        <span className="text-red-500 ml-1">*</span>
+                    )}
+                </Label>
+            )}
+            <MultiSelect
+                values={value ?? []}
+                onValuesChange={(vals) => onChange?.(vals)} >
+                <MultiSelectTrigger className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]">
+                    <MultiSelectValue placeholder={placeholder} />
+                </MultiSelectTrigger>
+                <MultiSelectContent>
+                    <MultiSelectGroup>
+                        {!isLoading && organizations.length === 0 && (
+                            <div className="px-3 py-2 text-sm text-muted-foreground">
+                                No organizations found.
+                            </div>
+                        )}
+                        {organizations.map((org: any) => (
+                            <MultiSelectItem
+                                key={org?.location?.organization_location_id}
+                                value={String(org?.location?.organization_location_id)}>
+                                {org?.location?.organization_name} - {org?.location?.country?.name}
+                            </MultiSelectItem>
+                        ))}
+                    </MultiSelectGroup>
+                </MultiSelectContent>
+            </MultiSelect>
         </div>
     )
 }

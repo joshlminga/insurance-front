@@ -20,6 +20,16 @@ export const ORGANIZATIONTYPES = [
   { label: "Organization", value: "Organization" },
 ]
 
+export const EORGANIZATIONTYPES = {
+  AGENT: "Agent",
+  INSURER: "Insurer",
+  PARTNER: "Partner",
+  COMPANY: "Company",
+  ORGANIZATION: "Organization",
+} as const;
+
+export type EORGANIZATIONTYPES = typeof EORGANIZATIONTYPES[keyof typeof EORGANIZATIONTYPES];
+
 export const ACCEPTED_IMAGE_TYPES = [
   "image/jpeg",
   "image/jpg",
@@ -57,4 +67,20 @@ export const PAYMENTPLANS = [
   { label: "1", value: "1" },
   { label: "2", value: "2" },
   { label: "3", value: "3" },
+]
+
+export const BOOLEANOPTIONS = [
+  { label: "Yes", value: true },
+  { label: "No", value: false },
+]
+
+export const ACCESSLEVELSOPTIONS = [
+  { label: "All", value: 'all' },
+  { label: "Personal Owned", value: 'personal-owned' },
+   { label: "Company Owned", value: 'company-owned' },
+]
+
+export const TARGET_AUDIENCE_OPTIONS = [
+    { label: "Yes", value: "true" },
+    { label: "No", value: "false" },
 ]

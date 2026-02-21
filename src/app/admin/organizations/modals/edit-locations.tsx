@@ -2,8 +2,8 @@
 import { CardFooter } from '@/components/ui/card'
 import { Button, ReuseableInput, ReuseableSingleSelectCountriesInput } from '@/dev/core'
 import { UseApiMutation } from '@/hooks/hooks'
-import { UsersSchema } from '@/types/form-schema'
-import { UsersFormValues } from '@/types/schema'
+import { EditLocationSchema } from '@/types/form-schema'
+import { EditLocationFormValues } from '@/types/schema'
 import { SubmitResponse } from '@/types/types'
 import { EMETHODS } from '@/utils/constatnts'
 import { extractErrorMessage } from '@/utils/helpers'
@@ -11,28 +11,26 @@ import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Controller, useForm } from 'react-hook-form'
 
-export const CreateUserModal = ({ handleDialogContextSwitch, componentProps }: {
+export const EditLocationsModal = ({ handleDialogContextSwitch, componentProps }: {
     handleDialogContextSwitch: (context?: any) => void
     componentProps?: any
 }) => {
-    const form = useForm<UsersFormValues>({
-        resolver: zodResolver(UsersSchema),
+    const form = useForm<EditLocationFormValues>({
+        resolver: zodResolver(EditLocationSchema),
         defaultValues: {
-            name: "",
-            email: "",
-            phone: "",
-            country: "",
+            logo: undefined,
+            country_id: componentProps?.data?.country?.id ?? "",
         },
     })
 
-    const submitMutation = UseApiMutation<SubmitResponse, UsersFormValues>({
-        url: "user/register",
-        method: EMETHODS.POST,
-        // config: {
-        //     headers: {
-        //         "Content-Type": "multipart/form-data",
-        //     },
-        // },
+    const submitMutation = UseApiMutation<SubmitResponse, FormData>({
+        url: `organization-location/${componentProps?.data?.organization_location_id}`,
+        method: EMETHODS.PATCH,
+        config: {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        },
         mutationOptions: {
             onSuccess: (data) => {
                 ShowToast.success(data.message || "Submitted successfully!")
@@ -46,65 +44,38 @@ export const CreateUserModal = ({ handleDialogContextSwitch, componentProps }: {
             },
         },
     })
-    const onSubmit = (data: UsersFormValues) => {
-        submitMutation.mutate(data)
+    const onSubmit = (data: EditLocationFormValues) => {
+        const formData = new FormData()
+        formData.append("country_id", data.country_id)
+        if (data.logo instanceof File) {
+            formData.append("logo", data.logo)
+        }
+        submitMutation.mutate(formData)
     }
+
 
     return (
         <div className="w-full min-w-[600px] max-w-[600px] p-6 space-y-6">
             <div className="border-b pb-3">
                 <h2 className="text-xl font-semibold">
-                    Create Users
+                    Edit Location
                 </h2>
                 <p className="text-sm text-muted-foreground mt-1">
-                    Fill in the details below to register a new user.
+                    Fill in the details below to update an existing location.
                 </p>
             </div>
 
-            <form onSubmit={form.handleSubmit(onSubmit)}
-                className="grid gap-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
                 <ReuseableInput
                     control={form.control}
-                    name="name"
-                    label="Full Name"
+                    name="logo"
+                    type='file'
+                    label="Logo"
                     className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
                 />
-                {/* <ReusableSelect
-                    control={form.control}
-                    name="organization_type"
-                    label="Organization Type"
-                    options={ORGANIZATIONTYPES}
-                /> */}
-                <ReuseableInput
-                    control={form.control}
-                    name="email"
-                    type='email'
-                    label="Email Address"
-                    className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
-                />
-
-                <ReuseableInput
-                    control={form.control}
-                    name="phone"
-                    label="Phone Number"
-                    type='tel'
-                    className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
-                />
-                {/* <Controller
-                    control={form.control}
-                    name="country"
-                    render={({ field }) => (
-                        <ReusableCountriesInputMultiselect
-                            label="country"
-                            required
-                            value={field.value}
-                            onChange={field.onChange}
-                        />
-                    )}
-                /> */}
                 <Controller
                     control={form.control}
-                    name="country"
+                    name="country_id"
                     render={({ field }) => (
                         <ReuseableSingleSelectCountriesInput
                             label="Country"
@@ -121,7 +92,6 @@ export const CreateUserModal = ({ handleDialogContextSwitch, componentProps }: {
                         onClick={() => handleDialogContextSwitch({})}>
                         Cancel
                     </Button>
-
                     <Button
                         type="submit"
                         className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"

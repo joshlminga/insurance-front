@@ -1,27 +1,26 @@
 /* eslint-disable no-extra-boolean-cast */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { PageHeader } from '@/components/shared'
-import { ActionColumn } from '@/dev/columns'
+import { Plus } from 'lucide-react'
+import { CreateProductModal } from './modals/create-product'
+import { useCustomDialogContextFactory, useDebounce } from '@/hooks'
 import { CustomDialogComponent } from '@/dev/core'
 import { CustomBaseTable, SearchTools } from '@/dev/table'
-import { useCustomDialogContextFactory, useDebounce } from '@/hooks'
 import { SingleActionsHandler, SubmitResponse, TFilterOptions, TPaginationFilters } from '@/types/types'
-import { FILTEROPTIONS, ReusableReducer } from '@/utils/constatnts'
+import { EMETHODS, FILTEROPTIONS, ReusableReducer } from '@/utils/constatnts'
 import { useReducer } from 'react'
-import { CreateUserModal } from './modals/create'
+import { ActionColumn } from '@/dev/columns'
 import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
-import { UsersColumns } from '@/dev/columns/admin/users'
-import { EMETHODS } from '@/utils/constatnts'
+import { MotorProductsColumns } from '@/dev/columns/admin/products'
 import { ShowToast } from '@/utils/utils'
 import { extractErrorMessage } from '@/utils/helpers'
-import { EditUserModal } from './modals/edit'
-import { ViewUserModal } from './modals/view'
-import { Plus } from 'lucide-react'
+import { EditProductModal } from './modals/edit-product'
 
-export const UsersPage = () => {
+export const MotorProductPage = () => {
+
     const [filter, optionsDispatcher] = useReducer(
         ReusableReducer<TPaginationFilters & TFilterOptions>,
-        { ...FILTEROPTIONS, page: 1, pageSize: 10 }
+        { ...FILTEROPTIONS, page: 1, pageSize: 15 }
     );
     const optionsDispatcherDebounce = useDebounce({
         debounceCallback: optionsDispatcher,
@@ -34,7 +33,7 @@ export const UsersPage = () => {
         }>();
 
     const { data, isLoading, refetch } = UseApiQuery<SubmitResponse>({
-        url: 'user',
+        url: 'products/motor',
         params: {
             page: filter.page,
             pageSize: filter.pageSize,
@@ -44,12 +43,13 @@ export const UsersPage = () => {
             enabled: true,
         },
     })
-    const deleteUserMutation = UseApiMutation<SubmitResponse, { id: number | string }>({
-        url: ({ id }) => `user/${id}`,
+
+    const deleteMotorProductMutation = UseApiMutation<SubmitResponse, { id: number | string }>({
+        url: ({ id }) => `products/motor/${id}`,
         method: EMETHODS.DELETE,
         mutationOptions: {
             onSuccess: (response) => {
-                ShowToast.success(response?.message || 'User deleted successfully')
+                ShowToast.success(response?.message || 'Motor product deleted successfully')
                 refetch()
             },
             onError: (error) => {
@@ -58,12 +58,26 @@ export const UsersPage = () => {
         },
     })
 
-    const toggleUserStatusMutation = UseApiMutation<SubmitResponse, { id: number | string; is_active: boolean }>({
-        url: ({ id }) => `user/${id}/status`,
+    const toggleMotorProductActivateMutation = UseApiMutation<SubmitResponse, { id: number | string, is_active: boolean }>({
+        url: ({ id }) => `products/motor/${id}/activate`,
         method: EMETHODS.PATCH,
         mutationOptions: {
             onSuccess: (response) => {
-                ShowToast.success(response?.message || 'User status updated successfully')
+                ShowToast.success(response?.message || 'Motor product status updated successfully')
+                refetch()
+            },
+            onError: (error) => {
+                ShowToast.error(extractErrorMessage(error))
+            },
+        },
+    })
+
+     const toggleMotorProductDeactivateMutation = UseApiMutation<SubmitResponse, { id: number | string, is_active: boolean }>({
+        url: ({ id }) => `products/motor/${id}/deactivate`,
+        method: EMETHODS.PATCH,
+        mutationOptions: {
+            onSuccess: (response) => {
+                ShowToast.success(response?.message || 'Motor product status updated successfully')
                 refetch()
             },
             onError: (error) => {
@@ -74,80 +88,75 @@ export const UsersPage = () => {
 
     const ActionsHandlerMapping: SingleActionsHandler<any>[] = [
         {
-            label: "View Details",
+            label: 'View Details',
             onSelect: (data) => {
+                console.log('View details for:', data)
+                // handleDialogContextSwitch({
+                //     componentProps: { data, refetch },
+                //     Component: ViewProductDetailsModal,
+                // })
+            },
+        },
+        {
+            label: 'Edit',
+            onSelect: (data) => {
+                console.log('Edit product:', data)
                 handleDialogContextSwitch({
                     componentProps: { data, refetch },
-                    Component: ViewUserModal,
+                    Component: EditProductModal,
                 })
             },
         },
         {
-            label: "Edit",
+            label: 'Delete',
             onSelect: (data) => {
-                handleDialogContextSwitch({
-                    componentProps: { data, refetch },
-                    Component: EditUserModal,
+                deleteMotorProductMutation.mutate({
+                    id: data?.id,
                 })
             },
+            conditional: (data) => Boolean(data?.id),
         },
         {
-            label: "Delete",
+            label: 'Deactivate',
             onSelect: (data) => {
-                const id = data?.user_id ?? data?.id
-                if (!id) return
-                deleteUserMutation.mutate({
-                    id,
-                })
-            },
-            conditional: (data) => Boolean(data?.user_id ?? data?.id),
-        },
-        {
-            label: "Deactivate",
-            onSelect: (data) => {
-                const id = data?.user_id ?? data?.id
-                if (!id) return
-                toggleUserStatusMutation.mutate({
-                    id,
+                toggleMotorProductDeactivateMutation.mutate({
                     is_active: false,
+                    id: data?.id,
                 })
             },
-            conditional: (data) => Boolean(data?.user_id ?? data?.id) && Boolean(data?.is_active),
+            conditional: (data) => Boolean(data?.id) && Boolean(data?.is_active),
         },
         {
-            label: "Activate",
+            label: 'Activate',
             onSelect: (data) => {
-                const id = data?.user_id ?? data?.id
-                if (!id) return
-                toggleUserStatusMutation.mutate({
-                    id,
+                toggleMotorProductActivateMutation.mutate({
                     is_active: true,
+                    id: data?.id,
                 })
             },
-            conditional: (data) => Boolean(data?.user_id ?? data?.id) && !Boolean(data?.is_active),
-        }
-    ]
+            conditional: (data) => Boolean(data?.id) && !Boolean(data?.is_active),
+        },
+    ];
 
     return (
         <div>
             <PageHeader
-                title="Users"
-                description="Manage users, their details, and associated users"
+                title="Motor Product"
+                description="Manage motor products, their details, and associated products"
                 actions={[
                     {
                         icon: Plus,
-                        label: 'Add User',
+                        label: 'Add Motor Product',
                         variant: 'default',
                         onClick: () => {
                             handleDialogContextSwitch({
                                 componentProps: { refetch },
-                                Component: CreateUserModal,
+                                Component: CreateProductModal,
                             })
                         },
                     },
                 ]}
             />
-
             <div className='w-full'>
                 <CustomBaseTable
                     {...{
@@ -166,31 +175,25 @@ export const UsersPage = () => {
                             includeFilter: true,
                         },
                         columns: [
-                            ...UsersColumns,
+                            ...MotorProductsColumns,
                             ActionColumn({ ActionsHandlerMapping }),
                         ],
                         OtherTools: SearchTools,
-                        data: data?.data?.users ?? [],
-                        pageCount:
-                            data?.data?.totalPages ??
-                            data?.data?.total_pages ??
-                            data?.data?.pagination?.totalPages ??
-                            data?.data?.pagination?.total_pages ??
-                            1,
-                        title: 'Users',
+                        data: data?.data?.products ?? [],
+                        pageCount: data?.data?.pagination?.last_page ?? 1,
+                        title: 'Motor Products',
                         showPagination: true,
                         setPageSize: (pageSize) =>
                             optionsDispatcher({
                                 payload: { pageSize },
                                 type: 'pageSize',
                             }),
-                        pageSize: filter.pageSize,
-                        page: filter.page,
+                        pageSize: data?.data?.pagination?.per_page ?? 10,
+                        page: data?.data?.pagination?.current_page ?? 1,
                         isLoading: isLoading,
                     }}
                 />
             </div>
-
             <CustomDialogComponent
                 {...{ handleDialogContextSwitch, dialogOpen }}
                 className='sm:max-w-fit w-[95vw] sm:w-auto p-4 sm:p-6'>

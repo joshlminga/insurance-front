@@ -6,7 +6,7 @@ import { Link } from "react-router-dom"
 
 export function PageHeader({ title, description, actions, children }: PageHeaderProps) {
   return (
-    <>
+    <div className="w-full">
       <title>{`${title} - Accensure Insurance Marketplace`}</title>
       {description && <meta name="description" content={description} />}
       <div className="flex flex-col gap-4">
@@ -22,7 +22,6 @@ export function PageHeader({ title, description, actions, children }: PageHeader
             )}
           </div>
           <div className="flex items-center gap-2 shrink-0">
-
             <BreadCrumbComponent />
           </div>
         </div>
@@ -57,6 +56,6 @@ export function PageHeader({ title, description, actions, children }: PageHeader
         </div>
         {children}
       </div>
-    </>
+    </div>
   )
 }

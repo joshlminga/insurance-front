@@ -20,7 +20,7 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar"
-import { EROUTES } from "@/utils/enums"
+import { EPREFIX, EROUTES } from "@/utils/enums"
 import AppLogo from "./ui/app-logo"
 import { UseAuth } from "./auth-provider"
 
@@ -97,12 +97,23 @@ const navData = {
       url: EROUTES.STAFF,
       icon: UserCog,
     },
-     {
+    {
+      title: "Products",
+      url: EROUTES.PRODUCTS,
+      icon: LayoutDashboard,
+      items: [
+        {
+          title: "Motor",
+          url: `${EROUTES.DASHBOARD}/${EPREFIX.PRODUCTS}/motor`,
+        },
+      ],
+    },
+    {
       title: "Organizations",
       url: EROUTES.ORGANIZATION,
       icon: UserCog,
     },
-     {
+    {
       title: "Users",
       url: EROUTES.USERS,
       icon: Users,
@@ -117,7 +128,7 @@ const navData = {
 
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const {user} = UseAuth()
+  const { user } = UseAuth()
 
   return (
     <Sidebar collapsible="icon" {...props}>

@@ -16,6 +16,7 @@ import { EMETHODS } from '@/utils/constatnts';
 import { ShowToast } from '@/utils/utils';
 import { extractErrorMessage } from '@/utils/helpers';
 import { ViewOrganizationModal } from './modals/view';
+import { Plus } from 'lucide-react';
 
 const OrganizationsPage = () => {
   const [filter, optionsDispatcher] = useReducer(
@@ -84,7 +85,6 @@ const OrganizationsPage = () => {
     {
       label: 'Edit',
       onSelect: (data) => {
-        console.log(data);
         handleDialogContextSwitch({
           componentProps: { data, refetch },
           Component: EditOrganizationModal,
@@ -129,6 +129,7 @@ const OrganizationsPage = () => {
         description="Manage organizations, their details, and associated users"
         actions={[
           {
+            icon: Plus,
             label: 'Add Organization',
             variant: 'default',
             onClick: () => {

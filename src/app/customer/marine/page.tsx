@@ -1,8 +1,8 @@
 import { StepperProvider } from '@/hooks/stepper-context';
 import React from 'react'
-import { Navbar } from '../landing/components/navbar';
+import { Navbar } from '../../landing/components/navbar';
 import { Outlet } from 'react-router-dom';
-import { Footer } from '../landing/components/footer';
+import { Footer } from '../../landing/components/footer';
 
 export const MarineLandingPage: React.FC = () => {
     return (
