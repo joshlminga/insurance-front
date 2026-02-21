@@ -38,12 +38,40 @@ export const ViewOrganizationModal = ({
     const organization = data?.data ?? componentProps?.data ?? {}
     const locations: any[] = organization?.organization_location ?? []
 
-    const deleteMotorProductMutation = UseApiMutation<SubmitResponse, { id: number | string }>({
+    const deleteLocationMutation = UseApiMutation<SubmitResponse, { id: number | string }>({
         url: ({ id }) => `organization-location/${id}`,
         method: EMETHODS.DELETE,
         mutationOptions: {
             onSuccess: (response) => {
                 ShowToast.success(response?.message || 'Organization location deleted successfully')
+                refetch()
+            },
+            onError: (error) => {
+                ShowToast.error(extractErrorMessage(error))
+            },
+        },
+    })
+
+    const toggleLocationStatusMutation = UseApiMutation<SubmitResponse, { id: number | string, is_active: boolean }>({
+        url: ({ id }) => `organization-location/${id}/status`,
+        method: EMETHODS.PATCH,
+        mutationOptions: {
+            onSuccess: (response) => {
+                ShowToast.success(response?.message || 'Organization location status updated successfully')
+                refetch()
+            },
+            onError: (error) => {
+                ShowToast.error(extractErrorMessage(error))
+            },
+        },
+    })
+
+        const toggleDefaultLocationMutation = UseApiMutation<SubmitResponse, { id: number | string, is_default: boolean }>({
+        url: ({ id }) => `organization-location/${id}/default`,
+        method: EMETHODS.PATCH,
+        mutationOptions: {
+            onSuccess: (response) => {
+                ShowToast.success(response?.message || 'Organization location default status updated successfully')
                 refetch()
             },
             onError: (error) => {
@@ -113,9 +141,17 @@ export const ViewOrganizationModal = ({
                                                 </Button>
                                             </div>
                                             <DetailGrid columns={2}>
-                                                <DetailItem label="Country Name" value={country?.name ?? 'N/A'} />
-                                                <DetailItem label="Country Slug" value={country?.slug ?? 'N/A'} />
-                                                <DetailItem label="Initials" value={meta?.initials ?? 'N/A'} />
+                                                <DetailItem label="Country Name" value={country?.name ?? ''} />
+                                                <DetailItem
+                                                    label="Default Location"
+                                                    value={
+                                                        <Badge className={`rounded-full text-white ${location?.is_default ? 'bg-cyan-500' : 'bg-red-500'}`}>
+                                                            {location?.is_default ? 'Default' : 'Non-default'}
+                                                        </Badge>
+                                                    }
+                                                />
+                                                <DetailItem label="Country Slug" value={country?.slug ?? ''} />
+                                                <DetailItem label="Initials" value={meta?.initials ?? ''} />
                                             </DetailGrid>
                                             {logoUrl ? (
                                                 <div className="space-y-2">
@@ -128,6 +164,26 @@ export const ViewOrganizationModal = ({
                                                 </div>
                                             ) : null}
                                             <CardFooter className="flex flex-col sm:flex-row justify-end gap-3 mt-2 px-0">
+                                                 <Button
+                                                    size="sm"
+                                                    onClick={() =>
+                                                        toggleDefaultLocationMutation.mutate({
+                                                            id: location?.organization_location_id,
+                                                            is_default: !location?.is_default,
+                                                        })
+                                                    }>
+                                                    Default Location?
+                                                </Button>
+                                                <Button
+                                                    size="sm"
+                                                    onClick={() =>
+                                                        toggleLocationStatusMutation.mutate({
+                                                            id: location?.organization_location_id,
+                                                            is_active: !location?.is_active,
+                                                        })
+                                                    }>
+                                                    Disable Location
+                                                </Button>
                                                 <Button
                                                     variant="outline"
                                                     size="sm"
@@ -146,7 +202,7 @@ export const ViewOrganizationModal = ({
                                                     variant="destructive"
                                                     size="sm"
                                                     onClick={() =>
-                                                        deleteMotorProductMutation.mutate({
+                                                        deleteLocationMutation.mutate({
                                                             id: location?.organization_location_id,
                                                         })
                                                     }>
