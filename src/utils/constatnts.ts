@@ -58,3 +58,14 @@ export const PAYMENTPLANS = [
   { label: "2", value: "2" },
   { label: "3", value: "3" },
 ]
+
+export const BOOLEANOPTIONS = [
+  { label: "Yes", value: true },
+  { label: "No", value: false },
+]
+
+export const ACCESSLEVELSOPTIONS = [
+  { label: "All", value: 'all' },
+  { label: "Personal Owned", value: 'personal-owned' },
+   { label: "Company Owned", value: 'company-owned' },
+]

@@ -6,11 +6,13 @@ import { useCustomDialogContextFactory, useDebounce } from '@/hooks'
 import { CustomDialogComponent } from '@/dev/core'
 import { CustomBaseTable, SearchTools } from '@/dev/table'
 import { SingleActionsHandler, SubmitResponse, TFilterOptions, TPaginationFilters } from '@/types/types'
-import { FILTEROPTIONS, ReusableReducer } from '@/utils/constatnts'
+import { EMETHODS, FILTEROPTIONS, ReusableReducer } from '@/utils/constatnts'
 import { useReducer } from 'react'
 import { ActionColumn } from '@/dev/columns'
-import { UseApiQuery } from '@/hooks/hooks'
+import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
 import { MotorProductsColumns } from '@/dev/columns/admin/products'
+import { ShowToast } from '@/utils/utils'
+import { extractErrorMessage } from '@/utils/helpers'
 
 export const MotorProductPage = () => {
 
@@ -40,9 +42,31 @@ export const MotorProductPage = () => {
         },
     })
 
-    console.log({ data })
+    const deleteMotorProductMutation = UseApiMutation<SubmitResponse, { id: number | string }>({
+        url: ({ id }) => `products/motor/${id}`,
+        method: EMETHODS.DELETE,
+        mutationOptions: {
+            onSuccess: (response) => {
+                ShowToast.success(response?.message || 'Motor product deleted successfully')
+                refetch()
+            },
+            onError: (error) => {
+                ShowToast.error(extractErrorMessage(error))
+            },
+        },
+    })
 
-    const ActionsHandlerMapping: SingleActionsHandler<any>[] = [];
+    const ActionsHandlerMapping: SingleActionsHandler<any>[] = [
+        {
+            label: 'Delete',
+            onSelect: (data) => {
+                deleteMotorProductMutation.mutate({
+                    id: data?.id,
+                })
+            },
+            conditional: (data) => Boolean(data?.id),
+        },
+    ];
 
     return (
         <div>
@@ -56,7 +80,7 @@ export const MotorProductPage = () => {
                         variant: 'default',
                         onClick: () => {
                             handleDialogContextSwitch({
-                                // componentProps: { refetch },
+                                componentProps: { refetch },
                                 Component: CreateProductModal,
                             })
                         },

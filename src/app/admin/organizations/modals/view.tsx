@@ -2,10 +2,14 @@
 import { DetailGrid, DetailItem } from '@/components/shared'
 import { Badge } from '@/components/ui/badge'
 import { Button, CustomDialogComponent } from '@/dev/core'
-import { UseApiQuery } from '@/hooks/hooks'
+import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
 import { SubmitResponse } from '@/types/types'
 import { ViewMemberLocationModal } from './members-location'
 import { useCustomDialogContextFactory } from '@/hooks'
+import { CardFooter } from '@/components/ui/card'
+import { EMETHODS } from '@/utils/constatnts'
+import { ShowToast } from '@/utils/utils'
+import { extractErrorMessage } from '@/utils/helpers'
 
 const getOrganizationName = (organization: Record<string, any>) =>
     organization?.organization_name ?? organization?.name ?? 'N/A'
@@ -25,7 +29,7 @@ export const ViewOrganizationModal = ({
             data?: any;
         }>();
 
-    const { data, isLoading } = UseApiQuery<SubmitResponse>({
+    const { data, isLoading, refetch } = UseApiQuery<SubmitResponse>({
         url: `organization/${orgId}`,
         queryOptions: {
             enabled: Boolean(orgId),
@@ -33,6 +37,21 @@ export const ViewOrganizationModal = ({
     })
     const organization = data?.data ?? componentProps?.data ?? {}
     const locations: any[] = organization?.organization_location ?? []
+
+    const deleteMotorProductMutation = UseApiMutation<SubmitResponse, { id: number | string }>({
+        url: ({ id }) => `organization-location/${id}`,
+        method: EMETHODS.DELETE,
+        mutationOptions: {
+            onSuccess: (response) => {
+                ShowToast.success(response?.message || 'Organization location deleted successfully')
+                refetch()
+            },
+            onError: (error) => {
+                ShowToast.error(extractErrorMessage(error))
+            },
+        },
+    })
+
     return (
         <div className="w-full min-w-[600px] max-w-[800px] p-6 space-y-6">
             <div className="border-b pb-3">
@@ -108,6 +127,32 @@ export const ViewOrganizationModal = ({
                                                     />
                                                 </div>
                                             ) : null}
+                                            <CardFooter className="flex flex-col sm:flex-row justify-end gap-3 mt-2 px-0">
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                // onClick={() =>
+                                                //     handleDialogContextSwitch({
+                                                //         componentProps: {
+                                                //             data: location?.organization_location_id
+                                                //         },
+                                                //         Component: ViewMemberLocationModal,
+                                                //     })
+                                                // }
+                                                >
+                                                    Edit Location
+                                                </Button>
+                                                <Button
+                                                    variant="destructive"
+                                                    size="sm"
+                                                    onClick={() =>
+                                                        deleteMotorProductMutation.mutate({
+                                                            id: location?.organization_location_id,
+                                                        })
+                                                    }>
+                                                    Remove Location
+                                                </Button>
+                                            </CardFooter>
                                         </div>
                                     )
                                 })}
