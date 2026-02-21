@@ -36,19 +36,21 @@ import SettingsPage from "./app/settings/page"
 
 // Landing
 import { Landingpage } from "./app/landing/page"
-import { StepPage } from "./app/motor/steppers/steppage"
-import { MotorLandingPage } from "./app/motor/page"
+// import { StepPage } from "./app/motor/steppers/steppage"
+// import { MotorLandingPage } from "./app/motor/page"
 import AuthLayoutPage from "./auth/layout"
 import { SignupForm } from "./auth/components/signup-form"
 import { LoginForm } from "./auth/components/login-form"
-import { MarineLandingPage } from "./app/marine/page"
-import { MarineStepPage } from "./app/marine/steppers/steppage"
+import { MarineLandingPage } from "./app/customer/marine/page"
+import { MarineStepPage } from "./app/customer/marine/steppers/steppage"
 
 import { ProtectedRoute, PublicRoute, CustomerPublicRoute } from "./hooks/hooks"
 import Layout from "./Layout"
 import OrganizationsPage from "./app/admin/organizations/page"
 import { UsersPage } from "./app/admin/users/page"
 import { MotorProductPage } from "./app/admin/product/motor/page"
+import { MotorLandingPage } from "./app/customer/motor/page"
+import { StepPage } from "./app/customer/motor/steppers/steppage"
 
 export const router = createBrowserRouter([
 

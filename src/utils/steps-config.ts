@@ -1,24 +1,24 @@
 
-import { MarineCustomerVerificationDetails } from "@/app/marine/steppers/capture-details";
-import { MarineDetailsPage } from "@/app/marine/steppers/marine-details";
-import OTPVerificationMarinePage from "@/app/marine/steppers/otp-verification";
-import { MarineQuotationsPage } from "@/app/marine/steppers/quotations";
-import { MarineExportPage } from "@/app/marine/steppers/tabs/export-tab";
-import { MarineImportPage } from "@/app/marine/steppers/tabs/import-tab";
-import { CustomerVerificationDetails } from "@/app/motor/steppers/capture-details";
-import { InvoicePayment } from "@/app/motor/steppers/invoice-payment";
-import { KycInfo } from "@/app/motor/steppers/kyc-info";
-import OTPVerificationPage from "@/app/motor/steppers/otp-verification";
-import { PaymentOptions } from "@/app/motor/steppers/payment-options";
-import { CardsTabPage } from "@/app/motor/steppers/payment-tabs/card";
-import { MpesaPageTab } from "@/app/motor/steppers/payment-tabs/mpesa";
-import { PesapalTabPage } from "@/app/motor/steppers/payment-tabs/pesapal";
-import { QuotationsPage } from "@/app/motor/steppers/quotations";
-import { SuccessPurchase } from "@/app/motor/steppers/success-purchase";
-import { MotorCommercialPage } from "@/app/motor/steppers/tabs/motor-commercial";
-import { MotorPrivatePage } from "@/app/motor/steppers/tabs/motor-private";
-import { MotorPsvPage } from "@/app/motor/steppers/tabs/motor-psv";
-import { VehicleDetailsPage } from "@/app/motor/steppers/vehicle-details";
+import { MarineCustomerVerificationDetails } from "@/app/customer/marine/steppers/capture-details";
+import { MarineDetailsPage } from "@/app/customer/marine/steppers/marine-details";
+import OTPVerificationMarinePage from "@/app/customer/marine/steppers/otp-verification";
+import { MarineQuotationsPage } from "@/app/customer/marine/steppers/quotations";
+import { MarineExportPage } from "@/app/customer/marine/steppers/tabs/export-tab";
+import { MarineImportPage } from "@/app/customer/marine/steppers/tabs/import-tab";
+import { CustomerVerificationDetails } from "@/app/customer/motor/steppers/capture-details";
+import { InvoicePayment } from "@/app/customer/motor/steppers/invoice-payment";
+import { KycInfo } from "@/app/customer/motor/steppers/kyc-info";
+import OTPVerificationPage from "@/app/customer/motor/steppers/otp-verification";
+import { PaymentOptions } from "@/app/customer/motor/steppers/payment-options";
+import { CardsTabPage } from "@/app/customer/motor/steppers/payment-tabs/card";
+import { MpesaPageTab } from "@/app/customer/motor/steppers/payment-tabs/mpesa";
+import { PesapalTabPage } from "@/app/customer/motor/steppers/payment-tabs/pesapal";
+import { QuotationsPage } from "@/app/customer/motor/steppers/quotations";
+import { SuccessPurchase } from "@/app/customer/motor/steppers/success-purchase";
+import { MotorCommercialPage } from "@/app/customer/motor/steppers/tabs/motor-commercial";
+import { MotorPrivatePage } from "@/app/customer/motor/steppers/tabs/motor-private";
+import { MotorPsvPage } from "@/app/customer/motor/steppers/tabs/motor-psv";
+import { VehicleDetailsPage } from "@/app/customer/motor/steppers/vehicle-details";
 import { ArrowUpToLine, Car, Download, Truck, Van } from "lucide-react";
 
 export const ESTEPS = [
