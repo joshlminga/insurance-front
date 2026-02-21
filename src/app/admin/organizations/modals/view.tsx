@@ -92,9 +92,9 @@ export const ViewOrganizationModal = ({
                     </p>
                 </div>
                 <Button
-                    variant="outline"
+                    variant="default"
                     size="sm"
-                    className='justify-end'
+                    className='self-start sm:self-auto'
                     onClick={() => handleDialogContextSwitch({
                         componentProps: {
                             data: organization,
@@ -161,12 +161,13 @@ export const ViewOrganizationModal = ({
                                     return (
                                         <Card key={locationId ?? index} className="gap-0 py-0">
                                             <CardHeader className="border-b px-5 py-4">
-                                                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                                                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                                                     <CardTitle className="text-base">Location #{index + 1}</CardTitle>
-                                                    <div className='justify-end flex gap-2'>
+                                                    <div className='flex flex-wrap items-center gap-2 sm:justify-end'>
                                                         <Button
                                                             variant="outline"
                                                             size="sm"
+                                                            className="min-w-[108px]"
                                                             onClick={() =>
                                                                 handleDialogContextSwitch({
                                                                     componentProps: {
@@ -181,6 +182,7 @@ export const ViewOrganizationModal = ({
                                                         <Button
                                                             variant="outline"
                                                             size="sm"
+                                                            className="min-w-[124px]"
                                                             onClick={() =>
                                                                 handleDialogContextSwitch({
                                                                     componentProps: {
@@ -230,35 +232,40 @@ export const ViewOrganizationModal = ({
                                                 ) : null}
                                             </CardContent>
 
-                                            <CardFooter className="flex flex-col justify-end gap-3 border-t px-5 py-4 sm:flex-row">
-                                                <Button
-                                                    size="sm"
-                                                    loading={isDefaultMutationPending}
-                                                    disabled={!locationId}
-                                                    onClick={() =>
-                                                        toggleDefaultLocationMutation.mutate({
-                                                            id: locationId,
-                                                            is_default: nextDefaultState,
-                                                        })
-                                                    }>
-                                                    {location?.is_default ? 'Unset Default' : 'Set As Default'}
-                                                </Button>
-                                                <Button
-                                                    size="sm"
-                                                    variant={location?.is_active ? 'secondary' : 'default'}
-                                                    loading={isStatusMutationPending}
-                                                    disabled={!locationId}
-                                                    onClick={() =>
-                                                        toggleLocationStatusMutation.mutate({
-                                                            id: locationId,
-                                                            is_active: nextActiveState,
-                                                        })
-                                                    }>
-                                                    {location?.is_active ? 'Deactivate Location' : 'Activate Location'}
-                                                </Button>
+                                            <CardFooter className="flex flex-col gap-3 border-t px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+                                                <div className="flex flex-col gap-2 sm:flex-row">
+                                                    <Button
+                                                        size="sm"
+                                                        className="w-full sm:w-auto min-w-[150px]"
+                                                        loading={isDefaultMutationPending}
+                                                        disabled={!locationId}
+                                                        onClick={() =>
+                                                            toggleDefaultLocationMutation.mutate({
+                                                                id: locationId,
+                                                                is_default: nextDefaultState,
+                                                            })
+                                                        }>
+                                                        {location?.is_default ? 'Unset Default' : 'Set As Default'}
+                                                    </Button>
+                                                    <Button
+                                                        size="sm"
+                                                        className="w-full sm:w-auto min-w-40"
+                                                        variant={location?.is_active ? 'secondary' : 'default'}
+                                                        loading={isStatusMutationPending}
+                                                        disabled={!locationId}
+                                                        onClick={() =>
+                                                            toggleLocationStatusMutation.mutate({
+                                                                id: locationId,
+                                                                is_active: nextActiveState,
+                                                            })
+                                                        }>
+                                                        {location?.is_active ? 'Deactivate Location' : 'Activate Location'}
+                                                    </Button>
+                                                </div>
                                                 <Button
                                                     variant="destructive"
                                                     size="sm"
+                                                    className="w-full sm:w-auto"
                                                     loading={isDeletePending}
                                                     disabled={!locationId}
                                                     onClick={() =>
