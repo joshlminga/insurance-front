@@ -139,8 +139,7 @@ export const LocationUsersColumns: ColumnDef<any>[] = [
                     className={`rounded-full px-3 py-1 border-none text-white font-medium shadow-sm transition-colors ${is_general
                         ? "bg-emerald-500"
                         : "bg-indigo-600"
-                        }`}
-                >
+                        }`}>
                     {is_general ? "General" : "Admin"}
                 </Badge>
             );

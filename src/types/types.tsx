@@ -184,7 +184,13 @@ export interface ToastOptions {
 export interface SubmitResponse {
   message: string,
   success:string,
-  data: any
+  data: any,
+  pagination?: {
+    total: number,
+    page: number,
+    per_page: number,
+    total_pages: number,
+  }
 }
 export interface CustomerVerificationDetailsProps {
   goToNextStep?: () => void

@@ -44,7 +44,6 @@ export const UsersPage = () => {
             enabled: true,
         },
     })
-
     const deleteUserMutation = UseApiMutation<SubmitResponse, { id: number | string }>({
         url: ({ id }) => `user/${id}`,
         method: EMETHODS.DELETE,

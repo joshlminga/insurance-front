@@ -5,16 +5,18 @@ import { CreateProductModal } from './modals/create'
 import { useCustomDialogContextFactory, useDebounce } from '@/hooks'
 import { CustomDialogComponent } from '@/dev/core'
 import { CustomBaseTable, SearchTools } from '@/dev/table'
-import { SingleActionsHandler, TFilterOptions, TPaginationFilters } from '@/types/types'
+import { SingleActionsHandler, SubmitResponse, TFilterOptions, TPaginationFilters } from '@/types/types'
 import { FILTEROPTIONS, ReusableReducer } from '@/utils/constatnts'
 import { useReducer } from 'react'
 import { ActionColumn } from '@/dev/columns'
+import { UseApiQuery } from '@/hooks/hooks'
+import { MotorProductsColumns } from '@/dev/columns/admin/products'
 
 export const MotorProductPage = () => {
 
     const [filter, optionsDispatcher] = useReducer(
         ReusableReducer<TPaginationFilters & TFilterOptions>,
-        { ...FILTEROPTIONS, page: 1, pageSize: 25 }
+        { ...FILTEROPTIONS, page: 1, pageSize: 15 }
     );
     const optionsDispatcherDebounce = useDebounce({
         debounceCallback: optionsDispatcher,
@@ -26,8 +28,22 @@ export const MotorProductPage = () => {
             data?: any;
         }>();
 
+    const { data, isLoading, refetch } = UseApiQuery<SubmitResponse>({
+        url: 'products/motor',
+        params: {
+            page: filter.page,
+            pageSize: filter.pageSize,
+            term: filter.term,
+        },
+        queryOptions: {
+            enabled: true,
+        },
+    })
+
+    console.log({ data })
+
     const ActionsHandlerMapping: SingleActionsHandler<any>[] = [];
-    
+
     return (
         <div>
             <PageHeader
@@ -66,12 +82,12 @@ export const MotorProductPage = () => {
                             includeFilter: true,
                         },
                         columns: [
-                            //   ...OrganizationsColumns,
+                            ...MotorProductsColumns,
                             ActionColumn({ ActionsHandlerMapping }),
                         ],
                         OtherTools: SearchTools,
-                        data: [],
-                        pageCount: 1,
+                        data: data?.data?.products ?? [],
+                        pageCount: data?.data?.pagination?.last_page ?? 1,
                         title: 'Motor Products',
                         showPagination: true,
                         setPageSize: (pageSize) =>
@@ -79,9 +95,9 @@ export const MotorProductPage = () => {
                                 payload: { pageSize },
                                 type: 'pageSize',
                             }),
-                        pageSize: filter.pageSize ?? 10,
-                        page: filter?.page ?? 1,
-                        // isLoading: isLoading,
+                        pageSize: data?.data?.pagination?.per_page ?? 10,
+                        page: data?.data?.pagination?.current_page ?? 1,
+                        isLoading: isLoading,
                     }}
                 />
             </div>
