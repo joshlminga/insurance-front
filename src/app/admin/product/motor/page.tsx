@@ -15,6 +15,7 @@ import { MotorProductsColumns } from '@/dev/columns/admin/products'
 import { ShowToast } from '@/utils/utils'
 import { extractErrorMessage } from '@/utils/helpers'
 import { EditProductModal } from './modals/edit-product'
+import { ViewProductModal } from './modals/view-product'
 
 export const MotorProductPage = () => {
 
@@ -90,11 +91,10 @@ export const MotorProductPage = () => {
         {
             label: 'View Details',
             onSelect: (data) => {
-                console.log('View details for:', data)
-                // handleDialogContextSwitch({
-                //     componentProps: { data, refetch },
-                //     Component: ViewProductDetailsModal,
-                // })
+                handleDialogContextSwitch({
+                    componentProps: { data, refetch },
+                    Component: ViewProductModal,
+                })
             },
         },
         {
