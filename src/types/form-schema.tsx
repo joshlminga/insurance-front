@@ -293,9 +293,9 @@ export const CreateProductSchema = z.object({
       .min(5, "Description must be at least 5 characters")
       .max(1000, "Description is too long"),
     access: z.string().min(1, "Access level is required"),
-    for_public: z
-      .string()
-      .refine((value) => value === "true" || value === "false", "Target audience is required"),
+    for_public: z.enum(["true", "false"], {
+      error: "Target audience is required",
+    }),
     start_date: z.string().min(1, "Start date is required"),
     expiry_date: z.string().min(1, "Expiry date is required"),
     brochure: z
@@ -332,9 +332,9 @@ export const EditProductSchema = z.object({
       .min(5, "Description must be at least 5 characters")
       .max(1000, "Description is too long"),
     access: z.string().min(1, "Access level is required"),
-    for_public: z
-      .string()
-      .refine((value) => value === "true" || value === "false", "Target audience is required"),
+    for_public: z.enum(["true", "false"], {
+      error: "Target audience is required",
+    }),
     start_date: z.string().min(1, "Start date is required"),
     expiry_date: z.string().min(1, "Expiry date is required"),
     brochure: z
@@ -342,11 +342,9 @@ export const EditProductSchema = z.object({
       .refine(
         (files) => files.every(isValidBrochureFile),
         "Brochure files must be PDF, CSV, XLS, XLSX, or DOCX"
-      )
-      .default([]),
+      ),
     organization_location_ids: z
-      .array(z.string().min(1))
-      .default([]),
+      .array(z.string().min(1)),
   })
   .refine(
     (data) => new Date(data.expiry_date) >= new Date(data.start_date),

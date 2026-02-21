@@ -29,6 +29,9 @@ export const EditProductModal = ({ handleDialogContextSwitch, componentProps }: 
 
     const ids = targets
       .map((target: any) =>
+        target?.organization_location_id ??
+        target?.target_organization_location_id ??
+        target?.location?.organization_location_id ??
         target?.ace_organization_location_id ??
         target?.location_id
       )
