@@ -8,12 +8,17 @@ import { ArrowLeftCircle, ArrowRightCircle, Plus } from 'lucide-react'
 import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { ComparisonPage } from './comparisons/page'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { QuotePreviewPage } from './qoute-preview/page'
+import { UseAuth } from '@/components/auth-provider'
+import { useStepperContext } from '@/hooks/stepper-context'
 
 export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goToNextStep, goToPrevStep }) => {
     const [page, setPage] = useState(1)
     const form = useForm();
+    const { isAuthenticated } = UseAuth()
+    const location = useLocation()
+    const { currentStep } = useStepperContext()
 
     const { handleDialogContextSwitch, dialogContent, dialogOpen } =
         useCustomDialogContextFactory<{
@@ -30,8 +35,6 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                             Additional Benefits:
                         </h1>
                         <hr className="mb-4 sm:mb-6" />
-
-                        {/* Checkbox Grid - responsive columns handled by component */}
                         <div className="overflow-x-auto">
                             <ReusableCheckboxGrid
                                 options={QUOTATIONCHECKBOX}
@@ -40,8 +43,6 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                         </div>
 
                         <hr className="my-4 sm:mb-6" />
-
-                        {/* Additional Inputs - 1 col mobile, 2 col sm+ */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8">
                             <ReuseableInput
                                 className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
@@ -56,7 +57,6 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                 label="Road Rescue"
                             />
                         </div>
-
                         <Button
                             type='button'
                             className="ml-auto mt-4 flex items-center rounded-[3px] border border-[#0CC2581F] bg-[#C7EED5] hover:bg-[#C7EED5]/90 text-[#43A047]"
@@ -93,21 +93,35 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                             type="button"
                                             onClick={() =>
                                                 handleDialogContextSwitch({
-                                                    componentProps: { data: item },
+                                                    componentProps: {
+                                                        data: item
+                                                    },
                                                     Component: QuotePreviewPage,
                                                 })
-                                            } 
+                                            }
                                             className="w-full lg:w-auto rounded-md border border-[#D9D9D9] bg-[#C20C0C] hover:bg-[#C20C0C]/90 font-medium text-white">
                                             Get Quote
                                         </Button>
 
-                                        <Link
-                                            to={`/${EPREFIX?.AUTH}${EROUTES.SIGNUP}`}
-                                            className="w-full lg:w-auto">
-                                            <Button type="button" className="w-full lg:w-auto rounded-md border border-[#D9D9D9] bg-[#0CC258] hover:bg-[#0CC258]/90 font-medium text-white">
+                                        {isAuthenticated ? (
+                                            <Button
+                                                type="button"
+                                                onClick={goToNextStep}
+                                                className="w-full lg:w-auto rounded-md border border-[#D9D9D9] bg-[#0CC258] hover:bg-[#0CC258]/90 font-medium text-white">
                                                 Purchase Cover
                                             </Button>
-                                        </Link>
+                                        ) : (
+                                            <Link
+                                                to={`/${EPREFIX.AUTH}${EROUTES.SIGNUP}`}
+                                                state={{ returnTo: location.pathname, stepperStep: currentStep }}
+                                                className="w-full lg:w-auto">
+                                                <Button
+                                                    type="button"
+                                                    className="w-full lg:w-auto rounded-md border border-[#D9D9D9] bg-[#0CC258] hover:bg-[#0CC258]/90 font-medium text-white">
+                                                    Purchase Cover
+                                                </Button>
+                                            </Link>
+                                        )}
                                     </>
                                 }
 

@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { ELOGO, EROUTES } from "@/utils/enums";
+import { ELOGO, EPREFIX, EROUTES } from "@/utils/enums";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
@@ -122,15 +122,15 @@ export const Navbar = (
                         <a className="hover:text-red-500 transition uppercase">Contact</a>
                         {isAuthenticated ? (
                             <>
-                                {isGeneral === false && (
+                                {isGeneral === true && (
                                     <Link to={EROUTES.DASHBOARD} className="hover:text-red-500 transition uppercase">Dashboard</Link>
                                 )}
                                 <button onClick={logout} className="hover:text-red-500 transition uppercase">Logout</button>
                             </>
                         ) : (
                             <>
-                                <Link to={EROUTES.SIGNIN} className="hover:text-red-500 transition uppercase">Login</Link>
-                                <Link to={EROUTES.SIGNUP} className="hover:text-red-500 transition uppercase">Sign Up</Link>
+                                <Link to={`/${EPREFIX.AUTH}${EROUTES.SIGNIN}`} className="hover:text-red-500 transition uppercase">Login</Link>
+                                <Link to={`/${EPREFIX.AUTH}${EROUTES.SIGNUP}`} className="hover:text-red-500 transition uppercase">Sign Up</Link>
                             </>
                         )}
                     </div>

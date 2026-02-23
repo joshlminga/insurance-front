@@ -27,7 +27,8 @@ import type {
     TTableReusableComponent,
     TTabsProps,
     TCountryResponse,
-    SubmitResponse
+    SubmitResponse,
+    UserMenuPopoverProps
 } from "@/types/types";
 import {
     Stepper,
@@ -65,6 +66,7 @@ import { MultiSelect, MultiSelectContent, MultiSelectGroup, MultiSelectItem, Mul
 import { UseApiQuery } from "@/hooks/hooks";
 import { Label } from "@/components/ui/label";
 import { EORGANIZATIONTYPES } from "@/utils/constatnts";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 const formatSegment = (segment: string) => {
     return segment
@@ -659,9 +661,7 @@ export const ReusableDropdown = ({
     );
 };
 
-export const ReuseableRadioChoiceGroup: React.FC<
-    RadioChoiceGroupProps
-> = ({
+export const ReuseableRadioChoiceGroup: React.FC<RadioChoiceGroupProps> = ({
     items,
     value,
     defaultValue,
@@ -674,50 +674,95 @@ export const ReuseableRadioChoiceGroup: React.FC<
     selectorPosition = "right",
     className,
 }) => {
-        const [internalValue, setInternalValue] =
-            React.useState(defaultValue)
-        const selected = value ?? internalValue
-        const handleChange = (val: string) => {
-            if (!value) setInternalValue(val)
-            onValueChange?.(val)
-        }
-        return (
-            <>
-                <RadioGroup
-                    value={selected}
-                    defaultValue={defaultValue}
-                    onValueChange={handleChange}
-                    className={cn(
-                        layout === "horizontal"
-                            ? "flex gap-6"
-                            : "flex flex-col gap-3",
-                        className
-                    )}>
-                    {items.map((item) => {
-                        const isActive = selected === item.value
-                        const Icon = item.icon
-                        return (
-                            <label
-                                key={item.value}
-                                className={cn(
-                                    "cursor-pointer rounded-lg border p-4 transition-all",
-                                    contentPosition === "inline"
-                                        ? "flex items-center justify-between gap-4"
-                                        : "flex flex-col gap-3",
-                                    item.disabled &&
-                                    "opacity-50 cursor-not-allowed"
+    const [internalValue, setInternalValue] =
+        React.useState(defaultValue)
+    const selected = value ?? internalValue
+    const handleChange = (val: string) => {
+        if (!value) setInternalValue(val)
+        onValueChange?.(val)
+    }
+    return (
+        <>
+            <RadioGroup
+                value={selected}
+                defaultValue={defaultValue}
+                onValueChange={handleChange}
+                className={cn(
+                    layout === "horizontal"
+                        ? "flex gap-6"
+                        : "flex flex-col gap-3",
+                    className
+                )}>
+                {items.map((item) => {
+                    const isActive = selected === item.value
+                    const Icon = item.icon
+                    return (
+                        <label
+                            key={item.value}
+                            className={cn(
+                                "cursor-pointer rounded-lg border p-4 transition-all",
+                                contentPosition === "inline"
+                                    ? "flex items-center justify-between gap-4"
+                                    : "flex flex-col gap-3",
+                                item.disabled &&
+                                "opacity-50 cursor-not-allowed"
+                            )}
+                            style={{
+                                borderColor: isActive ? activeColor : undefined,
+                                backgroundColor: isActive
+                                    ? `${activeColor}10`
+                                    : undefined,
+                            }}>
+                            {showSelector && selectorPosition === "left" && (
+                                <RadioGroupItem
+                                    value={item.value}
+                                    disabled={item.disabled}
+                                    className="mr-3"
+                                    style={{
+                                        borderColor: isActive
+                                            ? activeColor
+                                            : undefined,
+                                    }}
+                                />
+                            )}
+                            <div className="flex items-center gap-3 flex-1">
+                                {item.image && (
+                                    <img
+                                        src={item.image}
+                                        alt={item.label}
+                                        className="h-8 w-10 object-contain"
+                                    />
                                 )}
-                                style={{
-                                    borderColor: isActive ? activeColor : undefined,
-                                    backgroundColor: isActive
-                                        ? `${activeColor}10`
-                                        : undefined,
-                                }}>
-                                {showSelector && selectorPosition === "left" && (
+
+                                {Icon && (
+                                    <Icon
+                                        size={item.iconSize ?? 18}
+                                        color={
+                                            isActive ? activeColor : undefined
+                                        }
+                                    />)}
+                                <div>
+                                    <div
+                                        className="font-semibold"
+                                        style={{
+                                            color: isActive
+                                                ? activeColor
+                                                : undefined,
+                                        }}>
+                                        {item.label}
+                                    </div>
+                                    {item.description && (
+                                        <div className="text-sm text-muted-foreground">
+                                            {item.description}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                            {showSelector &&
+                                selectorPosition === "right" && (
                                     <RadioGroupItem
                                         value={item.value}
                                         disabled={item.disabled}
-                                        className="mr-3"
                                         style={{
                                             borderColor: isActive
                                                 ? activeColor
@@ -725,75 +770,26 @@ export const ReuseableRadioChoiceGroup: React.FC<
                                         }}
                                     />
                                 )}
-                                <div className="flex items-center gap-3 flex-1">
-                                    {item.image && (
-                                        <img
-                                            src={item.image}
-                                            alt={item.label}
-                                            className="h-8 w-10 object-contain"
-                                        />
-                                    )}
+                        </label>
+                    )
+                })}
+            </RadioGroup>
+            {variant === "tabs" && (
+                <div className="mt-6">
+                    {(() => {
+                        const SelectedComponent = items.find(
+                            (i) => i.value === selected
+                        )?.component
 
-                                    {Icon && (
-                                        <Icon
-                                            size={item.iconSize ?? 18}
-                                            color={
-                                                isActive ? activeColor : undefined
-                                            }
-                                        />
-                                    )}
-
-                                    <div>
-                                        <div
-                                            className="font-semibold"
-                                            style={{
-                                                color: isActive
-                                                    ? activeColor
-                                                    : undefined,
-                                            }}
-                                        >
-                                            {item.label}
-                                        </div>
-
-                                        {item.description && (
-                                            <div className="text-sm text-muted-foreground">
-                                                {item.description}
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                                {showSelector &&
-                                    selectorPosition === "right" && (
-                                        <RadioGroupItem
-                                            value={item.value}
-                                            disabled={item.disabled}
-                                            style={{
-                                                borderColor: isActive
-                                                    ? activeColor
-                                                    : undefined,
-                                            }}
-                                        />
-                                    )}
-                            </label>
-                        )
-                    })}
-                </RadioGroup>
-                {variant === "tabs" && (
-                    <div className="mt-6">
-                        {(() => {
-                            const SelectedComponent = items.find(
-                                (i) => i.value === selected
-                            )?.component
-
-                            return SelectedComponent ? (
-                                <SelectedComponent />
-                            ) : null
-                        })()}
-                    </div>
-                )}
-            </>
-        )
-    }
+                        return SelectedComponent ? (
+                            <SelectedComponent />
+                        ) : null
+                    })()}
+                </div>
+            )}
+        </>
+    )
+}
 
 export const TableComponentHeadings = ({ children }: TNodeChildrentType) => {
     return (
@@ -818,7 +814,6 @@ export const PageForPagination = ({
         {content}
     </div>
 );
-
 
 export const TReusablePagination = ({
     onPageChange,
@@ -1161,6 +1156,63 @@ export const ReusableOrganizationsInputMultiselect = ({
                     </MultiSelectGroup>
                 </MultiSelectContent>
             </MultiSelect>
+        </div>
+    )
+}
+
+export const UserMenuPopover = ({
+    userInitials,
+    userName,
+    userEmail,
+    items,
+    className,
+}: UserMenuPopoverProps) => {
+    return (
+        <div className={className}>
+            <Popover>
+                <PopoverTrigger asChild>
+                    <Button
+                        variant="ghost"
+                        className='h-11 w-11 rounded-full border border-white/70 bg-white/90 p-0 text-sm font-semibold text-slate-900 shadow-sm hover:bg-white'>
+                        {userInitials}
+                    </Button>
+                </PopoverTrigger>
+                <PopoverContent align="end" className="w-56 rounded-xl p-2">
+                    <div className="mb-2 rounded-lg bg-muted/40 px-3 py-2">
+                        <p className="truncate text-sm font-semibold">{userName}</p>
+                        {userEmail && (
+                            <p className="truncate text-xs text-muted-foreground">
+                                {userEmail}
+                            </p>
+                        )}
+                    </div>
+                    <div className="space-y-1">
+                        {items.map((item, index) => {
+                            const baseClass = "flex items-center gap-2 rounded-md px-2 py-2 text-sm hover:bg-accent"
+                            const Icon = item.icon
+                            if (item.to) {
+                                return (
+                                    <Link key={index} to={item.to} className={baseClass}>
+                                        {Icon && <Icon className="h-4 w-4" />}
+                                        {item.label}
+                                    </Link>
+                                )
+                            }
+
+                            return (
+                                <button
+                                    key={index}
+                                    type="button"
+                                    onClick={item.onClick}
+                                    className={`${baseClass} w-full text-left ${item.destructive ? "text-destructive" : ""}`}>
+                                    {Icon && <Icon className="h-4 w-4" />}
+                                    {item.label}
+                                </button>
+                            )
+                        })}
+                    </div>
+                </PopoverContent>
+            </Popover>
         </div>
     )
 }

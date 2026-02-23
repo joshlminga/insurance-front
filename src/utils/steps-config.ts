@@ -21,40 +21,52 @@ import { MotorPsvPage } from "@/app/customer/motor/steppers/tabs/motor-psv";
 import { VehicleDetailsPage } from "@/app/customer/motor/steppers/vehicle-details";
 import { ArrowUpToLine, Car, Download, Truck, Van } from "lucide-react";
 
-export const ESTEPS = [
-    {
-        title: "",
-        content: CustomerVerificationDetails,
-    },
-    {
-        title: "",
-        content: OTPVerificationPage,
-    },
-    {
-        title: "",
-        content: VehicleDetailsPage,
-    },
-    {
-        title: "",
-        content: QuotationsPage,
-    },
-    {
-        title: "",
-        content: KycInfo,
-    },
-    {
-        title: "",
-        content: InvoicePayment,
-    },
-    {
-        title: "",
-        content: PaymentOptions,
-    },
-    {
-        title: "",
-        content: SuccessPurchase,
-    },
-]
+export const getMotorSteps = (isAuthenticated: boolean) => {
+    const allSteps = [
+        {
+            disabled: true,
+            title: "",
+            content: CustomerVerificationDetails,
+        },
+        {
+            disabled: true,
+            title: "",
+            content: OTPVerificationPage,
+        },
+        {
+            disabled: true,
+            title: "",
+            content: VehicleDetailsPage,
+        },
+        {
+            disabled: false,
+            title: "",
+            content: QuotationsPage,
+        },
+        {
+            disabled: false,
+            title: "",
+            content: KycInfo,
+        },
+        {
+            disabled: false,
+            title: "",
+            content: InvoicePayment,
+        },
+        {
+            disabled: false,
+            title: "",
+            content: PaymentOptions,
+        },
+        {
+            disabled: false,
+            title: "",
+            content: SuccessPurchase,
+        },
+    ]
+    // Skip CustomerVerification + OTP steps for authenticated users
+    return isAuthenticated ? allSteps.slice(2) : allSteps
+}
 
 
 export const EMARINESTEPS = [
@@ -144,7 +156,7 @@ export const EPAYMENTTABS = [
     {
         value: "card",
         // label: "Card",
-        image:'/card.png',
+        image: '/card.png',
         // icon: CreditCard,
         // iconSize: 20,
         component: CardsTabPage,
@@ -154,7 +166,7 @@ export const EPAYMENTTABS = [
         // label: "PesaPal",
         // icon: Van,
         // iconSize: 16,
-        image:'/pesapal.png',
+        image: '/pesapal.png',
         component: PesapalTabPage,
     },
 ]

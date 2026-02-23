@@ -99,13 +99,10 @@ export function ProtectedRoute({ children, requireGeneral }: ProtectedRouteProps
 }
 
 export function CustomerPublicRoute({ children }: ProtectedRouteProps) {
-  const { isAuthenticated, isLoading, isGeneral } = UseAuth()
+  const { isLoading } = UseAuth()
 
   if (isLoading) {
     return <div>Loading...</div>
-  }
-  if (isAuthenticated && isGeneral === false) {
-    return <Navigate to={EROUTES.DASHBOARD} replace />
   }
 
   return <>{children}</>

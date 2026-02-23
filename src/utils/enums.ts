@@ -19,6 +19,7 @@ export const EROUTES = {
   TRAVEL: '/travel',
   MARINE: '/marine',
   LIFE: '/life',
+  MY_COVERS: '/my-covers',
 
   // Auth
   SIGNUP: '/signup',

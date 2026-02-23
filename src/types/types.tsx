@@ -31,6 +31,7 @@ export interface ReusableStepperProps {
   className?: string
   value?: number
   onValueChange?: (value: number) => void
+  disabled?: boolean,
 }
 export interface LoginResponse {
   message: string
@@ -461,5 +462,21 @@ export type ReuseableSingleSelectCountriesInputProps<T extends FieldValues> = {
   label?: string
   required?: boolean
   disabled?: boolean
+  className?: string
+}
+
+export type UserMenuItem = {
+  label: string
+  to?: string
+  icon?: LucideIcon
+  onClick?: () => void
+  destructive?: boolean
+}
+
+export type UserMenuPopoverProps = {
+  userInitials: string
+  userName: string
+  userEmail?: string
+  items: UserMenuItem[]
   className?: string
 }

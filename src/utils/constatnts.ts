@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { TActionType, TFilterOptions } from "@/types/types";
-import { SORT_ORDER } from "./enums";
+import { EPREFIX, EROUTES, SORT_ORDER } from "./enums";
+import { ShieldCheck, BarChart3, Settings, LogOut } from "lucide-react";
 
 // export 
 
@@ -58,9 +59,9 @@ export const FILTERS_DEFAULTS: TFilterOptions & Record<string, any> = {
 };
 
 export const FILTEROPTIONS: TFilterOptions & Record<string, any> = {
-	order: { direction: SORT_ORDER.Ascending, orderField: '' },
-	date: [],
-	term: '',
+  order: { direction: SORT_ORDER.Ascending, orderField: '' },
+  date: [],
+  term: '',
 };
 
 export const PAYMENTPLANS = [
@@ -77,10 +78,36 @@ export const BOOLEANOPTIONS = [
 export const ACCESSLEVELSOPTIONS = [
   { label: "All", value: 'all' },
   { label: "Personal Owned", value: 'personal-owned' },
-   { label: "Company Owned", value: 'company-owned' },
+  { label: "Company Owned", value: 'company-owned' },
 ]
 
 export const TARGET_AUDIENCE_OPTIONS = [
-    { label: "Yes", value: "true" },
-    { label: "No", value: "false" },
+  { label: "Yes", value: "true" },
+  { label: "No", value: "false" },
 ]
+
+export const createHeroPopoverItems = (
+  logout: () => void
+) => [
+    {
+      label: "My Covers",
+      to: `${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}`,
+      icon: ShieldCheck,
+    },
+    {
+      label: "Reports",
+      to: EROUTES.REPORTS,
+      icon: BarChart3,
+    },
+    {
+      label: "Settings",
+      to: EROUTES.SETTINGS,
+      icon: Settings,
+    },
+    {
+      label: "Log out",
+      onClick: logout,
+      icon: LogOut,
+      destructive: true,
+    },
+  ]
