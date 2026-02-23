@@ -47,8 +47,6 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToNextSt
     })
 
     const onSubmit = (data: KycFormValues) => {
-        console.log(data);
-
         submitMutation.mutate(data)
     }
     return (

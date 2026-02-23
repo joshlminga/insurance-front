@@ -6,8 +6,8 @@ import { Button, ReusableDropdown } from "@/dev/core";
 import { ArrowLeft, Download, Forward, Mail, Share2 } from "lucide-react";
 
 
-export const QuotePreviewPage = ({ componentProps }:{
-    componentProps: any,
+export const QuotePreviewPage = ({ componentProps }: {
+    componentProps?: any;
     handleDialogContextSwitch: any
 }) => {
 

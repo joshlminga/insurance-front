@@ -30,8 +30,6 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                             Additional Benefits:
                         </h1>
                         <hr className="mb-4 sm:mb-6" />
-
-                        {/* Checkbox Grid - responsive columns handled by component */}
                         <div className="overflow-x-auto">
                             <ReusableCheckboxGrid
                                 options={QUOTATIONCHECKBOX}
@@ -40,8 +38,6 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                         </div>
 
                         <hr className="my-4 sm:mb-6" />
-
-                        {/* Additional Inputs - 1 col mobile, 2 col sm+ */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8">
                             <ReuseableInput
                                 className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
@@ -93,7 +89,9 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                             type="button"
                                             onClick={() =>
                                                 handleDialogContextSwitch({
-                                                    componentProps: { data: item },
+                                                    componentProps: { 
+                                                        data: item 
+                                                    },
                                                     Component: QuotePreviewPage,
                                                 })
                                             } 
@@ -104,7 +102,8 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                         <Link
                                             to={`/${EPREFIX?.AUTH}${EROUTES.SIGNUP}`}
                                             className="w-full lg:w-auto">
-                                            <Button type="button" className="w-full lg:w-auto rounded-md border border-[#D9D9D9] bg-[#0CC258] hover:bg-[#0CC258]/90 font-medium text-white">
+                                            <Button type="button" 
+                                            className="w-full lg:w-auto rounded-md border border-[#D9D9D9] bg-[#0CC258] hover:bg-[#0CC258]/90 font-medium text-white">
                                                 Purchase Cover
                                             </Button>
                                         </Link>
