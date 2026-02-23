@@ -9,8 +9,6 @@ const coversTabs = [
     { label: 'Cancelled/Rejected', path: 'cancelled' },
 ]
 
-const basePath = `/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}`
-
 export function CoversPage() {
     const location = useLocation()
     const isCancelled = location.pathname.includes('cancelled')
@@ -18,7 +16,7 @@ export function CoversPage() {
     return (
         <div>
             <h1 className="w-full mb-6 text-xl font-semibold">Covers</h1>
-            <RouteTabNav tabs={coversTabs} basePath={basePath} />
+            <RouteTabNav tabs={coversTabs} basePath={`/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}`} />
             <div className="mt-6">
                 {isCancelled ? (
                     <Outlet />
