@@ -11,7 +11,6 @@ export const HeroSection = () => {
     const userEmail = user?.email ?? ""
     const userInitials = getInitials(userName)
     const heroPopoverItems = createHeroPopoverItems(logout)
-
     return (
         <section className="relative mx-auto h-[920px] w-full overflow-hidden">
             <div className="absolute inset-0 -z-10">
