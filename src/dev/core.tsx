@@ -143,7 +143,6 @@ export const ReusablePageTitle = ({
 };
 
 export function ReusableStepper({
-    disabled = false,
     steps,
     defaultStep = 1,
     className,

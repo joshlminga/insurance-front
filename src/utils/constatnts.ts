@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { TActionType, TFilterOptions } from "@/types/types";
-import { EROUTES, SORT_ORDER } from "./enums";
+import { EPREFIX, EROUTES, SORT_ORDER } from "./enums";
 import { ShieldCheck, BarChart3, Settings, LogOut } from "lucide-react";
 
 // export 
@@ -91,7 +91,7 @@ export const createHeroPopoverItems = (
 ) => [
     {
       label: "My Covers",
-      to: EROUTES.LOANS,
+      to: `${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}`,
       icon: ShieldCheck,
     },
     {

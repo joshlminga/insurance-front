@@ -51,6 +51,7 @@ import { UsersPage } from "./app/admin/users/page"
 import { MotorProductPage } from "./app/admin/product/motor/page"
 import { MotorLandingPage } from "./app/customer/motor/page"
 import { StepPage } from "./app/customer/motor/steppers/steppage"
+import { MyCoversPage } from "./app/customer/my-covers/page"
 
 export const router = createBrowserRouter([
 
@@ -78,6 +79,10 @@ export const router = createBrowserRouter([
         path: EROUTES.MOTOR.slice(1),
         element: <StepPage />,
       },
+      {
+        path: EROUTES.MY_COVERS.slice(1),
+        element: <MyCoversPage />,
+      }
     ],
   },
 

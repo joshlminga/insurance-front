@@ -8,8 +8,6 @@ export const StepPage: React.FC = () => {
     const { isAuthenticated } = UseAuth()
     const { currentStep, setCurrentStep } = useStepperContext()
     const steps = getMotorSteps(isAuthenticated)
-
-    // Reset stepper to step 1 when an authenticated user enters the flow
     useEffect(() => {
         if (isAuthenticated && currentStep > steps.length) {
             setCurrentStep(1)
