@@ -54,7 +54,7 @@ import { StepPage } from "./app/customer/motor/steppers/steppage"
 import { MyCoversLayout } from "./app/customer/my-covers/layout"
 import { CoversPage } from "./app/customer/my-covers/ongoing/page"
 import { CancelledCoversPage } from "./app/customer/my-covers/cancelled/page"
-import { MyAccountPage } from "./app/customer/my-covers/my-account/page"
+import { MyAccountManagementPage } from "./app/customer/my-covers/my-account/page"
 
 export const router = createBrowserRouter([
 
@@ -110,7 +110,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "account",
-        element: <MyAccountPage />,
+        element: <MyAccountManagementPage />,
       },
     ],
   },
