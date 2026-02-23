@@ -51,7 +51,9 @@ import { UsersPage } from "./app/admin/users/page"
 import { MotorProductPage } from "./app/admin/product/motor/page"
 import { MotorLandingPage } from "./app/customer/motor/page"
 import { StepPage } from "./app/customer/motor/steppers/steppage"
-import { MyCoversPage } from "./app/customer/my-covers/page"
+import { MyCoversLayout } from "./app/customer/my-covers/layout"
+import { CoversPage } from "./app/customer/my-covers/ongoing/page"
+import { CancelledCoversPage } from "./app/customer/my-covers/cancelled/page"
 
 export const router = createBrowserRouter([
 
@@ -79,10 +81,32 @@ export const router = createBrowserRouter([
         path: EROUTES.MOTOR.slice(1),
         element: <StepPage />,
       },
+    ],
+  },
+
+  // My Covers / Customer Account — protected (authenticated only)
+  {
+    path: `${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}`,
+    element: (
+      <ProtectedRoute>
+        <MyCoversLayout />
+      </ProtectedRoute>
+    ),
+    children: [
       {
-        path: EROUTES.MY_COVERS.slice(1),
-        element: <MyCoversPage />,
-      }
+        index: true,
+        element: <CoversPage />,
+      },
+      {
+        path: "cancelled",
+        element: <CoversPage />,
+        children: [
+          {
+            index: true,
+            element: <CancelledCoversPage />,
+          },
+        ],
+      },
     ],
   },
 

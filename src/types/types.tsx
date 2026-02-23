@@ -218,6 +218,17 @@ export type TTabsProps = {
   contentClassName?: string
 } & Record<string, any>
 
+export type TRouteTab = {
+  label: string
+  path: string
+}
+
+export type TRouteTabNavProps = {
+  tabs: TRouteTab[]
+  basePath: string
+  className?: string
+}
+
 export type TSelectOption = {
   label: string
   value: string
@@ -481,9 +492,14 @@ export type UserMenuPopoverProps = {
   className?: string
 }
 
-export type BorderedListProps<T> = {
-  items: T[]
-  renderItem: (item: T, index: number) => ReactNode
-  emptyState?: ReactNode
+export interface EmptyStateProps {
+  icon?: LucideIcon
+  title: string
+  description?: string
+  action?: {
+    label: string
+    href?: string
+    onClick?: () => void
+  }
   className?: string
 }

@@ -113,19 +113,19 @@ export const createHeroPopoverItems = (
   ]
 
 export const myAccounttLinks = [
-  'Account Management',
-  'Payment Settings',
-  'Address Book',
-  'Newsletter Preferences'
+  { label: 'Account Management', to: `/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}/account` },
+  { label: 'Payment Settings', to: `/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}/payments` },
+  { label: 'Address Book', to: `/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}/addresses` },
+  { label: 'Newsletter Preferences', to: `/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}/newsletters` },
 ]
 
 export const sidebarLinks = [
-    { label: 'My Account' },
-    { label: 'Covers', active: true },
-    // { label: 'Inbox' },
-    // { label: 'Pending Reviews' },
-    // { label: 'Claims' },
-    // { label: 'Wishlist' },
-    // { label: 'Followed Sellers' },
-    // { label: 'Recently Viewed' },
+  { label: 'My Account', to: `/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}/account` },
+  { label: 'Covers', to: `/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}` },
+  // { label: 'Inbox', to: `/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}/inbox` },
+  // { label: 'Pending Reviews', to: `/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}/reviews` },
+  // { label: 'Claims', to: `/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}/claims` },
+  // { label: 'Wishlist', to: `/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}/wishlist` },
+  // { label: 'Followed Sellers', to: `/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}/followed` },
+  // { label: 'Recently Viewed', to: `/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}/recent` },
 ]

@@ -26,10 +26,10 @@ import type {
     TRHFSelectProps,
     TTableReusableComponent,
     TTabsProps,
+    TRouteTabNavProps,
     TCountryResponse,
     SubmitResponse,
-    UserMenuPopoverProps,
-    BorderedListProps
+    UserMenuPopoverProps
 } from "@/types/types";
 import {
     Stepper,
@@ -47,7 +47,7 @@ import {
     TabsList,
     TabsTrigger,
 } from "@/components/ui/tabs"
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Fragment } from "react/jsx-runtime";
 import React, { useState } from "react";
 import { Button as ShadButton } from "@/components/ui/button"
@@ -436,6 +436,40 @@ export function ReusableTabs({
                 )
             })}
         </Tabs>
+    )
+}
+
+export function RouteTabNav({ tabs, basePath, className }: TRouteTabNavProps) {
+    const navigate = useNavigate()
+    const location = useLocation()
+
+    const isActive = (tabPath: string) => {
+        // const fullPath = tabPath ? `${basePath}/${tabPath}` : basePath
+        return tabPath
+            ? location.pathname.includes(tabPath)
+            : location.pathname === basePath || location.pathname === `${basePath}/`
+    }
+
+    return (
+        <div className={cn("flex border-b", className)}>
+            {tabs.map((tab) => {
+                const fullPath = tab.path ? `${basePath}/${tab.path}` : basePath
+                const active = isActive(tab.path)
+                return (
+                    <button
+                        key={tab.label}
+                        onClick={() => navigate(fullPath)}
+                        className={cn(
+                            "px-4 py-2 text-sm font-medium border-b-2 transition-colors",
+                            active
+                                ? "border-primary text-primary"
+                                : "border-transparent text-muted-foreground hover:text-foreground"
+                        )}>
+                        {tab.label}
+                    </button>
+                )
+            })}
+        </div>
     )
 }
 
@@ -905,6 +939,7 @@ export const ReusableDropDownComponent = <T,>({
         </DropdownMenu>
     );
 };
+
 export const ReusableCountriesInputMultiselect = ({
     value,
     onChange,

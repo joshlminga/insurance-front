@@ -1,18 +1,19 @@
-import React from 'react'
+import { StatusBadge } from '@/components/shared/status-badge'
 
-const Badge = ({ children, variant = 'default' }) => {
-    const styles = {
-        delivered: 'bg-green-100 text-green-700 border border-green-200',
-        default: 'bg-gray-100 text-gray-700 border border-gray-200',
-    }
-    return (
-        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold tracking-wide ${styles[variant] || styles.default}`}>
-            {children}
-        </span>
-    )
+interface CoverData {
+    id: string
+    title: string
+    variation?: string | null
+    status: string
+    date: string
+    img: string
 }
 
-export const MyCovers = ({ cover }) => {
+interface CoverCardProps {
+    cover: CoverData
+}
+
+export const CoverCard = ({ cover }: CoverCardProps) => {
     return (
         <div className="flex items-start gap-4 p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors">
             <div className="w-20 h-20 shrink-0 bg-gray-50 rounded overflow-hidden border border-gray-100">
@@ -20,7 +21,7 @@ export const MyCovers = ({ cover }) => {
                     src={cover.img}
                     alt={cover.title}
                     className="w-full h-full object-contain"
-                    onError={(e) => { e.target.style.background = '#f3f4f6' }}
+                    onError={(e) => { (e.target as HTMLImageElement).style.background = '#f3f4f6' }}
                 />
             </div>
             <div className="flex-1 min-w-0">
@@ -32,7 +33,7 @@ export const MyCovers = ({ cover }) => {
                     </p>
                 )}
                 <div className="flex items-center gap-2 mt-1">
-                    <Badge variant="delivered">{cover.status}</Badge>
+                    <StatusBadge status={cover.status.toLowerCase()} />
                     <span className="text-xs text-gray-500">{cover.date}</span>
                 </div>
             </div>
