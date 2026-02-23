@@ -31,6 +31,7 @@ export interface ReusableStepperProps {
   className?: string
   value?: number
   onValueChange?: (value: number) => void
+  disabled?: boolean,
 }
 export interface LoginResponse {
   message: string
