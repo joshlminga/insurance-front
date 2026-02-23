@@ -6,7 +6,7 @@ import {
   FieldGroup,
 } from "@/components/ui/field"
 import { EPREFIX, EROUTES } from "@/utils/enums"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 
 import { Button, ReuseableInput } from "@/dev/core"
 import { EMETHODS } from "@/utils/constatnts"
@@ -27,6 +27,8 @@ export function LoginForm({
 
   const { login } = UseAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+  const returnTo = (location.state as any)?.returnTo
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(LoginSchema),
     defaultValues: {
@@ -41,7 +43,9 @@ export function LoginForm({
       onSuccess: (data: LoginResponse) => {
         ShowToast.success(data.message || "Login successful!")
         login(data.user, data.access_token, data.is_general)
-        if (data.is_general) {
+        if (returnTo) {
+          navigate(returnTo)
+        } else if (data.is_general) {
           navigate(EROUTES.LANDING)
         } else {
           navigate(EROUTES.DASHBOARD)
@@ -94,7 +98,7 @@ export function LoginForm({
         </FieldGroup>
       </form>
       <FieldDescription>
-        Don&apos;t have an account?  <a href={`/${EPREFIX.AUTH}${EROUTES.SIGNUP}`}>Sign Up</a>
+        Don&apos;t have an account?  <a href={`/${EPREFIX.AUTH}${EROUTES.SIGNUP}`} onClick={(e) => { e.preventDefault(); navigate(`/${EPREFIX.AUTH}${EROUTES.SIGNUP}`, { state: location.state }) }}>Sign Up</a>
       </FieldDescription>
     </div>
   )

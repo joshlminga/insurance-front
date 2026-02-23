@@ -17,7 +17,7 @@ import { EPREFIX, EROUTES } from "@/utils/enums";
 import { SignUpSchema } from "@/types/form-schema";
 import { type SignUpFormValues } from "@/types/schema";
 import { extractErrorMessage } from "@/utils/helpers";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 export function SignupForm({
   className,
@@ -25,6 +25,8 @@ export function SignupForm({
 }: React.ComponentProps<"div">) {
 
   const navigate = useNavigate()
+  const location = useLocation()
+  const returnTo = (location.state as any)?.returnTo
   const form = useForm<SignUpFormValues>({
     resolver: zodResolver(SignUpSchema),
     defaultValues: {
@@ -41,7 +43,7 @@ export function SignupForm({
     mutationOptions: {
       onSuccess: (data: any) => {
         ShowToast.success(data.message || "Signup successful!")
-         navigate(EROUTES.LANDING)
+         navigate(returnTo || EROUTES.LANDING)
       },
       onError: (error: any) => {
         const message = extractErrorMessage(error);
@@ -106,7 +108,7 @@ export function SignupForm({
         </FieldGroup>
       </form>
       <FieldDescription>
-        Already have an account? <a href={`/${EPREFIX.AUTH}${EROUTES.SIGNIN}`}>Sign In</a>
+        Already have an account? <a href={`/${EPREFIX.AUTH}${EROUTES.SIGNIN}`} onClick={(e) => { e.preventDefault(); navigate(`/${EPREFIX.AUTH}${EROUTES.SIGNIN}`, { state: location.state }) }}>Sign In</a>
       </FieldDescription>
     </div>
   )

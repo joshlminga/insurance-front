@@ -8,14 +8,17 @@ import { ArrowLeftCircle, ArrowRightCircle, Plus } from 'lucide-react'
 import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { ComparisonPage } from './comparisons/page'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { QuotePreviewPage } from './qoute-preview/page'
 import { UseAuth } from '@/components/auth-provider'
+import { useStepperContext } from '@/hooks/stepper-context'
 
 export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goToNextStep, goToPrevStep }) => {
     const [page, setPage] = useState(1)
     const form = useForm();
     const { isAuthenticated } = UseAuth()
+    const location = useLocation()
+    const { currentStep } = useStepperContext()
 
     const { handleDialogContextSwitch, dialogContent, dialogOpen } =
         useCustomDialogContextFactory<{
@@ -110,6 +113,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                         ) : (
                                             <Link
                                                 to={`/${EPREFIX.AUTH}${EROUTES.SIGNUP}`}
+                                                state={{ returnTo: location.pathname, stepperStep: currentStep }}
                                                 className="w-full lg:w-auto">
                                                 <Button
                                                     type="button"
