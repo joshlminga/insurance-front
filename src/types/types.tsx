@@ -503,3 +503,16 @@ export interface EmptyStateProps {
   }
   className?: string
 }
+
+export interface CoverData {
+    id: string
+    title: string
+    variation?: string | null
+    status: string
+    date: string
+    img: string
+}
+
+export interface CoverCardProps {
+    cover: CoverData
+}

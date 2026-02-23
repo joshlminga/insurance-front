@@ -1,17 +1,5 @@
 import { StatusBadge } from '@/components/shared/status-badge'
-
-interface CoverData {
-    id: string
-    title: string
-    variation?: string | null
-    status: string
-    date: string
-    img: string
-}
-
-interface CoverCardProps {
-    cover: CoverData
-}
+import { CoverCardProps } from '@/types/types'
 
 export const CoverCard = ({ cover }: CoverCardProps) => {
     return (
