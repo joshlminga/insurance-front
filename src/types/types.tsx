@@ -480,3 +480,10 @@ export type UserMenuPopoverProps = {
   items: UserMenuItem[]
   className?: string
 }
+
+export type BorderedListProps<T> = {
+  items: T[]
+  renderItem: (item: T, index: number) => ReactNode
+  emptyState?: ReactNode
+  className?: string
+}

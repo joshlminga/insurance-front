@@ -91,7 +91,7 @@ export const createHeroPopoverItems = (
 ) => [
     {
       label: "My Covers",
-      to: `${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}`,
+      to: `/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}`,
       icon: ShieldCheck,
     },
     {
@@ -111,3 +111,21 @@ export const createHeroPopoverItems = (
       destructive: true,
     },
   ]
+
+export const myAccounttLinks = [
+  'Account Management',
+  'Payment Settings',
+  'Address Book',
+  'Newsletter Preferences'
+]
+
+export const sidebarLinks = [
+    { label: 'My Account' },
+    { label: 'Covers', active: true },
+    // { label: 'Inbox' },
+    // { label: 'Pending Reviews' },
+    // { label: 'Claims' },
+    // { label: 'Wishlist' },
+    // { label: 'Followed Sellers' },
+    // { label: 'Recently Viewed' },
+]

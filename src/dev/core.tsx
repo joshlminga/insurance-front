@@ -28,7 +28,8 @@ import type {
     TTabsProps,
     TCountryResponse,
     SubmitResponse,
-    UserMenuPopoverProps
+    UserMenuPopoverProps,
+    BorderedListProps
 } from "@/types/types";
 import {
     Stepper,
