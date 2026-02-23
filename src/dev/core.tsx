@@ -1173,7 +1173,7 @@ export const UserMenuPopover = ({
                 <PopoverTrigger asChild>
                     <Button
                         variant="ghost"
-                        className="h-11 w-11 rounded-full border border-white/70 bg-white/90 p-0 text-sm font-semibold text-slate-900 shadow-sm hover:bg-white">
+                        className='h-11 w-11 rounded-full border border-white/70 bg-white/90 p-0 text-sm font-semibold text-slate-900 shadow-sm hover:bg-white'>
                         {userInitials}
                     </Button>
                 </PopoverTrigger>
