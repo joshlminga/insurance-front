@@ -10,10 +10,12 @@ import { useForm } from 'react-hook-form'
 import { ComparisonPage } from './comparisons/page'
 import { Link } from 'react-router-dom'
 import { QuotePreviewPage } from './qoute-preview/page'
+import { UseAuth } from '@/components/auth-provider'
 
 export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goToNextStep, goToPrevStep }) => {
     const [page, setPage] = useState(1)
     const form = useForm();
+    const { isAuthenticated } = UseAuth()
 
     const { handleDialogContextSwitch, dialogContent, dialogOpen } =
         useCustomDialogContextFactory<{
@@ -52,7 +54,6 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                 label="Road Rescue"
                             />
                         </div>
-
                         <Button
                             type='button'
                             className="ml-auto mt-4 flex items-center rounded-[3px] border border-[#0CC2581F] bg-[#C7EED5] hover:bg-[#C7EED5]/90 text-[#43A047]"
@@ -89,24 +90,34 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                             type="button"
                                             onClick={() =>
                                                 handleDialogContextSwitch({
-                                                    componentProps: { 
-                                                        data: item 
+                                                    componentProps: {
+                                                        data: item
                                                     },
                                                     Component: QuotePreviewPage,
                                                 })
-                                            } 
+                                            }
                                             className="w-full lg:w-auto rounded-md border border-[#D9D9D9] bg-[#C20C0C] hover:bg-[#C20C0C]/90 font-medium text-white">
                                             Get Quote
                                         </Button>
 
-                                        <Link
-                                            to={`/${EPREFIX?.AUTH}${EROUTES.SIGNUP}`}
-                                            className="w-full lg:w-auto">
-                                            <Button type="button" 
-                                            className="w-full lg:w-auto rounded-md border border-[#D9D9D9] bg-[#0CC258] hover:bg-[#0CC258]/90 font-medium text-white">
+                                        {isAuthenticated ? (
+                                            <Button
+                                                type="button"
+                                                onClick={goToNextStep}
+                                                className="w-full lg:w-auto rounded-md border border-[#D9D9D9] bg-[#0CC258] hover:bg-[#0CC258]/90 font-medium text-white">
                                                 Purchase Cover
                                             </Button>
-                                        </Link>
+                                        ) : (
+                                            <Link
+                                                to={`/${EPREFIX.AUTH}${EROUTES.SIGNUP}`}
+                                                className="w-full lg:w-auto">
+                                                <Button
+                                                    type="button"
+                                                    className="w-full lg:w-auto rounded-md border border-[#D9D9D9] bg-[#0CC258] hover:bg-[#0CC258]/90 font-medium text-white">
+                                                    Purchase Cover
+                                                </Button>
+                                            </Link>
+                                        )}
                                     </>
                                 }
 
