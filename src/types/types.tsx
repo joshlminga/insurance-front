@@ -463,3 +463,19 @@ export type ReuseableSingleSelectCountriesInputProps<T extends FieldValues> = {
   disabled?: boolean
   className?: string
 }
+
+export type UserMenuItem = {
+  label: string
+  to?: string
+  icon?: LucideIcon
+  onClick?: () => void
+  destructive?: boolean
+}
+
+export type UserMenuPopoverProps = {
+  userInitials: string
+  userName: string
+  userEmail?: string
+  items: UserMenuItem[]
+  className?: string
+}

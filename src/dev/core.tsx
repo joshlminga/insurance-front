@@ -27,7 +27,8 @@ import type {
     TTableReusableComponent,
     TTabsProps,
     TCountryResponse,
-    SubmitResponse
+    SubmitResponse,
+    UserMenuPopoverProps
 } from "@/types/types";
 import {
     Stepper,
@@ -65,6 +66,7 @@ import { MultiSelect, MultiSelectContent, MultiSelectGroup, MultiSelectItem, Mul
 import { UseApiQuery } from "@/hooks/hooks";
 import { Label } from "@/components/ui/label";
 import { EORGANIZATIONTYPES } from "@/utils/constatnts";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 const formatSegment = (segment: string) => {
     return segment
@@ -1161,6 +1163,69 @@ export const ReusableOrganizationsInputMultiselect = ({
                     </MultiSelectGroup>
                 </MultiSelectContent>
             </MultiSelect>
+        </div>
+    )
+}
+
+export const UserMenuPopover = ({
+    userInitials,
+    userName,
+    userEmail,
+    items,
+    className,
+}: UserMenuPopoverProps) => {
+    return (
+        <div className={className}>
+            <Popover>
+                <PopoverTrigger asChild>
+                    <Button
+                        variant="ghost"
+                        className="h-11 w-11 rounded-full border border-white/70 bg-white/90 p-0 text-sm font-semibold text-slate-900 shadow-sm hover:bg-white">
+                        {userInitials}
+                    </Button>
+                </PopoverTrigger>
+                <PopoverContent align="end" className="w-56 rounded-xl p-2">
+                    <div className="mb-2 rounded-lg bg-muted/40 px-3 py-2">
+                        <p className="truncate text-sm font-semibold">{userName}</p>
+                        {userEmail && (
+                            <p className="truncate text-xs text-muted-foreground">
+                                {userEmail}
+                            </p>
+                        )}
+                    </div>
+
+                    <div className="space-y-1">
+                        {items.map((item, index) => {
+                            const baseClass =
+                                "flex items-center gap-2 rounded-md px-2 py-2 text-sm hover:bg-accent"
+
+                            const Icon = item.icon
+
+                            if (item.to) {
+                                return (
+                                    <Link key={index} to={item.to} className={baseClass}>
+                                        {Icon && <Icon className="h-4 w-4" />}
+                                        {item.label}
+                                    </Link>
+                                )
+                            }
+
+                            return (
+                                <button
+                                    key={index}
+                                    type="button"
+                                    onClick={item.onClick}
+                                    className={`${baseClass} w-full text-left ${item.destructive ? "text-destructive" : ""
+                                        }`}
+                                >
+                                    {Icon && <Icon className="h-4 w-4" />}
+                                    {item.label}
+                                </button>
+                            )
+                        })}
+                    </div>
+                </PopoverContent>
+            </Popover>
         </div>
     )
 }
