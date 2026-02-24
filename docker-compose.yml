@@ -1,0 +1,9 @@
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: acensure-frontend
+    ports:
+      - "8005:80"
+    restart: unless-stopped
