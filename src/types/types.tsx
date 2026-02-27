@@ -218,6 +218,17 @@ export type TTabsProps = {
   contentClassName?: string
 } & Record<string, any>
 
+export type TRouteTab = {
+  label: string
+  path: string
+}
+
+export type TRouteTabNavProps = {
+  tabs: TRouteTab[]
+  basePath: string
+  className?: string
+}
+
 export type TSelectOption = {
   label: string
   value: string
@@ -479,4 +490,29 @@ export type UserMenuPopoverProps = {
   userEmail?: string
   items: UserMenuItem[]
   className?: string
+}
+
+export interface EmptyStateProps {
+  icon?: LucideIcon
+  title: string
+  description?: string
+  action?: {
+    label: string
+    href?: string
+    onClick?: () => void
+  }
+  className?: string
+}
+
+export interface CoverData {
+    id: string
+    title: string
+    variation?: string | null
+    status: string
+    date: string
+    img: string
+}
+
+export interface CoverCardProps {
+    cover: CoverData
 }

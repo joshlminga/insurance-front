@@ -26,6 +26,7 @@ import type {
     TRHFSelectProps,
     TTableReusableComponent,
     TTabsProps,
+    TRouteTabNavProps,
     TCountryResponse,
     SubmitResponse,
     UserMenuPopoverProps
@@ -46,7 +47,7 @@ import {
     TabsList,
     TabsTrigger,
 } from "@/components/ui/tabs"
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Fragment } from "react/jsx-runtime";
 import React, { useState } from "react";
 import { Button as ShadButton } from "@/components/ui/button"
@@ -435,6 +436,40 @@ export function ReusableTabs({
                 )
             })}
         </Tabs>
+    )
+}
+
+export function RouteTabNav({ tabs, basePath, className }: TRouteTabNavProps) {
+    const navigate = useNavigate()
+    const location = useLocation()
+
+    const isActive = (tabPath: string) => {
+        // const fullPath = tabPath ? `${basePath}/${tabPath}` : basePath
+        return tabPath
+            ? location.pathname.includes(tabPath)
+            : location.pathname === basePath || location.pathname === `${basePath}/`
+    }
+
+    return (
+        <div className={cn("flex border-b", className)}>
+            {tabs.map((tab) => {
+                const fullPath = tab.path ? `${basePath}/${tab.path}` : basePath
+                const active = isActive(tab.path)
+                return (
+                    <button
+                        key={tab.label}
+                        onClick={() => navigate(fullPath)}
+                        className={cn(
+                            "px-4 py-2 text-sm font-medium border-b-2 transition-colors",
+                            active
+                                ? "border-primary text-primary"
+                                : "border-transparent text-muted-foreground hover:text-foreground"
+                        )}>
+                        {tab.label}
+                    </button>
+                )
+            })}
+        </div>
     )
 }
 
@@ -904,6 +939,7 @@ export const ReusableDropDownComponent = <T,>({
         </DropdownMenu>
     );
 };
+
 export const ReusableCountriesInputMultiselect = ({
     value,
     onChange,
@@ -914,7 +950,7 @@ export const ReusableCountriesInputMultiselect = ({
 
     const { data, isLoading } = UseApiQuery<TCountryResponse>({
         url: 'taxonomies/general/countries',
-        params: { direction: 'ASC' },
+        params: { direction: 'asc' },
         queryOptions: { enabled: true },
     })
 
@@ -970,7 +1006,7 @@ export function ReuseableSingleSelectCountriesInput<T extends FieldValues>({
 }: ReuseableSingleSelectCountriesInputProps<T>) {
     const { data, isLoading } = UseApiQuery<TCountryResponse>({
         url: "taxonomies/general/countries",
-        params: { direction: "ASC" },
+        params: { direction: "asc" },
         queryOptions: { enabled: true },
     })
 
@@ -1022,7 +1058,7 @@ export function ReuseableSingleSelectAdminInput<T extends FieldValues>({
 }: ReuseableSingleSelectCountriesInputProps<T>) {
     const { data, isLoading } = UseApiQuery<SubmitResponse>({
         url: "admin/user",
-        params: { direction: "ASC" },
+        params: { direction: "asc" },
         queryOptions: { enabled: true },
     })
     const users = data?.data?.users ?? []
@@ -1072,10 +1108,10 @@ export const ReuseableSelectInsurerInput = <T extends FieldValues>({
 }: ReuseableSingleSelectCountriesInputProps<T>) => {
     const { data, isLoading } = UseApiQuery<SubmitResponse>({
         url: `organization-location?organization_type=${EORGANIZATIONTYPES.INSURER}`,
-        params: { direction: "ASC" },
+        params: { direction: "asc" },
         queryOptions: { enabled: true },
     })
-    const insurers = data?.data ?? []
+    const insurers = data?.data ?? [];
     return (
         <div className={`space-y-2 ${className ?? ""}`}>
             {label && (
@@ -1095,8 +1131,8 @@ export const ReuseableSelectInsurerInput = <T extends FieldValues>({
                 </SelectTrigger>
                 <SelectContent>
                     {insurers.map((insurer: any) => (
-                        <SelectItem key={insurer?.location?.organization_location_id} value={String(insurer?.location?.organization_location_id)}>
-                            {insurer?.location?.organization_name} - {insurer?.location?.country?.name}
+                        <SelectItem key={insurer?.organization_location_id} value={String(insurer?.organization_location_id)}>
+                            {insurer?.organization_name} - {insurer?.country?.name}
                         </SelectItem>
                     ))}
                     {!isLoading && insurers.length === 0 && (
@@ -1119,10 +1155,13 @@ export const ReusableOrganizationsInputMultiselect = ({
 }: TCountriesInputMultiselectProps) => {
     const { data, isLoading } = UseApiQuery<SubmitResponse>({
         url: `organization-location?exclude_organization_type=${EORGANIZATIONTYPES.INSURER}`,
-        params: { direction: 'ASC' },
+        params: { direction: 'asc' },
         queryOptions: { enabled: true },
     })
     const organizations = data?.data ?? [];
+
+    console.log(organizations);
+
     return (
         <div className="space-y-2 w-full">
             {label && (
@@ -1148,9 +1187,9 @@ export const ReusableOrganizationsInputMultiselect = ({
                         )}
                         {organizations.map((org: any) => (
                             <MultiSelectItem
-                                key={org?.location?.organization_location_id}
-                                value={String(org?.location?.organization_location_id)}>
-                                {org?.location?.organization_name} - {org?.location?.country?.name}
+                                key={org?.organization_location_id}
+                                value={String(org?.organization_location_id)}>
+                                {org?.organization_name} - {org?.country?.name}
                             </MultiSelectItem>
                         ))}
                     </MultiSelectGroup>

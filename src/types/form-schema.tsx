@@ -60,6 +60,22 @@ export const SignUpSchema = z
     path: ["confirm_password"],
   })
 
+export const UpdateProfileSchema = z.object({
+  first_name: z.string().min(2, "First name is required").max(50),
+  last_name: z.string().min(2, "Last name is required").max(50),
+  email: z.string().email("Invalid email address"),
+  phone: z.string().min(10, "Phone number must be at least 10 digits").regex(/^(?:\+?\d{1,3})?[ -]?\d{6,14}$/, "Invalid phone number format"),
+})
+
+export const UpdatePasswordSchema = z.object({
+  current_password: z.string().min(1, "Current password is required"),
+  new_password: z.string().min(6, "New password must be at least 6 characters"),
+  confirm_password: z.string().min(6, "Confirm password must be at least 6 characters"),
+}).refine((data) => data.new_password === data.confirm_password, {
+  message: "Passwords do not match",
+  path: ["confirm_password"],
+})
+
 export const KycSchema = z.object({
   passport_number: z.string().min(1, "Passport/ID No number is required"),
   tax_number: z.string().min(1, "Tax Number is required"),

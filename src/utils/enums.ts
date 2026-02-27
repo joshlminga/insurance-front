@@ -58,7 +58,7 @@ export const EROUTES = {
 
   // products
   PRODUCTS: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor`,
-  
+
   ORGANIZATION: `/${EPREFIX.DASHBOARD}/organization`,
   USERS: `/${EPREFIX.DASHBOARD}/users`,
 } as const
@@ -340,3 +340,46 @@ export const POST_COMPARISON_DATA = [
     ],
   },
 ];
+
+export const ongoingCovers = [
+  {
+    id: '366782717',
+    title: 'PsV Car Insurance Cover',
+    variation: 'Paperback Edition',
+    status: 'COVERED',
+    date: 'On 11-02',
+    img: '/cic.png',
+  },
+  {
+    id: '377258917',
+    title: 'Excess Protector Cover',
+    variation: '5*6',
+    status: 'COVERED',
+    date: 'On 07-02',
+    img: '/britam.png',
+  },
+  {
+    id: '345454177',
+    title: 'Madison Insurance Cover',
+    variation: null,
+    status: 'COVERED',
+    date: 'On 09-12',
+    img: '/madison.png',
+  },
+  {
+    id: '311675987',
+    title: 'Sanlam Insurance Cover',
+    variation: null,
+    status: 'COVERED',
+    date: 'On 07-11',
+    img: '/sanlam.png',
+  },
+  {
+    id: '311675987',
+    title: 'All in One Cover',
+    variation: null,
+    status: 'COVERED',
+    date: 'On 07-11',
+    img: '/britam.png',
+  },
+]

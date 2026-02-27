@@ -6,13 +6,12 @@ import {
   FieldGroup,
 } from "@/components/ui/field"
 
-import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
 import { UseApiMutation } from "@/hooks/hooks";
 import { ShowToast } from "@/utils/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { EMETHODS } from "@/utils/constatnts";
-import { ReuseableInput } from "@/dev/core";
+import { Button, ReuseableInput } from "@/dev/core";
 import { EPREFIX, EROUTES } from "@/utils/enums";
 import { SignUpSchema } from "@/types/form-schema";
 import { type SignUpFormValues } from "@/types/schema";
@@ -100,7 +99,9 @@ export function SignupForm({
           <Field>
             <Button
               className="bg-[#C20C0C] hover:bg-[#C20C0C]/70"
-              type="submit">
+              type="submit"
+              loading={loginMutation.isPending}
+              >
               <p className='font-bold leading-6 text-sm'>Create Account</p>
             </Button>
 

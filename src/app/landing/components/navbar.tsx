@@ -117,9 +117,9 @@ export const Navbar = (
                     </div>
                     <div className={cn(`hidden lg:flex items-center gap-6 xl:gap-10 text-sm font-semibold cursor-pointer ${textStyle}`)}>
                         <Link to={EROUTES.LANDING} className="hover:text-red-500 transition uppercase">Home</Link>
-                        <a className="hover:text-red-500 transition uppercase">About</a>
-                        <a className="hover:text-red-500 transition uppercase">Services</a>
-                        <a className="hover:text-red-500 transition uppercase">Contact</a>
+                        <Link to='#' className="hover:text-red-500 transition uppercase">About</Link>
+                        <Link to='#' className="hover:text-red-500 transition uppercase">Services</Link>
+                        <Link to='#' className="hover:text-red-500 transition uppercase">Contact</Link>
                         {isAuthenticated ? (
                             <>
                                 {isGeneral === true && (

@@ -21,7 +21,7 @@ import { Plus } from 'lucide-react';
 const OrganizationsPage = () => {
   const [filter, optionsDispatcher] = useReducer(
     ReusableReducer<TPaginationFilters & TFilterOptions>,
-    { ...FILTEROPTIONS, page: 1, pageSize: 100 }
+    { ...FILTEROPTIONS, page: 1, pageSize: 10 }
   );
   const optionsDispatcherDebounce = useDebounce({
     debounceCallback: optionsDispatcher,
@@ -165,7 +165,7 @@ const OrganizationsPage = () => {
             ],
             OtherTools: SearchTools,
             data: data?.data?.organizations ?? [],
-            pageCount: 1,
+            pageCount: data?.data?.pagination?.last_page ?? 1,
             title: 'Organizations',
             showPagination: true,
             setPageSize: (pageSize) =>
@@ -173,8 +173,8 @@ const OrganizationsPage = () => {
                 payload: { pageSize },
                 type: 'pageSize',
               }),
-            pageSize: filter.pageSize ?? 10,
-            page: filter?.page ?? 1,
+            pageSize: data?.data?.pagination?.per_page ?? 10,
+            page: data?.data?.pagination?.current_page ?? 1,
             isLoading: isLoading,
           }}
         />
