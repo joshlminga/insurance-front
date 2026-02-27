@@ -950,7 +950,7 @@ export const ReusableCountriesInputMultiselect = ({
 
     const { data, isLoading } = UseApiQuery<TCountryResponse>({
         url: 'taxonomies/general/countries',
-        params: { direction: 'ASC' },
+        params: { direction: 'asc' },
         queryOptions: { enabled: true },
     })
 
@@ -1006,7 +1006,7 @@ export function ReuseableSingleSelectCountriesInput<T extends FieldValues>({
 }: ReuseableSingleSelectCountriesInputProps<T>) {
     const { data, isLoading } = UseApiQuery<TCountryResponse>({
         url: "taxonomies/general/countries",
-        params: { direction: "ASC" },
+        params: { direction: "asc" },
         queryOptions: { enabled: true },
     })
 
@@ -1058,7 +1058,7 @@ export function ReuseableSingleSelectAdminInput<T extends FieldValues>({
 }: ReuseableSingleSelectCountriesInputProps<T>) {
     const { data, isLoading } = UseApiQuery<SubmitResponse>({
         url: "admin/user",
-        params: { direction: "ASC" },
+        params: { direction: "asc" },
         queryOptions: { enabled: true },
     })
     const users = data?.data?.users ?? []
@@ -1108,10 +1108,10 @@ export const ReuseableSelectInsurerInput = <T extends FieldValues>({
 }: ReuseableSingleSelectCountriesInputProps<T>) => {
     const { data, isLoading } = UseApiQuery<SubmitResponse>({
         url: `organization-location?organization_type=${EORGANIZATIONTYPES.INSURER}`,
-        params: { direction: "ASC" },
+        params: { direction: "asc" },
         queryOptions: { enabled: true },
     })
-    const insurers = data?.data ?? []
+    const insurers = data?.data ?? [];
     return (
         <div className={`space-y-2 ${className ?? ""}`}>
             {label && (
@@ -1131,8 +1131,8 @@ export const ReuseableSelectInsurerInput = <T extends FieldValues>({
                 </SelectTrigger>
                 <SelectContent>
                     {insurers.map((insurer: any) => (
-                        <SelectItem key={insurer?.location?.organization_location_id} value={String(insurer?.location?.organization_location_id)}>
-                            {insurer?.location?.organization_name} - {insurer?.location?.country?.name}
+                        <SelectItem key={insurer?.organization_location_id} value={String(insurer?.organization_location_id)}>
+                            {insurer?.organization_name} - {insurer?.country?.name}
                         </SelectItem>
                     ))}
                     {!isLoading && insurers.length === 0 && (
@@ -1155,10 +1155,13 @@ export const ReusableOrganizationsInputMultiselect = ({
 }: TCountriesInputMultiselectProps) => {
     const { data, isLoading } = UseApiQuery<SubmitResponse>({
         url: `organization-location?exclude_organization_type=${EORGANIZATIONTYPES.INSURER}`,
-        params: { direction: 'ASC' },
+        params: { direction: 'asc' },
         queryOptions: { enabled: true },
     })
     const organizations = data?.data ?? [];
+
+    console.log(organizations);
+
     return (
         <div className="space-y-2 w-full">
             {label && (
@@ -1184,9 +1187,9 @@ export const ReusableOrganizationsInputMultiselect = ({
                         )}
                         {organizations.map((org: any) => (
                             <MultiSelectItem
-                                key={org?.location?.organization_location_id}
-                                value={String(org?.location?.organization_location_id)}>
-                                {org?.location?.organization_name} - {org?.location?.country?.name}
+                                key={org?.organization_location_id}
+                                value={String(org?.organization_location_id)}>
+                                {org?.organization_name} - {org?.country?.name}
                             </MultiSelectItem>
                         ))}
                     </MultiSelectGroup>
