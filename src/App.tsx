@@ -58,6 +58,7 @@ import { MyAccountManagementPage } from "./app/customer/my-covers/my-account/pag
 import { MyClaimsPage } from "./app/customer/my-covers/my-claims/page"
 import { MotorCoverTypePage } from "./app/admin/product/motor/cover_types/page"
 import { MotorCoveringPage } from "./app/admin/product/motor/motor-coving/page"
+import { VehicleClassesPage } from "./app/admin/product/motor/vehicle-clases/page"
 
 export const router = createBrowserRouter([
 
@@ -265,6 +266,10 @@ export const router = createBrowserRouter([
       {
         path: "products/motor/covering",
         element: <MotorCoveringPage />,
+      },
+       {
+        path: "products/motor/vehicle-classes",
+        element: <VehicleClassesPage />,
       },
 
       // Organizations

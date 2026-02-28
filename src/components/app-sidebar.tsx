@@ -110,9 +110,13 @@ const navData = {
           title: "Cover Types",
           url: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/cover-types`
         },
-         {
+        {
           title: "Motor Covering",
           url: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/covering`
+        },
+        {
+          title: "Vehicle Classes",
+          url: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/vehicle-classes`
         }
       ],
     },

@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { PageHeader } from '@/components/shared';
 import { ActionColumn } from '@/dev/columns';
-import { MotorCoveringsColumns } from '@/dev/columns/admin/motor-covering';
+import { VehicleClassesColumns } from '@/dev/columns/admin/vehicle-classes';
 import { CustomDialogComponent } from '@/dev/core';
 import { CustomBaseTable, SearchTools } from '@/dev/table';
 import { useCustomDialogContextFactory, useDebounce } from '@/hooks';
@@ -13,10 +13,10 @@ import { extractErrorMessage } from '@/utils/helpers';
 import { ShowToast } from '@/utils/utils';
 import { Plus } from 'lucide-react';
 import { useReducer } from 'react'
-import { CreateMotorCoveringModal } from './modals/create-covering';
-import { EditCoveringModal } from './modals/edit-covering';
+import { CreateVehicleClassesModal } from './modals/create';
+import { EditVehicleClassesModal } from './modals/edit';
 
-export const MotorCoveringPage = () => {
+export const VehicleClassesPage = () => {
     const [filter, optionsDispatcher] = useReducer(
         ReusableReducer<TPaginationFilters & TFilterOptions>,
         { ...FILTEROPTIONS, page: 1, pageSize: 15 }
@@ -32,7 +32,7 @@ export const MotorCoveringPage = () => {
         }>();
 
     const { data, isLoading, refetch } = UseApiQuery<SubmitResponse>({
-        url: 'motor/cover-covering',
+        url: 'motor/vehicle-classes',
         params: {
             page: filter.page,
             pageSize: filter.pageSize,
@@ -43,12 +43,12 @@ export const MotorCoveringPage = () => {
         },
     })
 
-    const deleteMotorCoveringMutation = UseApiMutation<SubmitResponse, { id: number | string }>({
-        url: ({ id }) => `motor/cover-covering/${id}`,
+    const deleteVehicleTypesMutation = UseApiMutation<SubmitResponse, { id: number | string }>({
+        url: ({ id }) => `motor/vehicle-classes/${id}`,
         method: EMETHODS.DELETE,
         mutationOptions: {
             onSuccess: (response) => {
-                ShowToast.success(response?.message || 'Motor Covering deleted successfully')
+                ShowToast.success(response?.message || 'Cover Type deleted successfully')
                 refetch()
             },
             onError: (error) => {
@@ -57,12 +57,12 @@ export const MotorCoveringPage = () => {
         },
     })
 
-    const toggleMotorCoveringStatusMutation = UseApiMutation<SubmitResponse, { id: number | string, is_active: boolean }>({
-        url: ({ id }) => `motor/cover-covering/${id}/status`,
+    const toggleVehicleClassesStatusMutation = UseApiMutation<SubmitResponse, { id: number | string, is_active: boolean }>({
+        url: ({ id }) => `motor/vehicle-classes/${id}/status`,
         method: EMETHODS.PATCH,
         mutationOptions: {
             onSuccess: (response) => {
-                ShowToast.success(response?.message || 'Motor Covering status updated successfully')
+                ShowToast.success(response?.message || 'Cover Type status updated successfully')
                 refetch()
             },
             onError: (error) => {
@@ -77,14 +77,14 @@ export const MotorCoveringPage = () => {
             onSelect: (data) => {
                 handleDialogContextSwitch({
                     componentProps: { data, refetch },
-                    Component: EditCoveringModal,
+                    Component: EditVehicleClassesModal,
                 })
             },
         },
         {
             label: 'Delete',
             onSelect: (data) => {
-                deleteMotorCoveringMutation.mutate({
+                deleteVehicleTypesMutation.mutate({
                     id: data?.id,
                 })
             },
@@ -93,7 +93,7 @@ export const MotorCoveringPage = () => {
         {
             label: 'Deactivate',
             onSelect: (data) => {
-                toggleMotorCoveringStatusMutation.mutate({
+                toggleVehicleClassesStatusMutation.mutate({
                     is_active: false,
                     id: data?.id,
                 })
@@ -103,7 +103,7 @@ export const MotorCoveringPage = () => {
         {
             label: 'Activate',
             onSelect: (data) => {
-                toggleMotorCoveringStatusMutation.mutate({
+                toggleVehicleClassesStatusMutation.mutate({
                     is_active: true,
                     id: data?.id,
                 })
@@ -115,17 +115,17 @@ export const MotorCoveringPage = () => {
     return (
         <div>
             <PageHeader
-                title="Motor Covering"
-                description="Manage Motor Covering, their details, and associated users"
+                title="Vehicle Classes"
+                description="Manage Vehicle Classes, their details, and associated users"
                 actions={[
                     {
                         icon: Plus,
-                        label: 'Add Motor Covering',
+                        label: 'Add Vehicle Classes',
                         variant: 'default',
                         onClick: () => {
                             handleDialogContextSwitch({
                                 componentProps: { refetch },
-                                Component: CreateMotorCoveringModal,
+                                Component: CreateVehicleClassesModal,
                             })
                         },
                     },
@@ -150,13 +150,13 @@ export const MotorCoveringPage = () => {
                             includeFilter: true,
                         },
                         columns: [
-                            ...MotorCoveringsColumns,
+                            ...VehicleClassesColumns,
                             ActionColumn({ ActionsHandlerMapping }),
                         ],
                         OtherTools: SearchTools,
                         data: data?.data ?? [],
                         pageCount: data?.pagination?.last_page ?? 1,
-                        title: 'Motor Covering',
+                        title: 'Vehicle Classes',
                         showPagination: true,
                         setPageSize: (pageSize) =>
                             optionsDispatcher({
@@ -169,6 +169,7 @@ export const MotorCoveringPage = () => {
                     }}
                 />
             </div>
+
             <CustomDialogComponent
                 {...{ handleDialogContextSwitch, dialogOpen }}
                 className='sm:max-w-fit w-[95vw] sm:w-auto p-4 sm:p-6'>

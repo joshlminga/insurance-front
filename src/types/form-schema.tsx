@@ -316,6 +316,17 @@ export const CreateCoveringSchema = z.object({
     .max(1000, "Description is too long"),
 })
 
+export const CreateVehicleClassesSchema = z.object({
+  name: z
+    .string()
+    .min(2, "Vehicle class name must be at least 2 characters")
+    .max(100, "Vehicle class name is too long"),
+  description: z
+    .string()
+    .min(5, "Description must be at least 5 characters")
+    .max(1000, "Description is too long"),
+})
+
 export const CreateProductSchema = z.object({
     organization_location_id: z.string().min(1, "Organization location is required"),
     name: z
