@@ -106,6 +106,10 @@ const navData = {
           title: "Motor",
           url: `${EROUTES.DASHBOARD}/${EPREFIX.PRODUCTS}/motor`,
         },
+        {
+          title: "Cover Types",
+          url: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/cover-types`
+        }
       ],
     },
     {

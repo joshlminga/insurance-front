@@ -56,6 +56,7 @@ import { CoversPage } from "./app/customer/my-covers/ongoing/page"
 import { CancelledCoversPage } from "./app/customer/my-covers/cancelled/page"
 import { MyAccountManagementPage } from "./app/customer/my-covers/my-account/page"
 import { MyClaimsPage } from "./app/customer/my-covers/my-claims/page"
+import { MotorCoverTypePage } from "./app/admin/product/motor/cover_types/page"
 
 export const router = createBrowserRouter([
 
@@ -250,9 +251,15 @@ export const router = createBrowserRouter([
       },
 
       // products
+
+      // motor
       {
         path: "products/motor",
         element: <MotorProductPage />,
+      },
+       {
+        path: "products/motor/cover-types",
+        element: <MotorCoverTypePage />,
       },
 
       // Organizations

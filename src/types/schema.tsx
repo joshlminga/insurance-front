@@ -13,6 +13,7 @@ import {
     UsersSchema,
     AddLocationSchema,
     EditLocationSchema,
+    CreateCoverTypeSchema,
     CreateProductSchema,
     EditProductSchema,
     UpdateProfileSchema,
@@ -33,6 +34,7 @@ export type OrganizationFormValues = z.infer<typeof OrganizationSchema>
 export type UsersFormValues = z.infer<typeof UsersSchema>
 export type AddLocationFormValues = z.infer<typeof AddLocationSchema>
 export type EditLocationFormValues = z.infer<typeof EditLocationSchema>
+export type CreateCoverTypeFormValues = z.infer<typeof CreateCoverTypeSchema>
 export type CreateProductFormValues = z.infer<typeof CreateProductSchema>
 export type EditProductFormValues = z.infer<typeof EditProductSchema>
 
