@@ -14,6 +14,7 @@ import { ShowToast } from '@/utils/utils';
 import { Plus } from 'lucide-react';
 import { useReducer } from 'react'
 import { CreateMotorCoveringModal } from './modals/create-covering';
+import { EditCoveringModal } from './modals/edit-covering';
 
 export const MotorCoveringPage = () => {
     const [filter, optionsDispatcher] = useReducer(
@@ -35,6 +36,7 @@ export const MotorCoveringPage = () => {
         params: {
             page: filter.page,
             pageSize: filter.pageSize,
+            term:{}
         },
         queryOptions: {
             enabled: true,
@@ -70,15 +72,15 @@ export const MotorCoveringPage = () => {
     })
 
     const ActionsHandlerMapping: SingleActionsHandler<any>[] = [
-        // {
-        //     label: 'Edit',
-        //     onSelect: (data) => {
-        //         handleDialogContextSwitch({
-        //             componentProps: { data, refetch },
-        //             Component: EditCoverTypesModal,
-        //         })
-        //     },
-        // },
+        {
+            label: 'Edit',
+            onSelect: (data) => {
+                handleDialogContextSwitch({
+                    componentProps: { data, refetch },
+                    Component: EditCoveringModal,
+                })
+            },
+        },
         {
             label: 'Delete',
             onSelect: (data) => {
