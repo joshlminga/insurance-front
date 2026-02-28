@@ -44,6 +44,7 @@ export const UsersPage = () => {
             enabled: true,
         },
     })
+
     const deleteUserMutation = UseApiMutation<SubmitResponse, { id: number | string }>({
         url: ({ id }) => `user/${id}`,
         method: EMETHODS.DELETE,
@@ -170,13 +171,8 @@ export const UsersPage = () => {
                             ActionColumn({ ActionsHandlerMapping }),
                         ],
                         OtherTools: SearchTools,
-                        data: data?.data?.users ?? [],
-                        pageCount:
-                            data?.data?.totalPages ??
-                            data?.data?.total_pages ??
-                            data?.data?.pagination?.totalPages ??
-                            data?.data?.pagination?.total_pages ??
-                            1,
+                        data: data?.data ?? [],
+                        pageCount: data?.pagination?.last_page ?? 1,
                         title: 'Users',
                         showPagination: true,
                         setPageSize: (pageSize) =>
@@ -184,8 +180,8 @@ export const UsersPage = () => {
                                 payload: { pageSize },
                                 type: 'pageSize',
                             }),
-                        pageSize: filter.pageSize,
-                        page: filter.page,
+                        pageSize: data?.pagination?.per_page ?? filter?.pageSize,
+                        page:  data?.pagination?.current_page ?? filter.page,
                         isLoading: isLoading,
                     }}
                 />
