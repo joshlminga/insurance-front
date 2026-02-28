@@ -103,12 +103,16 @@ const navData = {
       icon: LayoutDashboard,
       items: [
         {
-          title: "Motor",
+          title: "Motor Products",
           url: `${EROUTES.DASHBOARD}/${EPREFIX.PRODUCTS}/motor`,
         },
         {
           title: "Cover Types",
           url: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/cover-types`
+        },
+         {
+          title: "Motor Covering",
+          url: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/covering`
         }
       ],
     },

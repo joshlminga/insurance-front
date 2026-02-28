@@ -59,6 +59,7 @@ export const EROUTES = {
   // products
   PRODUCTS: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor`,
   COVERTYPES: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/cover-types`,
+  MOTORCOVERING: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/covering`,
 
   ORGANIZATION: `/${EPREFIX.DASHBOARD}/organization`,
   USERS: `/${EPREFIX.DASHBOARD}/users`,
