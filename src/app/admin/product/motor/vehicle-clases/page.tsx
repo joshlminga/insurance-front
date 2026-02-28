@@ -48,7 +48,7 @@ export const VehicleClassesPage = () => {
         method: EMETHODS.DELETE,
         mutationOptions: {
             onSuccess: (response) => {
-                ShowToast.success(response?.message || 'Cover Type deleted successfully')
+                ShowToast.success(response?.message || 'Vehicle class deleted successfully')
                 refetch()
             },
             onError: (error) => {
@@ -62,7 +62,7 @@ export const VehicleClassesPage = () => {
         method: EMETHODS.PATCH,
         mutationOptions: {
             onSuccess: (response) => {
-                ShowToast.success(response?.message || 'Cover Type status updated successfully')
+                ShowToast.success(response?.message || 'Vehicle class status updated successfully')
                 refetch()
             },
             onError: (error) => {

@@ -23,7 +23,6 @@ export const EditVehicleClassesModal = ({ handleDialogContextSwitch, componentPr
             description: componentProps?.data?.meta?.description ?? "",
         },
     })
-
     const submitMutation = UseApiMutation<SubmitResponse, CreateVehicleClassesFormValues>({
         url: `motor/vehicle-classes/${componentProps?.data?.id}`,
         method: EMETHODS.PATCH,
