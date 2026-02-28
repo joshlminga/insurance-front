@@ -36,7 +36,7 @@ export const MotorCoveringPage = () => {
         params: {
             page: filter.page,
             pageSize: filter.pageSize,
-            term:{}
+            term: filter.term,
         },
         queryOptions: {
             enabled: true,

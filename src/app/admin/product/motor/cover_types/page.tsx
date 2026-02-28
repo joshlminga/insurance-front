@@ -19,7 +19,7 @@ import { EditCoverTypesModal } from './modals/edit';
 export const MotorCoverTypePage = () => {
     const [filter, optionsDispatcher] = useReducer(
         ReusableReducer<TPaginationFilters & TFilterOptions>,
-        { ...FILTEROPTIONS, page: 1, pageSize: 10 }
+        { ...FILTEROPTIONS, page: 1, pageSize: 15 }
     );
     const optionsDispatcherDebounce = useDebounce({
         debounceCallback: optionsDispatcher,
@@ -36,6 +36,7 @@ export const MotorCoverTypePage = () => {
         params: {
             page: filter.page,
             pageSize: filter.pageSize,
+            term: filter.term,
         },
         queryOptions: {
             enabled: true,
