@@ -16,7 +16,9 @@ export const VehicleUsesColumns: ColumnDef<any>[] = [
         header: () => <div>Cover For</div>,
         cell: ({ row }) => {
             const cover_for: any = row.getValue("cover_for");
-            return <div>{cover_for?.name}</div>;
+            const coverForLabel =
+                cover_for?.name ?? (typeof cover_for === "string" ? cover_for : "-")
+            return <div>{coverForLabel}</div>;
         },
     },
      {
@@ -24,11 +26,12 @@ export const VehicleUsesColumns: ColumnDef<any>[] = [
         header: () => <div>Covers</div>,
         cell: ({ row }) => {
             const covering: any = row.getValue("covering");
+            const coveringCount = Array.isArray(covering) ? covering.length : 0
             return (
                 <div className="gap-2 flex">
                     <Badge
                         className="rounded bg-gray-200 text-gray-800">
-                        {covering?.length} Covering{covering.length !== 1 ? 's' : ''}
+                        {coveringCount} Covering{coveringCount !== 1 ? 's' : ''}
                     </Badge>
                 </div>
             );
@@ -39,7 +42,9 @@ export const VehicleUsesColumns: ColumnDef<any>[] = [
         header: () => <div>Description</div>,
         cell: ({ row }) => {
             const meta: any = row.getValue("meta");
-            return <div>{meta?.description}</div>;
+            const description =
+                meta?.description ?? (typeof meta === "string" ? meta : "-")
+            return <div>{description}</div>;
         },
     },
     {

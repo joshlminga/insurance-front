@@ -11,24 +11,38 @@ import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Controller, useForm } from 'react-hook-form'
 
-export const CreateVehicleUsesModal = ({ handleDialogContextSwitch, componentProps }: {
+export const EditVehicleUseModal = ({ handleDialogContextSwitch, componentProps }: {
     handleDialogContextSwitch: (context?: any) => void
     componentProps?: any
 }) => {
 
+    const vehicleUseData = componentProps?.data ?? {}
+
+    const defaultClassValue =
+        vehicleUseData?.cover_for?.id ??
+        vehicleUseData?.class?.id ??
+        vehicleUseData?.class_id ??
+        vehicleUseData?.parent_id
+
+    const defaultCoveringValue = Array.isArray(vehicleUseData?.covering)
+        ? vehicleUseData.covering.map((item: any) => String(item?.id ?? item))
+        : Array.isArray(vehicleUseData?.coverings)
+            ? vehicleUseData.coverings.map((item: any) => String(item?.id ?? item))
+            : []
+
     const form = useForm<CreateVehicleUsesFormValues>({
         resolver: zodResolver(CreateVehicleUsesSchema),
         defaultValues: {
-            name: "",
-            class: undefined,
-            covering: [],
-            description: "",
+            name: vehicleUseData?.name ?? "",
+            class: defaultClassValue ? String(defaultClassValue) : undefined,
+            covering: defaultCoveringValue,
+            description: vehicleUseData?.meta?.description ?? vehicleUseData?.description ?? "",
         },
     })
 
     const submitMutation = UseApiMutation<SubmitResponse, CreateVehicleUsesFormValues>({
-        url: "motor/vehicle-use",
-        method: EMETHODS.POST,
+        url: `motor/vehicle-use/${componentProps?.data?.id}`,
+        method: EMETHODS.PATCH,
         mutationOptions: {
             onSuccess: (data) => {
                 ShowToast.success(data.message || "Submitted successfully!")
@@ -50,10 +64,10 @@ export const CreateVehicleUsesModal = ({ handleDialogContextSwitch, componentPro
         <div className="w-full min-w-[600px] max-w-[600px] p-6 space-y-6">
             <div className="border-b pb-3">
                 <h2 className="text-xl font-semibold">
-                    Create Vehicle Uses
+                    Edit Vehicle Uses
                 </h2>
                 <p className="text-sm text-muted-foreground mt-1">
-                    Fill in the details below to register a Vehicle Uses.
+                    Fill in the details below to edit a Vehicle Uses.
                 </p>
             </div>
             <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
@@ -105,7 +119,7 @@ export const CreateVehicleUsesModal = ({ handleDialogContextSwitch, componentPro
                         type="submit"
                         className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
                         loading={submitMutation.isPending}>
-                        Save
+                        Save Changes
                     </Button>
                 </CardFooter>
             </form>

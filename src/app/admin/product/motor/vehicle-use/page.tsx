@@ -14,6 +14,7 @@ import { ShowToast } from '@/utils/utils';
 import { Plus } from 'lucide-react';
 import { useReducer } from 'react'
 import { CreateVehicleUsesModal } from './modals/create-vehicle-use';
+import { EditVehicleUseModal } from './modals/edit-vehicle-use';
 
 export const VehicleUsePage = () => {
     const [filter, optionsDispatcher] = useReducer(
@@ -71,15 +72,15 @@ export const VehicleUsePage = () => {
     })
 
     const ActionsHandlerMapping: SingleActionsHandler<any>[] = [
-        // {
-        //     label: 'Edit',
-        //     onSelect: (data) => {
-        //         handleDialogContextSwitch({
-        //             componentProps: { data, refetch },
-        //             Component: EditVehicleClassesModal,
-        //         })
-        //     },
-        // },
+        {
+            label: 'Edit',
+            onSelect: (data) => {
+                handleDialogContextSwitch({
+                    componentProps: { data, refetch },
+                    Component: EditVehicleUseModal,
+                })
+            },
+        },
         {
             label: 'Delete',
             onSelect: (data) => {
@@ -110,6 +111,31 @@ export const VehicleUsePage = () => {
             conditional: (data) => Boolean(data?.id) && !Boolean(data?.is_active),
         },
     ];
+
+    const rawRows = Array.isArray(data?.data)
+        ? data.data
+        : Array.isArray(data?.data?.data)
+            ? data.data.data
+            : []
+
+    const pagination = data?.pagination ?? data?.data?.pagination
+
+    const tableRows = rawRows.map((item: any) => ({
+        ...item,
+        cover_for:
+            item?.cover_for ??
+            item?.coverFor ??
+            item?.class ??
+            (item?.parent_name
+                ? { id: item?.parent_id, name: item?.parent_name }
+                : item?.parent),
+        covering: Array.isArray(item?.covering)
+            ? item.covering
+            : Array.isArray(item?.coverings)
+                ? item.coverings
+                : [],
+        meta: item?.meta ?? { description: item?.description ?? "" },
+    }))
 
     return (
         <div>
@@ -153,8 +179,8 @@ export const VehicleUsePage = () => {
                             ActionColumn({ ActionsHandlerMapping }),
                         ],
                         OtherTools: SearchTools,
-                        data: data?.data ?? [],
-                        pageCount: data?.pagination?.last_page ?? 1,
+                        data: tableRows,
+                        pageCount: pagination?.last_page ?? 1,
                         title: 'Vehicle Uses',
                         showPagination: true,
                         setPageSize: (pageSize) =>
@@ -162,8 +188,8 @@ export const VehicleUsePage = () => {
                                 payload: { pageSize },
                                 type: 'pageSize',
                             }),
-                        pageSize: data?.pagination?.per_page ?? 10,
-                        page: data?.pagination?.current_page ?? 1,
+                        pageSize: pagination?.per_page ?? 10,
+                        page: pagination?.current_page ?? 1,
                         isLoading: isLoading,
                     }}
                 />
