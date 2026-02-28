@@ -11,22 +11,21 @@ import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 
-export const CreateCoverTypeModal = ({ handleDialogContextSwitch, componentProps }: {
+export const EditCoverTypesModal = ({ handleDialogContextSwitch, componentProps }: {
     handleDialogContextSwitch: (context?: any) => void
     componentProps?: any
 }) => {
-
     const form = useForm<CreateCoverTypeFormValues>({
         resolver: zodResolver(CreateCoverTypeSchema),
         defaultValues: {
-            name: "",
-            description: "",
+            name: componentProps?.data?.name ?? "",
+            description: componentProps?.data?.meta?.description ?? "",
         },
     })
 
     const submitMutation = UseApiMutation<SubmitResponse, CreateCoverTypeFormValues>({
-        url: "motor/cover-type",
-        method: EMETHODS.POST,
+        url: `motor/cover-type/${componentProps?.data?.id}`,
+        method: EMETHODS.PATCH,
         mutationOptions: {
             onSuccess: (data) => {
                 ShowToast.success(data.message || "Submitted successfully!")
@@ -36,7 +35,7 @@ export const CreateCoverTypeModal = ({ handleDialogContextSwitch, componentProps
             },
             onError: (error: unknown) => {
                 const message = extractErrorMessage(error)
-                ShowToast.error(message || "Submission failed!")
+                ShowToast.error(message || "Update failed!")
             },
         },
     })
@@ -51,9 +50,10 @@ export const CreateCoverTypeModal = ({ handleDialogContextSwitch, componentProps
                     Create Cover Type
                 </h2>
                 <p className="text-sm text-muted-foreground mt-1">
-                    Fill in the details below to register a cover type.
+                    Fill in the details below to register a new motor product.
                 </p>
             </div>
+
             <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
                 <ReuseableInput
                     control={form.control}
@@ -65,7 +65,7 @@ export const CreateCoverTypeModal = ({ handleDialogContextSwitch, componentProps
                     control={form.control}
                     name="description"
                     type="textarea"
-                    label="Product Motor Description"
+                    label="Cover Description"
                     className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
                 />
                 <CardFooter className="flex flex-col sm:flex-row justify-between gap-3 mt-2 px-0">
@@ -79,7 +79,7 @@ export const CreateCoverTypeModal = ({ handleDialogContextSwitch, componentProps
                         type="submit"
                         className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
                         loading={submitMutation.isPending}>
-                        Save
+                        Save Changes
                     </Button>
                 </CardFooter>
             </form>

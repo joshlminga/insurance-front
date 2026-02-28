@@ -14,6 +14,7 @@ import { ShowToast } from '@/utils/utils';
 import { Plus } from 'lucide-react';
 import { useReducer } from 'react'
 import { CreateCoverTypeModal } from './modals/create';
+import { EditCoverTypesModal } from './modals/edit';
 
 export const MotorCoverTypePage = () => {
     const [filter, optionsDispatcher] = useReducer(
@@ -70,52 +71,43 @@ export const MotorCoverTypePage = () => {
     })
 
     const ActionsHandlerMapping: SingleActionsHandler<any>[] = [
-        // {
-        //   label: 'View',
-        //   onSelect: (data) => {
-        //     handleDialogContextSwitch({
-        //       componentProps: { data, refetch },
-        //       Component: ViewOrganizationModal,
-        //     })
-        //   }
-        // },
-        // {
-        //   label: 'Edit',
-        //   onSelect: (data) => {
-        //     handleDialogContextSwitch({
-        //       componentProps: { data, refetch },
-        //       Component: EditOrganizationModal,
-        //     })
-        //   },
-        // },
         {
-          label: 'Delete',
-          onSelect: (data) => {
-            deleteCoverTypeMutation.mutate({
-              id: data?.id,
-            })
-          },
-          conditional: (data) => Boolean(data?.id),
+            label: 'Edit',
+            onSelect: (data) => {
+                handleDialogContextSwitch({
+                    componentProps: { data, refetch },
+                    Component: EditCoverTypesModal,
+                })
+            },
         },
         {
-          label: 'Deactivate',
-          onSelect: (data) => {
-            toggleCovertypeStatusMutation.mutate({
-              is_active: false,
-              id: data?.id,
-            })
-          },
-          conditional: (data) => Boolean(data?.id) && Boolean(data?.is_active),
+            label: 'Delete',
+            onSelect: (data) => {
+                deleteCoverTypeMutation.mutate({
+                    id: data?.id,
+                })
+            },
+            conditional: (data) => Boolean(data?.id),
         },
         {
-          label: 'Activate',
-          onSelect: (data) => {
-            toggleCovertypeStatusMutation.mutate({
-               is_active: true,
-              id: data?.id,
-            })
-          },
-          conditional: (data) => Boolean(data?.id) && !Boolean(data?.is_active),
+            label: 'Deactivate',
+            onSelect: (data) => {
+                toggleCovertypeStatusMutation.mutate({
+                    is_active: false,
+                    id: data?.id,
+                })
+            },
+            conditional: (data) => Boolean(data?.id) && Boolean(data?.is_active),
+        },
+        {
+            label: 'Activate',
+            onSelect: (data) => {
+                toggleCovertypeStatusMutation.mutate({
+                    is_active: true,
+                    id: data?.id,
+                })
+            },
+            conditional: (data) => Boolean(data?.id) && !Boolean(data?.is_active),
         },
     ];
 
@@ -130,10 +122,10 @@ export const MotorCoverTypePage = () => {
                         label: 'Add Cover Types',
                         variant: 'default',
                         onClick: () => {
-                              handleDialogContextSwitch({
+                            handleDialogContextSwitch({
                                 componentProps: { refetch },
                                 Component: CreateCoverTypeModal,
-                              })
+                            })
                         },
                     },
                 ]}
@@ -157,12 +149,12 @@ export const MotorCoverTypePage = () => {
                             includeFilter: true,
                         },
                         columns: [
-                              ...CoverTypessColumns,
+                            ...CoverTypessColumns,
                             ActionColumn({ ActionsHandlerMapping }),
                         ],
                         OtherTools: SearchTools,
                         data: data?.data ?? [],
-                        pageCount: data?.data?.pagination?.last_page ?? 1,
+                        pageCount: data?.pagination?.last_page ?? 1,
                         title: 'Cover Types',
                         showPagination: true,
                         setPageSize: (pageSize) =>
@@ -170,8 +162,8 @@ export const MotorCoverTypePage = () => {
                                 payload: { pageSize },
                                 type: 'pageSize',
                             }),
-                        pageSize: data?.data?.pagination?.per_page ?? 10,
-                        page: data?.data?.pagination?.current_page ?? 1,
+                        pageSize: data?.pagination?.per_page ?? 10,
+                        page: data?.pagination?.current_page ?? 1,
                         isLoading: isLoading,
                     }}
                 />
