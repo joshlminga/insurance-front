@@ -118,9 +118,13 @@ const navData = {
           title: "Vehicle Classes",
           url: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/vehicle-classes`
         },
-         {
+        {
           title: "Vehicle Use",
           url: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/vehicle-use`
+        },
+         {
+          title: "Addon Benefits",
+          url: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/add-on-benefits`
         }
       ],
     },

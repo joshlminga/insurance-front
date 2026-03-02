@@ -60,6 +60,7 @@ import { MotorCoverTypePage } from "./app/admin/product/motor/cover_types/page"
 import { MotorCoveringPage } from "./app/admin/product/motor/motor-coving/page"
 import { VehicleClassesPage } from "./app/admin/product/motor/vehicle-clases/page"
 import { VehicleUsePage } from "./app/admin/product/motor/vehicle-use/page"
+import { MotorAddonBenefitsPage } from "./app/admin/product/motor/motor-addon-benefits/page"
 
 export const router = createBrowserRouter([
 
@@ -275,6 +276,10 @@ export const router = createBrowserRouter([
       {
         path: "products/motor/vehicle-use",
         element: <VehicleUsePage />,
+      },
+       {
+        path: "products/motor/add-on-benefits",
+        element: <MotorAddonBenefitsPage />,
       },
 
       // Organizations
