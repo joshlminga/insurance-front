@@ -5,9 +5,9 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
   Command,
-  CommandEmpty,
+  // CommandEmpty,
   CommandGroup,
-  CommandInput,
+  // CommandInput,
   CommandItem,
   CommandList,
   CommandSeparator,
@@ -122,7 +122,7 @@ export function MultiSelectTrigger({
         role={props.role ?? "combobox"}
         aria-expanded={props["aria-expanded"] ?? open}
         className={cn(
-          "flex h-auto min-h-9 w-fit items-center justify-between gap-2 overflow-hidden rounded-md border border-input bg-transparent px-3 py-1.5 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 data-[placeholder]:text-muted-foreground dark:bg-input/30 dark:hover:bg-input/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 [&_svg:not([class*='text-'])]:text-muted-foreground",
+          "flex h-auto min-h-9 w-fit items-center justify-between gap-2 overflow-hidden rounded-md border border-input bg-transparent px-3 py-1.5 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 data-placeholder:text-muted-foreground dark:bg-input/30 dark:hover:bg-input/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 [&_svg:not([class*='text-'])]:text-muted-foreground",
           className,
         )}
       >
@@ -225,8 +225,7 @@ export function MultiSelectValue({
         "flex w-full gap-1.5 overflow-hidden",
         shouldWrap && "h-full flex-wrap",
         className,
-      )}
-    >
+      )}>
       {[...selectedValues]
         .filter(value => items.has(value))
         .map(value => (
@@ -242,8 +241,7 @@ export function MultiSelectValue({
                     toggleValue(value)
                   }
                 : undefined
-            }
-          >
+            }>
             {items.get(value)}
             {clickToRemove && (
               <XIcon className="size-2 text-muted-foreground group-hover:text-destructive" />
@@ -255,8 +253,7 @@ export function MultiSelectValue({
           display: overflowAmount > 0 && !shouldWrap ? "block" : "none",
         }}
         variant="outline"
-        ref={overflowRef}
-      >
+        ref={overflowRef}>
         +{overflowAmount}
       </Badge>
     </div>
@@ -264,14 +261,12 @@ export function MultiSelectValue({
 }
 
 export function MultiSelectContent({
-  search = true,
   children,
   ...props
 }: {
   search?: boolean | { placeholder?: string; emptyMessage?: string }
   children: ReactNode
 } & Omit<ComponentPropsWithoutRef<typeof Command>, "children">) {
-  const canSearch = typeof search === "object" ? true : search
 
   return (
     <>
@@ -280,9 +275,9 @@ export function MultiSelectContent({
           <CommandList>{children}</CommandList>
         </Command>
       </div>
-      <PopoverContent className="min-w-[var(--radix-popover-trigger-width)] p-0">
+      <PopoverContent className="min-w-(--radix-popover-trigger-width) p-0">
         <Command {...props}>
-          {canSearch ? (
+          {/* {canSearch ? (
             <CommandInput
               placeholder={
                 typeof search === "object" ? search.placeholder : undefined
@@ -290,13 +285,13 @@ export function MultiSelectContent({
             />
           ) : (
             <button autoFocus className="sr-only" />
-          )}
+          )} */}
           <CommandList>
-            {canSearch && (
+            {/* {canSearch && (
               <CommandEmpty>
                 {typeof search === "object" ? search.emptyMessage : undefined}
               </CommandEmpty>
-            )}
+            )} */}
             {children}
           </CommandList>
         </Command>
@@ -328,8 +323,7 @@ export function MultiSelectItem({
       onSelect={() => {
         toggleValue(value)
         onSelect?.(value)
-      }}
-    >
+      }}>
       <CheckIcon
         className={cn("mr-2 size-4", isSelected ? "opacity-100" : "opacity-0")}
       />

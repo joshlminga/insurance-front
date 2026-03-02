@@ -276,7 +276,7 @@ export const AddMotorProductRatesPage = ({ handleDialogContextSwitch, componentP
                 {/*End Of Vehicle Info */}
 
                 {/* Fleet */}
-                <div className='flex gap-2'>
+                {/* <div className='flex gap-2'>
                     <Controller
                         control={form.control}
                         name="is_fleet"
@@ -321,7 +321,7 @@ export const AddMotorProductRatesPage = ({ handleDialogContextSwitch, componentP
                         label="Max Fleet"
                         className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
                     />
-                </div>
+                </div> */}
                 {/*End Fleet */}
 
                 {/* Targets */}

@@ -1559,6 +1559,7 @@ export function ReusableSingleSelectApiInput({
         </div>
     );
 }
+
 export function ReusableApiMultiSelect({
     url,
     value,
@@ -1628,7 +1629,7 @@ export function ReusableApiMultiSelect({
                     <MultiSelectValue placeholder={placeholder} />
                 </MultiSelectTrigger>
                 <MultiSelectContent>
-                    <div className="p-2">
+                    <div className="p-1">
                         <Input
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
