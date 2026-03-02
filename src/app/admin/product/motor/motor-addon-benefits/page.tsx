@@ -1,3 +1,4 @@
+/* eslint-disable no-extra-boolean-cast */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { PageHeader } from '@/components/shared';
 import { ActionColumn } from '@/dev/columns';
@@ -13,6 +14,7 @@ import { useReducer } from 'react'
 import { CreateMotorAddonBenefitsModal } from './modals/create-addons';
 import { extractErrorMessage } from '@/utils/helpers';
 import { ShowToast } from '@/utils/utils';
+import { EditMotorAddonsBenefitsModal } from './modals/edit-addons';
 
 export const MotorAddonBenefitsPage = () => {
     const [filter, optionsDispatcher] = useReducer(
@@ -70,15 +72,15 @@ export const MotorAddonBenefitsPage = () => {
     })
 
     const ActionsHandlerMapping: SingleActionsHandler<any>[] = [
-        // {
-        //     label: 'Edit',
-        //     onSelect: (data) => {
-        //         handleDialogContextSwitch({
-        //             componentProps: { data, refetch },
-        //             Component: EditCoverTypesModal,
-        //         })
-        //     },
-        // },
+        {
+            label: 'Edit',
+            onSelect: (data) => {
+                handleDialogContextSwitch({
+                    componentProps: { data, refetch },
+                    Component: EditMotorAddonsBenefitsModal,
+                })
+            },
+        },
         {
             label: 'Delete',
             onSelect: (data) => {

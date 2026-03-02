@@ -11,7 +11,7 @@ import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 
-export const CreateMotorAddonBenefitsModal = ({ handleDialogContextSwitch, componentProps }: {
+export const EditMotorAddonsBenefitsModal = ({ handleDialogContextSwitch, componentProps }: {
     handleDialogContextSwitch: (context?: any) => void
     componentProps?: any
 }) => {
@@ -19,14 +19,14 @@ export const CreateMotorAddonBenefitsModal = ({ handleDialogContextSwitch, compo
     const form = useForm<CreateMotorAddonBenefitsFormValues>({
         resolver: zodResolver(CreateMotorAddonBenefitsSchema),
         defaultValues: {
-            name: "",
-            description: "",
+            name: componentProps?.data?.name ?? "",
+            description: componentProps?.data?.meta?.description ?? "",
         },
     })
 
     const submitMutation = UseApiMutation<SubmitResponse, CreateMotorAddonBenefitsFormValues>({
-        url: "motor/addon-benefit",
-        method: EMETHODS.POST,
+        url: `motor/addon-benefit/${componentProps?.data?.id}`,
+        method: EMETHODS.PATCH,
         mutationOptions: {
             onSuccess: (data) => {
                 ShowToast.success(data.message || "Submitted successfully!")
@@ -48,10 +48,10 @@ export const CreateMotorAddonBenefitsModal = ({ handleDialogContextSwitch, compo
         <div className="w-full min-w-[600px] max-w-[600px] p-6 space-y-6">
             <div className="border-b pb-3">
                 <h2 className="text-xl font-semibold">
-                    Motor AddOn Benefits
+                    Create Cover Type
                 </h2>
                 <p className="text-sm text-muted-foreground mt-1">
-                    Fill in the details below to register a motor addon benefits.
+                    Fill in the details below to register a cover type.
                 </p>
             </div>
             <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
@@ -79,7 +79,7 @@ export const CreateMotorAddonBenefitsModal = ({ handleDialogContextSwitch, compo
                         type="submit"
                         className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
                         loading={submitMutation.isPending}>
-                        Save
+                        Save Changes
                     </Button>
                 </CardFooter>
             </form>
