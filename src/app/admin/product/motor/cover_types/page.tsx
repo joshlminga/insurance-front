@@ -1,27 +1,25 @@
 /* eslint-disable no-extra-boolean-cast */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { PageHeader } from '@/components/shared'
-import { ActionColumn } from '@/dev/columns'
-import { CustomDialogComponent } from '@/dev/core'
-import { CustomBaseTable, SearchTools } from '@/dev/table'
-import { useCustomDialogContextFactory, useDebounce } from '@/hooks'
-import { SingleActionsHandler, SubmitResponse, TFilterOptions, TPaginationFilters } from '@/types/types'
-import { FILTEROPTIONS, ReusableReducer } from '@/utils/constatnts'
+import { PageHeader } from '@/components/shared';
+import { ActionColumn } from '@/dev/columns';
+import { CoverTypessColumns } from '@/dev/columns/admin/cover-types';
+import { CustomDialogComponent } from '@/dev/core';
+import { CustomBaseTable, SearchTools } from '@/dev/table';
+import { useCustomDialogContextFactory, useDebounce } from '@/hooks';
+import { UseApiMutation, UseApiQuery } from '@/hooks/hooks';
+import { SingleActionsHandler, SubmitResponse, TFilterOptions, TPaginationFilters } from '@/types/types';
+import { EMETHODS, FILTEROPTIONS, ReusableReducer } from '@/utils/constatnts';
+import { extractErrorMessage } from '@/utils/helpers';
+import { ShowToast } from '@/utils/utils';
+import { Plus } from 'lucide-react';
 import { useReducer } from 'react'
-import { CreateUserModal } from './modals/create'
-import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
-import { UsersColumns } from '@/dev/columns/admin/users'
-import { EMETHODS } from '@/utils/constatnts'
-import { ShowToast } from '@/utils/utils'
-import { extractErrorMessage } from '@/utils/helpers'
-import { EditUserModal } from './modals/edit'
-import { ViewUserModal } from './modals/view'
-import { Plus } from 'lucide-react'
+import { CreateCoverTypeModal } from './modals/create';
+import { EditCoverTypesModal } from './modals/edit';
 
-export const UsersPage = () => {
+export const MotorCoverTypePage = () => {
     const [filter, optionsDispatcher] = useReducer(
         ReusableReducer<TPaginationFilters & TFilterOptions>,
-        { ...FILTEROPTIONS, page: 1, pageSize: 10 }
+        { ...FILTEROPTIONS, page: 1, pageSize: 15 }
     );
     const optionsDispatcherDebounce = useDebounce({
         debounceCallback: optionsDispatcher,
@@ -34,7 +32,7 @@ export const UsersPage = () => {
         }>();
 
     const { data, isLoading, refetch } = UseApiQuery<SubmitResponse>({
-        url: 'user',
+        url: 'motor/cover-type',
         params: {
             page: filter.page,
             pageSize: filter.pageSize,
@@ -45,12 +43,12 @@ export const UsersPage = () => {
         },
     })
 
-    const deleteUserMutation = UseApiMutation<SubmitResponse, { id: number | string }>({
-        url: ({ id }) => `user/${id}`,
+    const deleteCoverTypeMutation = UseApiMutation<SubmitResponse, { id: number | string }>({
+        url: ({ id }) => `motor/cover-type/${id}`,
         method: EMETHODS.DELETE,
         mutationOptions: {
             onSuccess: (response) => {
-                ShowToast.success(response?.message || 'User deleted successfully')
+                ShowToast.success(response?.message || 'Cover Type deleted successfully')
                 refetch()
             },
             onError: (error) => {
@@ -59,12 +57,12 @@ export const UsersPage = () => {
         },
     })
 
-    const toggleUserStatusMutation = UseApiMutation<SubmitResponse, { id: number | string; is_active: boolean }>({
-        url: ({ id }) => `user/${id}/status`,
+    const toggleCovertypeStatusMutation = UseApiMutation<SubmitResponse, { id: number | string, is_active: boolean }>({
+        url: ({ id }) => `motor/cover-type/${id}/status`,
         method: EMETHODS.PATCH,
         mutationOptions: {
             onSuccess: (response) => {
-                ShowToast.success(response?.message || 'User status updated successfully')
+                ShowToast.success(response?.message || 'Cover Type status updated successfully')
                 refetch()
             },
             onError: (error) => {
@@ -75,74 +73,59 @@ export const UsersPage = () => {
 
     const ActionsHandlerMapping: SingleActionsHandler<any>[] = [
         {
-            label: "View Details",
+            label: 'Edit',
             onSelect: (data) => {
                 handleDialogContextSwitch({
                     componentProps: { data, refetch },
-                    Component: ViewUserModal,
+                    Component: EditCoverTypesModal,
                 })
             },
         },
         {
-            label: "Edit",
+            label: 'Delete',
             onSelect: (data) => {
-                handleDialogContextSwitch({
-                    componentProps: { data, refetch },
-                    Component: EditUserModal,
+                deleteCoverTypeMutation.mutate({
+                    id: data?.id,
                 })
             },
+            conditional: (data) => Boolean(data?.id),
         },
         {
-            label: "Delete",
+            label: 'Deactivate',
             onSelect: (data) => {
-                const id = data?.user_id ?? data?.id
-                if (!id) return
-                deleteUserMutation.mutate({
-                    id,
-                })
-            },
-            conditional: (data) => Boolean(data?.user_id ?? data?.id),
-        },
-        {
-            label: "Deactivate",
-            onSelect: (data) => {
-                const id = data?.user_id ?? data?.id
-                if (!id) return
-                toggleUserStatusMutation.mutate({
-                    id,
+                toggleCovertypeStatusMutation.mutate({
                     is_active: false,
+                    id: data?.id,
                 })
             },
-            conditional: (data) => Boolean(data?.user_id ?? data?.id) && Boolean(data?.is_active),
+            conditional: (data) => Boolean(data?.id) && Boolean(data?.is_active),
         },
         {
-            label: "Activate",
+            label: 'Activate',
             onSelect: (data) => {
-                const id = data?.user_id ?? data?.id
-                if (!id) return
-                toggleUserStatusMutation.mutate({
-                    id,
+                toggleCovertypeStatusMutation.mutate({
                     is_active: true,
+                    id: data?.id,
                 })
             },
-            conditional: (data) => Boolean(data?.user_id ?? data?.id) && !Boolean(data?.is_active),
-        }
-    ]
+            conditional: (data) => Boolean(data?.id) && !Boolean(data?.is_active),
+        },
+    ];
 
     return (
         <div>
             <PageHeader
-                title="Users"
-                description="Manage users, their details, and associated users"
+                title="Cover Types"
+                description="Manage Cover Types, their details, and associated users"
                 actions={[
                     {
                         icon: Plus,
-                        label: 'Add User',
+                        label: 'Add Cover Types',
                         variant: 'default',
                         onClick: () => {
                             handleDialogContextSwitch({
                                 componentProps: { refetch },
-                                Component: CreateUserModal,
+                                Component: CreateCoverTypeModal,
                             })
                         },
                     },
@@ -167,26 +150,25 @@ export const UsersPage = () => {
                             includeFilter: true,
                         },
                         columns: [
-                            ...UsersColumns,
+                            ...CoverTypessColumns,
                             ActionColumn({ ActionsHandlerMapping }),
                         ],
                         OtherTools: SearchTools,
                         data: data?.data ?? [],
                         pageCount: data?.pagination?.last_page ?? 1,
-                        title: 'Users',
+                        title: 'Cover Types',
                         showPagination: true,
                         setPageSize: (pageSize) =>
                             optionsDispatcher({
                                 payload: { pageSize },
                                 type: 'pageSize',
                             }),
-                        pageSize: data?.pagination?.per_page ?? filter?.pageSize,
-                        page:  data?.pagination?.current_page ?? filter.page,
+                        pageSize: data?.pagination?.per_page ?? 10,
+                        page: data?.pagination?.current_page ?? 1,
                         isLoading: isLoading,
                     }}
                 />
             </div>
-
             <CustomDialogComponent
                 {...{ handleDialogContextSwitch, dialogOpen }}
                 className='sm:max-w-fit w-[95vw] sm:w-auto p-4 sm:p-6'>

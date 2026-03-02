@@ -1,8 +1,9 @@
 import axios from 'axios'
+import { EPREFIX, EROUTES } from '@/utils/enums'
 
-// const API_BASE_URL = 'http://localhost:8002/api/v1'
+const API_BASE_URL = 'http://localhost:8002/api/v1'
 
-const API_BASE_URL = 'https://sandbox.acensure.acentriagroup.com/api/v1/'
+// const API_BASE_URL = 'https://sandbox.acensure.acentriagroup.com:8005/api/v1/'
 
 
 const apiClient = axios.create({
@@ -29,6 +30,23 @@ apiClient.interceptors.request.use(
         return config
     },
     (error) => {
+        return Promise.reject(error)
+    }
+)
+
+apiClient.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        const status = error?.response?.status
+        const requestUrl = error?.config?.url ?? ''
+        const isLoginRequest = typeof requestUrl === 'string' && requestUrl.includes('auth/login')
+        const loginPath = `/${EPREFIX.AUTH}${EROUTES.SIGNIN}`
+        const isOnLoginPage = window.location.pathname === loginPath
+
+        if (status === 401 && !isLoginRequest && !isOnLoginPage) {
+            window.location.replace(loginPath)
+        }
+
         return Promise.reject(error)
     }
 )

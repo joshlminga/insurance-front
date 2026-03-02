@@ -191,6 +191,8 @@ export interface SubmitResponse {
     page: number,
     per_page: number,
     total_pages: number,
+    last_page: number,
+    current_page:number
   }
 }
 export interface CustomerVerificationDetailsProps {

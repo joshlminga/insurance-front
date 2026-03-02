@@ -294,6 +294,89 @@ const isValidBrochureFile = (file: File) => {
   return hasAllowedExtension || hasAllowedMimeType
 }
 
+export const CreateCoverTypeSchema = z.object({
+  name: z
+    .string()
+    .min(2, "Cover type name must be at least 2 characters")
+    .max(100, "Cover type name is too long"),
+  description: z
+    .string()
+    .min(5, "Description must be at least 5 characters")
+    .max(1000, "Description is too long"),
+})
+
+export const CreateCoveringSchema = z.object({
+  name: z
+    .string()
+    .min(2, "Motor Covering name must be at least 2 characters")
+    .max(100, "Motor Covering name is too long"),
+  description: z
+    .string()
+    .min(5, "Description must be at least 5 characters")
+    .max(1000, "Description is too long"),
+})
+
+export const CreateVehicleClassesSchema = z.object({
+  name: z
+    .string()
+    .min(2, "Vehicle class name must be at least 2 characters")
+    .max(100, "Vehicle class name is too long"),
+  description: z
+    .string()
+    .min(5, "Description must be at least 5 characters")
+    .max(1000, "Description is too long"),
+})
+
+export const CreateVehicleUsesSchema = z.object({
+  name: z
+    .string()
+    .min(2, "Vehicle use name must be at least 2 characters")
+    .max(100, "Vehicle use name is too long"),
+  description: z
+    .string()
+    .min(5, "Description must be at least 5 characters")
+    .max(1000, "Description is too long"),
+  class: z
+    .string()
+    .min(1, "Class is required"),
+  covering: z
+    .array(z.string().min(1))
+    .min(1, "At least one covering is required"),
+})
+
+export const CreateMotorAddonBenefitsSchema = z.object({
+  name: z
+    .string()
+    .min(2, "Addon benefit name must be at least 2 characters")
+    .max(100, "Addon benefit name is too long"),
+  description: z
+    .string()
+    .min(5, "Description must be at least 5 characters")
+    .max(1000, "Description is too long"),
+})
+
+export const CreateMotorDetailedBenefitsSchema = z.object({
+  name: z
+    .string()
+    .min(2, "Detailed benefit name must be at least 2 characters")
+    .max(100, "Detailed benefit name is too long"),
+  short_name: z
+    .string()
+    .max(100, "Detailed benefit short name is too long")
+    .optional()
+    .or(z.literal("")),
+  group: z
+    .string()
+    .min(1, "Group is required"),
+  reference: z
+    .string()
+    .min(1, "Reference is required"),
+  description: z
+    .string()
+    .min(5, "Description must be at least 5 characters")
+    .max(1000, "Description is too long"),
+})
+
 export const CreateProductSchema = z.object({
     organization_location_id: z.string().min(1, "Organization location is required"),
     name: z

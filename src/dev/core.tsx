@@ -1199,6 +1199,105 @@ export const ReusableOrganizationsInputMultiselect = ({
     )
 }
 
+export function ReuseableSingleSelectclassInput<T extends FieldValues>({
+    value,
+    onChange,
+    placeholder = "Select classes...",
+    label,
+    required = false,
+    disabled = false,
+    className,
+
+}: ReuseableSingleSelectCountriesInputProps<T>) {
+    const { data, isLoading } = UseApiQuery<SubmitResponse>({
+        url: "motor/vehicle-classes",
+        params: { direction: "asc", is_active:true },
+        queryOptions: { enabled: true },
+    })
+    const classes = data?.data ?? [];
+
+    return (
+        <div className={`space-y-2 ${className ?? ""}`}>
+            {label && (
+                <Label>
+                    {label}
+                    {required && <span className="text-destructive ml-1">*</span>}
+                </Label>
+            )}
+            <Select
+                value={value}
+                onValueChange={onChange}
+                disabled={disabled || isLoading}>
+                <SelectTrigger className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]">
+                    <SelectValue
+                        placeholder={isLoading ? "Loading users..." : placeholder}
+                    />
+                </SelectTrigger>
+                <SelectContent>
+                    {classes.map((user: any) => (
+                        <SelectItem key={user.id} value={String(user.id)}>
+                            {user?.name}
+                        </SelectItem>
+                    ))}
+                    {!isLoading && classes.length === 0 && (
+                        <div className="px-3 py-2 text-sm text-muted-foreground">
+                            No classes found
+                        </div>
+                    )}
+                </SelectContent>
+            </Select>
+        </div>
+    )
+}
+
+export const ReusableCoveringInputMultiselect = ({
+    value,
+    onChange,
+    placeholder = 'Select covering...',
+    label,
+    required = false,
+}: TCountriesInputMultiselectProps) => {
+    const { data, isLoading } = UseApiQuery<SubmitResponse>({
+        url: `motor/cover-covering`,
+        params: { direction: 'asc', is_active:true },
+        queryOptions: { enabled: true },
+    })
+    const covering = data?.data ?? [];
+    return (
+        <div className="space-y-2 w-full">
+            {label && (
+                <Label>
+                    {label}
+                    {required && (<span className="text-red-500 ml-1">*</span>)}
+                </Label>
+            )}
+            <MultiSelect
+                values={value ?? []}
+                onValuesChange={(vals) => onChange?.(vals)} >
+                <MultiSelectTrigger className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]">
+                    <MultiSelectValue placeholder={placeholder} />
+                </MultiSelectTrigger>
+                <MultiSelectContent>
+                    <MultiSelectGroup>
+                        {!isLoading && covering.length === 0 && (
+                            <div className="px-3 py-2 text-sm text-muted-foreground">
+                                No covering found.
+                            </div>
+                        )}
+                        {covering.map((covr: any) => (
+                            <MultiSelectItem
+                                key={covr?.id}
+                                value={String(covr?.id)}>
+                                {covr?.name}
+                            </MultiSelectItem>
+                        ))}
+                    </MultiSelectGroup>
+                </MultiSelectContent>
+            </MultiSelect>
+        </div>
+    )
+}
+
 export const UserMenuPopover = ({
     userInitials,
     userName,

@@ -48,7 +48,7 @@ import { ProtectedRoute, PublicRoute, CustomerPublicRoute } from "./hooks/hooks"
 import Layout from "./Layout"
 import OrganizationsPage from "./app/admin/organizations/page"
 import { UsersPage } from "./app/admin/users/page"
-import { MotorProductPage } from "./app/admin/product/motor/page"
+import { MotorProductPage } from "./app/admin/product/motor/motor-product/page"
 import { MotorLandingPage } from "./app/customer/motor/page"
 import { StepPage } from "./app/customer/motor/steppers/steppage"
 import { MyCoversLayout } from "./app/customer/my-covers/layout"
@@ -56,6 +56,13 @@ import { CoversPage } from "./app/customer/my-covers/ongoing/page"
 import { CancelledCoversPage } from "./app/customer/my-covers/cancelled/page"
 import { MyAccountManagementPage } from "./app/customer/my-covers/my-account/page"
 import { MyClaimsPage } from "./app/customer/my-covers/my-claims/page"
+import { MotorCoverTypePage } from "./app/admin/product/motor/cover_types/page"
+import { MotorCoveringPage } from "./app/admin/product/motor/motor-coving/page"
+import { VehicleClassesPage } from "./app/admin/product/motor/vehicle-clases/page"
+import { VehicleUsePage } from "./app/admin/product/motor/vehicle-use/page"
+import { MotorAddonBenefitsPage } from "./app/admin/product/motor/motor-addon-benefits/page"
+import { MotorDetailedBenefitPage } from "./app/admin/product/motor/motor-detailed-benefit/page"
+import { MotorTonangePage } from "./app/admin/product/motor/motor-tonage/page"
 
 export const router = createBrowserRouter([
 
@@ -250,9 +257,39 @@ export const router = createBrowserRouter([
       },
 
       // products
+
+      // motor
       {
         path: "products/motor",
         element: <MotorProductPage />,
+      },
+      {
+        path: "products/motor/cover-types",
+        element: <MotorCoverTypePage />,
+      },
+      {
+        path: "products/motor/covering",
+        element: <MotorCoveringPage />,
+      },
+      {
+        path: "products/motor/vehicle-classes",
+        element: <VehicleClassesPage />,
+      },
+      {
+        path: "products/motor/vehicle-use",
+        element: <VehicleUsePage />,
+      },
+      {
+        path: "products/motor/add-on-benefits",
+        element: <MotorAddonBenefitsPage />,
+      },
+      {
+        path: "products/motor/detailed-benefits",
+        element: <MotorDetailedBenefitPage />,
+      },
+       {
+        path: "products/motor/tonage",
+        element: <MotorTonangePage />,
       },
 
       // Organizations

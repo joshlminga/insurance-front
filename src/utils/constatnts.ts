@@ -21,6 +21,18 @@ export const ORGANIZATIONTYPES = [
   { label: "Organization", value: "Organization" },
 ]
 
+export const MOTORDETAILEDBENEFITSGROUPTYPES = [
+  {label: "All", value:"All"},
+  {label: "Single", value:"Single"},
+  {label: "Comparison", value:"Comparison"}
+]
+
+export const MOTORDETAILEDBENEFITSREFERENCETYPES = [
+  {label: "Benefit", value:"Benefit"},
+  {label: "Excess", value:"Excess"},
+  {label: "Both", value:"Both"}
+]
+
 export const EORGANIZATIONTYPES = {
   AGENT: "Agent",
   INSURER: "Insurer",
@@ -76,9 +88,9 @@ export const BOOLEANOPTIONS = [
 ]
 
 export const ACCESSLEVELSOPTIONS = [
-  { label: "All", value: 'all' },
-  { label: "Personal Owned", value: 'personal-owned' },
-  { label: "Company Owned", value: 'company-owned' },
+  { label: "All", value: 'All' },
+  { label: "Personal Owned", value: 'Personal Owned' },
+  { label: "Company Owned", value: 'Company Owned' },
 ]
 
 export const TARGET_AUDIENCE_OPTIONS = [

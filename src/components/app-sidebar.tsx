@@ -98,14 +98,42 @@ const navData = {
       icon: UserCog,
     },
     {
-      title: "Products",
+      title: "Motor",
       url: EROUTES.PRODUCTS,
       icon: LayoutDashboard,
       items: [
         {
-          title: "Motor",
+          title: "Motor Products",
           url: `${EROUTES.DASHBOARD}/${EPREFIX.PRODUCTS}/motor`,
         },
+        {
+          title: "Cover Types",
+          url: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/cover-types`
+        },
+        {
+          title: "Motor Covering",
+          url: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/covering`
+        },
+        {
+          title: "Vehicle Classes",
+          url: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/vehicle-classes`
+        },
+        {
+          title: "Vehicle Use",
+          url: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/vehicle-use`
+        },
+        {
+          title: "Addon Benefits",
+          url: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/add-on-benefits`
+        },
+        {
+          title: "Detailed Benefits",
+          url: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/detailed-benefits`
+        },
+        {
+          title: "Motor Tonage",
+          url: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/tonage`
+        }
       ],
     },
     {
