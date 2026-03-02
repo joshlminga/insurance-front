@@ -5,12 +5,14 @@ import { MotorAddOnBenefitsColumns } from '@/dev/columns/admin/motor-addon-benef
 import { CustomDialogComponent } from '@/dev/core';
 import { CustomBaseTable, SearchTools } from '@/dev/table';
 import { useCustomDialogContextFactory, useDebounce } from '@/hooks';
-import { UseApiQuery } from '@/hooks/hooks';
+import { UseApiMutation, UseApiQuery } from '@/hooks/hooks';
 import { SingleActionsHandler, SubmitResponse, TFilterOptions, TPaginationFilters } from '@/types/types';
-import { FILTEROPTIONS, ReusableReducer } from '@/utils/constatnts';
+import { EMETHODS, FILTEROPTIONS, ReusableReducer } from '@/utils/constatnts';
 import { Plus } from 'lucide-react';
 import { useReducer } from 'react'
 import { CreateMotorAddonBenefitsModal } from './modals/create-addons';
+import { extractErrorMessage } from '@/utils/helpers';
+import { ShowToast } from '@/utils/utils';
 
 export const MotorAddonBenefitsPage = () => {
     const [filter, optionsDispatcher] = useReducer(
@@ -39,33 +41,33 @@ export const MotorAddonBenefitsPage = () => {
         },
     })
 
-    // const deleteCoverTypeMutation = UseApiMutation<SubmitResponse, { id: number | string }>({
-    //     url: ({ id }) => `motor/cover-type/${id}`,
-    //     method: EMETHODS.DELETE,
-    //     mutationOptions: {
-    //         onSuccess: (response) => {
-    //             ShowToast.success(response?.message || 'Cover Type deleted successfully')
-    //             refetch()
-    //         },
-    //         onError: (error) => {
-    //             ShowToast.error(extractErrorMessage(error))
-    //         },
-    //     },
-    // })
+    const deleteAddOnBenefitMutation = UseApiMutation<SubmitResponse, { id: number | string }>({
+        url: ({ id }) => `motor/addon-benefit/${id}`,
+        method: EMETHODS.DELETE,
+        mutationOptions: {
+            onSuccess: (response) => {
+                ShowToast.success(response?.message || 'Cover Type deleted successfully')
+                refetch()
+            },
+            onError: (error) => {
+                ShowToast.error(extractErrorMessage(error))
+            },
+        },
+    })
 
-    // const toggleCovertypeStatusMutation = UseApiMutation<SubmitResponse, { id: number | string, is_active: boolean }>({
-    //     url: ({ id }) => `motor/cover-type/${id}/status`,
-    //     method: EMETHODS.PATCH,
-    //     mutationOptions: {
-    //         onSuccess: (response) => {
-    //             ShowToast.success(response?.message || 'Cover Type status updated successfully')
-    //             refetch()
-    //         },
-    //         onError: (error) => {
-    //             ShowToast.error(extractErrorMessage(error))
-    //         },
-    //     },
-    // })
+    const toggleAddOnBenefitStatusMutation = UseApiMutation<SubmitResponse, { id: number | string, is_active: boolean }>({
+        url: ({ id }) => `motor/addon-benefit/${id}/status`,
+        method: EMETHODS.PATCH,
+        mutationOptions: {
+            onSuccess: (response) => {
+                ShowToast.success(response?.message || 'AddOn Benefit status updated successfully')
+                refetch()
+            },
+            onError: (error) => {
+                ShowToast.error(extractErrorMessage(error))
+            },
+        },
+    })
 
     const ActionsHandlerMapping: SingleActionsHandler<any>[] = [
         // {
@@ -77,35 +79,35 @@ export const MotorAddonBenefitsPage = () => {
         //         })
         //     },
         // },
-        // {
-        //     label: 'Delete',
-        //     onSelect: (data) => {
-        //         deleteCoverTypeMutation.mutate({
-        //             id: data?.id,
-        //         })
-        //     },
-        //     conditional: (data) => Boolean(data?.id),
-        // },
-        // {
-        //     label: 'Deactivate',
-        //     onSelect: (data) => {
-        //         toggleCovertypeStatusMutation.mutate({
-        //             is_active: false,
-        //             id: data?.id,
-        //         })
-        //     },
-        //     conditional: (data) => Boolean(data?.id) && Boolean(data?.is_active),
-        // },
-        // {
-        //     label: 'Activate',
-        //     onSelect: (data) => {
-        //         toggleCovertypeStatusMutation.mutate({
-        //             is_active: true,
-        //             id: data?.id,
-        //         })
-        //     },
-        //     conditional: (data) => Boolean(data?.id) && !Boolean(data?.is_active),
-        // },
+        {
+            label: 'Delete',
+            onSelect: (data) => {
+                deleteAddOnBenefitMutation.mutate({
+                    id: data?.id,
+                })
+            },
+            conditional: (data) => Boolean(data?.id),
+        },
+        {
+            label: 'Deactivate',
+            onSelect: (data) => {
+                toggleAddOnBenefitStatusMutation.mutate({
+                    is_active: false,
+                    id: data?.id,
+                })
+            },
+            conditional: (data) => Boolean(data?.id) && Boolean(data?.is_active),
+        },
+        {
+            label: 'Activate',
+            onSelect: (data) => {
+                toggleAddOnBenefitStatusMutation.mutate({
+                    is_active: true,
+                    id: data?.id,
+                })
+            },
+            conditional: (data) => Boolean(data?.id) && !Boolean(data?.is_active),
+        },
     ];
 
     return (

@@ -20,7 +20,8 @@ import {
     UpdatePasswordSchema,
     CreateCoveringSchema,
     CreateVehicleClassesSchema,
-    CreateVehicleUsesSchema
+    CreateVehicleUsesSchema,
+    CreateMotorAddonBenefitsSchema
 } from "./form-schema";
 
 export type CustomerFormValues = z.infer<typeof CustomerDetailsSchema>
@@ -41,6 +42,7 @@ export type CreateCoverTypeFormValues = z.infer<typeof CreateCoverTypeSchema>
 export type MotorCreateCoveringFormValues = z.infer<typeof CreateCoveringSchema>
 export type CreateVehicleClassesFormValues = z.infer<typeof CreateVehicleClassesSchema>
 export type CreateVehicleUsesFormValues = z.infer<typeof CreateVehicleUsesSchema>
+export type CreateMotorAddonBenefitsFormValues = z.infer<typeof CreateMotorAddonBenefitsSchema>
 export type CreateProductFormValues = z.infer<typeof CreateProductSchema>
 export type EditProductFormValues = z.infer<typeof EditProductSchema>
 

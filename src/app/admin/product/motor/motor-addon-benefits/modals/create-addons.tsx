@@ -2,12 +2,13 @@
 import { CardFooter } from '@/components/ui/card'
 import { Button, ReuseableInput } from '@/dev/core'
 import { UseApiMutation } from '@/hooks/hooks'
+import { CreateMotorAddonBenefitsSchema } from '@/types/form-schema'
+import { CreateMotorAddonBenefitsFormValues } from '@/types/schema'
 import { SubmitResponse } from '@/types/types'
 import { EMETHODS } from '@/utils/constatnts'
 import { extractErrorMessage } from '@/utils/helpers'
 import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
-import React from 'react'
 import { useForm } from 'react-hook-form'
 
 export const CreateMotorAddonBenefitsModal = ({ handleDialogContextSwitch, componentProps }: {
@@ -15,15 +16,15 @@ export const CreateMotorAddonBenefitsModal = ({ handleDialogContextSwitch, compo
     componentProps?: any
 }) => {
 
-    const form = useForm<MotorCreateCoveringFormValues>({
-        resolver: zodResolver(CreateCoveringSchema),
+    const form = useForm<CreateMotorAddonBenefitsFormValues>({
+        resolver: zodResolver(CreateMotorAddonBenefitsSchema),
         defaultValues: {
             name: "",
             description: "",
         },
     })
 
-    const submitMutation = UseApiMutation<SubmitResponse, MotorCreateCoveringFormValues>({
+    const submitMutation = UseApiMutation<SubmitResponse, CreateMotorAddonBenefitsFormValues>({
         url: "motor/addon-benefit",
         method: EMETHODS.POST,
         mutationOptions: {
@@ -39,7 +40,7 @@ export const CreateMotorAddonBenefitsModal = ({ handleDialogContextSwitch, compo
             },
         },
     })
-    const onSubmit = (data: MotorCreateCoveringFormValues) => {
+    const onSubmit = (data: CreateMotorAddonBenefitsFormValues) => {
         submitMutation.mutate(data)
     }
 
@@ -57,14 +58,14 @@ export const CreateMotorAddonBenefitsModal = ({ handleDialogContextSwitch, compo
                 <ReuseableInput
                     control={form.control}
                     name="name"
-                    label="Motor Covering Name"
+                    label="AddOn Name"
                     className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
                 />
                 <ReuseableInput
                     control={form.control}
                     name="description"
                     type="textarea"
-                    label="Motor Covering Description"
+                    label="AddOn Description"
                     className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
                 />
                 <CardFooter className="flex flex-col sm:flex-row justify-between gap-3 mt-2 px-0">
