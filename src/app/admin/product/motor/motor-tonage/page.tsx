@@ -1,12 +1,16 @@
+/* eslint-disable no-extra-boolean-cast */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { PageHeader } from '@/components/shared';
 import { ActionColumn } from '@/dev/columns';
+import { MotorTonageColumns } from '@/dev/columns/admin/motor-tonage';
 import { CustomDialogComponent } from '@/dev/core';
 import { CustomBaseTable, SearchTools } from '@/dev/table';
 import { useCustomDialogContextFactory, useDebounce } from '@/hooks';
-import { UseApiQuery } from '@/hooks/hooks';
+import { UseApiMutation, UseApiQuery } from '@/hooks/hooks';
 import { SingleActionsHandler, SubmitResponse, TFilterOptions, TPaginationFilters } from '@/types/types';
-import { FILTEROPTIONS, ReusableReducer } from '@/utils/constatnts';
+import { EMETHODS, FILTEROPTIONS, ReusableReducer } from '@/utils/constatnts';
+import { extractErrorMessage } from '@/utils/helpers';
+import { ShowToast } from '@/utils/utils';
 import { Plus } from 'lucide-react';
 import { useReducer } from 'react'
 
@@ -37,33 +41,33 @@ export const MotorTonangePage = () => {
         },
     })
 
-    // const deleteDetailedBenefitMutation = UseApiMutation<SubmitResponse, { id: number | string }>({
-    //     url: ({ id }) => `motor/detail-benefit/${id}`,
-    //     method: EMETHODS.DELETE,
-    //     mutationOptions: {
-    //         onSuccess: (response) => {
-    //             ShowToast.success(response?.message || 'Cover Type deleted successfully')
-    //             refetch()
-    //         },
-    //         onError: (error) => {
-    //             ShowToast.error(extractErrorMessage(error))
-    //         },
-    //     },
-    // })
+    const deleteTonageMutation = UseApiMutation<SubmitResponse, { id: number | string }>({
+        url: ({ id }) => `motor/tonnage/${id}`,
+        method: EMETHODS.DELETE,
+        mutationOptions: {
+            onSuccess: (response) => {
+                ShowToast.success(response?.message || 'Cover Type deleted successfully')
+                refetch()
+            },
+            onError: (error) => {
+                ShowToast.error(extractErrorMessage(error))
+            },
+        },
+    })
 
-    // const toggleDetailedBenefitStatusMutation = UseApiMutation<SubmitResponse, { id: number | string, is_active: boolean }>({
-    //     url: ({ id }) => `motor/detail-benefit/${id}/status`,
-    //     method: EMETHODS.PATCH,
-    //     mutationOptions: {
-    //         onSuccess: (response) => {
-    //             ShowToast.success(response?.message || 'AddOn Benefit status updated successfully')
-    //             refetch()
-    //         },
-    //         onError: (error) => {
-    //             ShowToast.error(extractErrorMessage(error))
-    //         },
-    //     },
-    // })
+    const toggleTonageStatusMutation = UseApiMutation<SubmitResponse, { id: number | string, is_active: boolean }>({
+        url: ({ id }) => `motor/tonnage/${id}/status`,
+        method: EMETHODS.PATCH,
+        mutationOptions: {
+            onSuccess: (response) => {
+                ShowToast.success(response?.message || 'AddOn Benefit status updated successfully')
+                refetch()
+            },
+            onError: (error) => {
+                ShowToast.error(extractErrorMessage(error))
+            },
+        },
+    })
 
     const ActionsHandlerMapping: SingleActionsHandler<any>[] = [
         // {
@@ -75,35 +79,35 @@ export const MotorTonangePage = () => {
         //         })
         //     },
         // },
-        // {
-        //     label: 'Delete',
-        //     onSelect: (data) => {
-        //         deleteDetailedBenefitMutation.mutate({
-        //             id: data?.id,
-        //         })
-        //     },
-        //     conditional: (data) => Boolean(data?.id),
-        // },
-        // {
-        //     label: 'Deactivate',
-        //     onSelect: (data) => {
-        //         toggleDetailedBenefitStatusMutation.mutate({
-        //             is_active: false,
-        //             id: data?.id,
-        //         })
-        //     },
-        //     conditional: (data) => Boolean(data?.id) && Boolean(data?.is_active),
-        // },
-        // {
-        //     label: 'Activate',
-        //     onSelect: (data) => {
-        //         toggleDetailedBenefitStatusMutation.mutate({
-        //             is_active: true,
-        //             id: data?.id,
-        //         })
-        //     },
-        //     conditional: (data) => Boolean(data?.id) && !Boolean(data?.is_active),
-        // },
+        {
+            label: 'Delete',
+            onSelect: (data) => {
+                deleteTonageMutation.mutate({
+                    id: data?.id,
+                })
+            },
+            conditional: (data) => Boolean(data?.id),
+        },
+        {
+            label: 'Deactivate',
+            onSelect: (data) => {
+                toggleTonageStatusMutation.mutate({
+                    is_active: false,
+                    id: data?.id,
+                })
+            },
+            conditional: (data) => Boolean(data?.id) && Boolean(data?.is_active),
+        },
+        {
+            label: 'Activate',
+            onSelect: (data) => {
+                toggleTonageStatusMutation.mutate({
+                    is_active: true,
+                    id: data?.id,
+                })
+            },
+            conditional: (data) => Boolean(data?.id) && !Boolean(data?.is_active),
+        },
     ];
 
     return (
@@ -144,7 +148,7 @@ export const MotorTonangePage = () => {
                             includeFilter: true,
                         },
                         columns: [
-                            // ...MotorDetailedBenefitsColumns,
+                            ...MotorTonageColumns,
                             ActionColumn({ ActionsHandlerMapping }),
                         ],
                         OtherTools: SearchTools,
