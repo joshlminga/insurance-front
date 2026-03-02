@@ -98,7 +98,7 @@ const navData = {
       icon: UserCog,
     },
     {
-      title: "Products",
+      title: "Motor",
       url: EROUTES.PRODUCTS,
       icon: LayoutDashboard,
       items: [
@@ -126,9 +126,13 @@ const navData = {
           title: "Addon Benefits",
           url: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/add-on-benefits`
         },
-         {
+        {
           title: "Detailed Benefits",
           url: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/detailed-benefits`
+        },
+        {
+          title: "Motor Tonage",
+          url: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/tonage`
         }
       ],
     },
