@@ -540,7 +540,6 @@ export type ReusableApiMultiSelectProps = {
     url: string;
     value?: string[];
     onChange?: (values: string[]) => void;
-
     placeholder?: string;
     label?: string;
     required?: boolean;

@@ -406,6 +406,7 @@ export const CreateMotorProductRatesSchema = z.object({
   is_all_age: z.boolean(),
   age_from: z.union([z.string(), z.number()]).optional(),
   age_to: z.union([z.string(), z.number()]).optional(),
+  rate: z.union([z.string().min(1, "Rate is required"), z.number()]),
   minimum: z.union([z.string().min(1, "Minimum is required"), z.number()]),
   pll: z.union([z.string(), z.number()]).optional(),
   is_fleet: z.boolean(),
@@ -424,6 +425,30 @@ export const CreateMotorProductRatesSchema = z.object({
     key: z.string(),
     value: z.string()
   }))
+}).refine((data) => {
+    if (data.valued_from !== undefined && data.valued_to !== undefined && data.valued_from !== "" && data.valued_to !== "") {
+        return Number(data.valued_to) >= Number(data.valued_from)
+    }
+    return true
+}, {
+    message: "Valued To must be greater than or equal to Valued From",
+    path: ["valued_to"]
+}).refine((data) => {
+    if (data.age_from !== undefined && data.age_to !== undefined && data.age_from !== "" && data.age_to !== "") {
+        return Number(data.age_to) >= Number(data.age_from)
+    }
+    return true
+}, {
+    message: "Age To must be greater than or equal to Age From",
+    path: ["age_to"]
+}).refine((data) => {
+    if (data.min_fleet !== undefined && data.max_fleet !== undefined && data.min_fleet !== "" && data.max_fleet !== "") {
+        return Number(data.max_fleet) >= Number(data.min_fleet)
+    }
+    return true
+}, {
+    message: "Max Fleet must be greater than or equal to Min Fleet",
+    path: ["max_fleet"]
 })
 
 export const CreateProductSchema = z.object({

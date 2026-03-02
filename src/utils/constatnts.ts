@@ -98,6 +98,11 @@ export const TARGET_AUDIENCE_OPTIONS = [
   { label: "No", value: "false" },
 ]
 
+export const AUDIENCE_OPTIONS = [
+  { label: "Any", value: "Any" },
+  { label: "No", value: "false" },
+]
+
 export const createHeroPopoverItems = (
   logout: () => void
 ) => [
