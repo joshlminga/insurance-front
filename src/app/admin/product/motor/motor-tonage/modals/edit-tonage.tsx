@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { CardFooter } from '@/components/ui/card'
 import { Button, ReuseableInput, ReuseableSingleSelectVehicleUseInput } from '@/dev/core'
 import { UseApiMutation } from '@/hooks/hooks'
@@ -8,7 +9,6 @@ import { EMETHODS } from '@/utils/constatnts'
 import { extractErrorMessage } from '@/utils/helpers'
 import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
-import React from 'react'
 import { Controller, useForm } from 'react-hook-form'
 
 export const EditMotorTonageModal = ({ handleDialogContextSwitch, componentProps }: {
@@ -20,13 +20,13 @@ export const EditMotorTonageModal = ({ handleDialogContextSwitch, componentProps
         resolver: zodResolver(CreateMotorTonageSchema),
         defaultValues: {
             name: componentProps?.data?.name ?? "",
-            vehicle_use_id: componentProps?.data?.vehicle_use?.id ?? "",
+            vehicle_use_id: String(componentProps?.data?.vehicle_use?.id ?? ""),
             description: componentProps?.data?.meta?.description ?? "",
         },
     })
 
     const submitMutation = UseApiMutation<SubmitResponse, CreateMotorTonageFormValues>({
-        url: `motor/tonnage/${componentProps?.id}`,
+        url: `motor/tonnage/${componentProps?.data?.id}`,
         method: EMETHODS.PATCH,
         mutationOptions: {
             onSuccess: (data) => {
