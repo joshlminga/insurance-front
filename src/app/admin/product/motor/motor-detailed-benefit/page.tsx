@@ -11,9 +11,10 @@ import { EMETHODS, FILTEROPTIONS, ReusableReducer } from '@/utils/constatnts';
 import { extractErrorMessage } from '@/utils/helpers';
 import { ShowToast } from '@/utils/utils';
 import { Plus } from 'lucide-react';
-import React, { useReducer } from 'react'
+import { useReducer } from 'react'
 import { CreateDetailedBenefitsModal } from './modals/create-detailed-benefits';
 import { MotorDetailedBenefitsColumns } from '@/dev/columns/admin/motor-detailed-benefits';
+import { EditDetailedBenefitsModal } from './modals/edit-detailed-benefits';
 
 export const MotorDetailedBenefitPage = () => {
     const [filter, optionsDispatcher] = useReducer(
@@ -71,15 +72,15 @@ export const MotorDetailedBenefitPage = () => {
     })
 
     const ActionsHandlerMapping: SingleActionsHandler<any>[] = [
-        // {
-        //     label: 'Edit',
-        //     onSelect: (data) => {
-        //         handleDialogContextSwitch({
-        //             componentProps: { data, refetch },
-        //             Component: EditMotorAddonsBenefitsModal,
-        //         })
-        //     },
-        // },
+        {
+            label: 'Edit',
+            onSelect: (data) => {
+                handleDialogContextSwitch({
+                    componentProps: { data, refetch },
+                    Component: EditDetailedBenefitsModal,
+                })
+            },
+        },
         {
             label: 'Delete',
             onSelect: (data) => {

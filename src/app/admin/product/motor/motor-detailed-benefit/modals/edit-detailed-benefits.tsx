@@ -11,7 +11,7 @@ import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 
-export const CreateDetailedBenefitsModal = ({ handleDialogContextSwitch, componentProps }: {
+export const EditDetailedBenefitsModal = ({ handleDialogContextSwitch, componentProps }: {
     handleDialogContextSwitch: (context?: any) => void
     componentProps?: any
 }) => {
@@ -19,17 +19,17 @@ export const CreateDetailedBenefitsModal = ({ handleDialogContextSwitch, compone
     const form = useForm<CreateMotorDetailedBenefitsFormValues>({
         resolver: zodResolver(CreateMotorDetailedBenefitsSchema),
         defaultValues: {
-            name: "",
-            short_name: "",
-            group: "",
-            reference: "",
-            description: "",
+            name: componentProps?.data?.name ?? "",
+            short_name: componentProps?.data?.meta?.short_name ?? "",
+            group: componentProps?.data?.group ?? "",
+            reference: componentProps?.data?.reference ?? "",
+            description: componentProps?.data?.meta?.description ?? "",
         },
     })
 
     const submitMutation = UseApiMutation<SubmitResponse, CreateMotorDetailedBenefitsFormValues>({
-        url: "motor/detail-benefit",
-        method: EMETHODS.POST,
+        url: `motor/detail-benefit/${componentProps?.data?.id}`,
+        method: EMETHODS.PATCH,
         mutationOptions: {
             onSuccess: (data) => {
                 ShowToast.success(data.message || "Submitted successfully!")
@@ -64,7 +64,7 @@ export const CreateDetailedBenefitsModal = ({ handleDialogContextSwitch, compone
                     label="Detailed Benefit Name"
                     className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
                 />
-                 <ReuseableInput
+                <ReuseableInput
                     control={form.control}
                     name="short_name"
                     label="Detailed Benefit Short Name (Optional)"
