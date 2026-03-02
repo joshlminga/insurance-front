@@ -14,6 +14,7 @@ import { ShowToast } from '@/utils/utils';
 import { Plus } from 'lucide-react';
 import { useReducer } from 'react'
 import { CreateMotorTonageModal } from './modals/create-tonage';
+import { EditMotorTonageModal } from './modals/edit-tonage';
 
 export const MotorTonangePage = () => {
     const [filter, optionsDispatcher] = useReducer(
@@ -71,15 +72,15 @@ export const MotorTonangePage = () => {
     })
 
     const ActionsHandlerMapping: SingleActionsHandler<any>[] = [
-        // {
-        //     label: 'Edit',
-        //     onSelect: (data) => {
-        //         handleDialogContextSwitch({
-        //             componentProps: { data, refetch },
-        //             Component: EditDetailedBenefitsModal,
-        //         })
-        //     },
-        // },
+        {
+            label: 'Edit',
+            onSelect: (data) => {
+                handleDialogContextSwitch({
+                    componentProps: { data, refetch },
+                    Component: EditMotorTonageModal,
+                })
+            },
+        },
         {
             label: 'Delete',
             onSelect: (data) => {
