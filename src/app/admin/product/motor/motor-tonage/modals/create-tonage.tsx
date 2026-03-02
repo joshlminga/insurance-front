@@ -80,6 +80,7 @@ export const CreateMotorTonageModal = ({ handleDialogContextSwitch, componentPro
                     type="textarea"
                     label="Tonage Description"
                     className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                    rows={3}
                 />
                 <CardFooter className="flex flex-col sm:flex-row justify-between gap-3 mt-2 px-0">
                     <Button

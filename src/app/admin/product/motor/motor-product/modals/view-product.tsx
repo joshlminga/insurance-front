@@ -1,18 +1,26 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { DetailGrid, DetailItem } from '@/components/shared'
 import { Badge } from '@/components/ui/badge'
-import { CardFooter } from '@/components/ui/card'
-import { Button } from '@/dev/core'
-import { UseApiQuery } from '@/hooks/hooks'
+import { Button, CustomDialogComponent } from '@/dev/core'
+import { useCustomDialogContextFactory } from '@/hooks'
 import { SubmitResponse } from '@/types/types'
 import { formatDate } from '@/utils/helpers'
+import { AddMotorProductRatesPage } from './add-rates'
+import { UseApiQuery } from '@/hooks/hooks'
+import { CardFooter } from '@/components/ui/card'
 
 export const ViewProductModal = ({ handleDialogContextSwitch, componentProps }: {
     handleDialogContextSwitch: (context?: any) => void
     componentProps?: any
 }) => {
+    const { handleDialogContextSwitch: handleLocalDialogContextSwitch, dialogContent, dialogOpen } =
+        useCustomDialogContextFactory<{
+            refetch?: () => Promise<any>;
+            data?: any;
+        }>();
+
     const productId = componentProps?.data?.id
-    const { data, isLoading } = UseApiQuery<SubmitResponse>({
+    const { data, isLoading, refetch } = UseApiQuery<SubmitResponse>({
         url: `products/motor/${productId}`,
         queryOptions: {
             enabled: Boolean(productId),
@@ -44,11 +52,26 @@ export const ViewProductModal = ({ handleDialogContextSwitch, componentProps }: 
 
     return (
         <div className="w-full min-w-[600px] max-w-[760px] p-6 space-y-6">
-            <div className="border-b pb-3">
-                <h2 className="text-xl font-semibold">Motor Product Details</h2>
-                <p className="text-sm text-muted-foreground mt-1">
-                    View full product profile, location mapping, and target audience.
-                </p>
+            <div className="flex items-start justify-between gap-4">
+                <div className="border-b pb-3">
+                    <h2 className="text-xl font-semibold">Motor Product Details</h2>
+                    <p className="text-sm text-muted-foreground mt-1">
+                        View full product profile, location mapping, and target audience.
+                    </p>
+                </div>
+
+                <Button
+                    type="button"
+                    variant="default"
+                    onClick={() => {
+                        handleLocalDialogContextSwitch({
+                            componentProps: { refetch, data },
+                            Component: AddMotorProductRatesPage,
+                            state: true,
+                        });
+                    }}>
+                    Add Rates
+                </Button>
             </div>
 
             {!productId ? (
@@ -136,15 +159,27 @@ export const ViewProductModal = ({ handleDialogContextSwitch, componentProps }: 
                     </div>
                 </div>
             )}
-
             <CardFooter className="px-0 pt-2">
                 <Button
                     type="button"
                     className="rounded-full border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
-                    onClick={() => handleDialogContextSwitch({})}>
+                    onClick={() => handleDialogContextSwitch({state: false})}>
                     Close
                 </Button>
             </CardFooter>
+
+            <CustomDialogComponent
+                {...{ handleDialogContextSwitch: handleLocalDialogContextSwitch, dialogOpen }}
+                className='sm:max-w-fit w-[95vw] sm:w-auto p-4 sm:p-6'>
+                {dialogContent?.Component && (
+                    <dialogContent.Component
+                        {...{
+                            componentProps: dialogContent.componentProps,
+                            handleDialogContextSwitch: handleLocalDialogContextSwitch,
+                        }}
+                    />
+                )}
+            </CustomDialogComponent>
         </div>
     )
 }

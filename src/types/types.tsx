@@ -131,6 +131,7 @@ export type RHFInputProps<T extends FieldValues> = {
   autoComplete?: string
   required?: boolean
   className?: string
+  rows?: number
 }
 
 export interface AuthProviderState {
@@ -517,4 +518,38 @@ export interface CoverData {
 
 export interface CoverCardProps {
     cover: CoverData
+}
+
+export type ReusableSingleSelectApiInputProps = {
+    url: string;
+    value?: string;
+    onChange?: (value: string) => void;
+    placeholder?: string;
+    label?: string;
+    required?: boolean;
+    disabled?: boolean;
+    className?: string;
+    queryParams?: Record<string, any>;
+    labelKey?: string;
+    valueKey?: string;
+    searchPlaceholder?: string;
+    emptyMessage?: string;
+}
+
+export type ReusableApiMultiSelectProps = {
+    url: string;
+    value?: string[];
+    onChange?: (values: string[]) => void;
+
+    placeholder?: string;
+    label?: string;
+    required?: boolean;
+    disabled?: boolean;
+    className?: string;
+    queryParams?: Record<string, any>;
+    labelKey?: string;
+    valueKey?: string; 
+    searchKeys?: string[];
+    searchPlaceholder?: string;
+    emptyMessage?: string;
 }

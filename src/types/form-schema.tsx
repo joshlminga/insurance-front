@@ -391,6 +391,41 @@ export const CreateMotorTonageSchema = z.object({
     .max(1000, "Description is too long"),
 })
 
+export const CreateMotorProductRatesSchema = z.object({
+  coverfor_id: z.string().min(1, "Cover for is required"),
+  covertype_id: z.string().min(1, "Cover type is required"),
+  covering_id: z.string().min(1, "Covering is required"),
+  usedfor_id: z.string().min(1, "Used for is required"),
+  bodytype_id: z.string().min(1, "Body type is required"),
+  used_tonnage_id: z.string().optional().or(z.literal("")),
+  min_tonnage: z.union([z.string(), z.number()]).optional(),
+  max_tonnage: z.union([z.string(), z.number()]).optional(),
+  is_all_sum: z.boolean(),
+  valued_from: z.union([z.string(), z.number()]).optional(),
+  valued_to: z.union([z.string(), z.number()]).optional(),
+  is_all_age: z.boolean(),
+  age_from: z.union([z.string(), z.number()]).optional(),
+  age_to: z.union([z.string(), z.number()]).optional(),
+  minimum: z.union([z.string().min(1, "Minimum is required"), z.number()]),
+  pll: z.union([z.string(), z.number()]).optional(),
+  is_fleet: z.boolean(),
+  min_fleet: z.union([z.string(), z.number()]).optional(),
+  max_fleet: z.union([z.string(), z.number()]).optional(),
+  target_audience: z.string(),
+  cover_target: z.string(),
+  min_age: z.union([z.string(), z.number()]).optional(),
+  max_age: z.union([z.string(), z.number()]).optional(),
+  start_date: z.string().min(1, "Start date is required"),
+  expiry_date: z.string().min(1, "Expiry date is required"),
+  is_active: z.boolean(),
+  makemodel_offered: z.array(z.number()),
+  makemodel_notoffered: z.array(z.number()),
+  meta: z.array(z.object({
+    key: z.string(),
+    value: z.string()
+  }))
+})
+
 export const CreateProductSchema = z.object({
     organization_location_id: z.string().min(1, "Organization location is required"),
     name: z
