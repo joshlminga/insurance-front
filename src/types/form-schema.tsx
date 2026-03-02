@@ -355,6 +355,28 @@ export const CreateMotorAddonBenefitsSchema = z.object({
     .max(1000, "Description is too long"),
 })
 
+export const CreateMotorDetailedBenefitsSchema = z.object({
+  name: z
+    .string()
+    .min(2, "Detailed benefit name must be at least 2 characters")
+    .max(100, "Detailed benefit name is too long"),
+  short_name: z
+    .string()
+    .max(100, "Detailed benefit short name is too long")
+    .optional()
+    .or(z.literal("")),
+  group: z
+    .string()
+    .min(1, "Group is required"),
+  reference: z
+    .string()
+    .min(1, "Reference is required"),
+  description: z
+    .string()
+    .min(5, "Description must be at least 5 characters")
+    .max(1000, "Description is too long"),
+})
+
 export const CreateProductSchema = z.object({
     organization_location_id: z.string().min(1, "Organization location is required"),
     name: z

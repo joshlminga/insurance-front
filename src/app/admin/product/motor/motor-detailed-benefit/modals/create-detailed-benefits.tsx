@@ -1,8 +1,10 @@
 import { CardFooter } from '@/components/ui/card'
 import { Button, ReusableSelect, ReuseableInput } from '@/dev/core'
 import { UseApiMutation } from '@/hooks/hooks'
+import { CreateMotorDetailedBenefitsSchema } from '@/types/form-schema'
+import { CreateMotorDetailedBenefitsFormValues } from '@/types/schema'
 import { SubmitResponse } from '@/types/types'
-import { EMETHODS, MOTORDETAILEDBENEFITSGROUPTYPES } from '@/utils/constatnts'
+import { EMETHODS, MOTORDETAILEDBENEFITSGROUPTYPES, MOTORDETAILEDBENEFITSREFERENCETYPES } from '@/utils/constatnts'
 import { extractErrorMessage } from '@/utils/helpers'
 import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -13,8 +15,8 @@ export const CreateDetailedBenefitsModal = ({ handleDialogContextSwitch, compone
     componentProps?: any
 }) => {
 
-    const form = useForm<CreateMotorAddonBenefitsFormValues>({
-        resolver: zodResolver(CreateMotorAddonBenefitsSchema),
+    const form = useForm<CreateMotorDetailedBenefitsFormValues>({
+        resolver: zodResolver(CreateMotorDetailedBenefitsSchema),
         defaultValues: {
             name: "",
             short_name: "",
@@ -24,8 +26,8 @@ export const CreateDetailedBenefitsModal = ({ handleDialogContextSwitch, compone
         },
     })
 
-    const submitMutation = UseApiMutation<SubmitResponse, CreateMotorAddonBenefitsFormValues>({
-        url: "motor/addon-benefit",
+    const submitMutation = UseApiMutation<SubmitResponse, CreateMotorDetailedBenefitsFormValues>({
+        url: "motor/detail-benefit",
         method: EMETHODS.POST,
         mutationOptions: {
             onSuccess: (data) => {
@@ -40,7 +42,7 @@ export const CreateDetailedBenefitsModal = ({ handleDialogContextSwitch, compone
             },
         },
     })
-    const onSubmit = (data: CreateMotorAddonBenefitsFormValues) => {
+    const onSubmit = (data: CreateMotorDetailedBenefitsFormValues) => {
         submitMutation.mutate(data)
     }
 
@@ -72,14 +74,12 @@ export const CreateDetailedBenefitsModal = ({ handleDialogContextSwitch, compone
                     control={form.control}
                     label='Group'
                     options={MOTORDETAILEDBENEFITSGROUPTYPES}
-                    className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
                 />
                 <ReusableSelect
                     name='reference'
                     control={form.control}
                     label='Reference'
-                    options={MOTORDETAILEDBENEFITSGROUPTYPES}
-                    className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                    options={MOTORDETAILEDBENEFITSREFERENCETYPES}
                 />
                 <ReuseableInput
                     control={form.control}

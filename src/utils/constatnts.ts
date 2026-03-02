@@ -27,6 +27,12 @@ export const MOTORDETAILEDBENEFITSGROUPTYPES = [
   {label: "Comparison", value:"Comparison"}
 ]
 
+export const MOTORDETAILEDBENEFITSREFERENCETYPES = [
+  {label: "Benefit", value:"Benefit"},
+  {label: "Excess", value:"Excess"},
+  {label: "Both", value:"Both"}
+]
+
 export const EORGANIZATIONTYPES = {
   AGENT: "Agent",
   INSURER: "Insurer",
