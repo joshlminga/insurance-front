@@ -21,6 +21,12 @@ export const ORGANIZATIONTYPES = [
   { label: "Organization", value: "Organization" },
 ]
 
+export const MOTORDETAILEDBENEFITSGROUPTYPES = [
+  {label: "All", value:"All"},
+  {label: "Single", value:"Single"},
+  {label: "Comparison", value:"Comparison"}
+]
+
 export const EORGANIZATIONTYPES = {
   AGENT: "Agent",
   INSURER: "Insurer",
