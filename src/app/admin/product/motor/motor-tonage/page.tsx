@@ -13,6 +13,7 @@ import { extractErrorMessage } from '@/utils/helpers';
 import { ShowToast } from '@/utils/utils';
 import { Plus } from 'lucide-react';
 import { useReducer } from 'react'
+import { CreateMotorTonageModal } from './modals/create-tonage';
 
 export const MotorTonangePage = () => {
     const [filter, optionsDispatcher] = useReducer(
@@ -121,10 +122,10 @@ export const MotorTonangePage = () => {
                         label: 'Add Motor Tonage',
                         variant: 'default',
                         onClick: () => {
-                            // handleDialogContextSwitch({
-                            //     componentProps: { refetch },
-                            //     Component: CreateDetailedBenefitsModal,
-                            // })
+                            handleDialogContextSwitch({
+                                componentProps: { refetch },
+                                Component: CreateMotorTonageModal,
+                            })
                         },
                     },
                 ]}
