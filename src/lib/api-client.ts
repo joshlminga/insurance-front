@@ -1,11 +1,12 @@
 import axios from 'axios'
 import { EPREFIX, EROUTES } from '@/utils/enums'
+import { UseAuth } from '@/components/auth-provider'
 
 const API_BASE_URL = 'http://localhost:8002/api/v1'
 
 // const API_BASE_URL = 'https://sandbox.acensure.acentriagroup.com:8005/api/v1/'
 
-
+const { logout } = UseAuth()
 const apiClient = axios.create({
     baseURL: API_BASE_URL,
     headers: {
@@ -44,9 +45,9 @@ apiClient.interceptors.response.use(
         const isOnLoginPage = window.location.pathname === loginPath
 
         if (status === 401 && !isLoginRequest && !isOnLoginPage) {
+            logout();
             window.location.replace(loginPath)
         }
-
         return Promise.reject(error)
     }
 )
