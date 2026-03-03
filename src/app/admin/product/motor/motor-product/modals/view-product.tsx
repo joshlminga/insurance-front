@@ -1,26 +1,22 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { DetailGrid, DetailItem } from '@/components/shared'
 import { Badge } from '@/components/ui/badge'
-import { Button, CustomDialogComponent } from '@/dev/core'
-import { useCustomDialogContextFactory } from '@/hooks'
+import { Button } from '@/dev/core'
 import { SubmitResponse } from '@/types/types'
 import { formatDate } from '@/utils/helpers'
-import { AddMotorProductRatesPage } from './add-rates'
 import { UseApiQuery } from '@/hooks/hooks'
 import { CardFooter } from '@/components/ui/card'
+import { useNavigate } from 'react-router-dom'
+import { EPREFIX } from '@/utils/enums'
+import { ArrowUpRight } from 'lucide-react'
 
 export const ViewProductModal = ({ handleDialogContextSwitch, componentProps }: {
     handleDialogContextSwitch: (context?: any) => void
     componentProps?: any
 }) => {
-    const { handleDialogContextSwitch: handleLocalDialogContextSwitch, dialogContent, dialogOpen } =
-        useCustomDialogContextFactory<{
-            refetch?: () => Promise<any>;
-            data?: any;
-        }>();
-
+    const navigate = useNavigate();
     const productId = componentProps?.data?.id
-    const { data, isLoading, refetch } = UseApiQuery<SubmitResponse>({
+    const { data, isLoading } = UseApiQuery<SubmitResponse>({
         url: `products/motor/${productId}`,
         queryOptions: {
             enabled: Boolean(productId),
@@ -62,15 +58,12 @@ export const ViewProductModal = ({ handleDialogContextSwitch, componentProps }: 
 
                 <Button
                     type="button"
-                    variant="default"
+                    variant="outline"
+                    leftIcon={<ArrowUpRight />}
                     onClick={() => {
-                        handleLocalDialogContextSwitch({
-                            componentProps: { refetch, data },
-                            Component: AddMotorProductRatesPage,
-                            state: true,
-                        });
+                        navigate(`/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor-rates/${productId}`);
                     }}>
-                    Add Rates
+                    View Rates
                 </Button>
             </div>
 
@@ -163,23 +156,10 @@ export const ViewProductModal = ({ handleDialogContextSwitch, componentProps }: 
                 <Button
                     type="button"
                     className="rounded-full border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
-                    onClick={() => handleDialogContextSwitch({state: false})}>
+                    onClick={() => handleDialogContextSwitch({ state: false })}>
                     Close
                 </Button>
             </CardFooter>
-
-            <CustomDialogComponent
-                {...{ handleDialogContextSwitch: handleLocalDialogContextSwitch, dialogOpen }}
-                className='sm:max-w-fit w-[95vw] sm:w-auto p-4 sm:p-6'>
-                {dialogContent?.Component && (
-                    <dialogContent.Component
-                        {...{
-                            componentProps: dialogContent.componentProps,
-                            handleDialogContextSwitch: handleLocalDialogContextSwitch,
-                        }}
-                    />
-                )}
-            </CustomDialogComponent>
         </div>
     )
 }

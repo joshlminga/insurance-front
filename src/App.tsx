@@ -265,7 +265,7 @@ export const router = createBrowserRouter([
         element: <MotorProductPage />,
       },
       {
-        path: "products/motor-rates",
+        path: "products/motor-rates/:slung",
         element: <MotorProductRatesPage />,
       },
       {

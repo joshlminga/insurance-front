@@ -163,10 +163,6 @@ export const AddMotorProductRatesPage = ({ handleDialogContextSwitch, componentP
             </div>
 
             <form onSubmit={form.handleSubmit(onSubmit, onFormError)} className="space-y-4">
-                {/* <input type="hidden" {...form.register('is_active')} />
-                <input type="hidden" {...form.register('meta')} />
-                <input type="hidden" {...form.register('is_all_sum')} />
-                <input type="hidden" {...form.register('is_all_age')} /> */}
                 {currentStep === 0 && (
                     <div className="grid gap-4 animate-in fade-in duration-300">
                         <Controller
@@ -265,7 +261,6 @@ export const AddMotorProductRatesPage = ({ handleDialogContextSwitch, componentP
                                 className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
                             />
                         </div>
-                        <StepNavigation />
                     </div>
                 )}
                 {currentStep === 1 && (

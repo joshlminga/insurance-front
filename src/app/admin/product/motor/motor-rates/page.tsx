@@ -1,17 +1,24 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { PageHeader } from '@/components/shared';
 import { ActionColumn } from '@/dev/columns';
 import { CustomDialogComponent } from '@/dev/core';
 import { CustomBaseTable, SearchTools } from '@/dev/table';
 import { useCustomDialogContextFactory, useDebounce } from '@/hooks';
-import { UseApiMutation, UseApiQuery } from '@/hooks/hooks';
+import { UseApiQuery } from '@/hooks/hooks';
 import { SingleActionsHandler, SubmitResponse, TFilterOptions, TPaginationFilters } from '@/types/types';
-import { EMETHODS, FILTEROPTIONS, ReusableReducer } from '@/utils/constatnts';
-import { extractErrorMessage } from '@/utils/helpers';
-import { ShowToast } from '@/utils/utils';
+import { FILTEROPTIONS, ReusableReducer } from '@/utils/constatnts';
+// import { extractErrorMessage } from '@/utils/helpers';
+// import { ShowToast } from '@/utils/utils';
 import { Plus } from 'lucide-react';
 import React, { useReducer } from 'react'
+import { useParams } from 'react-router-dom';
+import { AddMotorProductRatesPage } from './modals/add-rates';
 
 export const MotorProductRatesPage = () => {
+
+    const {slung} = useParams();
+
  const [filter, optionsDispatcher] = useReducer(
         ReusableReducer<TPaginationFilters & TFilterOptions>,
         { ...FILTEROPTIONS, page: 1, pageSize: 15 }
@@ -27,16 +34,18 @@ export const MotorProductRatesPage = () => {
         }>();
 
     const { data, isLoading, refetch } = UseApiQuery<SubmitResponse>({
-        url: 'motor/tonnage',
+        url: `products/motor/rates/${slung}`,
         params: {
             page: filter.page,
             pageSize: filter.pageSize,
             term: filter.term,
         },
         queryOptions: {
-            enabled: true,
+            enabled: !!slung,
         },
     })
+
+    console.log()
 
     // const deleteTonageMutation = UseApiMutation<SubmitResponse, { id: number | string }>({
     //     url: ({ id }) => `motor/tonnage/${id}`,
@@ -118,10 +127,10 @@ export const MotorProductRatesPage = () => {
                         label: 'Add Motor Product Rates',
                         variant: 'default',
                         onClick: () => {
-                            // handleDialogContextSwitch({
-                            //     componentProps: { refetch },
-                            //     Component: CreateMotorTonageModal,
-                            // })
+                            handleDialogContextSwitch({
+                                componentProps: { refetch },
+                                Component: AddMotorProductRatesPage,
+                            })
                         },
                     },
                 ]}
@@ -177,7 +186,6 @@ export const MotorProductRatesPage = () => {
                     />
                 )}
             </CustomDialogComponent>
-
         </div>
     )
 }
