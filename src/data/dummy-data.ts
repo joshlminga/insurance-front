@@ -998,7 +998,7 @@ export const dashboardStats: DashboardStats = {
   totalMembers: 1230,
   activeMembers: 1150,
   pendingApplications: 15,
-  totalSavings: 123000000,
+  totalSavings: 1230000,
   totalLoans: 80500000,
   activeLoans: 425,
   loansDisbursedThisMonth: 8500000,

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Badge } from "@/components/ui/badge";
-import { formatDate } from "@/utils/helpers";
+import { formatDate, twoDecimalformatter } from "@/utils/helpers";
 import { ColumnDef } from "@tanstack/table-core";
 
 export const MotorRateColumns: ColumnDef<any>[] = [
@@ -53,40 +53,79 @@ export const MotorRateColumns: ColumnDef<any>[] = [
         },
     },
     {
+        accessorKey: "age_from",
+        header: () => <div>Age</div>,
+        cell: ({ row }) => {
+            const rowData = row.original as any;
+            const isAllAge = Boolean(rowData?.is_all_age);
+            const ageFrom = rowData?.age_from;
+            const ageTo = rowData?.age_to;
+            if (isAllAge) {
+                return <div>-</div>;
+            }
+            if (ageFrom != null && ageTo != null) {
+                return <div>{`${ageFrom} - ${ageTo}`}</div>;
+            }
+            return <div>-</div>;
+        },
+    },
+    {
         accessorKey: "rate",
         header: () => <div>Rate</div>,
         cell: ({ row }) => {
             const rate: number = row.getValue("rate");
-            return <div>{rate}</div>;
+            return <div>{twoDecimalformatter(rate)}</div>;
         },
     },
     {
         accessorKey: "min_tonnage",
-        header: () => <div>Min Tonnage</div>,
+        header: () => <div>Tonnage</div>,
         cell: ({ row }) => {
-            const min_tonnage: number = row.getValue("min_tonnage");
-            return <div>{min_tonnage}</div>;
+            const rowData = row.original as any;
+            const min_tonnage = rowData?.min_tonnage;
+            const max_tonnage = rowData?.max_tonnage;
+            if (min_tonnage != null && max_tonnage != null) {
+                return <div>{`${min_tonnage} - ${max_tonnage}`}</div>;
+            }
+            return <div>-</div>;
         },
     },
     {
-        accessorKey: "max_tonnage",
-        header: () => <div>Max Tonnage</div>,
+        accessorKey: "valued_from",
+        header: () => <div>Value</div>,
         cell: ({ row }) => {
-            const max_tonnage: number = row.getValue("max_tonnage");
-            return <div>{max_tonnage}</div>;
+            const rowData = row.original as any;
+            const isAllSum = Boolean(rowData?.is_all_sum);
+            const valuedFrom = rowData?.valued_from;
+            const valuedTo = rowData?.valued_to;
+            if (isAllSum) {
+                return <div>-</div>;
+            }
+            if (valuedFrom != null && valuedTo != null) {
+                return <div>{`${valuedFrom} - ${valuedTo}`}</div>;
+            }
+            return <div>-</div>;
         },
     },
     {
         accessorKey: "is_fleet",
-        header: () => <div>Is Fleet</div>,
+        header: () => <div>Fleet</div>,
         cell: ({ row }) => {
-            const isFleet: boolean = row.getValue("is_fleet");
-            return (
-                <Badge
-                    className={`rounded-lg text-white font-semibold ${isFleet ? "bg-cyan-400" : "bg-yellow-500"}`}>
-                    {isFleet ? "Fleet" : "Not Fleet"}
-                </Badge>
-            );
+            const rowData = row.original as any;
+            const isFleet = Boolean(rowData?.is_fleet);
+            const minFleet = rowData?.min_fleet;
+            const maxFleet = rowData?.max_fleet;
+            if (isFleet == true) {
+                return (
+                    <Badge className="rounded-lg text-white font-semibold bg-cyan-400">
+                        Is Fleet
+                    </Badge>
+                );
+            }
+            if (minFleet != null && maxFleet != null) {
+                return <div>{`${minFleet} - ${maxFleet}`}</div>;
+            }
+            return <div>-</div>;
         },
     },
     {

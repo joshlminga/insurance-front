@@ -25,42 +25,43 @@ import { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { useParams } from 'react-router-dom'
 
-export const AddMotorProductRatesPage = ({ handleDialogContextSwitch, componentProps }: {
+export const EditMotorProductRatesPage = ({ handleDialogContextSwitch, componentProps }: {
     handleDialogContextSwitch: (context?: any) => void
     componentProps?: any
 }) => {
+    console.log(componentProps?.data);
     const { slung } = useParams();
     const [step, setStep] = useState(1);
     const form = useForm<CreateMotorProductRatesFormValues>({
         resolver: zodResolver(CreateMotorProductRatesSchema),
         defaultValues: {
-            coverfor_id: "",
-            covertype_id: "",
-            covering_id: "",
-            usedfor_id: "",
-            bodytype_id: "",
-            used_tonnage_id: "",
-            min_tonnage: "",
-            max_tonnage: "",
-            is_all_sum: false,
-            valued_from: "",
-            valued_to: "",
-            is_all_age: false,
-            age_from: "",
-            age_to: "",
-            rate: "",
-            minimum: "",
-            pll: "",
-            is_fleet: false,
-            min_fleet: "",
-            max_fleet: "",
-            target_audience: "",
-            cover_target: "",
-            min_age: "",
-            max_age: "",
-            start_date: "",
-            expiry_date: "",
-            is_active: true,
+            coverfor_id: String(componentProps?.data?.coverfor_id ?? ""),
+            covertype_id: String(componentProps?.data?.covertype_id ?? ""),
+            covering_id: String(componentProps?.data?.covering_id ?? ""),
+            usedfor_id: String(componentProps?.data?.usedfor_id ?? ""),
+            bodytype_id: String(componentProps?.data?.bodytype_id ?? ""),
+            used_tonnage_id: String(componentProps?.data?.used_tonnage_id ?? ""),
+            min_tonnage: componentProps?.data?.min_tonnage ?? "",
+            max_tonnage: componentProps?.data?.max_tonnage ?? "",
+            is_all_sum: componentProps?.data?.is_all_sum ?? false,
+            valued_from: componentProps?.data?.valued_from ?? "",
+            valued_to: componentProps?.data?.valued_to ?? "",
+            is_all_age: Boolean(componentProps?.data?.is_all_age ?? false),
+            age_from: componentProps?.data?.age_from ?? "",
+            age_to: componentProps?.data?.age_to ?? "",
+            rate: componentProps?.data?.rate ?? "",
+            minimum: componentProps?.data?.minimum ?? "",
+            pll: componentProps?.data?.pll ?? "",
+            is_fleet: Boolean(componentProps?.data?.is_fleet ?? false),
+            min_fleet: componentProps?.data?.min_fleet ?? "",
+            max_fleet: componentProps?.data?.max_fleet ?? "",
+            target_audience: componentProps?.data?.target_audience ?? "",
+            cover_target: componentProps?.data?.cover_target ?? "",
+            min_age: componentProps?.data?.min_age ?? "",
+            max_age: componentProps?.data?.max_age ?? "",
+            start_date: componentProps?.data?.start_date ?? "",
+            expiry_date: componentProps?.data?.expiry_date ?? "",
+            is_active: Boolean(componentProps?.data?.is_active ?? true),
             makemodel_offered: [],
             makemodel_notoffered: [],
             meta: [],
