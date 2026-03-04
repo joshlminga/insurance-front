@@ -3,7 +3,7 @@ import { CardFooter } from '@/components/ui/card'
 import { Button, ReusableSelect, ReusableSingleSelectApiInput, ReuseableInput } from '@/dev/core'
 import { UseApiMutation } from '@/hooks/hooks'
 import { CreateMotorRateBenefitsSchema } from '@/types/form-schema'
-import { CreateMotorRateBenefitsFormValues } from '@/types/schema'
+import { CreateMotorRateBenefitsFormValues, CreateMotorRateBenefitsInputValues } from '@/types/schema'
 import { SubmitResponse } from '@/types/types'
 import { BENEFITTYPESOPTIONS, EMETHODS } from '@/utils/constatnts'
 import { extractErrorMessage } from '@/utils/helpers'
@@ -16,12 +16,12 @@ export const AddMotorRateBenefits = ({ handleDialogContextSwitch, componentProps
     componentProps?: any
 }) => {
 
-    const form = useForm<CreateMotorRateBenefitsFormValues>({
+    const form = useForm<CreateMotorRateBenefitsInputValues, any, CreateMotorRateBenefitsFormValues>({
         resolver: zodResolver(CreateMotorRateBenefitsSchema),
         defaultValues: {
             benefit_id: "",
-            rate: undefined,
-            minimum: undefined,
+            rate: "",
+            minimum: "",
             benefit_type: "",
             description: "",
             start_date: "",

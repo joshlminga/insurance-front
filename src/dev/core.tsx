@@ -235,6 +235,7 @@ export function ReuseableInput<T extends FieldValues>({
     id,
     placeholder,
     type = "text",
+    step,
     autoComplete = "off",
     required = false,
     disabled = false,
@@ -255,6 +256,7 @@ export function ReuseableInput<T extends FieldValues>({
                             {...(!isFile ? field : {})}
                             id={id}
                             type={type}
+                            step={step}
                             placeholder={placeholder}
                             autoComplete={autoComplete}
                             aria-invalid={fieldState.invalid}

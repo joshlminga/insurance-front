@@ -50,6 +50,7 @@ export type CreateMotorAddonBenefitsFormValues = z.infer<typeof CreateMotorAddon
 export type CreateMotorDetailedBenefitsFormValues = z.infer<typeof CreateMotorDetailedBenefitsSchema>
 export type CreateMotorTonageFormValues = z.infer<typeof CreateMotorTonageSchema>
 export type CreateMotorProductRatesFormValues = z.infer<typeof CreateMotorProductRatesSchema>
+export type CreateMotorRateBenefitsInputValues = z.input<typeof CreateMotorRateBenefitsSchema>
 export type CreateMotorRateBenefitsFormValues = z.infer<typeof CreateMotorRateBenefitsSchema>
 export type CreateProductFormValues = z.infer<typeof CreateProductSchema>
 export type EditProductFormValues = z.infer<typeof EditProductSchema>
