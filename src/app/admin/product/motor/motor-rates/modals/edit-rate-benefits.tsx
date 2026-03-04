@@ -11,7 +11,7 @@ import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Controller, useForm } from 'react-hook-form'
 
-export const AddMotorRateBenefits = ({ handleDialogContextSwitch, componentProps }: {
+export const EditMotorRateBenefits = ({ handleDialogContextSwitch, componentProps }: {
     handleDialogContextSwitch: (context?: any) => void
     componentProps?: any
 }) => {
@@ -19,19 +19,19 @@ export const AddMotorRateBenefits = ({ handleDialogContextSwitch, componentProps
     const form = useForm<CreateMotorRateBenefitsInputValues, any, CreateMotorRateBenefitsFormValues>({
         resolver: zodResolver(CreateMotorRateBenefitsSchema),
         defaultValues: {
-            benefit_id: "",
-            rate: "",
-            minimum: "",
-            benefit_type: "",
-            description: "",
-            // start_date: "",
-            // expiry_date: "",
+            benefit_id: String(componentProps?.data?.benefit_id ?? ""),
+            rate: componentProps?.data?.rate ?? "",
+            minimum: componentProps?.data?.minimum ?? "",
+            benefit_type: componentProps?.data?.benefit_type ?? "",
+            description: componentProps?.data?.description ?? "",
+            // start_date: componentProps?.data?.start_date ?? "",
+            // expiry_date: componentProps?.data?.expiry_date ??  "",
         },
     })
 
     const submitMutation = UseApiMutation<SubmitResponse, CreateMotorRateBenefitsFormValues>({
         url: `products/motor/rate-benefits/${componentProps?.data?.id}`,
-        method: EMETHODS.POST,
+        method: EMETHODS.PATCH,
         mutationOptions: {
             onSuccess: (data) => {
                 ShowToast.success(data.message || "Submitted successfully!")
@@ -53,7 +53,7 @@ export const AddMotorRateBenefits = ({ handleDialogContextSwitch, componentProps
         <div className="w-full min-w-[600px] max-w-[800px] p-6 space-y-4">
             <div className="border-b pb-3">
                 <h2 className="text-xl font-semibold">
-                    Add Optional Benefits
+                    Edit Optional Benefits
                 </h2>
                 <p className="text-sm text-muted-foreground mt-1">
                     Fill in the details below to register a Optional Benefits.

@@ -12,6 +12,7 @@ import { ShowToast } from '@/utils/utils'
 import { Plus } from 'lucide-react'
 import { useReducer } from 'react'
 import { AddMotorRateBenefits } from './add-rate-benefits'
+import { EditMotorRateBenefits } from './edit-rate-benefits'
 
 export const MotorRateBenefitsPage = ({ componentProps }: {
     handleDialogContextSwitch: (context?: any) => void
@@ -73,15 +74,15 @@ export const MotorRateBenefitsPage = ({ componentProps }: {
     })
 
     const ActionsHandlerMapping: SingleActionsHandler<any>[] = [
-        // {
-        //     label: 'Edit',
-        //     onSelect: (data) => {
-        //         handleDialogContextSwitch({
-        //             componentProps: { data, refetch },
-        //             Component: EditMotorProductRatesPage,
-        //         })
-        //     },
-        // },
+        {
+            label: 'Edit',
+            onSelect: (data) => {
+                handleDialogContextSwitch({
+                    componentProps: { data, refetch },
+                    Component: EditMotorRateBenefits,
+                })
+            },
+        },
         {
             label: 'Delete',
             onSelect: (data) => {
