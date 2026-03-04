@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ActionColumn } from '@/dev/columns'
-import { MotorRateBenefitsColumns } from '@/dev/columns/admin/rates-benefits'
 import { Button, CustomDialogComponent } from '@/dev/core'
 import { CustomBaseTable, SearchTools } from '@/dev/table'
 import { useCustomDialogContextFactory, useDebounce } from '@/hooks'
@@ -13,6 +12,7 @@ import { Plus } from 'lucide-react'
 import { useReducer } from 'react'
 import { EditMotorRateBenefits } from './edit-rate-benefits'
 import { AddMotorRateExcessBenefits } from './add-excess-benefits'
+import { MotorRateExcessBenefitsColumns } from '@/dev/columns/admin/motor-excess-benefits'
 
 export const MotorRateExcessBenefitsPage = ({ componentProps }: {
     handleDialogContextSwitch: (context?: any) => void
@@ -156,7 +156,7 @@ export const MotorRateExcessBenefitsPage = ({ componentProps }: {
                             includeFilter: true,
                         },
                         columns: [
-                            ...MotorRateBenefitsColumns,
+                            ...MotorRateExcessBenefitsColumns,
                             ActionColumn({ ActionsHandlerMapping }),
                         ],
                         OtherTools: SearchTools,
