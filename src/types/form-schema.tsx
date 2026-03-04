@@ -491,8 +491,14 @@ export const CreateMotorRateBenefitsSchema = z.object({
 
   benefit_type: z.string().optional().or(z.literal("")),
   description: z.string().optional().or(z.literal("")),
-  // start_date: z.string().min(1, "Start date is required"),
-  // expiry_date: z.string().min(1, "Expiry date is required"),
+})
+
+export const CreateMotorRateExcessBenefitsSchema = z.object({
+  detail_benefit_id: z.string().min(1, "Detailed Benefit is required"),
+  detail_type: z.string().optional().or(z.literal("")),
+  value: z.string().optional().or(z.literal("")),
+  key: z.string().optional().or(z.literal("")),
+  detail_highlight: z.string().optional().or(z.literal("")),
 })
 
 export const CreateProductSchema = z.object({

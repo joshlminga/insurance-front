@@ -99,6 +99,17 @@ export const BENEFITTYPESOPTIONS = [
   { label: "Compulsory", value: 'Compulsory' },
 ]
 
+export const DETAILEDTYPESOPTIONS = [
+  { label: "Benefit", value: 'Benefit' },
+  { label: "Excess", value: 'Excess' },
+  { label: "Both", value: 'Both' },
+]
+
+export const HIGHLIGHTOPTIONS = [
+  { label: "True", value: 'true' },
+  { label: "False", value: 'false' },
+]
+
 export const TARGET_AUDIENCE_OPTIONS = [
   { label: "Yes", value: "true" },
   { label: "No", value: "false" },

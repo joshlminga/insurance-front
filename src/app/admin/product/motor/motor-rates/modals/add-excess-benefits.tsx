@@ -2,33 +2,33 @@
 import { CardFooter } from '@/components/ui/card'
 import { Button, ReusableSelect, ReusableSingleSelectApiInput, ReuseableInput } from '@/dev/core'
 import { UseApiMutation } from '@/hooks/hooks'
-import { CreateMotorRateBenefitsSchema } from '@/types/form-schema'
-import { CreateMotorRateBenefitsFormValues, CreateMotorRateBenefitsInputValues } from '@/types/schema'
+import { CreateMotorRateExcessBenefitsSchema } from '@/types/form-schema'
+import { CreateMotorRateExcessBenefitsFormValues } from '@/types/schema'
 import { SubmitResponse } from '@/types/types'
-import { BENEFITTYPESOPTIONS, EMETHODS } from '@/utils/constatnts'
+import { DETAILEDTYPESOPTIONS, EMETHODS, HIGHLIGHTOPTIONS } from '@/utils/constatnts'
 import { extractErrorMessage } from '@/utils/helpers'
 import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Controller, useForm } from 'react-hook-form'
 
-export const AddMotorRateBenefits = ({ handleDialogContextSwitch, componentProps }: {
+export const AddMotorRateExcessBenefits = ({ handleDialogContextSwitch, componentProps }: {
     handleDialogContextSwitch: (context?: any) => void
     componentProps?: any
 }) => {
 
-    const form = useForm<CreateMotorRateBenefitsInputValues, any, CreateMotorRateBenefitsFormValues>({
-        resolver: zodResolver(CreateMotorRateBenefitsSchema),
+    const form = useForm<CreateMotorRateExcessBenefitsFormValues>({
+        resolver: zodResolver(CreateMotorRateExcessBenefitsSchema),
         defaultValues: {
-            benefit_id: "",
-            rate: "",
-            minimum: "",
-            benefit_type: "",
-            description: "",
+            detail_benefit_id: "",
+            detail_type: "",
+            key: "",
+            value: "",
+            detail_highlight: "",
         },
     })
 
-    const submitMutation = UseApiMutation<SubmitResponse, CreateMotorRateBenefitsFormValues>({
-        url: `products/motor/rate-benefits/${componentProps?.data?.id}`,
+    const submitMutation = UseApiMutation<SubmitResponse, CreateMotorRateExcessBenefitsFormValues>({
+        url: `products/motor/rate-details/${componentProps?.data?.id}`,
         method: EMETHODS.POST,
         mutationOptions: {
             onSuccess: (data) => {
@@ -43,7 +43,8 @@ export const AddMotorRateBenefits = ({ handleDialogContextSwitch, componentProps
             },
         },
     })
-    const onSubmit = (data: CreateMotorRateBenefitsFormValues) => {
+
+    const onSubmit = (data: CreateMotorRateExcessBenefitsFormValues) => {
         submitMutation.mutate(data)
     }
 
@@ -51,31 +52,30 @@ export const AddMotorRateBenefits = ({ handleDialogContextSwitch, componentProps
         <div className="w-full min-w-[600px] max-w-[800px] p-6 space-y-4">
             <div className="border-b pb-3">
                 <h2 className="text-xl font-semibold">
-                    Add Optional Benefits
+                    Add Excess Benefits
                 </h2>
                 <p className="text-sm text-muted-foreground mt-1">
-                    Fill in the details below to register a Optional Benefits.
+                    Fill in the details below to register a Excess Benefits.
                 </p>
             </div>
-
             <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
                 <Controller
                     control={form.control}
-                    name="benefit_id"
+                    name="detail_benefit_id"
                     render={({ field }) => (
                         <div>
                             <ReusableSingleSelectApiInput
-                                url="motor/addon-benefit"
+                                url="motor/detail-benefit"
                                 value={field.value}
                                 onChange={field.onChange}
-                                label="Addon Benefit"
+                                label="Detailed Benefit"
                                 required
-                                placeholder="Select Addon Benefit..."
-                                className={form.formState.errors.benefit_id ? "**:data-[slot=select-trigger]:border-red-500 **:data-[slot=select-trigger]:focus-visible:ring-red-500" : ""}
+                                placeholder="Select Detailed Benefit..."
+                                className={form.formState.errors.detail_benefit_id ? "**:data-[slot=select-trigger]:border-red-500 **:data-[slot=select-trigger]:focus-visible:ring-red-500" : ""}
                             />
-                            {form.formState.errors.benefit_id?.message && (
+                            {form.formState.errors.detail_benefit_id?.message && (
                                 <p className="text-red-500 text-sm mt-1">
-                                    {String(form.formState.errors.benefit_id.message)}
+                                    {String(form.formState.errors.detail_benefit_id.message)}
                                 </p>
                             )}
                         </div>
@@ -83,34 +83,29 @@ export const AddMotorRateBenefits = ({ handleDialogContextSwitch, componentProps
                 />
                 <ReusableSelect
                     control={form.control}
-                    name="benefit_type"
-                    label="Benefit Types"
-                    options={BENEFITTYPESOPTIONS}
+                    name="detail_type"
+                    label="Detail Types"
+                    options={DETAILEDTYPESOPTIONS}
                 />
                 <ReuseableInput
                     control={form.control}
-                    name="rate"
-                    label="Rate"
-                    type="number"
-                    step="0.01"
-                    required
+                    name="value"
+                    label="Title"
                     className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
                 />
                 <ReuseableInput
                     control={form.control}
-                    name="minimum"
-                    label="Minimum"
-                    type="number"
-                    step="0.01"
-                    className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
-                />
-                <ReuseableInput
-                    control={form.control}
-                    name="description"
+                    name="key"
                     label="description"
                     type='textarea'
                     rows={3}
                     className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                />
+                <ReusableSelect
+                    control={form.control}
+                    name="detail_highlight"
+                    label="Highlight"
+                    options={HIGHLIGHTOPTIONS}
                 />
                 <CardFooter className="flex flex-col sm:flex-row justify-between gap-3 mt-2 px-0">
                     <Button
