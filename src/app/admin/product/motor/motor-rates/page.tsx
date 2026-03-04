@@ -45,8 +45,6 @@ export const MotorProductRatesPage = () => {
         },
     })
 
-    console.log()
-
     // const deleteTonageMutation = UseApiMutation<SubmitResponse, { id: number | string }>({
     //     url: ({ id }) => `motor/tonnage/${id}`,
     //     method: EMETHODS.DELETE,
