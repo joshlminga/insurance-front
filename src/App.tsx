@@ -63,6 +63,7 @@ import { VehicleUsePage } from "./app/admin/product/motor/vehicle-use/page"
 import { MotorAddonBenefitsPage } from "./app/admin/product/motor/motor-addon-benefits/page"
 import { MotorDetailedBenefitPage } from "./app/admin/product/motor/motor-detailed-benefit/page"
 import { MotorTonangePage } from "./app/admin/product/motor/motor-tonage/page"
+import { MotorProductRatesPage } from "./app/admin/product/motor/motor-rates/page"
 
 export const router = createBrowserRouter([
 
@@ -262,6 +263,10 @@ export const router = createBrowserRouter([
       {
         path: "products/motor",
         element: <MotorProductPage />,
+      },
+      {
+        path: "products/motor-rates/:slung",
+        element: <MotorProductRatesPage />,
       },
       {
         path: "products/motor/cover-types",

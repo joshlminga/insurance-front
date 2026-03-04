@@ -377,6 +377,80 @@ export const CreateMotorDetailedBenefitsSchema = z.object({
     .max(1000, "Description is too long"),
 })
 
+export const CreateMotorTonageSchema = z.object({
+  name: z
+    .string()
+    .min(2, "Tonage name must be at least 2 characters")
+    .max(100, "Tonage name is too long"),
+  vehicle_use_id: z
+    .string()
+    .min(1, "Vehicle use is required"),
+  description: z
+    .string()
+    .min(5, "Description must be at least 5 characters")
+    .max(1000, "Description is too long"),
+})
+
+export const CreateMotorProductRatesSchema = z.object({
+  coverfor_id: z.string().min(1, "Cover for is required"),
+  covertype_id: z.string().min(1, "Cover type is required"),
+  covering_id: z.string().min(1, "Covering is required"),
+  usedfor_id: z.string().min(1, "Used for is required"),
+  bodytype_id: z.string().min(1, "Body type is required"),
+  used_tonnage_id: z.string().optional().or(z.literal("")),
+  min_tonnage: z.union([z.string(), z.number()]).optional(),
+  max_tonnage: z.union([z.string(), z.number()]).optional(),
+  is_all_sum: z.boolean(),
+  valued_from: z.union([z.string(), z.number()]).optional(),
+  valued_to: z.union([z.string(), z.number()]).optional(),
+  is_all_age: z.boolean(),
+  age_from: z.union([z.string(), z.number()]).optional(),
+  age_to: z.union([z.string(), z.number()]).optional(),
+  rate: z.union([z.string().min(1, "Rate is required"), z.number()]),
+  minimum: z.union([z.string().min(1, "Minimum is required"), z.number()]),
+  pll: z.union([z.string(), z.number()]).optional(),
+  is_fleet: z.boolean(),
+  min_fleet: z.union([z.string(), z.number()]).optional(),
+  max_fleet: z.union([z.string(), z.number()]).optional(),
+  target_audience: z.string(),
+  cover_target: z.string(),
+  min_age: z.union([z.string(), z.number()]).optional(),
+  max_age: z.union([z.string(), z.number()]).optional(),
+  start_date: z.string().min(1, "Start date is required"),
+  expiry_date: z.string().min(1, "Expiry date is required"),
+  is_active: z.boolean(),
+  makemodel_offered: z.array(z.number()),
+  makemodel_notoffered: z.array(z.number()),
+  meta: z.array(z.object({
+    key: z.string(),
+    value: z.string()
+  }))
+}).refine((data) => {
+    if (data.valued_from !== undefined && data.valued_to !== undefined && data.valued_from !== "" && data.valued_to !== "") {
+        return Number(data.valued_to) >= Number(data.valued_from)
+    }
+    return true
+}, {
+    message: "Valued To must be greater than or equal to Valued From",
+    path: ["valued_to"]
+}).refine((data) => {
+    if (data.age_from !== undefined && data.age_to !== undefined && data.age_from !== "" && data.age_to !== "") {
+        return Number(data.age_to) >= Number(data.age_from)
+    }
+    return true
+}, {
+    message: "Age To must be greater than or equal to Age From",
+    path: ["age_to"]
+}).refine((data) => {
+    if (data.min_fleet !== undefined && data.max_fleet !== undefined && data.min_fleet !== "" && data.max_fleet !== "") {
+        return Number(data.max_fleet) >= Number(data.min_fleet)
+    }
+    return true
+}, {
+    message: "Max Fleet must be greater than or equal to Min Fleet",
+    path: ["max_fleet"]
+})
+
 export const CreateProductSchema = z.object({
     organization_location_id: z.string().min(1, "Organization location is required"),
     name: z

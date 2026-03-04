@@ -4,7 +4,7 @@ import { EPREFIX, EROUTES } from '@/utils/enums'
 const API_BASE_URL = 'http://localhost:8002/api/v1'
 
 // const API_BASE_URL = 'https://sandbox.acensure.acentriagroup.com:8005/api/v1/'
-
+const AUTH_STORAGE_KEY = 'auth-storage'
 
 const apiClient = axios.create({
     baseURL: API_BASE_URL,
@@ -16,7 +16,7 @@ const apiClient = axios.create({
 
 apiClient.interceptors.request.use(
     (config) => {
-        const authStorage = localStorage.getItem('auth-storage')
+        const authStorage = localStorage.getItem(AUTH_STORAGE_KEY)
         if (authStorage) {
             try {
                 const { token } = JSON.parse(authStorage)
@@ -40,13 +40,13 @@ apiClient.interceptors.response.use(
         const status = error?.response?.status
         const requestUrl = error?.config?.url ?? ''
         const isLoginRequest = typeof requestUrl === 'string' && requestUrl.includes('auth/login')
-        const loginPath = `/${EPREFIX.AUTH}${EROUTES.SIGNIN}`
+        const loginPath = `${EPREFIX.AUTH}${EROUTES.SIGNIN}`
         const isOnLoginPage = window.location.pathname === loginPath
 
         if (status === 401 && !isLoginRequest && !isOnLoginPage) {
+            localStorage.removeItem(AUTH_STORAGE_KEY)
             window.location.replace(loginPath)
         }
-
         return Promise.reject(error)
     }
 )

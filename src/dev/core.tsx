@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
     Breadcrumb,
@@ -29,7 +30,9 @@ import type {
     TRouteTabNavProps,
     TCountryResponse,
     SubmitResponse,
-    UserMenuPopoverProps
+    UserMenuPopoverProps,
+    ReusableSingleSelectApiInputProps,
+    ReusableApiMultiSelectProps
 } from "@/types/types";
 import {
     Stepper,
@@ -49,7 +52,7 @@ import {
 } from "@/components/ui/tabs"
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Fragment } from "react/jsx-runtime";
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Button as ShadButton } from "@/components/ui/button"
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -235,6 +238,7 @@ export function ReuseableInput<T extends FieldValues>({
     autoComplete = "off",
     required = false,
     className,
+    rows,
 }: RHFInputProps<T>) {
     return (
         <Controller
@@ -267,6 +271,7 @@ export function ReuseableInput<T extends FieldValues>({
                                     field.onChange(e)
                                 }
                             }}
+                            {...(type === "textarea" && { rows })}
                         />
                         {fieldState.invalid && fieldState.error && (
                             <FieldError className="text-red-500 text-sm mt-1">
@@ -1211,7 +1216,7 @@ export function ReuseableSingleSelectclassInput<T extends FieldValues>({
 }: ReuseableSingleSelectCountriesInputProps<T>) {
     const { data, isLoading } = UseApiQuery<SubmitResponse>({
         url: "motor/vehicle-classes",
-        params: { direction: "asc", is_active:true },
+        params: { direction: "asc", is_active: true },
         queryOptions: { enabled: true },
     })
     const classes = data?.data ?? [];
@@ -1250,6 +1255,86 @@ export function ReuseableSingleSelectclassInput<T extends FieldValues>({
     )
 }
 
+export function ReuseableSingleSelectVehicleUseInput<T extends FieldValues>({
+    value,
+    onChange,
+    placeholder = "Select Vehicle uses...",
+    label,
+    required = false,
+    disabled = false,
+    className,
+}: ReuseableSingleSelectCountriesInputProps<T>) {
+    const [search, setSearch] = useState("");
+    const [debouncedSearch, setDebouncedSearch] = useState("");
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearch(search);
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [search]);
+
+    const { data, isLoading, isFetching } = UseApiQuery<SubmitResponse>({
+        url: "motor/vehicle-use",
+        params: {
+            direction: "asc",
+            is_active: true,
+            term: debouncedSearch || undefined,
+        },
+        queryOptions: {
+            enabled: true,
+            staleTime: 1000 * 60 * 5,
+        },
+    });
+    const vehicleUse = data?.data ?? [];
+    return (
+        <div className={`space-y-2 ${className ?? ""}`}>
+            {label && (
+                <Label>
+                    {label}
+                    {required && <span className="text-destructive ml-1">*</span>}
+                </Label>
+            )}
+            <Select
+                value={value}
+                onValueChange={onChange}
+                disabled={disabled}>
+                <SelectTrigger className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]">
+                    <SelectValue placeholder={placeholder} />
+                </SelectTrigger>
+                <SelectContent>
+                    <div className="p-2">
+                        <Input
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            placeholder="Search vehicle use..."
+                            className="h-9"
+                            onKeyDown={(e) => e.stopPropagation()}
+                        />
+                    </div>
+                    {isFetching && (
+                        <div className="px-3 py-2 text-sm text-muted-foreground flex items-center gap-2">
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                            Searching...
+                        </div>
+                    )}
+
+                    {vehicleUse.map((item: any) => (
+                        <SelectItem key={item.id} value={String(item.id)}>
+                            {item?.name}
+                        </SelectItem>
+                    ))}
+                    {!isLoading && !isFetching && vehicleUse.length === 0 && (
+                        <div className="px-3 py-2 text-sm text-muted-foreground">
+                            No vehicle use found
+                        </div>
+                    )}
+                </SelectContent>
+            </Select>
+        </div>
+    );
+}
+
 export const ReusableCoveringInputMultiselect = ({
     value,
     onChange,
@@ -1259,7 +1344,7 @@ export const ReusableCoveringInputMultiselect = ({
 }: TCountriesInputMultiselectProps) => {
     const { data, isLoading } = UseApiQuery<SubmitResponse>({
         url: `motor/cover-covering`,
-        params: { direction: 'asc', is_active:true },
+        params: { direction: 'asc', is_active: true },
         queryOptions: { enabled: true },
     })
     const covering = data?.data ?? [];
@@ -1296,6 +1381,287 @@ export const ReusableCoveringInputMultiselect = ({
             </MultiSelect>
         </div>
     )
+}
+
+export function ReuseableSingleSelectCoveringInput<T extends FieldValues>({
+    value,
+    onChange,
+    placeholder = "Select Covering...",
+    label,
+    required = false,
+    disabled = false,
+    className,
+}: ReuseableSingleSelectCountriesInputProps<T>) {
+    const [search, setSearch] = useState("");
+    const [debouncedSearch, setDebouncedSearch] = useState("");
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearch(search);
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [search]);
+
+    const { data, isLoading, isFetching } = UseApiQuery<SubmitResponse>({
+        url: `motor/cover-covering`,
+        params: {
+            direction: "asc",
+            is_active: true,
+            term: debouncedSearch || undefined,
+        },
+        queryOptions: {
+            enabled: true,
+            staleTime: 1000 * 60 * 5,
+        },
+    });
+    const covering = data?.data ?? [];
+    return (
+        <div className={`space-y-2 ${className ?? ""}`}>
+            {label && (
+                <Label>
+                    {label}
+                    {required && <span className="text-destructive ml-1">*</span>}
+                </Label>
+            )}
+            <Select
+                value={value}
+                onValueChange={onChange}
+                disabled={disabled}>
+                <SelectTrigger className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]">
+                    <SelectValue placeholder={placeholder} />
+                </SelectTrigger>
+                <SelectContent>
+                    <div className="p-2">
+                        <Input
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            placeholder="Search vehicle use..."
+                            className="h-9"
+                            onKeyDown={(e) => e.stopPropagation()}
+                        />
+                    </div>
+                    {isFetching && (
+                        <div className="px-3 py-2 text-sm text-muted-foreground flex items-center gap-2">
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                            Searching...
+                        </div>
+                    )}
+
+                    {covering.map((item: any) => (
+                        <SelectItem key={item.id} value={String(item.id)}>
+                            {item?.name}
+                        </SelectItem>
+                    ))}
+                    {!isLoading && !isFetching && covering.length === 0 && (
+                        <div className="px-3 py-2 text-sm text-muted-foreground">
+                            No covering use found
+                        </div>
+                    )}
+                </SelectContent>
+            </Select>
+        </div>
+    );
+}
+
+export function ReusableSingleSelectApiInput({
+    url,
+    value,
+    onChange,
+    placeholder = "Select option...",
+    label,
+    required = false,
+    disabled = false,
+    className,
+    queryParams = {},
+    labelKey = "name",
+    valueKey = "id",
+    searchPlaceholder = "Search...",
+    emptyMessage = "No results found",
+}: ReusableSingleSelectApiInputProps) {
+    const [search, setSearch] = useState("");
+    const [debouncedSearch, setDebouncedSearch] = useState("");
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearch(search);
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [search]);
+
+    const { data, isLoading, isFetching } = UseApiQuery<SubmitResponse>({
+        url,
+        params: {
+            direction: "asc",
+            is_active: true,
+            term: debouncedSearch || undefined,
+            ...queryParams,
+        },
+        queryOptions: {
+            enabled: !!url,
+            staleTime: 1000 * 60 * 5,
+        },
+    });
+    const items = data?.data ?? [];
+
+    return (
+        <div className={`space-y-2 ${className ?? ""}`}>
+            {label && (
+                <Label>
+                    {label}
+                    {required && (
+                        <span className="text-destructive ml-1">*</span>
+                    )}
+                </Label>
+            )}
+
+            <Select
+                value={value}
+                onValueChange={onChange}
+                disabled={disabled}
+            >
+                <SelectTrigger className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]">
+                    <SelectValue placeholder={placeholder} />
+                </SelectTrigger>
+
+                <SelectContent>
+                    <div className="p-2">
+                        <Input
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            placeholder={searchPlaceholder}
+                            className="h-9"
+                            onKeyDown={(e) => e.stopPropagation()}
+                        />
+                    </div>
+
+                    {isFetching && (
+                        <div className="px-3 py-2 text-sm text-muted-foreground flex items-center gap-2">
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                            Searching...
+                        </div>
+                    )}
+
+                    {items.map((item: any) => (
+                        <SelectItem
+                            key={item[valueKey]}
+                            value={String(item[valueKey])}
+                        >
+                            {item[labelKey]}
+                        </SelectItem>
+                    ))}
+
+                    {!isLoading && !isFetching && items.length === 0 && (
+                        <div className="px-3 py-2 text-sm text-muted-foreground">
+                            {emptyMessage}
+                        </div>
+                    )}
+                </SelectContent>
+            </Select>
+        </div>
+    );
+}
+
+export function ReusableApiMultiSelect({
+    url,
+    value,
+    onChange,
+    placeholder = "Select options...",
+    label,
+    required = false,
+    disabled = false,
+    className,
+    queryParams = {},
+    labelKey = "name",
+    valueKey = "id",
+    searchKeys = ["name"],
+    searchPlaceholder = "Search...",
+    emptyMessage = "No results found",
+}: ReusableApiMultiSelectProps) {
+    const [search, setSearch] = useState("");
+    const [debouncedSearch, setDebouncedSearch] = useState("");
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearch(search);
+        }, 400);
+        return () => clearTimeout(timer);
+    }, [search]);
+
+    const { data, isLoading, isFetching } = UseApiQuery<SubmitResponse>({
+        url,
+        params: {
+            direction: "asc",
+            term: debouncedSearch || undefined,
+            ...queryParams,
+        },
+        queryOptions: {
+            enabled: !!url,
+            placeholderData: (previousData) => previousData,
+            staleTime: 1000 * 60 * 5,
+        },
+    });
+    const items = data?.data ?? [];
+    const filteredItems = useMemo(() => {
+        if (!search) return items;
+        const lowerSearch = search.toLowerCase();
+        return items.filter((item: any) =>
+            searchKeys.some((key) =>
+                String(item?.[key] ?? "")
+                    .toLowerCase()
+                    .includes(lowerSearch)
+            )
+        );
+    }, [items, search, searchKeys]);
+    const controlledValue = Array.isArray(value) ? value : [];
+
+    return (
+        <div className={`space-y-0 w-full ${className ?? ""}`}>
+            {label && (
+                <Label>
+                    {label}
+                    {required && (
+                        <span className="text-destructive ml-1">*</span>
+                    )}
+                </Label>
+            )}
+            <MultiSelect
+                values={controlledValue}
+                onValuesChange={(vals) => onChange?.(vals)}>
+                <MultiSelectTrigger disabled={disabled} className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]">
+                    <MultiSelectValue placeholder={placeholder} />
+                </MultiSelectTrigger>
+                <MultiSelectContent>
+                    <div className="p-1">
+                        <Input
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            placeholder={searchPlaceholder}
+                            className="h-9"
+                            onKeyDown={(e) => e.stopPropagation()}
+                        />
+                    </div>
+                    {isFetching && (
+                        <div className="px-3 py-2 text-sm text-muted-foreground flex items-center gap-2">
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                            Searching...
+                        </div>
+                    )}
+                    <MultiSelectGroup>
+                        {!isLoading && filteredItems.length === 0 && (
+                            <div className="px-3 py-2 text-sm text-muted-foreground">
+                                {emptyMessage}
+                            </div>
+                        )}
+                        {filteredItems.map((item: any) => (
+                            <MultiSelectItem
+                                key={item[valueKey]}
+                                value={String(item[valueKey])}>
+                                {item[labelKey]}
+                            </MultiSelectItem>
+                        ))}
+                    </MultiSelectGroup>
+                </MultiSelectContent>
+            </MultiSelect>
+        </div>
+    );
 }
 
 export const UserMenuPopover = ({

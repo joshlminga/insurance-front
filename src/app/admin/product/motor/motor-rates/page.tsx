@@ -1,23 +1,25 @@
-/* eslint-disable no-extra-boolean-cast */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { PageHeader } from '@/components/shared';
 import { ActionColumn } from '@/dev/columns';
-import { MotorTonageColumns } from '@/dev/columns/admin/motor-tonage';
 import { CustomDialogComponent } from '@/dev/core';
 import { CustomBaseTable, SearchTools } from '@/dev/table';
 import { useCustomDialogContextFactory, useDebounce } from '@/hooks';
-import { UseApiMutation, UseApiQuery } from '@/hooks/hooks';
+import { UseApiQuery } from '@/hooks/hooks';
 import { SingleActionsHandler, SubmitResponse, TFilterOptions, TPaginationFilters } from '@/types/types';
-import { EMETHODS, FILTEROPTIONS, ReusableReducer } from '@/utils/constatnts';
-import { extractErrorMessage } from '@/utils/helpers';
-import { ShowToast } from '@/utils/utils';
+import { FILTEROPTIONS, ReusableReducer } from '@/utils/constatnts';
+// import { extractErrorMessage } from '@/utils/helpers';
+// import { ShowToast } from '@/utils/utils';
 import { Plus } from 'lucide-react';
-import { useReducer } from 'react'
-import { CreateMotorTonageModal } from './modals/create-tonage';
-import { EditMotorTonageModal } from './modals/edit-tonage';
+import React, { useReducer } from 'react'
+import { useParams } from 'react-router-dom';
+import { AddMotorProductRatesPage } from './modals/add-rates';
 
-export const MotorTonangePage = () => {
-    const [filter, optionsDispatcher] = useReducer(
+export const MotorProductRatesPage = () => {
+
+    const {slung} = useParams();
+
+ const [filter, optionsDispatcher] = useReducer(
         ReusableReducer<TPaginationFilters & TFilterOptions>,
         { ...FILTEROPTIONS, page: 1, pageSize: 15 }
     );
@@ -32,100 +34,102 @@ export const MotorTonangePage = () => {
         }>();
 
     const { data, isLoading, refetch } = UseApiQuery<SubmitResponse>({
-        url: 'motor/tonnage',
+        url: `products/motor/rates/${slung}`,
         params: {
             page: filter.page,
             pageSize: filter.pageSize,
             term: filter.term,
         },
         queryOptions: {
-            enabled: true,
+            enabled: !!slung,
         },
     })
 
-    const deleteTonageMutation = UseApiMutation<SubmitResponse, { id: number | string }>({
-        url: ({ id }) => `motor/tonnage/${id}`,
-        method: EMETHODS.DELETE,
-        mutationOptions: {
-            onSuccess: (response) => {
-                ShowToast.success(response?.message || 'Cover Type deleted successfully')
-                refetch()
-            },
-            onError: (error) => {
-                ShowToast.error(extractErrorMessage(error))
-            },
-        },
-    })
+    console.log()
 
-    const toggleTonageStatusMutation = UseApiMutation<SubmitResponse, { id: number | string, is_active: boolean }>({
-        url: ({ id }) => `motor/tonnage/${id}/status`,
-        method: EMETHODS.PATCH,
-        mutationOptions: {
-            onSuccess: (response) => {
-                ShowToast.success(response?.message || 'AddOn Benefit status updated successfully')
-                refetch()
-            },
-            onError: (error) => {
-                ShowToast.error(extractErrorMessage(error))
-            },
-        },
-    })
+    // const deleteTonageMutation = UseApiMutation<SubmitResponse, { id: number | string }>({
+    //     url: ({ id }) => `motor/tonnage/${id}`,
+    //     method: EMETHODS.DELETE,
+    //     mutationOptions: {
+    //         onSuccess: (response) => {
+    //             ShowToast.success(response?.message || 'Cover Type deleted successfully')
+    //             refetch()
+    //         },
+    //         onError: (error) => {
+    //             ShowToast.error(extractErrorMessage(error))
+    //         },
+    //     },
+    // })
+
+    // const toggleTonageStatusMutation = UseApiMutation<SubmitResponse, { id: number | string, is_active: boolean }>({
+    //     url: ({ id }) => `motor/tonnage/${id}/status`,
+    //     method: EMETHODS.PATCH,
+    //     mutationOptions: {
+    //         onSuccess: (response) => {
+    //             ShowToast.success(response?.message || 'AddOn Benefit status updated successfully')
+    //             refetch()
+    //         },
+    //         onError: (error) => {
+    //             ShowToast.error(extractErrorMessage(error))
+    //         },
+    //     },
+    // })
 
     const ActionsHandlerMapping: SingleActionsHandler<any>[] = [
-        {
-            label: 'Edit',
-            onSelect: (data) => {
-                handleDialogContextSwitch({
-                    componentProps: { data, refetch },
-                    Component: EditMotorTonageModal,
-                })
-            },
-        },
-        {
-            label: 'Delete',
-            onSelect: (data) => {
-                deleteTonageMutation.mutate({
-                    id: data?.id,
-                })
-            },
-            conditional: (data) => Boolean(data?.id),
-        },
-        {
-            label: 'Deactivate',
-            onSelect: (data) => {
-                toggleTonageStatusMutation.mutate({
-                    is_active: false,
-                    id: data?.id,
-                })
-            },
-            conditional: (data) => Boolean(data?.id) && Boolean(data?.is_active),
-        },
-        {
-            label: 'Activate',
-            onSelect: (data) => {
-                toggleTonageStatusMutation.mutate({
-                    is_active: true,
-                    id: data?.id,
-                })
-            },
-            conditional: (data) => Boolean(data?.id) && !Boolean(data?.is_active),
-        },
+        // {
+        //     label: 'Edit',
+        //     onSelect: (data) => {
+        //         handleDialogContextSwitch({
+        //             componentProps: { data, refetch },
+        //             Component: EditMotorTonageModal,
+        //         })
+        //     },
+        // },
+        // {
+        //     label: 'Delete',
+        //     onSelect: (data) => {
+        //         deleteTonageMutation.mutate({
+        //             id: data?.id,
+        //         })
+        //     },
+        //     conditional: (data) => Boolean(data?.id),
+        // },
+        // {
+        //     label: 'Deactivate',
+        //     onSelect: (data) => {
+        //         toggleTonageStatusMutation.mutate({
+        //             is_active: false,
+        //             id: data?.id,
+        //         })
+        //     },
+        //     conditional: (data) => Boolean(data?.id) && Boolean(data?.is_active),
+        // },
+        // {
+        //     label: 'Activate',
+        //     onSelect: (data) => {
+        //         toggleTonageStatusMutation.mutate({
+        //             is_active: true,
+        //             id: data?.id,
+        //         })
+        //     },
+        //     conditional: (data) => Boolean(data?.id) && !Boolean(data?.is_active),
+        // },
     ];
 
     return (
         <div>
             <PageHeader
-                title="Motor Tonage"
-                description="Manage Motor tonage, their details, and associated users"
+                title="Motor Product Rates"
+                description="Manage Motor Product Rates, their details, and associated users"
                 actions={[
                     {
                         icon: Plus,
-                        label: 'Add Motor Tonage',
+                        label: 'Add Motor Product Rates',
                         variant: 'default',
                         onClick: () => {
                             handleDialogContextSwitch({
                                 componentProps: { refetch },
-                                Component: CreateMotorTonageModal,
+                                Component: AddMotorProductRatesPage,
                             })
                         },
                     },
@@ -150,13 +154,13 @@ export const MotorTonangePage = () => {
                             includeFilter: true,
                         },
                         columns: [
-                            ...MotorTonageColumns,
+                            // ...MotorTonageColumns,
                             ActionColumn({ ActionsHandlerMapping }),
                         ],
                         OtherTools: SearchTools,
                         data: data?.data ?? [],
                         pageCount: data?.pagination?.last_page ?? 1,
-                        title: 'Motor Tonage',
+                        title: 'Motor Product Rates',
                         showPagination: true,
                         setPageSize: (pageSize) =>
                             optionsDispatcher({
@@ -182,7 +186,6 @@ export const MotorTonangePage = () => {
                     />
                 )}
             </CustomDialogComponent>
-
         </div>
     )
 }

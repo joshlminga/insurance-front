@@ -38,6 +38,7 @@ const OrganizationsPage = () => {
     params: {
       page: filter.page,
       pageSize: filter.pageSize,
+      term: filter.term,
     },
     queryOptions: {
       enabled: true,
@@ -114,7 +115,7 @@ const OrganizationsPage = () => {
       label: 'Activate',
       onSelect: (data) => {
         toggleOrganizationStatusMutation.mutate({
-           is_active: true,
+          is_active: true,
           id: data?.organization_id,
         })
       },
