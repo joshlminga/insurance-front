@@ -28,9 +28,9 @@ export const extractErrorMessage = (error: any): string => {
 };
 
 export const formatDate = (value?: string) => {
-    if (!value) return 'N/A'
+    if (!value) return '-'
     const parsedDate = new Date(value)
-    if (Number.isNaN(parsedDate.getTime())) return 'N/A'
+    if (Number.isNaN(parsedDate.getTime())) return '-'
 
     return parsedDate.toLocaleString('en-US', {
         year: 'numeric',

@@ -3,9 +3,9 @@ import { EPREFIX, EROUTES } from '@/utils/enums'
 
 // const API_BASE_URL = 'http://localhost:8002/api/v1'
 
-const API_BASE_URL = 'https://sandbox.acensure.acentriagroup.com:8005/api/v1/'
-const AUTH_STORAGE_KEY = 'auth-storage'
+const API_BASE_URL = 'https://sandbox.acensure.acentriagroup.com/api/v1/'
 
+const AUTH_STORAGE_KEY = 'auth-storage'
 const apiClient = axios.create({
     baseURL: API_BASE_URL,
     headers: {
