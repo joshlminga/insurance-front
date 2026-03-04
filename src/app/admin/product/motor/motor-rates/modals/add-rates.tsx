@@ -678,7 +678,6 @@ export const AddMotorProductRatesPage = ({ handleDialogContextSwitch, componentP
                                 />
                             )}
                         />
-
                         <CardFooter className="flex flex-col sm:flex-row justify-between gap-3 mt-8 px-0">
                             <Button
                                 type="button"

@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ActionColumn } from '@/dev/columns'
-import { CustomDialogComponent } from '@/dev/core'
+import { MotorRateBenefitsColumns } from '@/dev/columns/admin/rates-benefits'
+import { Button, CustomDialogComponent } from '@/dev/core'
 import { CustomBaseTable, SearchTools } from '@/dev/table'
 import { useCustomDialogContextFactory, useDebounce } from '@/hooks'
 import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
@@ -8,8 +9,10 @@ import { SingleActionsHandler, SubmitResponse, TFilterOptions, TPaginationFilter
 import { EMETHODS, FILTEROPTIONS, ReusableReducer } from '@/utils/constatnts'
 import { extractErrorMessage } from '@/utils/helpers'
 import { ShowToast } from '@/utils/utils'
+import { Plus } from 'lucide-react'
 import React, { useReducer } from 'react'
 import { useParams } from 'react-router-dom'
+import { AddMotorRateBenefits } from './add-rate-benefits'
 
 export const MotorRateBenefitsPage = ({ componentProps }: {
     handleDialogContextSwitch: (context?: any) => void
@@ -31,15 +34,15 @@ export const MotorRateBenefitsPage = ({ componentProps }: {
         }>();
 
     const { data, isLoading, refetch } = UseApiQuery<SubmitResponse>({
-        url: `products/motor/rate-benefits`,
+        url: "products/motor/rate-benefits",
         params: {
-            product_rate_id:componentProps?.data?.id,
+            product_rate_id: componentProps?.data?.id,
             page: filter.page,
             pageSize: filter.pageSize,
             term: filter.term,
         },
         queryOptions: {
-            enabled: !!slung,
+            enabled: true,
         },
     })
 
@@ -145,12 +148,27 @@ export const MotorRateBenefitsPage = ({ componentProps }: {
     ];
     return (
         <div className="w-full min-w-[800px] max-w-[800px] p-6 space-y-4">
-            <div className="border-b pb-3">
-                <h2 className="text-xl font-semibold">{componentProps?.data?.product?.name} - Optional Benefits
-                </h2>
-                <p className="text-sm text-muted-foreground mt-1">
-                    Fill in the details below to register a motor Detailed benefits.
-                </p>
+            <div className="border-b pb-3 flex items-start gap-4">
+                <div className="flex-1">
+                    <h2 className="text-xl font-semibold">
+                        {componentProps?.data?.product?.name} - Optional Benefits
+                    </h2>
+                    <p className="text-sm text-muted-foreground mt-1">
+                        Fill in the details below to register a motor Detailed benefits.
+                    </p>
+                </div>
+                <Button
+                    type="button"
+                    leftIcon={<Plus />}
+                    onClick={() => {
+                        handleDialogContextSwitch({
+                            componentProps: { data:componentProps?.data, refetch },
+                            Component: AddMotorRateBenefits,
+                        })
+                    }}
+                    className="flex items-center justify-center">
+                    Add Optional Benefits
+                </Button>
             </div>
 
             <div className='w-full'>
@@ -171,7 +189,7 @@ export const MotorRateBenefitsPage = ({ componentProps }: {
                             includeFilter: true,
                         },
                         columns: [
-                            // ...MotorRateColumns,
+                            ...MotorRateBenefitsColumns,
                             ActionColumn({ ActionsHandlerMapping }),
                         ],
                         OtherTools: SearchTools,

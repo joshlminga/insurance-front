@@ -93,6 +93,12 @@ export const ACCESSLEVELSOPTIONS = [
   { label: "Company Owned", value: 'Company Owned' },
 ]
 
+export const BENEFITTYPESOPTIONS = [
+  { label: "Optional", value: 'Optional' },
+  { label: "Inclusive", value: 'Inclusive' },
+  { label: "Compulsory", value: 'Compulsory' },
+]
+
 export const TARGET_AUDIENCE_OPTIONS = [
   { label: "Yes", value: "true" },
   { label: "No", value: "false" },
