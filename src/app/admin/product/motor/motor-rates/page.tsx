@@ -17,6 +17,7 @@ import { MotorRateColumns } from '@/dev/columns/admin/motor-rates';
 import { ShowToast } from '@/utils/utils';
 import { extractErrorMessage } from '@/utils/helpers';
 import { EditMotorProductRatesPage } from './modals/edit-rates';
+import { MotorRateBenefitsPage } from './modals/rate-benefits';
 
 export const MotorProductRatesPage = () => {
     const { slung } = useParams();
@@ -98,10 +99,10 @@ export const MotorProductRatesPage = () => {
                 })
             },
         },
-         {
+        {
             label: 'Duplicate',
             onSelect: (data) => {
-               toggleMotorRatesDuplicateStatusMutation.mutate({
+                toggleMotorRatesDuplicateStatusMutation.mutate({
                     is_active: true,
                     id: data?.id,
                 })
@@ -136,6 +137,15 @@ export const MotorProductRatesPage = () => {
             },
             conditional: (data) => Boolean(data?.id) && !(data?.is_active),
         },
+         {
+            label: 'Optional Benefits',
+            onSelect: (data) => {
+                handleDialogContextSwitch({
+                    componentProps: { data, refetch },
+                    Component: MotorRateBenefitsPage,
+                })
+            },
+        },
     ];
 
     return (
@@ -157,7 +167,6 @@ export const MotorProductRatesPage = () => {
                     },
                 ]}
             />
-
             <div className='w-full'>
                 <CustomBaseTable
                     {...{

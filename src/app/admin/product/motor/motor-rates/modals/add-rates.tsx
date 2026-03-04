@@ -132,10 +132,10 @@ export const AddMotorProductRatesPage = ({ handleDialogContextSwitch, componentP
         <div className="w-full min-w-[800px] max-w-[800px] p-6 space-y-4">
             <div className="border-b pb-3">
                 <h2 className="text-xl font-semibold">
-                    Motor Detailed Benefits
+                    Motor Rates
                 </h2>
                 <p className="text-sm text-muted-foreground mt-1">
-                    Fill in the details below to register a motor Detailed benefits.
+                    Fill in the details below to register a Motor Rates.
                 </p>
             </div>
             <div className="flex justify-between items-center mb-6 px-2">
