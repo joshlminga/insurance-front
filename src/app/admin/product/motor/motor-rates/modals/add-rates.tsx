@@ -39,9 +39,7 @@ export const AddMotorProductRatesPage = ({ handleDialogContextSwitch, componentP
     componentProps?: any
 }) => {
     const {slung} = useParams();
-
     const [currentStep, setCurrentStep] = useState(0)
-
     const form = useForm<CreateMotorProductRatesFormValues>({
         resolver: zodResolver(CreateMotorProductRatesSchema),
         defaultValues: {
