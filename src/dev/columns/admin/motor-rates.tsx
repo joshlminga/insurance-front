@@ -115,15 +115,19 @@ export const MotorRateColumns: ColumnDef<any>[] = [
             const isFleet = Boolean(rowData?.is_fleet);
             const minFleet = rowData?.min_fleet;
             const maxFleet = rowData?.max_fleet;
-            if (isFleet == true) {
+            if (isFleet == false) {
                 return (
-                    <Badge className="rounded-lg text-white font-semibold bg-cyan-400">
-                        Is Fleet
+                    <Badge className="rounded-lg text-white font-semibold bg-gray-400">
+                        Not Fleet
                     </Badge>
                 );
             }
-            if (minFleet != null && maxFleet != null) {
-                return <div>{`${minFleet} - ${maxFleet}`}</div>;
+            if (minFleet != null && maxFleet != null && isFleet) {
+                return ( 
+                <div>
+                    <Badge className="rounded-lg text-white font-semibold bg-cyan-400">Fleet {`${minFleet} - ${maxFleet}`}</Badge>
+                    </div>
+                    );
             }
             return <div>-</div>;
         },

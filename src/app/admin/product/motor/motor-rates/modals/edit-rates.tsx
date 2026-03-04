@@ -29,9 +29,32 @@ export const EditMotorProductRatesPage = ({ handleDialogContextSwitch, component
     handleDialogContextSwitch: (context?: any) => void
     componentProps?: any
 }) => {
-    console.log(componentProps?.data);
+
+    console.log(componentProps?.data)
     const { slung } = useParams();
     const [step, setStep] = useState(1);
+    const normalizeMakeModelIds = (items: any): number[] => {
+        if (!Array.isArray(items)) return []
+
+        return items
+            .map((item) => {
+                if (typeof item === "number") return item
+                if (typeof item === "string") return Number(item)
+                if (item && typeof item === "object") {
+                    return Number(item.id ?? item.value)
+                }
+                return NaN
+            })
+            .filter((id) => Number.isFinite(id))
+    }
+
+    const makeModelOffered = normalizeMakeModelIds(
+        componentProps?.data?.meta?.makemodel_offered ?? componentProps?.data?.makemodel_offered
+    )
+    const makeModelNotOffered = normalizeMakeModelIds(
+        componentProps?.data?.meta?.makemodel_notoffered ?? componentProps?.data?.makemodel_notoffered
+    )
+
     const form = useForm<CreateMotorProductRatesFormValues>({
         resolver: zodResolver(CreateMotorProductRatesSchema),
         defaultValues: {
@@ -62,8 +85,8 @@ export const EditMotorProductRatesPage = ({ handleDialogContextSwitch, component
             start_date: componentProps?.data?.start_date ?? "",
             expiry_date: componentProps?.data?.expiry_date ?? "",
             is_active: Boolean(componentProps?.data?.is_active ?? true),
-            makemodel_offered: [],
-            makemodel_notoffered: [],
+            makemodel_offered: makeModelOffered,
+            makemodel_notoffered: makeModelNotOffered,
             meta: [],
         },
     })
