@@ -24,6 +24,7 @@ export const AddMotorRateExcessBenefits = ({ handleDialogContextSwitch, componen
             key: "",
             value: "",
             detail_highlight: 'false',
+            product_rate_id: "",
         },
     })
 

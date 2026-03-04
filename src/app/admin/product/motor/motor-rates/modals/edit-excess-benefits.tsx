@@ -26,6 +26,7 @@ export const EditMotorRateExcessBenefits = ({ handleDialogContextSwitch, compone
             key: componentProps?.data?.key ?? "",
             value: componentProps?.data?.value ?? "",
             detail_highlight: String(componentProps?.data?.detail_highlight ?? 'false'),
+            product_rate_id: String(componentProps?.data?.product_motor_rate?.id ?? ''),
         },
     })
 

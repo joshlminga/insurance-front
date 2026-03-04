@@ -499,6 +499,7 @@ export const CreateMotorRateExcessBenefitsSchema = z.object({
   value: z.string().optional().or(z.literal("")),
   key: z.string().optional().or(z.literal("")),
   detail_highlight: z.string().optional().or(z.literal("")),
+  product_rate_id: z.string().optional()
 })
 
 export const CreateProductSchema = z.object({
