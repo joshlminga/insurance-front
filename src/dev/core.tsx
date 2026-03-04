@@ -237,6 +237,7 @@ export function ReuseableInput<T extends FieldValues>({
     type = "text",
     autoComplete = "off",
     required = false,
+    disabled = false,
     className,
     rows,
 }: RHFInputProps<T>) {
@@ -258,6 +259,7 @@ export function ReuseableInput<T extends FieldValues>({
                             autoComplete={autoComplete}
                             aria-invalid={fieldState.invalid}
                             required={required}
+                            disabled={disabled}
                             className={cn(
                                 className,
                                 fieldState.invalid &&

@@ -132,6 +132,7 @@ export type RHFInputProps<T extends FieldValues> = {
   required?: boolean
   className?: string
   rows?: number
+  disabled?: boolean
 }
 
 export interface AuthProviderState {
