@@ -74,6 +74,20 @@ export const MotorProductRatesPage = () => {
         },
     })
 
+    const toggleMotorRatesDuplicateStatusMutation = UseApiMutation<SubmitResponse, { id: number | string, is_active: boolean }>({
+        url: ({ id }) => `products/motor/rates/${slung}/copy/${id}`,
+        method: EMETHODS.POST,
+        mutationOptions: {
+            onSuccess: (response) => {
+                ShowToast.success(response?.message || 'Motor rate status updated successfully')
+                refetch()
+            },
+            onError: (error) => {
+                ShowToast.error(extractErrorMessage(error))
+            },
+        },
+    })
+
     const ActionsHandlerMapping: SingleActionsHandler<any>[] = [
         {
             label: 'Edit',
@@ -81,6 +95,15 @@ export const MotorProductRatesPage = () => {
                 handleDialogContextSwitch({
                     componentProps: { data, refetch },
                     Component: EditMotorProductRatesPage,
+                })
+            },
+        },
+         {
+            label: 'Duplicate',
+            onSelect: (data) => {
+               toggleMotorRatesDuplicateStatusMutation.mutate({
+                    is_active: true,
+                    id: data?.id,
                 })
             },
         },
