@@ -16,12 +16,9 @@ import { ShowToast } from '@/utils/utils'
 import { extractErrorMessage } from '@/utils/helpers'
 import { EditProductModal } from './modals/edit-product'
 import { ViewProductModal } from './modals/view-product'
-import { useNavigate } from 'react-router-dom'
 import { EPREFIX } from '@/utils/enums'
 
 export const MotorProductPage = () => {
-
-    const navigate = useNavigate();
 
     const [filter, optionsDispatcher] = useReducer(
         ReusableReducer<TPaginationFilters & TFilterOptions>,
@@ -77,7 +74,7 @@ export const MotorProductPage = () => {
         },
     })
 
-     const toggleMotorProductDeactivateMutation = UseApiMutation<SubmitResponse, { id: number | string, is_active: boolean }>({
+    const toggleMotorProductDeactivateMutation = UseApiMutation<SubmitResponse, { id: number | string, is_active: boolean }>({
         url: ({ id }) => `products/motor/${id}/deactivate`,
         method: EMETHODS.PATCH,
         mutationOptions: {
@@ -104,7 +101,9 @@ export const MotorProductPage = () => {
         {
             label: 'View Rates',
             onSelect: (data) => {
-                navigate(`/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor-rates/${data?.id}`)
+                const path = `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor-rates/${data?.id}`;
+                window.open(path, '_blank', 'noopener,noreferrer');
+                // navigate(`/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor-rates/${data?.id}`)
             },
         },
         {

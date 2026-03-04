@@ -22,15 +22,15 @@ export const ORGANIZATIONTYPES = [
 ]
 
 export const MOTORDETAILEDBENEFITSGROUPTYPES = [
-  {label: "All", value:"All"},
-  {label: "Single", value:"Single"},
-  {label: "Comparison", value:"Comparison"}
+  { label: "All", value: "All" },
+  { label: "Single", value: "Single" },
+  { label: "Comparison", value: "Comparison" }
 ]
 
 export const MOTORDETAILEDBENEFITSREFERENCETYPES = [
-  {label: "Benefit", value:"Benefit"},
-  {label: "Excess", value:"Excess"},
-  {label: "Both", value:"Both"}
+  { label: "Benefit", value: "Benefit" },
+  { label: "Excess", value: "Excess" },
+  { label: "Both", value: "Both" }
 ]
 
 export const EORGANIZATIONTYPES = {
@@ -98,9 +98,16 @@ export const TARGET_AUDIENCE_OPTIONS = [
   { label: "No", value: "false" },
 ]
 
-export const AUDIENCE_OPTIONS = [
-  { label: "Any", value: "Any" },
-  { label: "No", value: "false" },
+export const TAUDIENCE_OPTIONS = [
+  { label: "Any (available for any)", value: "Any" },
+  { label: "Existing Customer Only", value: "Existing" },
+  { label: "Co-oprate Customers Only", value: "Corporate" },
+]
+
+export const CAUDIENCE_OPTIONS = [
+  { label: "Any (All Genders)", value: "Any" },
+  { label: "Ladies (only ladies)", value: "Ladies Only" },
+  { label: "Men (only for men)", value: "Men Only" },
 ]
 
 export const createHeroPopoverItems = (

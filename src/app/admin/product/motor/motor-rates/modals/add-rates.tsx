@@ -2,13 +2,13 @@
 import { CardFooter } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Field, FieldLabel } from '@/components/ui/field'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import {
     Button,
     ReusableApiMultiSelect,
     ReusableSelect,
     ReusableSingleSelectApiInput,
     ReuseableInput,
-    ReuseableRadioChoiceGroup,
     ReuseableSingleSelectclassInput,
     ReuseableSingleSelectCoveringInput,
     ReuseableSingleSelectVehicleUseInput
@@ -17,12 +17,13 @@ import { UseApiMutation } from '@/hooks/hooks'
 import { CreateMotorProductRatesSchema } from '@/types/form-schema'
 import { CreateMotorProductRatesFormValues } from '@/types/schema'
 import { SubmitResponse } from '@/types/types'
-import { AUDIENCE_OPTIONS, EMETHODS } from '@/utils/constatnts'
+import { CAUDIENCE_OPTIONS, EMETHODS, TAUDIENCE_OPTIONS } from '@/utils/constatnts'
 import { extractErrorMessage } from '@/utils/helpers'
 import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
+import { useParams } from 'react-router-dom'
 
 const steps = [
     { title: 'Product', fields: ['coverfor_id', 'covertype_id', 'covering_id', 'usedfor_id', 'bodytype_id', 'used_tonnage_id'] },
@@ -37,8 +38,8 @@ export const AddMotorProductRatesPage = ({ handleDialogContextSwitch, componentP
     handleDialogContextSwitch: (context?: any) => void
     componentProps?: any
 }) => {
+    const {slung} = useParams();
 
-    console.log(componentProps?.data?.data?.product?.id)
     const [currentStep, setCurrentStep] = useState(0)
 
     const form = useForm<CreateMotorProductRatesFormValues>({
@@ -78,7 +79,7 @@ export const AddMotorProductRatesPage = ({ handleDialogContextSwitch, componentP
     })
 
     const submitMutation = UseApiMutation<SubmitResponse, CreateMotorProductRatesFormValues>({
-        url: `products/motor/rates/${componentProps?.data?.data?.product?.id}`,
+        url: `products/motor/rates/${slung}`,
         method: EMETHODS.POST,
         mutationOptions: {
             onSuccess: (data) => {
@@ -102,13 +103,13 @@ export const AddMotorProductRatesPage = ({ handleDialogContextSwitch, componentP
         console.error("Form validation errors (detailed):", JSON.stringify(errors, null, 2))
         const firstErrorKey = Object.keys(errors)[0]
         const firstError = errors[firstErrorKey] as any
-        
+
         if (firstError?.message) {
             ShowToast.error(`${firstErrorKey}: ${firstError.message}`)
         } else if (Array.isArray(firstError)) {
             const subErrors = firstError.filter(Boolean)
             if (subErrors.length > 0) {
-                 ShowToast.error(`Validation error in ${firstErrorKey}: ${subErrors[0].message || 'Invalid item'}`)
+                ShowToast.error(`Validation error in ${firstErrorKey}: ${subErrors[0].message || 'Invalid item'}`)
             }
         } else {
             ShowToast.error(`Validation error in ${firstErrorKey}`)
@@ -137,7 +138,7 @@ export const AddMotorProductRatesPage = ({ handleDialogContextSwitch, componentP
     }
 
     return (
-        <div className="w-full min-w-[600px] max-w-[600px] p-6 space-y-4">
+        <div className="w-full min-w-[800px] max-w-[800px] p-6 space-y-4">
             <div className="border-b pb-3">
                 <h2 className="text-xl font-semibold">
                     Motor Detailed Benefits
@@ -274,7 +275,13 @@ export const AddMotorProductRatesPage = ({ handleDialogContextSwitch, componentP
                                         <Field orientation="horizontal" className="items-center">
                                             <Checkbox
                                                 checked={field.value}
-                                                onCheckedChange={field.onChange}
+                                                onCheckedChange={(checked) => {
+                                                    field.onChange(checked);
+                                                    if (checked) {
+                                                        form.setValue("valued_from", "");
+                                                        form.setValue("valued_to", "");
+                                                    }
+                                                }}
                                             />
                                             <FieldLabel className="mb-0">All</FieldLabel>
                                         </Field>
@@ -286,14 +293,18 @@ export const AddMotorProductRatesPage = ({ handleDialogContextSwitch, componentP
                                 name="valued_from"
                                 type='number'
                                 label="Valued From"
-                                className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                                disabled={form.watch("is_all_sum")}
+                                className={`w-full h-[51px] rounded-[5px] border border-[#ADABAB] ${form.watch("is_all_sum") ? "bg-gray-100 opacity-60 cursor-not-allowed" : ""
+                                    }`}
                             />
                             <ReuseableInput
                                 control={form.control}
                                 name="valued_to"
                                 type='number'
                                 label="Valued To"
-                                className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                                disabled={form.watch("is_all_sum")}
+                                className={`w-full h-[51px] rounded-[5px] border border-[#ADABAB] ${form.watch("is_all_sum") ? "bg-gray-100 opacity-10 cursor-not-allowed" : ""
+                                    }`}
                             />
                         </div>
 
@@ -306,7 +317,13 @@ export const AddMotorProductRatesPage = ({ handleDialogContextSwitch, componentP
                                         <Field orientation="horizontal" className="items-center">
                                             <Checkbox
                                                 checked={field.value}
-                                                onCheckedChange={field.onChange}
+                                                onCheckedChange={(checked) => {
+                                                    field.onChange(checked);
+                                                    if (checked) {
+                                                        form.setValue("age_from", "");
+                                                        form.setValue("age_to", "");
+                                                    }
+                                                }}
                                             />
                                             <FieldLabel className="mb-0">Age</FieldLabel>
                                         </Field>
@@ -318,14 +335,18 @@ export const AddMotorProductRatesPage = ({ handleDialogContextSwitch, componentP
                                 name="age_from"
                                 type='number'
                                 label="Age From"
-                                className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                                disabled={form.watch("is_all_age")}
+                                className={`w-full h-[51px] rounded-[5px] border border-[#ADABAB] ${form.watch("is_all_age") ? "bg-gray-100 opacity-60" : ""
+                                    }`}
                             />
                             <ReuseableInput
                                 control={form.control}
                                 name="age_to"
                                 type='number'
                                 label="Age To"
-                                className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                                disabled={form.watch("is_all_age")}
+                                className={`w-full h-[51px] rounded-[5px] border border-[#ADABAB] ${form.watch("is_all_age") ? "bg-gray-100 opacity-60" : ""
+                                    }`}
                             />
                         </div>
 
@@ -356,71 +377,136 @@ export const AddMotorProductRatesPage = ({ handleDialogContextSwitch, componentP
                 )}
                 {currentStep === 2 && (
                     <div className="grid gap-4 animate-in fade-in duration-300">
-                        <Controller
-                            control={form.control}
-                            name="is_fleet"
-                            render={({ field }) => (
-                                <ReuseableRadioChoiceGroup
-                                    onValueChange={(val) => field.onChange(val === 'true')}
-                                    value={field.value ? 'true' : 'false'}
-                                    label="IsFleet?"
-                                    layout="horizontal"
-                                    items={[
-                                        { label: 'Yes', value: 'true' },
-                                        { label: 'No', value: 'false' },
-                                    ]}
-                                />
-                            )}
-                        />
+                        <div className="space-y-3">
+                            <FieldLabel className="text-sm font-semibold">Is Fleet?</FieldLabel>
+                            <Controller
+                                control={form.control}
+                                name="is_fleet"
+                                render={({ field }) => (
+                                    <RadioGroup
+                                        value={field.value ? "true" : "false"}
+                                        onValueChange={(val) => {
+                                            const isFleet = val === "true";
+                                            field.onChange(isFleet);
+                                            if (!isFleet) {
+                                                form.setValue("min_fleet", "");
+                                                form.setValue("max_fleet", "");
+                                            }
+                                        }}
+                                        className="flex flex-col gap-3">
+                                        <div className="flex items-center gap-3">
+                                            <RadioGroupItem value="false" id="fleet-no" />
+                                            <FieldLabel htmlFor="fleet-no" className="font-normal">
+                                                No (This cover is not applied to fleet of vehicles)
+                                            </FieldLabel>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            <RadioGroupItem value="true" id="fleet-yes" />
+                                            <FieldLabel htmlFor="fleet-yes" className="font-normal">
+                                                Yes (These rates applies to fleet of vehicles)
+                                            </FieldLabel>
+                                        </div>
+                                    </RadioGroup>
+                                )}
+                            />
+                        </div>
+
                         <div className="grid grid-cols-2 gap-4">
                             <ReuseableInput
                                 control={form.control}
                                 name="min_fleet"
                                 type='number'
                                 label="Min Fleet"
-                                className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                                disabled={!form.watch("is_fleet")}
+                                className={`w-full h-[51px] rounded-[5px] border border-[#ADABAB] ${!form.watch("is_fleet") ? "bg-gray-100 opacity-60 cursor-not-allowed" : ""
+                                    }`}
                             />
                             <ReuseableInput
                                 control={form.control}
                                 name="max_fleet"
                                 type='number'
                                 label="Max Fleet"
-                                className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                                disabled={!form.watch("is_fleet")}
+                                className={`w-full h-[51px] rounded-[5px] border border-[#ADABAB] ${!form.watch("is_fleet") ? "bg-gray-100 opacity-60 cursor-not-allowed" : ""
+                                    }`}
                             />
                         </div>
                     </div>
                 )}
                 {currentStep === 3 && (
                     <div className="grid gap-4 animate-in fade-in duration-300">
-                        <div className="grid grid-cols-2 gap-4">
-                            <ReusableSelect
-                                control={form.control}
-                                name="target_audience"
-                                label="Target Audience"
-                                options={AUDIENCE_OPTIONS}
-                            />
-                            <ReusableSelect
-                                control={form.control}
-                                name="cover_target"
-                                label="Cover Target"
-                                options={AUDIENCE_OPTIONS}
-                            />
+                        <div className="grid gap-4 animate-in fade-in duration-300">
+
+                            <div className="grid grid-cols-3 gap-4">
+                                <div className="space-y-3">
+                                    <FieldLabel className="text-sm font-semibold">Target Audience ?</FieldLabel>
+                                    <Controller
+                                        control={form.control}
+                                        name="cover_target"
+                                        render={({ field }) => (
+                                            <RadioGroup
+                                                value={field.value}
+                                                onValueChange={field.onChange}
+                                                className="flex flex-col gap-3">
+                                                {CAUDIENCE_OPTIONS.map((option) => (
+                                                    <div key={option.value} className="flex items-center gap-3">
+                                                        <RadioGroupItem
+                                                            value={option.value}
+                                                            id={`audience-${option.value}`}
+                                                        />
+                                                        <FieldLabel
+                                                            htmlFor={`audience-${option.value}`} className="font-normal cursor-pointer">
+                                                            {option.label}
+                                                        </FieldLabel>
+                                                    </div>
+                                                ))}
+                                            </RadioGroup>
+                                        )}
+                                    />
+                                </div>
+                                <ReuseableInput
+                                    control={form.control}
+                                    name="min_age"
+                                    type='number'
+                                    label="Owner Min Age"
+                                    className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                                />
+                                <ReuseableInput
+                                    control={form.control}
+                                    name="max_age"
+                                    type='number'
+                                    label="Owner Max Age"
+                                    className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                                />
+                            </div>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
-                            <ReuseableInput
-                                control={form.control}
-                                name="min_age"
-                                type='number'
-                                label="Min Age"
-                                className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
-                            />
-                            <ReuseableInput
-                                control={form.control}
-                                name="max_age"
-                                type='number'
-                                label="Max Age"
-                                className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
-                            />
+                            <div className="space-y-3">
+                                <FieldLabel className="text-sm font-semibold">Existing Customer ?</FieldLabel>
+                                <Controller
+                                    control={form.control}
+                                    name="target_audience"
+                                    render={({ field }) => (
+                                        <RadioGroup
+                                            value={field.value}
+                                            onValueChange={field.onChange}
+                                            className="flex flex-col gap-3">
+                                            {TAUDIENCE_OPTIONS.map((option) => (
+                                                <div key={option.value} className="flex items-center gap-3">
+                                                    <RadioGroupItem
+                                                        value={option.value}
+                                                        id={`audience-${option.value}`}
+                                                    />
+                                                    <FieldLabel
+                                                        htmlFor={`audience-${option.value}`} className="font-normal cursor-pointer">
+                                                        {option.label}
+                                                    </FieldLabel>
+                                                </div>
+                                            ))}
+                                        </RadioGroup>
+                                    )}
+                                />
+                            </div>
                         </div>
                     </div>
                 )}

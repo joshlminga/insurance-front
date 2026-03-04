@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { PageHeader } from '@/components/shared';
 import { ActionColumn } from '@/dev/columns';
@@ -11,9 +10,10 @@ import { FILTEROPTIONS, ReusableReducer } from '@/utils/constatnts';
 // import { extractErrorMessage } from '@/utils/helpers';
 // import { ShowToast } from '@/utils/utils';
 import { Plus } from 'lucide-react';
-import React, { useReducer } from 'react'
+import { useReducer } from 'react'
 import { useParams } from 'react-router-dom';
 import { AddMotorProductRatesPage } from './modals/add-rates';
+import { MotorRateColumns } from '@/dev/columns/admin/motor-rates';
 
 export const MotorProductRatesPage = () => {
 
@@ -154,7 +154,7 @@ export const MotorProductRatesPage = () => {
                             includeFilter: true,
                         },
                         columns: [
-                            // ...MotorTonageColumns,
+                            ...MotorRateColumns,
                             ActionColumn({ ActionsHandlerMapping }),
                         ],
                         OtherTools: SearchTools,

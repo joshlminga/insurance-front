@@ -6,7 +6,6 @@ import { SubmitResponse } from '@/types/types'
 import { formatDate } from '@/utils/helpers'
 import { UseApiQuery } from '@/hooks/hooks'
 import { CardFooter } from '@/components/ui/card'
-import { useNavigate } from 'react-router-dom'
 import { EPREFIX } from '@/utils/enums'
 import { ArrowUpRight } from 'lucide-react'
 
@@ -14,7 +13,6 @@ export const ViewProductModal = ({ handleDialogContextSwitch, componentProps }: 
     handleDialogContextSwitch: (context?: any) => void
     componentProps?: any
 }) => {
-    const navigate = useNavigate();
     const productId = componentProps?.data?.id
     const { data, isLoading } = UseApiQuery<SubmitResponse>({
         url: `products/motor/${productId}`,
@@ -61,12 +59,13 @@ export const ViewProductModal = ({ handleDialogContextSwitch, componentProps }: 
                     variant="outline"
                     leftIcon={<ArrowUpRight />}
                     onClick={() => {
-                        navigate(`/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor-rates/${productId}`);
+                        const path = `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor-rates/${productId}`;
+                        window.open(path, '_blank', 'noopener,noreferrer');
+                        // navigate(`/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor-rates/${productId}`);
                     }}>
                     View Rates
                 </Button>
             </div>
-
             {!productId ? (
                 <div className="text-sm text-destructive">Unable to load product details: missing product id.</div>
             ) : isLoading ? (
