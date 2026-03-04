@@ -10,9 +10,9 @@ import { extractErrorMessage } from '@/utils/helpers'
 import { ShowToast } from '@/utils/utils'
 import { Plus } from 'lucide-react'
 import { useReducer } from 'react'
-import { EditMotorRateBenefits } from './edit-rate-benefits'
 import { AddMotorRateExcessBenefits } from './add-excess-benefits'
 import { MotorRateExcessBenefitsColumns } from '@/dev/columns/admin/motor-excess-benefits'
+import { EditMotorRateExcessBenefits } from './edit-excess-benefits'
 
 export const MotorRateExcessBenefitsPage = ({ componentProps }: {
     handleDialogContextSwitch: (context?: any) => void
@@ -45,7 +45,7 @@ export const MotorRateExcessBenefitsPage = ({ componentProps }: {
         },
     })
 
-    const deleteMotorRateBenefitMutation = UseApiMutation<SubmitResponse, { id: number | string }>({
+    const deleteMotorRateExcessBenefitMutation = UseApiMutation<SubmitResponse, { id: number | string }>({
         url: ({ id }) => `products/motor/rate-details/${id}`,
         method: EMETHODS.DELETE,
         mutationOptions: {
@@ -59,12 +59,12 @@ export const MotorRateExcessBenefitsPage = ({ componentProps }: {
         },
     })
 
-    const toggleMotorRatesBenefitsStatusMutation = UseApiMutation<SubmitResponse, { id: number | string, is_active: boolean }>({
+    const toggleMotorRateExcessBenefitsStatusMutation = UseApiMutation<SubmitResponse, { id: number | string, is_active: boolean }>({
         url: ({ id }) => `products/motor/rate-details/${id}/status`,
         method: EMETHODS.PATCH,
         mutationOptions: {
             onSuccess: (response) => {
-                ShowToast.success(response?.message || 'Motor rate benefit status updated successfully')
+                ShowToast.success(response?.message || 'Motor rate excess benefit status updated successfully')
                 refetch()
             },
             onError: (error) => {
@@ -79,14 +79,14 @@ export const MotorRateExcessBenefitsPage = ({ componentProps }: {
             onSelect: (data) => {
                 handleDialogContextSwitch({
                     componentProps: { data, refetch },
-                    Component: EditMotorRateBenefits,
+                    Component: EditMotorRateExcessBenefits,
                 })
             },
         },
         {
             label: 'Delete',
             onSelect: (data) => {
-                deleteMotorRateBenefitMutation.mutate({
+                deleteMotorRateExcessBenefitMutation.mutate({
                     id: data?.id,
                 })
             },
@@ -95,7 +95,7 @@ export const MotorRateExcessBenefitsPage = ({ componentProps }: {
         {
             label: 'Deactivate',
             onSelect: (data) => {
-                toggleMotorRatesBenefitsStatusMutation.mutate({
+                toggleMotorRateExcessBenefitsStatusMutation.mutate({
                     is_active: false,
                     id: data?.id,
                 })
@@ -105,7 +105,7 @@ export const MotorRateExcessBenefitsPage = ({ componentProps }: {
         {
             label: 'Activate',
             onSelect: (data) => {
-                toggleMotorRatesBenefitsStatusMutation.mutate({
+                toggleMotorRateExcessBenefitsStatusMutation.mutate({
                     is_active: true,
                     id: data?.id,
                 })

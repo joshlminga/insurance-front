@@ -11,19 +11,21 @@ import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Controller, useForm } from 'react-hook-form'
 
-export const AddMotorRateExcessBenefits = ({ handleDialogContextSwitch, componentProps }: {
+export const EditMotorRateExcessBenefits = ({ handleDialogContextSwitch, componentProps }: {
     handleDialogContextSwitch: (context?: any) => void
     componentProps?: any
 }) => {
 
+    console.log(componentProps?.data);
+
     const form = useForm<CreateMotorRateExcessBenefitsFormValues>({
         resolver: zodResolver(CreateMotorRateExcessBenefitsSchema),
         defaultValues: {
-            detail_benefit_id: "",
-            detail_type: "",
-            key: "",
-            value: "",
-            detail_highlight: 'false',
+            detail_benefit_id: String(componentProps?.data?.common_benefit_id ?? ""),
+            detail_type: componentProps?.data?.detail_type ?? "",
+            key: componentProps?.data?.key ?? "",
+            value: componentProps?.data?.value ?? "",
+            detail_highlight: String(componentProps?.data?.detail_highlight ?? 'false'),
         },
     })
 
@@ -52,7 +54,7 @@ export const AddMotorRateExcessBenefits = ({ handleDialogContextSwitch, componen
         <div className="w-full min-w-[600px] max-w-[800px] p-6 space-y-4">
             <div className="border-b pb-3">
                 <h2 className="text-xl font-semibold">
-                    Add Excess Benefits
+                    Edit Excess Benefits
                 </h2>
                 <p className="text-sm text-muted-foreground mt-1">
                     Fill in the details below to register a Excess Benefits.
