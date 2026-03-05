@@ -25,44 +25,68 @@ import { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { useParams } from 'react-router-dom'
 
-export const AddMotorProductRatesPage = ({ handleDialogContextSwitch, componentProps }: {
+export const EditMotorProductRatesPage = ({ handleDialogContextSwitch, componentProps }: {
     handleDialogContextSwitch: (context?: any) => void
     componentProps?: any
 }) => {
+
+    console.log(componentProps?.data)
     const { slung } = useParams();
     const [step, setStep] = useState(1);
+    const normalizeMakeModelIds = (items: any): number[] => {
+        if (!Array.isArray(items)) return []
+
+        return items
+            .map((item) => {
+                if (typeof item === "number") return item
+                if (typeof item === "string") return Number(item)
+                if (item && typeof item === "object") {
+                    return Number(item.id ?? item.value)
+                }
+                return NaN
+            })
+            .filter((id) => Number.isFinite(id))
+    }
+
+    const makeModelOffered = normalizeMakeModelIds(
+        componentProps?.data?.meta?.makemodel_offered ?? componentProps?.data?.makemodel_offered
+    )
+    const makeModelNotOffered = normalizeMakeModelIds(
+        componentProps?.data?.meta?.makemodel_notoffered ?? componentProps?.data?.makemodel_notoffered
+    )
+
     const form = useForm<CreateMotorProductRatesFormValues>({
         resolver: zodResolver(CreateMotorProductRatesSchema),
         defaultValues: {
-            coverfor_id: "",
-            covertype_id: "",
-            covering_id: "",
-            usedfor_id: "",
-            bodytype_id: "",
-            used_tonnage_id: "",
-            min_tonnage: "",
-            max_tonnage: "",
-            is_all_sum: false,
-            valued_from: "",
-            valued_to: "",
-            is_all_age: false,
-            age_from: "",
-            age_to: "",
-            rate: "",
-            minimum: "",
-            pll: "",
-            is_fleet: false,
-            min_fleet: "",
-            max_fleet: "",
-            target_audience: "",
-            cover_target: "",
-            min_age: "",
-            max_age: "",
-            start_date: "",
-            expiry_date: "",
-            is_active: true,
-            makemodel_offered: [],
-            makemodel_notoffered: [],
+            coverfor_id: String(componentProps?.data?.coverfor_id ?? ""),
+            covertype_id: String(componentProps?.data?.covertype_id ?? ""),
+            covering_id: String(componentProps?.data?.covering_id ?? ""),
+            usedfor_id: String(componentProps?.data?.usedfor_id ?? ""),
+            bodytype_id: String(componentProps?.data?.bodytype_id ?? ""),
+            used_tonnage_id: String(componentProps?.data?.used_tonnage_id ?? ""),
+            min_tonnage: componentProps?.data?.min_tonnage ?? "",
+            max_tonnage: componentProps?.data?.max_tonnage ?? "",
+            is_all_sum: componentProps?.data?.is_all_sum ?? false,
+            valued_from: componentProps?.data?.valued_from ?? "",
+            valued_to: componentProps?.data?.valued_to ?? "",
+            is_all_age: Boolean(componentProps?.data?.is_all_age ?? false),
+            age_from: componentProps?.data?.age_from ?? "",
+            age_to: componentProps?.data?.age_to ?? "",
+            rate: componentProps?.data?.rate ?? "",
+            minimum: componentProps?.data?.minimum ?? "",
+            pll: componentProps?.data?.pll ?? "",
+            is_fleet: Boolean(componentProps?.data?.is_fleet ?? false),
+            min_fleet: componentProps?.data?.min_fleet ?? "",
+            max_fleet: componentProps?.data?.max_fleet ?? "",
+            target_audience: componentProps?.data?.target_audience ?? "",
+            cover_target: componentProps?.data?.cover_target ?? "",
+            min_age: componentProps?.data?.min_age ?? "",
+            max_age: componentProps?.data?.max_age ?? "",
+            start_date: componentProps?.data?.start_date ?? "",
+            expiry_date: componentProps?.data?.expiry_date ?? "",
+            is_active: Boolean(componentProps?.data?.is_active ?? true),
+            makemodel_offered: makeModelOffered,
+            makemodel_notoffered: makeModelNotOffered,
             meta: [],
         },
     })
@@ -132,10 +156,10 @@ export const AddMotorProductRatesPage = ({ handleDialogContextSwitch, componentP
         <div className="w-full min-w-[800px] max-w-[800px] p-6 space-y-4">
             <div className="border-b pb-3">
                 <h2 className="text-xl font-semibold">
-                    Motor Rates
+                    Motor Detailed Benefits
                 </h2>
                 <p className="text-sm text-muted-foreground mt-1">
-                    Fill in the details below to register a Motor Rates.
+                    Fill in the details below to register a motor Detailed benefits.
                 </p>
             </div>
             <div className="flex justify-between items-center mb-6 px-2">
@@ -678,6 +702,7 @@ export const AddMotorProductRatesPage = ({ handleDialogContextSwitch, componentP
                                 />
                             )}
                         />
+
                         <CardFooter className="flex flex-col sm:flex-row justify-between gap-3 mt-8 px-0">
                             <Button
                                 type="button"

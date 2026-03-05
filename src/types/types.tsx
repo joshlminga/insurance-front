@@ -122,12 +122,13 @@ export interface ButtonProps extends React.ComponentProps<typeof ShadButton> {
 }
 
 export type RHFInputProps<T extends FieldValues> = {
-  control?: Control<T>
+  control?: Control<T, any, any>
   name: Path<T>
   label: string
   id?: string
   placeholder?: string
   type?: string
+  step?: string | number
   autoComplete?: string
   required?: boolean
   className?: string

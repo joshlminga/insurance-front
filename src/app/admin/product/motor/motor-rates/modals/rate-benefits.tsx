@@ -1,27 +1,23 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { PageHeader } from '@/components/shared';
-import { ActionColumn } from '@/dev/columns';
-import { CustomDialogComponent } from '@/dev/core';
-import { CustomBaseTable, SearchTools } from '@/dev/table';
-import { useCustomDialogContextFactory, useDebounce } from '@/hooks';
-import { UseApiMutation, UseApiQuery } from '@/hooks/hooks';
-import { SingleActionsHandler, SubmitResponse, TFilterOptions, TPaginationFilters } from '@/types/types';
-import { EMETHODS, FILTEROPTIONS, ReusableReducer } from '@/utils/constatnts';
-// import { extractErrorMessage } from '@/utils/helpers';
-// import { ShowToast } from '@/utils/utils';
-import { Plus } from 'lucide-react';
+import { ActionColumn } from '@/dev/columns'
+import { MotorRateBenefitsColumns } from '@/dev/columns/admin/rates-benefits'
+import { Button, CustomDialogComponent } from '@/dev/core'
+import { CustomBaseTable, SearchTools } from '@/dev/table'
+import { useCustomDialogContextFactory, useDebounce } from '@/hooks'
+import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
+import { SingleActionsHandler, SubmitResponse, TFilterOptions, TPaginationFilters } from '@/types/types'
+import { EMETHODS, FILTEROPTIONS, ReusableReducer } from '@/utils/constatnts'
+import { extractErrorMessage } from '@/utils/helpers'
+import { ShowToast } from '@/utils/utils'
+import { Plus } from 'lucide-react'
 import { useReducer } from 'react'
-import { useParams } from 'react-router-dom';
-import { AddMotorProductRatesPage } from './modals/add-rates';
-import { MotorRateColumns } from '@/dev/columns/admin/motor-rates';
-import { ShowToast } from '@/utils/utils';
-import { extractErrorMessage } from '@/utils/helpers';
-import { EditMotorProductRatesPage } from './modals/edit-rates';
-import { MotorRateBenefitsPage } from './modals/rate-benefits';
-import { MotorRateExcessBenefitsPage } from './modals/excess-benefits';
+import { AddMotorRateBenefits } from './add-rate-benefits'
+import { EditMotorRateBenefits } from './edit-rate-benefits'
 
-export const MotorProductRatesPage = () => {
-    const { slung } = useParams();
+export const MotorRateBenefitsPage = ({ componentProps }: {
+    handleDialogContextSwitch: (context?: any) => void
+    componentProps?: any
+}) => {
     const [filter, optionsDispatcher] = useReducer(
         ReusableReducer<TPaginationFilters & TFilterOptions>,
         { ...FILTEROPTIONS, page: 1, pageSize: 15 }
@@ -37,19 +33,20 @@ export const MotorProductRatesPage = () => {
         }>();
 
     const { data, isLoading, refetch } = UseApiQuery<SubmitResponse>({
-        url: `products/motor/rates/${slung}`,
+        url: "products/motor/rate-benefits",
         params: {
+            product_rate_id: componentProps?.data?.id,
             page: filter.page,
             pageSize: filter.pageSize,
             term: filter.term,
         },
         queryOptions: {
-            enabled: !!slung,
+            enabled: true,
         },
     })
 
-    const deleteMotorRateMutation = UseApiMutation<SubmitResponse, { id: number | string }>({
-        url: ({ id }) => `products/motor/rates/${slung}/${id}`,
+    const deleteMotorRateBenefitMutation = UseApiMutation<SubmitResponse, { id: number | string }>({
+        url: ({ id }) => `products/motor/rate-benefits/${id}`,
         method: EMETHODS.DELETE,
         mutationOptions: {
             onSuccess: (response) => {
@@ -62,26 +59,12 @@ export const MotorProductRatesPage = () => {
         },
     })
 
-    const toggleMotorRatesStatusMutation = UseApiMutation<SubmitResponse, { id: number | string, is_active: boolean }>({
-        url: ({ id }) => `products/motor/rates/${slung}/${id}/status`,
+    const toggleMotorRatesBenefitsStatusMutation = UseApiMutation<SubmitResponse, { id: number | string, is_active: boolean }>({
+        url: ({ id }) => `products/motor/rate-benefits/${id}/status`,
         method: EMETHODS.PATCH,
         mutationOptions: {
             onSuccess: (response) => {
-                ShowToast.success(response?.message || 'Motor rate status updated successfully')
-                refetch()
-            },
-            onError: (error) => {
-                ShowToast.error(extractErrorMessage(error))
-            },
-        },
-    })
-
-    const toggleMotorRatesDuplicateStatusMutation = UseApiMutation<SubmitResponse, { id: number | string, is_active: boolean }>({
-        url: ({ id }) => `products/motor/rates/${slung}/copy/${id}`,
-        method: EMETHODS.POST,
-        mutationOptions: {
-            onSuccess: (response) => {
-                ShowToast.success(response?.message || 'Motor rate status updated successfully')
+                ShowToast.success(response?.message || 'Motor rate benefit status updated successfully')
                 refetch()
             },
             onError: (error) => {
@@ -96,23 +79,14 @@ export const MotorProductRatesPage = () => {
             onSelect: (data) => {
                 handleDialogContextSwitch({
                     componentProps: { data, refetch },
-                    Component: EditMotorProductRatesPage,
-                })
-            },
-        },
-        {
-            label: 'Duplicate',
-            onSelect: (data) => {
-                toggleMotorRatesDuplicateStatusMutation.mutate({
-                    is_active: true,
-                    id: data?.id,
+                    Component: EditMotorRateBenefits,
                 })
             },
         },
         {
             label: 'Delete',
             onSelect: (data) => {
-                deleteMotorRateMutation.mutate({
+                deleteMotorRateBenefitMutation.mutate({
                     id: data?.id,
                 })
             },
@@ -121,7 +95,7 @@ export const MotorProductRatesPage = () => {
         {
             label: 'Deactivate',
             onSelect: (data) => {
-                toggleMotorRatesStatusMutation.mutate({
+                toggleMotorRatesBenefitsStatusMutation.mutate({
                     is_active: false,
                     id: data?.id,
                 })
@@ -131,52 +105,39 @@ export const MotorProductRatesPage = () => {
         {
             label: 'Activate',
             onSelect: (data) => {
-                toggleMotorRatesStatusMutation.mutate({
+                toggleMotorRatesBenefitsStatusMutation.mutate({
                     is_active: true,
                     id: data?.id,
                 })
             },
             conditional: (data) => Boolean(data?.id) && !(data?.is_active),
         },
-        {
-            label: 'Optional Benefits',
-            onSelect: (data) => {
-                handleDialogContextSwitch({
-                    componentProps: { data, refetch },
-                    Component: MotorRateBenefitsPage,
-                })
-            },
-        },
-        {
-            label: 'Excess Benefits',
-            onSelect: (data) => {
-                handleDialogContextSwitch({
-                    componentProps: { data, refetch },
-                    Component: MotorRateExcessBenefitsPage,
-                })
-            },
-        },
     ];
-
     return (
-        <div>
-            <PageHeader
-                title="Motor Product Rates"
-                description="Manage Motor Product Rates, their details, and associated users"
-                actions={[
-                    {
-                        icon: Plus,
-                        label: 'Add Motor Product Rates',
-                        variant: 'default',
-                        onClick: () => {
-                            handleDialogContextSwitch({
-                                componentProps: { refetch },
-                                Component: AddMotorProductRatesPage,
-                            })
-                        },
-                    },
-                ]}
-            />
+        <div className="w-full min-w-[800px] max-w-[800px] p-6 space-y-4">
+            <div className="border-b pb-3 flex items-start gap-4">
+                <div className="flex-1">
+                    <h2 className="text-xl font-semibold">
+                        {componentProps?.data?.product?.name} - Optional Benefits
+                    </h2>
+                    <p className="text-sm text-muted-foreground mt-1">
+                        Fill in the details below to register a motor Detailed benefits.
+                    </p>
+                </div>
+                <Button
+                    type="button"
+                    leftIcon={<Plus />}
+                    onClick={() => {
+                        handleDialogContextSwitch({
+                            componentProps: { data: componentProps?.data, refetch },
+                            Component: AddMotorRateBenefits,
+                        })
+                    }}
+                    className="flex items-center justify-center">
+                    Add Optional Benefits
+                </Button>
+            </div>
+
             <div className='w-full'>
                 <CustomBaseTable
                     {...{
@@ -195,13 +156,13 @@ export const MotorProductRatesPage = () => {
                             includeFilter: true,
                         },
                         columns: [
-                            ...MotorRateColumns,
+                            ...MotorRateBenefitsColumns,
                             ActionColumn({ ActionsHandlerMapping }),
                         ],
                         OtherTools: SearchTools,
                         data: data?.data ?? [],
                         pageCount: data?.pagination?.last_page ?? 1,
-                        title: 'Motor Product Rates',
+                        title: 'Motor Optional Benefits',
                         showPagination: true,
                         setPageSize: (pageSize) =>
                             optionsDispatcher({

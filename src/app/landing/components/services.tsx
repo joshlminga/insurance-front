@@ -8,6 +8,7 @@ const ServiceCard = ({ title, image }: { title: string, image: string }) => (
             src={image}
             alt={title}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            loading='lazy'
         />
         <div className="absolute inset-0 bg-linear-to-t from-slate-900 via-slate-900/20 to-transparent"></div>
         <div className="absolute bottom-8 left-8 right-8">

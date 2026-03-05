@@ -23,7 +23,6 @@ export const CreateMotorCoveringModal = ({ handleDialogContextSwitch, componentP
             description: "",
         },
     })
-
     const submitMutation = UseApiMutation<SubmitResponse, MotorCreateCoveringFormValues>({
         url: "motor/cover-covering",
         method: EMETHODS.POST,

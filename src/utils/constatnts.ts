@@ -93,6 +93,23 @@ export const ACCESSLEVELSOPTIONS = [
   { label: "Company Owned", value: 'Company Owned' },
 ]
 
+export const BENEFITTYPESOPTIONS = [
+  { label: "Optional", value: 'Optional' },
+  { label: "Inclusive", value: 'Inclusive' },
+  { label: "Compulsory", value: 'Compulsory' },
+]
+
+export const DETAILEDTYPESOPTIONS = [
+  { label: "Benefit", value: 'Benefit' },
+  { label: "Excess", value: 'Excess' },
+  { label: "Both", value: 'Both' },
+]
+
+export const HIGHLIGHTOPTIONS = [
+  { label: "True", value: 'true' },
+  { label: "False", value: 'false' },
+]
+
 export const TARGET_AUDIENCE_OPTIONS = [
   { label: "Yes", value: "true" },
   { label: "No", value: "false" },
@@ -152,4 +169,13 @@ export const sidebarLinks = [
   // { label: 'Wishlist', to: `/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}/wishlist` },
   // { label: 'Followed Sellers', to: `/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}/followed` },
   // { label: 'Recently Viewed', to: `/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}/recent` },
+]
+
+export const RatesSteps = [
+    { title: 'Product', fields: ['coverfor_id', 'covertype_id', 'covering_id', 'usedfor_id', 'bodytype_id', 'used_tonnage_id'] },
+    { title: 'Vehicle Info', fields: ['valued_from', 'valued_to', 'age_from', 'age_to', 'rate', 'minimum', 'pll'] },
+    { title: 'Fleet', fields: ['is_fleet', 'min_fleet', 'max_fleet'] },
+    { title: 'Targets', fields: ['target_audience', 'cover_target', 'min_age', 'max_age'] },
+    { title: 'Dates', fields: ['start_date', 'expiry_date'] },
+    { title: 'Offered Vehicles', fields: ['makemodel_offered', 'makemodel_notoffered'] }
 ]
