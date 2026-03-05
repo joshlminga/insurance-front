@@ -14,7 +14,7 @@ export const HeroSection = () => {
     return (
         <section className="relative mx-auto h-[920px] w-full overflow-hidden">
             <div className="absolute inset-0 -z-10">
-                <img src="/hero.webp" alt="" className="h-full w-full object-cover" loading="lazy"  />
+                <img src="/hero.webp" alt="" className="h-full w-full object-cover" loading="eager"  />
                 <div className="absolute inset-0 bg-linear-to-r from-slate-900/60 to-slate-900/40" />
             </div>
             {isAuthenticated ? (
@@ -35,14 +35,14 @@ export const HeroSection = () => {
             <div className="relative h-full w-full">
                 <div className="absolute top-[278px] left-1/2 z-50 w-[70vw] -translate-x-1/2">
                     <h1
-                        className="mb-6 text-[48px] leading-[100%] font-semibold text-white">
+                        className="mb-6 text-[48px]  font-semibold text-white">
                         <span className="text-[#F91520]">Your Trusted </span>
                     </h1>
                     <h1
-                        className="mb-6 text-[48px] leading-[100%] font-semibold text-white">
+                        className="mb-6 text-[48px]  font-semibold text-white">
                         Global Consulting Partner
                     </h1>
-                    <p className="mb-10 w-[765px] font-['Poppins'] text-[20px] leading-[100%] font-semibold text-white/74">
+                    <p className="mb-10 w-[765px] text-[20px]  font-normal text-white/74">
                         Acensure is committed to empowering organizations with strategies that inspire confidence and drive growth.
                         Whether you're looking to optimize risk management, enhance financial performance, or embrace digital transformation, we are here to guide you every step of the way.
                     </p>

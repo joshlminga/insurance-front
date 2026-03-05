@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { ELOGO, EPREFIX, EROUTES } from "@/utils/enums";
+import { ELOGO, EROUTES } from "@/utils/enums";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
@@ -19,14 +19,13 @@ const Dropdown = ({
             <button className={`uppercase tracking-wider text-sm font-semibold hover:text-red-500 transition ${text}`}>
                 {label}
             </button>
-            <div className="absolute left-0 top-full mt-3 w-48 rounded-xl bg-white/80 backdrop-blur-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+            <div className="absolute left-0 top-full mt-3 w-48 rounded-xl bg-white/80 backdrop-blur-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-999">
                 <ul className="py-2">
                     {items.map((item) => (
                         <li key={item.name}>
                             <a
                                 href={item.href}
-                                className="block px-4 py-2 text-sm text-gray-800 hover:bg-red-500/10 hover:text-red-600 transition"
-                            >
+                                className="block px-4 py-2 text-sm text-gray-800 hover:bg-red-500/10 hover:text-red-600 transition">
                                 {item.name}
                             </a>
                         </li>
@@ -37,7 +36,6 @@ const Dropdown = ({
     )
 }
 
-// Mobile dropdown that expands on click
 const MobileDropdown = ({
     label,
     items,
@@ -46,10 +44,10 @@ const MobileDropdown = ({
     items: { name: string; href: string }[]
 }) => {
     const [isOpen, setIsOpen] = useState(false);
-    
+
     return (
         <div className="w-full">
-            <button 
+            <button
                 onClick={() => setIsOpen(!isOpen)}
                 className="w-full text-left uppercase tracking-wider text-sm font-semibold hover:text-red-500 transition py-2">
                 {label}
@@ -84,7 +82,7 @@ export const Navbar = (
     }) => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const { isAuthenticated, isGeneral, logout } = UseAuth();
-    
+
     const dropdownItems = {
         generateQuote: [
             { name: "Auto", href: "#" },
@@ -104,9 +102,9 @@ export const Navbar = (
             { name: "Contact Agent", href: "#" },
         ],
     };
-    
+
     return (
-        <nav className="absolute top-4 sm:top-[58px] left-1/2 -translate-x-1/2 z-50 w-[95vw] lg:w-[80vw]">
+        <nav className="absolute top-4 sm:top-[58px] left-1/2 -translate-x-1/2 z-999 w-[95vw] lg:w-[80vw]">
             <div
                 className={cn(className,
                     "shadow-[0_8.45px_16.9px_rgba(0,0,0,0.12)] px-4 sm:px-[37px] flex flex-col"
@@ -120,21 +118,16 @@ export const Navbar = (
                         <Link to='#' className="hover:text-red-500 transition uppercase">About</Link>
                         <Link to='#' className="hover:text-red-500 transition uppercase">Services</Link>
                         <Link to='#' className="hover:text-red-500 transition uppercase">Contact</Link>
-                        {isAuthenticated ? (
+                        {isAuthenticated && (
                             <>
                                 {isGeneral === true && (
                                     <Link to={EROUTES.DASHBOARD} className="hover:text-red-500 transition uppercase">Dashboard</Link>
                                 )}
                                 <button onClick={logout} className="hover:text-red-500 transition uppercase">Logout</button>
                             </>
-                        ) : (
-                            <>
-                                <Link to={`/${EPREFIX.AUTH}${EROUTES.SIGNIN}`} className="hover:text-red-500 transition uppercase">Login</Link>
-                                <Link to={`/${EPREFIX.AUTH}${EROUTES.SIGNUP}`} className="hover:text-red-500 transition uppercase">Sign Up</Link>
-                            </>
                         )}
                     </div>
-                    <button 
+                    <button
                         className="lg:hidden p-2 hover:bg-black/5 rounded-lg transition"
                         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                         aria-label="Toggle menu">
@@ -177,19 +170,14 @@ export const Navbar = (
                         <div className={cn(`flex flex-col space-y-3 mb-4 ${textStyle}`)}>
                             <Link to={EROUTES.LANDING} className="hover:text-red-500 transition uppercase text-sm font-semibold py-2">Home</Link>
                             <a className="hover:text-red-500 transition uppercase text-sm font-semibold py-2 cursor-pointer">About</a>
-                             <a className="hover:text-red-500 transition uppercase text-sm font-semibold py-2 cursor-pointer">Services</a>
+                            <a className="hover:text-red-500 transition uppercase text-sm font-semibold py-2 cursor-pointer">Services</a>
                             <a className="hover:text-red-500 transition uppercase text-sm font-semibold py-2 cursor-pointer">Contact</a>
-                            {isAuthenticated ? (
+                            {isAuthenticated && (
                                 <>
                                     {isGeneral === false && (
                                         <Link to={EROUTES.DASHBOARD} className="hover:text-red-500 transition uppercase text-sm font-semibold py-2">Dashboard</Link>
                                     )}
                                     <button onClick={logout} className="text-left hover:text-red-500 transition uppercase text-sm font-semibold py-2">Logout</button>
-                                </>
-                            ) : (
-                                <>
-                                    <Link to={EROUTES.SIGNIN} className="hover:text-red-500 transition uppercase text-sm font-semibold py-2">Login</Link>
-                                    <Link to={EROUTES.SIGNUP} className="hover:text-red-500 transition uppercase text-sm font-semibold py-2">Sign Up</Link>
                                 </>
                             )}
                         </div>

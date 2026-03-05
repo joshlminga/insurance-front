@@ -1,12 +1,11 @@
-import React from 'react'
 
 export const PartnersSection = () => {
     const partners = [
-        { name: 'CIC Group', logo: 'cic.png' },
-        { name: 'Britam', logo: 'britam.png' },
-        { name: 'apa', logo: 'apa.png' },
-        { name: 'sanlam', logo: 'sanlam.png' },
-        { name: 'madison', logo: 'madison.png' },
+        { name: 'CIC Group', logo: 'cic.webp' },
+        { name: 'Britam', logo: 'britam.webp' },
+        { name: 'apa', logo: 'apa.webp' },
+        { name: 'sanlam', logo: 'sanlam.webp' },
+        { name: 'madison', logo: 'madison.webp' },
     ]
 
     return (

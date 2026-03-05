@@ -22,9 +22,10 @@ export const AgentBanner = () => {
                         <div className="absolute top-[35px] left-0 w-[78px] h-[81px] rounded-tl-[20px] rounded-tr-[20px] rounded-br-[20px] bg-[#FF9A9A]/36" />
                         <div className="absolute top-[58px] left-6 w-[257px] h-[177px] rounded-tl-[20px] rounded-tr-[20px] rounded-br-[20px] border-2 border-white overflow-hidden">
                             <img
-                                src="agent.jpg"
+                                src="agent.webp"
                                 alt="Professional insurance agent"
                                 className="w-full h-full object-cover"
+                                loading="eager"
                             />
                         </div>
                     </div>

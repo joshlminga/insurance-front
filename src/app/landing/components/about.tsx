@@ -9,7 +9,7 @@ export const AboutSection = () => {
                                 src="about_big.webp"
                                 alt="Modern building"
                                 className="w-full h-[500px] object-cover"
-                                loading='lazy'
+                                loading='eager'
                             />
                         </div>
                         <div className="absolute -bottom-10 -right-10 w-64 h-64 rounded-3xl overflow-hidden border-8 border-white shadow-2xl hidden lg:block">
@@ -17,7 +17,7 @@ export const AboutSection = () => {
                                 src="about_small.webp"
                                 alt="Analytics"
                                 className="w-full h-full object-cover"
-                                loading='lazy'
+                                loading='eager'
                             />
                         </div>
                     </div>
