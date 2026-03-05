@@ -58,9 +58,10 @@ export const ContactSection = () => {
                         <div className="relative rounded-[10px] border border-[#D9D9D9] shadow-[0px_4px_4px_0px_#FF9A9A] overflow-hidden">
                             <div className="absolute inset-0 z-0">
                                 <img
-                                    src="contact.jpg"
+                                    src="contact.webp"
                                     alt="Team joined hands"
                                     className="w-full h-full object-cover"
+                                    loading='eager'
                                 />
                                 <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px]"></div>
                             </div>
