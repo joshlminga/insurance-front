@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom'
 const InsuranceCard = ({ title, description, image, url }: { title: string, description: string, image: string, url?: string }) => (
   <div className="w-[220px] h-[201px] rounded-tl-[20px] rounded-tr-[20px] rounded-br-[20px] border border-[#D9D9D9]/20 overflow-hidden transition-transform hover:scale-105 bg-black">
     <div className="w-[220px] h-[93px] rounded-tl-[20px] rounded-tr-[20px] relative overflow-hidden">
-      <img src={image} alt={title} className="w-full h-full object-cover" />
+      <img src={image} alt={title} className="w-full h-full object-cover" loading="lazy" />
       <div className="absolute inset-0 bg-linear-to-b from-transparent to-black/40" />
     </div>
     <div className="p-4">
@@ -34,25 +34,25 @@ export const Cards = () => {
           <InsuranceCard
             title="Motor Insurance"
             description="Comprehensive coverage for your vehicles against all types of risks."
-            image="motor.jpg"
+            image="motor.webp"
             url={`${EPREFIX.CUSTOMER}${EROUTES.MOTOR}`}
           />
           <InsuranceCard
             title="Travel Insurance"
             description="Travel with peace of mind knowing you're covered worldwide."
-            image="travel.jpg"
+            image="travel.webp"
             url={`${EPREFIX.CUSTOMER}${EROUTES.TRAVEL}`}
           />
           <InsuranceCard
             title="Marine Insurance"
             description="Protect your cargo and vessels across international waters."
-            image="marine.jpg"
+            image="marine.webp"
             url={`${EPREFIX.CUSTOMER}${EROUTES.MARINE}`}
           />
           <InsuranceCard
             title="Health Insurance"
             description="Health insurance provides comprehensive coverage for medical expenses."
-            image="life.jpg"
+            image="life.webp"
             url={`${EPREFIX.CUSTOMER}${EROUTES.LIFE}`}
           />
         </div>

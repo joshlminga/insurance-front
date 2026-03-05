@@ -14,7 +14,7 @@ export const HeroSection = () => {
     return (
         <section className="relative mx-auto h-[920px] w-full overflow-hidden">
             <div className="absolute inset-0 -z-10">
-                <img src="/hero.jpg" alt="" className="h-full w-full object-cover" />
+                <img src="/hero.webp" alt="" className="h-full w-full object-cover" loading="lazy"  />
                 <div className="absolute inset-0 bg-linear-to-r from-slate-900/60 to-slate-900/40" />
             </div>
             {isAuthenticated ? (
