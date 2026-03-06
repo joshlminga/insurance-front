@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
-import { Button, ReuseableInput } from "@/dev/core"
+import { Button, ReuseableInput, ReuseableSingleSelectCountriesInput } from "@/dev/core"
 import { ArrowLeftCircle, ArrowRightCircle, CircleCheck, ShieldCheck } from "lucide-react"
-import { useForm } from "react-hook-form"
+import { Controller, useForm } from "react-hook-form"
 import { FieldGroup } from "@/components/ui/field"
 import { ShowToast } from "@/utils/utils"
 import { CustomerDetailsSchema } from "@/types/form-schema"
@@ -25,6 +25,7 @@ export const CustomerVerificationDetails = ({ goToNextStep, goToPrevStep }: Cust
       last_name: "",
       email: "",
       phone: "",
+      country: "",
     },
   })
 
@@ -52,7 +53,7 @@ export const CustomerVerificationDetails = ({ goToNextStep, goToPrevStep }: Cust
     <div className="max-w-full mx-auto border-0 bg-transparent">
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <div className="grid grid-cols-1 lg:grid-cols-2 items-center gap-6 lg:gap-10">
-          <div className="hidden lg:flex flex-col items-center justify-center w-full max-w-[580px] h-auto aspect-video">
+          <div className="hidden lg:flex flex-col items-center justify-center w-full max-w-145 h-auto aspect-video">
             <h1 className="text-2xl xl:text-[32px] font-bold leading-none text-black text-center">
               Get Motor Insurance
             </h1>
@@ -68,31 +69,44 @@ export const CustomerVerificationDetails = ({ goToNextStep, goToPrevStep }: Cust
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
               <ReuseableInput
-                className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
                 control={form.control}
                 name="first_name"
                 label="First Name"
               />
               <ReuseableInput
-                className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
                 control={form.control}
                 name="last_name"
                 label="Last Name"
               />
               <ReuseableInput
-                className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
                 control={form.control}
                 name="email"
                 label="Email"
                 type="email"
               />
               <ReuseableInput
-                className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
                 control={form.control}
                 name="phone"
                 label="Mobile Number"
                 type="tel"
               />
+              <Controller
+                control={form.control}
+                name="country"
+                render={({ field }) => (
+                  <ReuseableSingleSelectCountriesInput
+                    label="Country"
+                    required
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
+                )}
+              />
+
             </div>
           </FieldGroup>
           <CardFooter className="col-span-1 lg:col-span-2 flex flex-col sm:flex-row justify-between gap-3 mt-1 px-0">
@@ -116,10 +130,10 @@ export const CustomerVerificationDetails = ({ goToNextStep, goToPrevStep }: Cust
           </CardFooter>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-stretch mt-6">
-          <Card className="h-auto sm:h-[178px] rounded-[10px] border border-[#D9D9D9] bg-[#DCFCE733]">
+          <Card className="h-auto sm:h-44.5 rounded-[10px] border border-[#D9D9D9] bg-[#DCFCE733]">
             <CardContent className="flex flex-col sm:flex-row gap-4 p-4 h-full">
               <div
-                className="w-[54px] h-[54px] rounded-full border border-[#D9D9D9] flex items-center justify-center shrink-0 mx-auto sm:mx-0">
+                className="w-13.5 h-13.5 rounded-full border border-[#D9D9D9] flex items-center justify-center shrink-0 mx-auto sm:mx-0">
                 <CircleCheck className="w-5 h-5 text-[#C20C0C]" />
               </div>
               <div className="flex flex-col justify-between flex-1">
@@ -144,9 +158,9 @@ export const CustomerVerificationDetails = ({ goToNextStep, goToPrevStep }: Cust
             </CardContent>
           </Card>
 
-          <Card className="h-auto sm:h-[178px] rounded-[10px] border border-[#C7EED5]">
+          <Card className="h-auto sm:h-44.5 rounded-[10px] border border-[#C7EED5]">
             <CardContent className="flex flex-col sm:flex-row gap-4 p-4 h-full">
-              <div className="w-[54px] h-[54px] rounded-full border border-[#D9D9D9] flex items-center justify-center shrink-0 mx-auto sm:mx-0">
+              <div className="w-13.5 h-13.5 rounded-full border border-[#D9D9D9] flex items-center justify-center shrink-0 mx-auto sm:mx-0">
                 <ShieldCheck className="w-5 h-5 text-[#C20C0C]" />
               </div>
               <div className="flex flex-col justify-between flex-1">
@@ -163,7 +177,7 @@ export const CustomerVerificationDetails = ({ goToNextStep, goToPrevStep }: Cust
                 </div>
                 <div className="flex items-start gap-2 mt-2">
                   <Checkbox
-                    className="w-[15px] h-[15px] rounded-[3px] border border-[#D9D9D9] data-[state=checked]:bg-[#C20C0C] data-[state=checked]:border-[#C20C0C]" />
+                    className="w-3.75 h-3.75 rounded-[3px] border border-[#D9D9D9] data-[state=checked]:bg-[#C20C0C] data-[state=checked]:border-[#C20C0C]" />
                   <label className="cursor-pointer text-sm">
                     I acknowledge and consent to the collection and processing of my
                     personal data as outlined in the <Link to="#" className="underline"> Privacy Policy</Link>

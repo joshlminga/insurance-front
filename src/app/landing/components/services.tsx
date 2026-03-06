@@ -18,7 +18,7 @@ const services = [
 ]
 
 const ServiceCard = ({ title, image, index }: { title: string, image: string, index: number }) => (
-    <div className="relative group overflow-hidden rounded-tl-3xl rounded-br-3xl h-[450px] border-x-2 border-red-600 shadow-2xl w-full">
+    <div className="relative group overflow-hidden rounded-tl-3xl rounded-br-3xl h-112.5 border-x-2 border-red-600 shadow-2xl w-full">
         <img
             src={image}
             alt={title}

@@ -322,7 +322,7 @@ export function ReusableSelect<T extends FieldValues>({
                             <SelectTrigger
                                 aria-invalid={fieldState.invalid}
                                 className={cn(
-                                    "w-full h-[51px] rounded-[5px] border border-[#ADABAB]",
+                                    "w-full h-12.75 rounded-[5px] border border-[#ADABAB]",
                                     fieldState.invalid &&
                                     "border-red-500 focus:ring-red-500",
                                     triggerClassName
@@ -369,11 +369,11 @@ export const ReusableCheckboxGrid = ({
                         onCheckedChange={(val) =>
                             option.onChange?.(Boolean(val))
                         }
-                        className="w-[15px] h-[15px] rounded-[3px] border border-[#D9D9D9]
+                        className="w-3.75 h-3.75 rounded-[3px] border border-[#D9D9D9]
                        data-[state=checked]:bg-[#C20C0C]
                        data-[state=checked]:border-[#C20C0C]"
                     />
-                    <label className="cursor-pointer max-w-[449px]">
+                    <label className="cursor-pointer max-w-112.25">
                         {option.label}
                     </label>
                 </div>
@@ -402,7 +402,7 @@ export function ReusableTabs({
             className={cn("w-full", className)}>
             <TabsList
                 className={cn(
-                    "h-auto min-h-[50px] sm:min-h-[60px] lg:h-[70px] w-full max-w-full lg:max-w-[509px] rounded-[12px] sm:rounded-[20px] border border-[#ADABAB] bg-white p-0 flex flex-wrap sm:flex-nowrap",
+                    "h-auto min-h-12.5 sm:min-h-15 lg:h-17.5 w-full max-w-full lg:max-w-127.25 rounded-[12px] sm:rounded-[20px] border border-[#ADABAB] bg-white p-0 flex flex-wrap sm:flex-nowrap",
                     tabsListClassName
                 )}>
                 {tabs.map((tab) => {
@@ -682,7 +682,7 @@ export const ReusableDropdown = ({
             <DropdownMenuContent
                 side={side}
                 align={align}
-                className={cn("min-w-[180px] p-1", contentClassName)}>
+                className={cn("min-w-45 p-1", contentClassName)}>
                 {items.map((item, index) =>
                     item.separator ? (
                         <DropdownMenuSeparator key={index} />
@@ -850,9 +850,9 @@ export const PageForPagination = ({
 }: {
     handler: (data: any) => void;
     content: string;
-    active?: boolean;
-}) => (
-    <div className={`rounded-xl selection:bg-inherit flex items-center justify-center leading-6 hover:bg-[#F9F5FF] text-[14px] font-medium text-center cursor-pointer w-10 h-10 ${active ? 'bg-[#F9F5FF] text-[#7F56D9]' : 'text-main-orange'
+    active?: boolean;}) => (
+    <div className={`rounded-xl selection:bg-inherit flex items-center justify-center leading-6 hover:bg-[#F9F5FF] text-[14px] 
+    font-medium text-center cursor-pointer w-10 h-10 ${active ? 'bg-[#F9F5FF] text-[#7F56D9]' : 'text-main-orange'
         }`}
         onClick={handler}>
         {content}
@@ -978,7 +978,7 @@ export const ReusableCountriesInputMultiselect = ({
             <MultiSelect
                 values={value ?? []}
                 onValuesChange={(vals) => onChange?.(vals)} >
-                <MultiSelectTrigger className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]">
+                <MultiSelectTrigger className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]">
                     <MultiSelectValue placeholder={placeholder} />
                 </MultiSelectTrigger>
                 <MultiSelectContent>
@@ -1033,7 +1033,7 @@ export function ReuseableSingleSelectCountriesInput<T extends FieldValues>({
                 value={value}
                 onValueChange={onChange}
                 disabled={disabled || isLoading}>
-                <SelectTrigger className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]">
+                <SelectTrigger className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]">
                     <SelectValue
                         placeholder={isLoading ? "Loading countries..." : placeholder}
                     />
@@ -1083,7 +1083,7 @@ export function ReuseableSingleSelectAdminInput<T extends FieldValues>({
                 value={value}
                 onValueChange={onChange}
                 disabled={disabled || isLoading}>
-                <SelectTrigger className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]">
+                <SelectTrigger className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]">
                     <SelectValue
                         placeholder={isLoading ? "Loading users..." : placeholder}
                     />
@@ -1133,7 +1133,7 @@ export const ReuseableSelectInsurerInput = <T extends FieldValues>({
                 value={value}
                 onValueChange={onChange}
                 disabled={disabled || isLoading}>
-                <SelectTrigger className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]">
+                <SelectTrigger className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]">
                     <SelectValue
                         placeholder={isLoading ? "Loading users..." : placeholder}
                     />
@@ -1184,7 +1184,7 @@ export const ReusableOrganizationsInputMultiselect = ({
             <MultiSelect
                 values={value ?? []}
                 onValuesChange={(vals) => onChange?.(vals)} >
-                <MultiSelectTrigger className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]">
+                <MultiSelectTrigger className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]">
                     <MultiSelectValue placeholder={placeholder} />
                 </MultiSelectTrigger>
                 <MultiSelectContent>
@@ -1237,7 +1237,7 @@ export function ReuseableSingleSelectclassInput<T extends FieldValues>({
                 value={value}
                 onValueChange={onChange}
                 disabled={disabled || isLoading}>
-                <SelectTrigger className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]">
+                <SelectTrigger className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]">
                     <SelectValue
                         placeholder={isLoading ? "Loading users..." : placeholder}
                     />
@@ -1303,7 +1303,7 @@ export function ReuseableSingleSelectVehicleUseInput<T extends FieldValues>({
                 value={value}
                 onValueChange={onChange}
                 disabled={disabled}>
-                <SelectTrigger className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]">
+                <SelectTrigger className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]">
                     <SelectValue placeholder={placeholder} />
                 </SelectTrigger>
                 <SelectContent>
@@ -1363,7 +1363,7 @@ export const ReusableCoveringInputMultiselect = ({
             <MultiSelect
                 values={value ?? []}
                 onValuesChange={(vals) => onChange?.(vals)} >
-                <MultiSelectTrigger className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]">
+                <MultiSelectTrigger className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]">
                     <MultiSelectValue placeholder={placeholder} />
                 </MultiSelectTrigger>
                 <MultiSelectContent>
@@ -1431,7 +1431,7 @@ export function ReuseableSingleSelectCoveringInput<T extends FieldValues>({
                 value={value}
                 onValueChange={onChange}
                 disabled={disabled}>
-                <SelectTrigger className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]">
+                <SelectTrigger className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]">
                     <SelectValue placeholder={placeholder} />
                 </SelectTrigger>
                 <SelectContent>
@@ -1516,13 +1516,11 @@ export function ReusableSingleSelectApiInput({
                     )}
                 </Label>
             )}
-
             <Select
                 value={value}
                 onValueChange={onChange}
-                disabled={disabled}
-            >
-                <SelectTrigger className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]">
+                disabled={disabled}>
+                <SelectTrigger className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]">
                     <SelectValue placeholder={placeholder} />
                 </SelectTrigger>
 
@@ -1629,7 +1627,7 @@ export function ReusableApiMultiSelect({
             <MultiSelect
                 values={controlledValue}
                 onValuesChange={(vals) => onChange?.(vals)}>
-                <MultiSelectTrigger disabled={disabled} className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]">
+                <MultiSelectTrigger disabled={disabled} className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]">
                     <MultiSelectValue placeholder={placeholder} />
                 </MultiSelectTrigger>
                 <MultiSelectContent>

@@ -66,20 +66,20 @@ export function SignupForm({
           <Field className="py-4">
             <div className="grid grid-cols-2 gap-3">
               <ReuseableInput
-                className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] pr-10"
                 control={form.control}
                 name="first_name"
                 label="First Name"
               />
               <ReuseableInput
-                className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] pr-10"
                 control={form.control}
                 name="last_name"
                 label="Last Name"
               />
             </div>
             <ReuseableInput
-              className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+              className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] pr-10"
               control={form.control}
               name="email"
               label="Email"
@@ -87,7 +87,7 @@ export function SignupForm({
             />
             <div className="relative items-center justify-center">
               <ReuseableInput
-                className="w-full h-[51px] rounded-[5px] border border-[#ADABAB] pr-10"
+                className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] pr-10"
                 control={form.control}
                 name="password"
                 label="Password"
@@ -103,7 +103,7 @@ export function SignupForm({
             </div>
             <div className="relative items-center justify-center">
               <ReuseableInput
-                className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] pr-10"
                 control={form.control}
                 name="confirm_password"
                 label="Confirm Password"
@@ -132,7 +132,11 @@ export function SignupForm({
       </form>
       <FieldDescription>
         Already have an account?
-        <Link to={`/${EPREFIX.AUTH}${EROUTES.SIGNIN}`} onClick={(e) => { e.preventDefault(); navigate(`/${EPREFIX.AUTH}${EROUTES.SIGNIN}`, { state: location.state }) }}>
+        <Link to={`/${EPREFIX.AUTH}${EROUTES.SIGNIN}`}
+          onClick={(e) => {
+            e.preventDefault();
+            navigate(`/${EPREFIX.AUTH}${EROUTES.SIGNIN}`, { state: location.state })
+          }}>
           Sign In
         </Link>
       </FieldDescription>

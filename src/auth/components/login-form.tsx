@@ -75,7 +75,7 @@ export function LoginForm({
         <FieldGroup>
           <Field className="py-4">
             <ReuseableInput
-              className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+              className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
               control={form.control}
               name="email"
               label="Email"
@@ -83,7 +83,7 @@ export function LoginForm({
             />
             <div className="relative items-center justify-center">
               <ReuseableInput
-                className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
                 control={form.control}
                 name="password"
                 label="Password"

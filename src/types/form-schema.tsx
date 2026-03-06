@@ -15,10 +15,16 @@ export const CustomerDetailsSchema = z.object({
     .string()
     .email("Invalid email address")
     .min(5)
-    .max(32),
+    .max(32)
+    .optional(),
   phone: z
     .string()
-    .min(7, "Invalid phone number"),
+    .min(7, "Invalid phone number")
+    .optional()
+    .or(z.literal("")),
+    country: z
+    .string()
+    .min(1, "Select a country"),
 })
 
 export const OTPVerificationSchema = z.object({
