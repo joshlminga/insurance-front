@@ -103,9 +103,7 @@ export default function OTPVerificationPage({ goToNextStep, goToPrevStep }: Cust
             type="submit"
             className="bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
             rightIcon={<ArrowRightCircle />}
-            loading={submitMutation.isPending}
-          //  onClick={() => goToNextStep?.()}
-          >
+            loading={submitMutation.isPending}>
             Verify & Proceed
           </Button>
         </CardFooter>

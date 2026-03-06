@@ -82,11 +82,12 @@ export interface PageHeaderProps {
   actions?: PageHeaderAction[]
   children?: React.ReactNode
 }
-export interface Tuser {
+export type Tuser = {
   name: string
   email: string
   avatar?: string
-  is_general: boolean
+  is_general: boolean,
+  id:number
 }
 
 export interface VerificationToken {
@@ -553,4 +554,11 @@ export type ReusableApiMultiSelectProps = {
     searchKeys?: string[];
     searchPlaceholder?: string;
     emptyMessage?: string;
+}
+
+export type VehicleClassItem = {
+    id: number
+    name: string
+    slug: string
+    is_active: boolean
 }

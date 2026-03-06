@@ -41,11 +41,29 @@ export const ResendOtpPayloadSchema = z.object({
 })
 
 export const VehicleDetailsSchema = z.object({
-  registration_number: z.string().min(1, "Registration number is required"),
-  vehicle_model: z.string().min(1, "Vehicle model is required"),
-  vehicle_make: z.string().min(1, "Vehicle make is required"),
-  yom: z.string().min(1, "Year of manufacture is required"),
-  insurance_type: z.string().min(1, "Insurance type is required"),
+  user_id: z.union([z.string(), z.number()]).optional().or(z.literal("")),
+  registration_number: z.string().optional().or(z.literal("")),
+  vehicle_model: z.string().optional().or(z.literal("")),
+  vehicle_make: z.string().optional().or(z.literal("")),
+  yom: z.string().optional().or(z.literal("")),
+  insurance_type: z.string().optional().or(z.literal("")),
+
+  // Previously required fields now made optional
+  covertype_id: z.string().optional().or(z.literal("")),
+  covering_id: z.string().optional().or(z.literal("")),
+  vehicle_make_id: z.string().optional().or(z.literal("")),
+  vehicle_model_id: z.string().optional().or(z.literal("")),
+  used_for_id: z.string().optional().or(z.literal("")),
+  bodytype_id: z.string().optional().or(z.literal("")),
+  country_id: z.string().optional().or(z.literal("")),
+  year: z.string().optional().or(z.literal("")),
+
+  ownership: z.string().optional().or(z.literal("")),
+  vehicle_value: z.string().optional().or(z.literal("")),
+  number_of_passengers: z.string().optional().or(z.literal("")),
+  tonnage: z.string().optional().or(z.literal("")),
+
+  vehicle_class_id: z.string().optional().or(z.literal("")),
 })
 
 export const LoginSchema = z.object({

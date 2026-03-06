@@ -322,7 +322,7 @@ export function ReusableSelect<T extends FieldValues>({
                             <SelectTrigger
                                 aria-invalid={fieldState.invalid}
                                 className={cn(
-                                    "w-full h-12.75 rounded-[5px] border border-[#ADABAB]",
+                                    "w-full h-12.75 rounded-[5px]]",
                                     fieldState.invalid &&
                                     "border-red-500 focus:ring-red-500",
                                     triggerClassName
@@ -400,20 +400,17 @@ export function ReusableTabs({
             value={value}
             onValueChange={onValueChange}
             className={cn("w-full", className)}>
-            <TabsList
-                className={cn(
-                    "h-auto min-h-12.5 sm:min-h-15 lg:h-17.5 w-full max-w-full lg:max-w-127.25 rounded-[12px] sm:rounded-[20px] border border-[#ADABAB] bg-white p-0 flex flex-wrap sm:flex-nowrap",
+            <TabsList className={cn("h-auto min-h-10 sm:min-h-10 lg:h-10 w-full max-w-full lg:max-w-130 rounded-[12px] sm:rounded-[20px] border border-[#ADABAB] bg-white p-0 flex flex-wrap sm:flex-nowrap",
                     tabsListClassName
                 )}>
                 {tabs.map((tab) => {
-                    const Icon = tab.icon
                     return (
                         <TabsTrigger
                             key={tab.value}
                             value={tab.value}
                             disabled={tab.disabled}
                             className={cn(
-                                "flex-1 h-12 sm:h-full min-w-0 rounded-none",
+                                "flex-1 h-6 sm:h-full min-w-0 rounded-none",
                                 "first:rounded-tl-[12px] first:rounded-bl-[12px] sm:first:rounded-l-[20px]",
                                 "last:rounded-tr-[12px] last:rounded-br-[12px] sm:last:rounded-r-[20px]",
                                 "data-[state=active]:bg-[#C20C0C] data-[state=active]:text-white",
@@ -421,13 +418,7 @@ export function ReusableTabs({
                                 "flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm lg:text-lg font-medium px-2 sm:px-4",
                                 triggerClassName
                             )}>
-                            {Icon && (
-                                <Icon
-                                    size={tab.iconSize ?? 16}
-                                    className="shrink-0 w-4 h-4 sm:w-5 sm:h-5"
-                                />
-                            )}
-                            <span className="truncate">{tab.label}</span>
+                            <span className="">{tab.label}</span>
                         </TabsTrigger>
                     )
                 })}

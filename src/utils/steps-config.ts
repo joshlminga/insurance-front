@@ -109,14 +109,14 @@ export const EMOTORTABS = [
         value: "private",
         label: "Private",
         icon: Car,
-        iconSize: 18,
+        iconSize: 10,
         component: MotorPrivatePage,
     },
     {
         value: "commercial",
         label: "Commercial",
         icon: Truck,
-        iconSize: 20,
+        iconSize: 10,
         component: MotorCommercialPage,
     },
     {

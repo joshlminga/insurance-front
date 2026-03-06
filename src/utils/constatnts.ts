@@ -93,6 +93,11 @@ export const ACCESSLEVELSOPTIONS = [
   { label: "Company Owned", value: 'Company Owned' },
 ]
 
+export const OWNERSHIPOPTIONS = [
+  { label: "Personal Owned", value: 'Personal Owned' },
+  { label: "Company Owned", value: 'Company Owned' },
+]
+
 export const BENEFITTYPESOPTIONS = [
   { label: "Optional", value: 'Optional' },
   { label: "Inclusive", value: 'Inclusive' },
