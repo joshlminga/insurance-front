@@ -12,26 +12,26 @@ interface StatusBadgeProps {
   className?: string
 }
 
-const statusConfig: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" | "success" | "warning" | "info" }> = {
+const statusConfig: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" | "ghost" | "link" }> = {
   // Member statuses
-  pending: { label: "Pending", variant: "warning" },
-  approved: { label: "Approved", variant: "success" },
-  active: { label: "Active", variant: "success" },
+  pending: { label: "Pending", variant: "secondary" },
+  approved: { label: "Approved", variant: "default" },
+  active: { label: "Active", variant: "default" },
   suspended: { label: "Suspended", variant: "destructive" },
   inactive: { label: "Inactive", variant: "secondary" },
 
   // Policy statuses
-  submitted: { label: "Applied", variant: "info" },
-  under_review: { label: "Underwriting", variant: "warning" },
-  disbursed: { label: "Issued", variant: "success" },
-  repaying: { label: "In Force", variant: "info" },
-  completed: { label: "Matured", variant: "success" },
+  submitted: { label: "Applied", variant: "outline" },
+  under_review: { label: "Underwriting", variant: "outline" },
+  disbursed: { label: "Issued", variant: "default" },
+  repaying: { label: "In Force", variant: "outline" },
+  completed: { label: "Matured", variant: "default" },
   defaulted: { label: "Lapsed", variant: "destructive" },
   rejected: { label: "Declined", variant: "destructive" },
 
   // Transaction statuses
   failed: { label: "Failed", variant: "destructive" },
-  reversed: { label: "Reversed", variant: "warning" },
+  reversed: { label: "Reversed", variant: "outline" },
 }
 
 export function StatusBadge({ status, className }: StatusBadgeProps) {

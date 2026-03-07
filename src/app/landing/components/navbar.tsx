@@ -72,7 +72,7 @@ const MobileDropdown = ({
 
 export const Navbar = (
     {
-        className = "w-full h-auto lg:h-[175px] rounded-2xl bg-white/40 backdrop-blur-[10px]",
+        className = "w-full h-auto lg:h-43.75 rounded-2xl bg-white/40 backdrop-blur-[10px]",
         textStyle = "text-[#141414]",
         navTextStyle
     }: {
@@ -104,13 +104,13 @@ export const Navbar = (
     };
 
     return (
-        <nav className="absolute top-4 sm:top-[58px] left-1/2 -translate-x-1/2 z-999 w-[95vw] lg:w-[80vw]">
+        <nav className="absolute top-4 sm:top-14.5 left-1/2 -translate-x-1/2 z-50 w-[95vw] lg:w-[80vw]">
             <div
                 className={cn(className,
-                    "shadow-[0_8.45px_16.9px_rgba(0,0,0,0.12)] px-4 sm:px-[37px] flex flex-col"
+                    "shadow-[0_8.45px_16.9px_rgba(0,0,0,0.12)] px-4 sm:px-9.25 flex flex-col"
                 )}>
-                <div className="h-[60px] lg:h-[50px] mt-4 lg:mt-6 flex items-center justify-between">
-                    <div className="flex items-center gap-3 w-[120px] sm:w-[158px] h-10 sm:h-[50px]">
+                <div className="h-15 lg:h-12.5 mt-4 lg:mt-6 flex items-center justify-between">
+                    <div className="flex items-center gap-3 w-30 sm:w-39.5 h-10 sm:h-12.5">
                         <img src={ELOGO.NAVBARLOGO} alt="logo" className="h-full w-auto object-contain" />
                     </div>
                     <div className={cn(`hidden lg:flex items-center gap-6 xl:gap-10 text-sm font-semibold cursor-pointer ${textStyle}`)}>
@@ -120,9 +120,9 @@ export const Navbar = (
                         <Link to='#' className="hover:text-red-500 transition uppercase">Contact</Link>
                         {isAuthenticated && (
                             <>
-                                {isGeneral === true && (
+                                {/* {isGeneral === true && (
                                     <Link to={EROUTES.DASHBOARD} className="hover:text-red-500 transition uppercase">Dashboard</Link>
-                                )}
+                                )} */}
                                 <button onClick={logout} className="hover:text-red-500 transition uppercase">Logout</button>
                             </>
                         )}
@@ -139,7 +139,7 @@ export const Navbar = (
                     </button>
                 </div>
                 <div className="hidden lg:block">
-                    <div className="absolute top-[101px] left-1/2 -translate-x-1/2 w-full max-w-7xl h-px border-t border-[#F91520]" />
+                    <div className="absolute top-25.25 left-1/2 -translate-x-1/2 w-full max-w-7xl h-px border-t border-[#F91520]" />
                     <div className="ml-4 mb-6 flex left-2/4 w-full max-w-7xl pt-6 mt-3">
                         <div className="flex gap-4 xl:gap-6 w-auto cursor-pointer flex-wrap">
                             <Dropdown

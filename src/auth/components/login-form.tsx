@@ -6,7 +6,7 @@ import {
   FieldGroup,
 } from "@/components/ui/field"
 import { EPREFIX, EROUTES } from "@/utils/enums"
-import { useNavigate, useLocation } from "react-router-dom"
+import { useNavigate, useLocation, Link } from "react-router-dom"
 
 import { Button, ReuseableInput } from "@/dev/core"
 import { EMETHODS } from "@/utils/constatnts"
@@ -19,11 +19,14 @@ import { UseApiMutation } from "@/hooks/hooks"
 import { ShowToast } from "@/utils/utils"
 import type { LoginResponse } from "@/types/types"
 import { extractErrorMessage } from "@/utils/helpers"
+import { useState } from "react"
+import { Eye, EyeOff } from "lucide-react"
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const [show, setShow] = useState(false);
 
   const { login } = UseAuth()
   const navigate = useNavigate()
@@ -61,9 +64,8 @@ export function LoginForm({
   const onSubmit = async (data: LoginFormValues) => {
     try {
       loginMutation.mutate(data)
-    } catch (error) {
-      console.log(error);
-      ShowToast.error("Login failed!")
+    } catch (error: any) {
+      ShowToast.error(extractErrorMessage(error?.message || "Login failed!"))
     }
   }
 
@@ -73,19 +75,28 @@ export function LoginForm({
         <FieldGroup>
           <Field className="py-4">
             <ReuseableInput
-              className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+              className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
               control={form.control}
               name="email"
               label="Email"
               type="email"
             />
-            <ReuseableInput
-              className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
-              control={form.control}
-              name="password"
-              label="Password"
-              type="password"
-            />
+            <div className="relative items-center justify-center">
+              <ReuseableInput
+                className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                control={form.control}
+                name="password"
+                label="Password"
+                type={show ? "text" : "password"}
+              />
+              <button
+                type="button"
+                onClick={() => setShow(!show)}
+                className="absolute right-3 top-12 text-slate-500 hover:text-slate-700"
+                aria-label={show ? "Hide password" : "Show password"}>
+                {show ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
           </Field>
           <Field>
             <Button
@@ -98,7 +109,10 @@ export function LoginForm({
         </FieldGroup>
       </form>
       <FieldDescription>
-        Don&apos;t have an account?  <a href={`/${EPREFIX.AUTH}${EROUTES.SIGNUP}`} onClick={(e) => { e.preventDefault(); navigate(`/${EPREFIX.AUTH}${EROUTES.SIGNUP}`, { state: location.state }) }}>Sign Up</a>
+        Don&apos;t have an account?
+        <Link to={`/${EPREFIX.AUTH}${EROUTES.SIGNUP}`} onClick={(e) => { e.preventDefault(); navigate(`/${EPREFIX.AUTH}${EROUTES.SIGNUP}`, { state: location.state }) }}>
+          Sign Up
+        </Link>
       </FieldDescription>
     </div>
   )

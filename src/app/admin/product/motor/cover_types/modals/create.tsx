@@ -45,7 +45,7 @@ export const CreateCoverTypeModal = ({ handleDialogContextSwitch, componentProps
     }
 
     return (
-        <div className="w-full min-w-[600px] max-w-[600px] p-6 space-y-6">
+        <div className="w-full min-w-150 max-w-150 p-6 space-y-6">
             <div className="border-b pb-3">
                 <h2 className="text-xl font-semibold">
                     Create Cover Type
@@ -59,14 +59,14 @@ export const CreateCoverTypeModal = ({ handleDialogContextSwitch, componentProps
                     control={form.control}
                     name="name"
                     label="Cover type Name"
-                    className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                    className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
                 />
                 <ReuseableInput
                     control={form.control}
                     name="description"
                     type="textarea"
                     label="Product Motor Description"
-                    className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                     className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
                 />
                 <CardFooter className="flex flex-col sm:flex-row justify-between gap-3 mt-2 px-0">
                     <Button

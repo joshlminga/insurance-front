@@ -10,9 +10,9 @@ import { InvoicePayment } from "@/app/customer/motor/steppers/invoice-payment";
 import { KycInfo } from "@/app/customer/motor/steppers/kyc-info";
 import OTPVerificationPage from "@/app/customer/motor/steppers/otp-verification";
 import { PaymentOptions } from "@/app/customer/motor/steppers/payment-options";
-import { CardsTabPage } from "@/app/customer/motor/steppers/payment-tabs/card";
+// import { CardsTabPage } from "@/app/customer/motor/steppers/payment-tabs/card";
 import { MpesaPageTab } from "@/app/customer/motor/steppers/payment-tabs/mpesa";
-import { PesapalTabPage } from "@/app/customer/motor/steppers/payment-tabs/pesapal";
+// import { PesapalTabPage } from "@/app/customer/motor/steppers/payment-tabs/pesapal";
 import { QuotationsPage } from "@/app/customer/motor/steppers/quotations";
 import { SuccessPurchase } from "@/app/customer/motor/steppers/success-purchase";
 import { MotorCommercialPage } from "@/app/customer/motor/steppers/tabs/motor-commercial";
@@ -109,14 +109,14 @@ export const EMOTORTABS = [
         value: "private",
         label: "Private",
         icon: Car,
-        iconSize: 18,
+        iconSize: 10,
         component: MotorPrivatePage,
     },
     {
         value: "commercial",
         label: "Commercial",
         icon: Truck,
-        iconSize: 20,
+        iconSize: 10,
         component: MotorCommercialPage,
     },
     {
@@ -153,20 +153,20 @@ export const EPAYMENTTABS = [
         // iconSize: 18,
         component: MpesaPageTab,
     },
-    {
-        value: "card",
-        // label: "Card",
-        image: '/card.png',
-        // icon: CreditCard,
-        // iconSize: 20,
-        component: CardsTabPage,
-    },
-    {
-        value: "pesapal",
-        // label: "PesaPal",
-        // icon: Van,
-        // iconSize: 16,
-        image: '/pesapal.png',
-        component: PesapalTabPage,
-    },
+    // {
+    //     value: "card",
+    //     // label: "Card",
+    //     image: '/card.png',
+    //     // icon: CreditCard,
+    //     // iconSize: 20,
+    //     component: CardsTabPage,
+    // },
+    // {
+    //     value: "pesapal",
+    //     // label: "PesaPal",
+    //     // icon: Van,
+    //     // iconSize: 16,
+    //     image: '/pesapal.png',
+    //     component: PesapalTabPage,
+    // },
 ]

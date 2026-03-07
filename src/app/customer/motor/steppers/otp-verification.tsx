@@ -4,7 +4,7 @@ import { CardFooter } from "@/components/ui/card"
 import { Button } from "@/dev/core"
 import { ArrowLeftCircle, ArrowRightCircle } from "lucide-react"
 import { Link } from "react-router-dom"
-import type { CustomerVerificationDetailsProps, SubmitResponse } from "@/types/types"
+import type { CustomerVerificationDetailsProps, LoginResponse } from "@/types/types"
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { EMETHODS } from "@/utils/constatnts";
@@ -16,21 +16,22 @@ import { extractErrorMessage } from "@/utils/helpers";
 import { UseAuth } from "@/components/auth-provider";
 
 export default function OTPVerificationPage({ goToNextStep, goToPrevStep }: CustomerVerificationDetailsProps) {
-  const { guest } = UseAuth();
+  const { login, guest } = UseAuth();
   const methods = useForm<OTPFormValues>({
     resolver: zodResolver(OTPVerificationSchema),
     defaultValues: {
       token: "",
-      token_type: guest?.verification?.phone?.verification_token_type,
+      token_type: "email_verification",
       token_name: guest?.verification?.phone?.verification_token_name
     },
   })
 
-  const submitMutation = UseApiMutation<SubmitResponse, OTPFormValues>({
+  const submitMutation = UseApiMutation<LoginResponse, OTPFormValues>({
     url: "auth/account-verification",
     method: EMETHODS.POST,
     mutationOptions: {
       onSuccess: (data) => {
+        login(data.user, data.access_token, data.is_general)
         goToNextStep?.()
         ShowToast.success(data.message || "Verified successfully!")
       },
@@ -45,7 +46,7 @@ export default function OTPVerificationPage({ goToNextStep, goToPrevStep }: Cust
     submitMutation.mutate(data)
   }
 
-  const resendMutation = UseApiMutation<SubmitResponse, ResendOTPFormValues>({
+  const resendMutation = UseApiMutation<LoginResponse, ResendOTPFormValues>({
     url: "auth/account-verification/retry",
     method: EMETHODS.POST,
     mutationOptions: {
@@ -71,7 +72,7 @@ export default function OTPVerificationPage({ goToNextStep, goToPrevStep }: Cust
 
   return (
     <FormProvider {...methods}>
-      <form onSubmit={methods.handleSubmit(onSubmit)} className="flex flex-col items-center justify-start min-h-[500px] w-full">
+      <form onSubmit={methods.handleSubmit(onSubmit)} className="flex flex-col items-center justify-start min-h-125 w-full">
         <div className="w-full max-w-xl border border-[#D9D9D9] rounded-2xl p-8 bg-white shadow-sm">
           <div className="flex flex-col gap-6">
             <OTPForm className="border-0 shadow-none bg-transparent" showFooter={false} />
@@ -102,9 +103,7 @@ export default function OTPVerificationPage({ goToNextStep, goToPrevStep }: Cust
             type="submit"
             className="bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
             rightIcon={<ArrowRightCircle />}
-            loading={submitMutation.isPending}
-          //  onClick={() => goToNextStep?.()}
-          >
+            loading={submitMutation.isPending}>
             Verify & Proceed
           </Button>
         </CardFooter>

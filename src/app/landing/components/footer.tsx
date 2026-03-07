@@ -8,6 +8,7 @@ const TikTokIcon = () => (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.27 1.77-.25 1.04.17 2.14.91 2.88.74.75 1.83 1.05 2.85.86 1.08-.18 2.04-.98 2.36-2.03.11-.38.14-.77.14-1.16V0z" /></svg>
 )
 export const Footer = () => {
+    const currentYear = new Date().getFullYear()
     return (
         <footer
             className="relative w-full overflow-hidden text-white"
@@ -39,9 +40,9 @@ export const Footer = () => {
                     marginTop: '90px'
                 }}>
                 <div className="flex flex-col items-center text-center">
-                    <img src="/logo/logo.png" alt="Acentria" className="h-[60px] mb-8" />
+                    <img src="/logo/logo.png" alt="Acentria" className="h-15 mb-8" />
                     <h2 className="text-[85px] font-bold mb-10 tracking-tight">Let's Join Us</h2>
-                    <div className="relative w-full max-w-[640px] border-b border-white/30 pb-4 flex items-center">
+                    <div className="relative w-full max-w-160 border-b border-white/30 pb-4 flex items-center">
                         <input
                             type="email"
                             placeholder="Enter Your Email"
@@ -74,7 +75,7 @@ export const Footer = () => {
                         <a href="#" className="hover:text-white transition-colors"><TikTokIcon /></a>
                     </div>
                     <p className=" font-bold tracking-[0.25em]">
-                        © 2025 Acentria Group. All rights reserved.
+                        © {currentYear} Acentria Group. All rights reserved.
                     </p>
 
                     <p className="font-bold tracking-[0.25em] cursor-pointer transition-colors">

@@ -93,6 +93,11 @@ export const ACCESSLEVELSOPTIONS = [
   { label: "Company Owned", value: 'Company Owned' },
 ]
 
+export const OWNERSHIPOPTIONS = [
+  { label: "Personal Owned", value: 'Personal Owned' },
+  { label: "Company Owned", value: 'Company Owned' },
+]
+
 export const BENEFITTYPESOPTIONS = [
   { label: "Optional", value: 'Optional' },
   { label: "Inclusive", value: 'Inclusive' },
@@ -179,3 +184,6 @@ export const RatesSteps = [
     { title: 'Dates', fields: ['start_date', 'expiry_date'] },
     { title: 'Offered Vehicles', fields: ['makemodel_offered', 'makemodel_notoffered'] }
 ]
+
+export const POLL_INTERVAL_MS = 3000
+export const POLL_TIMEOUT_MS = 90000

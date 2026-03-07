@@ -20,7 +20,7 @@ export const MotorLandingPage = () => {
             <main className="relative flex flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4 mb-3">
                 {isAuthenticated ? (
                     <UserMenuPopover
-                        className="absolute top-4 right-4 z-10 sm:right-[88px] rounded-full border border-[#C20C0C] bg-white"
+                        className="absolute top-4 right-4 z-999 sm:right-22 rounded-full border border-[#C20C0C] bg-white"
                         userInitials={userInitials}
                         userName={userName}
                         userEmail={userEmail}
@@ -29,11 +29,11 @@ export const MotorLandingPage = () => {
                 ) : (
                     <Link
                         to={`/${EPREFIX.AUTH}${EROUTES.SIGNIN}`}
-                        className="absolute top-[19px] right-[88px] z-10 flex h-[26px] w-[82px] items-center justify-center rounded-[20px] border border-[#C20C0C] bg-white text-sm font-semibold text-slate-900">
+                        className="absolute top-4.75 right-22 z-10 flex h-6.5 w-20.5 items-center justify-center rounded-[20px] border border-[#C20C0C] bg-white text-sm font-semibold text-slate-900">
                         Login
                     </Link>
                 )}
-                <Navbar className='bg-[#ADABAB30] w-full h-[175px] rounded-2xl backdrop-blur-[3.379px]' textStyle='text-[#141414]' navTextStyle="text-[#000000]" />
+                <Navbar className='bg-[#ADABAB30] w-full h-43.75 rounded-2xl backdrop-blur-[3.379px]' textStyle='text-[#141414]' navTextStyle="text-[#000000]" />
                 <div className="pt-64 w-[80vw] mx-auto">
                     <Outlet />
                 </div>

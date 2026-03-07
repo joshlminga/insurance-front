@@ -82,11 +82,12 @@ export interface PageHeaderProps {
   actions?: PageHeaderAction[]
   children?: React.ReactNode
 }
-export interface Tuser {
+export type Tuser = {
   name: string
   email: string
   avatar?: string
-  is_general: boolean
+  is_general: boolean,
+  id:number
 }
 
 export interface VerificationToken {
@@ -197,6 +198,7 @@ export interface SubmitResponse {
     last_page: number,
     current_page:number
   }
+  CheckoutRequestID?: any
 }
 export interface CustomerVerificationDetailsProps {
   goToNextStep?: () => void
@@ -553,4 +555,45 @@ export type ReusableApiMultiSelectProps = {
     searchKeys?: string[];
     searchPlaceholder?: string;
     emptyMessage?: string;
+}
+
+export type VehicleClassItem = {
+    id: number
+    name: string
+    slug: string
+    is_active: boolean
+}
+
+export type MpesaPayload = {
+    phone: string
+    amount: number
+    account_reference: string
+    transaction_desc: string
+}
+
+export type MpesaPollResponse = {
+    status?: string
+    message?: string
+    ResultCode?: number
+    ResultDesc?: string
+    data?: {
+        status?: string
+        message?: string
+        ResultCode?: number
+        ResultDesc?: string
+        CheckoutRequestID?: string
+        checkout_request_id?: string
+    }
+}
+
+export type ClaimStatus = 'pending' | 'approved' | 'rejected'
+
+export type ClaimItem = {
+  id: string
+  coverTitle: string
+  policyNumber: string
+  incidentDate: string
+  submittedDate: string
+  amount: number
+  status: ClaimStatus
 }

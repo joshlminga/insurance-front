@@ -50,7 +50,7 @@ export const AddMotorRateExcessBenefits = ({ handleDialogContextSwitch, componen
     }
 
     return (
-        <div className="w-full min-w-[600px] max-w-[800px] p-6 space-y-4">
+        <div className="w-full min-w-150 max-w-200 p-6 space-y-4">
             <div className="border-b pb-3">
                 <h2 className="text-xl font-semibold">
                     Add Excess Benefits
@@ -92,7 +92,7 @@ export const AddMotorRateExcessBenefits = ({ handleDialogContextSwitch, componen
                     control={form.control}
                     name="value"
                     label="Title"
-                    className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                    className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
                 />
                 <ReuseableInput
                     control={form.control}
@@ -100,7 +100,7 @@ export const AddMotorRateExcessBenefits = ({ handleDialogContextSwitch, componen
                     label="description"
                     type='textarea'
                     rows={3}
-                    className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                    className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
                 />
                 <ReusableSelect
                     control={form.control}
