@@ -198,12 +198,12 @@ export function ReusableStepper({
                         <StepperItem
                             key={stepNumber}
                             step={stepNumber}
-                            className="relative flex-1 min-w-[60px] sm:min-w-0 items-start">
+                            className="relative flex-1 min-w-15 sm:min-w-0 items-start">
                             <StepperTrigger className="flex flex-col items-center justify-center gap-0.5 sm:gap-1 grow">
                                 <StepperIndicator
-                                    className={cn("h-2 sm:h-[17px] w-full max-w-20 sm:max-w-[124px] rounded-[10px] transition-all",
+                                    className={cn("h-2 sm:h-4.25 w-full max-w-20 sm:max-w-31 rounded-[10px] transition-all",
                                         "bg-gray-300 data-[state=active]:bg-linear-to-r from-[#FFB3B3] via-[#FF8383] to-[#FF4545]")} />
-                                <StepperTitle className="hidden sm:block text-start text-xs lg:text-sm font-semibold group-data-[state=inactive]/step:text-muted-foreground truncate max-w-[100px] lg:max-w-none">
+                                <StepperTitle className="hidden sm:block text-start text-xs lg:text-sm font-semibold group-data-[state=inactive]/step:text-muted-foreground truncate max-w-25 lg:max-w-none">
                                     {step.title}
                                 </StepperTitle>
                                 <span className="sm:hidden text-[10px] font-medium text-muted-foreground">
@@ -609,7 +609,7 @@ export const ReusableCard = ({
             {header && (
                 <CardHeader className={cn('flex items-center justify-center p-3 text-center', headerClassName)}>
                     {header.type === 'image' && (
-                        <div className="w-[109px] h-[60px] flex items-center justify-center">
+                        <div className="w-27.25 h-15 flex items-center justify-center">
                             <img
                                 src={header.src}
                                 alt={header.alt ?? ''}
