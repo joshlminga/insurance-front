@@ -3,6 +3,7 @@ import { Input } from '@/components/ui/input'
 import React from 'react'
 import { useFormContext, Controller } from 'react-hook-form'
 import type { PaymentFormValues } from '@/types/schema'
+import { CircleAlert } from 'lucide-react'
 
 export const MpesaPageTab: React.FC = () => {
     const { control } = useFormContext<PaymentFormValues>()
@@ -18,9 +19,9 @@ export const MpesaPageTab: React.FC = () => {
     }
 
     return (
-        <div className='w-full max-w-6xl mx-auto p-4'>
+        <div className='w-full max-w-6xl mx-auto p-1'>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-                <div className="w-full p-6 rounded-[20px] border border-[#ADABAB]/30 bg-white shadow-sm">
+                <div className="w-full p-2 rounded-[20px] border border-[#ADABAB]/30 bg-white shadow-sm">
                     <FieldGroup>
                         <div className="mb-6 p-4 h-auto min-h-8.5 rounded-[15px] border border-[#ADABAB]/70 bg-green-50/30">
                             <span className="text-sm text-muted-foreground uppercase tracking-wider">Total to Pay:</span>
@@ -56,11 +57,9 @@ export const MpesaPageTab: React.FC = () => {
                             )}
                         />
 
-                        <div className="mt-6 flex items-start gap-3 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                        <div className="mt-6 flex items-start gap-3 p-2 bg-blue-50 rounded-lg border border-blue-100">
                             <div className="mt-1 text-blue-500">
-                                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
+                                <CircleAlert />
                             </div>
                             <span className="text-xs sm:text-sm text-blue-800 leading-relaxed">
                                 You will receive an M-Pesa prompt on your phone to enter your PIN and complete payment.
@@ -68,6 +67,7 @@ export const MpesaPageTab: React.FC = () => {
                         </div>
                     </FieldGroup>
                 </div>
+                
                 <div className="w-full p-6 bg-gray-50 rounded-[20px] border border-dashed border-[#ADABAB]">
                     <span className="font-bold text-gray-700 text-sm sm:text-base block mb-4 underline decoration-[#0CC258] underline-offset-4">
                         Option 2: Pay via Lipa na M-Pesa

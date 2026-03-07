@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CardFooter } from '@/components/ui/card'
 import { Button, ReusableSelect, ReuseableInput, ReuseableRadioChoiceGroup } from '@/dev/core'
-import { UseApiMutation } from '@/hooks/hooks'
-import type { CustomerVerificationDetailsProps, MpesaPayload, SubmitResponse } from '@/types/types'
-import { EMETHODS, PAYMENTPLANS } from '@/utils/constatnts'
+import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
+import type { CustomerVerificationDetailsProps, MpesaPayload, MpesaPollResponse, SubmitResponse } from '@/types/types'
+import { EMETHODS, PAYMENTPLANS, POLL_INTERVAL_MS, POLL_TIMEOUT_MS } from '@/utils/constatnts'
 import { EPAYMENTTABS } from '@/utils/steps-config'
 import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -14,9 +14,75 @@ import { PaymentDetailsSchema } from '@/types/form-schema'
 import type { PaymentFormValues } from '@/types/schema'
 import { extractErrorMessage } from '@/utils/helpers'
 
+
 export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goToNextStep, goToPrevStep }) => {
     const [selectedPaymentMethod, setSelectedPaymentMethod] = React.useState<string>('mpesa')
-    
+    const [isPolling, setIsPolling] = React.useState(false)
+    const [pollMessage, setPollMessage] = React.useState('')
+    const [checkoutRequestId, setCheckoutRequestId] = React.useState<string | null>(null)
+
+    const stopPolling = React.useCallback(() => {
+        setIsPolling(false)
+        setPollMessage('')
+        setCheckoutRequestId(null)
+    }, [])
+
+    const startPolling = React.useCallback((id: string) => {
+        setCheckoutRequestId(id)
+        setIsPolling(true)
+        setPollMessage('Waiting for payment confirmation...')
+    }, [])
+
+    const pollQuery = UseApiQuery<MpesaPollResponse>({
+        url: 'mpesa/status',
+        params: checkoutRequestId ? { checkout_request_id: checkoutRequestId } : undefined,
+        queryOptions: {
+            enabled: isPolling && Boolean(checkoutRequestId),
+            refetchInterval: isPolling ? POLL_INTERVAL_MS : false,
+            refetchIntervalInBackground: true,
+            retry: 1,
+        },
+    })
+
+    React.useEffect(() => {
+        if (!isPolling) return
+        const timeoutId = setTimeout(() => {
+            stopPolling()
+            ShowToast.error('Payment timed out. Please try again.')
+        }, POLL_TIMEOUT_MS)
+
+        return () => clearTimeout(timeoutId)
+    }, [isPolling, stopPolling])
+
+    React.useEffect(() => {
+        if (!isPolling || !pollQuery.data) return
+        const payload = pollQuery.data.data ?? pollQuery.data
+        const statusRaw = payload.status?.toLowerCase()
+        const resultCode = payload.ResultCode
+
+        const isSuccess = statusRaw === 'completed' || statusRaw === 'success' || statusRaw === 'successful' || resultCode === 0
+        const isFailed = statusRaw === 'failed' || statusRaw === 'cancelled' || statusRaw === 'canceled' || statusRaw === 'error' || (typeof resultCode === 'number' && resultCode !== 0)
+
+        if (isSuccess) {
+            stopPolling()
+            ShowToast.success(payload.message || payload.ResultDesc || 'Payment confirmed!')
+            goToNextStep?.()
+            return
+        }
+
+        if (isFailed) {
+            stopPolling()
+            ShowToast.error(payload.message || payload.ResultDesc || 'Payment failed. Please try again.')
+            return
+        }
+        setPollMessage(payload.message || 'Waiting for payment confirmation...')
+    }, [isPolling, pollQuery.data, goToNextStep, stopPolling])
+
+    React.useEffect(() => {
+        if (!isPolling || !pollQuery.isError) return
+        setPollMessage('Still checking payment status...')
+    }, [isPolling, pollQuery.isError])
+
     const form = useForm<PaymentFormValues>({
         resolver: zodResolver(PaymentDetailsSchema),
         defaultValues: {
@@ -38,16 +104,23 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
         url: 'mpesa/stk-push',
         method: EMETHODS.POST,
         mutationOptions: {
-            onSuccess: (data) => {
-                goToNextStep?.()
-                ShowToast.success(data.message || "Submitted successfully!")
+            onSuccess: (data: SubmitResponse) => {
+                const checkoutId = data.CheckoutRequestID || data.data?.CheckoutRequestID || data.data?.checkout_request_id
+
+                if (!checkoutId) {
+                    ShowToast.error(data.message || 'Failed to initiate payment.')
+                    return
+                }
+                ShowToast.success('Check your phone and enter your M-Pesa PIN.')
+                startPolling(String(checkoutId))
             },
             onError: (error: any) => {
-                const message = extractErrorMessage(error);
-                ShowToast.error(message ||"Submission failed!")
+                const message = extractErrorMessage(error)
+                ShowToast.error(message || 'Submission failed!')
             },
         },
     })
+
     const onSubmit = (data: PaymentFormValues) => {
         if (data.payment_method !== 'mpesa') {
             goToNextStep?.()
@@ -56,7 +129,7 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
         const payload: MpesaPayload = {
             phone: data.phone_number,
             amount: data.amount,
-            account_reference: 'Policy 101',
+            account_reference: 'POLICY-PAYMENT',
             transaction_desc: 'Policy payment',
         }
         submitMutation.mutate(payload)
@@ -116,6 +189,25 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
                         items={EPAYMENTTABS}
                     />
                 </div>
+
+                {isPolling && (
+                    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+                        <div className="bg-white rounded-2xl p-8 flex flex-col items-center gap-4 shadow-xl max-w-sm mx-4">
+                            <div className="w-12 h-12 border-4 border-[#0CC258] border-t-transparent rounded-full animate-spin" />
+                            <p className="text-center font-medium text-gray-700">{pollMessage}</p>
+                            <p className="text-center text-sm text-gray-500">
+                                Please enter your PIN on the M-Pesa prompt on your phone.
+                            </p>
+                            <button
+                                type="button"
+                                onClick={stopPolling}
+                                className="text-sm text-red-500 underline mt-2">
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                )}
+
                 <CardFooter className="w-full flex flex-col sm:flex-row justify-between gap-3 mt-3 px-2 sm:px-0">
                     <Button
                         type="button"
@@ -126,9 +218,10 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
                     </Button>
                     <Button
                         type="submit"
+                         disabled={isPolling}
                         className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
                         rightIcon={<ArrowRightCircle />}>
-                        Proceed To Payment
+                        {isPolling ? 'Processing...' : 'Proceed To Payment'}
                     </Button>
                 </CardFooter>
             </form>

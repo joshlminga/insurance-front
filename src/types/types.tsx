@@ -198,6 +198,7 @@ export interface SubmitResponse {
     last_page: number,
     current_page:number
   }
+  CheckoutRequestID?: any
 }
 export interface CustomerVerificationDetailsProps {
   goToNextStep?: () => void
@@ -568,4 +569,19 @@ export type MpesaPayload = {
     amount: number
     account_reference: string
     transaction_desc: string
+}
+
+export type MpesaPollResponse = {
+    status?: string
+    message?: string
+    ResultCode?: number
+    ResultDesc?: string
+    data?: {
+        status?: string
+        message?: string
+        ResultCode?: number
+        ResultDesc?: string
+        CheckoutRequestID?: string
+        checkout_request_id?: string
+    }
 }
