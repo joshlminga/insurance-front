@@ -467,14 +467,11 @@ export function ReusableTabs({
 export function RouteTabNav({ tabs, basePath, className }: TRouteTabNavProps) {
     const navigate = useNavigate()
     const location = useLocation()
-
     const isActive = (tabPath: string) => {
-        // const fullPath = tabPath ? `${basePath}/${tabPath}` : basePath
         return tabPath
             ? location.pathname.includes(tabPath)
             : location.pathname === basePath || location.pathname === `${basePath}/`
     }
-
     return (
         <div className={cn("flex border-b", className)}>
             {tabs.map((tab) => {

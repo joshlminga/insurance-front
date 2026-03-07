@@ -120,9 +120,9 @@ export const Navbar = (
                         <Link to='#' className="hover:text-red-500 transition uppercase">Contact</Link>
                         {isAuthenticated && (
                             <>
-                                {isGeneral === true && (
+                                {/* {isGeneral === true && (
                                     <Link to={EROUTES.DASHBOARD} className="hover:text-red-500 transition uppercase">Dashboard</Link>
-                                )}
+                                )} */}
                                 <button onClick={logout} className="hover:text-red-500 transition uppercase">Logout</button>
                             </>
                         )}

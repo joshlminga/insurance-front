@@ -585,3 +585,15 @@ export type MpesaPollResponse = {
         checkout_request_id?: string
     }
 }
+
+export type ClaimStatus = 'pending' | 'approved' | 'rejected'
+
+export type ClaimItem = {
+  id: string
+  coverTitle: string
+  policyNumber: string
+  incidentDate: string
+  submittedDate: string
+  amount: number
+  status: ClaimStatus
+}

@@ -5,8 +5,8 @@ export function CancelledCoversPage() {
     return (
         <EmptyState
             icon={ShieldX}
-            title="No cancelled or rejected covers"
-            description="You don't have any cancelled or rejected covers to display."
+            title="No pending covers"
+            description="You don't have any pending covers to display."
         />
     )
 }

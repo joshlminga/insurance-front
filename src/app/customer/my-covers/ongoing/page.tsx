@@ -5,14 +5,13 @@ import { EPREFIX, EROUTES } from '@/utils/enums'
 import { Outlet, useLocation } from 'react-router-dom'
 
 const coversTabs = [
-    { label: 'Ongoing/Renewed', path: '' },
-    { label: 'Cancelled/Rejected', path: 'cancelled' },
+    { label: 'Ongoing/Renewed Covers', path: '' },
+    { label: 'Pending Covers', path: 'cancelled' },
 ]
 
 export function CoversPage() {
     const location = useLocation()
     const isCancelled = location.pathname.includes('cancelled')
-
     return (
         <div>
             <h1 className="w-full mb-6 text-xl font-semibold">Covers</h1>
@@ -21,7 +20,7 @@ export function CoversPage() {
                 {isCancelled ? (
                     <Outlet />
                 ) : (
-                    <div>
+                    <div className=" overflow-hidden">
                         {ongoingCovers.map((cover, i) => (
                             <CoverCard key={`${cover.id}-${i}`} cover={cover} />
                         ))}

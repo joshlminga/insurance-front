@@ -1,3 +1,4 @@
+import { ClaimItem } from "@/types/types";
 
 export const ELOGO = {
   NAVBARLOGO: '/logo/logo1.png'
@@ -389,5 +390,26 @@ export const ongoingCovers = [
     status: 'COVERED',
     date: 'On 07-11',
     img: '/britam.png',
+  },
+]
+
+export const claims: ClaimItem[] = [
+  {
+    id: 'CLM-1001',
+    coverTitle: 'PSV Car Insurance Cover',
+    policyNumber: 'POL-366782717',
+    incidentDate: '2026-01-28',
+    submittedDate: '2026-01-29',
+    amount: 78000,
+    status: 'pending',
+  },
+  {
+    id: 'CLM-1002',
+    coverTitle: 'All in One Cover',
+    policyNumber: 'POL-311675987',
+    incidentDate: '2025-12-19',
+    submittedDate: '2025-12-20',
+    amount: 45000,
+    status: 'approved',
   },
 ]
