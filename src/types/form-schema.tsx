@@ -22,7 +22,7 @@ export const CustomerDetailsSchema = z.object({
     .min(7, "Invalid phone number")
     .optional()
     .or(z.literal("")),
-    country: z
+  country: z
     .string()
     .min(1, "Select a country"),
 })
@@ -143,6 +143,10 @@ const MpesaPaymentSchema = BasePaymentSchema.extend({
   phone_number: z.string()
     .min(10, "Phone number must be at least 10 digits")
     .regex(/^(?:\+254|254|0)?[17]\d{8}$/, "Invalid Kenyan phone number"),
+  //  amount: z.number().positive("Amount must be greater than 0"),
+  amount: z.number().positive().refine((val) => /^\d+(\.\d{1,2})?$/.test(val.toString()),
+    "Amount cannot have more than 2 decimal places"
+  )
 })
 
 // Card specific fields with validation

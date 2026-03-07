@@ -13,6 +13,13 @@ import { FormProvider, useForm } from 'react-hook-form'
 import { PaymentDetailsSchema } from '@/types/form-schema'
 import type { PaymentFormValues } from '@/types/schema'
 
+type MpesaPayload = {
+    phone: string
+    amount: number
+    account_reference: string
+    transaction_desc: string
+}
+
 export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goToNextStep, goToPrevStep }) => {
     const [selectedPaymentMethod, setSelectedPaymentMethod] = React.useState<string>('mpesa')
     
@@ -24,6 +31,8 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
             first_installment: '',
             second_installment: '',
             third_installment: '',
+            amount: 100,
+            phone_number: '',
         },
     })
     const handlePaymentMethodChange = (value: string) => {
@@ -32,8 +41,8 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
         form.clearErrors()
     }
     
-    const submitMutation = UseApiMutation<SubmitResponse, PaymentFormValues>({
-        url: '',
+    const submitMutation = UseApiMutation<SubmitResponse, MpesaPayload>({
+        url: 'mpesa/stk-push',
         method: EMETHODS.POST,
         mutationOptions: {
             onSuccess: (data) => {
@@ -51,9 +60,19 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
     })
     
     const onSubmit = (data: PaymentFormValues) => {
-        console.log(data);
+        if (data.payment_method !== 'mpesa') {
+            goToNextStep?.()
+            return
+        }
 
-        submitMutation.mutate(data)
+        const payload: MpesaPayload = {
+            phone: data.phone_number,
+            amount: data.amount,
+            account_reference: 'ORDER-1001',
+            transaction_desc: 'Policy payment',
+        }
+
+        submitMutation.mutate(payload)
     }
     
     return (
@@ -129,10 +148,9 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
                         Previous
                     </Button>
                     <Button
-                        type="button"
+                        type="submit"
                         className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
                         rightIcon={<ArrowRightCircle />}
-                        onClick={()=>goToNextStep?.()}
                     >
                         Proceed To Payment
                     </Button>

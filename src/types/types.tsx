@@ -562,3 +562,10 @@ export type VehicleClassItem = {
     slug: string
     is_active: boolean
 }
+
+export type MpesaPayload = {
+    phone: string
+    amount: number
+    account_reference: string
+    transaction_desc: string
+}
