@@ -263,7 +263,8 @@ export type CheckboxOption = {
 export type ReusableCheckboxGridProps = {
   options: CheckboxOption[]
   columns?: number
-  className?: string
+  className?: string,
+  name?:string
 }
 
 export type ReusablePaginationProps = {
@@ -463,6 +464,7 @@ export interface TCountry {
 
 export interface TCountryResponse {
   data: TCountry[]
+  pagination: any
 }
 export interface TCountriesInputMultiselectProps {
   value?: string[]

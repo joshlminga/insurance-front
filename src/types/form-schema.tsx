@@ -41,29 +41,36 @@ export const ResendOtpPayloadSchema = z.object({
 })
 
 export const VehicleDetailsSchema = z.object({
-  user_id: z.union([z.string(), z.number()]).optional().or(z.literal("")),
+  user_id: z.union([z.string(), z.number()]).or(z.literal("")),
   registration_number: z.string().optional().or(z.literal("")),
   vehicle_model: z.string().optional().or(z.literal("")),
   vehicle_make: z.string().optional().or(z.literal("")),
   yom: z.string().optional().or(z.literal("")),
   insurance_type: z.string().optional().or(z.literal("")),
 
-  // Previously required fields now made optional
-  covertype_id: z.string().optional().or(z.literal("")),
-  covering_id: z.string().optional().or(z.literal("")),
-  vehicle_make_id: z.string().optional().or(z.literal("")),
-  vehicle_model_id: z.string().optional().or(z.literal("")),
+  covertype_id: z.string().min(1, "Cover Type is required"),
+  covering_id: z.string().min(1, "Covering is required"),
+  vehicle_make_id: z.string().min(1, "Vehicle make is required"),
+  vehicle_model_id: z.string().min(1, "Vehicle model is required"),
   used_for_id: z.string().optional().or(z.literal("")),
   bodytype_id: z.string().optional().or(z.literal("")),
   country_id: z.string().optional().or(z.literal("")),
-  year: z.string().optional().or(z.literal("")),
+  year: z
+  .string()
+  .min(1, "YOM is required")
+  .refine((val) => {
+    const year = Number(val)
+    const currentYear = new Date().getFullYear()
+    return !isNaN(year) && year >= 2011 && year <= currentYear
+  }, `Year must be between 2011 and ${new Date().getFullYear()}`),
 
-  ownership: z.string().optional().or(z.literal("")),
+  ownership: z.string().min(1, "Ownarship is required"),
   vehicle_value: z.string().optional().or(z.literal("")),
   number_of_passengers: z.string().optional().or(z.literal("")),
   tonnage: z.string().optional().or(z.literal("")),
 
   vehicle_class_id: z.string().optional().or(z.literal("")),
+  valued_by_professional: z.boolean().optional()
 })
 
 export const LoginSchema = z.object({
