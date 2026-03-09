@@ -457,7 +457,8 @@ export type TReusableDropdownProp<T> = {
 
 export interface TCountry {
   id: number
-  name: string
+  name: string,
+  meta: any
 }
 
 export interface TCountryResponse {
