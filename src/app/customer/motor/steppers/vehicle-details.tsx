@@ -116,9 +116,14 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
         },
     })
     const onSubmit = (data: VehicleFormValues) => {
+        const valuedByProfessional =
+            data.valued_by_professional === true ||
+            String(data.valued_by_professional).toLowerCase() === "true"
+
         submitMutation.mutate({
             ...data,
             coverfor_id: data.vehicle_class_id,
+            valued_by_professional: valuedByProfessional,
         })
     }
 
