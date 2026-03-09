@@ -22,7 +22,7 @@ export const MotorPsvPage: React.FC = () => {
 
     return (
         <div className='justify-center items-center'>
-            <div className="justify-between">
+            <div className="justify-between p-2">
                 <FieldGroup>
                     <div className="grid grid-cols-2 gap-x-5 gap-2">
                         <Controller
@@ -156,7 +156,7 @@ export const MotorPsvPage: React.FC = () => {
                                 </div>
                             )}
                         />
-                        {/* <Controller
+                         {/* <Controller
                             control={control}
                             name="bodytype_id"
                             render={({ field }) => (
@@ -171,7 +171,7 @@ export const MotorPsvPage: React.FC = () => {
                                     />
                                 </div>
                             )}
-                        />
+                        /> */}
                          <ReuseableInput
                             className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
                             control={control}
@@ -187,7 +187,7 @@ export const MotorPsvPage: React.FC = () => {
                             label="Vehicle tonnage"
                             type="number"
                             placeholder="vehicle tonnage"
-                        />*/}
+                        />
                         <Controller
                             control={control}
                             name="country_id"

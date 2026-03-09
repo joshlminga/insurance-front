@@ -187,3 +187,4 @@ export const RatesSteps = [
 
 export const POLL_INTERVAL_MS = 3000
 export const POLL_TIMEOUT_MS = 90000
+export const MOTOR_QUOTE_SESSION_STORAGE_KEY = "motor_quote_session_id"

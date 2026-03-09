@@ -1,10 +1,19 @@
 import { FieldGroup } from '@/components/ui/field'
-import { ReusableSelect, ReusableSingleSelectApiInput, ReuseableInput, ReuseableSingleSelectCountriesInput } from '@/dev/core'
+import { 
+    ReusableSelect, 
+    ReusableSingleSelectApiInput, 
+    ReuseableInput, 
+    ReuseableSingleSelectCountriesInput 
+} from '@/dev/core'
 import { OWNERSHIPOPTIONS } from '@/utils/constatnts'
 import React, { useEffect } from 'react'
-import { Controller, useFormContext, useWatch } from 'react-hook-form'
+import { 
+    Controller, 
+    useFormContext, 
+    useWatch 
+} from 'react-hook-form'
 
-export const MotorSpecialVehicle = () => {
+export const MotorSpecialVehicle: React.FC = () => {
      const { control, setValue } = useFormContext()
         const selectedMakeId = useWatch({ control, name: "vehicle_make_id" })
         const selectedVehicleClassId = useWatch({ control, name: "vehicle_class_id" })
@@ -19,10 +28,10 @@ export const MotorSpecialVehicle = () => {
         useEffect(() => {
             setValue("used_for_id", "")
         }, [selectedVehicleClassId, selectedCoveringId, setValue]);
-        
+
   return (
    <div className='justify-center items-center'>
-            <div className="justify-between">
+            <div className="justify-between p-2">
                 <FieldGroup>
                     <div className="grid grid-cols-2 gap-x-5 gap-2">
                         <Controller

@@ -463,6 +463,7 @@ export interface TCountry {
 
 export interface TCountryResponse {
   data: TCountry[]
+  pagination: any
 }
 export interface TCountriesInputMultiselectProps {
   value?: string[]

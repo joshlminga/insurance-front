@@ -2,29 +2,66 @@
 import { CardFooter, } from '@/components/ui/card'
 import { Button, CustomDialogComponent, ReusableCard, ReusableCheckboxGrid, ReusablePagination, ReuseableInput } from '@/dev/core'
 import { useCustomDialogContextFactory, } from '@/hooks'
-import type { CustomerVerificationDetailsProps } from '@/types/types'
+import type { CustomerVerificationDetailsProps, SubmitResponse, TFilterOptions, TPaginationFilters } from '@/types/types'
 import { EPREFIX, EQUOTATIONSAMPLEDATA, EROUTES, QUOTATIONCHECKBOX } from '@/utils/enums'
 import { ArrowLeftCircle, ArrowRightCircle, Plus } from 'lucide-react'
-import React, { useState } from 'react'
+import React, { useEffect, useMemo, useReducer, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { ComparisonPage } from './comparisons/page'
 import { Link, useLocation } from 'react-router-dom'
 import { QuotePreviewPage } from './qoute-preview/page'
 import { UseAuth } from '@/components/auth-provider'
 import { useStepperContext } from '@/hooks/stepper-context'
+import { FILTEROPTIONS, MOTOR_QUOTE_SESSION_STORAGE_KEY, ReusableReducer } from '@/utils/constatnts'
+import { UseApiQuery } from '@/hooks/hooks'
 
 export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goToNextStep, goToPrevStep }) => {
     const [page, setPage] = useState(1)
+    const [quoteSessionId, setQuoteSessionId] = useState<number | null>(null)
     const form = useForm();
     const { isAuthenticated } = UseAuth()
     const location = useLocation()
     const { currentStep } = useStepperContext()
+
+     const [filter] = useReducer(
+        ReusableReducer<TPaginationFilters & TFilterOptions>,
+        { ...FILTEROPTIONS, page: 1, pageSize: 15 }
+      );
 
     const { handleDialogContextSwitch, dialogContent, dialogOpen } =
         useCustomDialogContextFactory<{
             refetch?: () => Promise<any>;
             data?: any;
         }>();
+
+    useEffect(() => {
+        const storedSessionId = Number(localStorage.getItem(MOTOR_QUOTE_SESSION_STORAGE_KEY))
+        if (Number.isFinite(storedSessionId) && storedSessionId > 0) {
+            setQuoteSessionId(storedSessionId)
+        } else {
+            setQuoteSessionId(null)
+        }
+    }, [])
+
+    const premiumUrl = useMemo(
+        () => (quoteSessionId ? `quotation/motor/${quoteSessionId}/premium` : ""),
+        [quoteSessionId]
+    )
+
+    const { data, isLoading } = UseApiQuery<SubmitResponse>({
+        url: premiumUrl,
+        params: {
+            page: filter?.page,
+            pageSize: filter?.pageSize,
+        },
+        queryOptions: {
+            enabled: Boolean(quoteSessionId),
+        },
+    })
+
+    console.log(data);
+
+    const EQUOTATIONSAMPLEDATA = data?.data;
 
     return (
         <>
@@ -35,6 +72,11 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                             Additional Benefits:
                         </h1>
                         <hr className="mb-4 sm:mb-6" />
+                        {!quoteSessionId && (
+                            <div className="mb-4 rounded border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+                                Quote session not found. Go back to Vehicle Details and submit again.
+                            </div>
+                        )}
                         <div className="overflow-x-auto">
                             <ReusableCheckboxGrid
                                 options={QUOTATIONCHECKBOX}
@@ -80,6 +122,12 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                     <h1 className="text-xl sm:text-2xl font-bold mb-4">
                         Quote Comparison
                     </h1>
+                    {isLoading && (
+                        <p className="mb-3 text-sm text-muted-foreground">Fetching premium quotations...</p>
+                    )}
+                    {quoteSessionId && !isLoading && (data?.data?.length ?? 0) === 0 && (
+                        <p className="mb-3 text-sm text-muted-foreground">No premium quotations available yet for this quote session.</p>
+                    )}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                         {EQUOTATIONSAMPLEDATA.map((item) => (
                             <ReusableCard
@@ -124,7 +172,6 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                         )}
                                     </>
                                 }
-
                                 children={
                                     <>
                                         {item.content.map((row, idx) => (
@@ -151,8 +198,8 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
 
                     <div className="order-first sm:order-0">
                         <ReusablePagination
-                            currentPage={page}
-                            totalPages={10}
+                            currentPage={data?.pagination?.current_page}
+                            totalPages={data?.pagination?.total}
                             onPageChange={setPage}
                         />
                     </div>

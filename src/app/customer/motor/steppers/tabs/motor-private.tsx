@@ -27,7 +27,7 @@ export const MotorPrivatePage: React.FC = () => {
 
     return (
         <div className='justify-center items-center'>
-            <div className="justify-between">
+            <div className="justify-between p-2">
                 <FieldGroup>
                     <div className="grid grid-cols-2 gap-x-5 gap-2">
                         <Controller

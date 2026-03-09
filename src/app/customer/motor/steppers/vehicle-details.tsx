@@ -9,13 +9,17 @@ import type {
     VehicleClassItem
 } from '@/types/types'
 import { CardFooter } from '@/components/ui/card'
-import { ArrowLeftCircle, ArrowRightCircle, Loader2 } from 'lucide-react'
+import { 
+    ArrowLeftCircle, 
+    ArrowRightCircle, 
+    Loader2 
+} from 'lucide-react'
 import { useForm, FormProvider } from 'react-hook-form'
 import type { VehicleFormValues } from '@/types/schema'
 import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { VehicleDetailsSchema } from '@/types/form-schema'
-import { EMETHODS } from '@/utils/constatnts'
+import { EMETHODS, MOTOR_QUOTE_SESSION_STORAGE_KEY } from '@/utils/constatnts'
 import { ShowToast } from '@/utils/utils'
 import { UseAuth } from '@/components/auth-provider'
 import { extractErrorMessage } from '@/utils/helpers'
@@ -94,6 +98,13 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
         method: EMETHODS.POST,
         mutationOptions: {
             onSuccess: (data) => {
+                const quoteSessionId = Number(data?.data?.quote_session?.id)
+                if (!Number.isFinite(quoteSessionId) || quoteSessionId <= 0) {
+                    ShowToast.error("Quote session could not be initialized. Please try again.")
+                    return
+                }
+
+                localStorage.setItem(MOTOR_QUOTE_SESSION_STORAGE_KEY, String(quoteSessionId))
                 goToNextStep?.()
                 ShowToast.success(data.message || "Submitted successfully!")
             },
