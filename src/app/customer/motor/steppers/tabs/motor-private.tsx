@@ -1,11 +1,13 @@
 import { FieldGroup } from '@/components/ui/field'
 import {
+    ReusableCheckboxGrid,
     ReusableSelect,
     ReusableSingleSelectApiInput,
-    ReuseableInput, 
+    ReuseableInput,
     ReuseableSingleSelectCountriesInput
 } from '@/dev/core'
 import { OWNERSHIPOPTIONS } from '@/utils/constatnts'
+import { PROFFESIONALVALUATIONCHECKBOX } from '@/utils/enums'
 import React, { useEffect } from 'react'
 import { Controller, useFormContext, useWatch } from 'react-hook-form'
 
@@ -161,38 +163,6 @@ export const MotorPrivatePage: React.FC = () => {
                                 </div>
                             )}
                         />
-                        {/* <Controller
-                            control={control}
-                            name="bodytype_id"
-                            render={({ field }) => (
-                                <div>
-                                    <ReusableSingleSelectApiInput
-                                        url={`taxonomies/vehicle/body-types`}
-                                        value={field.value}
-                                        onChange={field.onChange}
-                                        label="Vehicle Body Type"
-                                        required
-                                        placeholder="Select vehicle body type..."
-                                    />
-                                </div>
-                            )}
-                        />
-                         <ReuseableInput
-                            className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
-                            control={control}
-                            name="number_of_passengers"
-                            label="Vehicle number of passengers"
-                            type="number"
-                            placeholder="vehicle number of passengers"
-                        />
-                        <ReuseableInput
-                            className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
-                            control={control}
-                            name="tonnage"
-                            label="Vehicle tonnage"
-                            type="number"
-                            placeholder="vehicle tonnage"
-                        />*/}
                         <Controller
                             control={control}
                             name="country_id"
@@ -207,7 +177,14 @@ export const MotorPrivatePage: React.FC = () => {
                                     />
                                 </div>
                             )}
-                        /> 
+                        />
+                    </div>
+                    <div className="overflow-x-auto">
+                        <ReusableCheckboxGrid
+                            options={PROFFESIONALVALUATIONCHECKBOX}
+                            columns={1}
+                            name='valued_by_professional'
+                        />
                     </div>
                 </FieldGroup>
             </div>

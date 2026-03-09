@@ -70,6 +70,7 @@ export const VehicleDetailsSchema = z.object({
   tonnage: z.string().optional().or(z.literal("")),
 
   vehicle_class_id: z.string().optional().or(z.literal("")),
+  valued_by_professional: z.boolean().optional()
 })
 
 export const LoginSchema = z.object({

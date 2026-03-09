@@ -381,6 +381,7 @@ export function ReusableSelect<T extends FieldValues>({
 
 export const ReusableCheckboxGrid = ({
     options,
+    name,
     columns = 3,
     className = '',
 }: ReusableCheckboxGridProps) => {
@@ -393,6 +394,7 @@ export const ReusableCheckboxGrid = ({
                     className="flex items-start gap-2 mt-2">
                     <Checkbox
                         checked={option.checked}
+                        name={name}
                         onCheckedChange={(val) =>
                             option.onChange?.(Boolean(val))
                         }
@@ -401,7 +403,7 @@ export const ReusableCheckboxGrid = ({
                        data-[state=checked]:border-[#C20C0C]"
                     />
                     <label className="cursor-pointer max-w-112.25">
-                        {option.label}
+                        {option?.label}
                     </label>
                 </div>
             ))}

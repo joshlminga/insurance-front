@@ -85,6 +85,10 @@ export const QUOTATIONCHECKBOX = [
   { id: 'pa', label: 'Personal Accident' },
 ]
 
+export const PROFFESIONALVALUATIONCHECKBOX = [
+  { id: 'true', label: 'Vehicle has been valued by a professional valuer in the last 18 months?' },
+]
+
 export const EQUOTATIONSAMPLEDATA = [
   {
     id: 1,

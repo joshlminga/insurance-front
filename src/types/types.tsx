@@ -263,7 +263,8 @@ export type CheckboxOption = {
 export type ReusableCheckboxGridProps = {
   options: CheckboxOption[]
   columns?: number
-  className?: string
+  className?: string,
+  name?:string
 }
 
 export type ReusablePaginationProps = {

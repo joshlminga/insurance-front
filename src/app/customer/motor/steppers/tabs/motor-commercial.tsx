@@ -1,33 +1,35 @@
 import { FieldGroup } from '@/components/ui/field'
-import { 
-    ReusableSelect, 
-    ReusableSingleSelectApiInput, 
-    ReuseableInput, 
-    ReuseableSingleSelectCountriesInput 
+import {
+    ReusableCheckboxGrid,
+    ReusableSelect,
+    ReusableSingleSelectApiInput,
+    ReuseableInput,
+    ReuseableSingleSelectCountriesInput
 } from '@/dev/core'
 import { OWNERSHIPOPTIONS } from '@/utils/constatnts'
+import { PROFFESIONALVALUATIONCHECKBOX } from '@/utils/enums'
 import React, { useEffect } from 'react'
-import { 
-    Controller, 
-    useFormContext, 
-    useWatch 
+import {
+    Controller,
+    useFormContext,
+    useWatch
 } from 'react-hook-form'
 
 export const MotorCommercialPage: React.FC = () => {
-  const { control, setValue } = useFormContext()
-      const selectedMakeId = useWatch({ control, name: "vehicle_make_id" })
-      const selectedVehicleClassId = useWatch({ control, name: "vehicle_class_id" })
-      const selectedCoveringId = useWatch({ control, name: "covering_id" })
-      const canFetchModels = Boolean(selectedMakeId)
-      const canFetchVehicleUse = Boolean(selectedVehicleClassId && selectedCoveringId)
-  
-      useEffect(() => {
-          setValue("vehicle_model_id", "")
-      }, [selectedMakeId, setValue])
-  
-      useEffect(() => {
-          setValue("used_for_id", "")
-      }, [selectedVehicleClassId, selectedCoveringId, setValue])
+    const { control, setValue } = useFormContext()
+    const selectedMakeId = useWatch({ control, name: "vehicle_make_id" })
+    const selectedVehicleClassId = useWatch({ control, name: "vehicle_class_id" })
+    const selectedCoveringId = useWatch({ control, name: "covering_id" })
+    const canFetchModels = Boolean(selectedMakeId)
+    const canFetchVehicleUse = Boolean(selectedVehicleClassId && selectedCoveringId)
+
+    useEffect(() => {
+        setValue("vehicle_model_id", "")
+    }, [selectedMakeId, setValue])
+
+    useEffect(() => {
+        setValue("used_for_id", "")
+    }, [selectedVehicleClassId, selectedCoveringId, setValue])
 
     return (
         <div className='justify-center items-center'>
@@ -181,7 +183,7 @@ export const MotorCommercialPage: React.FC = () => {
                                 </div>
                             )}
                         />
-                         <ReuseableInput
+                        <ReuseableInput
                             className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
                             control={control}
                             name="number_of_passengers"
@@ -211,7 +213,14 @@ export const MotorCommercialPage: React.FC = () => {
                                     />
                                 </div>
                             )}
-                        /> 
+                        />
+                    </div>
+                    <div className="overflow-x-auto">
+                        <ReusableCheckboxGrid
+                            options={PROFFESIONALVALUATIONCHECKBOX}
+                            columns={1}
+                            name='valued_by_professional'
+                        />
                     </div>
                 </FieldGroup>
             </div>

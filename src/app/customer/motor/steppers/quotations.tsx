@@ -3,7 +3,7 @@ import { CardFooter, } from '@/components/ui/card'
 import { Button, CustomDialogComponent, ReusableCard, ReusableCheckboxGrid, ReusablePagination, ReuseableInput } from '@/dev/core'
 import { useCustomDialogContextFactory, } from '@/hooks'
 import type { CustomerVerificationDetailsProps, SubmitResponse, TFilterOptions, TPaginationFilters } from '@/types/types'
-import { EPREFIX, EQUOTATIONSAMPLEDATA, EROUTES, QUOTATIONCHECKBOX } from '@/utils/enums'
+import { EPREFIX, EROUTES, QUOTATIONCHECKBOX } from '@/utils/enums'
 import { ArrowLeftCircle, ArrowRightCircle, Plus } from 'lucide-react'
 import React, { useEffect, useMemo, useReducer, useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -16,14 +16,13 @@ import { FILTEROPTIONS, MOTOR_QUOTE_SESSION_STORAGE_KEY, ReusableReducer } from 
 import { UseApiQuery } from '@/hooks/hooks'
 
 export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goToNextStep, goToPrevStep }) => {
-    const [page, setPage] = useState(1)
     const [quoteSessionId, setQuoteSessionId] = useState<number | null>(null)
     const form = useForm();
     const { isAuthenticated } = UseAuth()
     const location = useLocation()
     const { currentStep } = useStepperContext()
 
-     const [filter] = useReducer(
+     const [filter, optionsDispatcher] = useReducer(
         ReusableReducer<TPaginationFilters & TFilterOptions>,
         { ...FILTEROPTIONS, page: 1, pageSize: 15 }
       );
@@ -59,9 +58,11 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
         },
     })
 
-    console.log(data);
-
-    const EQUOTATIONSAMPLEDATA = data?.data;
+    const quotationItems = useMemo(() => {
+        if (Array.isArray(data?.data)) return data.data
+        if (Array.isArray(data?.data?.products)) return data.data.products
+        return []
+    }, [data])
 
     return (
         <>
@@ -83,7 +84,6 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                 columns={3}
                             />
                         </div>
-
                         <hr className="my-4 sm:mb-6" />
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8">
                             <ReuseableInput
@@ -106,7 +106,6 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                             Add
                         </Button>
                     </div>
-
                     <Button
                         type='button'
                         className="w-full sm:w-auto sm:ml-auto mt-4 flex items-center justify-center font-bold bg-[#C20C0C]/80 hover:bg-[#C20C0C]"
@@ -125,13 +124,13 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                     {isLoading && (
                         <p className="mb-3 text-sm text-muted-foreground">Fetching premium quotations...</p>
                     )}
-                    {quoteSessionId && !isLoading && (data?.data?.length ?? 0) === 0 && (
+                    {quoteSessionId && !isLoading && quotationItems.length === 0 && (
                         <p className="mb-3 text-sm text-muted-foreground">No premium quotations available yet for this quote session.</p>
                     )}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-                        {EQUOTATIONSAMPLEDATA.map((item) => (
+                        {quotationItems.map((item: any, itemIndex: number) => (
                             <ReusableCard
-                                key={item.id}
+                                key={item?.id ?? `quotation-${itemIndex}`}
                                 header={item.header as any}
                                 rootClassName=""
                                 footerClassName="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between"
@@ -174,7 +173,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                 }
                                 children={
                                     <>
-                                        {item.content.map((row, idx) => (
+                                        {(Array.isArray(item?.content) ? item.content : []).map((row: any, idx: number) => (
                                             <div key={idx}>
                                                 <div className="flex flex-wrap justify-between gap-1 min-w-0">
                                                     <span className="text-xs sm:text-sm wrap-break-word max-w-[60%]">{row.label}</span>
@@ -198,9 +197,11 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
 
                     <div className="order-first sm:order-0">
                         <ReusablePagination
-                            currentPage={data?.pagination?.current_page}
-                            totalPages={data?.pagination?.total}
-                            onPageChange={setPage}
+                            currentPage={data?.pagination?.current_page ?? filter.page}
+                            totalPages={data?.pagination?.total_pages ?? 1}
+                            onPageChange={(nextPage) =>
+                                optionsDispatcher({ type: "page", payload: { page: nextPage } })
+                            }
                         />
                     </div>
 
