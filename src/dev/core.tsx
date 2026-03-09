@@ -32,7 +32,9 @@ import type {
     SubmitResponse,
     UserMenuPopoverProps,
     ReusableSingleSelectApiInputProps,
-    ReusableApiMultiSelectProps
+    ReusableApiMultiSelectProps,
+    TFilterOptions,
+    TPaginationFilters
 } from "@/types/types";
 import {
     Stepper,
@@ -52,7 +54,7 @@ import {
 } from "@/components/ui/tabs"
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Fragment } from "react/jsx-runtime";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { Button as ShadButton } from "@/components/ui/button"
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -61,40 +63,40 @@ import { Controller, type FieldValues } from "react-hook-form";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { 
-    Pagination, 
-    PaginationContent, 
-    PaginationEllipsis, 
-    PaginationItem, 
-    PaginationLink, 
-    PaginationNext, 
-    PaginationPrevious 
+import {
+    Pagination,
+    PaginationContent,
+    PaginationEllipsis,
+    PaginationItem,
+    PaginationLink,
+    PaginationNext,
+    PaginationPrevious
 } from "@/components/ui/pagination";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { 
-    DropdownMenu, 
-    DropdownMenuContent, 
-    DropdownMenuItem, 
-    DropdownMenuSeparator, 
-    DropdownMenuTrigger 
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { 
-    MultiSelect, 
-    MultiSelectContent, 
-    MultiSelectGroup, 
-    MultiSelectItem, 
-    MultiSelectTrigger, 
-    MultiSelectValue 
+import {
+    MultiSelect,
+    MultiSelectContent,
+    MultiSelectGroup,
+    MultiSelectItem,
+    MultiSelectTrigger,
+    MultiSelectValue
 } from "@/components/ui/multi-select";
 import { UseApiQuery } from "@/hooks/hooks";
 import { Label } from "@/components/ui/label";
-import { EORGANIZATIONTYPES } from "@/utils/constatnts";
-import { 
-    Popover, 
-    PopoverContent, 
-    PopoverTrigger 
+import { EORGANIZATIONTYPES, FILTEROPTIONS, ReusableReducer } from "@/utils/constatnts";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger
 } from "@/components/ui/popover";
 
 const formatSegment = (segment: string) => {
@@ -198,12 +200,12 @@ export function ReusableStepper({
                         <StepperItem
                             key={stepNumber}
                             step={stepNumber}
-                            className="relative flex-1 min-w-[60px] sm:min-w-0 items-start">
+                            className="relative flex-1 min-w-15 sm:min-w-0 items-start">
                             <StepperTrigger className="flex flex-col items-center justify-center gap-0.5 sm:gap-1 grow">
                                 <StepperIndicator
-                                    className={cn("h-2 sm:h-[17px] w-full max-w-20 sm:max-w-[124px] rounded-[10px] transition-all",
+                                    className={cn("h-2 sm:h-4.25 w-full max-w-20 sm:max-w-31 rounded-[10px] transition-all",
                                         "bg-gray-300 data-[state=active]:bg-linear-to-r from-[#FFB3B3] via-[#FF8383] to-[#FF4545]")} />
-                                <StepperTitle className="hidden sm:block text-start text-xs lg:text-sm font-semibold group-data-[state=inactive]/step:text-muted-foreground truncate max-w-[100px] lg:max-w-none">
+                                <StepperTitle className="hidden sm:block text-start text-xs lg:text-sm font-semibold group-data-[state=inactive]/step:text-muted-foreground truncate max-w-25 lg:max-w-none">
                                     {step.title}
                                 </StepperTitle>
                                 <span className="sm:hidden text-[10px] font-medium text-muted-foreground">
@@ -426,8 +428,8 @@ export function ReusableTabs({
             onValueChange={onValueChange}
             className={cn("w-full", className)}>
             <TabsList className={cn("h-auto min-h-10 sm:min-h-10 lg:h-10 w-full max-w-full lg:max-w-130 rounded-[12px] sm:rounded-[20px] border border-[#ADABAB] bg-white p-0 flex flex-wrap sm:flex-nowrap",
-                    tabsListClassName
-                )}>
+                tabsListClassName
+            )}>
                 {tabs.map((tab) => {
                     return (
                         <TabsTrigger
@@ -609,7 +611,7 @@ export const ReusableCard = ({
             {header && (
                 <CardHeader className={cn('flex items-center justify-center p-3 text-center', headerClassName)}>
                     {header.type === 'image' && (
-                        <div className="w-[109px] h-[60px] flex items-center justify-center">
+                        <div className="w-27.25 h-15 flex items-center justify-center">
                             <img
                                 src={header.src}
                                 alt={header.alt ?? ''}
@@ -863,7 +865,8 @@ export const PageForPagination = ({
 }: {
     handler: (data: any) => void;
     content: string;
-    active?: boolean;}) => (
+    active?: boolean;
+}) => (
     <div className={`rounded-xl selection:bg-inherit flex items-center justify-center leading-6 hover:bg-[#F9F5FF] text-[14px] 
     font-medium text-center cursor-pointer w-10 h-10 ${active ? 'bg-[#F9F5FF] text-[#7F56D9]' : 'text-main-orange'
         }`}
@@ -1016,7 +1019,7 @@ export const ReusableCountriesInputMultiselect = ({
     )
 }
 
-export function ReuseableSingleSelectCountriesInput<T extends FieldValues>({
+{/* export function ReuseableSingleSelectCountriesInput<T extends FieldValues>({
     value,
     onChange,
     placeholder = "Select country...",
@@ -1026,9 +1029,19 @@ export function ReuseableSingleSelectCountriesInput<T extends FieldValues>({
     className,
 
 }: ReuseableSingleSelectCountriesInputProps<T>) {
+    const [filter, optionsDispatcher] = useReducer(
+        ReusableReducer<TPaginationFilters & TFilterOptions>,
+        { ...FILTEROPTIONS, page: 1, pageSize: 15 }
+    );
+
     const { data, isLoading } = UseApiQuery<TCountryResponse>({
         url: "taxonomies/general/countries",
-        params: { direction: "asc" },
+        params: {
+            direction: "asc",
+            page: filter.page,
+            pageSize: filter.pageSize,
+            term: filter.term
+        },
         queryOptions: { enabled: true },
     })
 
@@ -1062,6 +1075,117 @@ export function ReuseableSingleSelectCountriesInput<T extends FieldValues>({
                             No countries found
                         </div>
                     )}
+                </SelectContent>
+            </Select>
+        </div>
+    )
+} */}
+
+export function ReuseableSingleSelectCountriesInput<T extends FieldValues>({
+    value,
+    onChange,
+    placeholder = "Select country...",
+    label,
+    required = false,
+    disabled = false,
+    className,
+}: ReuseableSingleSelectCountriesInputProps<T>) {
+
+    const [filter, optionsDispatcher] = useReducer(
+        ReusableReducer<TPaginationFilters & TFilterOptions>,
+        { ...FILTEROPTIONS, page: 1, pageSize: 15 }
+    )
+    const observerRef = useRef<HTMLDivElement | null>(null)
+    const { data, isLoading } = UseApiQuery<TCountryResponse>({
+        url: "taxonomies/general/countries",
+        params: {
+            direction: "asc",
+            page: filter.page,
+            pageSize: filter.pageSize,
+            term: filter.term,
+        },
+        queryOptions: {
+            placeholderData: (previousData) => previousData,
+        },
+    })
+    const countries = data?.data ?? []
+    const meta = data?.meta
+    useEffect(() => {
+        if (!observerRef.current) return
+
+        const observer = new IntersectionObserver((entries) => {
+            if (
+                entries[0].isIntersecting &&
+                !isLoading &&
+                meta &&
+                filter.page < meta.last_page
+            ) {
+                optionsDispatcher({
+                    type: "SET_PAGE",
+                    payload: { page: filter.page + 1 },
+                })
+            }
+        })
+
+        observer.observe(observerRef.current)
+
+        return () => observer.disconnect()
+    }, [meta, filter.page, isLoading])
+
+    const handleSearch = (value: string) => {
+        optionsDispatcher({
+            type: "SET_FILTER",
+            payload: { term: value, page: 1 },
+        })
+    }
+
+    return (
+        <div className={`space-y-2 ${className ?? ""}`}>
+            {label && (
+                <Label>
+                    {label}
+                    {required && (
+                        <span className="text-destructive ml-1">*</span>
+                    )}
+                </Label>
+            )}
+
+            <Select value={value} onValueChange={onChange} disabled={disabled}>
+                <SelectTrigger className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]">
+                    <SelectValue
+                        placeholder={
+                            isLoading
+                                ? "Loading countries..."
+                                : placeholder
+                        }
+                    />
+                </SelectTrigger>
+                <SelectContent className="max-h-75">
+                    <div className="p-2 sticky top-0 bg-white z-10">
+                        <Input
+                            placeholder="Search country..."
+                            onChange={(e) => handleSearch(e.target.value)}
+                            className="h-8"
+                        />
+                    </div>
+                    {countries.map((country) => (
+                        <SelectItem
+                            key={country.id}
+                            value={String(country.id)}>
+                            {country.name}
+                        </SelectItem>
+                    ))}
+                    {isLoading && (
+                        <div className="px-3 py-2 text-sm text-muted-foreground">
+                            Loading...
+                        </div>
+                    )}
+                    {!isLoading && countries.length === 0 && (
+                        <div className="px-3 py-2 text-sm text-muted-foreground">
+                            No countries found
+                        </div>
+                    )}
+                    <div ref={observerRef} className="h-4" />
                 </SelectContent>
             </Select>
         </div>

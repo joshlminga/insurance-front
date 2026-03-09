@@ -18,6 +18,7 @@ import { SuccessPurchase } from "@/app/customer/motor/steppers/success-purchase"
 import { MotorCommercialPage } from "@/app/customer/motor/steppers/tabs/motor-commercial";
 import { MotorPrivatePage } from "@/app/customer/motor/steppers/tabs/motor-private";
 import { MotorPsvPage } from "@/app/customer/motor/steppers/tabs/motor-psv";
+import { MotorSpecialVehicle } from "@/app/customer/motor/steppers/tabs/motor-special-vehicle";
 import { VehicleDetailsPage } from "@/app/customer/motor/steppers/vehicle-details";
 import { ArrowUpToLine, Car, Download, Truck, Van } from "lucide-react";
 
@@ -125,6 +126,13 @@ export const EMOTORTABS = [
         icon: Van,
         iconSize: 16,
         component: MotorPsvPage,
+    },
+     {
+        value: "specialvehicle",
+        label: "Special Vehicle",
+        icon: Van,
+        iconSize: 16,
+        component: MotorSpecialVehicle,
     },
 ]
 

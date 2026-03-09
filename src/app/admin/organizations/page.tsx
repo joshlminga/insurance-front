@@ -21,7 +21,7 @@ import { Plus } from 'lucide-react';
 const OrganizationsPage = () => {
   const [filter, optionsDispatcher] = useReducer(
     ReusableReducer<TPaginationFilters & TFilterOptions>,
-    { ...FILTEROPTIONS, page: 1, pageSize: 10 }
+    { ...FILTEROPTIONS, page: 1, pageSize: 15 }
   );
   const optionsDispatcherDebounce = useDebounce({
     debounceCallback: optionsDispatcher,

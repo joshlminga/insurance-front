@@ -2,11 +2,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button, ReusableTabs } from '@/dev/core'
 import React, { useEffect, useMemo, useState } from 'react'
-import type { 
-    CustomerVerificationDetailsProps, 
-    SubmitResponse, 
-    TTabItem, 
-    VehicleClassItem 
+import type {
+    CustomerVerificationDetailsProps,
+    SubmitResponse,
+    TTabItem,
+    VehicleClassItem
 } from '@/types/types'
 import { CardFooter } from '@/components/ui/card'
 import { ArrowLeftCircle, ArrowRightCircle, Loader2 } from 'lucide-react'
@@ -22,18 +22,20 @@ import { extractErrorMessage } from '@/utils/helpers'
 import { MotorCommercialPage } from './tabs/motor-commercial'
 import { MotorPrivatePage } from './tabs/motor-private'
 import { MotorPsvPage } from './tabs/motor-psv'
+import { MotorSpecialVehicle } from './tabs/motor-special-vehicle'
 
 export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({ goToNextStep, goToPrevStep }) => {
     const [selectedTabValue, setSelectedTabValue] = useState<string>("");
 
     const { user, guest } = UseAuth();
-    const { data, isLoading, isFetching } = UseApiQuery<SubmitResponse>({
+    const { data, isLoading } = UseApiQuery<SubmitResponse>({
         url: 'motor/general-tools/vehicle_classes',
         queryOptions: {
             enabled: true,
         },
     })
-    const vehicleClasses = (data?.data ?? []) as VehicleClassItem[]
+    const vehicleClasses = (data?.data ?? []) as VehicleClassItem[];
+
     const activeVehicleClasses = useMemo(
         () => vehicleClasses.filter((item) => item.is_active),
         [vehicleClasses]
@@ -44,15 +46,23 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
             private: MotorPrivatePage,
             commercial: MotorCommercialPage,
             psv: MotorPsvPage,
+            specialvehicle: MotorSpecialVehicle,
         }
+        const normalizeSlug = (slug: string) =>
+            slug.replace(/[^a-zA-Z0-9]/g, "").toLowerCase()
+        return activeVehicleClasses.map((item) => {
+            const cleanedSlug = normalizeSlug(item.slug)
 
-        return activeVehicleClasses.map((item) => ({
-            value: String(item.id),
-            label: item.name,
-            component: componentBySlug[item.slug as keyof typeof componentBySlug] ?? MotorPrivatePage,
-        }))
+            return {
+                value: String(item.id),
+                label: item.name,
+                component:
+                    componentBySlug[cleanedSlug as keyof typeof componentBySlug] ??
+                    MotorPrivatePage,
+            }
+        })
     }, [activeVehicleClasses])
-    const isClassTabsLoading = isLoading || isFetching
+    const isClassTabsLoading = isLoading
 
     const form = useForm<VehicleFormValues>({
         resolver: zodResolver(VehicleDetailsSchema),
