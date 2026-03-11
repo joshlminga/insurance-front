@@ -76,7 +76,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
     }
 
     return (
-        <>
+        <div>
             <div className="max-w-full mx-auto border-0 bg-transparent">
                 <form className='w-full py-2 sm:py-4'>
                     <div className="w-full border rounded-0 px-3 sm:px-6 py-4 sm:py-6">
@@ -241,6 +241,6 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                     />
                 )}
             </CustomDialogComponent>
-        </>
+        </div>
     )
 }
