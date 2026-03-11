@@ -1,8 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CardFooter, } from '@/components/ui/card'
-import { Button, CustomDialogComponent, ReusableCard, ReusableCheckboxGrid, ReusablePagination, ReuseableInput } from '@/dev/core'
+import {
+    Button,
+    CustomDialogComponent,
+    ReusableCard,
+    ReusableCheckboxGrid,
+    ReusablePagination,
+    ReuseableInput
+} from '@/dev/core'
 import { useCustomDialogContextFactory, } from '@/hooks'
-import type { CustomerVerificationDetailsProps, SubmitResponse, TFilterOptions, TPaginationFilters } from '@/types/types'
+import type {
+    CustomerVerificationDetailsProps,
+    SubmitResponse,
+    TFilterOptions,
+    TPaginationFilters
+} from '@/types/types'
 import { EPREFIX, EROUTES, QUOTATIONCHECKBOX } from '@/utils/enums'
 import { ArrowLeftCircle, ArrowRightCircle, Plus } from 'lucide-react'
 import React, { useEffect, useMemo, useReducer, useState } from 'react'
@@ -51,18 +63,16 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
         url: premiumUrl,
         params: {
             page: filter?.page,
-            pageSize: filter?.pageSize,
+            per_page: filter?.pageSize,
         },
         queryOptions: {
             enabled: Boolean(quoteSessionId),
         },
     })
-
-    const quotationItems = useMemo(() => {
-        if (Array.isArray(data?.data)) return data.data
-        if (Array.isArray(data?.data?.products)) return data.data.products
-        return []
-    }, [data])
+    const quotationItems = data?.data;
+    if (isLoading) {
+        return <div className="mb-3 text-sm text-muted-foreground">Fetching premium quotations...</div>
+    }
 
     return (
         <>
@@ -121,9 +131,6 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                     <h1 className="text-xl sm:text-2xl font-bold mb-4">
                         Quote Comparison
                     </h1>
-                    {isLoading && (
-                        <p className="mb-3 text-sm text-muted-foreground">Fetching premium quotations...</p>
-                    )}
                     {quoteSessionId && !isLoading && quotationItems.length === 0 && (
                         <p className="mb-3 text-sm text-muted-foreground">No premium quotations available yet for this quote session.</p>
                     )}
@@ -136,7 +143,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                     src: `${import.meta.env.VITE_BASE_URL}/${item?.product?.organization?.logo}`,
                                     alt: item?.product?.organization?.name ?? 'Insurer logo',
                                 }}
-                                 rootClassName=''
+                                rootClassName=''
                                 footerClassName="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between"
                                 footer={
                                     <>
@@ -204,7 +211,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                             currentPage={data?.pagination?.current_page ?? filter.page}
                             totalPages={data?.pagination?.last_page ?? 1}
                             onPageChange={(nextPage) =>
-                                optionsDispatcher({ type: "page", payload: { page: nextPage } })
+                                optionsDispatcher({ type: "per_page", payload: { page: nextPage } })
                             }
                             disabled={isLoading}
                         />

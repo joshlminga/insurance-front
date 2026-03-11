@@ -12,11 +12,12 @@ import { Link, useLocation } from "react-router-dom";
 import React from "react";
 import { premiumPreview } from "@/types/types";
 
-export const QuotePreviewPage:React.FC<premiumPreview> = ({ componentProps, goToNextStep}) => {
+export const QuotePreviewPage: React.FC<premiumPreview> = ({ componentProps, goToNextStep: goToNextStepProp, handleDialogContextSwitch }) => {
     const { currentStep } = useStepperContext()
     const location = useLocation()
     const { isAuthenticated } = UseAuth()
-    const item = componentProps?.data;
+    const item = componentProps?.data
+    const goToNextStep = goToNextStepProp ?? componentProps?.goToNextStep
     const org = item?.product?.organization;
     const premium = item?.calculated_premium;
     const benefits = item?.benefits;
@@ -33,8 +34,6 @@ export const QuotePreviewPage:React.FC<premiumPreview> = ({ componentProps, goTo
         ...(benefits?.compulsory ?? []).map((b: any) => ({ ...b, type: 'compulsory' as const })),
         ...(benefits?.optional ?? []).map((b: any) => ({ ...b, type: 'optional' as const })),
     ];
-
-    console.log(org);
 
     return (
         <div className="mx-auto max-w-125 min-w-125 px-4 space-y-6">
@@ -116,7 +115,10 @@ export const QuotePreviewPage:React.FC<premiumPreview> = ({ componentProps, goTo
                     <Button
                         variant="outline"
                         leftIcon={<ShoppingCart />}
-                        onClick={goToNextStep}
+                        onClick={() => {
+                            handleDialogContextSwitch?.({})
+                            goToNextStep?.()
+                        }}
                         className="w-full sm:w-auto text-white hover:text-white bg-[#0CC258] hover:bg-[#0CC258]/80">
                         Purchase Cover
                     </Button>
