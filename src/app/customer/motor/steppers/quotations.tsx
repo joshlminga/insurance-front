@@ -22,10 +22,10 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
     const location = useLocation()
     const { currentStep } = useStepperContext()
 
-     const [filter, optionsDispatcher] = useReducer(
+    const [filter, optionsDispatcher] = useReducer(
         ReusableReducer<TPaginationFilters & TFilterOptions>,
-        { ...FILTEROPTIONS, page: 1, pageSize: 15 }
-      );
+        { ...FILTEROPTIONS, page: 1, pageSize: 8 }
+    );
 
     const { handleDialogContextSwitch, dialogContent, dialogOpen } =
         useCustomDialogContextFactory<{
@@ -131,7 +131,11 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                         {quotationItems.map((item: any, itemIndex: number) => (
                             <ReusableCard
                                 key={item?.id ?? `quotation-${itemIndex}`}
-                                header={item.header as any}
+                                header={{
+                                    type: 'image',
+                                    src: `${import.meta.env.VITE_BASE_URL}/${item?.product?.organization?.logo}`,
+                                    alt: item?.product?.organization?.name ?? 'Insurer logo',
+                                }}
                                 rootClassName=""
                                 footerClassName="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between"
                                 footer={
@@ -140,9 +144,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                             type="button"
                                             onClick={() =>
                                                 handleDialogContextSwitch({
-                                                    componentProps: {
-                                                        data: item
-                                                    },
+                                                    componentProps: { data: item },
                                                     Component: QuotePreviewPage,
                                                 })
                                             }
@@ -173,16 +175,19 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                 }
                                 children={
                                     <>
-                                        {(Array.isArray(item?.content) ? item.content : []).map((row: any, idx: number) => (
-                                            <div key={idx}>
-                                                <div className="flex flex-wrap justify-between gap-1 min-w-0">
-                                                    <span className="text-xs sm:text-sm wrap-break-word max-w-[60%]">{row.label}</span>
-                                                    <span className="text-xs sm:text-sm wrap-break-word max-w-[35%] text-right">{row.value}</span>
-                                                </div>
+                                        <div>
+                                            <div className="flex flex-wrap justify-between gap-1 min-w-0">
+                                                <span className="text-xs sm:text-sm wrap-break-word max-w-[60%]">Basic Premium</span>
+                                                <span className="text-xs sm:text-sm wrap-break-word max-w-[35%] text-right">{item?.calculated_premium?.basic_premium?.toLocaleString()}</span>
                                             </div>
-                                        ))}
+                                            <div className="flex flex-wrap justify-between gap-1 min-w-0">
+                                                <span className="text-xs sm:text-sm wrap-break-word max-w-[60%]">Total Premium</span>
+                                                <span className="text-xs sm:text-sm wrap-break-word max-w-[35%] text-right">{item?.calculated_premium?.total_premium?.toLocaleString()}</span>
+                                            </div>
+                                        </div>
                                     </>
-                                } />
+                                }
+                            />
                         ))}
                     </div>
                 </div>
@@ -198,10 +203,11 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                     <div className="order-first sm:order-0">
                         <ReusablePagination
                             currentPage={data?.pagination?.current_page ?? filter.page}
-                            totalPages={data?.pagination?.total_pages ?? 1}
+                            totalPages={data?.pagination?.last_page ?? 1}
                             onPageChange={(nextPage) =>
                                 optionsDispatcher({ type: "page", payload: { page: nextPage } })
                             }
+                            disabled={isLoading}
                         />
                     </div>
 

@@ -498,7 +498,6 @@ export function RouteTabNav({ tabs, basePath, className }: TRouteTabNavProps) {
         </div>
     )
 }
-
 export const ReusablePagination = ({
     currentPage,
     totalPages,
@@ -510,23 +509,26 @@ export const ReusablePagination = ({
 
     const range = (start: number, end: number) =>
         Array.from({ length: end - start + 1 }, (_, i) => start + i)
+
     const leftSibling = Math.max(currentPage - siblingCount, 1)
     const rightSibling = Math.min(currentPage + siblingCount, totalPages)
     const showLeftEllipsis = leftSibling > 2
     const showRightEllipsis = rightSibling < totalPages - 1
+
     const pages: (number | "ellipsis")[] = []
     pages.push(1)
     if (showLeftEllipsis) pages.push("ellipsis")
     pages.push(...range(leftSibling, rightSibling).filter(p => p !== 1 && p !== totalPages))
-
     if (showRightEllipsis) pages.push("ellipsis")
-
     if (totalPages > 1) pages.push(totalPages)
 
     const goToPage = (page: number) => {
-        if (page < 1 || page > totalPages || page === currentPage) return
+        if (disabled || page < 1 || page > totalPages || page === currentPage) return  // ✅ respect disabled
         onPageChange(page)
     }
+
+    const isPrevDisabled = disabled || currentPage === 1
+    const isNextDisabled = disabled || currentPage === totalPages
 
     return (
         <Pagination>
@@ -538,7 +540,8 @@ export const ReusablePagination = ({
                             e.preventDefault()
                             goToPage(currentPage - 1)
                         }}
-                        aria-disabled={disabled || currentPage === 1}
+                        aria-disabled={isPrevDisabled}
+                        className={cn(isPrevDisabled && "pointer-events-none opacity-50")}  // ✅ actually blocks click
                     />
                 </PaginationItem>
 
@@ -554,6 +557,7 @@ export const ReusablePagination = ({
                                     e.preventDefault()
                                     goToPage(page)
                                 }}
+                                className={cn(disabled && "pointer-events-none opacity-50")}  // ✅ lock all pages when loading
                             >
                                 {page}
                             </PaginationLink>
@@ -568,14 +572,14 @@ export const ReusablePagination = ({
                             e.preventDefault()
                             goToPage(currentPage + 1)
                         }}
-                        aria-disabled={disabled || currentPage === totalPages}
+                        aria-disabled={isNextDisabled}
+                        className={cn(isNextDisabled && "pointer-events-none opacity-50")}  // ✅ actually blocks click
                     />
                 </PaginationItem>
             </PaginationContent>
         </Pagination>
     )
 }
-
 export const ReusableCard = ({
     header,
     children,
