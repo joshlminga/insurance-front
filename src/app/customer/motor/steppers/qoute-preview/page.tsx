@@ -34,7 +34,6 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({ componentProps, goT
         ...(benefits?.compulsory ?? []).map((b: any) => ({ ...b, type: 'compulsory' as const })),
         ...(benefits?.optional ?? []).map((b: any) => ({ ...b, type: 'optional' as const })),
     ];
-
     return (
         <div className="mx-auto max-w-125 min-w-125 px-4 space-y-6">
             <h1 className="text-2xl font-bold">
@@ -42,8 +41,8 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({ componentProps, goT
             </h1>
             <Card className="flex items-center justify-center py-6">
                 <img
-                    src={org?.logo}
-                    alt={componentProps?.data?.product?.organization?.logo ?? ''}
+                    src={`${import.meta.env.VITE_BASE_URL}/${org?.logo}`}
+                    // alt={componentProps?.data?.product?.organization?.logo ?? ''}
                     className="w-36 h-16 object-contain"
                 />
             </Card>

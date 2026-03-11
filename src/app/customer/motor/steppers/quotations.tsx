@@ -70,6 +70,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
         },
     })
     const quotationItems = data?.data;
+
     if (isLoading) {
         return <div className="mb-3 text-sm text-muted-foreground">Fetching premium quotations...</div>
     }
@@ -209,9 +210,10 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                     <div className="order-first sm:order-0">
                         <ReusablePagination
                             currentPage={data?.pagination?.current_page ?? filter.page}
+                            pageCount={data?.pagination?.last_page ?? 1}
                             totalPages={data?.pagination?.last_page ?? 1}
                             onPageChange={(nextPage) =>
-                                optionsDispatcher({ type: "per_page", payload: { page: nextPage } })
+                                optionsDispatcher({ type: "page", payload: { page: nextPage } })
                             }
                             disabled={isLoading}
                         />

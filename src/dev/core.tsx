@@ -499,15 +499,21 @@ export function RouteTabNav({ tabs, basePath, className }: TRouteTabNavProps) {
     )
 }
 export const ReusablePagination = ({
-    currentPage,
-    totalPages,
+    currentPage: currentPageProp,
+    totalPages: totalPagesProp,
     onPageChange,
     siblingCount = 1,
     disabled = false,
+    className,
+    page: pageProp,
+    pageCount: pageCountProp,
 }: ReusablePaginationProps) => {
+    const currentPage = pageProp ?? currentPageProp ?? 1
+    const totalPages = pageCountProp ?? totalPagesProp ?? 1
+
     if (totalPages < 1) return null
     const range = (start: number, end: number) =>
-        Array.from({ length: end - start + 1 }, (_, i) => start + i)
+        Array.from({ length: Math.max(0, end - start + 1) }, (_, i) => start + i)
     const leftSibling = Math.max(currentPage - siblingCount, 1)
     const rightSibling = Math.min(currentPage + siblingCount, totalPages)
     const showLeftEllipsis = leftSibling > 2
@@ -525,11 +531,11 @@ export const ReusablePagination = ({
         onPageChange(page)
     }
 
-    const isPrevDisabled = disabled || currentPage === 1
-    const isNextDisabled = disabled || currentPage === totalPages
+    const isPrevDisabled = disabled || currentPage <= 1
+    const isNextDisabled = disabled || currentPage >= totalPages
 
     return (
-        <Pagination>
+        <Pagination className={cn(className)}>
             <PaginationContent>
                 <PaginationItem>
                     <PaginationPrevious
@@ -544,7 +550,7 @@ export const ReusablePagination = ({
                 </PaginationItem>
 
                 {pages.map((page, index) => (
-                    <PaginationItem key={index}>
+                    <PaginationItem key={page === "ellipsis" ? `ellipsis-${index}` : page}>
                         {page === "ellipsis" ? (
                             <PaginationEllipsis />
                         ) : (

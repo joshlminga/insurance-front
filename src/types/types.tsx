@@ -275,11 +275,16 @@ export type ReusableCheckboxGridProps = {
 }
 
 export type ReusablePaginationProps = {
-  currentPage: number
-  totalPages: number
+  currentPage?: number
+  totalPages?: number
   onPageChange: (page: number) => void
   siblingCount?: number
   disabled?: boolean
+  className?: string
+  /** Table-style alias: use instead of currentPage when passing table pagination props */
+  page?: number
+  /** Table-style alias: use instead of totalPages when passing table pagination props */
+  pageCount?: number
 }
 
 export type CardHeaderContent =
