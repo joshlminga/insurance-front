@@ -44,6 +44,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
         useCustomDialogContextFactory<{
             refetch?: () => Promise<any>;
             data?: any;
+            goToNextStep?: (CustomerVerificationDetailsProps['goToNextStep']);
         }>();
 
     useEffect(() => {
@@ -152,7 +153,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                             type="button"
                                             onClick={() =>
                                                 handleDialogContextSwitch({
-                                                    componentProps: { data: item },
+                                                    componentProps: { data: item, goToNextStep },
                                                     Component: QuotePreviewPage,
                                                 })
                                             }
