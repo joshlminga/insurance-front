@@ -205,6 +205,13 @@ export interface CustomerVerificationDetailsProps {
   goToPrevStep?: () => void
 }
 
+export interface premiumPreview {
+  goToNextStep?: () => void
+  goToPrevStep?: () => void
+      componentProps?: any;
+    handleDialogContextSwitch: any,
+}
+
 export type TTabItem = {
   value: string
   label: string

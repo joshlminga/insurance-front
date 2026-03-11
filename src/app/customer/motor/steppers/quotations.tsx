@@ -14,6 +14,7 @@ import { UseAuth } from '@/components/auth-provider'
 import { useStepperContext } from '@/hooks/stepper-context'
 import { FILTEROPTIONS, MOTOR_QUOTE_SESSION_STORAGE_KEY, ReusableReducer } from '@/utils/constatnts'
 import { UseApiQuery } from '@/hooks/hooks'
+import { formatCurrency } from '@/lib/format'
 
 export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goToNextStep, goToPrevStep }) => {
     const [quoteSessionId, setQuoteSessionId] = useState<number | null>(null)
@@ -46,7 +47,6 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
         () => (quoteSessionId ? `quotation/motor/${quoteSessionId}/premium` : ""),
         [quoteSessionId]
     )
-
     const { data, isLoading } = UseApiQuery<SubmitResponse>({
         url: premiumUrl,
         params: {
@@ -136,7 +136,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                     src: `${import.meta.env.VITE_BASE_URL}/${item?.product?.organization?.logo}`,
                                     alt: item?.product?.organization?.name ?? 'Insurer logo',
                                 }}
-                                rootClassName=""
+                                 rootClassName=''
                                 footerClassName="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between"
                                 footer={
                                     <>
@@ -151,7 +151,6 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                             className="w-full lg:w-auto rounded-md border border-[#D9D9D9] bg-[#C20C0C] hover:bg-[#C20C0C]/90 font-medium text-white">
                                             Get Quote
                                         </Button>
-
                                         {isAuthenticated ? (
                                             <Button
                                                 type="button"
@@ -178,11 +177,11 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                         <div>
                                             <div className="flex flex-wrap justify-between gap-1 min-w-0">
                                                 <span className="text-xs sm:text-sm wrap-break-word max-w-[60%]">Basic Premium</span>
-                                                <span className="text-xs sm:text-sm wrap-break-word max-w-[35%] text-right">{item?.calculated_premium?.basic_premium?.toLocaleString()}</span>
+                                                <span className="text-xs sm:text-sm wrap-break-word max-w-[35%] text-right">{formatCurrency(item?.calculated_premium?.basic_premium)}</span>
                                             </div>
                                             <div className="flex flex-wrap justify-between gap-1 min-w-0">
                                                 <span className="text-xs sm:text-sm wrap-break-word max-w-[60%]">Total Premium</span>
-                                                <span className="text-xs sm:text-sm wrap-break-word max-w-[35%] text-right">{item?.calculated_premium?.total_premium?.toLocaleString()}</span>
+                                                <span className="text-xs sm:text-sm wrap-break-word max-w-[35%] text-right">{formatCurrency(item?.calculated_premium?.total_premium)}</span>
                                             </div>
                                         </div>
                                     </>

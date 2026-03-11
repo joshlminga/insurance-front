@@ -505,11 +505,9 @@ export const ReusablePagination = ({
     siblingCount = 1,
     disabled = false,
 }: ReusablePaginationProps) => {
-    if (totalPages <= 1) return null
-
+    if (totalPages < 1) return null
     const range = (start: number, end: number) =>
         Array.from({ length: end - start + 1 }, (_, i) => start + i)
-
     const leftSibling = Math.max(currentPage - siblingCount, 1)
     const rightSibling = Math.min(currentPage + siblingCount, totalPages)
     const showLeftEllipsis = leftSibling > 2
@@ -523,7 +521,7 @@ export const ReusablePagination = ({
     if (totalPages > 1) pages.push(totalPages)
 
     const goToPage = (page: number) => {
-        if (disabled || page < 1 || page > totalPages || page === currentPage) return  // ✅ respect disabled
+        if (disabled || page < 1 || page > totalPages || page === currentPage) return
         onPageChange(page)
     }
 
@@ -541,7 +539,7 @@ export const ReusablePagination = ({
                             goToPage(currentPage - 1)
                         }}
                         aria-disabled={isPrevDisabled}
-                        className={cn(isPrevDisabled && "pointer-events-none opacity-50")}  // ✅ actually blocks click
+                        className={cn(isPrevDisabled && "pointer-events-none opacity-50")}
                     />
                 </PaginationItem>
 
@@ -557,7 +555,7 @@ export const ReusablePagination = ({
                                     e.preventDefault()
                                     goToPage(page)
                                 }}
-                                className={cn(disabled && "pointer-events-none opacity-50")}  // ✅ lock all pages when loading
+                                className={cn(disabled && "pointer-events-none opacity-50")}
                             >
                                 {page}
                             </PaginationLink>
@@ -573,13 +571,14 @@ export const ReusablePagination = ({
                             goToPage(currentPage + 1)
                         }}
                         aria-disabled={isNextDisabled}
-                        className={cn(isNextDisabled && "pointer-events-none opacity-50")}  // ✅ actually blocks click
+                        className={cn(isNextDisabled && "pointer-events-none opacity-50")}
                     />
                 </PaginationItem>
             </PaginationContent>
         </Pagination>
     )
 }
+
 export const ReusableCard = ({
     header,
     children,
