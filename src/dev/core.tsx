@@ -498,38 +498,44 @@ export function RouteTabNav({ tabs, basePath, className }: TRouteTabNavProps) {
         </div>
     )
 }
-
 export const ReusablePagination = ({
-    currentPage,
-    totalPages,
+    currentPage: currentPageProp,
+    totalPages: totalPagesProp,
     onPageChange,
     siblingCount = 1,
     disabled = false,
+    className,
+    page: pageProp,
+    pageCount: pageCountProp,
 }: ReusablePaginationProps) => {
-    if (totalPages <= 1) return null
+    const currentPage = pageProp ?? currentPageProp ?? 1
+    const totalPages = pageCountProp ?? totalPagesProp ?? 1
 
+    if (totalPages < 1) return null
     const range = (start: number, end: number) =>
-        Array.from({ length: end - start + 1 }, (_, i) => start + i)
+        Array.from({ length: Math.max(0, end - start + 1) }, (_, i) => start + i)
     const leftSibling = Math.max(currentPage - siblingCount, 1)
     const rightSibling = Math.min(currentPage + siblingCount, totalPages)
     const showLeftEllipsis = leftSibling > 2
     const showRightEllipsis = rightSibling < totalPages - 1
+
     const pages: (number | "ellipsis")[] = []
     pages.push(1)
     if (showLeftEllipsis) pages.push("ellipsis")
     pages.push(...range(leftSibling, rightSibling).filter(p => p !== 1 && p !== totalPages))
-
     if (showRightEllipsis) pages.push("ellipsis")
-
     if (totalPages > 1) pages.push(totalPages)
 
     const goToPage = (page: number) => {
-        if (page < 1 || page > totalPages || page === currentPage) return
+        if (disabled || page < 1 || page > totalPages || page === currentPage) return
         onPageChange(page)
     }
 
+    const isPrevDisabled = disabled || currentPage <= 1
+    const isNextDisabled = disabled || currentPage >= totalPages
+
     return (
-        <Pagination>
+        <Pagination className={cn(className)}>
             <PaginationContent>
                 <PaginationItem>
                     <PaginationPrevious
@@ -538,12 +544,13 @@ export const ReusablePagination = ({
                             e.preventDefault()
                             goToPage(currentPage - 1)
                         }}
-                        aria-disabled={disabled || currentPage === 1}
+                        aria-disabled={isPrevDisabled}
+                        className={cn(isPrevDisabled && "pointer-events-none opacity-50")}
                     />
                 </PaginationItem>
 
                 {pages.map((page, index) => (
-                    <PaginationItem key={index}>
+                    <PaginationItem key={page === "ellipsis" ? `ellipsis-${index}` : page}>
                         {page === "ellipsis" ? (
                             <PaginationEllipsis />
                         ) : (
@@ -554,6 +561,7 @@ export const ReusablePagination = ({
                                     e.preventDefault()
                                     goToPage(page)
                                 }}
+                                className={cn(disabled && "pointer-events-none opacity-50")}
                             >
                                 {page}
                             </PaginationLink>
@@ -568,7 +576,8 @@ export const ReusablePagination = ({
                             e.preventDefault()
                             goToPage(currentPage + 1)
                         }}
-                        aria-disabled={disabled || currentPage === totalPages}
+                        aria-disabled={isNextDisabled}
+                        className={cn(isNextDisabled && "pointer-events-none opacity-50")}
                     />
                 </PaginationItem>
             </PaginationContent>

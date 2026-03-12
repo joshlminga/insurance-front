@@ -1,8 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CardFooter, } from '@/components/ui/card'
-import { Button, CustomDialogComponent, ReusableCard, ReusableCheckboxGrid, ReusablePagination, ReuseableInput } from '@/dev/core'
+import {
+    Button,
+    CustomDialogComponent,
+    ReusableCard,
+    ReusableCheckboxGrid,
+    ReusablePagination,
+    ReuseableInput
+} from '@/dev/core'
 import { useCustomDialogContextFactory, } from '@/hooks'
-import type { CustomerVerificationDetailsProps, SubmitResponse, TFilterOptions, TPaginationFilters } from '@/types/types'
+import type {
+    CustomerVerificationDetailsProps,
+    SubmitResponse,
+    TFilterOptions,
+    TPaginationFilters
+} from '@/types/types'
 import { EPREFIX, EROUTES, QUOTATIONCHECKBOX } from '@/utils/enums'
 import { ArrowLeftCircle, ArrowRightCircle, Plus } from 'lucide-react'
 import React, { useEffect, useMemo, useReducer, useState } from 'react'
@@ -14,6 +26,7 @@ import { UseAuth } from '@/components/auth-provider'
 import { useStepperContext } from '@/hooks/stepper-context'
 import { FILTEROPTIONS, MOTOR_QUOTE_SESSION_STORAGE_KEY, ReusableReducer } from '@/utils/constatnts'
 import { UseApiQuery } from '@/hooks/hooks'
+import { formatCurrency } from '@/lib/format'
 
 export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goToNextStep, goToPrevStep }) => {
     const [quoteSessionId, setQuoteSessionId] = useState<number | null>(null)
@@ -22,15 +35,16 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
     const location = useLocation()
     const { currentStep } = useStepperContext()
 
-     const [filter, optionsDispatcher] = useReducer(
+    const [filter, optionsDispatcher] = useReducer(
         ReusableReducer<TPaginationFilters & TFilterOptions>,
-        { ...FILTEROPTIONS, page: 1, pageSize: 15 }
-      );
+        { ...FILTEROPTIONS, page: 1, pageSize: 8 }
+    );
 
     const { handleDialogContextSwitch, dialogContent, dialogOpen } =
         useCustomDialogContextFactory<{
             refetch?: () => Promise<any>;
             data?: any;
+            goToNextStep?: (CustomerVerificationDetailsProps['goToNextStep']);
         }>();
 
     useEffect(() => {
@@ -46,26 +60,24 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
         () => (quoteSessionId ? `quotation/motor/${quoteSessionId}/premium` : ""),
         [quoteSessionId]
     )
-
     const { data, isLoading } = UseApiQuery<SubmitResponse>({
         url: premiumUrl,
         params: {
             page: filter?.page,
-            pageSize: filter?.pageSize,
+            per_page: filter?.pageSize,
         },
         queryOptions: {
             enabled: Boolean(quoteSessionId),
         },
     })
+    const quotationItems = data?.data;
 
-    const quotationItems = useMemo(() => {
-        if (Array.isArray(data?.data)) return data.data
-        if (Array.isArray(data?.data?.products)) return data.data.products
-        return []
-    }, [data])
+    if (isLoading) {
+        return <div className="mb-3 text-sm text-muted-foreground">Fetching premium quotations...</div>
+    }
 
     return (
-        <>
+        <div>
             <div className="max-w-full mx-auto border-0 bg-transparent">
                 <form className='w-full py-2 sm:py-4'>
                     <div className="w-full border rounded-0 px-3 sm:px-6 py-4 sm:py-6">
@@ -121,9 +133,6 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                     <h1 className="text-xl sm:text-2xl font-bold mb-4">
                         Quote Comparison
                     </h1>
-                    {isLoading && (
-                        <p className="mb-3 text-sm text-muted-foreground">Fetching premium quotations...</p>
-                    )}
                     {quoteSessionId && !isLoading && quotationItems.length === 0 && (
                         <p className="mb-3 text-sm text-muted-foreground">No premium quotations available yet for this quote session.</p>
                     )}
@@ -131,8 +140,12 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                         {quotationItems.map((item: any, itemIndex: number) => (
                             <ReusableCard
                                 key={item?.id ?? `quotation-${itemIndex}`}
-                                header={item.header as any}
-                                rootClassName=""
+                                header={{
+                                    type: 'image',
+                                    src: `${import.meta.env.VITE_BASE_URL}/${item?.product?.organization?.logo}`,
+                                    alt: item?.product?.organization?.name ?? 'Insurer logo',
+                                }}
+                                rootClassName=''
                                 footerClassName="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between"
                                 footer={
                                     <>
@@ -140,16 +153,13 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                             type="button"
                                             onClick={() =>
                                                 handleDialogContextSwitch({
-                                                    componentProps: {
-                                                        data: item
-                                                    },
+                                                    componentProps: { data: item, goToNextStep },
                                                     Component: QuotePreviewPage,
                                                 })
                                             }
                                             className="w-full lg:w-auto rounded-md border border-[#D9D9D9] bg-[#C20C0C] hover:bg-[#C20C0C]/90 font-medium text-white">
                                             Get Quote
                                         </Button>
-
                                         {isAuthenticated ? (
                                             <Button
                                                 type="button"
@@ -173,16 +183,19 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                 }
                                 children={
                                     <>
-                                        {(Array.isArray(item?.content) ? item.content : []).map((row: any, idx: number) => (
-                                            <div key={idx}>
-                                                <div className="flex flex-wrap justify-between gap-1 min-w-0">
-                                                    <span className="text-xs sm:text-sm wrap-break-word max-w-[60%]">{row.label}</span>
-                                                    <span className="text-xs sm:text-sm wrap-break-word max-w-[35%] text-right">{row.value}</span>
-                                                </div>
+                                        <div>
+                                            <div className="flex flex-wrap justify-between gap-1 min-w-0">
+                                                <span className="text-xs sm:text-sm wrap-break-word max-w-[60%]">Basic Premium</span>
+                                                <span className="text-xs sm:text-sm wrap-break-word max-w-[35%] text-right">{formatCurrency(item?.calculated_premium?.basic_premium)}</span>
                                             </div>
-                                        ))}
+                                            <div className="flex flex-wrap justify-between gap-1 min-w-0">
+                                                <span className="text-xs sm:text-sm wrap-break-word max-w-[60%]">Total Premium</span>
+                                                <span className="text-xs sm:text-sm wrap-break-word max-w-[35%] text-right">{formatCurrency(item?.calculated_premium?.total_premium)}</span>
+                                            </div>
+                                        </div>
                                     </>
-                                } />
+                                }
+                            />
                         ))}
                     </div>
                 </div>
@@ -198,10 +211,12 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                     <div className="order-first sm:order-0">
                         <ReusablePagination
                             currentPage={data?.pagination?.current_page ?? filter.page}
-                            totalPages={data?.pagination?.total_pages ?? 1}
+                            pageCount={data?.pagination?.last_page ?? 1}
+                            totalPages={data?.pagination?.last_page ?? 1}
                             onPageChange={(nextPage) =>
                                 optionsDispatcher({ type: "page", payload: { page: nextPage } })
                             }
+                            disabled={isLoading}
                         />
                     </div>
 
@@ -227,6 +242,6 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                     />
                 )}
             </CustomDialogComponent>
-        </>
+        </div>
     )
 }

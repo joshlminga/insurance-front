@@ -36,7 +36,7 @@ export const ComparisonPage: React.FC = () => {
                         }}
                         key={item.id}
                         header={item.header as any}
-                        rootClassName=''
+                        rootClassName='aspect-square p-2'
                         contentClassName='items-center text-center'
                         children={
                             <>
