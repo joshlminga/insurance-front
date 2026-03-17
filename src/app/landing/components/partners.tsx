@@ -13,7 +13,7 @@ export const PartnersSection = () => {
             <div className="container mx-auto px-6 max-w-7xl">
                 <div className="flex flex-wrap items-center justify-center gap-12 md:gap-16">
                     {partners.map((partner, index) => (
-                        <div key={index} className="w-[164px] h-[92px] flex items-center justify-center">
+                        <div key={index} className="w-41 h-23 flex items-center justify-center">
                             <img 
                                 src={partner.logo} 
                                 alt={partner.name} 

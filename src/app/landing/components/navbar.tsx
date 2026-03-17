@@ -1,9 +1,10 @@
 import { cn } from "@/lib/utils";
-import { ELOGO, EROUTES } from "@/utils/enums";
-import { Menu, X } from "lucide-react";
+import { ELOGO, EPREFIX, EROUTES } from "@/utils/enums";
+import { ChevronDown, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { UseAuth } from "@/components/auth-provider";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 const Dropdown = ({
     label,
@@ -15,51 +16,68 @@ const Dropdown = ({
     text?: string
 }) => {
     return (
-        <div className="relative group">
-            <button className={`uppercase tracking-wider text-sm font-semibold hover:text-red-500 transition ${text}`}>
-                {label}
-            </button>
-            <div className="absolute left-0 top-full mt-3 w-48 rounded-xl bg-white/80 backdrop-blur-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-999">
-                <ul className="py-2">
-                    {items.map((item) => (
-                        <li key={item.name}>
-                            <a
-                                href={item.href}
-                                className="block px-4 py-2 text-sm text-gray-800 hover:bg-red-500/10 hover:text-red-600 transition">
-                                {item.name}
-                            </a>
-                        </li>
-                    ))}
-                </ul>
-            </div>
-        </div>
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <button
+                    className={cn(
+                        "uppercase tracking-wider text-sm font-semibold hover:text-red-500 transition inline-flex items-center gap-1",
+                        text
+                    )}
+                    aria-haspopup="true"
+                    aria-expanded="false">
+                    {label}
+                    <ChevronDown className="h-3.5 w-3.5 opacity-70" />
+                </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+                align="start"
+                className="min-w-48 rounded-xl border border-gray-200/80 bg-white py-2 shadow-xl shadow-black/5 backdrop-blur-sm"
+                sideOffset={8}>
+                {items.map((item) => (
+                    <DropdownMenuItem key={item.name} asChild>
+                        <a
+                            href={item.href}
+                            className="block w-full cursor-pointer px-4 py-2.5 text-sm text-gray-700 outline-none focus:bg-red-500/10 focus:text-red-600 hover:bg-red-500/10 hover:text-red-600">
+                            {item.name}
+                        </a>
+                    </DropdownMenuItem>
+                ))}
+            </DropdownMenuContent>
+        </DropdownMenu>
     )
 }
 
 const MobileDropdown = ({
     label,
     items,
+    textStyle = "text-[#141414]",
 }: {
     label: string
     items: { name: string; href: string }[]
+    textStyle?: string
 }) => {
     const [isOpen, setIsOpen] = useState(false);
 
     return (
-        <div className="w-full">
+        <div className="w-full border-b border-gray-200/60 last:border-b-0">
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="w-full text-left uppercase tracking-wider text-sm font-semibold hover:text-red-500 transition py-2">
+                className={cn(
+                    "flex w-full items-center justify-between py-3 text-left uppercase tracking-wider text-sm font-semibold transition",
+                    textStyle,
+                    "hover:text-red-500"
+                )}
+                aria-expanded={isOpen}>
                 {label}
+                <ChevronDown className={cn("h-4 w-4 transition-transform", isOpen && "rotate-180")} />
             </button>
             {isOpen && (
-                <ul className="pl-4 py-2 space-y-2">
+                <ul className="space-y-0.5 border-t border-gray-100 bg-gray-50/80 pb-3 pt-2">
                     {items.map((item) => (
                         <li key={item.name}>
                             <a
                                 href={item.href}
-                                className="block py-1 text-sm text-gray-600 hover:text-red-600 transition"
-                            >
+                                className="block px-4 py-2.5 text-sm text-gray-600 transition hover:bg-red-500/5 hover:text-red-600">
                                 {item.name}
                             </a>
                         </li>
@@ -85,9 +103,10 @@ export const Navbar = (
 
     const dropdownItems = {
         generateQuote: [
-            { name: "Auto", href: "#" },
-            { name: "Health", href: "#" },
-            { name: "Property", href: "#" },
+            { name: "Motor Insurance", href: `${EPREFIX.CUSTOMER}${EROUTES.MOTOR}`},
+            { name: "Travel Insurance", href: `${EPREFIX.CUSTOMER}${EROUTES.TRAVEL}` },
+            { name: "Marine Insurance", href: `${EPREFIX.CUSTOMER}${EROUTES.MARINE}` },
+             { name: "Life Insurance", href: `${EPREFIX.CUSTOMER}${EROUTES.LIFE}`},
         ],
         claims: [
             { name: "File Claim", href: "#" },
