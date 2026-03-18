@@ -75,11 +75,11 @@ const MobileDropdown = ({
                 <ul className="space-y-0.5 border-t border-gray-100 bg-gray-50/80 pb-3 pt-2">
                     {items.map((item) => (
                         <li key={item.name}>
-                            <a
-                                href={item.href}
+                            <Link
+                                to={item.href}
                                 className="block px-4 py-2.5 text-sm text-gray-600 transition hover:bg-red-500/5 hover:text-red-600">
                                 {item.name}
-                            </a>
+                            </Link>
                         </li>
                     ))}
                 </ul>
@@ -100,13 +100,12 @@ export const Navbar = (
     }) => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const { isAuthenticated, isGeneral, logout } = UseAuth();
-
     const dropdownItems = {
         generateQuote: [
-            { name: "Motor Insurance", href: `${EPREFIX.CUSTOMER}${EROUTES.MOTOR}`},
-            { name: "Travel Insurance", href: `${EPREFIX.CUSTOMER}${EROUTES.TRAVEL}` },
-            { name: "Marine Insurance", href: `${EPREFIX.CUSTOMER}${EROUTES.MARINE}` },
-             { name: "Life Insurance", href: `${EPREFIX.CUSTOMER}${EROUTES.LIFE}`},
+            { name: "Motor Insurance", href: `/${EPREFIX.CUSTOMER}${EROUTES.MOTOR}`},
+            { name: "Travel Insurance", href: `/${EPREFIX.CUSTOMER}${EROUTES.TRAVEL}` },
+            { name: "Marine Insurance", href: `/${EPREFIX.CUSTOMER}${EROUTES.MARINE}` },
+             { name: "Life Insurance", href: `/${EPREFIX.CUSTOMER}${EROUTES.LIFE}`},
         ],
         claims: [
             { name: "File Claim", href: "#" },

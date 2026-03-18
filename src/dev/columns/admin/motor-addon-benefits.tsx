@@ -11,12 +11,20 @@ export const MotorAddOnBenefitsColumns: ColumnDef<any>[] = [
             return <div>{name}</div>;
         },
     },
-     {
+    {
         accessorKey: "meta",
         header: () => <div>Description</div>,
         cell: ({ row }) => {
             const meta: any = row.getValue("meta");
             return <div>{meta?.description}</div>;
+        },
+    },
+    {
+        accessorKey: "group",
+        header: () => <div>Group</div>,
+        cell: ({ row }) => {
+            const group: string = row.getValue("group");
+            return <div>{group}</div>;
         },
     },
     {

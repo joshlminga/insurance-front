@@ -115,12 +115,12 @@ export const MotorAddonBenefitsPage = () => {
     return (
         <div>
             <PageHeader
-                title="Motor AddOn Benefits"
-                description="Manage Motor AddOn Benefits, their details, and associated users"
+                title="Motor Add-on Benefits"
+                description="Manage Motor Add-on Benefits, their details, and associated users"
                 actions={[
                     {
                         icon: Plus,
-                        label: 'Add Motor AddOn Benefits',
+                        label: 'Add Motor Add-on Benefits',
                         variant: 'default',
                         onClick: () => {
                             handleDialogContextSwitch({
@@ -156,7 +156,7 @@ export const MotorAddonBenefitsPage = () => {
                         OtherTools: SearchTools,
                         data: data?.data ?? [],
                         pageCount: data?.pagination?.last_page ?? 1,
-                        title: 'Motor AddOn Benefits',
+                        title: 'Motor Add-On Benefits',
                         showPagination: true,
                         setPageSize: (pageSize) =>
                             optionsDispatcher({

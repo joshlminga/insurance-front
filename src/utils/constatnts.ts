@@ -82,6 +82,14 @@ export const PAYMENTPLANS = [
   { label: "3", value: "3" },
 ]
 
+export const MOTORADDONSBENEFITS = [
+  { label: "Excess", value: "Excess" },
+  { label: "Political", value: "Political" },
+  { label: "Courtesy", value: "Courtesy" },
+  { label: "Rescue", value: "Rescue" },
+  { label: "Accident", value: "Accident" },
+]
+
 export const BOOLEANOPTIONS = [
   { label: "Yes", value: true },
   { label: "No", value: false },
