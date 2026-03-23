@@ -67,7 +67,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
             per_page: filter?.pageSize,
         },
         queryOptions: {
-            enabled: Boolean(quoteSessionId),
+            enabled: !!quoteSessionId,
         },
     })
     const quotationItems = data?.data?.results;

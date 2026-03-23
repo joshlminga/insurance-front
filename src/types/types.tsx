@@ -7,6 +7,7 @@ import { type AxiosRequestConfig, type Method } from 'axios'
 import type { UseMutationOptions, UseQueryOptions } from "@tanstack/react-query";
 import type { SORT_ORDER } from "@/utils/enums";
 import { ColumnDef, OnChangeFn, Row, RowSelectionState } from "@tanstack/table-core";
+import { BENEFIT_TYPE_CONFIG } from "@/utils/constatnts";
 
 export type T = {
   [key: string]: any;
@@ -612,3 +613,5 @@ export type ClaimItem = {
   amount: number
   status: ClaimStatus
 }
+export 
+type BenefitType = keyof typeof BENEFIT_TYPE_CONFIG;

@@ -20,13 +20,14 @@ const MotorQuotationSchema = CustomerDetailsSchema.omit({ country: true }).merge
 type MotorQuotationFormValues = Omit<CustomerFormValues, 'country'> & VehicleFormValues
 
 export const MotorQuotationPage = () => {
-    
+
     const [selectedTabValue, setSelectedTabValue] = useState<string>('')
 
     const { data: vehicleClassesData, isLoading } = UseApiQuery<SubmitResponse>({
         url: 'motor/general-tools/vehicle_classes',
         queryOptions: { enabled: true },
     })
+    
     const vehicleClasses = (vehicleClassesData?.data ?? []) as VehicleClassItem[]
     const activeVehicleClasses = useMemo(
         () => vehicleClasses.filter((item) => item.is_active),
