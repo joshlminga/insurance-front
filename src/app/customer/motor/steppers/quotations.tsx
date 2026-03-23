@@ -72,9 +72,6 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
     })
     const quotationItems = data?.data?.results;
     const QUOTATIONCHECKBOX = data?.data?.benefits?.available;
-
-    console.log(QUOTATIONCHECKBOX);
-
     if (isLoading) {
         return <div className="mb-3 text-sm text-muted-foreground">Fetching premium quotations...</div>
     }

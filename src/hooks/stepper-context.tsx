@@ -31,9 +31,8 @@ export const StepperProvider: React.FC<StepperProviderProps> = ({ children }) =>
 
   const setCurrentStep = (step: number) => {
     setCurrentStepState(step);
-    // localStorage.setItem(STORAGE_KEY, step.toString());
+    localStorage.setItem(STORAGE_KEY, step.toString());
   };
-
   const goToNextStep = () => setCurrentStep(currentStep + 1);
   const goToPrevStep = () => setCurrentStep(currentStep - 1);
 
