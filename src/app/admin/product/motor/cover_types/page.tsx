@@ -131,7 +131,6 @@ export const MotorCoverTypePage = () => {
                     },
                 ]}
             />
-
             <div className='w-full'>
                 <CustomBaseTable
                     {...{

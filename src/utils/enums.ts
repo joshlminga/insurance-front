@@ -11,6 +11,7 @@ export const EPREFIX = {
   CUSTOMER: "customer",
   DASHBOARD: "dashboard",
   PRODUCTS: "products",
+  QUOTATIONS: "quotations",
 } as const
 
 export const EROUTES = {
@@ -57,6 +58,9 @@ export const EROUTES = {
   // Settings
   SETTINGS: `/${EPREFIX.DASHBOARD}/settings`,
 
+  // Quotations
+  QUOTATIONS: `/${EPREFIX.DASHBOARD}/${EPREFIX.QUOTATIONS}`,
+  MOTORQUOTATIONS: `/${EPREFIX.DASHBOARD}/${EPREFIX.QUOTATIONS}/motor-quotations`,
   // products
   // Motor
   PRODUCTS: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor`,

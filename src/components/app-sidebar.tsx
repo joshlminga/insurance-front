@@ -8,6 +8,7 @@ import {
   BarChart3,
   UserCog,
   ShieldCheck,
+  TextQuote,
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -93,13 +94,32 @@ const navData = {
       icon: BarChart3,
     },
     {
+      title: "Quotations",
+      url: `${EROUTES.QUOTATIONS}`,
+      icon: TextQuote,
+      items: [
+        {
+          title: "Motor Quotation",
+          url: `${EROUTES.MOTORQUOTATIONS}`,
+        },
+        {
+          title: "Marine Quotation",
+          url: '',
+        },
+        {
+          title: "Travel Quotation",
+          url: '',
+        },
+      ],
+    },
+    {
       title: "Agents",
       url: EROUTES.STAFF,
       icon: UserCog,
     },
     {
       title: "Motor",
-      url: EROUTES.PRODUCTS,
+      url: `${EROUTES.DASHBOARD}/${EPREFIX.PRODUCTS}`,
       icon: LayoutDashboard,
       items: [
         {

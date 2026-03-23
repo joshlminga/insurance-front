@@ -64,6 +64,7 @@ import { MotorAddonBenefitsPage } from "./app/admin/product/motor/motor-addon-be
 import { MotorDetailedBenefitPage } from "./app/admin/product/motor/motor-detailed-benefit/page"
 import { MotorTonangePage } from "./app/admin/product/motor/motor-tonage/page"
 import { MotorProductRatesPage } from "./app/admin/product/motor/motor-rates/page"
+import { MotorQuotationPage } from "./app/admin/quotations/motor/page"
 
 export const router = createBrowserRouter([
 
@@ -257,8 +258,13 @@ export const router = createBrowserRouter([
         element: <StaffDetailPage />,
       },
 
+      // quotations
+      // motor
+{
+        path: "quotations/motor-quotations",
+        element: <MotorQuotationPage />,
+      },
       // products
-
       // motor
       {
         path: "products/motor",

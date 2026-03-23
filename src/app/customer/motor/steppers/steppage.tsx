@@ -5,9 +5,9 @@ import { UseAuth } from '@/components/auth-provider'
 import { useEffect } from 'react'
 
 export const StepPage: React.FC = () => {
-    const { isAuthenticated } = UseAuth()
-    const { currentStep, setCurrentStep } = useStepperContext()
-    const steps = getMotorSteps(isAuthenticated)
+    const { isAuthenticated } = UseAuth();
+    const { currentStep, setCurrentStep } = useStepperContext();
+    const steps = getMotorSteps(isAuthenticated);
     useEffect(() => {
         if (isAuthenticated && currentStep > steps.length) {
             setCurrentStep(1)
