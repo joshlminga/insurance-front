@@ -1,17 +1,36 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { UseAuth } from "@/components/auth-provider";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import {
+    Card,
+    CardContent,
+    CardFooter,
+    CardHeader
+} from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Button, ReusableDropdown } from "@/dev/core";
 import { useStepperContext } from "@/hooks/stepper-context";
 import { formatCurrency } from "@/lib/format";
 import { EPREFIX, EROUTES } from "@/utils/enums";
-import { Download, Forward, Mail, Share2, ShoppingCart } from "lucide-react";
+import {
+    Download,
+    Forward,
+    Mail,
+    Share2,
+    ShoppingCart
+} from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import React, { useEffect, useState } from "react";
-import { BenefitType, premiumPreview, SubmitResponse } from "@/types/types";
-import { BENEFIT_SECTIONS, BENEFIT_TYPE_CONFIG, EMETHODS, MOTOR_QUOTE_SESSION_STORAGE_KEY } from "@/utils/constatnts";
+import {
+    BenefitType,
+    premiumPreview,
+} from "@/types/types";
+import {
+    BENEFIT_SECTIONS,
+    BENEFIT_TYPE_CONFIG,
+    EMETHODS,
+    MOTOR_QUOTE_SESSION_STORAGE_KEY
+} from "@/utils/constatnts";
 import { ShowToast } from "@/utils/utils";
 import { UseApiMutation } from "@/hooks/hooks";
 import { extractErrorMessage } from "@/utils/helpers";
@@ -37,45 +56,55 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
         (benefits?.[key] ?? []).map((b: any) => ({ ...b, type }))
     );
 
-     useEffect(() => {
-            const storedSessionId = Number(localStorage.getItem(MOTOR_QUOTE_SESSION_STORAGE_KEY))
-            if (Number.isFinite(storedSessionId) && storedSessionId > 0) {
-                setQuoteSessionId(storedSessionId)
-            } else {
-                setQuoteSessionId(null)
-            }
-        }, [])
+    useEffect(() => {
+        const storedSessionId = Number(localStorage.getItem(MOTOR_QUOTE_SESSION_STORAGE_KEY))
+        if (Number.isFinite(storedSessionId) && storedSessionId > 0) {
+            setQuoteSessionId(storedSessionId)
+        } else {
+            setQuoteSessionId(null)
+        }
+    }, [])
 
-   const submitMutation = UseApiMutation<SubmitResponse, void>({
-    url: `quotation/motor/${quoteSessionId}/documents/single-quote?product_id=${componentProps?.data?.product_id}&rate_id=${componentProps?.data?.rate_id}`,
-    method: EMETHODS.GET,
-    mutationOptions: {
-        onSuccess: (data) => {
-            // const fileUrl = data?.data?.url ?? data?.url  
-            // if (fileUrl) {
-            //     const link = document.createElement("a")
-            //     link.href = fileUrl
-            //     link.download = `quote-${componentProps?.data?.product_id}.pdf`
-            //     document.body.appendChild(link)
-            //     link.click()
-            //     document.body.removeChild(link)
-            // }
-            ShowToast.success(data.message || "Downloaded successfully!")
+    const submitMutation = UseApiMutation<Blob, void>({
+        url: `document/motor/single-quote/${quoteSessionId}`,
+        method: EMETHODS.POST,
+        config: {
+            responseType: 'blob',
         },
-        onError: (error: any) => {
-            const message = extractErrorMessage(error);
-            ShowToast.error(message || "Download failed!")
-        },
-    },
-})
+        mutationOptions: {
+            onSuccess: (data) => {
+                const blob = new Blob([data], { type: 'application/pdf' });
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
 
-const onSubmit = () => {
-    if (!quoteSessionId) {
-        ShowToast.error("No active quote session found.")
-        return
+                link.href = url;
+                link.download = `quote-${quoteSessionId}.pdf`; // 👈 filename
+                document.body.appendChild(link);
+                link.click();
+
+                link.remove();
+                window.URL.revokeObjectURL(url);
+
+                ShowToast.success("Download started");
+            },
+            onError: (error: unknown) => {
+                const message = extractErrorMessage(error);
+                ShowToast.error(message || "Download failed!");
+            },
+        },
+    });
+
+    const onSubmit = () => {
+        if (!quoteSessionId) {
+            ShowToast.error("No active quote session found.")
+            return
+        }
+        const data = {
+            'product_id': componentProps?.data?.product_id,
+            'rate_id': componentProps?.data?.rate_id,
+        };
+        submitMutation.mutate(data)
     }
-    submitMutation.mutate()
-}
 
     return (
         <>
@@ -140,7 +169,7 @@ const onSubmit = () => {
                     <Button
                         variant="outline"
                         leftIcon={<Download />}
-                        onClick={onSubmit}
+                        onClick={onSubmit}loading={submitMutation.isPending}
                         className="w-full sm:w-auto">
                         Download
                     </Button>
