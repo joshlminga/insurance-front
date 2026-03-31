@@ -1,19 +1,7 @@
 import { Button } from "@/components/ui/button"
-import type { LucideIcon } from "lucide-react"
 import { Link } from "react-router-dom"
 import { cn } from "@/lib/utils"
-
-interface EmptyStateProps {
-  icon?: LucideIcon
-  title: string
-  description?: string
-  action?: {
-    label: string
-    href?: string
-    onClick?: () => void
-  }
-  className?: string
-}
+import { EmptyStateProps } from "@/types/types"
 
 export function EmptyState({
   icon: Icon,
@@ -25,7 +13,7 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center py-12 text-center",
+        "w-full flex flex-col items-center justify-center text-center",
         className
       )}
     >

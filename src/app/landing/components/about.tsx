@@ -1,5 +1,3 @@
-import React from 'react'
-
 export const AboutSection = () => {
     return (
         <section id="about" className="py-24 bg-white">
@@ -8,16 +6,18 @@ export const AboutSection = () => {
                     <div className="relative">
                         <div className="rounded-3xl overflow-hidden shadow-2xl">
                             <img
-                                src="about_big.jpg"
+                                src="about_big.webp"
                                 alt="Modern building"
-                                className="w-full h-[500px] object-cover"
+                                className="w-full h-125 object-cover"
+                                loading='eager'
                             />
                         </div>
                         <div className="absolute -bottom-10 -right-10 w-64 h-64 rounded-3xl overflow-hidden border-8 border-white shadow-2xl hidden lg:block">
                             <img
-                                src="about_small.jpg"
+                                src="about_small.webp"
                                 alt="Analytics"
                                 className="w-full h-full object-cover"
+                                loading='eager'
                             />
                         </div>
                     </div>
@@ -40,12 +40,12 @@ export const AboutSection = () => {
                                 <h4 className="text-[20px] font-bold text-black mb-2 leading-[100%]">200,000+</h4>
                                 <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Customer</p>
                             </div>
-                            <div className="hidden md:block w-px h-[115px] bg-[#C20C0C]"></div>
+                            <div className="hidden md:block w-px h-28.75 bg-[#C20C0C]"></div>
                             <div className="flex-1 text-center py-4">
                                 <h4 className="text-[20px] font-bold text-black mb-2 leading-[100%]">150,000+</h4>
                                 <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Quote Generated</p>
                             </div>
-                            <div className="hidden md:block w-px h-[115px] bg-[#C20C0C]"></div>
+                            <div className="hidden md:block w-px h-28.75 bg-[#C20C0C]"></div>
                             <div className="flex-1 text-center py-4">
                                 <h4 className="text-[20px] font-bold text-black mb-2 leading-[100%]">12+</h4>
                                 <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Years in Business</p>

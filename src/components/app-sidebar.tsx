@@ -1,11 +1,5 @@
 import * as React from "react"
 import {
-  // Users,
-  // Wallet,
-  // CreditCard,
-  // ArrowLeftRight,
-  // BarChart3,
-  // UserCog,
   Settings,
   LayoutDashboard,
   Users,
@@ -14,6 +8,7 @@ import {
   BarChart3,
   UserCog,
   ShieldCheck,
+  TextQuote,
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -26,85 +21,154 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar"
-import { CURRENTUSER } from "@/utils/enums"
+import { EPREFIX, EROUTES } from "@/utils/enums"
 import AppLogo from "./ui/app-logo"
+import { UseAuth } from "./auth-provider"
 
-// Navigation data for Accensure Management System
+
 const navData = {
   navMain: [
     {
       title: "Dashboard",
-      url: "/",
+      url: EROUTES.DASHBOARD,
       icon: LayoutDashboard,
       isActive: true,
     },
     {
       title: "Policyholders",
-      url: "/members",
+      url: EROUTES.MEMBERS,
       icon: Users,
       items: [
         {
           title: "All Policyholders",
-          url: "/members",
+          url: EROUTES.MEMBERS,
         },
         {
           title: "New Policyholder",
-          url: "/members/new",
+          url: EROUTES.MEMBERS_NEW,
         },
       ],
     },
     {
       title: "Premiums & Claims",
-      url: "/savings",
+      url: EROUTES.SAVINGS,
       icon: Wallet,
       items: [
         {
           title: "Accounts",
-          url: "/savings",
+          url: EROUTES.SAVINGS,
         },
         {
           title: "Insurance Products",
-          url: "/savings/products",
+          url: EROUTES.SAVINGS_PRODUCTS,
         },
       ],
     },
     {
       title: "Policies",
-      url: "/loans",
+      url: EROUTES.LOANS,
       icon: ShieldCheck,
       items: [
         {
           title: "All Policies",
-          url: "/loans",
+          url: EROUTES.LOANS,
         },
         {
           title: "New Application",
-          url: "/loans/apply",
+          url: EROUTES.LOANS_APPLY,
         },
         {
           title: "Policy Products",
-          url: "/loans/products",
+          url: EROUTES.LOANS_PRODUCTS,
         },
       ],
     },
     {
       title: "Payments",
-      url: "/transactions",
+      url: EROUTES.TRANSACTIONS,
       icon: ArrowLeftRight,
     },
     {
       title: "Insights",
-      url: "/reports",
+      url: EROUTES.REPORTS,
       icon: BarChart3,
     },
     {
+      title: "Quotations",
+      url: `${EROUTES.QUOTATIONS}`,
+      icon: TextQuote,
+      items: [
+        {
+          title: "Motor Quotation",
+          url: `${EROUTES.MOTORQUOTATIONS}`,
+        },
+        {
+          title: "Marine Quotation",
+          url: '',
+        },
+        {
+          title: "Travel Quotation",
+          url: '',
+        },
+      ],
+    },
+    {
       title: "Agents",
-      url: "/staff",
+      url: EROUTES.STAFF,
       icon: UserCog,
     },
     {
+      title: "Motor",
+      url: `${EROUTES.DASHBOARD}/${EPREFIX.PRODUCTS}`,
+      icon: LayoutDashboard,
+      items: [
+        {
+          title: "Motor Products",
+          url: `${EROUTES.DASHBOARD}/${EPREFIX.PRODUCTS}/motor`,
+        },
+        {
+          title: "Cover Types",
+          url: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/cover-types`
+        },
+        {
+          title: "Motor Covering",
+          url: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/covering`
+        },
+        {
+          title: "Vehicle Classes",
+          url: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/vehicle-classes`
+        },
+        {
+          title: "Vehicle Use",
+          url: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/vehicle-use`
+        },
+        {
+          title: "Addon Benefits",
+          url: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/add-on-benefits`
+        },
+        {
+          title: "Detailed Benefits",
+          url: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/detailed-benefits`
+        },
+        {
+          title: "Motor Tonage",
+          url: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/tonage`
+        }
+      ],
+    },
+    {
+      title: "Organizations",
+      url: EROUTES.ORGANIZATION,
+      icon: UserCog,
+    },
+    {
+      title: "Users",
+      url: EROUTES.USERS,
+      icon: Users,
+    },
+    {
       title: "Settings",
-      url: "/settings",
+      url: EROUTES.SETTINGS,
       icon: Settings,
     },
   ],
@@ -112,6 +176,8 @@ const navData = {
 
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { user } = UseAuth()
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -121,7 +187,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavMain items={navData.navMain} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={CURRENTUSER} />
+        <NavUser user={user} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

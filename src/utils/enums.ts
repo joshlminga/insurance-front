@@ -1,19 +1,17 @@
+import { ClaimItem } from "@/types/types";
 
 export const ELOGO = {
   NAVBARLOGO: '/logo/logo1.png'
 }
 
-export const CURRENTUSER = {
-  name: "Admin",
-  email: "admin@accensure.com",
-  avatar: "",
-}
-
 export const EPREFIX = {
-  AUTH:"auth",
+  AUTH: "auth",
   ADMIN: "admin",
   AGENT: "agent",
   CUSTOMER: "customer",
+  DASHBOARD: "dashboard",
+  PRODUCTS: "products",
+  QUOTATIONS: "quotations",
 } as const
 
 export const EROUTES = {
@@ -23,43 +21,60 @@ export const EROUTES = {
   TRAVEL: '/travel',
   MARINE: '/marine',
   LIFE: '/life',
+  MY_COVERS: '/my-covers',
 
   // Auth
-  SIGNUP:'/signup',
-  SIGNIN:'/signin',
+  SIGNUP: '/signup',
+  SIGNIN: '/signin',
 
-  // Admin / Dashboard
-  DASHBOARD: "/dashboard",
-
+  // dashbaord
+  DASHBOARD: `/${EPREFIX.DASHBOARD}`,
   // Members
-  MEMBERS: "/members",
-  MEMBERS_NEW: "/members/new",
-  MEMBERS_DETAIL: "/members/:id",
+  MEMBERS: `/${EPREFIX.DASHBOARD}/members`,
+  MEMBERS_NEW: `/${EPREFIX.DASHBOARD}/members/new`,
+  MEMBERS_DETAIL: `/${EPREFIX.DASHBOARD}/members/:id`,
 
   // Savings
-  SAVINGS: "/savings",
-  SAVINGS_PRODUCTS: "/savings/products",
-  SAVINGS_DETAIL: "/savings/:id",
+  SAVINGS: `/${EPREFIX.DASHBOARD}/savings`,
+  SAVINGS_PRODUCTS: `/${EPREFIX.DASHBOARD}/savings/products`,
+  SAVINGS_DETAIL: `/${EPREFIX.DASHBOARD}/savings/:id`,
 
   // Loans
-  LOANS: "/loans",
-  LOANS_APPLY: "/loans/apply",
-  LOANS_PRODUCTS: "/loans/products",
-  LOANS_DETAIL: "/loans/:id",
+  LOANS: `/${EPREFIX.DASHBOARD}/loans`,
+  LOANS_APPLY: `/${EPREFIX.DASHBOARD}/loans/apply`,
+  LOANS_PRODUCTS: `/${EPREFIX.DASHBOARD}/loans/products`,
+  LOANS_DETAIL: `/${EPREFIX.DASHBOARD}/loans/:id`,
 
   // Transactions
-  TRANSACTIONS: "/transactions",
+  TRANSACTIONS: `/${EPREFIX.DASHBOARD}/transactions`,
 
   // Reports
-  REPORTS: "/reports",
+  REPORTS: `/${EPREFIX.DASHBOARD}/reports`,
 
   // Staff
-  STAFF: "/staff",
-  STAFF_DETAIL: "/staff/:id",
+  STAFF: `/${EPREFIX.DASHBOARD}/staff`,
+  STAFF_DETAIL: `/${EPREFIX.DASHBOARD}/staff/:id`,
 
   // Settings
-  SETTINGS: "/settings",
-} as const;
+  SETTINGS: `/${EPREFIX.DASHBOARD}/settings`,
+
+  // Quotations
+  QUOTATIONS: `/${EPREFIX.DASHBOARD}/${EPREFIX.QUOTATIONS}`,
+  MOTORQUOTATIONS: `/${EPREFIX.DASHBOARD}/${EPREFIX.QUOTATIONS}/motor-quotations`,
+  // products
+  // Motor
+  PRODUCTS: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor`,
+  PRODUCTSRATES: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor-rates/:slung`,
+  COVERTYPES: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/cover-types`,
+  MOTORCOVERING: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/covering`,
+  VEHICLECLASSES: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/vehicle-classes`,
+  VEHICLEUSE: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/vehicle-use`,
+  MOTORADDONBENEFITS: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/add-on-benefits`,
+  MOTORDETAILEDBENEFIT: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/detailed-benefit`,
+
+  ORGANIZATION: `/${EPREFIX.DASHBOARD}/organization`,
+  USERS: `/${EPREFIX.DASHBOARD}/users`,
+} as const
 
 export const SORT_ORDER = {
   Descending: 'DESC',
@@ -72,6 +87,10 @@ export const QUOTATIONCHECKBOX = [
   { id: 'excess', label: 'Excess Protector' },
   { id: 'pvt', label: 'Political Violence & Terrorism' },
   { id: 'pa', label: 'Personal Accident' },
+]
+
+export const PROFFESIONALVALUATIONCHECKBOX = [
+  { id: 'true', label: 'Vehicle has been valued by a professional valuer in the last 18 months?' },
 ]
 
 export const EQUOTATIONSAMPLEDATA = [
@@ -338,3 +357,67 @@ export const POST_COMPARISON_DATA = [
     ],
   },
 ];
+
+export const ongoingCovers = [
+  {
+    id: '366782717',
+    title: 'PsV Car Insurance Cover',
+    variation: 'Paperback Edition',
+    status: 'COVERED',
+    date: 'On 11-02',
+    img: '/cic.png',
+  },
+  {
+    id: '377258917',
+    title: 'Excess Protector Cover',
+    variation: '5*6',
+    status: 'COVERED',
+    date: 'On 07-02',
+    img: '/britam.png',
+  },
+  {
+    id: '345454177',
+    title: 'Madison Insurance Cover',
+    variation: null,
+    status: 'COVERED',
+    date: 'On 09-12',
+    img: '/madison.png',
+  },
+  {
+    id: '311675987',
+    title: 'Sanlam Insurance Cover',
+    variation: null,
+    status: 'COVERED',
+    date: 'On 07-11',
+    img: '/sanlam.png',
+  },
+  {
+    id: '311675987',
+    title: 'All in One Cover',
+    variation: null,
+    status: 'COVERED',
+    date: 'On 07-11',
+    img: '/britam.png',
+  },
+]
+
+export const claims: ClaimItem[] = [
+  {
+    id: 'CLM-1001',
+    coverTitle: 'PSV Car Insurance Cover',
+    policyNumber: 'POL-366782717',
+    incidentDate: '2026-01-28',
+    submittedDate: '2026-01-29',
+    amount: 78000,
+    status: 'pending',
+  },
+  {
+    id: 'CLM-1002',
+    coverTitle: 'All in One Cover',
+    policyNumber: 'POL-311675987',
+    incidentDate: '2025-12-19',
+    submittedDate: '2025-12-20',
+    amount: 45000,
+    status: 'approved',
+  },
+]

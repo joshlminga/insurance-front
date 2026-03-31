@@ -1,6 +1,5 @@
 // routes.tsx
 import { createBrowserRouter, Navigate } from "react-router-dom"
-import Layout from "./Layout"
 import { EPREFIX, EROUTES } from "./utils/enums"
 
 // Pages
@@ -37,23 +36,57 @@ import SettingsPage from "./app/settings/page"
 
 // Landing
 import { Landingpage } from "./app/landing/page"
-import { StepPage } from "./app/motor/steppers/steppage"
-import { MotorLandingPage } from "./app/motor/page"
+// import { StepPage } from "./app/motor/steppers/steppage"
+// import { MotorLandingPage } from "./app/motor/page"
 import AuthLayoutPage from "./auth/layout"
 import { SignupForm } from "./auth/components/signup-form"
 import { LoginForm } from "./auth/components/login-form"
+import { MarineLandingPage } from "./app/customer/marine/page"
+import { MarineStepPage } from "./app/customer/marine/steppers/steppage"
+
+import { ProtectedRoute, PublicRoute, CustomerPublicRoute } from "./hooks/hooks"
+import Layout from "./Layout"
+import OrganizationsPage from "./app/admin/organizations/page"
+import { UsersPage } from "./app/admin/users/page"
+import { MotorProductPage } from "./app/admin/product/motor/motor-product/page"
+import { MotorLandingPage } from "./app/customer/motor/page"
+import { StepPage } from "./app/customer/motor/steppers/steppage"
+import { MyCoversLayout } from "./app/customer/my-covers/layout"
+import { CoversPage } from "./app/customer/my-covers/ongoing/page"
+import { CancelledCoversPage } from "./app/customer/my-covers/cancelled/page"
+import { MyAccountManagementPage } from "./app/customer/my-covers/my-account/page"
+import { MyClaimsPage } from "./app/customer/my-covers/my-claims/page"
+import { MotorCoverTypePage } from "./app/admin/product/motor/cover_types/page"
+import { MotorCoveringPage } from "./app/admin/product/motor/motor-coving/page"
+import { VehicleClassesPage } from "./app/admin/product/motor/vehicle-clases/page"
+import { VehicleUsePage } from "./app/admin/product/motor/vehicle-use/page"
+import { MotorAddonBenefitsPage } from "./app/admin/product/motor/motor-addon-benefits/page"
+import { MotorDetailedBenefitPage } from "./app/admin/product/motor/motor-detailed-benefit/page"
+import { MotorTonangePage } from "./app/admin/product/motor/motor-tonage/page"
+import { MotorProductRatesPage } from "./app/admin/product/motor/motor-rates/page"
+import { MotorQuotationPage } from "./app/admin/quotations/motor/page"
 
 export const router = createBrowserRouter([
+
   // Public
   {
     path: EROUTES.LANDING,
-    element: <Landingpage />,
+    element: (
+      <PublicRoute>
+        <Landingpage />
+      </PublicRoute>
+    ),
   },
 
+  // START-USERGENERAL = TRUE
   // Motor / Customer
   {
     path: EPREFIX.CUSTOMER,
-    element: <MotorLandingPage />,
+    element: (
+      <CustomerPublicRoute>
+        <MotorLandingPage />
+      </CustomerPublicRoute>
+    ),
     children: [
       {
         path: EROUTES.MOTOR.slice(1),
@@ -62,6 +95,57 @@ export const router = createBrowserRouter([
     ],
   },
 
+  // My Covers / Customer Account — protected (authenticated only)
+  {
+    path: `${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}`,
+    element: (
+      <ProtectedRoute>
+        <MyCoversLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      {
+        index: true,
+        element: <CoversPage />,
+      },
+      {
+        path: "cancelled",
+        element: <CoversPage />,
+        children: [
+          {
+            index: true,
+            element: <CancelledCoversPage />,
+          },
+        ],
+      },
+      {
+        path: "account",
+        element: <MyAccountManagementPage />,
+      },
+      {
+        path: "claims",
+        element: <MyClaimsPage />,
+      },
+    ],
+  },
+
+  // marine
+  {
+    path: EPREFIX.CUSTOMER,
+    element: (
+      <CustomerPublicRoute>
+        <MarineLandingPage />
+      </CustomerPublicRoute>
+    ),
+    children: [
+      {
+        path: EROUTES.MARINE.slice(1),
+        element: <MarineStepPage />,
+      },
+    ],
+  },
+  // END-USERGENERAL = TRUE
+
   // Auth
   {
     path: EPREFIX.AUTH,
@@ -69,106 +153,174 @@ export const router = createBrowserRouter([
       {
         path: EROUTES.SIGNIN.slice(1),
         element: (
-          <AuthLayoutPage
-            title="Please sign in or register"
-            description="to purchase your cover">
-            <LoginForm />
-          </AuthLayoutPage>
+          <PublicRoute>
+            <AuthLayoutPage
+              title="Please sign in"
+              description="to purchase your cover">
+              <LoginForm />
+            </AuthLayoutPage>
+          </PublicRoute>
         ),
       },
       {
         path: EROUTES.SIGNUP.slice(1),
         element: (
-          <AuthLayoutPage
-            title="Please sign in or register"
-            description="to purchase your cover">
-            <SignupForm />
-          </AuthLayoutPage>
+          <PublicRoute>
+            <AuthLayoutPage
+              title="Please or register"
+              description="to purchase your cover">
+              <SignupForm />
+            </AuthLayoutPage>
+          </PublicRoute>
         ),
       },
     ],
   },
-  
 
-  // Admin - Dashboard
+  // START-USERGENERAL = FALSE
+  // Admin - Dashboard & Nested Routes
   {
     path: EROUTES.DASHBOARD,
-    element: <Layout><DashboardPage /></Layout>,
-  },
+    element: (
+      <ProtectedRoute requireGeneral={false}>
+        <Layout />
+      </ProtectedRoute>
+    ),
+    children: [
+      {
+        index: true,
+        element: <DashboardPage />,
+      },
+      // Members
+      {
+        path: "members",
+        element: <MembersPage />,
+      },
+      {
+        path: "members/new",
+        element: <MemberNewPage />,
+      },
+      {
+        path: "members/:id",
+        element: <MemberDetailPage />,
+      },
+      // Savings
+      {
+        path: "savings",
+        element: <SavingsPage />,
+      },
+      {
+        path: "savings/products",
+        element: <SavingsProductsPage />,
+      },
+      {
+        path: "savings/:id",
+        element: <SavingAccensureuntDetailPage />,
+      },
+      // Loans
+      {
+        path: "loans",
+        element: <LoansPage />,
+      },
+      {
+        path: "loans/apply",
+        element: <LoanApplicationPage />,
+      },
+      {
+        path: "loans/products",
+        element: <LoanProductsPage />,
+      },
+      {
+        path: "loans/:id",
+        element: <LoanDetailPage />,
+      },
+      // Transactions
+      {
+        path: "transactions",
+        element: <TransactionsPage />,
+      },
+      // Reports
+      {
+        path: "reports",
+        element: <ReportsPage />,
+      },
+      // Staff
+      {
+        path: "staff",
+        element: <StaffPage />,
+      },
+      {
+        path: "staff",
+        element: <StaffPage />,
+      },
+      {
+        path: "staff/:id",
+        element: <StaffDetailPage />,
+      },
 
-  // Members
-  {
-    path: EROUTES.MEMBERS,
-    element: <Layout><MembersPage /></Layout>,
-  },
-  {
-    path: EROUTES.MEMBERS_NEW,
-    element: <Layout><MemberNewPage /></Layout>,
-  },
-  {
-    path: EROUTES.MEMBERS_DETAIL,
-    element: <Layout><MemberDetailPage /></Layout>,
-  },
+      // quotations
+      // motor
+{
+        path: "quotations/motor-quotations",
+        element: <MotorQuotationPage />,
+      },
+      // products
+      // motor
+      {
+        path: "products/motor",
+        element: <MotorProductPage />,
+      },
+      {
+        path: "products/motor-rates/:slung",
+        element: <MotorProductRatesPage />,
+      },
+      {
+        path: "products/motor/cover-types",
+        element: <MotorCoverTypePage />,
+      },
+      {
+        path: "products/motor/covering",
+        element: <MotorCoveringPage />,
+      },
+      {
+        path: "products/motor/vehicle-classes",
+        element: <VehicleClassesPage />,
+      },
+      {
+        path: "products/motor/vehicle-use",
+        element: <VehicleUsePage />,
+      },
+      {
+        path: "products/motor/add-on-benefits",
+        element: <MotorAddonBenefitsPage />,
+      },
+      {
+        path: "products/motor/detailed-benefits",
+        element: <MotorDetailedBenefitPage />,
+      },
+       {
+        path: "products/motor/tonage",
+        element: <MotorTonangePage />,
+      },
 
-  // Savings
-  {
-    path: EROUTES.SAVINGS,
-    element: <Layout><SavingsPage /></Layout>,
+      // Organizations
+      {
+        path: "organization",
+        element: <OrganizationsPage />,
+      },
+      // Users
+      {
+        path: "users",
+        element: <UsersPage />,
+      },
+      // Settings
+      {
+        path: "settings",
+        element: <SettingsPage />,
+      },
+    ],
   },
-  {
-    path: EROUTES.SAVINGS_PRODUCTS,
-    element: <Layout><SavingsProductsPage /></Layout>,
-  },
-  {
-    path: EROUTES.SAVINGS_DETAIL,
-    element: <Layout><SavingAccensureuntDetailPage /></Layout>,
-  },
-
-  // Loans
-  {
-    path: EROUTES.LOANS,
-    element: <Layout><LoansPage /></Layout>,
-  },
-  {
-    path: EROUTES.LOANS_APPLY,
-    element: <Layout><LoanApplicationPage /></Layout>,
-  },
-  {
-    path: EROUTES.LOANS_PRODUCTS,
-    element: <Layout><LoanProductsPage /></Layout>,
-  },
-  {
-    path: EROUTES.LOANS_DETAIL,
-    element: <Layout><LoanDetailPage /></Layout>,
-  },
-
-  // Transactions
-  {
-    path: EROUTES.TRANSACTIONS,
-    element: <Layout><TransactionsPage /></Layout>,
-  },
-
-  // Reports
-  {
-    path: EROUTES.REPORTS,
-    element: <Layout><ReportsPage /></Layout>,
-  },
-
-  // Staff
-  {
-    path: EROUTES.STAFF,
-    element: <Layout><StaffPage /></Layout>,
-  },
-  {
-    path: EROUTES.STAFF_DETAIL,
-    element: <Layout><StaffDetailPage /></Layout>,
-  },
-
-  // Settings
-  {
-    path: EROUTES.SETTINGS,
-    element: <Layout><SettingsPage /></Layout>,
-  },
+  // END-USERGENERAL = FALSE
 
   // Fallback
   {

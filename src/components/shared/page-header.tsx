@@ -6,7 +6,7 @@ import { Link } from "react-router-dom"
 
 export function PageHeader({ title, description, actions, children }: PageHeaderProps) {
   return (
-    <>
+    <div className="w-full">
       <title>{`${title} - Accensure Insurance Marketplace`}</title>
       {description && <meta name="description" content={description} />}
       <div className="flex flex-col gap-4">
@@ -21,41 +21,41 @@ export function PageHeader({ title, description, actions, children }: PageHeader
               </p>
             )}
           </div>
-          <div className="flex items-center gap-2 flex-shrink-0">
-            {actions?.map((action, index) => {
-              const Icon = action.icon
-              const buttonContent = (
-                <>
-                  {Icon && <Icon className="h-4 w-4" />}
-                  {action.label}
-                </>
-              )
-
-              if (action.href) {
-                return (
-                  <Button
-                    key={index}
-                    variant={action.variant || "default"}
-                    asChild>
-                    <Link to={action.href}>{buttonContent}</Link>
-                  </Button>
-                )
-              }
-
+          <div className="flex items-center gap-2 shrink-0">
+            <BreadCrumbComponent />
+          </div>
+        </div>
+        <div className="flex items-center justify-end gap-2 shrink-0">
+          {actions?.map((action, index) => {
+            const Icon = action.icon
+            const buttonContent = (
+              <>
+                {Icon && <Icon className="h-4 w-4" />}
+                {action.label}
+              </>
+            )
+            if (action.href) {
               return (
                 <Button
                   key={index}
                   variant={action.variant || "default"}
-                  onClick={action.onClick}>
-                  {buttonContent}
+                  asChild>
+                  <Link to={action.href}>{buttonContent}</Link>
                 </Button>
               )
-            })}
-            <BreadCrumbComponent />
-          </div>
+            }
+            return (
+              <Button
+                key={index}
+                variant={action.variant || "default"}
+                onClick={action.onClick}>
+                {buttonContent}
+              </Button>
+            )
+          })}
         </div>
         {children}
       </div>
-    </>
+    </div>
   )
 }
