@@ -24,6 +24,7 @@ import React, { useEffect, useState } from "react";
 import {
     BenefitType,
     premiumPreview,
+    SubmitResponse,
 } from "@/types/types";
 import {
     BENEFIT_SECTIONS,
@@ -65,6 +66,11 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
         }
     }, [])
 
+     const data = {
+        'product_id': componentProps?.data?.product_id,
+        'rate_id': componentProps?.data?.rate_id,
+    };
+
     const submitMutation = UseApiMutation<Blob, void>({
         url: `document/motor/single-quote/${quoteSessionId}`,
         method: EMETHODS.POST,
@@ -78,7 +84,7 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
                 const link = document.createElement('a');
 
                 link.href = url;
-                link.download = `quote-${quoteSessionId}.pdf`; // 👈 filename
+                link.download = `quote-${quoteSessionId}.pdf`;
                 document.body.appendChild(link);
                 link.click();
 
@@ -94,16 +100,35 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
         },
     });
 
-    const onSubmit = () => {
+    const onSubmit = (data: any) => {
         if (!quoteSessionId) {
             ShowToast.error("No active quote session found.")
             return
         }
-        const data = {
-            'product_id': componentProps?.data?.product_id,
-            'rate_id': componentProps?.data?.rate_id,
-        };
         submitMutation.mutate(data)
+    }
+
+    const submitPurchaseMutation = UseApiMutation<SubmitResponse, any>({
+        url: `purchase/motor/${quoteSessionId}`,
+        method: EMETHODS.POST,
+        mutationOptions: {
+            onSuccess: (data) => {
+                goToNextStep?.();
+                ShowToast.success(data?.message ?? "Purchase started");
+            },
+            onError: (error: unknown) => {
+                const message = extractErrorMessage(error);
+                ShowToast.error(message || "Purchase failed!");
+            },
+        },
+    });
+
+    const onPurchase = (data: any) => {
+        if (!quoteSessionId) {
+            ShowToast.error("No active quote session found.")
+            return
+        }
+        submitPurchaseMutation.mutate(data)
     }
 
     return (
@@ -133,7 +158,6 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
                                 const displayName = benefit.name ?? benefit.label;
                                 const hasRate = benefit?.rate != null;
                                 const hasMinimum = benefit?.minimum != null;
-
                                 return (
                                     <React.Fragment key={benefit?.id}>
                                         <div className="flex flex-col gap-0.5">
@@ -169,7 +193,8 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
                     <Button
                         variant="outline"
                         leftIcon={<Download />}
-                        onClick={onSubmit}loading={submitMutation.isPending}
+                        onClick={() => {onSubmit(data)}}
+                         loading={submitMutation.isPending}
                         className="w-full sm:w-auto">
                         Download
                     </Button>
@@ -193,8 +218,9 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
                         leftIcon={<ShoppingCart />}
                         onClick={() => {
                             handleDialogContextSwitch?.({});
-                            goToNextStep?.();
+                            onPurchase(data);
                         }}
+                        loading={submitPurchaseMutation.isPending}
                         className="w-full sm:w-auto text-white hover:text-white bg-[#0CC258] hover:bg-[#0CC258]/80">
                         Purchase Cover
                     </Button>
