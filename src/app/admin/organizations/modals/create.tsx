@@ -75,7 +75,7 @@ export const CreateOrganizationModal = ({ handleDialogContextSwitch, componentPr
         <div className="w-full min-w-150 max-w-150 p-6 space-y-6">
             <div className="border-b pb-3">
                 <h2 className="text-xl font-semibold">
-                    Create Organization
+                    Create Organizations
                 </h2>
                 <p className="text-sm text-muted-foreground mt-1">
                     Fill in the details below to register a new organization.
