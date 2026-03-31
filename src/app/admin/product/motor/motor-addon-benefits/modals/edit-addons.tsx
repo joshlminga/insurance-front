@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CardFooter } from '@/components/ui/card'
-import { Button, ReuseableInput } from '@/dev/core'
+import { Button, ReusableSelect, ReuseableInput } from '@/dev/core'
 import { UseApiMutation } from '@/hooks/hooks'
 import { CreateMotorAddonBenefitsSchema } from '@/types/form-schema'
 import { CreateMotorAddonBenefitsFormValues } from '@/types/schema'
 import { SubmitResponse } from '@/types/types'
-import { EMETHODS } from '@/utils/constatnts'
+import { EMETHODS, MOTORADDONSBENEFITS } from '@/utils/constatnts'
 import { extractErrorMessage } from '@/utils/helpers'
 import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -21,6 +21,7 @@ export const EditMotorAddonsBenefitsModal = ({ handleDialogContextSwitch, compon
         defaultValues: {
             name: componentProps?.data?.name ?? "",
             description: componentProps?.data?.meta?.description ?? "",
+            group: componentProps?.data?.group ?? "",
         },
     })
 
@@ -45,7 +46,7 @@ export const EditMotorAddonsBenefitsModal = ({ handleDialogContextSwitch, compon
     }
 
     return (
-        <div className="w-full min-w-[600px] max-w-[600px] p-6 space-y-6">
+        <div className="w-full min-w-150 max-w-150 p-6 space-y-6">
             <div className="border-b pb-3">
                 <h2 className="text-xl font-semibold">
                     Create Cover Type
@@ -59,14 +60,20 @@ export const EditMotorAddonsBenefitsModal = ({ handleDialogContextSwitch, compon
                     control={form.control}
                     name="name"
                     label="AddOn Name"
-                    className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                    className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
                 />
                 <ReuseableInput
                     control={form.control}
                     name="description"
                     type="textarea"
                     label="AddOn Description"
-                    className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                    className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                />
+                <ReusableSelect
+                    control={form.control}
+                    name="group"
+                    label="Group"
+                    options={MOTORADDONSBENEFITS}
                 />
                 <CardFooter className="flex flex-col sm:flex-row justify-between gap-3 mt-2 px-0">
                     <Button

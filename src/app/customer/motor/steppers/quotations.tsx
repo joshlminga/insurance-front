@@ -15,7 +15,7 @@ import type {
     TFilterOptions,
     TPaginationFilters
 } from '@/types/types'
-import { EPREFIX, EROUTES, QUOTATIONCHECKBOX } from '@/utils/enums'
+import { EPREFIX, EROUTES } from '@/utils/enums'
 import { ArrowLeftCircle, ArrowRightCircle, Plus } from 'lucide-react'
 import React, { useEffect, useMemo, useReducer, useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -67,15 +67,14 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
             per_page: filter?.pageSize,
         },
         queryOptions: {
-            enabled: Boolean(quoteSessionId),
+            enabled: !!quoteSessionId,
         },
     })
-    const quotationItems = data?.data;
-
+    const quotationItems = data?.data?.results;
+    const QUOTATIONCHECKBOX = data?.data?.benefits?.available;
     if (isLoading) {
         return <div className="mb-3 text-sm text-muted-foreground">Fetching premium quotations...</div>
     }
-
     return (
         <div>
             <div className="max-w-full mx-auto border-0 bg-transparent">
@@ -186,11 +185,15 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                         <div>
                                             <div className="flex flex-wrap justify-between gap-1 min-w-0">
                                                 <span className="text-xs sm:text-sm wrap-break-word max-w-[60%]">Basic Premium</span>
-                                                <span className="text-xs sm:text-sm wrap-break-word max-w-[35%] text-right">{formatCurrency(item?.calculated_premium?.basic_premium)}</span>
+                                                <span className="text-xs sm:text-sm wrap-break-word max-w-[35%] text-right">
+                                                    {formatCurrency(item?.calculated_premium?.basic_premium)}
+                                                    </span>
                                             </div>
                                             <div className="flex flex-wrap justify-between gap-1 min-w-0">
                                                 <span className="text-xs sm:text-sm wrap-break-word max-w-[60%]">Total Premium</span>
-                                                <span className="text-xs sm:text-sm wrap-break-word max-w-[35%] text-right">{formatCurrency(item?.calculated_premium?.total_premium)}</span>
+                                                <span className="text-xs sm:text-sm wrap-break-word max-w-[35%] text-right">
+                                                    {formatCurrency(item?.calculated_premium?.total_premium)}
+                                                    </span>
                                             </div>
                                         </div>
                                     </>
@@ -207,7 +210,6 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                         onClick={() => goToPrevStep?.()}>
                         Previous
                     </Button>
-
                     <div className="order-first sm:order-0">
                         <ReusablePagination
                             currentPage={data?.pagination?.current_page ?? filter.page}
@@ -219,7 +221,6 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
                             disabled={isLoading}
                         />
                     </div>
-
                     <Button
                         type="button"
                         className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"

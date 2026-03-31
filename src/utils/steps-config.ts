@@ -65,7 +65,7 @@ export const getMotorSteps = (isAuthenticated: boolean) => {
             content: SuccessPurchase,
         },
     ]
-    // Skip CustomerVerification + OTP steps for authenticated users
+    
     return isAuthenticated ? allSteps.slice(2) : allSteps
 }
 

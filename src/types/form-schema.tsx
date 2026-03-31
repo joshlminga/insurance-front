@@ -56,13 +56,13 @@ export const VehicleDetailsSchema = z.object({
   bodytype_id: z.string().optional().or(z.literal("")),
   country_id: z.string().optional().or(z.literal("")),
   year: z
-  .string()
-  .min(1, "YOM is required")
-  .refine((val) => {
-    const year = Number(val)
-    const currentYear = new Date().getFullYear()
-    return !isNaN(year) && year >= 2011 && year <= currentYear
-  }, `Year must be between 2011 and ${new Date().getFullYear()}`),
+    .string()
+    .min(1, "YOM is required")
+    .refine((val) => {
+      const year = Number(val)
+      const currentYear = new Date().getFullYear()
+      return !isNaN(year) && year >= 2011 && year <= currentYear
+    }, `Year must be between 2011 and ${new Date().getFullYear()}`),
 
   ownership: z.string().min(1, "Ownarship is required"),
   vehicle_value: z.string().optional().or(z.literal("")),
@@ -150,7 +150,7 @@ const MpesaPaymentSchema = BasePaymentSchema.extend({
   phone_number: z.string()
     .min(10, "Phone number must be at least 10 digits")
     .regex(/^(?:\+254|254|0)?[17]\d{8}$/, "Invalid Kenyan phone number"),
-   amount: z.number().positive("Amount must be greater than 0"),
+  amount: z.number().positive("Amount must be greater than 0"),
   // amount: z.number().positive().refine((val) => /^\d+(\.\d{1,2})?$/.test(val.toString()),
   //   "Amount cannot have more than 2 decimal places"
   // )
@@ -384,6 +384,9 @@ export const CreateMotorAddonBenefitsSchema = z.object({
     .string()
     .min(2, "Addon benefit name must be at least 2 characters")
     .max(100, "Addon benefit name is too long"),
+  group: z
+    .string()
+    .min(2, "Addon benefit group must be selected"),
   description: z
     .string()
     .min(5, "Description must be at least 5 characters")

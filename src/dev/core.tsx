@@ -387,30 +387,30 @@ export const ReusableCheckboxGrid = ({
 }: ReusableCheckboxGridProps) => {
     return (
         <div
-            className={`grid gap-8 grid-cols-${columns} ${className}`}>
+            className={`grid gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-${columns} ${className}`}>
             {options.map((option) => (
-                <div
-                    key={option.id}
-                    className="flex items-start gap-2 mt-2">
+                <div key={option.id} className="flex items-start gap-2 mt-2">
                     <Checkbox
+                        id={`checkbox-${option.id}`}
                         checked={option.checked}
                         name={name}
-                        onCheckedChange={(val) =>
-                            option.onChange?.(Boolean(val))
-                        }
+                        onCheckedChange={(checked) => {
+                            option.onChange?.(Boolean(checked));
+                        }}
                         className="w-3.75 h-3.75 rounded-[3px] border border-[#D9D9D9]
                        data-[state=checked]:bg-[#C20C0C]
                        data-[state=checked]:border-[#C20C0C]"
                     />
-                    <label className="cursor-pointer max-w-112.25">
-                        {option?.label}
+                    <label 
+                        htmlFor={`checkbox-${option.id}`} 
+                        className="cursor-pointer max-w-112.25 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                        {option?.name}
                     </label>
                 </div>
             ))}
         </div>
     )
 }
-
 export function ReusableTabs({
     tabs,
     defaultValue,
@@ -498,6 +498,7 @@ export function RouteTabNav({ tabs, basePath, className }: TRouteTabNavProps) {
         </div>
     )
 }
+
 export const ReusablePagination = ({
     currentPage: currentPageProp,
     totalPages: totalPagesProp,
@@ -869,6 +870,7 @@ export const TableComponentHeadings = ({ children }: TNodeChildrentType) => {
     );
 };
 
+
 export const PageForPagination = ({
     active = false,
     content,
@@ -1029,68 +1031,6 @@ export const ReusableCountriesInputMultiselect = ({
         </div>
     )
 }
-
-{/* export function ReuseableSingleSelectCountriesInput<T extends FieldValues>({
-    value,
-    onChange,
-    placeholder = "Select country...",
-    label,
-    required = false,
-    disabled = false,
-    className,
-
-}: ReuseableSingleSelectCountriesInputProps<T>) {
-    const [filter, optionsDispatcher] = useReducer(
-        ReusableReducer<TPaginationFilters & TFilterOptions>,
-        { ...FILTEROPTIONS, page: 1, pageSize: 15 }
-    );
-
-    const { data, isLoading } = UseApiQuery<TCountryResponse>({
-        url: "taxonomies/general/countries",
-        params: {
-            direction: "asc",
-            page: filter.page,
-            pageSize: filter.pageSize,
-            term: filter.term
-        },
-        queryOptions: { enabled: true },
-    })
-
-    const countries = data?.data ?? []
-
-    return (
-        <div className={`space-y-2 ${className ?? ""}`}>
-            {label && (
-                <Label>
-                    {label}
-                    {required && <span className="text-destructive ml-1">*</span>}
-                </Label>
-            )}
-            <Select
-                value={value}
-                onValueChange={onChange}
-                disabled={disabled || isLoading}>
-                <SelectTrigger className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]">
-                    <SelectValue
-                        placeholder={isLoading ? "Loading countries..." : placeholder}
-                    />
-                </SelectTrigger>
-                <SelectContent>
-                    {countries.map((country) => (
-                        <SelectItem key={country.id} value={String(country.id)}>
-                            {country?.name}
-                        </SelectItem>
-                    ))}
-                    {!isLoading && countries.length === 0 && (
-                        <div className="px-3 py-2 text-sm text-muted-foreground">
-                            No countries found
-                        </div>
-                    )}
-                </SelectContent>
-            </Select>
-        </div>
-    )
-} */}
 
 export function ReuseableSingleSelectCountriesInput<T extends FieldValues>({
     value,

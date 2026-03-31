@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { TActionType, TFilterOptions } from "@/types/types";
+import type { BenefitType, TActionType, TFilterOptions } from "@/types/types";
 import { EPREFIX, EROUTES, SORT_ORDER } from "./enums";
 import { ShieldCheck, BarChart3, Settings, LogOut } from "lucide-react";
 
@@ -80,6 +80,14 @@ export const PAYMENTPLANS = [
   { label: "1", value: "1" },
   { label: "2", value: "2" },
   { label: "3", value: "3" },
+]
+
+export const MOTORADDONSBENEFITS = [
+  { label: "Excess", value: "Excess" },
+  { label: "Political", value: "Political" },
+  { label: "Courtesy", value: "Courtesy" },
+  { label: "Rescue", value: "Rescue" },
+  { label: "Accident", value: "Accident" },
 ]
 
 export const BOOLEANOPTIONS = [
@@ -188,3 +196,16 @@ export const RatesSteps = [
 export const POLL_INTERVAL_MS = 3000
 export const POLL_TIMEOUT_MS = 90000
 export const MOTOR_QUOTE_SESSION_STORAGE_KEY = "motor_quote_session_id"
+
+export const BENEFIT_TYPE_CONFIG = {
+    inclusive: { label: "Inclusive", color: "bg-[#0CC258]" },
+    compulsory: { label: "Compulsory", color: "bg-[#C20C0C]" },
+    optional: { label: "Optional", color: "bg-[#209BFF]" },
+} as const;
+
+
+export const BENEFIT_SECTIONS: { type: BenefitType; key: "compulsory" | "inclusive" | "optional" }[] = [
+    { type: "compulsory", key: "compulsory" },
+    { type: "inclusive", key: "inclusive" },
+    { type: "optional", key: "optional" },
+];

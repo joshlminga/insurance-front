@@ -99,12 +99,11 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
         method: EMETHODS.POST,
         mutationOptions: {
             onSuccess: (data) => {
-                const quoteSessionId = Number(data?.data?.quote_session?.id)
+                const quoteSessionId = Number(data?.data?.id)
                 if (!Number.isFinite(quoteSessionId) || quoteSessionId <= 0) {
                     ShowToast.error("Quote session could not be initialized. Please try again.")
                     return
                 }
-
                 localStorage.setItem(MOTOR_QUOTE_SESSION_STORAGE_KEY, String(quoteSessionId))
                 goToNextStep?.()
                 ShowToast.success(data.message || "Submitted successfully!")

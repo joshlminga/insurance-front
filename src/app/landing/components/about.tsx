@@ -8,7 +8,7 @@ export const AboutSection = () => {
                             <img
                                 src="about_big.webp"
                                 alt="Modern building"
-                                className="w-full h-[500px] object-cover"
+                                className="w-full h-125 object-cover"
                                 loading='eager'
                             />
                         </div>
@@ -40,12 +40,12 @@ export const AboutSection = () => {
                                 <h4 className="text-[20px] font-bold text-black mb-2 leading-[100%]">200,000+</h4>
                                 <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Customer</p>
                             </div>
-                            <div className="hidden md:block w-px h-[115px] bg-[#C20C0C]"></div>
+                            <div className="hidden md:block w-px h-28.75 bg-[#C20C0C]"></div>
                             <div className="flex-1 text-center py-4">
                                 <h4 className="text-[20px] font-bold text-black mb-2 leading-[100%]">150,000+</h4>
                                 <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Quote Generated</p>
                             </div>
-                            <div className="hidden md:block w-px h-[115px] bg-[#C20C0C]"></div>
+                            <div className="hidden md:block w-px h-28.75 bg-[#C20C0C]"></div>
                             <div className="flex-1 text-center py-4">
                                 <h4 className="text-[20px] font-bold text-black mb-2 leading-[100%]">12+</h4>
                                 <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Years in Business</p>
