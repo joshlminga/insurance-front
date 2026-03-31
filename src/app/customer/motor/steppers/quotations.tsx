@@ -1,14 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { CardFooter, } from '@/components/ui/card'
+import { CardFooter } from '@/components/ui/card'
 import {
     Button,
     CustomDialogComponent,
+    EmptyState,
     ReusableCard,
     ReusableCheckboxGrid,
     ReusablePagination,
-    ReuseableInput
+    ReuseableInput,
+    SkeletonCard
 } from '@/dev/core'
-import { useCustomDialogContextFactory, } from '@/hooks'
+import { useCustomDialogContextFactory } from '@/hooks'
 import type {
     CustomerVerificationDetailsProps,
     SubmitResponse,
@@ -24,13 +26,21 @@ import { Link, useLocation } from 'react-router-dom'
 import { QuotePreviewPage } from './qoute-preview/page'
 import { UseAuth } from '@/components/auth-provider'
 import { useStepperContext } from '@/hooks/stepper-context'
-import { FILTEROPTIONS, MOTOR_QUOTE_SESSION_STORAGE_KEY, ReusableReducer } from '@/utils/constatnts'
+import { 
+    FILTEROPTIONS, 
+    MOTOR_QUOTE_SESSION_STORAGE_KEY, 
+    ReusableReducer 
+} from '@/utils/constatnts'
 import { UseApiQuery } from '@/hooks/hooks'
 import { formatCurrency } from '@/lib/format'
 
-export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goToNextStep, goToPrevStep }) => {
+
+export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
+    goToNextStep,
+    goToPrevStep,
+}) => {
     const [quoteSessionId, setQuoteSessionId] = useState<number | null>(null)
-    const form = useForm();
+    const form = useForm()
     const { isAuthenticated } = UseAuth()
     const location = useLocation()
     const { currentStep } = useStepperContext()
@@ -38,14 +48,14 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
     const [filter, optionsDispatcher] = useReducer(
         ReusableReducer<TPaginationFilters & TFilterOptions>,
         { ...FILTEROPTIONS, page: 1, pageSize: 8 }
-    );
+    )
 
     const { handleDialogContextSwitch, dialogContent, dialogOpen } =
         useCustomDialogContextFactory<{
-            refetch?: () => Promise<any>;
-            data?: any;
-            goToNextStep?: (CustomerVerificationDetailsProps['goToNextStep']);
-        }>();
+            refetch?: () => Promise<any>
+            data?: any
+            goToNextStep?: CustomerVerificationDetailsProps['goToNextStep']
+        }>()
 
     useEffect(() => {
         const storedSessionId = Number(localStorage.getItem(MOTOR_QUOTE_SESSION_STORAGE_KEY))
@@ -57,9 +67,10 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
     }, [])
 
     const premiumUrl = useMemo(
-        () => (quoteSessionId ? `quotation/motor/${quoteSessionId}/premium` : ""),
+        () => (quoteSessionId ? `quotation/motor/${quoteSessionId}/premium` : ''),
         [quoteSessionId]
     )
+
     const { data, isLoading } = UseApiQuery<SubmitResponse>({
         url: premiumUrl,
         params: {
@@ -70,170 +81,191 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({ goT
             enabled: !!quoteSessionId,
         },
     })
-    const quotationItems = data?.data?.results;
-    const QUOTATIONCHECKBOX = data?.data?.benefits?.available;
-    if (isLoading) {
-        return <div className="mb-3 text-sm text-muted-foreground">Fetching premium quotations...</div>
-    }
+
+    const quotationItems = data?.data?.results ?? []
+    const QUOTATIONCHECKBOX = data?.data?.benefits?.available ?? []
+    const currentPage = data?.pagination?.current_page ?? filter.page
+    const lastPage = data?.pagination?.last_page ?? 1
+
     return (
-        <div>
-            <div className="max-w-full mx-auto border-0 bg-transparent">
-                <form className='w-full py-2 sm:py-4'>
-                    <div className="w-full border rounded-0 px-3 sm:px-6 py-4 sm:py-6">
-                        <h1 className="text-xl sm:text-2xl font-bold mb-4">
-                            Additional Benefits:
-                        </h1>
-                        <hr className="mb-4 sm:mb-6" />
-                        {!quoteSessionId && (
-                            <div className="mb-4 rounded border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-800">
-                                Quote session not found. Go back to Vehicle Details and submit again.
-                            </div>
-                        )}
-                        <div className="overflow-x-auto">
-                            <ReusableCheckboxGrid
-                                options={QUOTATIONCHECKBOX}
-                                columns={3}
-                            />
-                        </div>
-                        <hr className="my-4 sm:mb-6" />
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8">
-                            <ReuseableInput
-                                className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
-                                control={form.control}
-                                name="courtesy_car"
-                                label="Courtesy Car"
-                            />
-                            <ReuseableInput
-                                className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
-                                control={form.control}
-                                name="road_rescue"
-                                label="Road Rescue"
-                            />
-                        </div>
-                        <Button
-                            type='button'
-                            className="ml-auto mt-4 flex items-center rounded-[3px] border border-[#0CC2581F] bg-[#C7EED5] hover:bg-[#C7EED5]/90 text-[#43A047]"
-                            leftIcon={<Plus className='h-6 w-6 sm:h-8 sm:w-8' />}>
-                            Add
-                        </Button>
-                    </div>
-                    <Button
-                        type='button'
-                        className="w-full sm:w-auto sm:ml-auto mt-4 flex items-center justify-center font-bold bg-[#C20C0C]/80 hover:bg-[#C20C0C]"
-                        onClick={() =>
-                            handleDialogContextSwitch({
-                                Component: ComparisonPage,
-                            })
-                        }>
-                        Generate Comparison
-                    </Button>
-                </form>
-                <div className='w-full py-3'>
-                    <h1 className="text-xl sm:text-2xl font-bold mb-4">
-                        Quote Comparison
-                    </h1>
-                    {quoteSessionId && !isLoading && quotationItems.length === 0 && (
-                        <p className="mb-3 text-sm text-muted-foreground">No premium quotations available yet for this quote session.</p>
-                    )}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-                        {quotationItems.map((item: any, itemIndex: number) => (
-                            <ReusableCard
-                                key={item?.id ?? `quotation-${itemIndex}`}
-                                header={{
-                                    type: 'image',
-                                    src: `${import.meta.env.VITE_BASE_URL}/${item?.product?.organization?.logo}`,
-                                    alt: item?.product?.organization?.name ?? 'Insurer logo',
-                                }}
-                                rootClassName=''
-                                footerClassName="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between"
-                                footer={
-                                    <>
-                                        <Button
-                                            type="button"
-                                            onClick={() =>
-                                                handleDialogContextSwitch({
-                                                    componentProps: { data: item, goToNextStep },
-                                                    Component: QuotePreviewPage,
-                                                })
-                                            }
-                                            className="w-full lg:w-auto rounded-md border border-[#D9D9D9] bg-[#C20C0C] hover:bg-[#C20C0C]/90 font-medium text-white">
-                                            Get Quote
-                                        </Button>
-                                        {isAuthenticated ? (
-                                            <Button
-                                                type="button"
-                                                onClick={goToNextStep}
-                                                className="w-full lg:w-auto rounded-md border border-[#D9D9D9] bg-[#0CC258] hover:bg-[#0CC258]/90 font-medium text-white">
-                                                Purchase Cover
-                                            </Button>
-                                        ) : (
-                                            <Link
-                                                to={`/${EPREFIX.AUTH}${EROUTES.SIGNUP}`}
-                                                state={{ returnTo: location.pathname, stepperStep: currentStep }}
-                                                className="w-full lg:w-auto">
-                                                <Button
-                                                    type="button"
-                                                    className="w-full lg:w-auto rounded-md border border-[#D9D9D9] bg-[#0CC258] hover:bg-[#0CC258]/90 font-medium text-white">
-                                                    Purchase Cover
-                                                </Button>
-                                            </Link>
-                                        )}
-                                    </>
-                                }
-                                children={
-                                    <>
-                                        <div>
-                                            <div className="flex flex-wrap justify-between gap-1 min-w-0">
-                                                <span className="text-xs sm:text-sm wrap-break-word max-w-[60%]">Basic Premium</span>
-                                                <span className="text-xs sm:text-sm wrap-break-word max-w-[35%] text-right">
-                                                    {formatCurrency(item?.calculated_premium?.basic_premium)}
-                                                    </span>
-                                            </div>
-                                            <div className="flex flex-wrap justify-between gap-1 min-w-0">
-                                                <span className="text-xs sm:text-sm wrap-break-word max-w-[60%]">Total Premium</span>
-                                                <span className="text-xs sm:text-sm wrap-break-word max-w-[35%] text-right">
-                                                    {formatCurrency(item?.calculated_premium?.total_premium)}
-                                                    </span>
-                                            </div>
-                                        </div>
-                                    </>
-                                }
-                            />
-                        ))}
-                    </div>
+        <div className="space-y-6">
+            {!quoteSessionId && (
+                <div className="rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                    <strong>Quote session not found.</strong> Go back to Vehicle Details and submit again.
                 </div>
-                <CardFooter className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-4 px-0">
-                    <Button
-                        type="button"
-                        className="w-full sm:w-auto rounded-full border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
-                        leftIcon={<ArrowLeftCircle />}
-                        onClick={() => goToPrevStep?.()}>
-                        Previous
-                    </Button>
-                    <div className="order-first sm:order-0">
-                        <ReusablePagination
-                            currentPage={data?.pagination?.current_page ?? filter.page}
-                            pageCount={data?.pagination?.last_page ?? 1}
-                            totalPages={data?.pagination?.last_page ?? 1}
-                            onPageChange={(nextPage) =>
-                                optionsDispatcher({ type: "page", payload: { page: nextPage } })
-                            }
-                            disabled={isLoading}
+            )}
+            <section className="rounded-lg border border-[#E5E7EB] bg-white px-4 py-5 sm:px-6 sm:py-6">
+                <h2 className="mb-1 text-lg font-semibold text-gray-900">Additional Benefits</h2>
+                <p className="mb-4 text-sm text-gray-500">
+                    Select optional add-ons to include in your premium calculation.
+                </p>
+                <hr className="mb-5" />
+
+                <form className="space-y-5">
+                    <div className="overflow-x-auto">
+                        <ReusableCheckboxGrid options={QUOTATIONCHECKBOX} columns={3} />
+                    </div>
+                    <hr />
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <ReuseableInput
+                            className="h-11 w-full rounded-md border border-[#ADABAB]"
+                            control={form.control}
+                            name="courtesy_car"
+                            label="Courtesy Car"
+                        />
+                        <ReuseableInput
+                            className="h-11 w-full rounded-md border border-[#ADABAB]"
+                            control={form.control}
+                            name="road_rescue"
+                            label="Road Rescue"
                         />
                     </div>
-                    <Button
-                        type="button"
-                        className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
-                        rightIcon={<ArrowRightCircle />}
-                        onClick={() => (goToNextStep?.())}>
-                        Next
-                    </Button>
-                </CardFooter>
-            </div>
+                    <div className="flex items-center justify-between">
+                        <Button
+                            type="button"
+                            className="flex items-center gap-1.5 rounded border border-[#0CC2581F] bg-[#C7EED5] px-4 py-2 text-sm font-medium text-[#43A047] hover:bg-[#C7EED5]/90"
+                            leftIcon={<Plus className="h-4 w-4" />}
+                        >
+                            Add Benefit
+                        </Button>
 
+                        <Button
+                            type="button"
+                            className="flex items-center gap-1.5 rounded bg-[#C20C0C]/80 px-5 py-2 text-sm font-medium text-white hover:bg-[#C20C0C]"
+                            onClick={() =>
+                                handleDialogContextSwitch({ Component: ComparisonPage })
+                            }
+                        >
+                            Generate Comparison
+                        </Button>
+                    </div>
+                </form>
+            </section>
+            <section className="space-y-4">
+                <div className="flex items-center justify-between">
+                    <h2 className="text-lg font-semibold text-gray-900">Quote Comparison</h2>
+                    {isLoading && (
+                        <span className="text-xs text-gray-400 animate-pulse">
+                            Fetching premium quotations…
+                        </span>
+                    )}
+                </div>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-6">
+                    {isLoading
+                        ? Array.from({ length: filter.pageSize }).map((_, i) => (
+                            <SkeletonCard key={`skeleton-${i}`} />
+                        ))
+                        : quotationItems.length === 0
+                            ? <EmptyState />
+                            : quotationItems.map((item: any, itemIndex: number) => (
+                                <ReusableCard
+                                    key={item?.id ?? `quotation-${itemIndex}`}
+                                    header={{
+                                        type: 'image',
+                                        src: `${import.meta.env.VITE_BASE_URL}/${item?.product?.organization?.logo}`,
+                                        alt: item?.product?.organization?.name ?? 'Insurer logo',
+                                    }}
+                                    rootClassName=""
+                                    footerClassName="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between"
+                                    footer={
+                                        <>
+                                            <Button
+                                                type="button"
+                                                onClick={() =>
+                                                    handleDialogContextSwitch({
+                                                        componentProps: { data: item, goToNextStep },
+                                                        Component: QuotePreviewPage,
+                                                    })
+                                                }
+                                                className="w-full rounded-md border border-[#D9D9D9] bg-[#C20C0C] px-4 py-2 text-sm font-medium text-white hover:bg-[#C20C0C]/90 lg:w-auto"
+                                            >
+                                                Get Quote
+                                            </Button>
+
+                                            {isAuthenticated ? (
+                                                <Button
+                                                    type="button"
+                                                    onClick={goToNextStep}
+                                                    className="w-full rounded-md border border-[#D9D9D9] bg-[#0CC258] px-4 py-2 text-sm font-medium text-white hover:bg-[#0CC258]/90 lg:w-auto"
+                                                >
+                                                    Purchase Cover
+                                                </Button>
+                                            ) : (
+                                                <Link
+                                                    to={`/${EPREFIX.AUTH}${EROUTES.SIGNUP}`}
+                                                    state={{
+                                                        returnTo: location.pathname,
+                                                        stepperStep: currentStep,
+                                                    }}
+                                                    className="w-full lg:w-auto"
+                                                >
+                                                    <Button
+                                                        type="button"
+                                                        className="w-full rounded-md border border-[#D9D9D9] bg-[#0CC258] px-4 py-2 text-sm font-medium text-white hover:bg-[#0CC258]/90 lg:w-auto"
+                                                    >
+                                                        Purchase Cover
+                                                    </Button>
+                                                </Link>
+                                            )}
+                                        </>
+                                    }
+                                >
+                                    <div className="space-y-1.5 px-1">
+                                        <div className="flex justify-between gap-2">
+                                            <span className="text-xs text-gray-500 sm:text-sm">
+                                                Basic Premium
+                                            </span>
+                                            <span className="text-xs font-medium text-gray-900 sm:text-sm">
+                                                {formatCurrency(item?.calculated_premium?.basic_premium)}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between gap-2">
+                                            <span className="text-xs text-gray-500 sm:text-sm">
+                                                Total Premium
+                                            </span>
+                                            <span className="text-xs font-semibold text-[#C20C0C] sm:text-sm">
+                                                {formatCurrency(item?.calculated_premium?.total_premium)}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </ReusableCard>
+                            ))}
+                </div>
+            </section>
+
+            <CardFooter className="flex flex-col items-center justify-between gap-3 px-0 pt-2 sm:flex-row">
+                <Button
+                    type="button"
+                    className="w-full rounded-full border border-[#C20C0C] bg-transparent px-5 py-2 text-sm font-medium text-[#C20C0C] hover:bg-[#C20C0C]/10 sm:w-auto"
+                    leftIcon={<ArrowLeftCircle className="h-4 w-4" />}
+                    onClick={() => goToPrevStep?.()}
+                >
+                    Previous
+                </Button>
+
+                <ReusablePagination
+                    currentPage={currentPage}
+                    pageCount={lastPage}
+                    totalPages={lastPage}
+                    onPageChange={(nextPage) =>
+                        optionsDispatcher({ type: 'page', payload: { page: nextPage } })
+                    }
+                    disabled={isLoading}
+                />
+
+                <Button
+                    type="button"
+                    className="w-full rounded-full bg-[#C20C0C]/80 px-5 py-2 text-sm font-medium text-white hover:bg-[#C20C0C] sm:w-auto"
+                    rightIcon={<ArrowRightCircle className="h-4 w-4" />}
+                    onClick={() => goToNextStep?.()}
+                >
+                    Next
+                </Button>
+            </CardFooter>
             <CustomDialogComponent
                 {...{ handleDialogContextSwitch, dialogOpen }}
-                className='sm:max-w-fit w-[95vw] sm:w-auto p-4 sm:p-6'>
+                className="w-[95vw] p-4 sm:max-w-fit sm:w-auto sm:p-6"
+            >
                 {dialogContent?.Component && (
                     <dialogContent.Component
                         {...{

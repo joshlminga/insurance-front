@@ -48,6 +48,7 @@ export function UseApiMutation<TData = unknown, TVariables = unknown, TContext =
   config,
   invalidateQueries = [],
   mutationOptions,
+  
 }: UseApiMutationOptions<TData, TVariables, TContext>) {
   const queryClient = useQueryClient()
   return useMutation<TData, Error, TVariables, TContext>({

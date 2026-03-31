@@ -263,7 +263,8 @@ export type TRHFSelectProps<T extends FieldValues> = {
 
 export type CheckboxOption = {
   id: string
-  label: string
+  label?: string
+  name?: string
   checked?: boolean
   onChange?: (checked: boolean) => void
 }

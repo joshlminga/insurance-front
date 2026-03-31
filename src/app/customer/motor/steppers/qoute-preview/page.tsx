@@ -1,17 +1,37 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { UseAuth } from "@/components/auth-provider";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import {
+    Card,
+    CardContent,
+    CardFooter,
+    CardHeader
+} from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Button, ReusableDropdown } from "@/dev/core";
 import { useStepperContext } from "@/hooks/stepper-context";
 import { formatCurrency } from "@/lib/format";
 import { EPREFIX, EROUTES } from "@/utils/enums";
-import { Download, Forward, Mail, Share2, ShoppingCart } from "lucide-react";
+import {
+    Download,
+    Forward,
+    Mail,
+    Share2,
+    ShoppingCart
+} from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import React, { useEffect, useState } from "react";
-import { BenefitType, premiumPreview, SubmitResponse } from "@/types/types";
-import { BENEFIT_SECTIONS, BENEFIT_TYPE_CONFIG, EMETHODS, MOTOR_QUOTE_SESSION_STORAGE_KEY } from "@/utils/constatnts";
+import {
+    BenefitType,
+    premiumPreview,
+    SubmitResponse,
+} from "@/types/types";
+import {
+    BENEFIT_SECTIONS,
+    BENEFIT_TYPE_CONFIG,
+    EMETHODS,
+    MOTOR_QUOTE_SESSION_STORAGE_KEY
+} from "@/utils/constatnts";
 import { ShowToast } from "@/utils/utils";
 import { UseApiMutation } from "@/hooks/hooks";
 import { extractErrorMessage } from "@/utils/helpers";
@@ -37,45 +57,79 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
         (benefits?.[key] ?? []).map((b: any) => ({ ...b, type }))
     );
 
-     useEffect(() => {
-            const storedSessionId = Number(localStorage.getItem(MOTOR_QUOTE_SESSION_STORAGE_KEY))
-            if (Number.isFinite(storedSessionId) && storedSessionId > 0) {
-                setQuoteSessionId(storedSessionId)
-            } else {
-                setQuoteSessionId(null)
-            }
-        }, [])
+    useEffect(() => {
+        const storedSessionId = Number(localStorage.getItem(MOTOR_QUOTE_SESSION_STORAGE_KEY))
+        if (Number.isFinite(storedSessionId) && storedSessionId > 0) {
+            setQuoteSessionId(storedSessionId)
+        } else {
+            setQuoteSessionId(null)
+        }
+    }, [])
 
-   const submitMutation = UseApiMutation<SubmitResponse, void>({
-    url: `quotation/motor/${quoteSessionId}/documents/single-quote?product_id=${componentProps?.data?.product_id}&rate_id=${componentProps?.data?.rate_id}`,
-    method: EMETHODS.GET,
-    mutationOptions: {
-        onSuccess: (data) => {
-            // const fileUrl = data?.data?.url ?? data?.url  
-            // if (fileUrl) {
-            //     const link = document.createElement("a")
-            //     link.href = fileUrl
-            //     link.download = `quote-${componentProps?.data?.product_id}.pdf`
-            //     document.body.appendChild(link)
-            //     link.click()
-            //     document.body.removeChild(link)
-            // }
-            ShowToast.success(data.message || "Downloaded successfully!")
-        },
-        onError: (error: any) => {
-            const message = extractErrorMessage(error);
-            ShowToast.error(message || "Download failed!")
-        },
-    },
-})
+     const data = {
+        'product_id': componentProps?.data?.product_id,
+        'rate_id': componentProps?.data?.rate_id,
+    };
 
-const onSubmit = () => {
-    if (!quoteSessionId) {
-        ShowToast.error("No active quote session found.")
-        return
+    const submitMutation = UseApiMutation<Blob, void>({
+        url: `document/motor/single-quote/${quoteSessionId}`,
+        method: EMETHODS.POST,
+        config: {
+            responseType: 'blob',
+        },
+        mutationOptions: {
+            onSuccess: (data) => {
+                const blob = new Blob([data], { type: 'application/pdf' });
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+
+                link.href = url;
+                link.download = `quote-${quoteSessionId}.pdf`;
+                document.body.appendChild(link);
+                link.click();
+
+                link.remove();
+                window.URL.revokeObjectURL(url);
+
+                ShowToast.success("Download started");
+            },
+            onError: (error: unknown) => {
+                const message = extractErrorMessage(error);
+                ShowToast.error(message || "Download failed!");
+            },
+        },
+    });
+
+    const onSubmit = (data: any) => {
+        if (!quoteSessionId) {
+            ShowToast.error("No active quote session found.")
+            return
+        }
+        submitMutation.mutate(data)
     }
-    submitMutation.mutate()
-}
+
+    const submitPurchaseMutation = UseApiMutation<SubmitResponse, any>({
+        url: `purchase/motor/${quoteSessionId}`,
+        method: EMETHODS.POST,
+        mutationOptions: {
+            onSuccess: (data) => {
+                goToNextStep?.();
+                ShowToast.success(data?.message ?? "Purchase started");
+            },
+            onError: (error: unknown) => {
+                const message = extractErrorMessage(error);
+                ShowToast.error(message || "Purchase failed!");
+            },
+        },
+    });
+
+    const onPurchase = (data: any) => {
+        if (!quoteSessionId) {
+            ShowToast.error("No active quote session found.")
+            return
+        }
+        submitPurchaseMutation.mutate(data)
+    }
 
     return (
         <>
@@ -104,7 +158,6 @@ const onSubmit = () => {
                                 const displayName = benefit.name ?? benefit.label;
                                 const hasRate = benefit?.rate != null;
                                 const hasMinimum = benefit?.minimum != null;
-
                                 return (
                                     <React.Fragment key={benefit?.id}>
                                         <div className="flex flex-col gap-0.5">
@@ -140,7 +193,8 @@ const onSubmit = () => {
                     <Button
                         variant="outline"
                         leftIcon={<Download />}
-                        onClick={onSubmit}
+                        onClick={() => {onSubmit(data)}}
+                         loading={submitMutation.isPending}
                         className="w-full sm:w-auto">
                         Download
                     </Button>
@@ -164,8 +218,9 @@ const onSubmit = () => {
                         leftIcon={<ShoppingCart />}
                         onClick={() => {
                             handleDialogContextSwitch?.({});
-                            goToNextStep?.();
+                            onPurchase(data);
                         }}
+                        loading={submitPurchaseMutation.isPending}
                         className="w-full sm:w-auto text-white hover:text-white bg-[#0CC258] hover:bg-[#0CC258]/80">
                         Purchase Cover
                     </Button>
