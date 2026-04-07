@@ -70,12 +70,14 @@ export function SignupForm({
                 control={form.control}
                 name="first_name"
                 label="First Name"
+                placeholder="Enter first name"
               />
               <ReuseableInput
                 className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] pr-10"
                 control={form.control}
                 name="last_name"
                 label="Last Name"
+                placeholder="Enter last name"
               />
             </div>
             <ReuseableInput
@@ -84,6 +86,7 @@ export function SignupForm({
               name="email"
               label="Email"
               type="email"
+              placeholder="Enter email address"
             />
             <div className="relative items-center justify-center">
               <ReuseableInput
@@ -92,6 +95,7 @@ export function SignupForm({
                 name="password"
                 label="Password"
                 type={show ? "text" : "password"}
+                placeholder="Enter your password"
               />
               <button
                 type="button"
@@ -108,6 +112,7 @@ export function SignupForm({
                 name="confirm_password"
                 label="Confirm Password"
                 type={showConfirm ? "text" : "password"}
+                placeholder="Confirm your password"
               />
               <button
                 type="button"
@@ -133,6 +138,7 @@ export function SignupForm({
       <FieldDescription>
         Already have an account?
         <Link to={`/${EPREFIX.AUTH}${EROUTES.SIGNIN}`}
+         className="text-sm text-[#C20C0C] hover:underline"
           onClick={(e) => {
             e.preventDefault();
             navigate(`/${EPREFIX.AUTH}${EROUTES.SIGNIN}`, { state: location.state })

@@ -26,7 +26,9 @@ import {
     CreateMotorTonageSchema,
     CreateMotorProductRatesSchema,
     CreateMotorRateBenefitsSchema,
-    CreateMotorRateExcessBenefitsSchema
+    CreateMotorRateExcessBenefitsSchema,
+    ForgotPasswordSchema,
+    ResetPasswordSchema
 } from "./form-schema";
 
 export type CustomerFormValues = z.infer<typeof CustomerDetailsSchema>
@@ -35,6 +37,8 @@ export type ResendOTPFormValues = z.infer<typeof ResendOtpPayloadSchema>
 export type VehicleFormValues = z.infer<typeof VehicleDetailsSchema>
 export type LoginFormValues = z.infer<typeof LoginSchema>
 export type SignUpFormValues = z.infer<typeof SignUpSchema>
+export type ForgotPasswordValues = z.infer<typeof ForgotPasswordSchema>;
+export type ResetPasswordValues = z.infer<typeof ResetPasswordSchema>;
 export type KycFormValues = z.infer<typeof KycSchema>
 export type InvoicePaymentFormValues = z.infer<typeof InvoicePaymentSchema>
 export type PaymentFormValues = z.infer<typeof PaymentDetailsSchema>

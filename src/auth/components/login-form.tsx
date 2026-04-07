@@ -72,27 +72,40 @@ export function LoginForm({
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
-        <FieldGroup>
-          <Field className="py-4">
+        <FieldGroup className="flex flex-col gap-4">
+          <Field>
             <ReuseableInput
-              className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+              className="w-full h-12 rounded-md border border-gray-300"
               control={form.control}
               name="email"
               label="Email"
               type="email"
+              placeholder="Enter email address"
             />
-            <div className="relative items-center justify-center">
+          </Field>
+          <Field className="flex flex-col gap-2">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium">Password</span>
+              <Link
+                to={`/${EPREFIX.AUTH}${EROUTES.FORGOT_PASSWORD}`}
+                className="text-sm text-[#C20C0C] hover:underline">
+                Forgot Password?
+              </Link>
+            </div>
+
+            <div className="relative">
               <ReuseableInput
-                className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                className="w-full h-12 rounded-md border border-gray-300 pr-10"
                 control={form.control}
                 name="password"
-                label="Password"
+                label=""
                 type={show ? "text" : "password"}
+                placeholder="Enter your password"
               />
               <button
                 type="button"
-                onClick={() => setShow(!show)}
-                className="absolute right-3 top-12 text-slate-500 hover:text-slate-700"
+                onClick={() => setShow((prev) => !prev)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
                 aria-label={show ? "Hide password" : "Show password"}>
                 {show ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
@@ -100,20 +113,30 @@ export function LoginForm({
           </Field>
           <Field>
             <Button
-              className="bg-[#C20C0C] hover:bg-[#C20C0C]/70"
+              className="w-full h-12 bg-[#C20C0C] hover:bg-[#C20C0C]/80"
               type="submit"
-              loading={loginMutation.isPending}>
-              <p className='font-bold leading-6 text-sm'>Login</p>
+              loading={loginMutation.isPending}
+            >
+              <span className="font-semibold text-sm">Login</span>
             </Button>
           </Field>
         </FieldGroup>
       </form>
-      <FieldDescription>
-        Don&apos;t have an account?
-        <Link to={`/${EPREFIX.AUTH}${EROUTES.SIGNUP}`} onClick={(e) => { e.preventDefault(); navigate(`/${EPREFIX.AUTH}${EROUTES.SIGNUP}`, { state: location.state }) }}>
+      <FieldDescription className="text-center text-sm">
+        Don&apos;t have an account?{" "}
+        <Link
+          to={`/${EPREFIX.AUTH}${EROUTES.SIGNUP}`}
+          className="text-[#C20C0C] font-medium hover:underline"
+          onClick={(e) => {
+            e.preventDefault();
+            navigate(`/${EPREFIX.AUTH}${EROUTES.SIGNUP}`, {
+              state: location.state,
+            });
+          }}>
           Sign Up
         </Link>
       </FieldDescription>
     </div>
-  )
+  );
+
 }
