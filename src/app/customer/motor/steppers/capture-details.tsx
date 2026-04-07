@@ -39,6 +39,7 @@ export const CustomerVerificationDetails = ({ goToNextStep, goToPrevStep }: Cust
         ShowToast.success(data.message || "Submitted successfully!")
       },
       onError: (error: any) => {
+        console.log(error);
         const message = extractErrorMessage(error);
         ShowToast.error(message || "Submission failed!")
       },
