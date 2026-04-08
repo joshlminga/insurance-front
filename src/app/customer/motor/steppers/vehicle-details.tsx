@@ -9,10 +9,10 @@ import type {
     VehicleClassItem
 } from '@/types/types'
 import { CardFooter } from '@/components/ui/card'
-import { 
-    ArrowLeftCircle, 
-    ArrowRightCircle, 
-    Loader2 
+import {
+    ArrowLeftCircle,
+    ArrowRightCircle,
+    Loader2
 } from 'lucide-react'
 import { useForm, FormProvider } from 'react-hook-form'
 import type { VehicleFormValues } from '@/types/schema'
@@ -87,6 +87,7 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
             valued_by_professional: false
         },
     })
+    
     useEffect(() => {
         if (motoTabs.length === 0) return
         const firstTab = motoTabs[0]
