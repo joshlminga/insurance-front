@@ -62,37 +62,37 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToNextSt
                 {/* Personal & Vehicle Info - 1 col mobile, 2 col sm, 3 col lg */}
                 <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5'>
                     <ReuseableInput
-                        className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                        className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
                         control={form.control}
                         name="passport_number"
                         label="Passport/ID Number"
                     />
                     <ReuseableInput
-                        className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                        className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
                         control={form.control}
                         name="tax_number"
                         label="Personal Tax Number"
                     />
                     <ReuseableInput
-                        className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                        className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
                         control={form.control}
                         name="chassis_number"
                         label="Vehicle Chassis Number"
                     />
                     <ReuseableInput
-                        className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                        className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
                         control={form.control}
                         name="engine_number"
                         label="Vehicle Engine Number"
                     />
                     <ReuseableInput
-                        className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                        className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
                         control={form.control}
                         name="total_seats"
                         label="Vehicle Total Seat Number"
                     />
                     <ReuseableInput
-                        className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                        className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
                         control={form.control}
                         type='number'
                         name="tonage_capacity"
@@ -103,21 +103,21 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToNextSt
                 <Separator className='my-4' />
                 <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5'>
                     <ReuseableInput
-                        className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                        className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
                         control={form.control}
                         type='file'
                         name="log_book_attachment"
                         label="Attach Logbook"
                     />
                     <ReuseableInput
-                        className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                        className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
                         control={form.control}
                         type='file'
                         name="tax_certificate"
                         label="Attach Tax Certificate"
                     />
                     <ReuseableInput
-                        className="w-full h-[51px] rounded-[5px] border border-[#ADABAB] sm:col-span-2 lg:col-span-1"
+                        className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] sm:col-span-2 lg:col-span-1"
                         control={form.control}
                         type='file'
                         name="passport_attachment"
