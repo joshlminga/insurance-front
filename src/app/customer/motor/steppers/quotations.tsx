@@ -26,13 +26,16 @@ import { Link, useLocation } from 'react-router-dom'
 import { QuotePreviewPage } from './qoute-preview/page'
 import { UseAuth } from '@/components/auth-provider'
 import { useStepperContext } from '@/hooks/stepper-context'
-import { 
-    FILTEROPTIONS, 
-    MOTOR_QUOTE_SESSION_STORAGE_KEY, 
-    ReusableReducer 
+import {
+    EMETHODS,
+    FILTEROPTIONS,
+    MOTOR_QUOTE_SESSION_STORAGE_KEY,
+    ReusableReducer
 } from '@/utils/constatnts'
-import { UseApiQuery } from '@/hooks/hooks'
+import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
 import { formatCurrency } from '@/lib/format'
+import { ShowToast } from '@/utils/utils'
+import { extractErrorMessage } from '@/utils/helpers'
 
 
 export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
@@ -87,6 +90,29 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
     const currentPage = data?.pagination?.current_page ?? filter.page
     const lastPage = data?.pagination?.last_page ?? 1
 
+    const submitPurchaseMutation = UseApiMutation<SubmitResponse, any>({
+        url: `purchase/motor/${quoteSessionId}`,
+        method: EMETHODS.POST,
+        mutationOptions: {
+            onSuccess: (data) => {
+                goToNextStep?.();
+                ShowToast.success(data?.message ?? "Purchase started");
+            },
+            onError: (error: unknown) => {
+                const message = extractErrorMessage(error);
+                ShowToast.error(message || "Purchase failed!");
+            },
+        },
+    });
+
+    const onPurchase = (data: any) => {
+        if (!quoteSessionId) {
+            ShowToast.error("No active quote session found.")
+            return
+        }
+        submitPurchaseMutation.mutate(data)
+    }
+
     return (
         <div className="space-y-6">
             {!quoteSessionId && (
@@ -134,8 +160,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                             className="flex items-center gap-1.5 rounded bg-[#C20C0C]/80 px-5 py-2 text-sm font-medium text-white hover:bg-[#C20C0C]"
                             onClick={() =>
                                 handleDialogContextSwitch({ Component: ComparisonPage })
-                            }
-                        >
+                            } >
                             Generate Comparison
                         </Button>
                     </div>
@@ -177,17 +202,14 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                                                         Component: QuotePreviewPage,
                                                     })
                                                 }
-                                                className="w-full rounded-md border border-[#D9D9D9] bg-[#C20C0C] px-4 py-2 text-sm font-medium text-white hover:bg-[#C20C0C]/90 lg:w-auto"
-                                            >
+                                                className="w-full rounded-md border border-[#D9D9D9] bg-[#C20C0C] px-4 py-2 text-sm font-medium text-white hover:bg-[#C20C0C]/90 lg:w-auto">
                                                 Get Quote
                                             </Button>
-
                                             {isAuthenticated ? (
                                                 <Button
                                                     type="button"
                                                     onClick={goToNextStep}
-                                                    className="w-full rounded-md border border-[#D9D9D9] bg-[#0CC258] px-4 py-2 text-sm font-medium text-white hover:bg-[#0CC258]/90 lg:w-auto"
-                                                >
+                                                    className="w-full rounded-md border border-[#D9D9D9] bg-[#0CC258] px-4 py-2 text-sm font-medium text-white hover:bg-[#0CC258]/90 lg:w-auto">
                                                     Purchase Cover
                                                 </Button>
                                             ) : (
@@ -197,12 +219,11 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                                                         returnTo: location.pathname,
                                                         stepperStep: currentStep,
                                                     }}
-                                                    className="w-full lg:w-auto"
-                                                >
+                                                    className="w-full lg:w-auto">
                                                     <Button
+                                                        onClick={onPurchase}
                                                         type="button"
-                                                        className="w-full rounded-md border border-[#D9D9D9] bg-[#0CC258] px-4 py-2 text-sm font-medium text-white hover:bg-[#0CC258]/90 lg:w-auto"
-                                                    >
+                                                        className="w-full rounded-md border border-[#D9D9D9] bg-[#0CC258] px-4 py-2 text-sm font-medium text-white hover:bg-[#0CC258]/90 lg:w-auto">
                                                         Purchase Cover
                                                     </Button>
                                                 </Link>

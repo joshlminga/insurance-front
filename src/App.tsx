@@ -65,6 +65,8 @@ import { MotorDetailedBenefitPage } from "./app/admin/product/motor/motor-detail
 import { MotorTonangePage } from "./app/admin/product/motor/motor-tonage/page"
 import { MotorProductRatesPage } from "./app/admin/product/motor/motor-rates/page"
 import { MotorQuotationPage } from "./app/admin/quotations/motor/page"
+import ForgotPasswordForm from "./auth/components/forgot-password-form"
+import { ResetPasswordForm } from "./auth/components/rest-password-form"
 
 export const router = createBrowserRouter([
 
@@ -174,6 +176,30 @@ export const router = createBrowserRouter([
           </PublicRoute>
         ),
       },
+      {
+        path: EROUTES.FORGOT_PASSWORD.slice(1),
+        element: (
+          <PublicRoute>
+            <AuthLayoutPage
+              title="Forgot Password"
+              description="">
+              <ForgotPasswordForm />
+            </AuthLayoutPage>
+          </PublicRoute>
+        ),
+      },
+      {
+        path: EROUTES.RESET_PASSWORD.slice(1),
+        element: (
+          <PublicRoute>
+            <AuthLayoutPage
+              title="Reset Password"
+              description="Enter your new password below.">
+              <ResetPasswordForm />
+            </AuthLayoutPage>
+          </PublicRoute>
+        ),
+      }
     ],
   },
 
@@ -260,7 +286,7 @@ export const router = createBrowserRouter([
 
       // quotations
       // motor
-{
+      {
         path: "quotations/motor-quotations",
         element: <MotorQuotationPage />,
       },
@@ -298,7 +324,7 @@ export const router = createBrowserRouter([
         path: "products/motor/detailed-benefits",
         element: <MotorDetailedBenefitPage />,
       },
-       {
+      {
         path: "products/motor/tonage",
         element: <MotorTonangePage />,
       },

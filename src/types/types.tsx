@@ -173,6 +173,7 @@ export interface UseApiQueryOptions<TData = unknown> {
   params?: Record<string, any>
   config?: AxiosRequestConfig
   queryOptions?: Omit<UseQueryOptions<TData>, 'queryKey' | 'queryFn'>
+  signal?: any,
 }
 
 export interface UseApiMutationOptions<TData = unknown, TVariables = unknown, TContext = unknown> {

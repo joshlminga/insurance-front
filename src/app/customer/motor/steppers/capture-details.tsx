@@ -12,12 +12,14 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { UseApiMutation } from "@/hooks/hooks"
 import type { CustomerVerificationDetailsProps, SubmitResponse } from "@/types/types"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { extractErrorMessage } from "@/utils/helpers"
 import { UseAuth } from "@/components/auth-provider"
+import { EPREFIX, EROUTES } from "@/utils/enums"
 
 export const CustomerVerificationDetails = ({ goToNextStep, goToPrevStep }: CustomerVerificationDetailsProps) => {
   const { setGuest } = UseAuth();
+  const navigate = useNavigate();
   const form = useForm<CustomerFormValues>({
     resolver: zodResolver(CustomerDetailsSchema),
     defaultValues: {
@@ -39,6 +41,14 @@ export const CustomerVerificationDetails = ({ goToNextStep, goToPrevStep }: Cust
         ShowToast.success(data.message || "Submitted successfully!")
       },
       onError: (error: any) => {
+        const status = error?.response?.status;
+        if (status === 409) {
+          setTimeout(() => {
+            ShowToast.info("Account already exists. Redirecting to login...");
+          }, 2000);
+          navigate(`/${EPREFIX.AUTH}${EROUTES.SIGNIN}`);
+          return;
+        }
         const message = extractErrorMessage(error);
         ShowToast.error(message || "Submission failed!")
       },
