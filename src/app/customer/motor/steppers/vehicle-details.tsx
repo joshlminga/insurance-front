@@ -82,6 +82,7 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
             used_for_id: "",
             bodytype_id: "",
             registration_number: "",
+            vehicle_registration_number: "",
             vehicle_model: "",
             year: "",
             valued_by_professional: false
