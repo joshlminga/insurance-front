@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CardFooter } from '@/components/ui/card'
-import { Button, ReusableSelect, ReuseableInput, ReuseableRadioChoiceGroup } from '@/dev/core'
+import { Button, ReusableDropdown, ReusableSelect, ReuseableInput, ReuseableRadioChoiceGroup } from '@/dev/core'
 import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
 import type { CustomerVerificationDetailsProps, MpesaPayload, MpesaPollResponse, SubmitResponse } from '@/types/types'
-import { EMETHODS, PAYMENTPLANS, POLL_INTERVAL_MS, POLL_TIMEOUT_MS } from '@/utils/constatnts'
+import { EMETHODS, INVOICE_ID_KEY, PAYMENTPLANS, POLL_INTERVAL_MS, POLL_TIMEOUT_MS } from '@/utils/constatnts'
 import { EPAYMENTTABS } from '@/utils/steps-config'
 import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ArrowLeftCircle, ArrowRightCircle } from 'lucide-react'
+import { ArrowLeftCircle, ArrowRightCircle, Eye, Mail, Share2 } from 'lucide-react'
 import React from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { PaymentDetailsSchema } from '@/types/form-schema'
@@ -19,6 +19,7 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
     const [isPolling, setIsPolling] = React.useState(false)
     const [pollMessage, setPollMessage] = React.useState('')
     const [checkoutRequestId, setCheckoutRequestId] = React.useState<string | null>(null)
+    const [purchaseSessionId, setPurchaseSessionId] = React.useState<string | null>(null)
 
     const stopPolling = React.useCallback(() => {
         setIsPolling(false)
@@ -42,6 +43,15 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
             retry: 1,
         },
     })
+
+    React.useEffect(() => {
+        const storedPurchaseKey = String(localStorage.getItem(INVOICE_ID_KEY))
+        if (storedPurchaseKey) {
+            setPurchaseSessionId(storedPurchaseKey)
+        } else {
+            setPurchaseSessionId(null)
+        }
+    }, [])
 
     React.useEffect(() => {
         if (!isPolling) return
@@ -79,7 +89,6 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
             }, 4000)
             return
         }
-
         setPollMessage(payload.message || 'Waiting for payment confirmation...')
     }, [isPolling, pollQuery.data, goToNextStep, stopPolling])
 
@@ -92,12 +101,15 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
         resolver: zodResolver(PaymentDetailsSchema),
         defaultValues: {
             payment_method: 'mpesa',
-            payment_plans: '',
-            first_installment: '',
-            second_installment: '',
-            third_installment: '',
             amount: 1.00,
             phone_number: '',
+            invoice_id: purchaseSessionId?.[0]?.invoice_id ?? "",
+
+            // payment_plan: "Full",
+            // payment_plans: '',
+            // Full: '',
+            // Two_Installment: '',
+            // Three_Installment: '',
         },
     })
     const handlePaymentMethodChange = (value: string) => {
@@ -134,8 +146,7 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
         const payload: MpesaPayload = {
             phone: data.phone_number,
             amount: data.amount,
-            account_reference: 'POLICY-1001',
-            transaction_desc: 'Policy payment',
+            invoice_id: purchaseSessionId ?? "",
         }
         submitMutation.mutate(payload)
     }
@@ -164,8 +175,8 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
                             <ReuseableInput
                                 className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] bg-white"
                                 control={form.control}
-                                name="first_installment"
-                                label="1st Installment 40%"
+                                name="full_installment"
+                                label="Full Installment"
                             />
                             <ReuseableInput
                                 className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] bg-white"
@@ -213,7 +224,7 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
                         </div>
                     </div>
                 )}
-                <CardFooter className="w-full flex flex-col sm:flex-row justify-between gap-3 mt-3 px-2 sm:px-0">
+                <CardFooter className="w-full flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mt-3 px-0">
                     <Button
                         type="button"
                         className="w-full sm:w-auto rounded-full border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
@@ -221,13 +232,45 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
                         onClick={() => goToPrevStep?.()}>
                         Previous
                     </Button>
-                    <Button
-                        type="submit"
-                        disabled={isPolling}
-                        className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
-                        rightIcon={<ArrowRightCircle />}>
-                        {isPolling ? 'Processing...' : 'Proceed To Payment'}
-                    </Button>
+
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                        <ReusableDropdown
+                            trigger={
+                                <Button
+                                    className="w-full sm:w-auto bg-[#0CC258] hover:bg-[#0CC258]/80">
+                                    Generate Invoice
+                                </Button>
+                            }
+                            items={[
+                                {
+                                    label: "WhatsApp",
+                                    icon: <Share2 className="w-4 h-4" />,
+                                    onClick: () => console.log("WhatsApp"),
+                                },
+                                {
+                                    label: "Email",
+                                    icon: <Mail className="w-4 h-4" />,
+                                    onClick: () => console.log("Email"),
+                                },
+                                {
+                                    label: "View Online",
+                                    icon: <Eye className="w-4 h-4" />,
+                                    onClick: () => console.log("view online"),
+                                },
+                                {
+                                    label: "Select All",
+                                    icon: <Eye className="w-4 h-4" />,
+                                    onClick: () => console.log("select all"),
+                                },
+                            ]} />
+                        <Button
+                            type="submit"
+                            disabled={isPolling}
+                            className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
+                            rightIcon={<ArrowRightCircle />}>
+                            {isPolling ? 'Processing...' : 'Proceed To Payment'}
+                        </Button>
+                    </div>
                 </CardFooter>
             </form>
         </FormProvider>

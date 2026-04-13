@@ -77,9 +77,9 @@ export const FILTEROPTIONS: TFilterOptions & Record<string, any> = {
 };
 
 export const PAYMENTPLANS = [
-  { label: "1", value: "1" },
-  { label: "2", value: "2" },
-  { label: "3", value: "3" },
+  { label: "Full Payment", value: "Full" },
+  { label: "Two Payment Installments", value: "Two_Installment" },
+  { label: "Three Payment Installments", value: "Three_Installment" },
 ]
 
 export const MOTORADDONSBENEFITS = [
@@ -140,6 +140,14 @@ export const CAUDIENCE_OPTIONS = [
   { label: "Men (only for men)", value: "Men Only" },
 ]
 
+export const IDTYPES = [
+  { label: "National ID", value: "NationalID" },
+  { label: "Passport", value: "Passport" },
+  { label: "Allien ID", value: "AllienID" },
+  { label: "Millitary ID", value: "MillitaryID" },
+]
+
+
 export const createHeroPopoverItems = (
   logout: () => void
 ) => [
@@ -197,6 +205,8 @@ export const POLL_INTERVAL_MS = 3000
 export const POLL_TIMEOUT_MS = 90000
 export const MOTOR_QUOTE_SESSION_STORAGE_KEY = "motor_quote_session_id"
 export const PURCHASE_SESSION_STORAGE_KEY = "purchase_session_id"
+export const INVOICE_SESSION_STORAGE_KEY = "invoice_purchase_session_id"
+export const INVOICE_ID_KEY = "invoice_id"
 
 export const BENEFIT_TYPE_CONFIG = {
     inclusive: { label: "Inclusive", color: "bg-[#0CC258]" },

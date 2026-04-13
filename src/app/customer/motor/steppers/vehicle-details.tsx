@@ -52,8 +52,8 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
             psv: MotorPsvPage,
             specialvehicle: MotorSpecialVehicle,
         }
-        const normalizeSlug = (slug: string) =>
-            slug.replace(/[^a-zA-Z0-9]/g, "").toLowerCase()
+        const normalizeSlug = (slug: string | null | undefined) =>
+            (slug ?? "").replace(/[^a-zA-Z0-9]/g, "").toLowerCase()
         return activeVehicleClasses.map((item) => {
             const cleanedSlug = normalizeSlug(item.slug)
 

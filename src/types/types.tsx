@@ -88,7 +88,7 @@ export type Tuser = {
   email: string
   avatar?: string
   is_general: boolean,
-  id:number
+  id: number
 }
 
 export interface VerificationToken {
@@ -190,7 +190,7 @@ export interface ToastOptions {
 
 export interface SubmitResponse {
   message: string,
-  success:string,
+  success: string,
   data: any,
   pagination?: {
     total: number,
@@ -198,7 +198,7 @@ export interface SubmitResponse {
     per_page: number,
     total_pages: number,
     last_page: number,
-    current_page:number
+    current_page: number
   }
   CheckoutRequestID?: any
 }
@@ -210,8 +210,8 @@ export interface CustomerVerificationDetailsProps {
 export interface premiumPreview {
   goToNextStep?: () => void
   goToPrevStep?: () => void
-      componentProps?: any;
-    handleDialogContextSwitch: any,
+  componentProps?: any;
+  handleDialogContextSwitch: any,
 }
 
 export type TTabItem = {
@@ -274,7 +274,7 @@ export type ReusableCheckboxGridProps = {
   options: CheckboxOption[]
   columns?: number
   className?: string,
-  name?:string
+  name?: string
 }
 
 export type ReusablePaginationProps = {
@@ -284,9 +284,7 @@ export type ReusablePaginationProps = {
   siblingCount?: number
   disabled?: boolean
   className?: string
-  /** Table-style alias: use instead of currentPage when passing table pagination props */
   page?: number
-  /** Table-style alias: use instead of totalPages when passing table pagination props */
   pageCount?: number
 }
 
@@ -494,7 +492,7 @@ export interface TCountriesInputMultiselectProps {
 
 export type ReuseableSingleSelectCountriesInputProps<T extends FieldValues> = {
   value?: string
-   name?: Path<T>
+  name?: Path<T>
   onChange: (value: string) => void
   placeholder?: string
   label?: string
@@ -532,78 +530,78 @@ export interface EmptyStateProps {
 }
 
 export interface CoverData {
-    id: string
-    title: string
-    variation?: string | null
-    status: string
-    date: string
-    img: string
+  id: string
+  title: string
+  variation?: string | null
+  status: string
+  date: string
+  img: string
 }
 
 export interface CoverCardProps {
-    cover: CoverData
+  cover: CoverData
 }
 
 export type ReusableSingleSelectApiInputProps = {
-    url: string;
-    value?: string;
-    onChange?: (value: string) => void;
-    placeholder?: string;
-    label?: string;
-    required?: boolean;
-    disabled?: boolean;
-    className?: string;
-    queryParams?: Record<string, any>;
-    labelKey?: string;
-    valueKey?: string;
-    searchPlaceholder?: string;
-    emptyMessage?: string;
+  url: string;
+  value?: string;
+  onChange?: (value: string) => void;
+  placeholder?: string;
+  label?: string;
+  required?: boolean;
+  disabled?: boolean;
+  className?: string;
+  queryParams?: Record<string, any>;
+  labelKey?: string;
+  valueKey?: string;
+  searchPlaceholder?: string;
+  emptyMessage?: string;
 }
 
 export type ReusableApiMultiSelectProps = {
-    url: string;
-    value?: string[];
-    onChange?: (values: string[]) => void;
-    placeholder?: string;
-    label?: string;
-    required?: boolean;
-    disabled?: boolean;
-    className?: string;
-    queryParams?: Record<string, any>;
-    labelKey?: string;
-    valueKey?: string; 
-    searchKeys?: string[];
-    searchPlaceholder?: string;
-    emptyMessage?: string;
+  url: string;
+  value?: string[];
+  onChange?: (values: string[]) => void;
+  placeholder?: string;
+  label?: string;
+  required?: boolean;
+  disabled?: boolean;
+  className?: string;
+  queryParams?: Record<string, any>;
+  labelKey?: string;
+  valueKey?: string;
+  searchKeys?: string[];
+  searchPlaceholder?: string;
+  emptyMessage?: string;
 }
 
 export type VehicleClassItem = {
-    id: number
-    name: string
-    slug: string
-    is_active: boolean
+  id: number
+  name: string
+  slug: string
+  is_active: boolean
 }
 
 export type MpesaPayload = {
-    phone: string
-    amount: number
-    account_reference: string
-    transaction_desc: string
+  phone: string
+  amount: number
+  invoice_id: string
+  transaction_desc?: string
 }
 
 export type MpesaPollResponse = {
+  status?: string
+  message?: string
+  ResultCode?: number
+  ResultDesc?: string
+  data?: {
     status?: string
     message?: string
     ResultCode?: number
     ResultDesc?: string
-    data?: {
-        status?: string
-        message?: string
-        ResultCode?: number
-        ResultDesc?: string
-        CheckoutRequestID?: string
-        checkout_request_id?: string
-    }
+    CheckoutRequestID?: string
+    checkout_request_id?: string
+  }
 }
 
 export type ClaimStatus = 'pending' | 'approved' | 'rejected'
@@ -617,5 +615,5 @@ export type ClaimItem = {
   amount: number
   status: ClaimStatus
 }
-export 
-type BenefitType = keyof typeof BENEFIT_TYPE_CONFIG;
+export
+  type BenefitType = keyof typeof BENEFIT_TYPE_CONFIG;
