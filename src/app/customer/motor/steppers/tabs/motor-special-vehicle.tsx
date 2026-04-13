@@ -133,6 +133,14 @@ export const MotorSpecialVehicle: React.FC = () => {
                         <ReuseableInput
                             className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
                             control={control}
+                            name="vehicle_registration_number"
+                            label="Vehicle Registration Number"
+                            type="text"
+                            placeholder="e.g. KAA 123A"
+                        />
+                        <ReuseableInput
+                            className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                            control={control}
                             name="vehicle_value"
                             label="Vehicle Value"
                             type="number"

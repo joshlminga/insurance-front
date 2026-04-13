@@ -43,6 +43,7 @@ export const ResendOtpPayloadSchema = z.object({
 export const VehicleDetailsSchema = z.object({
   user_id: z.union([z.string(), z.number()]).or(z.literal("")),
   registration_number: z.string().optional().or(z.literal("")),
+  vehicle_registration_number: z.string().optional().or(z.literal("")),
   vehicle_model: z.string().optional().or(z.literal("")),
   vehicle_make: z.string().optional().or(z.literal("")),
   yom: z.string().optional().or(z.literal("")),
