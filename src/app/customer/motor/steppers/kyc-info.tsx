@@ -6,13 +6,16 @@ import { UseApiMutation } from '@/hooks/hooks'
 import { KycSchema } from '@/types/form-schema'
 import type { KycFormValues } from '@/types/schema'
 import type { CustomerVerificationDetailsProps, SubmitResponse } from '@/types/types'
-import { EMETHODS } from '@/utils/constatnts'
+import { EMETHODS, PURCHASE_SESSION_STORAGE_KEY } from '@/utils/constatnts'
 import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowLeftCircle, ArrowRightCircle } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
-export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToNextStep, goToPrevStep }) => {
+export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToPrevStep }) => {
+    const [purchaseSessionId, setPurchaseSessionId] = useState<string | null>(null)
+
     const form = useForm<KycFormValues>({
         resolver: zodResolver(KycSchema),
         defaultValues: {
@@ -28,12 +31,22 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToNextSt
         },
 
     })
+
+    useEffect(() => {
+        const storedPurchaseKey = String(localStorage.getItem(PURCHASE_SESSION_STORAGE_KEY))
+        if (storedPurchaseKey) {
+            setPurchaseSessionId(storedPurchaseKey)
+        } else {
+            setPurchaseSessionId(null)
+        }
+    }, [])
+
     const submitMutation = UseApiMutation<SubmitResponse, KycFormValues>({
-        url: '',
+        url: `purchase/motor/${purchaseSessionId}/kyc`,
         method: EMETHODS.POST,
         mutationOptions: {
             onSuccess: (data) => {
-                goToNextStep?.()
+                // goToNextStep?.()
                 ShowToast.success(data.message || "Submitted successfully!")
             },
             onError: (error: any) => {
@@ -47,8 +60,6 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToNextSt
     })
 
     const onSubmit = (data: KycFormValues) => {
-        console.log(data);
-
         submitMutation.mutate(data)
     }
     return (
@@ -58,8 +69,6 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToNextSt
                     <h1 className="text-xl sm:text-2xl font-bold leading-none mb-4">KYC Info</h1>
                 </div>
                 <Separator className='my-4' />
-                
-                {/* Personal & Vehicle Info - 1 col mobile, 2 col sm, 3 col lg */}
                 <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5'>
                     <ReuseableInput
                         className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
@@ -99,7 +108,7 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToNextSt
                         label="Vehicle Tonage Capacity"
                     />
                 </div>
-                
+
                 <Separator className='my-4' />
                 <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5'>
                     <ReuseableInput
@@ -134,11 +143,11 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToNextSt
                     Previous
                 </Button>
                 <Button
-                    type="button"
+                    type="submit"
                     className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
                     rightIcon={<ArrowRightCircle />}
-                    onClick={() => goToNextStep?.()}
-                >
+                    // onClick={() => goToNextStep?.()}
+                    loading={submitMutation.isPending}>
                     Invoice Cover Quotation
                 </Button>
             </CardFooter>

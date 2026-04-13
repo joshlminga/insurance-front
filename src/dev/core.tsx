@@ -597,8 +597,10 @@ export const ReusableCard = ({
     onClick,
     disabled,
     selected,
+    onChange,
 }: ReusableCardProps) => {
     const isClickable = Boolean(onClick) && !disabled;
+    const showCheckbox = Boolean(onChange);
     return (
         <Card
             role={isClickable ? "button" : undefined}
@@ -612,14 +614,26 @@ export const ReusableCard = ({
                     onClick?.();
                 }
             }}
-            className={cn("flex flex-col w-full min-w-0 overflow-hidden rounded-[10px] border bg-white",
-                "border-[#ADABAB]",
+            className={cn("relative flex flex-col w-full min-w-0 overflow-hidden rounded-[10px] border bg-white",
+                selected ? "border-[#C20C0C] border-2" : "border-[#ADABAB]",
                 isClickable &&
                 "cursor-pointer transition-all hover:border-[#FF9A9A] hover:-translate-y-px focus-visible:ring-2 focus-visible:ring-[#FF9A9A]",
-                selected && "ring-2 ring-primary",
                 disabled && "opacity-50 cursor-not-allowed",
                 rootClassName
             )}>
+            {showCheckbox && (
+                <Input
+                    type="checkbox"
+                    className="absolute top-3 right-3 z-10 h-4 w-4 cursor-pointer accent-[#C20C0C] rounded"
+                    checked={!!selected}
+                    disabled={disabled}
+                    onChange={(e) => {
+                        e.stopPropagation();
+                        if (disabled) return;
+                        onChange?.(e.target.checked);
+                    }}
+                />
+            )}
             {header && (
                 <CardHeader className={cn('flex items-center justify-center p-3 text-center', headerClassName)}>
                     {header.type === 'image' && (
@@ -660,6 +674,82 @@ export const ReusableCard = ({
         </Card>
     )
 }
+
+// export const ReusableCard = ({
+//     header,
+//     children,
+//     footer,
+//     rootClassName,
+//     headerClassName,
+//     contentClassName,
+//     footerClassName,
+//     onChange,
+//     disabled,
+//     selected,
+// }: ReusableCardProps) => {
+
+//     return (
+//         <label
+//             className={cn(
+//                 "flex flex-col w-full min-w-0 overflow-hidden rounded-[10px] border bg-white",
+//                 "border-[#ADABAB]",
+//                 "cursor-pointer transition-all hover:border-[#FF9A9A] hover:-translate-y-px",
+//                 selected && "ring-2 ring-primary",
+//                 disabled && "opacity-50 cursor-not-allowed",
+//                 rootClassName
+//             )}>
+//             <input
+//                 type="checkbox"
+//                 className="sr-only"
+//                 checked={selected}
+//                 disabled={disabled}
+//                 onChange={(e) => {
+//                     if (disabled) return;
+//                     onChange?.(e.target.checked);
+//                 }}
+//             />
+//             {header && (
+//                 <CardHeader className={cn('flex items-center justify-center p-3 text-center', headerClassName)}>
+//                     {header.type === 'image' && (
+//                         <div className="w-27.25 h-15 flex items-center justify-center">
+//                             <img
+//                                 src={header.src}
+//                                 alt={header.alt ?? ''}
+//                                 className={cn(
+//                                     'max-w-full max-h-full object-contain',
+//                                     header.className
+//                                 )}
+//                             />
+//                         </div>
+//                     )}
+
+//                     {header.type === 'text' && (
+//                         <div className={cn('flex flex-col gap-1', header.className)}>
+//                             <h3 className="text-sm font-semibold">
+//                                 {header.title}
+//                             </h3>
+//                             {header.description && (
+//                                 <p className="text-xs text-muted-foreground">
+//                                     {header.description}
+//                                 </p>
+//                             )}
+//                         </div>
+//                     )}
+
+//                     {header.type === 'custom' && header.node}
+//                 </CardHeader>
+//             )}
+//             <CardContent className={cn('flex flex-col gap-2 px-4 py-2', contentClassName)}>
+//                 {children}
+//             </CardContent>
+//             {footer && (
+//                 <CardFooter className={cn(footerClassName, 'mt-auto px-4 pb-3')}>
+//                     {footer}
+//                 </CardFooter>
+//             )}
+//         </label>
+//     )
+// }
 
 export const CustomDialogComponent = <T = TKeyValueStringType,>({
     handleDialogContextSwitch,

@@ -109,7 +109,7 @@ export const CustomerVerificationDetails = ({ goToNextStep, goToPrevStep }: Cust
                 name="country"
                 render={({ field }) => (
                   <ReuseableSingleSelectCountriesInput
-                    label="Country"
+                    label="Country of Residence"
                     required
                     value={field.value}
                     onChange={field.onChange}
