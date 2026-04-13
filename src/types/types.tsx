@@ -306,6 +306,8 @@ export type ReusableCardProps = {
   onClick?: () => void;
   disabled?: boolean;
   selected?: boolean;
+
+  onChange?: (checked: boolean) => void
 }
 
 export type TNavBarUrlType = {

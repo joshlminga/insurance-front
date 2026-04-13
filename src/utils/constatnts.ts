@@ -196,6 +196,7 @@ export const RatesSteps = [
 export const POLL_INTERVAL_MS = 3000
 export const POLL_TIMEOUT_MS = 90000
 export const MOTOR_QUOTE_SESSION_STORAGE_KEY = "motor_quote_session_id"
+export const PURCHASE_SESSION_STORAGE_KEY = "purchase_session_id"
 
 export const BENEFIT_TYPE_CONFIG = {
     inclusive: { label: "Inclusive", color: "bg-[#0CC258]" },

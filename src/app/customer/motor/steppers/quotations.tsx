@@ -19,7 +19,7 @@ import type {
 } from '@/types/types'
 import { EPREFIX, EROUTES } from '@/utils/enums'
 import { ArrowLeftCircle, ArrowRightCircle, Plus } from 'lucide-react'
-import React, { useEffect, useMemo, useReducer, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { ComparisonPage } from './comparisons/page'
 import { Link, useLocation } from 'react-router-dom'
@@ -30,6 +30,7 @@ import {
     EMETHODS,
     FILTEROPTIONS,
     MOTOR_QUOTE_SESSION_STORAGE_KEY,
+    PURCHASE_SESSION_STORAGE_KEY,
     ReusableReducer
 } from '@/utils/constatnts'
 import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
@@ -42,7 +43,9 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
     goToNextStep,
     goToPrevStep,
 }) => {
+    const MAX_COMPARISONS = 3
     const [quoteSessionId, setQuoteSessionId] = useState<number | null>(null)
+    const [selectedQuotes, setSelectedQuotes] = useState<{ product_id: string | number; rate_id: string | number }[]>([])
     const form = useForm()
     const { isAuthenticated } = UseAuth()
     const location = useLocation()
@@ -90,11 +93,37 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
     const currentPage = data?.pagination?.current_page ?? filter.page
     const lastPage = data?.pagination?.last_page ?? 1
 
+    const isQuoteSelected = useCallback(
+        (rateId: string | number) => selectedQuotes.some((q) => q.rate_id === rateId),
+        [selectedQuotes]
+    )
+
+    const toggleQuoteSelection = useCallback(
+        (productId: string | number, rateId: string | number) => {
+            setSelectedQuotes((prev) => {
+                const exists = prev.some((q) => q.rate_id === rateId)
+                if (exists) return prev.filter((q) => q.rate_id !== rateId)
+                if (prev.length >= MAX_COMPARISONS) {
+                    ShowToast.error(`You can select a maximum of ${MAX_COMPARISONS} quotations to compare.`)
+                    return prev
+                }
+                return [...prev, { product_id: productId, rate_id: rateId }]
+            })
+        },
+        []
+    )
+
     const submitPurchaseMutation = UseApiMutation<SubmitResponse, any>({
         url: `purchase/motor/${quoteSessionId}`,
         method: EMETHODS.POST,
         mutationOptions: {
             onSuccess: (data) => {
+                const purchaseId = data?.data?.purchase_id
+                if (purchaseId === undefined) {
+                    ShowToast.error("Purchase session could not be initialized. Please try again.")
+                    return
+                }
+                localStorage.setItem(PURCHASE_SESSION_STORAGE_KEY, String(purchaseId))
                 goToNextStep?.();
                 ShowToast.success(data?.message ?? "Purchase started");
             },
@@ -102,15 +131,53 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                 const message = extractErrorMessage(error);
                 ShowToast.error(message || "Purchase failed!");
             },
+            retry: 3,
         },
     });
 
-    const onPurchase = (data: any) => {
+    const onPurchase = (productId: number | string, rateId: number | string) => {
         if (!quoteSessionId) {
             ShowToast.error("No active quote session found.")
             return
         }
-        submitPurchaseMutation.mutate(data)
+        submitPurchaseMutation.mutate({
+            'product_id': productId,
+            'rate_id': rateId,
+        })
+    }
+
+    const submitComparisonMutation = UseApiMutation<SubmitResponse, any>({
+        url: `purchase/motor/${quoteSessionId}`,
+        method: EMETHODS.POST,
+        mutationOptions: {
+            onSuccess: (data) => {
+                const purchaseId = data?.data?.purchase_id
+                if (purchaseId === undefined) {
+                    ShowToast.error("Purchase session could not be initialized. Please try again.")
+                    return
+                }
+                localStorage.setItem(PURCHASE_SESSION_STORAGE_KEY, String(purchaseId))
+                // goToNextStep?.();
+                ShowToast.success(data?.message ?? "Purchase started");
+            },
+            onError: (error: unknown) => {
+                const message = extractErrorMessage(error);
+                ShowToast.error(message || "Purchase failed!");
+            },
+            retry: 3,
+        },
+    });
+
+    const onComparison = () => {
+        if (!quoteSessionId) {
+            ShowToast.error("No active quote session found.")
+            return
+        }
+        if (selectedQuotes.length < 2) {
+            ShowToast.error("Select at least 2 quotations to compare.")
+            return
+        }
+        submitComparisonMutation.mutate(selectedQuotes)
     }
 
     return (
@@ -126,7 +193,6 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                     Select optional add-ons to include in your premium calculation.
                 </p>
                 <hr className="mb-5" />
-
                 <form className="space-y-5">
                     <div className="overflow-x-auto">
                         <ReusableCheckboxGrid options={QUOTATIONCHECKBOX} columns={3} />
@@ -150,25 +216,32 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                         <Button
                             type="button"
                             className="flex items-center gap-1.5 rounded border border-[#0CC2581F] bg-[#C7EED5] px-4 py-2 text-sm font-medium text-[#43A047] hover:bg-[#C7EED5]/90"
-                            leftIcon={<Plus className="h-4 w-4" />}
-                        >
+                            leftIcon={<Plus className="h-4 w-4" />}>
                             Add Benefit
                         </Button>
 
                         <Button
                             type="button"
                             className="flex items-center gap-1.5 rounded bg-[#C20C0C]/80 px-5 py-2 text-sm font-medium text-white hover:bg-[#C20C0C]"
-                            onClick={() =>
-                                handleDialogContextSwitch({ Component: ComparisonPage })
-                            } >
-                            Generate Comparison
+                            onClick={onComparison}
+                            loading={submitComparisonMutation.isPending}
+                            disabled={selectedQuotes.length < 2}
+                        >
+                            Generate Comparison {selectedQuotes.length > 0 && `(${selectedQuotes.length}/${MAX_COMPARISONS})`}
                         </Button>
                     </div>
                 </form>
             </section>
             <section className="space-y-4">
                 <div className="flex items-center justify-between">
-                    <h2 className="text-lg font-semibold text-gray-900">Quote Comparison</h2>
+                    <div className="flex items-center gap-3">
+                        <h2 className="text-lg font-semibold text-gray-900">Quote Comparison</h2>
+                        {selectedQuotes.length > 0 && (
+                            <span className="rounded-full bg-[#C20C0C]/10 px-2.5 py-0.5 text-xs font-medium text-[#C20C0C]">
+                                {selectedQuotes.length}/{MAX_COMPARISONS} selected
+                            </span>
+                        )}
+                    </div>
                     {isLoading && (
                         <span className="text-xs text-gray-400 animate-pulse">
                             Fetching premium quotations…
@@ -184,6 +257,8 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                             ? <EmptyState />
                             : quotationItems.map((item: any, itemIndex: number) => (
                                 <ReusableCard
+                                    selected={isQuoteSelected(item?.rate_id)}
+                                    onChange={() => toggleQuoteSelection(item?.product?.id, item?.rate_id)}
                                     key={item?.id ?? `quotation-${itemIndex}`}
                                     header={{
                                         type: 'image',
@@ -208,7 +283,8 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                                             {isAuthenticated ? (
                                                 <Button
                                                     type="button"
-                                                    onClick={goToNextStep}
+                                                    onClick={() => onPurchase(item?.product_id, item?.rate_id)}
+                                                    loading={submitPurchaseMutation.isPending}
                                                     className="w-full rounded-md border border-[#D9D9D9] bg-[#0CC258] px-4 py-2 text-sm font-medium text-white hover:bg-[#0CC258]/90 lg:w-auto">
                                                     Purchase Cover
                                                 </Button>
@@ -221,16 +297,15 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                                                     }}
                                                     className="w-full lg:w-auto">
                                                     <Button
-                                                        onClick={onPurchase}
                                                         type="button"
+                                                        loading={submitPurchaseMutation.isPending}
                                                         className="w-full rounded-md border border-[#D9D9D9] bg-[#0CC258] px-4 py-2 text-sm font-medium text-white hover:bg-[#0CC258]/90 lg:w-auto">
                                                         Purchase Cover
                                                     </Button>
                                                 </Link>
                                             )}
                                         </>
-                                    }
-                                >
+                                    }>
                                     <div className="space-y-1.5 px-1">
                                         <div className="flex justify-between gap-2">
                                             <span className="text-xs text-gray-500 sm:text-sm">
@@ -259,8 +334,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                     type="button"
                     className="w-full rounded-full border border-[#C20C0C] bg-transparent px-5 py-2 text-sm font-medium text-[#C20C0C] hover:bg-[#C20C0C]/10 sm:w-auto"
                     leftIcon={<ArrowLeftCircle className="h-4 w-4" />}
-                    onClick={() => goToPrevStep?.()}
-                >
+                    onClick={() => goToPrevStep?.()}>
                     Previous
                 </Button>
 
@@ -276,9 +350,10 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
 
                 <Button
                     type="button"
-                    className="w-full rounded-full bg-[#C20C0C]/80 px-5 py-2 text-sm font-medium text-white hover:bg-[#C20C0C] sm:w-auto"
+                    className="hidden w-full rounded-full bg-[#C20C0C]/80 px-5 py-2 text-sm font-medium text-white hover:bg-[#C20C0C] sm:w-auto"
                     rightIcon={<ArrowRightCircle className="h-4 w-4" />}
-                    onClick={() => goToNextStep?.()}
+                    disabled
+                // onClick={() => goToNextStep?.()}
                 >
                     Next
                 </Button>
