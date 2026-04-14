@@ -98,7 +98,7 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
         setPollMessage('Still checking payment status...')
     }, [isPolling, pollQuery.isError])
 
-    const { data: SummaryData } = UseApiQuery<SubmitResponse>({
+    const { data: SummaryData, refetch: refetchSummary } = UseApiQuery<SubmitResponse>({
         url: `purchase/motor/${purchaseSessionId}/summary`,
         queryOptions: {
             enabled: !!purchaseSessionId,
@@ -112,7 +112,7 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
             payment_method: 'mpesa',
             amount: 1.00,
             phone_number: '',
-            invoice_id: SummaryData?.data?.invoice_breakdown?.items?.[0]?.id ?? "",
+            invoice_id: '',
             payment_plans: '',
             first_installment: '',
             second_installment: '',
@@ -122,9 +122,12 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
 
     React.useEffect(() => {
         if (!SummaryData?.data) return
-        const firstDue = SummaryData.data.invoice_breakdown?.items?.[0]?.installment_amount
-        if (firstDue) {
-            form.setValue('amount', Number(firstDue))
+        const firstItem = SummaryData.data.invoice_breakdown?.items?.[0]
+        if (firstItem?.installment_amount) {
+            form.setValue('amount', Number(firstItem.installment_amount))
+        }
+        if (firstItem?.id) {
+            form.setValue('invoice_id', String(firstItem.id))
         }
     }, [SummaryData, form])
 
@@ -140,6 +143,7 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
                 if (schedule?.[0]?.amount) {
                     form.setValue('amount', Number(schedule[0].amount))
                 }
+                refetchSummary()
             },
             onError: (error: any) => {
                 const message = extractErrorMessage(error);
@@ -192,7 +196,7 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
         const payload: MpesaPayload = {
             phone: data.phone_number,
             amount: data.amount,
-            invoice_id: purchaseSessionId ?? "",
+            invoice_id: data.invoice_id,
         }
         submitMutation.mutate(payload)
     }
