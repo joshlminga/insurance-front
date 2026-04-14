@@ -31,7 +31,7 @@ import { MotorSpecialVehicle } from './tabs/motor-special-vehicle'
 export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({ goToNextStep, goToPrevStep }) => {
     const [selectedTabValue, setSelectedTabValue] = useState<string>("");
 
-    const { user, guest } = UseAuth();
+    const { user } = UseAuth();
     const { data, isLoading } = UseApiQuery<SubmitResponse>({
         url: 'motor/general-tools/vehicle_classes',
         queryOptions: {
@@ -71,7 +71,7 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
     const form = useForm<VehicleFormValues>({
         resolver: zodResolver(VehicleDetailsSchema),
         defaultValues: {
-            user_id: user?.id ?? guest?.guestId ?? "",
+            user_id: user?.id ?? "",
             country_id: "",
             covertype_id: "",
             covering_id: "",

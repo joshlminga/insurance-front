@@ -10,7 +10,14 @@ import { PostComparisonPage } from './[id]/page'
 // import { UseApiQuery } from '@/hooks/hooks'
 // import { SubmitResponse } from '@/types/types'
 
-export const ComparisonPage: React.FC = () => {
+export const ComparisonPage = ({
+    componentProps,
+}: {
+    handleDialogContextSwitch: (context?: any) => void
+    componentProps?: any
+}) => {
+
+    console.log(componentProps?.data?.data);
     // const [quoteSessionId, setQuoteSessionId] = useState<number | null>(null)
 
     const { handleDialogContextSwitch, dialogContent, dialogOpen } =
