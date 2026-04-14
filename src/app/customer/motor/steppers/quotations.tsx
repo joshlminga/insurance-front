@@ -62,6 +62,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
             refetch?: () => Promise<any>
             data?: any
             goToNextStep?: CustomerVerificationDetailsProps['goToNextStep']
+            onDownload?: () => void
         }>()
 
     useEffect(() => {
@@ -155,10 +156,13 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
         mutationOptions: {
             onSuccess: (data) => {
                 handleDialogContextSwitch({
-                    componentProps: { data, id:quoteSessionId },
+                    componentProps: {
+                        data,
+                        onDownload: () => onComparison(true),
+                    },
                     Component: PostComparisonPage,
                 })
-                ShowToast.success(data?.message ?? "Purchase started");
+                ShowToast.success(data?.message ?? "Comparison generated");
             },
             onError: (error: unknown) => {
                 const message = extractErrorMessage(error);
@@ -169,7 +173,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
     });
 
     const submitComparisonDownloadMutation = UseApiMutation<Blob, any>({
-        url: `purchase/motor/${quoteSessionId}`,
+        url: `document/motor/comparison/${quoteSessionId}`,
         method: EMETHODS.POST,
         config: {
             responseType: 'blob',
