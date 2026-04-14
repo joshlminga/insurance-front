@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CardFooter } from '@/components/ui/card'
 import { Button, ReusableDropdown, ReusableSelect, ReuseableInput, ReuseableRadioChoiceGroup } from '@/dev/core'
@@ -97,21 +98,6 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
         setPollMessage('Still checking payment status...')
     }, [isPolling, pollQuery.isError])
 
-
-    const form = useForm<PaymentFormValues>({
-        resolver: zodResolver(PaymentDetailsSchema),
-        defaultValues: {
-            payment_method: 'mpesa',
-            amount: 1.00,
-            phone_number: '',
-            invoice_id: purchaseSessionId ?? "",
-            payment_plans: '',
-            first_installment: '',
-            second_installment: '',
-            third_installment: '',
-        },
-    })
-
     const { data: SummaryData } = UseApiQuery<SubmitResponse>({
         url: `purchase/motor/${purchaseSessionId}/summary`,
         queryOptions: {
@@ -120,11 +106,25 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
         },
     })
 
+    const form = useForm<PaymentFormValues>({
+        resolver: zodResolver(PaymentDetailsSchema),
+        defaultValues: {
+            payment_method: 'mpesa',
+            amount: 1.00,
+            phone_number: '',
+            invoice_id: SummaryData?.data?.invoice_breakdown?.items?.[0]?.id ?? "",
+            payment_plans: '',
+            first_installment: '',
+            second_installment: '',
+            third_installment: '',
+        },
+    })
+
     React.useEffect(() => {
         if (!SummaryData?.data) return
-        const premium = SummaryData.data.cover?.premium?.total_premium
-        if (premium) {
-            form.setValue('amount', Number(premium))
+        const firstDue = SummaryData.data.invoice_breakdown?.items?.[0]?.installment_amount
+        if (firstDue) {
+            form.setValue('amount', Number(firstDue))
         }
     }, [SummaryData, form])
 
@@ -137,6 +137,9 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
                 form.setValue('first_installment', schedule?.[0]?.amount?.toString() ?? '')
                 form.setValue('second_installment', schedule?.[1]?.amount?.toString() ?? '')
                 form.setValue('third_installment', schedule?.[2]?.amount?.toString() ?? '')
+                if (schedule?.[0]?.amount) {
+                    form.setValue('amount', Number(schedule[0].amount))
+                }
             },
             onError: (error: any) => {
                 const message = extractErrorMessage(error);

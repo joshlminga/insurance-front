@@ -6,7 +6,9 @@ import { useFormContext, Controller } from 'react-hook-form'
 import type { PaymentFormValues } from '@/types/schema'
 
 export const CardsTabPage: React.FC = () => {
-    const { control } = useFormContext<PaymentFormValues>()
+    const { control, watch } = useFormContext<PaymentFormValues>()
+    const amount = watch('amount')
+    const formattedAmount = Number(amount || 0).toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
     const expiryRef = useRef<HTMLInputElement>(null)
     const cvvRef = useRef<HTMLInputElement>(null)
 
@@ -60,7 +62,7 @@ export const CardsTabPage: React.FC = () => {
                     {/* Payment Amount Display */}
                     <div className="w-full p-4 h-auto min-h-[74px] rounded-[20px] border border-[#ADABAB]/70 bg-white">
                         <span className="text-sm text-muted-foreground">You will Pay:</span>
-                        <h1 className='text-[#0CC258] font-bold text-xl sm:text-2xl'>Kshs 904,090</h1>
+                        <h1 className='text-[#0CC258] font-bold text-xl sm:text-2xl'>Ksh {formattedAmount}</h1>
                     </div>
                     
                     {/* Card Inputs - 2 columns on sm+, 1 column on mobile */}
