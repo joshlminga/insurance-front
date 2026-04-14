@@ -122,31 +122,36 @@ export const UpdatePasswordSchema = z.object({
 })
 
 export const KycSchema = z.object({
-  passport_number: z.string().min(1, "Passport/ID No number is required"),
-  tax_number: z.string().min(1, "Tax Number is required"),
+  nationality_id: z.string().min(1, "Select Nationality"),
+  id_type: z.string().min(1, "Slect ID Type"),
+  id_number: z.string().min(1, "Passport/ID No number is required"),
+  tax_pin: z.string().min(1, "Tax Number is required"),
+  color: z.string().min(1, "Car color is required"),
   chassis_number: z.string().min(1, "Vehicle chassis number is required"),
+  engine_cc: z.string().min(1, "Vehicle engine capacity is required"),
   engine_number: z.string().min(1, "Engine number is required"),
   total_seats: z.string().min(1, "Number of seats is required"),
   tonage_capacity: z.string().min(1, "Vehicle tonage capacity is required"),
-  log_book_attachment: z
+  logbook: z
     .any()
     .refine((file) => file instanceof File, "Attach a logbook"),
   tax_certificate: z
     .any()
     .refine((file) => file instanceof File, "Attach a tax certificate"),
-  passport_attachment: z
+  id_document: z
     .any()
     .refine((file) => file instanceof File, "Attach ID/Passport"),
 })
 
 export const InvoicePaymentSchema = z.object({
-  customer_name: z.string().min(1, "Customer Name is required"),
+  name: z.string().min(1, "Customer Name is required"),
   email: z.email().min(1, "Email is required"),
-  phone_number: z.string().min(1, "Phone number is required"),
-  covering: z.string().min(1, "Covering is required"),
-  provider: z.string().min(1, "Provider is required"),
-  cover_startdate: z.string().min(1, "Cover Start Date is required"),
-  total_payable: z.string().min(1, "Total payable is required"),
+  payment_plan: z.string().optional(),
+  phone: z.string().min(1, "Phone number is required"),
+  covering: z.string().optional(),
+  provider: z.string().optional(),
+  cover_start_date: z.string().min(1, "Cover Start Date is required"),
+  // total_payable: z.string().min(1, "Total payable is required"),
 })
 
 // Base payment schema with common fields
@@ -161,6 +166,7 @@ const BasePaymentSchema = z.object({
 // Mpesa specific fields
 const MpesaPaymentSchema = BasePaymentSchema.extend({
   payment_method: z.literal("mpesa"),
+  invoice_id: z.string(),
   phone_number: z.string()
     .min(10, "Phone number must be at least 10 digits")
     .regex(/^(?:\+254|254|0)?[17]\d{8}$/, "Invalid Kenyan phone number"),

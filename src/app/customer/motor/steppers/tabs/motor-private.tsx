@@ -66,7 +66,6 @@ export const MotorPrivatePage: React.FC = () => {
                                 </div>
                             )}
                         />
-
                         <Controller
                             control={control}
                             name="vehicle_make_id"

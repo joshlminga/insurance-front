@@ -675,82 +675,6 @@ export const ReusableCard = ({
     )
 }
 
-// export const ReusableCard = ({
-//     header,
-//     children,
-//     footer,
-//     rootClassName,
-//     headerClassName,
-//     contentClassName,
-//     footerClassName,
-//     onChange,
-//     disabled,
-//     selected,
-// }: ReusableCardProps) => {
-
-//     return (
-//         <label
-//             className={cn(
-//                 "flex flex-col w-full min-w-0 overflow-hidden rounded-[10px] border bg-white",
-//                 "border-[#ADABAB]",
-//                 "cursor-pointer transition-all hover:border-[#FF9A9A] hover:-translate-y-px",
-//                 selected && "ring-2 ring-primary",
-//                 disabled && "opacity-50 cursor-not-allowed",
-//                 rootClassName
-//             )}>
-//             <input
-//                 type="checkbox"
-//                 className="sr-only"
-//                 checked={selected}
-//                 disabled={disabled}
-//                 onChange={(e) => {
-//                     if (disabled) return;
-//                     onChange?.(e.target.checked);
-//                 }}
-//             />
-//             {header && (
-//                 <CardHeader className={cn('flex items-center justify-center p-3 text-center', headerClassName)}>
-//                     {header.type === 'image' && (
-//                         <div className="w-27.25 h-15 flex items-center justify-center">
-//                             <img
-//                                 src={header.src}
-//                                 alt={header.alt ?? ''}
-//                                 className={cn(
-//                                     'max-w-full max-h-full object-contain',
-//                                     header.className
-//                                 )}
-//                             />
-//                         </div>
-//                     )}
-
-//                     {header.type === 'text' && (
-//                         <div className={cn('flex flex-col gap-1', header.className)}>
-//                             <h3 className="text-sm font-semibold">
-//                                 {header.title}
-//                             </h3>
-//                             {header.description && (
-//                                 <p className="text-xs text-muted-foreground">
-//                                     {header.description}
-//                                 </p>
-//                             )}
-//                         </div>
-//                     )}
-
-//                     {header.type === 'custom' && header.node}
-//                 </CardHeader>
-//             )}
-//             <CardContent className={cn('flex flex-col gap-2 px-4 py-2', contentClassName)}>
-//                 {children}
-//             </CardContent>
-//             {footer && (
-//                 <CardFooter className={cn(footerClassName, 'mt-auto px-4 pb-3')}>
-//                     {footer}
-//                 </CardFooter>
-//             )}
-//         </label>
-//     )
-// }
-
 export const CustomDialogComponent = <T = TKeyValueStringType,>({
     handleDialogContextSwitch,
     dialogOpen,
@@ -1139,6 +1063,116 @@ export function ReuseableSingleSelectCountriesInput<T extends FieldValues>({
     const observerRef = useRef<HTMLDivElement | null>(null)
     const { data, isLoading } = UseApiQuery<TCountryResponse>({
         url: "taxonomies/general/countries",
+        params: {
+            direction: "asc",
+            page: filter.page,
+            pageSize: filter.pageSize,
+            term: filter.term,
+        },
+        queryOptions: {
+            placeholderData: (previousData) => previousData,
+        },
+    });
+    const countries = data?.data ?? []
+    const meta = data?.pagination;
+    useEffect(() => {
+        if (!observerRef.current) return
+        const observer = new IntersectionObserver((entries) => {
+            if (
+                entries[0].isIntersecting &&
+                !isLoading &&
+                meta &&
+                filter.page < meta.last_page
+            ) {
+                optionsDispatcher({
+                    type: "SET_PAGE",
+                    payload: { page: filter.page + 1 },
+                })
+            }
+        })
+        observer.observe(observerRef.current)
+
+        return () => observer.disconnect()
+    }, [meta, filter.page, isLoading])
+
+    const handleSearch = (value: string) => {
+        optionsDispatcher({
+            type: "SET_FILTER",
+            payload: { term: value, page: 1 },
+        })
+    }
+
+    return (
+        <div className={`space-y-2 ${className ?? ""}`}>
+            {label && (
+                <Label>
+                    {label}
+                    {required && (
+                        <span className="text-destructive ml-1">*</span>
+                    )}
+                </Label>
+            )}
+
+            <Select value={value} onValueChange={onChange} disabled={disabled}>
+                <SelectTrigger className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]">
+                    <SelectValue
+                        placeholder={
+                            isLoading
+                                ? "Loading countries..."
+                                : placeholder
+                        }
+                    />
+                </SelectTrigger>
+                <SelectContent className="max-h-75">
+                    <div className="p-2 sticky top-0 bg-white z-10">
+                        <Input
+                            placeholder="Search country..."
+                            onChange={(e) => handleSearch(e.target.value)}
+                            className="h-8"
+                        />
+                    </div>
+                    {countries.map((country) => (
+                        <SelectItem
+                            key={country.id}
+                            value={String(country.id)}>
+                            {country.name}
+                        </SelectItem>
+                    ))}
+                    {isLoading && (
+                        <div className="px-3 py-2 text-sm text-muted-foreground">
+                            Loading...
+                        </div>
+                    )}
+                    {!isLoading && countries.length === 0 && (
+                        <div className="px-3 py-2 text-sm text-muted-foreground">
+                            No countries found
+                        </div>
+                    )}
+                    <div ref={observerRef} className="h-4" />
+                </SelectContent>
+            </Select>
+        </div>
+    )
+}
+
+
+export function ReuseableSingleSelectNationalityInput<T extends FieldValues>({
+    value,
+    onChange,
+    placeholder = "Select nationality...",
+    label,
+    required = false,
+    disabled = false,
+    className,
+}: ReuseableSingleSelectCountriesInputProps<T>) {
+
+    const [filter, optionsDispatcher] = useReducer(
+        ReusableReducer<TPaginationFilters & TFilterOptions>,
+        { ...FILTEROPTIONS, page: 1, pageSize: 15 }
+    )
+    const observerRef = useRef<HTMLDivElement | null>(null)
+    const { data, isLoading } = UseApiQuery<TCountryResponse>({
+        url: "taxonomies/geo/nationality",
         params: {
             direction: "asc",
             page: filter.page,

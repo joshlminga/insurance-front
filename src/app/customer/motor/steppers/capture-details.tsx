@@ -116,7 +116,6 @@ export const CustomerVerificationDetails = ({ goToNextStep, goToPrevStep }: Cust
                   />
                 )}
               />
-
             </div>
           </FieldGroup>
           <CardFooter className="col-span-1 lg:col-span-2 flex flex-col sm:flex-row justify-between gap-3 mt-1 px-0">

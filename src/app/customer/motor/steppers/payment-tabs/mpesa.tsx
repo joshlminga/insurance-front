@@ -6,7 +6,10 @@ import type { PaymentFormValues } from '@/types/schema'
 import { CircleAlert } from 'lucide-react'
 
 export const MpesaPageTab: React.FC = () => {
-    const { control } = useFormContext<PaymentFormValues>()
+    const { control, watch } = useFormContext<PaymentFormValues>()
+    const amount = watch('amount')
+    const formattedAmount = Number(amount || 0).toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+
     const formatPhoneNumber = (value: string): string => {
         const digits = value.replace(/\D/g, '')
         if (digits.startsWith('254')) {
@@ -25,7 +28,7 @@ export const MpesaPageTab: React.FC = () => {
                     <FieldGroup>
                         <div className="mb-6 p-4 h-auto min-h-8.5 rounded-[15px] border border-[#ADABAB]/70 bg-green-50/30">
                             <span className="text-sm text-muted-foreground uppercase tracking-wider">Total to Pay:</span>
-                            <h1 className='text-[#0CC258] font-bold text-2xl sm:text-2xl'>Ksh 1.00</h1>
+                            <h1 className='text-[#0CC258] font-bold text-2xl sm:text-2xl'>Ksh {formattedAmount}</h1>
                         </div>
 
                         <Controller
@@ -78,7 +81,7 @@ export const MpesaPageTab: React.FC = () => {
                         <li className="pl-2">Select <span className="font-semibold">Paybill</span></li>
                         <li className="pl-2">Enter Business No. <span className="font-bold text-[#0CC258]">******</span></li>
                         <li className="pl-2">Enter Account No. <span className="font-bold text-[#0CC258]">*******</span></li>
-                        <li className="pl-2">Enter Amount: <span className="font-bold text-[#0CC258]">Ksh 1.00</span></li>
+                        <li className="pl-2">Enter Amount: <span className="font-bold text-[#0CC258]">Ksh {formattedAmount}</span></li>
                         <li className="pl-2">Enter your <span className="font-semibold">PIN</span> and press OK</li>
                         <li className="pl-2">Wait for the confirmation SMS</li>
                     </ol>
