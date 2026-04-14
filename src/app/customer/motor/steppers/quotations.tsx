@@ -130,7 +130,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                 const message = extractErrorMessage(error);
                 ShowToast.error(message || "Purchase failed!");
             },
-            retry: 3,
+            // retry: 3,
         },
     });
 
@@ -218,14 +218,12 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                             leftIcon={<Plus className="h-4 w-4" />}>
                             Add Benefit
                         </Button>
-
                         <Button
                             type="button"
                             className="flex items-center gap-1.5 rounded bg-[#C20C0C]/80 px-5 py-2 text-sm font-medium text-white hover:bg-[#C20C0C]"
                             onClick={onComparison}
                             loading={submitComparisonMutation.isPending}
-                            disabled={selectedQuotes.length < 2}
-                        >
+                            disabled={selectedQuotes.length < 2}>
                             Generate Comparison {selectedQuotes.length > 0 && `(${selectedQuotes.length}/${MAX_COMPARISONS})`}
                         </Button>
                     </div>
@@ -336,7 +334,6 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                     onClick={() => goToPrevStep?.()}>
                     Previous
                 </Button>
-
                 <ReusablePagination
                     currentPage={currentPage}
                     pageCount={lastPage}
@@ -346,21 +343,19 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                     }
                     disabled={isLoading}
                 />
-
                 <Button
                     type="button"
                     className="hidden w-full rounded-full bg-[#C20C0C]/80 px-5 py-2 text-sm font-medium text-white hover:bg-[#C20C0C] sm:w-auto"
                     rightIcon={<ArrowRightCircle className="h-4 w-4" />}
                     disabled
                 // onClick={() => goToNextStep?.()}
-                >
+                 >
                     Next
                 </Button>
             </CardFooter>
             <CustomDialogComponent
                 {...{ handleDialogContextSwitch, dialogOpen }}
-                className="w-[95vw] p-4 sm:max-w-fit sm:w-auto sm:p-6"
-            >
+                className="w-[95vw] p-4 sm:max-w-fit sm:w-auto sm:p-6">
                 {dialogContent?.Component && (
                     <dialogContent.Component
                         {...{

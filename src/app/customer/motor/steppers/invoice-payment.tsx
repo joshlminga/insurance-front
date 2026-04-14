@@ -6,7 +6,7 @@ import { UseApiMutation } from '@/hooks/hooks'
 import { InvoicePaymentSchema } from '@/types/form-schema'
 import type { InvoicePaymentFormValues } from '@/types/schema'
 import type { CustomerVerificationDetailsProps, SubmitResponse } from '@/types/types'
-import { EMETHODS, INVOICE_ID_KEY, INVOICE_SESSION_STORAGE_KEY } from '@/utils/constatnts'
+import { EMETHODS, INVOICE_SESSION_STORAGE_KEY } from '@/utils/constatnts'
 import { extractErrorMessage } from '@/utils/helpers'
 import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -35,14 +35,13 @@ export const InvoicePayment: React.FC<CustomerVerificationDetailsProps> = ({ goT
             setPurchaseSessionId(null)
         }
     }, [])
+    
     const submitMutation = UseApiMutation<SubmitResponse, InvoicePaymentFormValues>({
         url: `purchase/motor/${purchaseSessionId}/invoice`,
         method: EMETHODS.POST,
         mutationOptions: {
             onSuccess: (data) => {
-                console.log(data?.data?.payment_breakdown?.schedule);
-                localStorage.setItem(INVOICE_ID_KEY, String(data?.data?.payment_breakdown?.schedule))
-                // goToNextStep?.()
+                goToNextStep?.()
                 ShowToast.success(data.message || "Submitted successfully!")
             },
             onError: (error: any) => {

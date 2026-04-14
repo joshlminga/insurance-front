@@ -3,7 +3,7 @@ import { CardFooter } from '@/components/ui/card'
 import { Button, ReusableDropdown, ReusableSelect, ReuseableInput, ReuseableRadioChoiceGroup } from '@/dev/core'
 import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
 import type { CustomerVerificationDetailsProps, MpesaPayload, MpesaPollResponse, SubmitResponse } from '@/types/types'
-import { EMETHODS, INVOICE_ID_KEY, PAYMENTPLANS, POLL_INTERVAL_MS, POLL_TIMEOUT_MS } from '@/utils/constatnts'
+import { EMETHODS, INVOICE_SESSION_STORAGE_KEY, PAYMENTPLANS, POLL_INTERVAL_MS, POLL_TIMEOUT_MS } from '@/utils/constatnts'
 import { EPAYMENTTABS } from '@/utils/steps-config'
 import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -45,7 +45,7 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
     })
 
     React.useEffect(() => {
-        const storedPurchaseKey = String(localStorage.getItem(INVOICE_ID_KEY))
+        const storedPurchaseKey = String(localStorage.getItem(INVOICE_SESSION_STORAGE_KEY))
         if (storedPurchaseKey) {
             setPurchaseSessionId(storedPurchaseKey)
         } else {
@@ -97,21 +97,64 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
         setPollMessage('Still checking payment status...')
     }, [isPolling, pollQuery.isError])
 
+
     const form = useForm<PaymentFormValues>({
         resolver: zodResolver(PaymentDetailsSchema),
         defaultValues: {
             payment_method: 'mpesa',
             amount: 1.00,
             phone_number: '',
-            invoice_id: purchaseSessionId?.[0]?.invoice_id ?? "",
-
-            // payment_plan: "Full",
-            // payment_plans: '',
-            // Full: '',
-            // Two_Installment: '',
-            // Three_Installment: '',
+            invoice_id: purchaseSessionId ?? "",
+            payment_plans: '',
+            first_installment: '',
+            second_installment: '',
+            third_installment: '',
         },
     })
+
+    const { data: SummaryData } = UseApiQuery<SubmitResponse>({
+        url: `purchase/motor/${purchaseSessionId}/summary`,
+        queryOptions: {
+            enabled: !!purchaseSessionId,
+            retry: 1,
+        },
+    })
+
+    React.useEffect(() => {
+        if (!SummaryData?.data) return
+        const premium = SummaryData.data.cover?.premium?.total_premium
+        if (premium) {
+            form.setValue('amount', Number(premium))
+        }
+    }, [SummaryData, form])
+
+    const paymentPlanMutation = UseApiMutation<SubmitResponse, { payment_plan: string }>({
+        url: `purchase/motor/${purchaseSessionId}/payment-plan`,
+        method: EMETHODS.POST,
+        mutationOptions: {
+            onSuccess: (data) => {
+                const schedule = data?.data?.payment_breakdown?.schedule
+                form.setValue('first_installment', schedule?.[0]?.amount?.toString() ?? '')
+                form.setValue('second_installment', schedule?.[1]?.amount?.toString() ?? '')
+                form.setValue('third_installment', schedule?.[2]?.amount?.toString() ?? '')
+            },
+            onError: (error: any) => {
+                const message = extractErrorMessage(error);
+                ShowToast.error(message || "Failed to update payment plan!")
+            },
+        },
+    })
+
+    const selectedPaymentPlan = form.watch('payment_plans')
+    const prevPlanRef = React.useRef(selectedPaymentPlan)
+
+    React.useEffect(() => {
+        if (!selectedPaymentPlan || !purchaseSessionId || selectedPaymentPlan === prevPlanRef.current) return
+        prevPlanRef.current = selectedPaymentPlan
+        paymentPlanMutation.mutate({ payment_plan: selectedPaymentPlan })
+    }, [selectedPaymentPlan, purchaseSessionId])
+
+
     const handlePaymentMethodChange = (value: string) => {
         setSelectedPaymentMethod(value)
         form.setValue('payment_method', value as 'mpesa' | 'card' | 'pesapal')
@@ -173,22 +216,25 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
                         </div>
                         <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4'>
                             <ReuseableInput
-                                className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] bg-white"
+                                className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] bg-white text-black"
                                 control={form.control}
-                                name="full_installment"
+                                name="first_installment"
                                 label="Full Installment"
+                                disabled
                             />
                             <ReuseableInput
-                                className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] bg-white"
+                                className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] bg-white text-black"
                                 control={form.control}
                                 name="second_installment"
                                 label="2nd Installment 30%"
+                                disabled
                             />
                             <ReuseableInput
-                                className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] bg-white sm:col-span-2 lg:col-span-1"
+                                className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] bg-white sm:col-span-2 lg:col-span-1 text-black"
                                 control={form.control}
                                 name="third_installment"
                                 label="3rd Installment 30%"
+                                disabled
                             />
                         </div>
                     </div>

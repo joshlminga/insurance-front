@@ -615,5 +615,5 @@ export type ClaimItem = {
   amount: number
   status: ClaimStatus
 }
-export
-  type BenefitType = keyof typeof BENEFIT_TYPE_CONFIG;
+
+export type BenefitType = keyof typeof BENEFIT_TYPE_CONFIG;
