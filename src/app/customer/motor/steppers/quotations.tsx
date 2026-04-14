@@ -36,6 +36,7 @@ import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
 import { formatCurrency } from '@/lib/format'
 import { ShowToast } from '@/utils/utils'
 import { extractErrorMessage } from '@/utils/helpers'
+import { PostComparisonPage } from './comparisons/[id]/page'
 
 
 export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
@@ -45,6 +46,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
     const MAX_COMPARISONS = 3
     const [quoteSessionId, setQuoteSessionId] = useState<number | null>(null)
     const [selectedQuotes, setSelectedQuotes] = useState<{ product_id: string | number; rate_id: string | number }[]>([])
+    const [purchasingRateId, setPurchasingRateId] = useState<string | number | null>(null)
     const form = useForm()
     const { isAuthenticated } = UseAuth()
     const location = useLocation()
@@ -117,6 +119,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
         method: EMETHODS.POST,
         mutationOptions: {
             onSuccess: (data) => {
+                setPurchasingRateId(null)
                 const purchaseId = data?.data?.purchase_id
                 if (purchaseId === undefined) {
                     ShowToast.error("Purchase session could not be initialized. Please try again.")
@@ -127,10 +130,10 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                 ShowToast.success(data?.message ?? "Purchase started");
             },
             onError: (error: unknown) => {
+                setPurchasingRateId(null)
                 const message = extractErrorMessage(error);
                 ShowToast.error(message || "Purchase failed!");
             },
-            // retry: 3,
         },
     });
 
@@ -139,6 +142,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
             ShowToast.error("No active quote session found.")
             return
         }
+        setPurchasingRateId(rateId)
         submitPurchaseMutation.mutate({
             'product_id': productId,
             'rate_id': rateId,
@@ -146,17 +150,14 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
     }
 
     const submitComparisonMutation = UseApiMutation<SubmitResponse, any>({
-        url: `purchase/motor/${quoteSessionId}`,
+        url: `document/motor/comparison/${quoteSessionId}`,
         method: EMETHODS.POST,
         mutationOptions: {
             onSuccess: (data) => {
-                const purchaseId = data?.data?.purchase_id
-                if (purchaseId === undefined) {
-                    ShowToast.error("Purchase session could not be initialized. Please try again.")
-                    return
-                }
-                localStorage.setItem(PURCHASE_SESSION_STORAGE_KEY, String(purchaseId))
-                // goToNextStep?.();
+                handleDialogContextSwitch({
+                    componentProps: { data, id:quoteSessionId },
+                    Component: PostComparisonPage,
+                })
                 ShowToast.success(data?.message ?? "Purchase started");
             },
             onError: (error: unknown) => {
@@ -167,7 +168,33 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
         },
     });
 
-    const onComparison = () => {
+    const submitComparisonDownloadMutation = UseApiMutation<Blob, any>({
+        url: `purchase/motor/${quoteSessionId}`,
+        method: EMETHODS.POST,
+        config: {
+            responseType: 'blob',
+        },
+        mutationOptions: {
+            onSuccess: (data) => {
+                const blob = new Blob([data], { type: 'application/pdf' })
+                const url = window.URL.createObjectURL(blob)
+                const link = document.createElement('a')
+                link.href = url
+                link.download = `comparison-${quoteSessionId}.pdf`
+                document.body.appendChild(link)
+                link.click()
+                link.remove()
+                window.URL.revokeObjectURL(url)
+                ShowToast.success("Comparison PDF downloaded")
+            },
+            onError: (error: unknown) => {
+                const message = extractErrorMessage(error);
+                ShowToast.error(message || "Download failed!");
+            },
+        },
+    });
+
+    const onComparison = (isDownload = false) => {
         if (!quoteSessionId) {
             ShowToast.error("No active quote session found.")
             return
@@ -176,7 +203,15 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
             ShowToast.error("Select at least 2 quotations to compare.")
             return
         }
-        submitComparisonMutation.mutate(selectedQuotes)
+        const payload = {
+            is_download: isDownload,
+            products: selectedQuotes,
+        }
+        if (isDownload) {
+            submitComparisonDownloadMutation.mutate(payload)
+        } else {
+            submitComparisonMutation.mutate(payload)
+        }
     }
 
     return (
@@ -221,8 +256,8 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                         <Button
                             type="button"
                             className="flex items-center gap-1.5 rounded bg-[#C20C0C]/80 px-5 py-2 text-sm font-medium text-white hover:bg-[#C20C0C]"
-                            onClick={onComparison}
-                            loading={submitComparisonMutation.isPending}
+                            onClick={() => onComparison(false)}
+                            loading={submitComparisonMutation.isPending || submitComparisonDownloadMutation.isPending}
                             disabled={selectedQuotes.length < 2}>
                             Generate Comparison {selectedQuotes.length > 0 && `(${selectedQuotes.length}/${MAX_COMPARISONS})`}
                         </Button>
@@ -280,8 +315,9 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                                             {isAuthenticated ? (
                                                 <Button
                                                     type="button"
-                                                    onClick={() => onPurchase(item?.product_id, item?.rate_id)}
-                                                    loading={submitPurchaseMutation.isPending}
+                                                    onClick={() => onPurchase(item?.product?.id, item?.rate_id)}
+                                                    loading={submitPurchaseMutation.isPending && purchasingRateId === item?.rate_id}
+                                                    disabled={submitPurchaseMutation.isPending && purchasingRateId !== item?.rate_id}
                                                     className="w-full rounded-md border border-[#D9D9D9] bg-[#0CC258] px-4 py-2 text-sm font-medium text-white hover:bg-[#0CC258]/90 lg:w-auto">
                                                     Purchase Cover
                                                 </Button>
@@ -295,7 +331,6 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                                                     className="w-full lg:w-auto">
                                                     <Button
                                                         type="button"
-                                                        loading={submitPurchaseMutation.isPending}
                                                         className="w-full rounded-md border border-[#D9D9D9] bg-[#0CC258] px-4 py-2 text-sm font-medium text-white hover:bg-[#0CC258]/90 lg:w-auto">
                                                         Purchase Cover
                                                     </Button>
@@ -347,9 +382,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                     type="button"
                     className="hidden w-full rounded-full bg-[#C20C0C]/80 px-5 py-2 text-sm font-medium text-white hover:bg-[#C20C0C] sm:w-auto"
                     rightIcon={<ArrowRightCircle className="h-4 w-4" />}
-                    disabled
-                // onClick={() => goToNextStep?.()}
-                 >
+                    disabled>
                     Next
                 </Button>
             </CardFooter>

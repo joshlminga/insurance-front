@@ -1,79 +1,119 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Button } from "@/dev/core";
-import { POST_COMPARISON_DATA } from "@/utils/enums";
+import { Button, EmptyState } from "@/dev/core";
 import { ArrowDown, MoveLeft } from "lucide-react";
 import React from "react";
 
-export const PostComparisonPage = () => {
-  return (
-    <div>
-      <h1 className="flex items-center gap-2 px-3 text-2xl font-bold mb-6">
-        <Button
-          type="button"
-          className="rounded-md p-1 bg-transparent hover:bg-muted"
-          leftIcon={<MoveLeft className="h-7 w-7 text-primary" />}
-        />
-        Click preferred Insurers to Compare
-      </h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        {POST_COMPARISON_DATA.map((item) => (
-          <Card key={item.id} className="flex flex-col">
-            <CardHeader className="flex items-center justify-center py-6">
-              <img
-                src={item.logo}
-                alt="insurer"
-                className="w-36 h-16 object-contain"
-              />
-            </CardHeader>
-            <CardContent className="space-y-4 text-sm">
-              <div className="grid grid-cols-2 gap-y-3">
-                <span className="text-muted-foreground">Basic Premium</span>
-                <span className="font-medium text-right">
-                  {item.premiums.basic}
-                </span>
+const PREMIUM_KEYS = new Set(["Basic Premium", "Gross Premium", "Levies"])
 
-                {item.coverages.map((cov, idx) => (
-                  <React.Fragment key={idx}>
-                    <span className="text-muted-foreground">{cov.label}</span>
-                    <Badge
-                      className="justify-self-end"
-                      style={{ backgroundColor: cov.color }}>
-                      {cov.status}
-                    </Badge>
-                  </React.Fragment>
-                ))}
+function getBadgeClass(status: string): string {
+    const lower = status.toLowerCase()
+    if (lower === "inclusive" || lower === "covered") return "bg-[#0CC258]"
+    if (lower === "optional") return "bg-[#209BFF]"
+    if (lower === "compulsory") return "bg-[#C20C0C]"
+    return "bg-[#9CA3AF]"
+}
 
-                <span className="text-muted-foreground">
-                  PHCF, TL & Stamp Duty
-                </span>
-                <span className="font-medium text-right">
-                  {item.premiums.duties}
-                </span>
-              </div>
+export const PostComparisonPage = ({
+    componentProps,
+    handleDialogContextSwitch,
+}: {
+    handleDialogContextSwitch: (context?: any) => void
+    componentProps?: any
+}) => {
+    const comparisons: any[] = componentProps?.data?.data?.comparison ?? []
 
-              <Separator />
+    return (
+        <div className="space-y-6">
+            <h1 className="flex items-center gap-2 px-3 text-2xl font-bold">
+                <Button
+                    type="button"
+                    className="rounded-md p-1 bg-transparent hover:bg-muted"
+                    leftIcon={<MoveLeft className="h-7 w-7 text-primary" />}
+                    onClick={() => handleDialogContextSwitch()}
+                />
+                Insurer Comparison
+            </h1>
 
-              <div className="grid grid-cols-2 font-semibold">
-                <span>Total Premium</span>
-                <span className="text-right">
-                  {item.premiums.total}
-                </span>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+            {comparisons.length === 0 ? (
+                <EmptyState />
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {comparisons.map((item, idx) => {
+                        const breakdown = item.breakdown ?? {}
+                        const coverages = Object.entries(breakdown).filter(
+                            ([key]) => !PREMIUM_KEYS.has(key)
+                        )
 
-      <CardFooter className="flex justify-end mt-8">
-        <Button
-          type="button"
-          className="bg-[#C20C0C] hover:bg-[#C20C0C]/70"
-          leftIcon={<ArrowDown />}>
-          Download Comparison
-        </Button>
-      </CardFooter>
-    </div>
-  );
+                        return (
+                            <div key={`${item.rate_id}-${idx}`} className="space-y-4">
+                                {/* <Card className="flex items-center justify-center py-6">
+                                    <img
+                                        src={`${import.meta.env.VITE_BASE_URL}/${item.insuerer_logo}`}
+                                        alt={item.insurer_name}
+                                        className="w-36 h-16 object-contain"
+                                    />
+                                </Card> */}
+
+                                <Card>
+                                    <CardHeader className="pb-2">
+                                        <h3 className="text-lg font-semibold">{item.insurer_name}</h3>
+                                    </CardHeader>
+                                    <CardContent className="space-y-4">
+                                        <div className="grid grid-cols-2 gap-y-3 text-sm">
+                                            <span className="text-muted-foreground">Basic Premium</span>
+                                            <span className="font-medium text-right">
+                                                {breakdown["Basic Premium"] ?? "—"}
+                                            </span>
+
+                                            <Separator className="col-span-2 my-1" />
+
+                                            {coverages.map(([label, status], covIdx) => (
+                                                <React.Fragment key={covIdx}>
+                                                    <span className="text-muted-foreground">{label}</span>
+                                                    <div className="flex items-center justify-end gap-2">
+                                                        <Badge className={`${getBadgeClass(status as string)} text-white`}>
+                                                            {status as string}
+                                                        </Badge>
+                                                    </div>
+                                                </React.Fragment>
+                                            ))}
+
+                                            <Separator className="col-span-2 my-1" />
+
+                                            <span className="text-muted-foreground">Levies</span>
+                                            <span className="font-medium text-right">
+                                                {breakdown["Levies"] ?? "—"}
+                                            </span>
+                                        </div>
+
+                                        <Separator />
+
+                                        <div className="grid grid-cols-2 text-sm font-semibold">
+                                            <span>Total Premium</span>
+                                            <span className="text-right">
+                                                {breakdown["Gross Premium"] ?? "—"}
+                                            </span>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            </div>
+                        )
+                    })}
+                </div>
+            )}
+
+            <CardFooter className="flex justify-end px-0">
+                <Button
+                    type="button"
+                    className="bg-[#C20C0C] hover:bg-[#C20C0C]/70"
+                    leftIcon={<ArrowDown />}
+                    onClick={() => componentProps?.onDownload?.()}>
+                    Download Comparison
+                </Button>
+            </CardFooter>
+        </div>
+    );
 };

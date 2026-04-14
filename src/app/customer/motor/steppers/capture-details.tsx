@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
-import { Button, ReuseableInput, ReuseableSingleSelectCountriesInput } from "@/dev/core"
+import { Button, ReuseableInput, ReuseableSingleSelectNationalityInput } from "@/dev/core"
 import { ArrowLeftCircle, ArrowRightCircle, CircleCheck, ShieldCheck } from "lucide-react"
 import { Controller, useForm } from "react-hook-form"
 import { FieldGroup } from "@/components/ui/field"
@@ -108,8 +108,8 @@ export const CustomerVerificationDetails = ({ goToNextStep, goToPrevStep }: Cust
                 control={form.control}
                 name="country"
                 render={({ field }) => (
-                  <ReuseableSingleSelectCountriesInput
-                    label="Country of Residence"
+                  <ReuseableSingleSelectNationalityInput
+                    label="Nationality"
                     required
                     value={field.value}
                     onChange={field.onChange}

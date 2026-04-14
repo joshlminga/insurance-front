@@ -59,15 +59,11 @@ export const CardsTabPage: React.FC = () => {
         <div className='w-full flex justify-center items-center'>
             <div className="w-full max-w-5xl mx-auto">
                 <FieldGroup>
-                    {/* Payment Amount Display */}
-                    <div className="w-full p-4 h-auto min-h-[74px] rounded-[20px] border border-[#ADABAB]/70 bg-white">
+                    <div className="w-full p-4 h-auto min-h-18.5 rounded-[20px] border border-[#ADABAB]/70 bg-white">
                         <span className="text-sm text-muted-foreground">You will Pay:</span>
                         <h1 className='text-[#0CC258] font-bold text-xl sm:text-2xl'>Ksh {formattedAmount}</h1>
                     </div>
-                    
-                    {/* Card Inputs - 2 columns on sm+, 1 column on mobile */}
                     <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4'>
-                        {/* Card Number - spans full width */}
                         <div className="col-span-1 sm:col-span-2">
                             <Controller
                                 name="card_number"
@@ -82,7 +78,7 @@ export const CardsTabPage: React.FC = () => {
                                             placeholder="0000 0000 0000 0000"
                                             autoComplete="cc-number"
                                             maxLength={19}
-                                            className={`w-full h-[51px] rounded-[5px] border border-[#ADABAB] ${
+                                            className={`w-full h-12.75 rounded-[5px] border border-[#ADABAB] ${
                                                 fieldState.invalid ? 'border-red-500 focus-visible:ring-red-500' : ''
                                             }`}
                                             onChange={(e) => handleCardNumberChange(e, field.onChange)}
@@ -96,8 +92,6 @@ export const CardsTabPage: React.FC = () => {
                                 )}
                             />
                         </div>
-                        
-                        {/* Expiry Date */}
                         <Controller
                             name="expiry_date"
                             control={control}
@@ -112,7 +106,7 @@ export const CardsTabPage: React.FC = () => {
                                         placeholder="MM/YY"
                                         autoComplete="cc-exp"
                                         maxLength={5}
-                                        className={`w-full h-[51px] rounded-[5px] border border-[#ADABAB] ${
+                                        className={`w-full h-12.75 rounded-[5px] border border-[#ADABAB] ${
                                             fieldState.invalid ? 'border-red-500 focus-visible:ring-red-500' : ''
                                         }`}
                                         onChange={(e) => handleExpiryChange(e, field.onChange)}
@@ -125,8 +119,6 @@ export const CardsTabPage: React.FC = () => {
                                 </Field>
                             )}
                         />
-                        
-                        {/* CVV */}
                         <Controller
                             name="cvv"
                             control={control}
@@ -141,7 +133,7 @@ export const CardsTabPage: React.FC = () => {
                                         placeholder="123"
                                         autoComplete="cc-csc"
                                         maxLength={4}
-                                        className={`w-full h-[51px] rounded-[5px] border border-[#ADABAB] ${
+                                        className={`w-full h-12.75 rounded-[5px] border border-[#ADABAB] ${
                                             fieldState.invalid ? 'border-red-500 focus-visible:ring-red-500' : ''
                                         }`}
                                         onChange={(e) => handleCvvChange(e, field.onChange)}
