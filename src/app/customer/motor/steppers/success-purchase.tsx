@@ -38,7 +38,7 @@ export const SuccessPurchase: React.FC<CustomerVerificationDetailsProps> = ({
             setPurchaseSessionId(null)
         }
     }, [])
-    const { data: SummaryData, refetch: refetchSummary } = UseApiQuery<SubmitResponse>({
+    const { data: SummaryData } = UseApiQuery<SubmitResponse>({
         url: `purchase/motor/${purchaseSessionId}/summary`,
         queryOptions: {
             enabled: !!purchaseSessionId,
@@ -46,42 +46,50 @@ export const SuccessPurchase: React.FC<CustomerVerificationDetailsProps> = ({
         },
     })
 
-     const firstItem = SummaryData.data.invoice_breakdown?.items?.[0]
-    const submitMutation = UseApiMutation<Blob, void>({
-        url: `document/motor/receipt/${firstItem?.id}`,
-        method: EMETHODS.GET,
-        config: {
-            responseType: 'blob',
-        },
-        mutationOptions: {
-            onSuccess: (data) => {
-                const blob = new Blob([data], { type: 'application/pdf' });
-                const url = window.URL.createObjectURL(blob);
-                const link = document.createElement('a');
+    const firstItem = SummaryData?.data?.invoice_breakdown?.items?.[0]
+    const invoiceId = firstItem?.id
 
-                link.href = url;
-                link.download = `quote-${firstItem?.id}.pdf`;
-                document.body.appendChild(link);
-                link.click();
-
-                link.remove();
-                window.URL.revokeObjectURL(url);
-                ShowToast.success("Download started");
-            },
-            onError: (error: unknown) => {
-                const message = extractErrorMessage(error);
-                ShowToast.error(message || "Download failed!");
-            },
-        },
-    });
-
-    const onSubmit = () => {
-        if (!firstItem?.id) {
-            ShowToast.error("No active quote session found.")
+    const downloadDocument = (type: 'receipt' | 'certificate') => {
+        if (!invoiceId) {
+            ShowToast.error("No invoice found.")
             return
         }
-        submitMutation.mutate()
+        if (type === 'receipt') {
+            receiptMutation.mutate(String(invoiceId))
+        } else {
+            certificateMutation.mutate(String(invoiceId))
+        }
     }
+
+    const createDownloadMutation = (docType: string) =>
+        UseApiMutation<Blob, string>({
+            url: (id) => `document/motor/${docType}/${id}`,
+            method: EMETHODS.GET,
+            config: {
+                responseType: 'blob',
+            },
+            mutationOptions: {
+                onSuccess: (data) => {
+                    const blob = new Blob([data], { type: 'application/pdf' })
+                    const url = window.URL.createObjectURL(blob)
+                    const link = document.createElement('a')
+                    link.href = url
+                    link.download = `${docType}-${invoiceId}.pdf`
+                    document.body.appendChild(link)
+                    link.click()
+                    link.remove()
+                    window.URL.revokeObjectURL(url)
+                    ShowToast.success(`${docType.charAt(0).toUpperCase() + docType.slice(1)} downloaded`)
+                },
+                onError: (error: unknown) => {
+                    const message = extractErrorMessage(error)
+                    ShowToast.error(message || "Download failed!")
+                },
+            },
+        })
+
+    const receiptMutation = createDownloadMutation('receipt')
+    const certificateMutation = createDownloadMutation('certificate')
     return (
         <section className='w-full flex flex-col items-center justify-center p-4'>
             <div className='w-full max-w-4xl mx-auto space-y-6'>
@@ -94,7 +102,11 @@ export const SuccessPurchase: React.FC<CustomerVerificationDetailsProps> = ({
                         <FileText className='h-8 w-8 mb-2 text-primary' />
                         <h2 className='text-lg font-bold'>Certificate</h2>
                         <span className='text-sm text-muted-foreground mb-3'>Ready to download</span>
-                        <Button className='bg-[#43A047]/80 hover:bg-[#43A047] rounded-full text-white'>
+                        <Button
+                            className='bg-[#43A047]/80 hover:bg-[#43A047] rounded-full text-white'
+                            onClick={() => downloadDocument('certificate')}
+                            loading={certificateMutation.isPending}
+                        >
                             Download Certificate
                         </Button>
                     </Card>
@@ -104,8 +116,8 @@ export const SuccessPurchase: React.FC<CustomerVerificationDetailsProps> = ({
                         <span className='text-sm text-muted-foreground mb-3'>Ready to download</span>
                         <Button
                             className='bg-[#43A047]/80 hover:bg-[#43A047] rounded-full text-white'
-                            onClick={() => { onSubmit }}
-                            loading={submitMutation.isPending}
+                            onClick={() => downloadDocument('receipt')}
+                            loading={receiptMutation.isPending}
                         >
                             Download Receipt
                         </Button>
