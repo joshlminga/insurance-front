@@ -16,8 +16,7 @@ export const Footer = () => {
             <div className="absolute inset-0 -z-30">
                 <img src="/footer.webp" alt="" className="w-full h-full object-cover" />
             </div>
-            <div
-                className="absolute inset-0 -z-20"
+            <div className="absolute inset-0 -z-20"
                 style={{
                     background: `
                         linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, #000000 100%),
@@ -40,8 +39,8 @@ export const Footer = () => {
                     marginTop: '90px'
                 }}>
                 <div className="flex flex-col items-center text-center">
-                    <img src="/logo/logo.png" alt="Acentria" className="h-15 mb-8" />
-                    <h2 className="text-[85px] font-bold mb-10 tracking-tight">Let's Join Us</h2>
+                    <img src="/logo/logo.png" alt="Acentria" className="h-18 w-[228.34px] mb-8" />
+                    <h2 className="text-[85px] font-bold mb-10 tracking-tight">Join Us</h2>
                     <div className="relative w-full max-w-160 border-b border-white/30 pb-4 flex items-center">
                         <input
                             type="email"

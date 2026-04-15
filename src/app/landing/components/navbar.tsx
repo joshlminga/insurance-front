@@ -1,10 +1,16 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { cn } from "@/lib/utils";
 import { ELOGO, EPREFIX, EROUTES } from "@/utils/enums";
 import { ChevronDown, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { UseAuth } from "@/components/auth-provider";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
 
 const Dropdown = ({
     label,
@@ -102,10 +108,10 @@ export const Navbar = (
     const { isAuthenticated, isGeneral, logout } = UseAuth();
     const dropdownItems = {
         generateQuote: [
-            { name: "Motor Insurance", href: `/${EPREFIX.CUSTOMER}${EROUTES.MOTOR}`},
+            { name: "Motor Insurance", href: `/${EPREFIX.CUSTOMER}${EROUTES.MOTOR}` },
             { name: "Travel Insurance", href: `/${EPREFIX.CUSTOMER}${EROUTES.TRAVEL}` },
             { name: "Marine Insurance", href: `/${EPREFIX.CUSTOMER}${EROUTES.MARINE}` },
-             { name: "Life Insurance", href: `/${EPREFIX.CUSTOMER}${EROUTES.LIFE}`},
+            { name: "Life Insurance", href: `/${EPREFIX.CUSTOMER}${EROUTES.LIFE}` },
         ],
         claims: [
             { name: "File Claim", href: "#" },
@@ -132,16 +138,16 @@ export const Navbar = (
                         <img src={ELOGO.NAVBARLOGO} alt="logo" className="h-full w-auto object-contain" />
                     </div>
                     <div className={cn(`hidden lg:flex items-center gap-6 xl:gap-10 text-sm font-semibold cursor-pointer ${textStyle}`)}>
-                        <Link to={EROUTES.LANDING} className="hover:text-red-500 transition uppercase">Home</Link>
-                        <Link to='#' className="hover:text-red-500 transition uppercase">About</Link>
-                        <Link to='#' className="hover:text-red-500 transition uppercase">Services</Link>
-                        <Link to='#' className="hover:text-red-500 transition uppercase">Contact</Link>
+                        <Link to={EROUTES.LANDING} className="hover:text-red-500 transition uppercase text-sm font-semibold py-2">Home</Link>
+                        <a className="hover:text-red-500 transition uppercase text-sm font-semibold py-2 cursor-pointer">News</a>
+                        <a className="hover:text-red-500 transition uppercase text-sm font-semibold py-2 cursor-pointer">Careers</a>
+                        <a className="hover:text-red-500 transition uppercase text-sm font-semibold py-2 cursor-pointer">Contact</a>
                         {isAuthenticated && (
                             <>
                                 {/* {isGeneral === true && (
                                     <Link to={EROUTES.DASHBOARD} className="hover:text-red-500 transition uppercase">Dashboard</Link>
                                 )} */}
-                                <button onClick={logout} className="hover:text-red-500 transition uppercase">Logout</button>
+                                {/* <button onClick={logout} className="hover:text-red-500 transition uppercase">Logout</button> */}
                             </>
                         )}
                     </div>
@@ -157,7 +163,7 @@ export const Navbar = (
                     </button>
                 </div>
                 <div className="hidden lg:block">
-                    <div className="absolute top-25.25 left-1/2 -translate-x-1/2 w-full max-w-7xl h-px border-t border-[#F91520]" />
+                    <div className="absolute top-25.25 left-1/2 -translate-x-1/2 w-full h-px border-t border-[#F91520]" />
                     <div className="ml-4 mb-6 flex left-2/4 w-full max-w-7xl pt-6 mt-3">
                         <div className="flex gap-4 xl:gap-6 w-auto cursor-pointer flex-wrap">
                             <Dropdown
@@ -187,15 +193,15 @@ export const Navbar = (
                     <div className="lg:hidden flex flex-col py-4 border-t border-gray-200 mt-2">
                         <div className={cn(`flex flex-col space-y-3 mb-4 ${textStyle}`)}>
                             <Link to={EROUTES.LANDING} className="hover:text-red-500 transition uppercase text-sm font-semibold py-2">Home</Link>
-                            <a className="hover:text-red-500 transition uppercase text-sm font-semibold py-2 cursor-pointer">About</a>
-                            <a className="hover:text-red-500 transition uppercase text-sm font-semibold py-2 cursor-pointer">Services</a>
+                            <a className="hover:text-red-500 transition uppercase text-sm font-semibold py-2 cursor-pointer">News</a>
+                            <a className="hover:text-red-500 transition uppercase text-sm font-semibold py-2 cursor-pointer">Careers</a>
                             <a className="hover:text-red-500 transition uppercase text-sm font-semibold py-2 cursor-pointer">Contact</a>
                             {isAuthenticated && (
                                 <>
-                                    {isGeneral === false && (
+                                    {/* {isGeneral === false && (
                                         <Link to={EROUTES.DASHBOARD} className="hover:text-red-500 transition uppercase text-sm font-semibold py-2">Dashboard</Link>
-                                    )}
-                                    <button onClick={logout} className="text-left hover:text-red-500 transition uppercase text-sm font-semibold py-2">Logout</button>
+                                    )} */}
+                                    {/* <button onClick={logout} className="text-left hover:text-red-500 transition uppercase text-sm font-semibold py-2">Logout</button> */}
                                 </>
                             )}
                         </div>

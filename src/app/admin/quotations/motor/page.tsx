@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { PageHeader } from '@/components/shared'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -197,8 +198,10 @@ export const MotorQuotationPage = () => {
                                                 key={tab.value}
                                                 value={tab.value}
                                                 disabled={tab.disabled}
-                                                className="flex-1 h-6 sm:h-full min-w-0 rounded-none first:rounded-tl-[12px] first:rounded-bl-[12px] sm:first:rounded-l-[20px] last:rounded-tr-[12px] last:rounded-br-[12px] sm:last:rounded-r-[20px] data-[state=active]:bg-[#C20C0C] data-[state=active]:text-white data-[state=inactive]:bg-white data-[state=inactive]:text-black flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm lg:text-lg font-medium px-2 sm:px-4"
-                                            >
+                                                className="flex-1 h-6 sm:h-full min-w-0 rounded-none 
+                                                first:rounded-tl-[12px] first:rounded-bl-[12px] sm:first:rounded-l-[20px] last:rounded-tr-[12px] last:rounded-br-[12px] 
+                                                sm:last:rounded-r-[20px] data-[state=active]:bg-[#C20C0C] data-[state=active]:text-white data-[state=inactive]:bg-white data-[state=inactive]:text-black 
+                                                flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm lg:text-lg font-medium px-2 sm:px-4">
                                                 {tab.label}
                                             </TabsTrigger>
                                         ))}

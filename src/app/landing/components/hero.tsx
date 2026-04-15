@@ -36,10 +36,10 @@ export const HeroSection = () => {
                 <div className="absolute top-69.5 left-1/2 z-50 w-[70vw] -translate-x-1/2">
                     <h1
                         className="mb-6 text-[48px]  font-semibold text-white">
-                        <span className="text-[#F91520]">Your Trusted </span>
+                        <span className="text-[#000000]">Your Trusted </span>
                     </h1>
                     <h1
-                        className="mb-6 text-[48px]  font-semibold text-white">
+                        className="mb-6 text-[48px]  font-semibold text-[#EE2527]">
                         Global Consulting Partner
                     </h1>
                     <p className="mb-10 w-191.25 text-[20px]  font-normal text-white/74">
