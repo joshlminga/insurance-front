@@ -1,14 +1,15 @@
 import { Navbar } from './components/navbar'
 import { HeroSection } from './components/hero'
-import { AboutSection } from './components/about'
-import { ServicesSection } from './components/services'
-import { AgentBanner } from './components/agent-banner'
-import { ContactSection } from './components/contact'
+// import { AboutSection } from './components/about'
+// import { ServicesSection } from './components/services'
+// import { AgentBanner } from './components/agent-banner'
+// import { ContactSection } from './components/contact'
 import { PartnersSection } from './components/partners'
 import { Footer } from './components/footer'
 import { Cards } from './components/cards-section'
 import { HowItWorks } from './components/how-it-works'
 import { FaqsPage } from './components/faqs'
+import { ClaimsPage } from './components/claims'
 
 export const Landingpage = () => {
     return (
@@ -18,11 +19,12 @@ export const Landingpage = () => {
                 <HeroSection />
                 <Cards />
                 <HowItWorks/>
+                <ClaimsPage/>
                 <FaqsPage/>
-                <AboutSection />
+                {/* <AboutSection />
                 <ServicesSection />
                 <AgentBanner />
-                <ContactSection />
+                <ContactSection /> */}
                 <PartnersSection />
             </main>
             <Footer />
