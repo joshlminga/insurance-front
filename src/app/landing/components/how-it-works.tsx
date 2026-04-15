@@ -119,7 +119,7 @@ export const HowItWorks = () => {
                         </p>
 
                         <div className="mt-2">
-                            <button className="font-medium text-sm text-[#1A1A1A] bg-transparent border border-[#1A1A1A] rounded px-6 py-2.5 cursor-pointer tracking-[0.02em]">
+                            <button className="font-medium text-sm text-[#1A1A1A] bg-transparent border border-[#ED1E26] rounded px-6 py-2.5 cursor-pointer tracking-[0.02em]">
                                 Apply Now
                             </button>
                         </div>
