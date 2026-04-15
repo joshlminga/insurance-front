@@ -10,8 +10,8 @@ import {
 } from "@/components/ui/carousel"
 
 const InsuranceCard = ({ title, description, image, url }: { title: string, description: string, image: string, url?: string }) => (
-  <Link to={url || '#'} className="flex flex-col w-full max-w-[220px] h-[201px] rounded-t-[20px] rounded-br-[20px] border border-white/10 overflow-hidden transition-transform hover:scale-105 bg-black mx-auto">
-    <div className="h-[93px] relative overflow-hidden">
+  <Link to={url || '#'} className="flex flex-col w-full max-w-55 h-50.25 rounded-t-[20px] rounded-br-[20px] border border-[#D9D9D9] overflow-hidden transition-transform hover:scale-105 bg-black mx-auto">
+    <div className="h-23.25 relative overflow-hidden">
       <img src={image} alt={title} className="w-full h-full object-cover" loading="eager" />
       <div className="absolute inset-0 bg-linear-to-b from-transparent to-black/40" />
     </div>
@@ -45,15 +45,15 @@ export const Cards = () => {
   ]
 
   return (
-    <div className="relative w-full h-[127px] bg-black z-20" style={{ marginTop: '-127px' }}>
-      <div className="absolute bottom-0 w-full h-[127px] flex items-center justify-center">
+    <div className="relative w-full h-31.75 bg-black z-20" style={{ marginTop: '-127px' }}>
+      <div className="absolute bottom-0 w-full h-31.75 flex items-center justify-center">
         <div className="absolute bottom-0 flex gap-6 items-end justify-center">
           <Carousel
             opts={{
               align: "start",
               loop: true,
             }}
-            className="w-full max-w-[1000px] mx-auto">
+            className="w-full max-w-250 mx-auto mb-2">
             <CarouselContent className="-ml-6 flex items-end h-60">
               {insuranceData.map((item, index) => (
                 <CarouselItem key={index} className="pl-6 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
@@ -61,11 +61,11 @@ export const Cards = () => {
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <CarouselPrevious className="absolute left-[-50px] top-1/2 -translate-y-1/2 w-[30px] h-[30px] bg-white border border-[#FF9A9A] rounded-full flex items-center justify-center hover:bg-gray-50 transition-all z-10">
+            <CarouselPrevious className="absolute -left-12.5 top-1/2 -translate-y-1/2 w-7.5 h-7.5 bg-[#FFFFFF] border border-[#FF9A9A] rounded-full flex items-center justify-center hover:bg-gray-50 transition-all z-10">
               <ChevronLeft size={16} className="text-slate-900" />
             </CarouselPrevious>
             <CarouselNext
-              className="absolute right-[-50px] top-1/2 -translate-y-1/2 w-[30px] h-[30px] bg-white border border-[#FF9A9A] rounded-full flex items-center justify-center hover:bg-gray-50 transition-all z-10">
+              className="absolute -right-12.5 top-1/2 -translate-y-1/2 w-7.5 h-7.5 bg-[#FFFFFF] border border-[#FF9A9A] rounded-full flex items-center justify-center hover:bg-gray-50 transition-all z-10">
               <ChevronRight size={16} className="text-slate-900" />
             </CarouselNext>
           </Carousel>

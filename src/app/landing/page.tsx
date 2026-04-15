@@ -7,6 +7,8 @@ import { ContactSection } from './components/contact'
 import { PartnersSection } from './components/partners'
 import { Footer } from './components/footer'
 import { Cards } from './components/cards-section'
+import { HowItWorks } from './components/how-it-works'
+import { FaqsPage } from './components/faqs'
 
 export const Landingpage = () => {
     return (
@@ -15,6 +17,8 @@ export const Landingpage = () => {
             <main>
                 <HeroSection />
                 <Cards />
+                <HowItWorks/>
+                <FaqsPage/>
                 <AboutSection />
                 <ServicesSection />
                 <AgentBanner />
