@@ -617,3 +617,4 @@ export type ClaimItem = {
 }
 
 export type BenefitType = keyof typeof BENEFIT_TYPE_CONFIG;
+export type StepState = "completed" | "active" | "upcoming"

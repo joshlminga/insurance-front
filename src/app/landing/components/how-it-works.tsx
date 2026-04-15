@@ -1,3 +1,4 @@
+import { StepState } from "@/types/types"
 import React from "react"
 
 const steps = [
@@ -18,7 +19,6 @@ const steps = [
     },
 ]
 
-type StepState = "completed" | "active" | "upcoming"
 
 function getStepState(index: number, activeStep: number): StepState {
     if (index + 1 < activeStep) return "completed"
