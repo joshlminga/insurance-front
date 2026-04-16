@@ -44,7 +44,7 @@ export const HowItWorks = () => {
     return (
         <section id="how-it-works" className="py-14 bg-white">
             <div className="max-w-7xl mx-auto px-6">
-                <p className="font-semibold text-[28px] tracking-widest uppercase text-[#D11F3E] text-center mb-10">
+                <p className="text-sm font-semibold uppercase tracking-wider text-[#D11F3E] text-center mb-10">
                     HOW IT WORKS
                 </p>
                 <div className="w-full relative">

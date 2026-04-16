@@ -1,69 +1,65 @@
-import React from 'react'
+import React from "react"
 
 export const FaqsPage: React.FC = () => {
-    return (
-        <section id="faqs" className="bg-[#FFFFF] py-14 relative overflow-hidden">
-            <div className="max-w-360.75 mx-auto px-30 flex justify-between items-start">
-                <div className="max-w-155 relative z-10">
+  return (
+    <section id="faqs" className="bg-[#FffF] py-14 relative overflow-hidden">
+      <div className="max-w-7xl mx-auto px-6 flex gap-2 justify-between items-start">
+        <div className="flex-1 relative z-10 mx-auto">
+          <p className="text-sm font-semibold uppercase tracking-wider text-[#D11F3E] mb-2">
+            FAQs
+          </p>
+          <h2 className="text-[36px] font-bold text-black mb-10">
+            Frequently Asked Questions
+          </h2>
+          <div className="space-y-4">
+            <FaqItem text="How long does a claim take to process?" />
+            <FaqItem text="How quickly can I get covered?" />
+            <FaqItem text="Can I change or cancel my policy?" />
+            <FaqItem text="Can I cover my whole family under one plan?" />
+          </div>
+        </div>
 
-                    <p className="text-[32px] font-semibold uppercase text-[#D11F3E] mb-2">
-                        FAQS
-                    </p>
-
-                    <h2 className="text-[36px] font-bold text-black mb-10">
-                        Frequently Asked Questions
-                    </h2>
-
-                    <div className="space-y-4">
-                        <FaqItem text="How long does a claim take to process?" />
-                        <FaqItem text="How quickly can I get covered?" />
-                        <FaqItem text="Can I change or cancel my policy?" />
-                        <FaqItem text="Can I cover my whole family under one plan?" />
-                    </div>
-                </div>
-                <div className="relative w-130 h-115">
-
-                    <div className="absolute right-27.5 top-0 w-85.25 h-108 bg-[#EE2527] clip-main"></div>
-
-                    <div className="absolute right-0 top-0 w-46.25 h-61.25 bg-[#BE2332] clip-top"></div>
-
-                    <div className="absolute right-2.5 bottom-0 w-53.5 h-25 bg-[#BE2332] clip-bottom"></div>
-
-                    <img
-                        src="/faqimage.png"
-                        alt="faq"
-                        className="absolute right-13.75 top-17.5 w-62.5 h-65 object-cover z-10 grayscale"
-                    />
-                </div>
-            </div>
-
-            <div className="absolute bottom-5 left-0 w- h-30 dotted-fade">
-                <img
-                    src="/fluid-dots-red.svg"
-                    className="w-full h-full object-cover object-bottom"
-                    alt=""
-                />
-            </div>
-        </section>
-    )
+        <div className="relative w-125 h-112.5 overflow-hidden bg-white">
+          <div className="absolute left-0 top-0 w-75 h-full bg-[#EE2527] z-3"
+            style={{ clipPath: "polygon(60% 0%, 100% 0%, 40% 100%, 0% 100%)" }}
+          />
+          <div className="absolute left-37.5 top-25 w-75 h-80 z-1">
+            <img
+              src="/faqimage.png"
+              alt="Family walking together"
+              className="w-full h-full object-cover grayscale opacity-90"
+            />
+          </div>
+          <div className="absolute left-45 top-0 w-67 h-70 bg-[#BE2332] z-2"
+            style={{ clipPath: "polygon(0% 0%, 50% 0%, 100% 100%, 45% 100%)" }}
+          />
+          <div className="absolute right-12 bottom-5 w-55 h-17.5 bg-[#BE2332] z-3"
+            style={{ clipPath: "polygon(25% 0%, 100% 0%, 100% 100%, 0% 100%)" }}
+          />
+        </div>
+      </div>
+    </section>
+  )
 }
 
-
 const FaqItem = ({ text }: { text: string }) => {
-    return (
-        <div className="flex items-center justify-between border border-gray-300 rounded-[10px] px-4 py-3 bg-white">
-
-            <div className="flex items-center gap-4">
-                <div className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-100">
-                    <span className="text-[#D11F3E] text-3xl font-extrabold">{'>'}</span>
-                </div>
-
-                <p className="text-[14px] text-black">
-                    {text}
-                </p>
-            </div>
-
-            <span className="text-[#D11F3E] text-xl font-semibold">+</span>
+  return (
+    <div className="flex items-center justify-between border border-gray-200 rounded-[10px] px-4 py-3 bg-white shadow-sm">
+      <div className="flex items-center gap-4">
+        <div className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 shrink-0">
+          <svg width="8" height="12" viewBox="0 0 8 12" fill="none">
+            <path
+              d="M1.5 1L6.5 6L1.5 11"
+              stroke="#D11F3E"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
         </div>
-    )
+        <p className="text-sm text-black">{text}</p>
+      </div>
+      <span className="text-[#D11F3E] text-xl font-semibold shrink-0 ml-4">+</span>
+    </div>
+  )
 }

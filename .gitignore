@@ -6,7 +6,7 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
-/src/lib/api-client
+/src/lib/api-client.ts
 
 node_modules
 dist

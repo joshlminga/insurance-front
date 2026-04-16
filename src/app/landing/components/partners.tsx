@@ -9,7 +9,7 @@ export const PartnersSection = () => {
     ]
 
     return (
-        <section className="py-12 bg-slate-50 border-y border-slate-100 overflow-hidden">
+        <section className="py-12 bg-white overflow-hidden">
             <div className="container mx-auto px-6 max-w-7xl">
                 <div className="flex flex-wrap items-center justify-center gap-12 md:gap-16">
                     {partners.map((partner, index) => (
