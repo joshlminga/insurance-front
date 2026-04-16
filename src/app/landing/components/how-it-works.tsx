@@ -96,8 +96,7 @@ export const HowItWorks = () => {
                                 borderColor: "transparent #D11F3E transparent transparent",
                             }}
                         />
-                        <div
-                            className="absolute bottom-0 left-15 w-30 h-30 bg-[rgba(180,180,180,0.4)] z-2"
+                        <div className="absolute bottom-0 left-15 w-30 h-30 bg-[rgba(180,180,180,0.4)] z-2"
                             style={{ clipPath: "polygon(50% 0%, 100% 100%, 0% 100%)" }}
                         />
                         <div className="absolute inset-0 flex items-center justify-center z-0">
@@ -125,6 +124,7 @@ export const HowItWorks = () => {
                         </div>
                     </div>
                 </div>
+                
             </div>
         </section>
     )

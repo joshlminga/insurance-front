@@ -2,9 +2,10 @@ import React from "react"
 
 export const FaqsPage: React.FC = () => {
   return (
-    <section id="faqs" className="bg-[#FffF] py-14 relative overflow-hidden">
-      <div className="max-w-7xl mx-auto px-6 flex gap-2 justify-between items-start">
-        <div className="flex-1 relative z-10 mx-auto">
+    <section id="faqs" className="bg-[#FFFFFF] py-14 relative overflow-hidden">
+      <div className="max-w-7xl mx-auto px-6 flex gap-10 justify-between items-start">
+
+        <div className="flex-1 relative z-10">
           <p className="text-sm font-semibold uppercase tracking-wider text-[#D11F3E] mb-2">
             FAQs
           </p>
@@ -19,11 +20,11 @@ export const FaqsPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="relative w-125 h-112.5 overflow-hidden bg-white">
+        <div className="relative w-125 h-112.5 shrink-0 overflow-hidden">
           <div className="absolute left-0 top-0 w-75 h-full bg-[#EE2527] z-3"
             style={{ clipPath: "polygon(60% 0%, 100% 0%, 40% 100%, 0% 100%)" }}
           />
-          <div className="absolute left-37.5 top-25 w-75 h-80 z-1">
+          <div className="absolute left-32 top-30 w-70 h-82 z-1">
             <img
               src="/faqimage.png"
               alt="Family walking together"
@@ -33,8 +34,9 @@ export const FaqsPage: React.FC = () => {
           <div className="absolute left-45 top-0 w-67 h-70 bg-[#BE2332] z-2"
             style={{ clipPath: "polygon(0% 0%, 50% 0%, 100% 100%, 45% 100%)" }}
           />
-          <div className="absolute right-12 bottom-5 w-55 h-17.5 bg-[#BE2332] z-3"
-            style={{ clipPath: "polygon(25% 0%, 100% 0%, 100% 100%, 0% 100%)" }}
+          <div className="absolute right-12 bottom-1 w-60 h-27.5 bg-[#BE2332] z-3"
+           style={{ clipPath: "polygon(0% 0%, 100% 0%, 100% 100%, 25% 100%)" }}
+
           />
         </div>
       </div>
