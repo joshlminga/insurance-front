@@ -91,18 +91,18 @@ export const HowItWorks = () => {
                 </div>
 
                 {/* Mobile vertical stepper */}
-                <div className="md:hidden flex flex-col gap-6 relative pl-10">
-                    <div className="absolute left-5.75 top-4 bottom-4 w-px bg-[#D1D1D1]" />
+                <div className="md:hidden flex flex-col gap-6 relative">
+                    <div className="absolute left-[22px] top-[22px] bottom-[22px] w-px bg-[#D1D1D1]" />
                     {steps.map((step, index) => {
                         const state = getStepState(index, ACTIVE_STEP)
                         return (
-                            <div key={index} className="flex items-start gap-4 relative">
-                                <div className={`absolute -left-4.25 w-11 h-11 rounded-full flex items-center justify-center shrink-0 z-1 ${stepCircleClass[state]}`}>
+                            <div key={index} className="flex items-start gap-4">
+                                <div className={`w-11 h-11 rounded-full flex items-center justify-center shrink-0 z-1 ${stepCircleClass[state]}`}>
                                     <span className={`font-medium text-base leading-none ${stepNumberClass[state]}`}>
                                         {index + 1}
                                     </span>
                                 </div>
-                                <div className="ml-4 pt-1">
+                                <div className="pt-2">
                                     <p className="font-medium text-lg leading-normal text-black">
                                         {step.title}
                                     </p>
