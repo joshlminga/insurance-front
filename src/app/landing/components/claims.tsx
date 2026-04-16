@@ -3,9 +3,9 @@ import React from 'react'
 export const ClaimsPage: React.FC = () => {
     return (
         <section id="faqs" className="bg-[#F5F3EF] py-14">
-            <div className="max-w-360.75 mx-auto px-30 flex justify-between items-start">
+            <div className="max-w-7xl mx-auto px-6 flex justify-between items-start">
                 <div className="max-w-150">
-                    <p className="text-[32px] font-semibold uppercase text-[#D11F3E] mb-2">
+                    <p className="text-sm font-semibold uppercase tracking-wider text-[#D11F3E] mb-2">
                         CLAIMS
                     </p>
                     <h2 className="text-[36px] font-bold text-black leading-[100%] mb-4">
