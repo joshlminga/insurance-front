@@ -19,7 +19,7 @@ export const HeroSection = () => {
             </div>
             {isAuthenticated ? (
                 <UserMenuPopover
-                    className="absolute hidden lg:block top-4 right-4 z-999 sm:right-22"
+                    className="absolute hidden lg:block top-4 right-22 z-999"
                     userInitials={userInitials}
                     userName={userName}
                     userEmail={userEmail}
@@ -28,7 +28,7 @@ export const HeroSection = () => {
             ) : (
                 <Link
                     to={`/${EPREFIX.AUTH}${EROUTES.SIGNIN}`}
-                    className="absolute top-5 right-5 sm:top-4.75 sm:right-22 z-10 flex h-6.5 w-20.5 items-center justify-center rounded-[20px] border border-[#C20C0C] bg-white text-sm font-semibold text-slate-900">
+                    className="absolute hidden lg:flex top-4.75 right-22 z-10 h-6.5 w-20.5 items-center justify-center rounded-[20px] border border-[#C20C0C] bg-white text-sm font-semibold text-slate-900">
                     Login
                 </Link>
             )}
