@@ -21,10 +21,6 @@ export const Landingpage = () => {
                 <HowItWorks/>
                 <ClaimsPage/>
                 <FaqsPage/>
-                {/* <AboutSection />
-                <ServicesSection />
-                <AgentBanner />
-                <ContactSection /> */}
                 <PartnersSection />
             </main>
             <Footer />
