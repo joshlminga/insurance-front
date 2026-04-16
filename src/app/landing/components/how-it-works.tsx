@@ -42,12 +42,14 @@ const stepNumberClass: Record<StepState, string> = {
 
 export const HowItWorks = () => {
     return (
-        <section id="how-it-works" className="py-14 bg-white">
-            <div className="max-w-7xl mx-auto px-6">
-                <p className="text-sm font-semibold uppercase tracking-wider text-[#D11F3E] text-center mb-10">
+        <section id="how-it-works" className="py-10 sm:py-14 bg-white">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6">
+                <p className="text-sm font-semibold uppercase tracking-wider text-[#D11F3E] text-center mb-8 sm:mb-10">
                     HOW IT WORKS
                 </p>
-                <div className="w-full relative">
+
+                {/* Desktop horizontal stepper */}
+                <div className="hidden md:block w-full relative">
                     <div className="flex items-center w-full">
                         {steps.map((_step, index) => {
                             const state = getStepState(index, ACTIVE_STEP)
@@ -87,31 +89,64 @@ export const HowItWorks = () => {
                         ))}
                     </div>
                 </div>
-                <div className="mt-20 rounded-xl border-5 border-[#E5E5E5] bg-white flex items-stretch overflow-hidden min-h-85">
-                    <div className="relative w-[45%] shrink-0 min-h-85 bg-[#F5F5F5] overflow-hidden">
+
+                {/* Mobile vertical stepper */}
+                <div className="md:hidden flex flex-col gap-6 relative pl-10">
+                    <div className="absolute left-5.75 top-4 bottom-4 w-px bg-[#D1D1D1]" />
+                    {steps.map((step, index) => {
+                        const state = getStepState(index, ACTIVE_STEP)
+                        return (
+                            <div key={index} className="flex items-start gap-4 relative">
+                                <div className={`absolute -left-4.25 w-11 h-11 rounded-full flex items-center justify-center shrink-0 z-1 ${stepCircleClass[state]}`}>
+                                    <span className={`font-medium text-base leading-none ${stepNumberClass[state]}`}>
+                                        {index + 1}
+                                    </span>
+                                </div>
+                                <div className="ml-4 pt-1">
+                                    <p className="font-medium text-lg leading-normal text-black">
+                                        {step.title}
+                                    </p>
+                                    <p className="font-normal text-sm leading-[1.6] text-[#6B6B6B] mt-1">
+                                        {step.description}
+                                    </p>
+                                </div>
+                            </div>
+                        )
+                    })}
+                </div>
+
+                <div className="mt-12 sm:mt-20 rounded-xl border-4 sm:border-5 border-[#E5E5E5] bg-white flex flex-col md:flex-row items-stretch overflow-hidden min-h-fit md:min-h-85">
+                    <div className="relative w-full md:w-[45%] shrink-0 h-56 sm:h-72 md:h-auto md:min-h-85 bg-[#F5F5F5] overflow-hidden">
                         <div
-                            className="absolute top-0 right-0 w-0 h-0 border-solid z-1"
+                            className="absolute top-0 right-0 w-0 h-0 border-solid z-1 hidden sm:block"
                             style={{
                                 borderWidth: "0 220px 340px 0",
                                 borderColor: "transparent #D11F3E transparent transparent",
                             }}
                         />
-                        <div className="absolute bottom-0 left-15 w-30 h-30 bg-[rgba(180,180,180,0.4)] z-2"
+                        <div
+                            className="absolute top-0 right-0 w-0 h-0 border-solid z-1 sm:hidden"
+                            style={{
+                                borderWidth: "0 140px 224px 0",
+                                borderColor: "transparent #D11F3E transparent transparent",
+                            }}
+                        />
+                        <div className="absolute bottom-0 left-8 sm:left-15 w-20 sm:w-30 h-20 sm:h-30 bg-[rgba(180,180,180,0.4)] z-2"
                             style={{ clipPath: "polygon(50% 0%, 100% 100%, 0% 100%)" }}
                         />
                         <div className="absolute inset-0 flex items-center justify-center z-0">
-                            <div className="w-55 h-70 bg-[#b5a99e] rounded-lg flex items-center justify-center">
-                                <img src="/become-agent.jpg" className="w-109.5 h-86.5 object-cover" />
+                            <div className="w-40 sm:w-55 h-52 sm:h-70 bg-[#b5a99e] rounded-lg flex items-center justify-center">
+                                <img src="/become-agent.jpg" className="w-full h-full object-cover" />
                             </div>
                         </div>
                     </div>
 
-                    <div className="flex-1 px-14 py-12 flex flex-col justify-center gap-5">
-                        <h2 className="font-bold text-[28px] leading-[1.3] tracking-wider text-[#1A1A1A] uppercase">
+                    <div className="flex-1 px-6 sm:px-14 py-8 sm:py-12 flex flex-col justify-center gap-4 sm:gap-5">
+                        <h2 className="font-bold text-xl sm:text-[28px] leading-[1.3] tracking-wider text-[#1A1A1A] uppercase">
                             BECOME AN AGENT WITH ACENTRIA
                         </h2>
 
-                        <p className="font-normal text-base leading-[1.7] text-[#9B9B9B] max-w-105">
+                        <p className="font-normal text-sm sm:text-base leading-[1.7] text-[#9B9B9B] max-w-full lg:max-w-105">
                             Join our network of industry experts and unlock new opportunities in risk management,
                             insurance, and financial consulting. Partner with us to grow your career, expand your
                             reach, and deliver innovative solutions to clients worldwide.
@@ -124,7 +159,6 @@ export const HowItWorks = () => {
                         </div>
                     </div>
                 </div>
-                
             </div>
         </section>
     )

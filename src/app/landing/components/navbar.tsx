@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { cn } from "@/lib/utils";
 import { ELOGO, EPREFIX, EROUTES } from "@/utils/enums";
 import { ChevronDown, Menu, X } from "lucide-react";
@@ -105,7 +104,7 @@ export const Navbar = (
         navTextStyle?: string
     }) => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const { isAuthenticated, isGeneral, logout } = UseAuth();
+    const { isAuthenticated } = UseAuth();
     const dropdownItems = {
         generateQuote: [
             { name: "Motor Insurance", href: `/${EPREFIX.CUSTOMER}${EROUTES.MOTOR}` },
