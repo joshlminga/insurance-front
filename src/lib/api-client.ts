@@ -1,9 +1,12 @@
 import axios from 'axios'
 import { EPREFIX, EROUTES } from '@/utils/enums'
 
-const API_BASE_URL = 'http://localhost:8002/api/v1'
-
+// const API_BASE_URL = 'http://localhost:8002/api/v1'
 // const API_BASE_URL = 'https://sandbox.acensure.acentriagroup.com/api/v1/'
+
+const API_BASE_URL = import.meta.env.VITE_DEBUG ==='true'
+    ? import.meta.env.VITE_LOCAL_URL
+    : import.meta.env.VITE_LIVE_URL
 
 const AUTH_STORAGE_KEY = 'auth-storage'
 const apiClient = axios.create({

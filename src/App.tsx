@@ -16,7 +16,7 @@ function S({ children }: { children: React.ReactNode }) {
   return <Suspense fallback={<Loader />}>{children}</Suspense>
 }
 
-// Client-facing pages
+// customer-facing pages
 const Landingpage = lazy(() => import("./app/landing/page").then(m => ({ default: m.Landingpage })))
 const MotorLandingPage = lazy(() => import("./app/customer/motor/page").then(m => ({ default: m.MotorLandingPage })))
 const StepPage = lazy(() => import("./app/customer/motor/steppers/steppage").then(m => ({ default: m.StepPage })))

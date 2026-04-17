@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import { getInitials } from "@/lib/format";
 import { ELOGO, EPREFIX, EROUTES } from "@/utils/enums";
-import { ChevronDown, Menu, X, ShieldCheck, BarChart3, Settings, LogOut } from "lucide-react";
+import { ChevronDown, Menu, X, ShieldCheck, BarChart3, Settings, LogOut, Globe } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { UseAuth } from "@/components/auth-provider";
@@ -11,6 +11,16 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
+import { CountryDropdown } from "@/components/ui/country-dropdown";
+import { TCountry } from "@/types/types";
+
+const LANG_NAMES: Record<string, string> = {
+    eng: 'English',
+    swa: 'Swahili',
+    fra: 'French',
+    kin: 'Kinyarwanda',
+    tsn: 'Tswana',
+}
 
 const Dropdown = ({
     label,
@@ -105,7 +115,12 @@ export const Navbar = (
         navTextStyle?: string
     }) => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const { isAuthenticated, user, logout } = UseAuth();
+    const { isAuthenticated, user, logout, alpha, lang, setLocale } = UseAuth();
+
+    const handleCountryChange = (selected: TCountry) => {
+        const primaryLang = selected.languages?.[0] ?? 'eng'
+        setLocale(selected.name ?? '', primaryLang, selected.alpha2 ?? '')
+    }
     const dropdownItems = {
         generateQuote: [
             { name: "Motor Insurance", href: `/${EPREFIX.CUSTOMER}${EROUTES.MOTOR}` },
@@ -138,6 +153,17 @@ export const Navbar = (
                         <img src={ELOGO.NAVBARLOGO} alt="logo" className="h-full w-auto object-contain" />
                     </div>
                     <div className={cn(`hidden lg:flex items-center gap-6 xl:gap-10 text-sm font-semibold cursor-pointer ${textStyle}`)}>
+                        <div className="flex items-center gap-2 shrink-0">
+                            <CountryDropdown
+                                defaultValue={alpha}
+                                onChange={handleCountryChange}
+                                slim={false}
+                            />
+                            <span className="flex items-center gap-1 text-xs font-medium text-gray-500 whitespace-nowrap border-l border-gray-300 pl-2">
+                                <Globe className="w-3 h-3 shrink-0" />
+                                {LANG_NAMES[lang] ?? lang}
+                            </span>
+                        </div>
                         <Link to={EROUTES.LANDING} className="hover:text-red-500 transition uppercase text-sm font-semibold py-2">Home</Link>
                         <a className="hover:text-red-500 transition uppercase text-sm font-semibold py-2 cursor-pointer">News</a>
                         <a className="hover:text-red-500 transition uppercase text-sm font-semibold py-2 cursor-pointer">Careers</a>
@@ -202,6 +228,20 @@ export const Navbar = (
                                 </div>
                             </div>
                         )}
+                        {/* Country & language selector */}
+                        <div className="flex items-center gap-3 pb-4 mb-3 border-b border-gray-200">
+                            <div className="flex-1 min-w-0">
+                                <CountryDropdown
+                                    defaultValue={alpha}
+                                    onChange={handleCountryChange}
+                                    slim={false}
+                                />
+                            </div>
+                            <span className="flex items-center gap-1 text-xs font-medium text-gray-500 whitespace-nowrap shrink-0">
+                                <Globe className="w-3 h-3" />
+                                {LANG_NAMES[lang] ?? lang}
+                            </span>
+                        </div>
                         <div className={cn(`flex flex-col space-y-3 mb-4 ${textStyle}`)}>
                             <Link to={EROUTES.LANDING} onClick={() => setMobileMenuOpen(false)} className="hover:text-red-500 transition uppercase text-sm font-semibold py-2">Home</Link>
                             <a className="hover:text-red-500 transition uppercase text-sm font-semibold py-2 cursor-pointer">News</a>

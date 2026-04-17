@@ -145,10 +145,14 @@ export interface AuthProviderState {
   isGeneral: boolean | null
   isAuthenticated: boolean
   isLoading: boolean
+  country: string
+  lang: string
+  alpha: string
   login: (user: Tuser, token: string, isGeneral: boolean) => void
   logout: () => void
   updateUser: (user: Partial<Tuser>) => void
   setGuest: (guest: Guest | null) => void
+  setLocale: (country: string, lang: string, alpha: string) => void
 }
 export interface AuthProviderProps {
   children: ReactNode
@@ -162,10 +166,14 @@ export const initialState: AuthProviderState = {
   isGeneral: null,
   isAuthenticated: false,
   isLoading: true,
+  country: 'Kenya',
+  lang: 'eng',
+  alpha: 'KE',
   login: () => null,
   logout: () => null,
   updateUser: () => null,
   setGuest: () => null,
+  setLocale: () => null,
 }
 
 export interface UseApiQueryOptions<TData = unknown> {
@@ -472,9 +480,17 @@ export type TReusableDropdownProp<T> = {
   TActionColumnGenProps<T>;
 
 export interface TCountry {
-  id: number
-  name: string,
-  meta: any
+  id?: number
+  name?: string,
+  meta?: any,
+  alpha2?: string;
+  alpha3?: string;
+  countryCallingCodes?: string[];
+  currencies?: string[];
+  emoji?: string;
+  ioc?: string;
+  languages?: string[];
+  status?: string;
 }
 
 export interface TCountryResponse {
@@ -618,3 +634,4 @@ export type ClaimItem = {
 
 export type BenefitType = keyof typeof BENEFIT_TYPE_CONFIG;
 export type StepState = "completed" | "active" | "upcoming"
+// export type TLang =[];
