@@ -88,8 +88,8 @@ const CountryDropdownComponent = (
   );
 
   const triggerClasses = cn(
-    "flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
-    slim === true && "w-20"
+    "flex h-9 items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
+    slim ? "w-20" : "w-full min-w-[140px]"
   );
 
   return (
@@ -100,29 +100,36 @@ const CountryDropdownComponent = (
         disabled={disabled}
         {...props}>
         {selectedCountry ? (
-          <div className="flex items-center grow w-0 gap-2 overflow-hidden">
-            <div className="inline-flex items-center justify-center w-5 h-5 shrink-0 overflow-hidden rounded-full">
-              <CircleFlag
-                countryCode={selectedCountry.alpha2?.toLowerCase() || ""}
-                height={20}
-              />
-            </div>
+          <div className="flex items-center gap-2 overflow-hidden flex-1 min-w-0">
+            {selectedCountry.emoji ? (
+              <span className="text-base leading-none shrink-0">
+                {selectedCountry.emoji}
+              </span>
+            ) : (
+              <div className="inline-flex items-center justify-center w-5 h-5 shrink-0 overflow-hidden rounded-full">
+                <CircleFlag
+                  countryCode={selectedCountry.alpha2?.toLowerCase() || ""}
+                  height={20}
+                />
+              </div>
+            )}
             {slim === false && (
-              <span className="overflow-hidden text-ellipsis whitespace-nowrap">
+              <span className="overflow-hidden text-ellipsis whitespace-nowrap text-sm">
                 {selectedCountry.name}
               </span>
             )}
           </div>
         ) : (
-          <span>
-            {slim === false ? (
-              placeholder || setSelectedCountry.name
-            ) : (
-              <Globe size={20} />
+          <div className="flex items-center gap-2 text-muted-foreground flex-1 min-w-0">
+            <Globe size={16} className="shrink-0" />
+            {slim === false && (
+              <span className="overflow-hidden text-ellipsis whitespace-nowrap text-sm">
+                {placeholder}
+              </span>
             )}
-          </span>
+          </div>
         )}
-        <ChevronDown size={16} />
+        <ChevronDown size={16} className="shrink-0 ml-1 opacity-60" />
       </PopoverTrigger>
       <PopoverContent
         collisionPadding={10}
@@ -144,13 +151,17 @@ const CountryDropdownComponent = (
                     key={key}
                     onSelect={() => handleSelect(option)}
                   >
-                    <div className="flex grow w-0 space-x-2 overflow-hidden">
-                      <div className="inline-flex items-center justify-center w-5 h-5 shrink-0 overflow-hidden rounded-full">
-                        <CircleFlag
-                          countryCode={option.alpha2?.toLowerCase() || ""}
-                          height={20}
-                        />
-                      </div>
+                    <div className="flex items-center flex-1 min-w-0 gap-2 overflow-hidden">
+                      {option.emoji ? (
+                        <span className="text-base leading-none shrink-0">{option.emoji}</span>
+                      ) : (
+                        <div className="inline-flex items-center justify-center w-5 h-5 shrink-0 overflow-hidden rounded-full">
+                          <CircleFlag
+                            countryCode={option.alpha2?.toLowerCase() || ""}
+                            height={20}
+                          />
+                        </div>
+                      )}
                       <span className="overflow-hidden text-ellipsis whitespace-nowrap">
                         {option.name}
                       </span>
