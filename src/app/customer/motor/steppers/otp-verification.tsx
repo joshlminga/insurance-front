@@ -31,17 +31,8 @@ export default function OTPVerificationPage({ goToNextStep, goToPrevStep }: Cust
     method: EMETHODS.POST,
     mutationOptions: {
       onSuccess: (data) => {
-        // #region agent log
-        fetch('http://127.0.0.1:7869/ingest/6b26b564-2b2f-4d86-86d4-491e7f1525ee',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'1b90db'},body:JSON.stringify({sessionId:'1b90db',runId:'pre-fix',hypothesisId:'H1',location:'src/app/customer/motor/steppers/otp-verification.tsx:36',message:'OTP verify success callback (before login/goToNextStep)',data:{hasAccessToken:!!data?.access_token,isGeneral:!!data?.is_general,hasGoToNextStep:!!goToNextStep},timestamp:Date.now()})}).catch(()=>{});
-        // #endregion agent log
         login(data.user, data.access_token, data.is_general)
-        // #region agent log
-        fetch('http://127.0.0.1:7869/ingest/6b26b564-2b2f-4d86-86d4-491e7f1525ee',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'1b90db'},body:JSON.stringify({sessionId:'1b90db',runId:'pre-fix',hypothesisId:'H1',location:'src/app/customer/motor/steppers/otp-verification.tsx:38',message:'OTP verify success callback (after login, before goToNextStep)',data:{},timestamp:Date.now()})}).catch(()=>{});
-        // #endregion agent log
         goToNextStep?.()
-        // #region agent log
-        fetch('http://127.0.0.1:7869/ingest/6b26b564-2b2f-4d86-86d4-491e7f1525ee',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'1b90db'},body:JSON.stringify({sessionId:'1b90db',runId:'pre-fix',hypothesisId:'H1',location:'src/app/customer/motor/steppers/otp-verification.tsx:40',message:'OTP verify success callback (after goToNextStep)',data:{},timestamp:Date.now()})}).catch(()=>{});
-        // #endregion agent log
         ShowToast.success(data.message || "Verified successfully!")
       },
       onError: (error: any) => {
