@@ -1,10 +1,16 @@
 import { cn } from "@/lib/utils";
+import { getInitials } from "@/lib/format";
 import { ELOGO, EPREFIX, EROUTES } from "@/utils/enums";
-import { ChevronDown, Menu, X } from "lucide-react";
+import { ChevronDown, Menu, X, ShieldCheck, BarChart3, Settings, LogOut } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { UseAuth } from "@/components/auth-provider";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
 
 const Dropdown = ({
     label,
@@ -99,13 +105,13 @@ export const Navbar = (
         navTextStyle?: string
     }) => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const { isAuthenticated, isGeneral, logout } = UseAuth();
+    const { isAuthenticated, user, logout } = UseAuth();
     const dropdownItems = {
         generateQuote: [
-            { name: "Motor Insurance", href: `/${EPREFIX.CUSTOMER}${EROUTES.MOTOR}`},
+            { name: "Motor Insurance", href: `/${EPREFIX.CUSTOMER}${EROUTES.MOTOR}` },
             { name: "Travel Insurance", href: `/${EPREFIX.CUSTOMER}${EROUTES.TRAVEL}` },
             { name: "Marine Insurance", href: `/${EPREFIX.CUSTOMER}${EROUTES.MARINE}` },
-             { name: "Life Insurance", href: `/${EPREFIX.CUSTOMER}${EROUTES.LIFE}`},
+            { name: "Life Insurance", href: `/${EPREFIX.CUSTOMER}${EROUTES.LIFE}` },
         ],
         claims: [
             { name: "File Claim", href: "#" },
@@ -132,16 +138,16 @@ export const Navbar = (
                         <img src={ELOGO.NAVBARLOGO} alt="logo" className="h-full w-auto object-contain" />
                     </div>
                     <div className={cn(`hidden lg:flex items-center gap-6 xl:gap-10 text-sm font-semibold cursor-pointer ${textStyle}`)}>
-                        <Link to={EROUTES.LANDING} className="hover:text-red-500 transition uppercase">Home</Link>
-                        <Link to='#' className="hover:text-red-500 transition uppercase">About</Link>
-                        <Link to='#' className="hover:text-red-500 transition uppercase">Services</Link>
-                        <Link to='#' className="hover:text-red-500 transition uppercase">Contact</Link>
+                        <Link to={EROUTES.LANDING} className="hover:text-red-500 transition uppercase text-sm font-semibold py-2">Home</Link>
+                        <a className="hover:text-red-500 transition uppercase text-sm font-semibold py-2 cursor-pointer">News</a>
+                        <a className="hover:text-red-500 transition uppercase text-sm font-semibold py-2 cursor-pointer">Careers</a>
+                        <a className="hover:text-red-500 transition uppercase text-sm font-semibold py-2 cursor-pointer">Contact</a>
                         {isAuthenticated && (
                             <>
                                 {/* {isGeneral === true && (
                                     <Link to={EROUTES.DASHBOARD} className="hover:text-red-500 transition uppercase">Dashboard</Link>
                                 )} */}
-                                <button onClick={logout} className="hover:text-red-500 transition uppercase">Logout</button>
+                                {/* <button onClick={logout} className="hover:text-red-500 transition uppercase">Logout</button> */}
                             </>
                         )}
                     </div>
@@ -157,7 +163,7 @@ export const Navbar = (
                     </button>
                 </div>
                 <div className="hidden lg:block">
-                    <div className="absolute top-25.25 left-1/2 -translate-x-1/2 w-full max-w-7xl h-px border-t border-[#F91520]" />
+                    <div className="absolute top-25.25 left-1/2 -translate-x-1/2 w-full h-px border-t border-[#F91520]" />
                     <div className="ml-4 mb-6 flex left-2/4 w-full max-w-7xl pt-6 mt-3">
                         <div className="flex gap-4 xl:gap-6 w-auto cursor-pointer flex-wrap">
                             <Dropdown
@@ -184,20 +190,23 @@ export const Navbar = (
                     </div>
                 </div>
                 {mobileMenuOpen && (
-                    <div className="lg:hidden flex flex-col py-4 border-t border-gray-200 mt-2">
+                    <div className="lg:hidden flex flex-col py-4 border-t border-gray-200 mt-2 max-h-[70vh] overflow-y-auto">
+                        {isAuthenticated && user && (
+                            <div className="flex items-center gap-3 pb-4 mb-3 border-b border-gray-200">
+                                <div className="w-10 h-10 rounded-full bg-[#C20C0C] flex items-center justify-center text-white text-sm font-semibold shrink-0">
+                                    {getInitials(user.name ?? "User")}
+                                </div>
+                                <div className="min-w-0">
+                                    <p className="text-sm font-semibold text-gray-900 truncate">{user.name}</p>
+                                    <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                                </div>
+                            </div>
+                        )}
                         <div className={cn(`flex flex-col space-y-3 mb-4 ${textStyle}`)}>
-                            <Link to={EROUTES.LANDING} className="hover:text-red-500 transition uppercase text-sm font-semibold py-2">Home</Link>
-                            <a className="hover:text-red-500 transition uppercase text-sm font-semibold py-2 cursor-pointer">About</a>
-                            <a className="hover:text-red-500 transition uppercase text-sm font-semibold py-2 cursor-pointer">Services</a>
+                            <Link to={EROUTES.LANDING} onClick={() => setMobileMenuOpen(false)} className="hover:text-red-500 transition uppercase text-sm font-semibold py-2">Home</Link>
+                            <a className="hover:text-red-500 transition uppercase text-sm font-semibold py-2 cursor-pointer">News</a>
+                            <a className="hover:text-red-500 transition uppercase text-sm font-semibold py-2 cursor-pointer">Careers</a>
                             <a className="hover:text-red-500 transition uppercase text-sm font-semibold py-2 cursor-pointer">Contact</a>
-                            {isAuthenticated && (
-                                <>
-                                    {isGeneral === false && (
-                                        <Link to={EROUTES.DASHBOARD} className="hover:text-red-500 transition uppercase text-sm font-semibold py-2">Dashboard</Link>
-                                    )}
-                                    <button onClick={logout} className="text-left hover:text-red-500 transition uppercase text-sm font-semibold py-2">Logout</button>
-                                </>
-                            )}
                         </div>
                         <div className="border-t border-gray-200 pt-4 space-y-2">
                             <MobileDropdown label="Generate Quote" items={dropdownItems.generateQuote} />
@@ -205,6 +214,37 @@ export const Navbar = (
                             <MobileDropdown label="Resources" items={dropdownItems.resources} />
                             <MobileDropdown label="Service" items={dropdownItems.service} />
                         </div>
+                        {isAuthenticated ? (
+                            <div className="border-t border-gray-200 mt-4 pt-4 space-y-1">
+                                <Link to={`/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}`} onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-1 py-2.5 text-sm text-gray-700 hover:text-[#C20C0C] transition">
+                                    <ShieldCheck className="w-4 h-4" />
+                                    My Covers
+                                </Link>
+                                <Link to={EROUTES.REPORTS} onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-1 py-2.5 text-sm text-gray-700 hover:text-[#C20C0C] transition">
+                                    <BarChart3 className="w-4 h-4" />
+                                    Reports
+                                </Link>
+                                <Link to={EROUTES.SETTINGS} onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-1 py-2.5 text-sm text-gray-700 hover:text-[#C20C0C] transition">
+                                    <Settings className="w-4 h-4" />
+                                    Settings
+                                </Link>
+                                <button
+                                    onClick={() => { logout(); setMobileMenuOpen(false); }}
+                                    className="flex items-center gap-3 px-1 py-2.5 text-sm text-red-600 hover:text-red-700 transition w-full text-left mt-2 border-t border-gray-100 pt-3">
+                                    <LogOut className="w-4 h-4" />
+                                    Log out
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="border-t border-gray-200 mt-4 pt-4">
+                                <Link
+                                    to={`/${EPREFIX.AUTH}${EROUTES.SIGNIN}`}
+                                    onClick={() => setMobileMenuOpen(false)}
+                                    className="flex items-center justify-center h-10 rounded-[20px] border border-[#C20C0C] bg-white text-sm font-semibold text-slate-900 hover:bg-gray-50 transition">
+                                    Login
+                                </Link>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
