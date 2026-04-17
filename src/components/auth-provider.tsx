@@ -12,6 +12,10 @@ export function AuthProvider({
   const [isGeneral, setIsGeneral] = useState<boolean | null>(null)
   const [guest, setGuest] = useState<Guest | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [country, setCountry] = useState('Kenya')
+  const [lang, setLang] = useState('eng')
+  const [alpha, setAlpha] = useState('KE')
+
 
   useEffect(() => {
     try {
@@ -59,6 +63,12 @@ export function AuthProvider({
     }
   }
 
+  const setLocale = (newCountry: string, newLang: string, newAlpha: string) => {
+    setCountry(newCountry)
+    setLang(newLang)
+    setAlpha(newAlpha)
+  }
+
   const value: AuthProviderState = {
     user,
     token,
@@ -66,10 +76,14 @@ export function AuthProvider({
     isGeneral,
     isAuthenticated: !!user && !!token,
     isLoading,
+    country,
+    lang,
+    alpha,
     login,
     logout,
     updateUser,
     setGuest,
+    setLocale,
   }
 
   return (
