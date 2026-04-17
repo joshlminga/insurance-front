@@ -40,6 +40,9 @@ export function AuthProvider({
   }, [user, token, guest, isGeneral, storageKey])
 
   const login = (userData: Tuser, userToken: string, userIsGeneral: boolean) => {
+    // #region agent log
+    fetch('http://127.0.0.1:7869/ingest/6b26b564-2b2f-4d86-86d4-491e7f1525ee',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'1b90db'},body:JSON.stringify({sessionId:'1b90db',runId:'pre-fix',hypothesisId:'H2',location:'src/components/auth-provider.tsx:45',message:'AuthProvider.login called',data:{hadUser:!!user,hadToken:!!token,nextHasUser:!!userData,nextHasToken:!!userToken,isGeneral:!!userIsGeneral},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion agent log
     setUser(userData)
     setToken(userToken)
     setIsGeneral(userIsGeneral)
