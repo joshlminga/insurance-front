@@ -28,7 +28,7 @@ import { CircleFlag } from "react-circle-flags";
 import { countries } from "country-data-list";
 import { TCountry } from "@/types/types";
 
-const ALLOWED_COUNTRY_CODES = new Set(["KE", "UG", "RW", "TZ", "BW", "ZM"]);
+const ALLOWED_COUNTRY_CODES = new Set(["KE", "UG", "RW", "TZ", "BW", "ZM", "CD"]);
 
 const allowedCountries = countries.all.filter(
   (country: TCountry) =>
