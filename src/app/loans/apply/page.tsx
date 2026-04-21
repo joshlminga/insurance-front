@@ -87,8 +87,8 @@ export default function LoanApplicationPage() {
     const newErrors: Partial<LoanFormData> = {}
 
     if (!formData.memberId) newErrors.memberId = "Member is required"
-    if (!formData.productId) newErrors.productId = "Loan product is required"
-    if (!formData.amount) newErrors.amount = "Loan amount is required"
+    if (!formData.productId) newErrors.productId = "Claim product is required"
+    if (!formData.amount) newErrors.amount = "Claim amount is required"
     else if (selectedProduct) {
       const amount = parseFloat(formData.amount)
       if (amount < selectedProduct.minAmount) {
@@ -113,7 +113,7 @@ export default function LoanApplicationPage() {
     setIsSubmitting(true)
     await new Promise((resolve) => setTimeout(resolve, 1000))
 
-    console.log("Loan application submitted:", formData)
+    console.log("Claim application submitted:", formData)
     setIsSubmitting(false)
     navigate("/loans")
   }
@@ -132,7 +132,7 @@ export default function LoanApplicationPage() {
   return (
     <>
       <PageHeader
-        title="New Loan Application"
+        title="New Claim Application"
         description="Submit a new loan application"
         actions={[
           {
@@ -147,10 +147,10 @@ export default function LoanApplicationPage() {
       <form onSubmit={handleSubmit}>
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2 space-y-6">
-            {/* Loan Details */}
+            {/* Claim Details */}
             <Card>
               <CardHeader>
-                <CardTitle>Loan Details</CardTitle>
+                <CardTitle>Claim Details</CardTitle>
                 <CardDescription>
                   Select the loan product and enter application details
                 </CardDescription>
@@ -173,7 +173,7 @@ export default function LoanApplicationPage() {
                     placeholder="Select member"
                   />
                   <SelectField
-                    label="Loan Product"
+                    label="Claim Product"
                     name="productId"
                     value={formData.productId}
                     onChange={handleSelectChange("productId")}
@@ -188,7 +188,7 @@ export default function LoanApplicationPage() {
                     placeholder="Select loan product"
                   />
                   <FormField
-                    label="Loan Amount"
+                    label="Claim Amount"
                     name="amount"
                     type="number"
                     value={formData.amount}
@@ -216,7 +216,7 @@ export default function LoanApplicationPage() {
                 </FormGrid>
                 <div className="mt-4">
                   <TextareaField
-                    label="Purpose of Loan"
+                    label="Purpose of Claim"
                     name="purpose"
                     value={formData.purpose}
                     onChange={handleInputChange}
@@ -269,13 +269,13 @@ export default function LoanApplicationPage() {
             )}
           </div>
 
-          {/* Loan Calculator */}
+          {/* Claim Calculator */}
           <div className="lg:col-span-1">
             <Card className="sticky top-4">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Calculator className="h-5 w-5" />
-                  Loan Calculator
+                  Claim Calculator
                 </CardTitle>
               </CardHeader>
               <CardContent>

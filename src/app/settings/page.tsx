@@ -230,7 +230,7 @@ export default function SettingsPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Loan Settings</CardTitle>
+              <CardTitle>Claim Settings</CardTitle>
               <CardDescription>
                 Default loan processing configurations
               </CardDescription>
@@ -238,7 +238,7 @@ export default function SettingsPage() {
             <CardContent>
               <FormGrid columns={2}>
                 <FormField
-                  label="Maximum Loan Multiplier"
+                  label="Maximum Claim Multiplier"
                   name="loanMultiplier"
                   type="number"
                   defaultValue="3"
@@ -318,7 +318,7 @@ export default function SettingsPage() {
             <CardContent className="space-y-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-medium">Loan Approval</p>
+                  <p className="font-medium">Claim Approval</p>
                   <p className="text-sm text-muted-foreground">
                     Notify member when loan is approved
                   </p>
@@ -327,7 +327,7 @@ export default function SettingsPage() {
               </div>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-medium">Loan Disbursement</p>
+                  <p className="font-medium">Claim Disbursement</p>
                   <p className="text-sm text-muted-foreground">
                     Notify member when loan is disbursed
                   </p>

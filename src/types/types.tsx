@@ -604,3 +604,19 @@ export type ClaimItem = {
 
 export type BenefitType = keyof typeof BENEFIT_TYPE_CONFIG;
 export type StepState = "completed" | "active" | "upcoming"
+
+export type AuthState = {
+  user: Tuser | null
+  token: string | null
+  guest: Guest | null
+  isGeneral: boolean | null
+  hasHydrated: boolean
+  country: string
+  lang: string
+  alpha: string
+  login: (user: Tuser, token: string, isGeneral: boolean) => void
+  logout: () => void
+  updateUser: (updates: Partial<Tuser>) => void
+  setGuest: (guest: Guest | null) => void
+  setLocale: (country: string, lang: string, alpha: string) => void
+}

@@ -1,24 +1,10 @@
 import { create } from 'zustand'
 import { useShallow } from 'zustand/react/shallow'
-import type { AuthProviderState, Guest, Tuser } from '@/types/types'
+import type { AuthProviderState, AuthState, Guest, Tuser } from '@/types/types'
 
 const AUTH_STORAGE_KEY = 'auth-storage'
 
-type AuthState = {
-  user: Tuser | null
-  token: string | null
-  guest: Guest | null
-  isGeneral: boolean | null
-  hasHydrated: boolean
-  country: string
-  lang: string
-  alpha: string
-  login: (user: Tuser, token: string, isGeneral: boolean) => void
-  logout: () => void
-  updateUser: (updates: Partial<Tuser>) => void
-  setGuest: (guest: Guest | null) => void
-  setLocale: (country: string, lang: string, alpha: string) => void
-}
+
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
