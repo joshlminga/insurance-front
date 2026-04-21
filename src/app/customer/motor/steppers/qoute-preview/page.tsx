@@ -30,7 +30,8 @@ import {
     BENEFIT_SECTIONS,
     BENEFIT_TYPE_CONFIG,
     EMETHODS,
-    MOTOR_QUOTE_SESSION_STORAGE_KEY
+    MOTOR_QUOTE_SESSION_STORAGE_KEY,
+    PURCHASE_SESSION_STORAGE_KEY
 } from "@/utils/constatnts";
 import { ShowToast } from "@/utils/utils";
 import { UseApiMutation } from "@/hooks/hooks";
@@ -47,6 +48,8 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
     const location = useLocation();
     const { isAuthenticated } = UseAuth();
     const item = componentProps?.data;
+
+    console.log(componentProps);
 
     const goToNextStep = goToNextStepProp ?? componentProps?.goToNextStep;
     const org = item?.product?.organization;
@@ -113,6 +116,8 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
         method: EMETHODS.POST,
         mutationOptions: {
             onSuccess: (data) => {
+                 const purchaseId = data?.data?.purchase_id
+                sessionStorage.setItem(PURCHASE_SESSION_STORAGE_KEY, String(purchaseId))
                 goToNextStep?.();
                 ShowToast.success(data?.message ?? "Purchase started");
             },

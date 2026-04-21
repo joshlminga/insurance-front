@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CardFooter } from '@/components/ui/card'
 import {
@@ -5,14 +6,15 @@ import {
     CustomDialogComponent,
     EmptyState,
     ReusableCard,
-    ReusableCheckboxGrid,
     ReusablePagination,
-    ReuseableInput,
+    ReusableSelect,
     SkeletonCard
 } from '@/dev/core'
 import { useCustomDialogContextFactory } from '@/hooks'
 import type {
+    BenefitGroup,
     CustomerVerificationDetailsProps,
+    MotorBenefitOption,
     SubmitResponse,
     TFilterOptions,
     TPaginationFilters
@@ -20,6 +22,7 @@ import type {
 import { EPREFIX, EROUTES } from '@/utils/enums'
 import { ArrowLeftCircle, ArrowRightCircle, Plus } from 'lucide-react'
 import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react'
+import type { FieldValues, Path } from 'react-hook-form'
 import { useForm } from 'react-hook-form'
 import { Link, useLocation } from 'react-router-dom'
 import { QuotePreviewPage } from './qoute-preview/page'
@@ -34,9 +37,30 @@ import {
 } from '@/utils/constatnts'
 import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
 import { formatCurrency } from '@/lib/format'
+import { serializeMotorPremiumParams } from '@/lib/motor-premium-params'
 import { ShowToast } from '@/utils/utils'
 import { extractErrorMessage } from '@/utils/helpers'
 import { PostComparisonPage } from './comparisons/[id]/page'
+
+const BENEFIT_SELECT_NONE = '__none__'
+
+function benefitGroupFormKey(groupLabel: string): string {
+    const slug =
+        groupLabel
+            .trim()
+            .replace(/\s+/g, '_')
+            .replace(/[^a-zA-Z0-9_]/g, '') || 'Other'
+    return `benefit_${slug}`
+}
+
+function benefitOptionLabel(item: MotorBenefitOption): string {
+    const base =
+        item.name ??
+        item.label ??
+        (item.reference ? `Ref ${item.reference}` : null) ??
+        `Benefit ${item.id}`
+    return String(base)
+}
 
 
 export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
@@ -47,7 +71,9 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
     const [quoteSessionId, setQuoteSessionId] = useState<number | null>(null)
     const [selectedQuotes, setSelectedQuotes] = useState<{ product_id: string | number; rate_id: string | number }[]>([])
     const [purchasingRateId, setPurchasingRateId] = useState<string | number | null>(null)
-    const form = useForm()
+    const [appliedBenefitIds, setAppliedBenefitIds] = useState<number[]>([])
+
+    const benefitForm = useForm<FieldValues>({ defaultValues: {} })
     const { isAuthenticated } = UseAuth()
     const location = useLocation()
     const { currentStep } = usePurchaseStepper('motor')
@@ -74,26 +100,95 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
         }
     }, [])
 
+    useEffect(() => {
+        setAppliedBenefitIds([])
+    }, [quoteSessionId])
+
     const premiumUrl = useMemo(
         () => (quoteSessionId ? `quotation/motor/${quoteSessionId}/premium` : ''),
         [quoteSessionId]
     )
 
-    const { data, isLoading } = UseApiQuery<SubmitResponse>({
+    const premiumQueryParams = useMemo(
+        () => ({
+            page: filter.page,
+            per_page: filter.pageSize,
+            sort_by: 'created_at',
+            direction: 'asc' as const,
+            ...(appliedBenefitIds.length > 0 ? { benefit_ids: appliedBenefitIds } : {}),
+        }),
+        [filter.page, filter.pageSize, appliedBenefitIds]
+    )
+
+    const { data, isPending, isFetching } = UseApiQuery<SubmitResponse>({
         url: premiumUrl,
-        params: {
-            page: filter?.page,
-            per_page: filter?.pageSize,
+        params: premiumQueryParams as Record<string, unknown>,
+        config: {
+            paramsSerializer: serializeMotorPremiumParams,
         },
         queryOptions: {
-            enabled: !!quoteSessionId,
+            enabled: !!quoteSessionId && !!premiumUrl,
         },
     })
 
     const quotationItems = data?.data?.results ?? []
-    const QUOTATIONCHECKBOX = data?.data?.benefits?.available ?? []
+    const benefitsAvailable = (data?.data?.benefits?.available ?? []) as MotorBenefitOption[]
+
+    const benefitGroups = useMemo<BenefitGroup[]>(() => {
+        const map = new Map<string, MotorBenefitOption[]>()
+        for (const item of benefitsAvailable) {
+            const g = String(item.group ?? 'Other').trim() || 'Other'
+            if (!map.has(g)) map.set(g, [])
+            map.get(g)!.push(item)
+        }
+        return Array.from(map.entries())
+            .map(([group, items]) => ({
+                group,
+                items: [...items].sort((a, b) => a.id - b.id),
+            }))
+            .sort((a, b) => a.group.localeCompare(b.group))
+    }, [benefitsAvailable])
+
+    const benefitGroupsResetKey = useMemo(
+        () =>
+            benefitGroups
+                .map(
+                    ({ group, items }) =>
+                        `${group}:${[...items.map((i) => i.id)].sort((a, b) => a - b).join(',')}`
+                )
+                .join('|'),
+        [benefitGroups]
+    )
+
+    useEffect(() => {
+        if (benefitGroups.length === 0) return
+        const next: FieldValues = {}
+        for (const { group } of benefitGroups) {
+            next[benefitGroupFormKey(group)] = BENEFIT_SELECT_NONE
+        }
+        benefitForm.reset(next)
+    }, [benefitGroupsResetKey])
+
     const currentPage = data?.pagination?.current_page ?? filter.page
     const lastPage = data?.pagination?.last_page ?? 1
+
+    const applyBenefitSelections = useCallback(() => {
+        const values = benefitForm.getValues()
+        const ids: number[] = []
+        for (const { group } of benefitGroups) {
+            const key = benefitGroupFormKey(group)
+            const raw = values[key]
+            if (raw == null || raw === '' || raw === BENEFIT_SELECT_NONE) continue
+            const n = Number(raw)
+            if (Number.isFinite(n)) ids.push(n)
+        }
+        if (ids.length === 0) {
+            ShowToast.error('Choose at least one add-on from the dropdowns, then tap Add benefit.')
+            return
+        }
+        setAppliedBenefitIds(ids)
+        ShowToast.success('Recalculating premiums with your add-ons…')
+    }, [benefitForm, benefitGroups])
 
     const isQuoteSelected = useCallback(
         (rateId: string | number) => selectedQuotes.some((q) => q.rate_id === rateId),
@@ -226,46 +321,73 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                 </div>
             )}
             <section className="rounded-lg border border-[#E5E7EB] bg-white px-4 py-5 sm:px-6 sm:py-6">
-                <h2 className="mb-1 text-lg font-semibold text-gray-900">Additional Benefits</h2>
+                <h2 className="mb-1 text-lg font-semibold text-gray-900">Additional benefits</h2>
                 <p className="mb-4 text-sm text-gray-500">
-                    Select optional add-ons to include in your premium calculation.
+                    Each group lists add-ons returned for this quote. Pick one option per group (or leave
+                    &quot;No add-on&quot;), then add them to your premium calculation.
                 </p>
                 <hr className="mb-5" />
-                <form className="space-y-5">
-                    <div className="overflow-x-auto">
-                        <ReusableCheckboxGrid options={QUOTATIONCHECKBOX} columns={3} />
-                    </div>
-                    <hr />
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <ReuseableInput
-                            className="h-11 w-full rounded-md border border-[#ADABAB]"
-                            control={form.control}
-                            name="courtesy_car"
-                            label="Courtesy Car"
-                        />
-                        <ReuseableInput
-                            className="h-11 w-full rounded-md border border-[#ADABAB]"
-                            control={form.control}
-                            name="road_rescue"
-                            label="Road Rescue"
-                        />
-                    </div>
-                    <div className="flex items-center justify-between">
+                <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
+                    {!quoteSessionId ? null : isPending && !data && benefitGroups.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">Loading benefit options…</p>
+                    ) : benefitGroups.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">
+                            No optional benefits are available for this quote yet.
+                        </p>
+                    ) : (
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                            {benefitGroups.map(({ group, items }) => {
+                                const fieldName = benefitGroupFormKey(group)
+                                const options = [
+                                    { value: BENEFIT_SELECT_NONE, label: 'No add-on' },
+                                    ...items.map((item) => ({
+                                        value: String(item.id),
+                                        label: benefitOptionLabel(item),
+                                    })),
+                                ]
+                                return (
+                                    <ReusableSelect
+                                        key={group}
+                                        control={benefitForm.control}
+                                        name={fieldName as Path<FieldValues>}
+                                        label={group}
+                                        placeholder={`Choose in ${group}`}
+                                        options={options}
+                                        disabled={isFetching}
+                                        triggerClassName="border-[#ADABAB]"
+                                    />
+                                )
+                            })}
+                        </div>
+                    )}
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <Button
                             type="button"
-                            className="flex items-center gap-1.5 rounded border border-[#0CC2581F] bg-[#C7EED5] px-4 py-2 text-sm font-medium text-[#43A047] hover:bg-[#C7EED5]/90"
-                            leftIcon={<Plus className="h-4 w-4" />}>
-                            Add Benefit
+                            className="flex w-full items-center gap-1.5 rounded border border-[#0CC2581F] bg-[#C7EED5] px-4 py-2 text-sm font-medium text-[#43A047] hover:bg-[#C7EED5]/90 sm:w-auto"
+                            leftIcon={<Plus className="h-4 w-4" />}
+                            onClick={applyBenefitSelections}
+                            disabled={
+                                !quoteSessionId ||
+                                benefitGroups.length === 0 ||
+                                isFetching
+                            }>
+                            Add benefit
                         </Button>
                         <Button
                             type="button"
-                            className="flex items-center gap-1.5 rounded bg-[#C20C0C]/80 px-5 py-2 text-sm font-medium text-white hover:bg-[#C20C0C]"
+                            className="flex w-full items-center gap-1.5 rounded bg-[#C20C0C]/80 px-5 py-2 text-sm font-medium text-white hover:bg-[#C20C0C] sm:ml-auto sm:w-auto"
                             onClick={() => onComparison(false)}
                             loading={submitComparisonMutation.isPending || submitComparisonDownloadMutation.isPending}
                             disabled={selectedQuotes.length < 2}>
                             Generate Comparison {selectedQuotes.length > 0 && `(${selectedQuotes.length}/${MAX_COMPARISONS})`}
                         </Button>
                     </div>
+                    {/* {appliedBenefitIds.length > 0 && (
+                        <p className="text-xs text-muted-foreground">
+                            Active add-on IDs sent to pricing: {appliedBenefitIds.join(', ')} — adjust
+                            dropdowns and tap <strong>Add benefit</strong> again to update.
+                        </p>
+                    )} */}
                 </form>
             </section>
             <section className="space-y-4">
@@ -278,14 +400,14 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                             </span>
                         )}
                     </div>
-                    {isLoading && (
-                        <span className="text-xs text-gray-400 animate-pulse">
+                    {isFetching && (
+                        <span className="animate-pulse text-xs text-gray-400">
                             Fetching premium quotations…
                         </span>
                     )}
                 </div>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-6">
-                    {isLoading
+                    {isPending && !data
                         ? Array.from({ length: filter.pageSize }).map((_, i) => (
                             <SkeletonCard key={`skeleton-${i}`} />
                         ))
@@ -380,7 +502,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                     onPageChange={(nextPage) =>
                         optionsDispatcher({ type: 'page', payload: { page: nextPage } })
                     }
-                    disabled={isLoading}
+                    disabled={isFetching}
                 />
                 <Button
                     type="button"

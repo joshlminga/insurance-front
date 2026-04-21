@@ -14,6 +14,14 @@ import { FormProvider, useForm } from 'react-hook-form'
 import { PaymentDetailsSchema } from '@/types/form-schema'
 import type { PaymentFormValues } from '@/types/schema'
 import { extractErrorMessage } from '@/utils/helpers'
+import { cn } from '@/lib/utils'
+
+/** PAYMENTPLANS `value` → how many readonly installment amount fields to show */
+const INSTALLMENT_FIELDS_VISIBLE: Record<string, number> = {
+    Full: 1,
+    Two_Installment: 2,
+    Three_Installment: 3,
+}
 
 export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goToNextStep, goToPrevStep }) => {
     const [selectedPaymentMethod, setSelectedPaymentMethod] = React.useState<string>('mpesa')
@@ -155,6 +163,20 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
     const selectedPaymentPlan = form.watch('payment_plans')
     const prevPlanRef = React.useRef(selectedPaymentPlan)
 
+    const visibleInstallmentCount = selectedPaymentPlan
+        ? INSTALLMENT_FIELDS_VISIBLE[selectedPaymentPlan] ?? 0
+        : 0
+
+    React.useEffect(() => {
+        if (!selectedPaymentPlan) return
+        if (selectedPaymentPlan === 'Full') {
+            form.setValue('second_installment', '')
+            form.setValue('third_installment', '')
+        } else if (selectedPaymentPlan === 'Two_Installment') {
+            form.setValue('third_installment', '')
+        }
+    }, [selectedPaymentPlan, form])
+
     React.useEffect(() => {
         if (!selectedPaymentPlan || !purchaseSessionId || selectedPaymentPlan === prevPlanRef.current) return
         prevPlanRef.current = selectedPaymentPlan
@@ -221,29 +243,51 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                 />
                             </div>
                         </div>
-                        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4'>
-                            <ReuseableInput
-                                className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] bg-white text-black"
-                                control={form.control}
-                                name="first_installment"
-                                label="Full Installment"
-                                disabled
-                            />
-                            <ReuseableInput
-                                className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] bg-white text-black"
-                                control={form.control}
-                                name="second_installment"
-                                label="2nd Installment 30%"
-                                disabled
-                            />
-                            <ReuseableInput
-                                className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] bg-white sm:col-span-2 lg:col-span-1 text-black"
-                                control={form.control}
-                                name="third_installment"
-                                label="3rd Installment 30%"
-                                disabled
-                            />
-                        </div>
+                        {visibleInstallmentCount > 0 ? (
+                            <div
+                                className={cn(
+                                    'grid gap-3 sm:gap-4',
+                                    visibleInstallmentCount === 1 && 'grid-cols-1 sm:max-w-md',
+                                    visibleInstallmentCount === 2 && 'grid-cols-1 sm:grid-cols-2',
+                                    visibleInstallmentCount >= 3 && 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
+                                )}>
+                                {visibleInstallmentCount >= 1 && (
+                                    <ReuseableInput
+                                        className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] bg-white text-black"
+                                        control={form.control}
+                                        name="first_installment"
+                                        label={
+                                            selectedPaymentPlan === 'Full'
+                                                ? 'Full installment'
+                                                : '1st installment'
+                                        }
+                                        disabled
+                                    />
+                                )}
+                                {visibleInstallmentCount >= 2 && (
+                                    <ReuseableInput
+                                        className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] bg-white text-black"
+                                        control={form.control}
+                                        name="second_installment"
+                                        label="2nd installment"
+                                        disabled
+                                    />
+                                )}
+                                {visibleInstallmentCount >= 3 && (
+                                    <ReuseableInput
+                                        className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] bg-white text-black"
+                                        control={form.control}
+                                        name="third_installment"
+                                        label="3rd installment"
+                                        disabled
+                                    />
+                                )}
+                            </div>
+                        ) : (
+                            <p className="text-sm text-muted-foreground">
+                                Select a payment plan above to see the installment schedule.
+                            </p>
+                        )}
                     </div>
                     <div className="w-full py-3">
                         <h6 className='text-base sm:text-lg font-bold'>Please Select Your Preferred Payment Option</h6>
