@@ -10,7 +10,7 @@ export default function LoanProductsPage() {
   return (
     <>
       <PageHeader
-        title="Loan Products"
+        title="Claim Products"
         description="Configure loan types, interest rates, and eligibility rules"
         actions={[
           {

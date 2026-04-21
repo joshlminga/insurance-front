@@ -1,12 +1,12 @@
 import { ReusableStepper } from '@/dev/core'
 import { getMotorSteps } from '@/utils/steps-config'
-import { useStepperContext } from '@/hooks/stepper-context'
-import { UseAuth } from '@/components/auth-provider'
+import { usePurchaseStepper } from '@/hooks/use-purchase-stepper'
+import { UseAuth } from '@/stores/auth-store'
 import { useEffect, useRef } from 'react'
 
 export const StepPage: React.FC = () => {
     const { isAuthenticated } = UseAuth();
-    const { currentStep, setCurrentStep } = useStepperContext();
+    const { currentStep, setCurrentStep } = usePurchaseStepper('motor');
     const steps = getMotorSteps(isAuthenticated);
     const prevIsAuthenticated = useRef(isAuthenticated)
     useEffect(() => {

@@ -121,12 +121,12 @@ export default function ReportsPage() {
               </CardContent>
             </Card>
 
-            {/* Loan Distribution */}
+            {/* Claim Distribution */}
             <Card>
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
                   <PieChart className="h-4 w-4" />
-                  Loan Distribution by Product
+                  Claim Distribution by Product
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -149,12 +149,12 @@ export default function ReportsPage() {
               </CardContent>
             </Card>
 
-            {/* Loan Status Distribution */}
+            {/* Claim Status Distribution */}
             <Card>
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
                   <BarChart3 className="h-4 w-4" />
-                  Loan Status Distribution
+                  Claim Status Distribution
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -237,28 +237,28 @@ export default function ReportsPage() {
           <ReportsList
             reports={[
               {
-                name: "Loan Portfolio Report",
+                name: "Claim Portfolio Report",
                 description: "Overview of all active loans",
                 icon: CreditCard,
               },
               {
-                name: "Loan Disbursement Report",
+                name: "Claim Disbursement Report",
                 description: "Loans disbursed within a period",
                 icon: CreditCard,
               },
               {
-                name: "Loan Repayment Report",
-                description: "Loan repayments received",
+                name: "Claim Repayment Report",
+                description: "Claim repayments received",
                 icon: TrendingUp,
               },
               {
-                name: "Loan Arrears Report",
+                name: "Claim Arrears Report",
                 description: "Overdue loans and defaulters",
                 icon: CreditCard,
               },
               {
-                name: "Loan Performance Report",
-                description: "Loan performance by product",
+                name: "Claim Performance Report",
+                description: "Claim performance by product",
                 icon: BarChart3,
               },
             ]}

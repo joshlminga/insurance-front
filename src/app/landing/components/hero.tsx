@@ -1,4 +1,4 @@
-import { UseAuth } from "@/components/auth-provider"
+import { UseAuth } from "@/stores/auth-store"
 import { UserMenuPopover } from "@/dev/core"
 import { getInitials } from "@/lib/format"
 import { createHeroPopoverItems } from "@/utils/constatnts"

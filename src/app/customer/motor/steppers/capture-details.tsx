@@ -14,7 +14,7 @@ import type { CustomerVerificationDetailsProps, SubmitResponse } from "@/types/t
 import { Checkbox } from "@/components/ui/checkbox"
 import { Link, useNavigate } from "react-router-dom"
 import { extractErrorMessage } from "@/utils/helpers"
-import { UseAuth } from "@/components/auth-provider"
+import { UseAuth } from "@/stores/auth-store"
 import { EPREFIX, EROUTES } from "@/utils/enums"
 
 export const CustomerVerificationDetails = ({ goToNextStep, goToPrevStep }: CustomerVerificationDetailsProps) => {

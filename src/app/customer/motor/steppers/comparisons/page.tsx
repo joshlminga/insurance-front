@@ -27,7 +27,7 @@ export const ComparisonPage = ({
         }>();
 
     // useEffect(() => {
-    //     const storedSessionId = Number(localStorage.getItem(MOTOR_QUOTE_SESSION_STORAGE_KEY))
+    //     const storedSessionId = Number(sessionStorage.getItem(MOTOR_QUOTE_SESSION_STORAGE_KEY))
     //     if (Number.isFinite(storedSessionId) && storedSessionId > 0) {
     //         setQuoteSessionId(storedSessionId)
     //     } else {

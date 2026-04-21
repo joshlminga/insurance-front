@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { UseAuth } from "@/components/auth-provider";
+import { UseAuth } from "@/stores/auth-store";
 import { Badge } from "@/components/ui/badge";
 import {
     Card,
@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Button, ReusableDropdown } from "@/dev/core";
-import { useStepperContext } from "@/hooks/stepper-context";
+import { usePurchaseStepper } from "@/hooks/use-purchase-stepper";
 import { formatCurrency } from "@/lib/format";
 import { EPREFIX, EROUTES } from "@/utils/enums";
 import {
@@ -42,7 +42,7 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
     handleDialogContextSwitch,
 }) => {
 
-    const { currentStep } = useStepperContext();
+    const { currentStep } = usePurchaseStepper('motor');
     const [quoteSessionId, setQuoteSessionId] = useState<number | null>(null)
     const location = useLocation();
     const { isAuthenticated } = UseAuth();
@@ -58,7 +58,7 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
     );
 
     useEffect(() => {
-        const storedSessionId = Number(localStorage.getItem(MOTOR_QUOTE_SESSION_STORAGE_KEY))
+        const storedSessionId = Number(sessionStorage.getItem(MOTOR_QUOTE_SESSION_STORAGE_KEY))
         if (Number.isFinite(storedSessionId) && storedSessionId > 0) {
             setQuoteSessionId(storedSessionId)
         } else {

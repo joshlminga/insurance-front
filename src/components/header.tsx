@@ -7,7 +7,7 @@ import { LanguageSwitcher } from "@/components/language-switcher"
 import { ModeToggle } from "@/components/mode-toggle"
 import { NavUser } from "@/components/nav-user"
 import { Search } from "@/components/search"
-import { UseAuth } from "./auth-provider"
+import { UseAuth } from "@/stores/auth-store"
 
 export default function Header() {
   const { user } = UseAuth();

@@ -3,15 +3,40 @@ import { createRoot } from 'react-dom/client'
 import { RouterProvider } from 'react-router-dom'
 import './index.css'
 import { QueryProvider } from './utils/providers.tsx'
-import { AuthProvider } from './components/auth-provider.tsx'
 import { router } from './App.tsx'
+import { initAuthStore } from './stores/auth-store'
+import { initThemeStore } from './stores/theme-store'
+import {
+  INVOICE_SESSION_STORAGE_KEY,
+  MOTOR_QUOTE_SESSION_STORAGE_KEY,
+  PURCHASE_SESSION_STORAGE_KEY,
+} from './utils/constatnts'
+
+/** One-time copy from legacy localStorage so in-flight motor checkout keeps working after this change. */
+function migrateLegacyLocalStorageKeys(keys: readonly string[]) {
+  if (typeof window === 'undefined' || typeof localStorage === 'undefined') return
+  for (const key of keys) {
+    const value = localStorage.getItem(key)
+    if (value != null && sessionStorage.getItem(key) == null) {
+      sessionStorage.setItem(key, value)
+      localStorage.removeItem(key)
+    }
+  }
+}
+
+migrateLegacyLocalStorageKeys([
+  MOTOR_QUOTE_SESSION_STORAGE_KEY,
+  PURCHASE_SESSION_STORAGE_KEY,
+  INVOICE_SESSION_STORAGE_KEY,
+])
+
+initAuthStore()
+initThemeStore()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryProvider>
-      <AuthProvider>
-        <RouterProvider router={router} />
-      </AuthProvider>
+      <RouterProvider router={router} />
     </QueryProvider>
   </StrictMode>,
 )

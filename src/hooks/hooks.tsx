@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import axios from 'axios'
 import apiClient from '@/lib/api-client'
 import { EMETHODS } from '@/utils/constatnts'
-import { UseAuth } from '@/components/auth-provider'
+import { UseAuth } from '@/stores/auth-store'
 import { EROUTES } from '@/utils/enums'
 import { Navigate, useLocation } from 'react-router-dom'
 import type { 

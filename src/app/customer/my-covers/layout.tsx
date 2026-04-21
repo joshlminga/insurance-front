@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Navbar } from '@/app/landing/components/navbar'
-import { UseAuth } from '@/components/auth-provider'
+import { UseAuth } from '@/stores/auth-store'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { Button, UserMenuPopover } from '@/dev/core'

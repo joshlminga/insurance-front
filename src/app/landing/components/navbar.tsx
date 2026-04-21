@@ -4,7 +4,7 @@ import { ELOGO, EPREFIX, EROUTES } from "@/utils/enums";
 import { ChevronDown, Menu, X, ShieldCheck, BarChart3, Settings, LogOut, Globe } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { UseAuth } from "@/components/auth-provider";
+import { UseAuth } from "@/stores/auth-store";
 import {
     DropdownMenu,
     DropdownMenuContent,

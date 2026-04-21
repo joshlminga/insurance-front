@@ -28,7 +28,7 @@ export const InvoicePayment: React.FC<CustomerVerificationDetailsProps> = ({ goT
 
     })
     useEffect(() => {
-        const storedPurchaseKey = String(localStorage.getItem(INVOICE_SESSION_STORAGE_KEY))
+        const storedPurchaseKey = String(sessionStorage.getItem(INVOICE_SESSION_STORAGE_KEY))
         if (storedPurchaseKey) {
             setPurchaseSessionId(storedPurchaseKey)
         } else {
