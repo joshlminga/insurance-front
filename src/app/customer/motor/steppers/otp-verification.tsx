@@ -13,7 +13,7 @@ import { UseApiMutation } from "@/hooks/hooks";
 import { OTPVerificationSchema } from "@/types/form-schema";
 import type { OTPFormValues, ResendOTPFormValues } from "@/types/schema";
 import { extractErrorMessage } from "@/utils/helpers";
-import { UseAuth } from "@/components/auth-provider";
+import { UseAuth } from "@/stores/auth-store";
 
 export default function OTPVerificationPage({ goToNextStep, goToPrevStep }: CustomerVerificationDetailsProps) {
   const { login, guest } = UseAuth();

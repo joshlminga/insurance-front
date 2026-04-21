@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { UseAuth } from '@/components/auth-provider'
+import { UseAuth } from '@/stores/auth-store'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { Button, ReuseableInput } from '@/dev/core'

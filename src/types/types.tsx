@@ -14,15 +14,6 @@ export type T = {
   ReactNode?: ReactNode;
 }
 
-export interface StepperContextType {
-  currentStep: number;
-  setCurrentStep: (step: number) => void;
-  goToNextStep: () => void;
-  goToPrevStep: () => void;
-}
-export interface StepperProviderProps {
-  children: ReactNode;
-}
 export interface ReusableStepperProps {
   steps: {
     title: string
@@ -84,11 +75,11 @@ export interface PageHeaderProps {
   children?: React.ReactNode
 }
 export type Tuser = {
-  name: string
-  email: string
+  name?: string
+  email?: string
   avatar?: string
-  is_general: boolean,
-  id: number
+  is_general?: boolean,
+  id?: number
 }
 
 export interface VerificationToken {
@@ -153,27 +144,6 @@ export interface AuthProviderState {
   updateUser: (user: Partial<Tuser>) => void
   setGuest: (guest: Guest | null) => void
   setLocale: (country: string, lang: string, alpha: string) => void
-}
-export interface AuthProviderProps {
-  children: ReactNode
-  storageKey?: string
-}
-
-export const initialState: AuthProviderState = {
-  user: null,
-  token: null,
-  guest: null,
-  isGeneral: null,
-  isAuthenticated: false,
-  isLoading: true,
-  country: 'Kenya',
-  lang: 'eng',
-  alpha: 'KE',
-  login: () => null,
-  logout: () => null,
-  updateUser: () => null,
-  setGuest: () => null,
-  setLocale: () => null,
 }
 
 export interface UseApiQueryOptions<TData = unknown> {
@@ -634,4 +604,3 @@ export type ClaimItem = {
 
 export type BenefitType = keyof typeof BENEFIT_TYPE_CONFIG;
 export type StepState = "completed" | "active" | "upcoming"
-// export type TLang =[];

@@ -19,7 +19,7 @@ const apiClient = axios.create({
 
 apiClient.interceptors.request.use(
     (config) => {
-        const authStorage = localStorage.getItem(AUTH_STORAGE_KEY)
+        const authStorage = sessionStorage.getItem(AUTH_STORAGE_KEY)
         if (authStorage) {
             try {
                 const { token } = JSON.parse(authStorage)
@@ -46,7 +46,7 @@ apiClient.interceptors.response.use(
         const loginPath = `${EPREFIX.AUTH}${EROUTES.SIGNIN}`
         const isOnLoginPage = window.location.pathname === loginPath
         if (status === 401 && !isLoginRequest && !isOnLoginPage) {
-            localStorage.removeItem(AUTH_STORAGE_KEY)
+            sessionStorage.removeItem(AUTH_STORAGE_KEY)
             window.location.replace(loginPath)
         }
         return Promise.reject(error)

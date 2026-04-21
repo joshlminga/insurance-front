@@ -10,7 +10,7 @@ import { useNavigate, useLocation, Link } from "react-router-dom"
 
 import { Button, ReuseableInput } from "@/dev/core"
 import { EMETHODS } from "@/utils/constatnts"
-import { UseAuth } from "@/components/auth-provider"
+import { UseAuth } from "@/stores/auth-store"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { LoginSchema } from "@/types/form-schema"

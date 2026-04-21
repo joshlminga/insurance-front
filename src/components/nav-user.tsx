@@ -9,7 +9,7 @@ import {
   Settings,
 } from "lucide-react"
 import { Link } from "react-router-dom"
-import { UseAuth } from "./auth-provider"
+import { UseAuth } from "@/stores/auth-store"
 import { EROUTES } from "@/utils/enums"
 
 import {

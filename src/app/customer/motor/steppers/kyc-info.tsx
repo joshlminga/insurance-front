@@ -37,7 +37,7 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToPrevSt
     })
 
     useEffect(() => {
-        const storedPurchaseKey = String(localStorage.getItem(PURCHASE_SESSION_STORAGE_KEY))
+        const storedPurchaseKey = String(sessionStorage.getItem(PURCHASE_SESSION_STORAGE_KEY))
         if (storedPurchaseKey) {
             setPurchaseSessionId(storedPurchaseKey)
         } else {
@@ -54,7 +54,7 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToPrevSt
         },
         mutationOptions: {
             onSuccess: (data) => {
-                localStorage.setItem(INVOICE_SESSION_STORAGE_KEY, String(data?.data?.purchase_id))
+                sessionStorage.setItem(INVOICE_SESSION_STORAGE_KEY, String(data?.data?.purchase_id))
                 goToNextStep?.()
                 ShowToast.success(data.message || "Submitted successfully!")
             },

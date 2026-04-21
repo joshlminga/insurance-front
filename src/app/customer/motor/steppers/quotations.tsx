@@ -23,8 +23,8 @@ import React, { useCallback, useEffect, useMemo, useReducer, useState } from 're
 import { useForm } from 'react-hook-form'
 import { Link, useLocation } from 'react-router-dom'
 import { QuotePreviewPage } from './qoute-preview/page'
-import { UseAuth } from '@/components/auth-provider'
-import { useStepperContext } from '@/hooks/stepper-context'
+import { UseAuth } from '@/stores/auth-store'
+import { usePurchaseStepper } from '@/hooks/use-purchase-stepper'
 import {
     EMETHODS,
     FILTEROPTIONS,
@@ -50,7 +50,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
     const form = useForm()
     const { isAuthenticated } = UseAuth()
     const location = useLocation()
-    const { currentStep } = useStepperContext()
+    const { currentStep } = usePurchaseStepper('motor')
 
     const [filter, optionsDispatcher] = useReducer(
         ReusableReducer<TPaginationFilters & TFilterOptions>,
@@ -66,7 +66,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
         }>()
 
     useEffect(() => {
-        const storedSessionId = Number(localStorage.getItem(MOTOR_QUOTE_SESSION_STORAGE_KEY))
+        const storedSessionId = Number(sessionStorage.getItem(MOTOR_QUOTE_SESSION_STORAGE_KEY))
         if (Number.isFinite(storedSessionId) && storedSessionId > 0) {
             setQuoteSessionId(storedSessionId)
         } else {
@@ -126,7 +126,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                     ShowToast.error("Purchase session could not be initialized. Please try again.")
                     return
                 }
-                localStorage.setItem(PURCHASE_SESSION_STORAGE_KEY, String(purchaseId))
+                sessionStorage.setItem(PURCHASE_SESSION_STORAGE_KEY, String(purchaseId))
                 goToNextStep?.();
                 ShowToast.success(data?.message ?? "Purchase started");
             },

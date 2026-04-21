@@ -21,7 +21,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { VehicleDetailsSchema } from '@/types/form-schema'
 import { EMETHODS, MOTOR_QUOTE_SESSION_STORAGE_KEY } from '@/utils/constatnts'
 import { ShowToast } from '@/utils/utils'
-import { UseAuth } from '@/components/auth-provider'
+import { UseAuth } from '@/stores/auth-store'
 import { extractErrorMessage } from '@/utils/helpers'
 import { MotorCommercialPage } from './tabs/motor-commercial'
 import { MotorPrivatePage } from './tabs/motor-private'
@@ -106,7 +106,7 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
                     ShowToast.error("Quote session could not be initialized. Please try again.")
                     return
                 }
-                localStorage.setItem(MOTOR_QUOTE_SESSION_STORAGE_KEY, String(quoteSessionId))
+                sessionStorage.setItem(MOTOR_QUOTE_SESSION_STORAGE_KEY, String(quoteSessionId))
                 goToNextStep?.()
                 ShowToast.success(data.message || "Submitted successfully!")
             },

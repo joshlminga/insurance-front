@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/sidebar"
 import { EPREFIX, EROUTES } from "@/utils/enums"
 import AppLogo from "./ui/app-logo"
-import { UseAuth } from "./auth-provider"
+import { UseAuth } from "@/stores/auth-store"
 
 
 const navData = {
