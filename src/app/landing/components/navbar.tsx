@@ -121,6 +121,7 @@ export const Navbar = (
         const primaryLang = selected.languages?.[0] ?? 'eng'
         setLocale(selected.name ?? '', primaryLang, selected.alpha2 ?? '')
     }
+    
     const dropdownItems = {
         generateQuote: [
             { name: "Motor Insurance", href: `/${EPREFIX.CUSTOMER}${EROUTES.MOTOR}` },
