@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Button, ReusableTabs } from '@/dev/core'
-import React, { useEffect, useMemo, useState } from 'react'
+import { Button } from '@/dev/core'
+import React, { useMemo, useState } from 'react'
 import type {
     CustomerVerificationDetailsProps,
     SubmitResponse,
@@ -9,10 +9,17 @@ import type {
     VehicleClassItem
 } from '@/types/types'
 import { CardFooter } from '@/components/ui/card'
+import { Label } from '@/components/ui/label'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import {
     ArrowLeftCircle,
     ArrowRightCircle,
-    Loader2
+    Bus,
+    Car,
+    Container,
+    Loader2,
+    Truck,
+    type LucideIcon,
 } from 'lucide-react'
 import { useForm, FormProvider } from 'react-hook-form'
 import type { VehicleFormValues } from '@/types/schema'
@@ -23,10 +30,20 @@ import { EMETHODS, MOTOR_QUOTE_SESSION_STORAGE_KEY } from '@/utils/constatnts'
 import { ShowToast } from '@/utils/utils'
 import { UseAuth } from '@/stores/auth-store'
 import { extractErrorMessage } from '@/utils/helpers'
+import { cn } from '@/lib/utils'
 import { MotorCommercialPage } from './tabs/motor-commercial'
 import { MotorPrivatePage } from './tabs/motor-private'
 import { MotorPsvPage } from './tabs/motor-psv'
 import { MotorSpecialVehicle } from './tabs/motor-special-vehicle'
+
+type MotorClassTab = TTabItem & { slug: string }
+
+const SLUG_ICON: Record<string, LucideIcon> = {
+    private: Car,
+    commercial: Truck,
+    psv: Bus,
+    specialvehicle: Container,
+}
 
 export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({ goToNextStep, goToPrevStep }) => {
     const [selectedTabValue, setSelectedTabValue] = useState<string>("");
@@ -45,7 +62,7 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
         [vehicleClasses]
     )
 
-    const motoTabs = useMemo<TTabItem[]>(() => {
+    const motoTabs = useMemo<MotorClassTab[]>(() => {
         const componentBySlug = {
             private: MotorPrivatePage,
             commercial: MotorCommercialPage,
@@ -60,6 +77,7 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
             return {
                 value: String(item.id),
                 label: item.name,
+                slug: cleanedSlug,
                 component:
                     componentBySlug[cleanedSlug as keyof typeof componentBySlug] ??
                     MotorPrivatePage,
@@ -67,6 +85,12 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
         })
     }, [activeVehicleClasses])
     const isClassTabsLoading = isLoading
+
+    const activeTab = useMemo(
+        () => motoTabs.find((t) => t.value === selectedTabValue),
+        [motoTabs, selectedTabValue]
+    )
+    const ActiveFormPanel = activeTab?.component
 
     const form = useForm<VehicleFormValues>({
         resolver: zodResolver(VehicleDetailsSchema),
@@ -88,13 +112,6 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
             valued_by_professional: false
         },
     })
-    
-    useEffect(() => {
-        if (motoTabs.length === 0) return
-        const firstTab = motoTabs[0]
-        setSelectedTabValue((prev) => prev || firstTab.value)
-        form.setValue("vehicle_class_id", form.getValues("vehicle_class_id") || firstTab.value, { shouldValidate: true })
-    }, [motoTabs, form])
 
     const submitMutation = UseApiMutation<SubmitResponse, Record<string, any>>({
         url: "quotation/motor",
@@ -128,7 +145,7 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
         })
     }
 
-    const handleTabChange = (value: string) => {
+    const handleClassChange = (value: string) => {
         setSelectedTabValue(value)
         form.setValue("vehicle_class_id", value, { shouldValidate: true, shouldDirty: true })
     }
@@ -136,47 +153,119 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
     return (
         <FormProvider {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="w-full mx-auto bg-transparent">
-                <div className='items-center justify-center border p-3 sm:p-4'>
-                    <div className="w-full py-3">
-                        <h1 className="text-xl sm:text-2xl font-bold leading-none mb-2 sm:mb-4">
-                            Proceed to add your <span className='text-[#C20C0C]'>Vehicle Details</span>
+                <div className="rounded-2xl border border-[#ADABAB]/50 bg-linear-to-b from-white to-neutral-50/90 p-4 shadow-sm sm:p-6">
+                    <div className="w-full pb-2">
+                        <h1 className="text-xl font-bold leading-tight tracking-tight sm:text-2xl">
+                            Add your{' '}
+                            <span className="text-[#C20C0C]">vehicle details</span>
                         </h1>
-                        <h6 className='text-base sm:text-lg font-bold'>Select type of cover</h6>
+                        <p className="mt-2 max-w-2xl text-sm text-muted-foreground sm:text-base">
+                            Choose the class that best describes your vehicle. We&apos;ll show the right fields next.
+                        </p>
                     </div>
-                    <div className="w-full overflow-x-auto">
+
+                    <div className="mt-5">
+                        <Label className="text-base font-semibold text-foreground">
+                            Vehicle class
+                        </Label>
+                        <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
+                            Tap one option — only one class applies.
+                        </p>
+
                         {isClassTabsLoading ? (
-                            <div className="flex items-center gap-2 py-4 text-sm text-muted-foreground">
+                            <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
                                 <Loader2 className="h-4 w-4 animate-spin" />
-                                Loading vehicle classes...
+                                Loading vehicle classes…
                             </div>
                         ) : motoTabs.length === 0 ? (
-                            <div className="py-4 text-sm text-muted-foreground">
+                            <div className="mt-4 rounded-xl border border-dashed border-muted-foreground/30 bg-muted/20 px-4 py-8 text-center text-sm text-muted-foreground">
                                 No active vehicle classes found.
                             </div>
                         ) : (
-                            <ReusableTabs
-                                tabs={motoTabs}
+                            <RadioGroup
                                 value={selectedTabValue}
-                                onValueChange={handleTabChange}
-                                form={form}
-                            />
+                                onValueChange={handleClassChange}
+                                className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                                {motoTabs.map((tab) => {
+                                    const Icon = SLUG_ICON[tab.slug] ?? Car
+                                    const inputId = `vehicle-class-${tab.value}`
+                                    const isSelected = selectedTabValue === tab.value
+                                    return (
+                                        <div key={tab.value} className="relative">
+                                            <RadioGroupItem
+                                                value={tab.value}
+                                                id={inputId}
+                                                className="sr-only"
+                                            />
+                                            <Label
+                                                htmlFor={inputId}
+                                                className={cn(
+                                                    'flex min-h-30 cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border-2 px-3 py-5 text-center transition-all',
+                                                    'shadow-sm outline-none hover:border-[#C20C0C]/45 hover:bg-white',
+                                                    'focus-within:ring-2 focus-within:ring-[#C20C0C]/25',
+                                                    isSelected
+                                                        ? 'border-[#C20C0C] bg-[#C20C0C]/[0.07] ring-2 ring-[#C20C0C]/20'
+                                                        : 'border-[#E5E5E5] bg-white/90'
+                                                )}
+                                            >
+                                                <span
+                                                    className={cn(
+                                                        'flex h-12 w-12 items-center justify-center rounded-xl border transition-colors',
+                                                        isSelected
+                                                            ? 'border-[#C20C0C]/40 bg-[#C20C0C]/10 text-[#C20C0C]'
+                                                            : 'border-neutral-200 bg-neutral-50 text-neutral-600'
+                                                    )}
+                                                >
+                                                    <Icon className="h-6 w-6" strokeWidth={1.75} />
+                                                </span>
+                                                <span className="text-xs font-semibold leading-snug sm:text-sm">
+                                                    {tab.label}
+                                                </span>
+                                            </Label>
+                                        </div>
+                                    )
+                                })}
+                            </RadioGroup>
                         )}
                     </div>
+                    {ActiveFormPanel && selectedTabValue ? (
+                        <div className="mt-8 space-y-3">
+                            <div className="flex flex-col gap-0.5 border-b border-[#ADABAB]/30 pb-3">
+                                <h2 className="text-base font-semibold sm:text-lg">
+                                    Details for {activeTab?.label}
+                                </h2>
+                                <p className="text-xs text-muted-foreground sm:text-sm">
+                                    Complete the fields below, then continue.
+                                </p>
+                            </div>
+                            <div className="rounded-2xl border border-[#ADABAB]/35 bg-white/95 p-3 sm:p-5">
+                                <ActiveFormPanel />
+                            </div>
+                        </div>
+                    ) : !isClassTabsLoading && motoTabs.length > 0 ? (
+                        <div className="mt-8 rounded-xl border border-dashed border-[#C20C0C]/25 bg-[#C20C0C]/4 px-4 py-6 text-center text-sm text-muted-foreground">
+                            Select a vehicle class above to continue.
+                        </div>
+                    ) : null}
                 </div>
-                <CardFooter className="w-full flex flex-col sm:flex-row justify-between gap-3 mt-3 px-0">
+                <CardFooter className="mt-4 w-full flex flex-col gap-3 px-0 sm:flex-row sm:justify-between">
                     <Button
                         type="button"
-                        className="w-full sm:w-auto rounded-full border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
+                        className="w-full rounded-full border border-[#C20C0C] bg-transparent text-[#C20C0C] hover:bg-[#C20C0C]/10 sm:w-auto"
                         leftIcon={<ArrowLeftCircle />}
                         onClick={() => goToPrevStep?.()}>
                         Previous
                     </Button>
                     <Button
                         type="submit"
-                        className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
+                        className="w-full rounded-full bg-[#C20C0C]/90 hover:bg-[#C20C0C] sm:w-auto"
                         rightIcon={<ArrowRightCircle />}
                         loading={submitMutation.isPending}
-                        disabled={isClassTabsLoading || motoTabs.length === 0}>
+                        disabled={
+                            isClassTabsLoading ||
+                            motoTabs.length === 0 ||
+                            !selectedTabValue
+                        }>
                         Next
                     </Button>
                 </CardFooter>

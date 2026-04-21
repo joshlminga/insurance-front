@@ -64,8 +64,6 @@ export const MarineDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({ 
                         />
                     </div>
                 </div>
-                
-                {/* Navigation Buttons - stack on mobile */}
                 <CardFooter className="w-full flex flex-col sm:flex-row justify-between gap-3 mt-3 px-0">
                     <Button
                         type="button"
