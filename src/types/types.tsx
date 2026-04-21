@@ -620,3 +620,17 @@ export type AuthState = {
   setGuest: (guest: Guest | null) => void
   setLocale: (country: string, lang: string, alpha: string) => void
 }
+
+export type MotorBenefitOption = {
+    id: number
+    group?: string | null
+    type?: string | null
+    name?: string | null
+    label?: string | null
+    reference?: string | null
+}
+
+export type BenefitGroup = {
+    group: string
+    items: MotorBenefitOption[]
+}
