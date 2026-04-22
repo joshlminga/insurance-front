@@ -1,12 +1,10 @@
 import { FieldGroup } from '@/components/ui/field'
 import {
     ReusableCheckboxGrid,
-    ReusableSelect,
     ReusableSingleSelectApiInput,
     ReuseableInput,
     ReuseableSingleSelectCountriesInput
 } from '@/dev/core'
-import { OWNERSHIPOPTIONS } from '@/utils/constatnts'
 import { PROFFESIONALVALUATIONCHECKBOX } from '@/utils/enums'
 import React, { useEffect } from 'react'
 import { Controller, useFormContext, useWatch } from 'react-hook-form'
@@ -26,55 +24,6 @@ export const MotorPrivatePage: React.FC = () => {
             <div className="justify-between p-2">
                 <FieldGroup>
                     <div className="grid grid-cols-2 gap-x-5 gap-2">
-                        <Controller
-                            control={control}
-                            name="covertype_id"
-                            render={({ field }) => (
-                                <div>
-                                    <ReusableSingleSelectApiInput
-                                        url="motor/general-tools/covertype"
-                                        value={field.value}
-                                        onChange={field.onChange}
-                                        label="Type of Cover"
-                                        required
-                                        placeholder="Select type of Cover..."
-
-                                    />
-
-                                </div>
-                            )}
-                        />
-                        <Controller
-                            control={control}
-                            name="covering_id"
-                            render={({ field }) => (
-                                <div>
-                                    <ReusableSingleSelectApiInput
-                                        url="motor/general-tools/covercovering"
-                                        value={field.value}
-                                        onChange={field.onChange}
-                                        label="Cover covering Options"
-                                        required
-                                        placeholder="Select Cover covering..."
-                                    />
-                                </div>
-                            )}
-                        />
-                        <ReusableSelect
-                            control={control}
-                            name="ownership"
-                            label="ownership"
-                            placeholder="Select ownership"
-                            options={OWNERSHIPOPTIONS}
-                        />
-                        <ReuseableInput
-                            className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
-                            control={control}
-                            name="vehicle_registration_number"
-                            label="Vehicle Registration Number"
-                            type="text"
-                            placeholder="e.g. KAA 123A"
-                        />
                         <ReuseableInput
                             className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
                             control={control}

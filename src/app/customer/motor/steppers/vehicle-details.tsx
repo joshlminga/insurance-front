@@ -2,7 +2,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button } from '@/dev/core'
 import {
+    ReusableSelect,
     ReusableSingleSelectApiInput,
+    ReuseableInput,
 } from '@/dev/core'
 import React, { useEffect, useMemo, useState } from 'react'
 import type {
@@ -34,6 +36,7 @@ import { ShowToast } from '@/utils/utils'
 import { UseAuth } from '@/stores/auth-store'
 import { extractErrorMessage } from '@/utils/helpers'
 import { cn } from '@/lib/utils'
+import { OWNERSHIPOPTIONS } from '@/utils/constatnts'
 import { MotorCommercialPage } from './tabs/motor-commercial'
 import { MotorPrivatePage } from './tabs/motor-private'
 import { MotorPsvPage } from './tabs/motor-psv'
@@ -69,7 +72,7 @@ const VehicleDetailsBox: React.FC = () => {
             </div>
 
             <div className="rounded-2xl border border-[#ADABAB]/35 bg-white/95 p-3 sm:p-5">
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
                     <Controller
                         control={control}
                         name="vehicle_make_id"
@@ -115,9 +118,65 @@ const VehicleDetailsBox: React.FC = () => {
                         name="year"
                         comprehensiveId="1384"
                     />
+
+                    <ReuseableInput
+                        className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                        control={control}
+                        name="vehicle_registration_number"
+                        label="Vehicle Registration Number"
+                        type="text"
+                        required
+                        placeholder="e.g. KAA 123A"
+                    />
                 </div>
             </div>
         </>
+    )
+}
+
+const CoverDetailsBox: React.FC = () => {
+    const { control } = useFormContext<VehicleFormValues>()
+
+    return (
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <Controller
+                control={control}
+                name="covertype_id"
+                render={({ field }) => (
+                    <ReusableSingleSelectApiInput
+                        url="motor/general-tools/covertype"
+                        value={field.value}
+                        onChange={field.onChange}
+                        label="Type of Cover"
+                        required
+                        placeholder="Select type of Cover..."
+                    />
+                )}
+            />
+
+            <Controller
+                control={control}
+                name="covering_id"
+                render={({ field }) => (
+                    <ReusableSingleSelectApiInput
+                        url="motor/general-tools/covercovering"
+                        value={field.value}
+                        onChange={field.onChange}
+                        label="Cover covering Options"
+                        required
+                        placeholder="Select Cover covering..."
+                    />
+                )}
+            />
+
+            <ReusableSelect
+                control={control}
+                name="ownership"
+                label="ownership"
+                placeholder="Select ownership"
+                options={OWNERSHIPOPTIONS}
+            />
+        </div>
     )
 }
 
@@ -260,50 +319,56 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
                                 No active vehicle classes found.
                             </div>
                         ) : (
-                            <RadioGroup
-                                value={selectedTabValue}
-                                onValueChange={handleClassChange}
-                                className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                                {motoTabs.map((tab) => {
-                                    const Icon = SLUG_ICON[tab.slug] ?? Car
-                                    const inputId = `vehicle-class-${tab.value}`
-                                    const isSelected = selectedTabValue === tab.value
-                                    return (
-                                        <div key={tab.value} className="relative">
-                                            <RadioGroupItem
-                                                value={tab.value}
-                                                id={inputId}
-                                                className="sr-only"
-                                            />
-                                            <Label
-                                                htmlFor={inputId}
-                                                className={cn(
-                                                    'flex min-h-30 cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border-2 px-3 py-5 text-center transition-all',
-                                                    'shadow-sm outline-none hover:border-[#C20C0C]/45 hover:bg-white',
-                                                    'focus-within:ring-2 focus-within:ring-[#C20C0C]/25',
-                                                    isSelected
-                                                        ? 'border-[#C20C0C] bg-[#C20C0C]/[0.07] ring-2 ring-[#C20C0C]/20'
-                                                        : 'border-[#E5E5E5] bg-white/90'
-                                                )}
-                                            >
-                                                <span
+                            <>
+                                <RadioGroup
+                                    value={selectedTabValue}
+                                    onValueChange={handleClassChange}
+                                    className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                                    {motoTabs.map((tab) => {
+                                        const Icon = SLUG_ICON[tab.slug] ?? Car
+                                        const inputId = `vehicle-class-${tab.value}`
+                                        const isSelected = selectedTabValue === tab.value
+                                        return (
+                                            <div key={tab.value} className="relative">
+                                                <RadioGroupItem
+                                                    value={tab.value}
+                                                    id={inputId}
+                                                    className="sr-only"
+                                                />
+                                                <Label
+                                                    htmlFor={inputId}
                                                     className={cn(
-                                                        'flex h-12 w-12 items-center justify-center rounded-xl border transition-colors',
+                                                        'flex min-h-30 cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border-2 px-3 py-5 text-center transition-all',
+                                                        'shadow-sm outline-none hover:border-[#C20C0C]/45 hover:bg-white',
+                                                        'focus-within:ring-2 focus-within:ring-[#C20C0C]/25',
                                                         isSelected
-                                                            ? 'border-[#C20C0C]/40 bg-[#C20C0C]/10 text-[#C20C0C]'
-                                                            : 'border-neutral-200 bg-neutral-50 text-neutral-600'
+                                                            ? 'border-[#C20C0C] bg-[#C20C0C]/[0.07] ring-2 ring-[#C20C0C]/20'
+                                                            : 'border-[#E5E5E5] bg-white/90'
                                                     )}
                                                 >
-                                                    <Icon className="h-6 w-6" strokeWidth={1.75} />
-                                                </span>
-                                                <span className="text-xs font-semibold leading-snug sm:text-sm">
-                                                    {tab.label}
-                                                </span>
-                                            </Label>
-                                        </div>
-                                    )
-                                })}
-                            </RadioGroup>
+                                                    <span
+                                                        className={cn(
+                                                            'flex h-12 w-12 items-center justify-center rounded-xl border transition-colors',
+                                                            isSelected
+                                                                ? 'border-[#C20C0C]/40 bg-[#C20C0C]/10 text-[#C20C0C]'
+                                                                : 'border-neutral-200 bg-neutral-50 text-neutral-600'
+                                                        )}
+                                                    >
+                                                        <Icon className="h-6 w-6" strokeWidth={1.75} />
+                                                    </span>
+                                                    <span className="text-xs font-semibold leading-snug sm:text-sm">
+                                                        {tab.label}
+                                                    </span>
+                                                </Label>
+                                            </div>
+                                        )
+                                    })}
+                                </RadioGroup>
+
+                                <div className="mt-5 rounded-2xl border border-[#ADABAB]/35 bg-white/95 p-3 sm:p-5">
+                                    <CoverDetailsBox />
+                                </div>
+                            </>
                         )}
                     </div>
                     {ActiveFormPanel && selectedTabValue ? (

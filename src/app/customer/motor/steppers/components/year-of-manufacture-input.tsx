@@ -8,6 +8,7 @@ export type YearOfManufactureInputProps<TFieldValues extends FieldValues> = {
   name?: Path<TFieldValues>
   comprehensiveId?: string | number
   className?: string
+  required?: boolean
 }
 
 export function YearOfManufactureInput<TFieldValues extends FieldValues>({
@@ -16,6 +17,7 @@ export function YearOfManufactureInput<TFieldValues extends FieldValues>({
   name,
   comprehensiveId = 1384,
   className,
+  required = true,
 }: YearOfManufactureInputProps<TFieldValues>) {
   const currentYear = new Date().getFullYear()
 
@@ -30,7 +32,7 @@ export function YearOfManufactureInput<TFieldValues extends FieldValues>({
       control={control}
       name={(name ?? ("year" as Path<TFieldValues>)) as Path<TFieldValues>}
       label={`Year of Manufacture (min ${minYear})`}
-      required
+      required={required}
       type="number"
       placeholder={`e.g. ${Math.min(currentYear, Math.max(minYear, currentYear - 2))}`}
     />
