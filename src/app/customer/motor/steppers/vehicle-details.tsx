@@ -3,7 +3,6 @@
 import { Button } from '@/dev/core'
 import {
     ReusableSingleSelectApiInput,
-    ReuseableInput,
 } from '@/dev/core'
 import React, { useEffect, useMemo, useState } from 'react'
 import type {
@@ -39,6 +38,7 @@ import { MotorCommercialPage } from './tabs/motor-commercial'
 import { MotorPrivatePage } from './tabs/motor-private'
 import { MotorPsvPage } from './tabs/motor-psv'
 import { MotorSpecialVehicle } from './tabs/motor-special-vehicle'
+import { YearOfManufactureInput } from './components/year-of-manufacture-input'
 
 type MotorClassTab = TTabItem & { slug: string }
 
@@ -52,6 +52,7 @@ const SLUG_ICON: Record<string, LucideIcon> = {
 const VehicleDetailsBox: React.FC = () => {
     const { control, setValue } = useFormContext<VehicleFormValues>()
     const selectedMakeId = useWatch({ control, name: 'vehicle_make_id' })
+    const selectedCoverTypeId = useWatch({ control, name: 'covertype_id' })
     const canFetchModels = Boolean(selectedMakeId)
 
     useEffect(() => {
@@ -59,63 +60,64 @@ const VehicleDetailsBox: React.FC = () => {
     }, [selectedMakeId, setValue])
 
     return (
-        <div className="rounded-2xl border border-[#ADABAB]/35 bg-white/95 p-3 sm:p-5">
-            <div className="mb-3 flex flex-col gap-0.5 border-b border-[#ADABAB]/30 pb-3">
+        <>
+            <div className="flex flex-col gap-0.5 border-b border-[#ADABAB]/30 pb-3">
                 <h3 className="text-base font-semibold sm:text-lg">Vehicle Details</h3>
                 <p className="text-xs text-muted-foreground sm:text-sm">
                     Provide the make, model, and year of manufacture.
                 </p>
             </div>
 
-            <div className="grid grid-cols-3 gap-3">
-                <Controller
-                    control={control}
-                    name="vehicle_make_id"
-                    render={({ field }) => (
-                        <ReusableSingleSelectApiInput
-                            url="taxonomies/vehicle/makes"
-                            value={field.value}
-                            onChange={field.onChange}
-                            label="Vehicle Make"
-                            required
-                            placeholder="Select make..."
-                        />
-                    )}
-                />
+            <div className="rounded-2xl border border-[#ADABAB]/35 bg-white/95 p-3 sm:p-5">
+                <div className="grid grid-cols-3 gap-3">
+                    <Controller
+                        control={control}
+                        name="vehicle_make_id"
+                        render={({ field }) => (
+                            <ReusableSingleSelectApiInput
+                                url="taxonomies/vehicle/makes"
+                                value={field.value}
+                                onChange={field.onChange}
+                                label="Vehicle Make"
+                                required
+                                placeholder="Select make..."
+                            />
+                        )}
+                    />
 
-                <Controller
-                    control={control}
-                    name="vehicle_model_id"
-                    render={({ field }) => (
-                        <ReusableSingleSelectApiInput
-                            url={canFetchModels ? 'taxonomies/vehicle/models' : ''}
-                            queryParams={
-                                canFetchModels
-                                    ? {
-                                          make_id: selectedMakeId,
-                                      }
-                                    : {}
-                            }
-                            value={field.value}
-                            onChange={field.onChange}
-                            label="Vehicle Model"
-                            required
-                            disabled={!canFetchModels}
-                            placeholder={canFetchModels ? 'Select model...' : 'Select make first'}
-                        />
-                    )}
-                />
+                    <Controller
+                        control={control}
+                        name="vehicle_model_id"
+                        render={({ field }) => (
+                            <ReusableSingleSelectApiInput
+                                url={canFetchModels ? 'taxonomies/vehicle/models' : ''}
+                                queryParams={
+                                    canFetchModels
+                                        ? {
+                                              make_id: selectedMakeId,
+                                          }
+                                        : {}
+                                }
+                                value={field.value}
+                                onChange={field.onChange}
+                                label="Vehicle Model"
+                                required
+                                disabled={!canFetchModels}
+                                placeholder={canFetchModels ? 'Select model...' : 'Select make first'}
+                            />
+                        )}
+                    />
 
-                <ReuseableInput
-                    className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
-                    control={control}
-                    name="year"
-                    label="Year of Manufacture"
-                    type="number"
-                    placeholder="e.g. 2020"
-                />
+                    <YearOfManufactureInput<VehicleFormValues>
+                        className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                        control={control}
+                        covertypeId={selectedCoverTypeId}
+                        name="year"
+                        comprehensiveId="1384"
+                    />
+                </div>
             </div>
-        </div>
+        </>
     )
 }
 
@@ -168,6 +170,8 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
 
     const form = useForm<VehicleFormValues>({
         resolver: zodResolver(VehicleDetailsSchema),
+        mode: "onChange",
+        reValidateMode: "onChange",
         defaultValues: {
             user_id: user?.id ?? "",
             country_id: "",
