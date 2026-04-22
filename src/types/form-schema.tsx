@@ -60,12 +60,7 @@ export const VehicleDetailsSchema = z.object({
   country_id: z.string().optional().or(z.literal("")),
   year: z
     .string()
-    .min(1, "YOM is required")
-    .refine((val) => {
-      const year = Number(val)
-      const currentYear = new Date().getFullYear()
-      return !isNaN(year) && year >= 2011 && year <= currentYear
-    }, `Year must be between 2011 and ${new Date().getFullYear()}`),
+    .min(1, "YOM is required"),
 
   ownership: z.string().min(1, "Ownarship is required"),
   vehicle_value: z.string().optional().or(z.literal("")),
@@ -75,6 +70,34 @@ export const VehicleDetailsSchema = z.object({
   vehicle_class_id: z.string().optional().or(z.literal("")),
   valued_by_professional: z.boolean().optional()
 })
+  .superRefine((data, ctx) => {
+    const currentYear = new Date().getFullYear()
+    const comprehensiveCoverTypeId = "1384"
+    const defaultMinYear = currentYear - 50
+
+    if (String(data.covertype_id ?? "").trim().length === 0) return
+
+    const isComprehensive = String(data.covertype_id) === comprehensiveCoverTypeId
+    const minYear = isComprehensive ? currentYear - 15 : defaultMinYear
+
+    const year = Number(data.year)
+    if (!Number.isFinite(year)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["year"],
+        message: `Accepted from ${minYear}`,
+      })
+      return
+    }
+
+    if (year < minYear || year > currentYear) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["year"],
+        message: `Accepted from ${minYear}`,
+      })
+    }
+  })
 
 export const LoginSchema = z.object({
   email: z.string().email("Invalid email address"),
