@@ -17,15 +17,9 @@ import {
 
 export const MotorCommercialPage: React.FC = () => {
     const { control, setValue } = useFormContext()
-    const selectedMakeId = useWatch({ control, name: "vehicle_make_id" })
     const selectedVehicleClassId = useWatch({ control, name: "vehicle_class_id" })
     const selectedCoveringId = useWatch({ control, name: "covering_id" })
-    const canFetchModels = Boolean(selectedMakeId)
     const canFetchVehicleUse = Boolean(selectedVehicleClassId && selectedCoveringId)
-
-    useEffect(() => {
-        setValue("vehicle_model_id", "")
-    }, [selectedMakeId, setValue])
 
     useEffect(() => {
         setValue("used_for_id", "")
@@ -71,64 +65,12 @@ export const MotorCommercialPage: React.FC = () => {
                             )}
                         />
 
-                        <Controller
-                            control={control}
-                            name="vehicle_make_id"
-                            render={({ field }) => (
-                                <div>
-                                    <ReusableSingleSelectApiInput
-                                        url="taxonomies/vehicle/makes"
-                                        value={field.value}
-                                        onChange={field.onChange}
-                                        label="Make of the Vehicle"
-                                        required
-                                        placeholder="Select Make of the Vehicle..."
-                                    />
-                                </div>
-                            )}
-                        />
-                        <Controller
-                            control={control}
-                            name="vehicle_model_id"
-                            render={({ field }) => (
-                                <div>
-                                    <ReusableSingleSelectApiInput
-                                        url={canFetchModels ? "taxonomies/vehicle/models" : ""}
-                                        queryParams={
-                                            canFetchModels
-                                                ? {
-                                                    make_id: selectedMakeId,
-                                                }
-                                                : {}
-                                        }
-                                        value={field.value}
-                                        onChange={field.onChange}
-                                        label="Model for the vehicle"
-                                        required
-                                        disabled={!canFetchModels}
-                                        placeholder={
-                                            canFetchModels
-                                                ? "Select Model for the vehicle..."
-                                                : "Select make first"
-                                        }
-                                    />
-                                </div>
-                            )}
-                        />
                         <ReusableSelect
                             control={control}
                             name="ownership"
                             label="ownership"
                             placeholder="Select ownership"
                             options={OWNERSHIPOPTIONS}
-                        />
-                        <ReuseableInput
-                            className="w-full  h-12.75 rounded-[5px] border border-[#ADABAB]"
-                            control={control}
-                            name="year"
-                            label="Year of Manufacture"
-                            type="number"
-                            placeholder="e.g. 2020"
                         />
                         <ReuseableInput
                             className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"

@@ -1,7 +1,11 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button } from '@/dev/core'
-import React, { useMemo, useState } from 'react'
+import {
+    ReusableSingleSelectApiInput,
+    ReuseableInput,
+} from '@/dev/core'
+import React, { useEffect, useMemo, useState } from 'react'
 import type {
     CustomerVerificationDetailsProps,
     SubmitResponse,
@@ -21,7 +25,7 @@ import {
     Truck,
     type LucideIcon,
 } from 'lucide-react'
-import { useForm, FormProvider } from 'react-hook-form'
+import { Controller, useForm, FormProvider, useFormContext, useWatch } from 'react-hook-form'
 import type { VehicleFormValues } from '@/types/schema'
 import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -43,6 +47,76 @@ const SLUG_ICON: Record<string, LucideIcon> = {
     commercial: Truck,
     psv: Bus,
     specialvehicle: Container,
+}
+
+const VehicleDetailsBox: React.FC = () => {
+    const { control, setValue } = useFormContext<VehicleFormValues>()
+    const selectedMakeId = useWatch({ control, name: 'vehicle_make_id' })
+    const canFetchModels = Boolean(selectedMakeId)
+
+    useEffect(() => {
+        setValue('vehicle_model_id', '')
+    }, [selectedMakeId, setValue])
+
+    return (
+        <div className="rounded-2xl border border-[#ADABAB]/35 bg-white/95 p-3 sm:p-5">
+            <div className="mb-3 flex flex-col gap-0.5 border-b border-[#ADABAB]/30 pb-3">
+                <h3 className="text-base font-semibold sm:text-lg">Vehicle Details</h3>
+                <p className="text-xs text-muted-foreground sm:text-sm">
+                    Provide the make, model, and year of manufacture.
+                </p>
+            </div>
+
+            <div className="grid grid-cols-3 gap-3">
+                <Controller
+                    control={control}
+                    name="vehicle_make_id"
+                    render={({ field }) => (
+                        <ReusableSingleSelectApiInput
+                            url="taxonomies/vehicle/makes"
+                            value={field.value}
+                            onChange={field.onChange}
+                            label="Vehicle Make"
+                            required
+                            placeholder="Select make..."
+                        />
+                    )}
+                />
+
+                <Controller
+                    control={control}
+                    name="vehicle_model_id"
+                    render={({ field }) => (
+                        <ReusableSingleSelectApiInput
+                            url={canFetchModels ? 'taxonomies/vehicle/models' : ''}
+                            queryParams={
+                                canFetchModels
+                                    ? {
+                                          make_id: selectedMakeId,
+                                      }
+                                    : {}
+                            }
+                            value={field.value}
+                            onChange={field.onChange}
+                            label="Vehicle Model"
+                            required
+                            disabled={!canFetchModels}
+                            placeholder={canFetchModels ? 'Select model...' : 'Select make first'}
+                        />
+                    )}
+                />
+
+                <ReuseableInput
+                    className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                    control={control}
+                    name="year"
+                    label="Year of Manufacture"
+                    type="number"
+                    placeholder="e.g. 2020"
+                />
+            </div>
+        </div>
+    )
 }
 
 export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({ goToNextStep, goToPrevStep }) => {
@@ -230,6 +304,7 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
                     </div>
                     {ActiveFormPanel && selectedTabValue ? (
                         <div className="mt-8 space-y-3">
+                            <VehicleDetailsBox />
                             <div className="flex flex-col gap-0.5 border-b border-[#ADABAB]/30 pb-3">
                                 <h2 className="text-base font-semibold sm:text-lg">
                                     Details for {activeTab?.label}
