@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
-import { Button, ReuseableInput, ReuseableSingleSelectNationalityInput } from "@/dev/core"
+import { Button, ReuseableInput } from "@/dev/core"
 import { ArrowLeftCircle, ArrowRightCircle, CircleCheck, ShieldCheck } from "lucide-react"
-import { Controller, useForm } from "react-hook-form"
+import { useForm } from "react-hook-form"
 import { FieldGroup } from "@/components/ui/field"
 import { ShowToast } from "@/utils/utils"
 import { CustomerDetailsSchema } from "@/types/form-schema"
@@ -27,7 +27,6 @@ export const CustomerVerificationDetails = ({ goToNextStep, goToPrevStep }: Cust
       last_name: "",
       email: "",
       phone: "",
-      country: "",
     },
   })
 
@@ -103,18 +102,6 @@ export const CustomerVerificationDetails = ({ goToNextStep, goToPrevStep }: Cust
                 name="phone"
                 label="Mobile Number"
                 type="tel"
-              />
-              <Controller
-                control={form.control}
-                name="country"
-                render={({ field }) => (
-                  <ReuseableSingleSelectNationalityInput
-                    label="Nationality"
-                    required
-                    value={field.value}
-                    onChange={field.onChange}
-                  />
-                )}
               />
             </div>
           </FieldGroup>
