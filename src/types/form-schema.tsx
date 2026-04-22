@@ -24,7 +24,9 @@ export const CustomerDetailsSchema = z.object({
     .or(z.literal("")),
   country: z
     .string()
-    .min(1, "Select a country"),
+    .min(1, "Select a country")
+    .optional()
+    .or(z.literal("")),
 })
 
 export const OTPVerificationSchema = z.object({
