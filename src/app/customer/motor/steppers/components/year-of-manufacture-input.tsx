@@ -21,7 +21,8 @@ export function YearOfManufactureInput<TFieldValues extends FieldValues>({
 }: YearOfManufactureInputProps<TFieldValues>) {
   const currentYear = new Date().getFullYear()
 
-  const minYear = useMemo(() => {
+  const minYear = useMemo<number | null>(() => {
+    if (String(covertypeId ?? "").trim().length === 0) return null
     const isComprehensive = String(covertypeId ?? "") === String(comprehensiveId)
     return isComprehensive ? currentYear - 15 : currentYear - 50
   }, [covertypeId, comprehensiveId, currentYear])
@@ -31,10 +32,10 @@ export function YearOfManufactureInput<TFieldValues extends FieldValues>({
       className={className}
       control={control}
       name={(name ?? ("year" as Path<TFieldValues>)) as Path<TFieldValues>}
-      label={`Year of Manufacture (min ${minYear})`}
+      label={minYear ? `Year of Manufacture (min ${minYear})` : "Year of Manufacture"}
       required={required}
       type="number"
-      placeholder={`e.g. ${Math.min(currentYear, Math.max(minYear, currentYear - 2))}`}
+      placeholder={`e.g. ${currentYear - 2}`}
     />
   )
 }

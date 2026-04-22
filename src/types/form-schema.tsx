@@ -75,6 +75,8 @@ export const VehicleDetailsSchema = z.object({
     const comprehensiveCoverTypeId = "1384"
     const defaultMinYear = currentYear - 50
 
+    if (String(data.covertype_id ?? "").trim().length === 0) return
+
     const isComprehensive = String(data.covertype_id) === comprehensiveCoverTypeId
     const minYear = isComprehensive ? currentYear - 15 : defaultMinYear
 

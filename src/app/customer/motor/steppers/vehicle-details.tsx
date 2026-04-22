@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button } from '@/dev/core'
 import {
+    ReusableCheckboxGrid,
     ReusableSelect,
     ReusableSingleSelectApiInput,
     ReuseableInput,
@@ -37,6 +38,7 @@ import { UseAuth } from '@/stores/auth-store'
 import { extractErrorMessage } from '@/utils/helpers'
 import { cn } from '@/lib/utils'
 import { OWNERSHIPOPTIONS } from '@/utils/constatnts'
+import { PROFFESIONALVALUATIONCHECKBOX } from '@/utils/enums'
 import { MotorCommercialPage } from './tabs/motor-commercial'
 import { MotorPrivatePage } from './tabs/motor-private'
 import { MotorPsvPage } from './tabs/motor-psv'
@@ -44,6 +46,36 @@ import { MotorSpecialVehicle } from './tabs/motor-special-vehicle'
 import { YearOfManufactureInput } from './components/year-of-manufacture-input'
 
 type MotorClassTab = TTabItem & { slug: string }
+
+function canonicalizeMotorClassKey(input: string | null | undefined): string {
+    const normalized = String(input ?? '')
+        .trim()
+        .toLowerCase()
+        .replace(/[\s\-_]+/g, '')
+        .replace(/[^a-z0-9]/g, '')
+
+    if (!normalized) return ''
+
+    // Aliases for common API variations
+    const alias: Record<string, string> = {
+        priv: 'private',
+        personal: 'private',
+
+        comm: 'commercial',
+        commercialvehicle: 'commercial',
+        commercialmotor: 'commercial',
+
+        psvvehicle: 'psv',
+        publicservicevehicle: 'psv',
+        publicservice: 'psv',
+
+        special: 'specialvehicle',
+        specialvehicles: 'specialvehicle',
+        specialmotor: 'specialvehicle',
+    }
+
+    return alias[normalized] ?? normalized
+}
 
 const SLUG_ICON: Record<string, LucideIcon> = {
     private: Car,
@@ -64,15 +96,15 @@ const VehicleDetailsBox: React.FC = () => {
 
     return (
         <>
-            <div className="flex flex-col gap-0.5 border-b border-[#ADABAB]/30 pb-3">
+            <div className="flex flex-col gap-0.5 pb-3">
                 <h3 className="text-base font-semibold sm:text-lg">Vehicle Details</h3>
                 <p className="text-xs text-muted-foreground sm:text-sm">
-                    Provide the make, model, and year of manufacture.
+                    Provide vehicle related details.
                 </p>
             </div>
 
             <div className="rounded-2xl border border-[#ADABAB]/35 bg-white/95 p-3 sm:p-5">
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     <Controller
                         control={control}
                         name="vehicle_make_id"
@@ -128,6 +160,25 @@ const VehicleDetailsBox: React.FC = () => {
                         required
                         placeholder="e.g. KAA 123A"
                     />
+
+                    <ReuseableInput
+                        className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                        control={control}
+                        name="vehicle_value"
+                        label="Vehicle Value"
+                        type="text"
+                        thousandsSeparator
+                        placeholder="vehicle value"
+                    />
+                </div>
+
+                <div className="mt-5 overflow-x-auto">
+                    <ReusableCheckboxGrid
+                        className="text-[#C20C0C]"
+                        options={PROFFESIONALVALUATIONCHECKBOX}
+                        columns={1}
+                        name="valued_by_professional"
+                    />
                 </div>
             </div>
         </>
@@ -180,10 +231,33 @@ const CoverDetailsBox: React.FC = () => {
     )
 }
 
+type AnimatedSectionProps = {
+    show: boolean
+    children: React.ReactNode
+    className?: string
+}
+
+function AnimatedSection({ show, children, className }: AnimatedSectionProps) {
+    return (
+        <div
+            data-state={show ? 'open' : 'closed'}
+            className={cn(
+                'transition-all duration-300 ease-out',
+                show
+                    ? 'opacity-100 translate-y-0 max-h-[2000px]'
+                    : 'pointer-events-none opacity-0 -translate-y-1 max-h-0 overflow-hidden',
+                className
+            )}
+        >
+            {children}
+        </div>
+    )
+}
+
 export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({ goToNextStep, goToPrevStep }) => {
     const [selectedTabValue, setSelectedTabValue] = useState<string>("");
 
-    const { user } = UseAuth();
+    const { user, alpha } = UseAuth();
     const { data, isLoading } = UseApiQuery<SubmitResponse>({
         url: 'motor/general-tools/vehicle_classes',
         queryOptions: {
@@ -204,10 +278,10 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
             psv: MotorPsvPage,
             specialvehicle: MotorSpecialVehicle,
         }
-        const normalizeSlug = (slug: string | null | undefined) =>
-            (slug ?? "").replace(/[^a-zA-Z0-9]/g, "").toLowerCase()
         return activeVehicleClasses.map((item) => {
-            const cleanedSlug = normalizeSlug(item.slug)
+            const cleanedSlug =
+                canonicalizeMotorClassKey(item.slug) ||
+                canonicalizeMotorClassKey(item.name)
 
             return {
                 value: String(item.id),
@@ -233,7 +307,7 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
         reValidateMode: "onChange",
         defaultValues: {
             user_id: user?.id ?? "",
-            country_id: "",
+            country_id: alpha || "KE",
             covertype_id: "",
             covering_id: "",
             ownership: "",
@@ -249,6 +323,22 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
             valued_by_professional: false
         },
     })
+
+    useEffect(() => {
+        form.setValue("country_id", alpha || "KE")
+    }, [alpha, form])
+
+    const vehicleMakeId = useWatch({ control: form.control, name: 'vehicle_make_id' })
+    const vehicleModelId = useWatch({ control: form.control, name: 'vehicle_model_id' })
+    const year = useWatch({ control: form.control, name: 'year' })
+    const vehicleRegistrationNumber = useWatch({ control: form.control, name: 'vehicle_registration_number' })
+
+    const hasSelectedClass = Boolean(selectedTabValue)
+    const hasCompletedVehicleDetails =
+        Boolean(String(vehicleMakeId ?? '').trim()) &&
+        Boolean(String(vehicleModelId ?? '').trim()) &&
+        Boolean(String(year ?? '').trim()) &&
+        Boolean(String(vehicleRegistrationNumber ?? '').trim())
 
     const submitMutation = UseApiMutation<SubmitResponse, Record<string, any>>({
         url: "quotation/motor",
@@ -277,6 +367,7 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
 
         submitMutation.mutate({
             ...data,
+            country_id: String(data.country_id ?? "").trim() || alpha || "KE",
             coverfor_id: data.vehicle_class_id,
             valued_by_professional: valuedByProfessional,
         })
@@ -371,24 +462,26 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
                             </>
                         )}
                     </div>
-                    {ActiveFormPanel && selectedTabValue ? (
+
+                    {!isClassTabsLoading && motoTabs.length > 0 ? (
                         <div className="mt-8 space-y-3">
-                            <VehicleDetailsBox />
-                            <div className="flex flex-col gap-0.5 border-b border-[#ADABAB]/30 pb-3">
-                                <h2 className="text-base font-semibold sm:text-lg">
-                                    Details for {activeTab?.label}
-                                </h2>
-                                <p className="text-xs text-muted-foreground sm:text-sm">
-                                    Complete the fields below, then continue.
-                                </p>
-                            </div>
-                            <div className="rounded-2xl border border-[#ADABAB]/35 bg-white/95 p-3 sm:p-5">
-                                <ActiveFormPanel />
-                            </div>
-                        </div>
-                    ) : !isClassTabsLoading && motoTabs.length > 0 ? (
-                        <div className="mt-8 rounded-xl border border-dashed border-[#C20C0C]/25 bg-[#C20C0C]/4 px-4 py-6 text-center text-sm text-muted-foreground">
-                            Select a vehicle class above to continue.
+                            <AnimatedSection show={hasSelectedClass}>
+                                <VehicleDetailsBox />
+                            </AnimatedSection>
+
+                            <AnimatedSection show={hasSelectedClass && hasCompletedVehicleDetails}>
+                            <div className="flex flex-col gap-0.5 pb-3">
+                                    <h2 className="text-base font-semibold sm:text-lg">
+                                        Details for {activeTab?.label}
+                                    </h2>
+                                    <p className="text-xs text-muted-foreground sm:text-sm">
+                                        Complete the fields below, then continue.
+                                    </p>
+                                </div>
+                                <div className="rounded-2xl border border-[#ADABAB]/35 bg-white/95 p-3 sm:p-5">
+                                    {ActiveFormPanel ? <ActiveFormPanel /> : null}
+                                </div>
+                            </AnimatedSection>
                         </div>
                     ) : null}
                 </div>

@@ -1,11 +1,7 @@
 import { FieldGroup } from '@/components/ui/field'
 import {
-    ReusableCheckboxGrid,
     ReusableSingleSelectApiInput,
-    ReuseableInput,
-    ReuseableSingleSelectCountriesInput
 } from '@/dev/core'
-import { PROFFESIONALVALUATIONCHECKBOX } from '@/utils/enums'
 import React, { useEffect } from 'react'
 import {
     Controller,
@@ -28,14 +24,6 @@ export const MotorSpecialVehicle: React.FC = () => {
             <div className="justify-between p-2">
                 <FieldGroup>
                     <div className="grid grid-cols-2 gap-x-5 gap-2">
-                        <ReuseableInput
-                            className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
-                            control={control}
-                            name="vehicle_value"
-                            label="Vehicle Value"
-                            type="number"
-                            placeholder="vehicle value"
-                        />
                         <Controller
                             control={control}
                             name="used_for_id"
@@ -65,28 +53,7 @@ export const MotorSpecialVehicle: React.FC = () => {
                                 </div>
                             )}
                         />
-                        <Controller
-                            control={control}
-                            name="country_id"
-                            render={({ field }) => (
-                                <div>
-                                    <ReuseableSingleSelectCountriesInput
-                                        value={field.value}
-                                        onChange={field.onChange}
-                                        label="Country"
-                                        required
-                                        placeholder="Select Country..."
-                                    />
-                                </div>
-                            )}
-                        />
-                    </div>
-                    <div className="overflow-x-auto">
-                        <ReusableCheckboxGrid
-                            options={PROFFESIONALVALUATIONCHECKBOX}
-                            columns={1}
-                            name='valued_by_professional'
-                        />
+                        <div />
                     </div>
                 </FieldGroup>
             </div>

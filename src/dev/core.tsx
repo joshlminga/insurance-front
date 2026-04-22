@@ -263,18 +263,35 @@ export function ReuseableInput<T extends FieldValues>({
     placeholder,
     type = "text",
     step,
+    thousandsSeparator = false,
     autoComplete = "off",
     required = false,
     disabled = false,
     className,
     rows,
 }: RHFInputProps<T>) {
+    const toRawNumberString = (value: string) => {
+        // Keep digits and at most one decimal point.
+        const cleaned = value.replace(/,/g, "").replace(/[^\d.]/g, "")
+        const [intPart, ...rest] = cleaned.split(".")
+        if (rest.length === 0) return intPart
+        return `${intPart}.${rest.join("")}`
+    }
+
+    const formatThousands = (raw: string) => {
+        if (!raw) return ""
+        const [intPart, decPart] = raw.split(".")
+        const withCommas = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+        return decPart !== undefined && decPart.length > 0 ? `${withCommas}.${decPart}` : withCommas
+    }
+
     return (
         <Controller
             name={name}
             control={control}
             render={({ field, fieldState }) => {
                 const isFile = type === "file"
+                const shouldFormatThousands = !isFile && thousandsSeparator
 
                 return (
                     <Field data-invalid={fieldState.invalid}>
@@ -282,7 +299,7 @@ export function ReuseableInput<T extends FieldValues>({
                         <Input
                             {...(!isFile ? field : {})}
                             id={id}
-                            type={type}
+                            type={shouldFormatThousands ? "text" : type}
                             step={step}
                             placeholder={placeholder}
                             autoComplete={autoComplete}
@@ -294,12 +311,22 @@ export function ReuseableInput<T extends FieldValues>({
                                 fieldState.invalid &&
                                 "border-red-500 focus-visible:ring-red-500"
                             )}
+                            value={
+                                shouldFormatThousands
+                                    ? formatThousands(String(field.value ?? ""))
+                                    : (field.value ?? "")
+                            }
                             onChange={(e) => {
                                 if (isFile) {
                                     const file = (e.target as HTMLInputElement).files?.[0]
                                     field.onChange(file)
                                 } else {
-                                    field.onChange(e)
+                                    if (shouldFormatThousands) {
+                                        const nextRaw = toRawNumberString((e.target as HTMLInputElement).value)
+                                        field.onChange(nextRaw)
+                                    } else {
+                                        field.onChange(e)
+                                    }
                                 }
                             }}
                             {...(type === "textarea" && { rows })}
