@@ -1,6 +1,17 @@
 /* eslint-disable no-extra-boolean-cast */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { PageHeader } from "@/components/shared"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { buttonVariants } from "@/components/ui/button"
 import { ActionColumn } from "@/dev/columns"
 import { CustomDialogComponent } from "@/dev/core"
 import { CustomBaseTable, SearchTools } from "@/dev/table"
@@ -17,7 +28,7 @@ import { EMETHODS } from "@/utils/constatnts"
 import { extractErrorMessage } from "@/utils/helpers"
 import { ShowToast } from "@/utils/utils"
 import { Plus } from "lucide-react"
-import { useReducer } from "react"
+import { useReducer, useState } from "react"
 
 import { OrganizationLocationColumns } from "@/dev/columns/admin/organization-location"
 import CreateOrganizationLocationModal from "./modals/create"
@@ -25,6 +36,11 @@ import ViewOrganizationLocationModal from "./modals/view"
 import EditOrganizationLocationModal from "./modals/edit"
 
 const OrganizationLocationPage = () => {
+  const [deleteTarget, setDeleteTarget] = useState<{
+    id: number | string
+    label: string
+  } | null>(null)
+
   const [filter, optionsDispatcher] = useReducer(
     ReusableReducer<TPaginationFilters & TFilterOptions>,
     { ...FILTEROPTIONS, page: 1, pageSize: 15 }
@@ -155,7 +171,14 @@ const OrganizationLocationPage = () => {
       onSelect: (rowData) => {
         const id = getRowId(rowData)
         if (!id) return
-        deleteLocationMutation.mutate({ id })
+        const orgName =
+          rowData?.organization_name ??
+          rowData?.organization?.name ??
+          "this location"
+        const country =
+          rowData?.country?.name ?? rowData?.country_name ?? null
+        const label = country ? `${orgName} (${country})` : orgName
+        setDeleteTarget({ id, label })
       },
       conditional: (rowData) => Boolean(getRowId(rowData)),
     },
@@ -270,6 +293,36 @@ const OrganizationLocationPage = () => {
           />
         )}
       </CustomDialogComponent>
+
+      <AlertDialog
+        open={deleteTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTarget(null)
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete organization location?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. You are about to delete the
+              location for &quot;{deleteTarget?.label}&quot;. Are you sure?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className={buttonVariants({ variant: "destructive" })}
+              disabled={deleteLocationMutation.isPending}
+              onClick={() => {
+                if (!deleteTarget) return
+                deleteLocationMutation.mutate({ id: deleteTarget.id })
+              }}
+            >
+              {deleteLocationMutation.isPending ? "Deleting…" : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
