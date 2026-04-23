@@ -21,6 +21,8 @@ import { useReducer } from "react"
 
 import { OrganizationLocationColumns } from "@/dev/columns/admin/organization-location"
 import CreateOrganizationLocationModal from "./modals/create"
+import ViewOrganizationLocationModal from "./modals/view"
+import EditOrganizationLocationModal from "./modals/edit"
 
 const OrganizationLocationPage = () => {
   const [filter, optionsDispatcher] = useReducer(
@@ -119,6 +121,26 @@ const OrganizationLocationPage = () => {
       : Boolean(rowData?.is_active)
 
   const ActionsHandlerMapping: SingleActionsHandler<any>[] = [
+    {
+      label: "View",
+      onSelect: (rowData) => {
+        handleDialogContextSwitch({
+          componentProps: { data: rowData, refetch },
+          Component: ViewOrganizationLocationModal,
+        })
+      },
+      conditional: (rowData) => Boolean(getRowId(rowData)),
+    },
+    {
+      label: "Edit",
+      onSelect: (rowData) => {
+        handleDialogContextSwitch({
+          componentProps: { data: rowData, refetch },
+          Component: EditOrganizationLocationModal,
+        })
+      },
+      conditional: (rowData) => Boolean(getRowId(rowData)),
+    },
     {
       label: "Set Default",
       onSelect: (rowData) => {

@@ -1114,7 +1114,10 @@ export function ReuseableSingleSelectCountriesInput<T extends FieldValues>({
 
     const [filter, optionsDispatcher] = useReducer(
         ReusableReducer<TPaginationFilters & TFilterOptions>,
-        { ...FILTEROPTIONS, page: 1, pageSize: 15 }
+        // NOTE: Select can only show the chosen item if it's in the loaded list.
+        // Loading more countries upfront avoids “not picked” when the selected id
+        // isn’t in the first small page.
+        { ...FILTEROPTIONS, page: 1, pageSize: 300 }
     )
     const observerRef = useRef<HTMLDivElement | null>(null)
     const { data, isLoading } = UseApiQuery<TCountryResponse>({

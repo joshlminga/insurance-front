@@ -388,6 +388,28 @@ export const OrganizationLocationCreateSchema = z.object({
     ),
 })
 
+export const OrganizationLocationEditSchema = z.object({
+  initials: z
+    .string()
+    .optional()
+    .or(z.literal(""))
+    .refine((value) => String(value ?? "").length === 0 || String(value).length >= 2, {
+      message: "Initials must be at least 2 characters",
+    })
+    .refine((value) => String(value ?? "").length === 0 || String(value).length <= 10, {
+      message: "Initials cannot exceed 10 characters",
+    }),
+  country_id: z.string().min(1, "Country is required"),
+  logo: z
+    .any()
+    .optional()
+    .refine((file) => !file || file instanceof File, "Logo must be a valid file")
+    .refine(
+      (file) => !file || ACCEPTED_IMAGE_TYPES.includes(file.type),
+      "Logo must be jpeg, png, jpg, or webp"
+    ),
+})
+
 const ACCEPTED_BROCHURE_MIME_TYPES = [
   "application/pdf",
   "text/csv",
