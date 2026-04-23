@@ -31,7 +31,6 @@ export const CreateOrganizationModal = ({ handleDialogContextSwitch, componentPr
             domain: "",
             hq_location: "",
             admin_id: "",
-            initials: "",
             logo: undefined,
         },
     })
@@ -63,7 +62,6 @@ export const CreateOrganizationModal = ({ handleDialogContextSwitch, componentPr
         formData.append("organization_type", data.organization_type)
         formData.append("domain", data.domain)
         formData.append("admin_id", data.admin_id)
-        formData.append("initials", data.initials)
         if (data.hq_location) {
             formData.append("locations[]", data.hq_location)
         }
@@ -88,7 +86,7 @@ export const CreateOrganizationModal = ({ handleDialogContextSwitch, componentPr
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="grid grid-cols-6 gap-4"
             >
-                <div className="col-span-6 sm:col-span-4">
+                <div className="col-span-6">
                     <ReuseableInput
                         control={form.control}
                         name="name"
@@ -98,17 +96,7 @@ export const CreateOrganizationModal = ({ handleDialogContextSwitch, componentPr
                     />
                 </div>
 
-                <div className="col-span-6 sm:col-span-2">
-                    <ReuseableInput
-                        control={form.control}
-                        name="initials"
-                        label="Organization Initials"
-                        className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
-                        required
-                    />
-                </div>
-
-                <div className="col-span-6">
+                <div className="col-span-6 sm:col-span-3">
                     <ReusableSelect
                         control={form.control}
                         name="organization_type"
@@ -118,7 +106,7 @@ export const CreateOrganizationModal = ({ handleDialogContextSwitch, componentPr
                     />
                 </div>
 
-                <div className="col-span-6">
+                <div className="col-span-6 sm:col-span-3">
                     <Controller
                         control={form.control}
                         name="admin_id"

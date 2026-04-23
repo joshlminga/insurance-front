@@ -270,10 +270,6 @@ export const OrganizationSchema = z.object({
   admin_id: z
     .string()
     .min(1, "Admin ID is required"),
-  initials: z
-    .string()
-    .min(2, "Initials must be at least 2 characters")
-    .max(10, "Initials cannot exceed 10 characters"),
   logo: z
     .any()
     .refine((file) => file instanceof File, "Attach a Logo")
@@ -281,6 +277,20 @@ export const OrganizationSchema = z.object({
       (file) => ACCEPTED_IMAGE_TYPES.includes(file.type),
       "Logo must be jpeg, png, jpg, or webp"
     ),
+})
+
+export const OrganizationEditSchema = z.object({
+  name: z
+    .string()
+    .min(2, "Organization name must be at least 2 characters")
+    .max(100, "Organization name is too long"),
+  organization_type: z
+    .string()
+    .min(2, "Organization type must be at least 2 characters")
+    .max(100, "Organization type is too long"),
+  admin_id: z
+    .string()
+    .min(1, "Admin ID is required"),
 })
 
 export const UsersSchema = z.object({
@@ -347,6 +357,31 @@ export const EditLocationSchema = z.object({
       (file) => !file || file instanceof File,
       "Logo must be a valid file"
     )
+    .refine(
+      (file) => !file || ACCEPTED_IMAGE_TYPES.includes(file.type),
+      "Logo must be jpeg, png, jpg, or webp"
+    ),
+})
+
+export const OrganizationLocationCreateSchema = z.object({
+  organization_id: z
+    .union([z.string(), z.number()])
+    .refine((value) => String(value).trim().length > 0, "Organization is required"),
+  initials: z
+    .string()
+    .optional()
+    .or(z.literal(""))
+    .refine((value) => String(value ?? "").length === 0 || String(value).length >= 2, {
+      message: "Initials must be at least 2 characters",
+    })
+    .refine((value) => String(value ?? "").length === 0 || String(value).length <= 10, {
+      message: "Initials cannot exceed 10 characters",
+    }),
+  country_id: z.string().min(1, "Country is required"),
+  logo: z
+    .any()
+    .optional()
+    .refine((file) => !file || file instanceof File, "Logo must be a valid file")
     .refine(
       (file) => !file || ACCEPTED_IMAGE_TYPES.includes(file.type),
       "Logo must be jpeg, png, jpg, or webp"

@@ -1,47 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CardFooter } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import {
     Button,
     ReusableSelect,
     ReuseableInput,
     ReuseableSingleSelectAdminInput,
-    ReuseableSingleSelectCountriesInput,
 } from '@/dev/core'
 import { UseApiMutation } from '@/hooks/hooks'
-import { OrganizationSchema } from '@/types/form-schema'
-import { OrganizationFormValues } from '@/types/schema'
+import { OrganizationEditSchema } from '@/types/form-schema'
+import { OrganizationEditFormValues } from '@/types/schema'
 import { SubmitResponse } from '@/types/types'
 import { EMETHODS, ORGANIZATIONTYPES } from '@/utils/constatnts'
 import { extractErrorMessage } from '@/utils/helpers'
 import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Controller, useForm } from 'react-hook-form'
-
-const mapLocationsToIds = (locations: any): string[] => {
-    if (!Array.isArray(locations)) return []
-    return locations
-        .map((location) => {
-            if (typeof location === 'string' || typeof location === 'number') {
-                return String(location)
-            }
-            const nestedCountryId =
-                location?.country?.id ??
-                location?.country?.country_id ??
-                location?.country?.value
-
-            return String(
-                location?.id ??
-                nestedCountryId ??
-                location?.location_id ??
-                location?.country_id ??
-                location?.value ??
-                ''
-            )
-        })
-        .filter(Boolean)
-}
 
 export const EditOrganizationModal = ({
     componentProps,
@@ -53,28 +26,28 @@ export const EditOrganizationModal = ({
     }
     handleDialogContextSwitch: (context?: any) => void
 }) => {
-    const organization = componentProps?.data ?? {}
-    const form = useForm<OrganizationFormValues>({
-        resolver: zodResolver(OrganizationSchema),
+
+    const organizationId =
+        componentProps?.data?.organization_id ??
+        componentProps?.data?.id
+
+    const form = useForm<OrganizationEditFormValues>({
+        resolver: zodResolver(OrganizationEditSchema),
         defaultValues: {
-            name: organization?.name ?? organization?.organization_name ?? '',
-            organization_type: organization?.organization_type ?? '',
-            domain: organization?.domain ?? '',
-            admin_id: organization?.organization_admin_id ? String(organization?.organization_admin_id) : '',
-            initials: organization?.initials ?? '',
-            logo: organization?.logo ?? undefined,
-            hq_location: mapLocationsToIds(organization?.organization_location)?.[0] ?? '',
+            name: componentProps?.data?.organization_name ?? '',
+            organization_type: componentProps?.data?.organization_type ?? '',
+            admin_id: String(componentProps?.data?.organization_admin_id ?? ''),
         },
     })
 
     const updateMutation = UseApiMutation<SubmitResponse, FormData>({
-        url: `organization/${organization?.organization_id}`,
+        url: `organization/${organizationId}`,
         config: {
             headers: {
                 "Content-Type": "multipart/form-data",
             },
         },
-        method: EMETHODS.PATCH,
+        method: EMETHODS.POST,
         mutationOptions: {
             onSuccess: (response) => {
                 ShowToast.success(response?.message || 'Organization updated successfully')
@@ -87,24 +60,15 @@ export const EditOrganizationModal = ({
         },
     })
 
-    const onSubmit = (data: OrganizationFormValues) => {
-        if (!organization?.organization_id) {
+    const onSubmit = (data: OrganizationEditFormValues) => {
+        if (!organizationId) {
             ShowToast.error('Unable to update organization: missing organization id')
             return
         }
         const formData = new FormData()
         formData.append("name", data.name)
         formData.append("organization_type", data.organization_type)
-        formData.append("domain", data.domain)
         formData.append("admin_id", data.admin_id)
-        formData.append("initials", data.initials)
-
-        if (data.hq_location) {
-            formData.append("locations[]", data.hq_location)
-        }
-        if (data.logo instanceof File) {
-            formData.append("logo", data.logo)
-        }
         updateMutation.mutate(formData)
     }
 
@@ -117,8 +81,14 @@ export const EditOrganizationModal = ({
                 </p>
             </div>
 
+            {!organizationId && (
+                <div className="text-sm text-destructive">
+                    Unable to load organization details: missing organization id.
+                </div>
+            )}
+
             <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-6 gap-4">
-                <div className="col-span-6 sm:col-span-4">
+                <div className="col-span-6">
                     <ReuseableInput
                         control={form.control}
                         name="name"
@@ -128,17 +98,7 @@ export const EditOrganizationModal = ({
                     />
                 </div>
 
-                <div className="col-span-6 sm:col-span-2">
-                    <ReuseableInput
-                        control={form.control}
-                        name="initials"
-                        label="Organization Initials"
-                        className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
-                        required
-                    />
-                </div>
-
-                <div className="col-span-6">
+                <div className="col-span-6 sm:col-span-3">
                     <ReusableSelect
                         control={form.control}
                         name="organization_type"
@@ -148,7 +108,7 @@ export const EditOrganizationModal = ({
                     />
                 </div>
 
-                <div className="col-span-6">
+                <div className="col-span-6 sm:col-span-3">
                     <Controller
                         control={form.control}
                         name="admin_id"
@@ -156,75 +116,11 @@ export const EditOrganizationModal = ({
                             <ReuseableSingleSelectAdminInput
                                 label="Admin"
                                 required
-                                value={field.value}
+                                value={field.value ?? ''}
                                 onChange={field.onChange}
                             />
                         )}
                     />
-                </div>
-
-                <div className="col-span-6 sm:col-span-3">
-                    <Controller
-                        control={form.control}
-                        name="domain"
-                        render={({ field, fieldState }) => (
-                            <div className="space-y-2">
-                                <Label>
-                                    Acensure Subdomain
-                                    <span className="text-destructive ml-1">*</span>
-                                </Label>
-                                <div className="flex items-center gap-2">
-                                    <Input
-                                        value={field.value ?? ""}
-                                        onChange={(e) => {
-                                            const raw = e.target.value
-                                                .toLowerCase()
-                                                .replace(/[^a-z0-9-]/g, "")
-                                            field.onChange(raw)
-                                        }}
-                                        placeholder="e.g. acme"
-                                        className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
-                                    />
-                                    <span className="text-sm text-muted-foreground whitespace-nowrap">
-                                        .acensure.com
-                                    </span>
-                                </div>
-                                {fieldState.error?.message && (
-                                    <p className="text-sm text-red-500">
-                                        {fieldState.error.message}
-                                    </p>
-                                )}
-                            </div>
-                        )}
-                    />
-                </div>
-
-                <div className="col-span-6 sm:col-span-3">
-                    <Controller
-                        control={form.control}
-                        name="hq_location"
-                        render={({ field }) => (
-                            <ReuseableSingleSelectCountriesInput
-                                label="HQ location"
-                                required
-                                value={field.value}
-                                onChange={field.onChange}
-                            />
-                        )}
-                    />
-                </div>
-
-                <div className="col-span-6">
-                    <ReuseableInput
-                        className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
-                        control={form.control}
-                        type="file"
-                        name="logo"
-                        label="Organization Main Logo"
-                    />
-                    <p className="text-xs text-muted-foreground mt-1">
-                        Logo used in HQ country.
-                    </p>
                 </div>
                 <CardFooter className="flex flex-col sm:flex-row justify-between gap-3 mt-2 px-0">
                     <Button
@@ -237,6 +133,7 @@ export const EditOrganizationModal = ({
                     <Button
                         type="submit"
                         className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
+                        disabled={!organizationId || updateMutation.isPending}
                         loading={updateMutation.isPending}>
                         Save Changes
                     </Button>

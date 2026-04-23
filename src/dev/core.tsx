@@ -108,7 +108,8 @@ const formatSegment = (segment: string) => {
 
 export const BreadCrumbComponent = () => {
     const location = useLocation();
-    const pathSegments = location.pathname.split('/').filter(Boolean);
+    const rawSegments = location.pathname.split('/').filter(Boolean);
+    const pathSegments = rawSegments[0] === "dashboard" ? rawSegments.slice(1) : rawSegments;
 
     return (
         <div className="w-auto">
@@ -119,11 +120,37 @@ export const BreadCrumbComponent = () => {
                             <Link to="/">Dashboard</Link>
                         </BreadcrumbLink>
                     </BreadcrumbItem>
-                    {pathSegments.map((segment, index) => {
-                        const href = '/' + pathSegments.slice(0, index + 1).join('/');
+                    {pathSegments.flatMap((segment, index) => {
+                        if (segment === "organization-location") {
+                            const isLast = index === pathSegments.length - 1
+                            return [
+                                <Fragment key="/dashboard/organization">
+                                    <BreadcrumbSeparator />
+                                    <BreadcrumbItem>
+                                        <BreadcrumbLink asChild>
+                                            <Link to="/dashboard/organization">Organization</Link>
+                                        </BreadcrumbLink>
+                                    </BreadcrumbItem>
+                                </Fragment>,
+                                <Fragment key="/dashboard/organization-location">
+                                    <BreadcrumbSeparator />
+                                    <BreadcrumbItem>
+                                        {isLast ? (
+                                            <BreadcrumbPage>Location</BreadcrumbPage>
+                                        ) : (
+                                            <BreadcrumbLink asChild>
+                                                <Link to="/dashboard/organization-location">Location</Link>
+                                            </BreadcrumbLink>
+                                        )}
+                                    </BreadcrumbItem>
+                                </Fragment>,
+                            ]
+                        }
+
+                        const href = '/dashboard/' + pathSegments.slice(0, index + 1).join('/');
                         const isLast = index === pathSegments.length - 1;
                         const title = formatSegment(segment);
-                        return (
+                        return [
                             <Fragment key={href}>
                                 <BreadcrumbSeparator />
                                 <BreadcrumbItem>
@@ -136,7 +163,7 @@ export const BreadCrumbComponent = () => {
                                     )}
                                 </BreadcrumbItem>
                             </Fragment>
-                        );
+                        ];
                     })}
                 </BreadcrumbList>
             </Breadcrumb>
@@ -311,11 +338,13 @@ export function ReuseableInput<T extends FieldValues>({
                                 fieldState.invalid &&
                                 "border-red-500 focus-visible:ring-red-500"
                             )}
-                            value={
-                                shouldFormatThousands
-                                    ? formatThousands(String(field.value ?? ""))
-                                    : (field.value ?? "")
-                            }
+                            {...(!isFile
+                                ? {
+                                    value: shouldFormatThousands
+                                        ? formatThousands(String(field.value ?? ""))
+                                        : (field.value ?? ""),
+                                }
+                                : {})}
                             onChange={(e) => {
                                 if (isFile) {
                                     const file = (e.target as HTMLInputElement).files?.[0]
@@ -1335,6 +1364,61 @@ export function ReuseableSingleSelectAdminInput<T extends FieldValues>({
                     {!isLoading && users.length === 0 && (
                         <div className="px-3 py-2 text-sm text-muted-foreground">
                             No users found
+                        </div>
+                    )}
+                </SelectContent>
+            </Select>
+        </div>
+    )
+}
+
+export function ReuseableSingleSelectOrganizationInput<T extends FieldValues>({
+    value,
+    onChange,
+    placeholder = "Select organization...",
+    label,
+    required = false,
+    disabled = false,
+    className,
+}: ReuseableSingleSelectCountriesInputProps<T>) {
+    const { data, isLoading } = UseApiQuery<SubmitResponse>({
+        url: "organization",
+        params: { direction: "asc" },
+        queryOptions: { enabled: true },
+    })
+
+    const organizations = data?.data ?? []
+
+    return (
+        <div className={`space-y-2 ${className ?? ""}`}>
+            {label && (
+                <Label>
+                    {label}
+                    {required && <span className="text-destructive ml-1">*</span>}
+                </Label>
+            )}
+            <Select
+                value={value}
+                onValueChange={onChange}
+                disabled={disabled || isLoading}
+            >
+                <SelectTrigger className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]">
+                    <SelectValue
+                        placeholder={isLoading ? "Loading organizations..." : placeholder}
+                    />
+                </SelectTrigger>
+                <SelectContent>
+                    {organizations.map((org: any) => (
+                        <SelectItem
+                            key={org?.organization_id ?? org?.id}
+                            value={String(org?.organization_id ?? org?.id)}
+                        >
+                            {org?.organization_name ?? org?.name}
+                        </SelectItem>
+                    ))}
+                    {!isLoading && organizations.length === 0 && (
+                        <div className="px-3 py-2 text-sm text-muted-foreground">
+                            No organizations found
                         </div>
                     )}
                 </SelectContent>
