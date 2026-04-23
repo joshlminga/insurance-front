@@ -295,7 +295,7 @@ export function ReuseableInput<T extends FieldValues>({
 
                 return (
                     <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel htmlFor={id}>{label}</FieldLabel>
+                        <FieldLabel htmlFor={id}>{label}  {required && <span className="ml-1 text-red-500">*</span>}</FieldLabel>
                         <Input
                             {...(!isFile ? field : {})}
                             id={id}
