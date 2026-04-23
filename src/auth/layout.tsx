@@ -22,9 +22,9 @@ export default function AuthLayoutPage({
 }: AuthLayoutProps) {
   return (
     <main className="relative min-h-svh flex flex-col">
-      <Navbar className='bg-[#ADABAB30] w-full h-43.75 rounded-2xl backdrop-blur-[3.379px]' textStyle='text-[#141414]' navTextStyle="text-[#000000]" />
+      <Navbar className='bg-[#ADABAB30] w-full h-auto lg:h-43.75 rounded-2xl backdrop-blur-[3.379px]' textStyle='text-[#141414]' navTextStyle="text-[#000000]" />
 
-      <div className="bg-background flex flex-1 flex-col items-center gap-6 px-6 md:px-10 pt-56 sm:pt-72 pb-6 md:pb-10">
+      <div className="bg-background flex flex-1 flex-col items-center gap-6 px-6 md:px-10 pt-28 sm:pt-48 lg:pt-72 pb-6 md:pb-10">
         <div className="w-full max-w-md flex flex-col gap-6">
           <div className="flex flex-col items-center gap-2 text-center">
             <div className="flex flex-col items-center gap-2 font-bold text-xl text-[#C20C0C]">

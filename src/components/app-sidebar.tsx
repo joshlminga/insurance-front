@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/sidebar"
 import { EPREFIX, EROUTES } from "@/utils/enums"
 import AppLogo from "./ui/app-logo"
-import { UseAuth } from "./auth-provider"
+import { UseAuth } from "@/stores/auth-store"
 
 
 const navData = {
@@ -157,9 +157,19 @@ const navData = {
       ],
     },
     {
-      title: "Organizations",
+      title: "Organization",
       url: EROUTES.ORGANIZATION,
       icon: UserCog,
+      items: [
+        {
+          title: "Manage",
+          url: EROUTES.ORGANIZATION,
+        },
+        {
+          title: "Location",
+          url: EROUTES.ORGANIZATION_LOCATION,
+        },
+      ],
     },
     {
       title: "Users",

@@ -24,7 +24,9 @@ export const CustomerDetailsSchema = z.object({
     .or(z.literal("")),
   country: z
     .string()
-    .min(1, "Select a country"),
+    .min(1, "Select a country")
+    .optional()
+    .or(z.literal("")),
 })
 
 export const OTPVerificationSchema = z.object({
@@ -43,6 +45,7 @@ export const ResendOtpPayloadSchema = z.object({
 export const VehicleDetailsSchema = z.object({
   user_id: z.union([z.string(), z.number()]).or(z.literal("")),
   registration_number: z.string().optional().or(z.literal("")),
+  vehicle_registration_number: z.string().optional().or(z.literal("")),
   vehicle_model: z.string().optional().or(z.literal("")),
   vehicle_make: z.string().optional().or(z.literal("")),
   yom: z.string().optional().or(z.literal("")),
@@ -57,12 +60,7 @@ export const VehicleDetailsSchema = z.object({
   country_id: z.string().optional().or(z.literal("")),
   year: z
     .string()
-    .min(1, "YOM is required")
-    .refine((val) => {
-      const year = Number(val)
-      const currentYear = new Date().getFullYear()
-      return !isNaN(year) && year >= 2011 && year <= currentYear
-    }, `Year must be between 2011 and ${new Date().getFullYear()}`),
+    .min(1, "YOM is required"),
 
   ownership: z.string().min(1, "Ownarship is required"),
   vehicle_value: z.string().optional().or(z.literal("")),
@@ -72,6 +70,34 @@ export const VehicleDetailsSchema = z.object({
   vehicle_class_id: z.string().optional().or(z.literal("")),
   valued_by_professional: z.boolean().optional()
 })
+  .superRefine((data, ctx) => {
+    const currentYear = new Date().getFullYear()
+    const comprehensiveCoverTypeId = "1384"
+    const defaultMinYear = currentYear - 50
+
+    if (String(data.covertype_id ?? "").trim().length === 0) return
+
+    const isComprehensive = String(data.covertype_id) === comprehensiveCoverTypeId
+    const minYear = isComprehensive ? currentYear - 15 : defaultMinYear
+
+    const year = Number(data.year)
+    if (!Number.isFinite(year)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["year"],
+        message: `Accepted from ${minYear}`,
+      })
+      return
+    }
+
+    if (year < minYear || year > currentYear) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["year"],
+        message: `Accepted from ${minYear}`,
+      })
+    }
+  })
 
 export const LoginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -121,31 +147,36 @@ export const UpdatePasswordSchema = z.object({
 })
 
 export const KycSchema = z.object({
-  passport_number: z.string().min(1, "Passport/ID No number is required"),
-  tax_number: z.string().min(1, "Tax Number is required"),
+  nationality_id: z.string().min(1, "Select Nationality"),
+  id_type: z.string().min(1, "Slect ID Type"),
+  id_number: z.string().min(1, "Passport/ID No number is required"),
+  tax_pin: z.string().min(1, "Tax Number is required"),
+  color: z.string().min(1, "Car color is required"),
   chassis_number: z.string().min(1, "Vehicle chassis number is required"),
+  engine_cc: z.string().min(1, "Vehicle engine capacity is required"),
   engine_number: z.string().min(1, "Engine number is required"),
   total_seats: z.string().min(1, "Number of seats is required"),
   tonage_capacity: z.string().min(1, "Vehicle tonage capacity is required"),
-  log_book_attachment: z
+  logbook: z
     .any()
     .refine((file) => file instanceof File, "Attach a logbook"),
   tax_certificate: z
     .any()
     .refine((file) => file instanceof File, "Attach a tax certificate"),
-  passport_attachment: z
+  id_document: z
     .any()
     .refine((file) => file instanceof File, "Attach ID/Passport"),
 })
 
 export const InvoicePaymentSchema = z.object({
-  customer_name: z.string().min(1, "Customer Name is required"),
+  name: z.string().min(1, "Customer Name is required"),
   email: z.email().min(1, "Email is required"),
-  phone_number: z.string().min(1, "Phone number is required"),
-  covering: z.string().min(1, "Covering is required"),
-  provider: z.string().min(1, "Provider is required"),
-  cover_startdate: z.string().min(1, "Cover Start Date is required"),
-  total_payable: z.string().min(1, "Total payable is required"),
+  payment_plan: z.string().optional(),
+  phone: z.string().min(1, "Phone number is required"),
+  covering: z.string().optional(),
+  provider: z.string().optional(),
+  cover_start_date: z.string().min(1, "Cover Start Date is required"),
+  // total_payable: z.string().min(1, "Total payable is required"),
 })
 
 // Base payment schema with common fields
@@ -160,6 +191,7 @@ const BasePaymentSchema = z.object({
 // Mpesa specific fields
 const MpesaPaymentSchema = BasePaymentSchema.extend({
   payment_method: z.literal("mpesa"),
+  invoice_id: z.string(),
   phone_number: z.string()
     .min(10, "Phone number must be at least 10 digits")
     .regex(/^(?:\+254|254|0)?[17]\d{8}$/, "Invalid Kenyan phone number"),
@@ -226,14 +258,18 @@ export const OrganizationSchema = z.object({
     .max(100, "Organization type is too long"),
   domain: z
     .string()
-    .min(2, "Domain is required"),
+    .min(2, "Acensure subdomain is required")
+    .max(63, "Subdomain is too long")
+    .regex(
+      /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/,
+      "Use lowercase letters, numbers, and hyphens only (no dots/spaces)"
+    ),
+  hq_location: z
+    .string()
+    .min(1, "HQ location is required"),
   admin_id: z
     .string()
     .min(1, "Admin ID is required"),
-  initials: z
-    .string()
-    .min(2, "Initials must be at least 2 characters")
-    .max(10, "Initials cannot exceed 10 characters"),
   logo: z
     .any()
     .refine((file) => file instanceof File, "Attach a Logo")
@@ -241,9 +277,20 @@ export const OrganizationSchema = z.object({
       (file) => ACCEPTED_IMAGE_TYPES.includes(file.type),
       "Logo must be jpeg, png, jpg, or webp"
     ),
-  locations: z
-    .array(z.string())
-    .min(1, "At least one location must be selected"),
+})
+
+export const OrganizationEditSchema = z.object({
+  name: z
+    .string()
+    .min(2, "Organization name must be at least 2 characters")
+    .max(100, "Organization name is too long"),
+  organization_type: z
+    .string()
+    .min(2, "Organization type must be at least 2 characters")
+    .max(100, "Organization type is too long"),
+  admin_id: z
+    .string()
+    .min(1, "Admin ID is required"),
 })
 
 export const UsersSchema = z.object({
@@ -310,6 +357,53 @@ export const EditLocationSchema = z.object({
       (file) => !file || file instanceof File,
       "Logo must be a valid file"
     )
+    .refine(
+      (file) => !file || ACCEPTED_IMAGE_TYPES.includes(file.type),
+      "Logo must be jpeg, png, jpg, or webp"
+    ),
+})
+
+export const OrganizationLocationCreateSchema = z.object({
+  organization_id: z
+    .union([z.string(), z.number()])
+    .refine((value) => String(value).trim().length > 0, "Organization is required"),
+  initials: z
+    .string()
+    .optional()
+    .or(z.literal(""))
+    .refine((value) => String(value ?? "").length === 0 || String(value).length >= 2, {
+      message: "Initials must be at least 2 characters",
+    })
+    .refine((value) => String(value ?? "").length === 0 || String(value).length <= 10, {
+      message: "Initials cannot exceed 10 characters",
+    }),
+  country_id: z.string().min(1, "Country is required"),
+  logo: z
+    .any()
+    .optional()
+    .refine((file) => !file || file instanceof File, "Logo must be a valid file")
+    .refine(
+      (file) => !file || ACCEPTED_IMAGE_TYPES.includes(file.type),
+      "Logo must be jpeg, png, jpg, or webp"
+    ),
+})
+
+export const OrganizationLocationEditSchema = z.object({
+  initials: z
+    .string()
+    .optional()
+    .or(z.literal(""))
+    .refine((value) => String(value ?? "").length === 0 || String(value).length >= 2, {
+      message: "Initials must be at least 2 characters",
+    })
+    .refine((value) => String(value ?? "").length === 0 || String(value).length <= 10, {
+      message: "Initials cannot exceed 10 characters",
+    }),
+  country_id: z.string().min(1, "Country is required"),
+  logo: z
+    .any()
+    .optional()
+    .refine((file) => !file || file instanceof File, "Logo must be a valid file")
     .refine(
       (file) => !file || ACCEPTED_IMAGE_TYPES.includes(file.type),
       "Logo must be jpeg, png, jpg, or webp"

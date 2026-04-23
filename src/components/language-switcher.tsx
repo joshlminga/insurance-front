@@ -42,7 +42,7 @@ export function LanguageSwitcher() {
           variant="ghost"
           role="combobox"
           aria-expanded={open}
-          className="w-[140px] justify-between"
+          className="w-35 justify-between"
         >
           <Globe className="mr-2 h-4 w-4" />
           {value
@@ -51,7 +51,7 @@ export function LanguageSwitcher() {
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0">
+      <PopoverContent className="w-50 p-0">
         <Command>
           <CommandInput placeholder="Search language..." />
           <CommandList>

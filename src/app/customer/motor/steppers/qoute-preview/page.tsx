@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { UseAuth } from "@/components/auth-provider";
+import { UseAuth } from "@/stores/auth-store";
 import { Badge } from "@/components/ui/badge";
 import {
     Card,
@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Button, ReusableDropdown } from "@/dev/core";
-import { useStepperContext } from "@/hooks/stepper-context";
+import { usePurchaseStepper } from "@/hooks/use-purchase-stepper";
 import { formatCurrency } from "@/lib/format";
 import { EPREFIX, EROUTES } from "@/utils/enums";
 import {
@@ -30,7 +30,8 @@ import {
     BENEFIT_SECTIONS,
     BENEFIT_TYPE_CONFIG,
     EMETHODS,
-    MOTOR_QUOTE_SESSION_STORAGE_KEY
+    MOTOR_QUOTE_SESSION_STORAGE_KEY,
+    PURCHASE_SESSION_STORAGE_KEY
 } from "@/utils/constatnts";
 import { ShowToast } from "@/utils/utils";
 import { UseApiMutation } from "@/hooks/hooks";
@@ -42,11 +43,13 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
     handleDialogContextSwitch,
 }) => {
 
-    const { currentStep } = useStepperContext();
+    const { currentStep } = usePurchaseStepper('motor');
     const [quoteSessionId, setQuoteSessionId] = useState<number | null>(null)
     const location = useLocation();
     const { isAuthenticated } = UseAuth();
     const item = componentProps?.data;
+
+    console.log(componentProps);
 
     const goToNextStep = goToNextStepProp ?? componentProps?.goToNextStep;
     const org = item?.product?.organization;
@@ -58,7 +61,7 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
     );
 
     useEffect(() => {
-        const storedSessionId = Number(localStorage.getItem(MOTOR_QUOTE_SESSION_STORAGE_KEY))
+        const storedSessionId = Number(sessionStorage.getItem(MOTOR_QUOTE_SESSION_STORAGE_KEY))
         if (Number.isFinite(storedSessionId) && storedSessionId > 0) {
             setQuoteSessionId(storedSessionId)
         } else {
@@ -113,6 +116,8 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
         method: EMETHODS.POST,
         mutationOptions: {
             onSuccess: (data) => {
+                 const purchaseId = data?.data?.purchase_id
+                sessionStorage.setItem(PURCHASE_SESSION_STORAGE_KEY, String(purchaseId))
                 goToNextStep?.();
                 ShowToast.success(data?.message ?? "Purchase started");
             },

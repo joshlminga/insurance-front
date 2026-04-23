@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
-import { Button, ReuseableInput, ReuseableSingleSelectCountriesInput } from "@/dev/core"
+import { Button, ReuseableInput } from "@/dev/core"
 import { ArrowLeftCircle, ArrowRightCircle, CircleCheck, ShieldCheck } from "lucide-react"
-import { Controller, useForm } from "react-hook-form"
+import { useForm } from "react-hook-form"
 import { FieldGroup } from "@/components/ui/field"
 import { ShowToast } from "@/utils/utils"
 import { CustomerDetailsSchema } from "@/types/form-schema"
@@ -14,7 +14,7 @@ import type { CustomerVerificationDetailsProps, SubmitResponse } from "@/types/t
 import { Checkbox } from "@/components/ui/checkbox"
 import { Link, useNavigate } from "react-router-dom"
 import { extractErrorMessage } from "@/utils/helpers"
-import { UseAuth } from "@/components/auth-provider"
+import { UseAuth } from "@/stores/auth-store"
 import { EPREFIX, EROUTES } from "@/utils/enums"
 
 export const CustomerVerificationDetails = ({ goToNextStep, goToPrevStep }: CustomerVerificationDetailsProps) => {
@@ -27,7 +27,6 @@ export const CustomerVerificationDetails = ({ goToNextStep, goToPrevStep }: Cust
       last_name: "",
       email: "",
       phone: "",
-      country: "",
     },
   })
 
@@ -104,19 +103,6 @@ export const CustomerVerificationDetails = ({ goToNextStep, goToPrevStep }: Cust
                 label="Mobile Number"
                 type="tel"
               />
-              <Controller
-                control={form.control}
-                name="country"
-                render={({ field }) => (
-                  <ReuseableSingleSelectCountriesInput
-                    label="Country"
-                    required
-                    value={field.value}
-                    onChange={field.onChange}
-                  />
-                )}
-              />
-
             </div>
           </FieldGroup>
           <CardFooter className="col-span-1 lg:col-span-2 flex flex-col sm:flex-row justify-between gap-3 mt-1 px-0">

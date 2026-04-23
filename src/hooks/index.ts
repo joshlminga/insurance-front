@@ -1,4 +1,8 @@
-import type { TCustomDialogPropsContextProps, TDebounceprops, TKeyValueAnyType } from "@/types/types";
+import type { 
+	TCustomDialogPropsContextProps, 
+	TDebounceprops, 
+	TKeyValueAnyType 
+} from "@/types/types";
 import { baseFactoryReducer } from "@/utils/constatnts";
 import { useReducer, useRef, useState } from "react";
 

@@ -108,7 +108,8 @@ const formatSegment = (segment: string) => {
 
 export const BreadCrumbComponent = () => {
     const location = useLocation();
-    const pathSegments = location.pathname.split('/').filter(Boolean);
+    const rawSegments = location.pathname.split('/').filter(Boolean);
+    const pathSegments = rawSegments[0] === "dashboard" ? rawSegments.slice(1) : rawSegments;
 
     return (
         <div className="w-auto">
@@ -119,11 +120,37 @@ export const BreadCrumbComponent = () => {
                             <Link to="/">Dashboard</Link>
                         </BreadcrumbLink>
                     </BreadcrumbItem>
-                    {pathSegments.map((segment, index) => {
-                        const href = '/' + pathSegments.slice(0, index + 1).join('/');
+                    {pathSegments.flatMap((segment, index) => {
+                        if (segment === "organization-location") {
+                            const isLast = index === pathSegments.length - 1
+                            return [
+                                <Fragment key="/dashboard/organization">
+                                    <BreadcrumbSeparator />
+                                    <BreadcrumbItem>
+                                        <BreadcrumbLink asChild>
+                                            <Link to="/dashboard/organization">Organization</Link>
+                                        </BreadcrumbLink>
+                                    </BreadcrumbItem>
+                                </Fragment>,
+                                <Fragment key="/dashboard/organization-location">
+                                    <BreadcrumbSeparator />
+                                    <BreadcrumbItem>
+                                        {isLast ? (
+                                            <BreadcrumbPage>Location</BreadcrumbPage>
+                                        ) : (
+                                            <BreadcrumbLink asChild>
+                                                <Link to="/dashboard/organization-location">Location</Link>
+                                            </BreadcrumbLink>
+                                        )}
+                                    </BreadcrumbItem>
+                                </Fragment>,
+                            ]
+                        }
+
+                        const href = '/dashboard/' + pathSegments.slice(0, index + 1).join('/');
                         const isLast = index === pathSegments.length - 1;
                         const title = formatSegment(segment);
-                        return (
+                        return [
                             <Fragment key={href}>
                                 <BreadcrumbSeparator />
                                 <BreadcrumbItem>
@@ -136,7 +163,7 @@ export const BreadCrumbComponent = () => {
                                     )}
                                 </BreadcrumbItem>
                             </Fragment>
-                        );
+                        ];
                     })}
                 </BreadcrumbList>
             </Breadcrumb>
@@ -263,18 +290,35 @@ export function ReuseableInput<T extends FieldValues>({
     placeholder,
     type = "text",
     step,
+    thousandsSeparator = false,
     autoComplete = "off",
     required = false,
     disabled = false,
     className,
     rows,
 }: RHFInputProps<T>) {
+    const toRawNumberString = (value: string) => {
+        // Keep digits and at most one decimal point.
+        const cleaned = value.replace(/,/g, "").replace(/[^\d.]/g, "")
+        const [intPart, ...rest] = cleaned.split(".")
+        if (rest.length === 0) return intPart
+        return `${intPart}.${rest.join("")}`
+    }
+
+    const formatThousands = (raw: string) => {
+        if (!raw) return ""
+        const [intPart, decPart] = raw.split(".")
+        const withCommas = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+        return decPart !== undefined && decPart.length > 0 ? `${withCommas}.${decPart}` : withCommas
+    }
+
     return (
         <Controller
             name={name}
             control={control}
             render={({ field, fieldState }) => {
                 const isFile = type === "file"
+                const shouldFormatThousands = !isFile && thousandsSeparator
 
                 return (
                     <Field data-invalid={fieldState.invalid}>
@@ -282,7 +326,7 @@ export function ReuseableInput<T extends FieldValues>({
                         <Input
                             {...(!isFile ? field : {})}
                             id={id}
-                            type={type}
+                            type={shouldFormatThousands ? "text" : type}
                             step={step}
                             placeholder={placeholder}
                             autoComplete={autoComplete}
@@ -294,12 +338,24 @@ export function ReuseableInput<T extends FieldValues>({
                                 fieldState.invalid &&
                                 "border-red-500 focus-visible:ring-red-500"
                             )}
+                            {...(!isFile
+                                ? {
+                                    value: shouldFormatThousands
+                                        ? formatThousands(String(field.value ?? ""))
+                                        : (field.value ?? ""),
+                                }
+                                : {})}
                             onChange={(e) => {
                                 if (isFile) {
                                     const file = (e.target as HTMLInputElement).files?.[0]
                                     field.onChange(file)
                                 } else {
-                                    field.onChange(e)
+                                    if (shouldFormatThousands) {
+                                        const nextRaw = toRawNumberString((e.target as HTMLInputElement).value)
+                                        field.onChange(nextRaw)
+                                    } else {
+                                        field.onChange(e)
+                                    }
                                 }
                             }}
                             {...(type === "textarea" && { rows })}
@@ -349,7 +405,7 @@ export function ReusableSelect<T extends FieldValues>({
                             <SelectTrigger
                                 aria-invalid={fieldState.invalid}
                                 className={cn(
-                                    "w-full h-12.75 rounded-[5px]]",
+                                    "w-full h-12.75 rounded-[5px] border border-[#ADABAB]",
                                     fieldState.invalid &&
                                     "border-red-500 focus:ring-red-500",
                                     triggerClassName
@@ -597,8 +653,10 @@ export const ReusableCard = ({
     onClick,
     disabled,
     selected,
+    onChange,
 }: ReusableCardProps) => {
     const isClickable = Boolean(onClick) && !disabled;
+    const showCheckbox = Boolean(onChange);
     return (
         <Card
             role={isClickable ? "button" : undefined}
@@ -612,14 +670,26 @@ export const ReusableCard = ({
                     onClick?.();
                 }
             }}
-            className={cn("flex flex-col w-full min-w-0 overflow-hidden rounded-[10px] border bg-white",
-                "border-[#ADABAB]",
+            className={cn("relative flex flex-col w-full min-w-0 overflow-hidden rounded-[10px] border bg-white",
+                selected ? "border-[#C20C0C] border-2" : "border-[#ADABAB]",
                 isClickable &&
                 "cursor-pointer transition-all hover:border-[#FF9A9A] hover:-translate-y-px focus-visible:ring-2 focus-visible:ring-[#FF9A9A]",
-                selected && "ring-2 ring-primary",
                 disabled && "opacity-50 cursor-not-allowed",
                 rootClassName
             )}>
+            {showCheckbox && (
+                <Input
+                    type="checkbox"
+                    className="absolute top-3 right-3 z-10 h-4 w-4 cursor-pointer accent-[#C20C0C] rounded"
+                    checked={!!selected}
+                    disabled={disabled}
+                    onChange={(e) => {
+                        e.stopPropagation();
+                        if (disabled) return;
+                        onChange?.(e.target.checked);
+                    }}
+                />
+            )}
             {header && (
                 <CardHeader className={cn('flex items-center justify-center p-3 text-center', headerClassName)}>
                     {header.type === 'image' && (
@@ -1044,11 +1114,124 @@ export function ReuseableSingleSelectCountriesInput<T extends FieldValues>({
 
     const [filter, optionsDispatcher] = useReducer(
         ReusableReducer<TPaginationFilters & TFilterOptions>,
-        { ...FILTEROPTIONS, page: 1, pageSize: 15 }
+        // NOTE: Select can only show the chosen item if it's in the loaded list.
+        // Loading more countries upfront avoids “not picked” when the selected id
+        // isn’t in the first small page.
+        { ...FILTEROPTIONS, page: 1, pageSize: 300 }
     )
     const observerRef = useRef<HTMLDivElement | null>(null)
     const { data, isLoading } = UseApiQuery<TCountryResponse>({
         url: "taxonomies/general/countries",
+        params: {
+            direction: "asc",
+            page: filter.page,
+            pageSize: filter.pageSize,
+            term: filter.term,
+        },
+        queryOptions: {
+            placeholderData: (previousData) => previousData,
+        },
+    });
+    const countries = data?.data ?? []
+    const meta = data?.pagination;
+    useEffect(() => {
+        if (!observerRef.current) return
+        const observer = new IntersectionObserver((entries) => {
+            if (
+                entries[0].isIntersecting &&
+                !isLoading &&
+                meta &&
+                filter.page < meta.last_page
+            ) {
+                optionsDispatcher({
+                    type: "SET_PAGE",
+                    payload: { page: filter.page + 1 },
+                })
+            }
+        })
+        observer.observe(observerRef.current)
+
+        return () => observer.disconnect()
+    }, [meta, filter.page, isLoading])
+
+    const handleSearch = (value: string) => {
+        optionsDispatcher({
+            type: "SET_FILTER",
+            payload: { term: value, page: 1 },
+        })
+    }
+
+    return (
+        <div className={`space-y-2 ${className ?? ""}`}>
+            {label && (
+                <Label>
+                    {label}
+                    {required && (
+                        <span className="text-destructive ml-1">*</span>
+                    )}
+                </Label>
+            )}
+
+            <Select value={value} onValueChange={onChange} disabled={disabled}>
+                <SelectTrigger className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]">
+                    <SelectValue
+                        placeholder={
+                            isLoading
+                                ? "Loading countries..."
+                                : placeholder
+                        }
+                    />
+                </SelectTrigger>
+                <SelectContent className="max-h-75">
+                    <div className="p-2 sticky top-0 bg-white z-10">
+                        <Input
+                            placeholder="Search country..."
+                            onChange={(e) => handleSearch(e.target.value)}
+                            className="h-8"
+                        />
+                    </div>
+                    {countries.map((country) => (
+                        <SelectItem
+                            key={country.id}
+                            value={String(country.id)}>
+                            {country.name}
+                        </SelectItem>
+                    ))}
+                    {isLoading && (
+                        <div className="px-3 py-2 text-sm text-muted-foreground">
+                            Loading...
+                        </div>
+                    )}
+                    {!isLoading && countries.length === 0 && (
+                        <div className="px-3 py-2 text-sm text-muted-foreground">
+                            No countries found
+                        </div>
+                    )}
+                    <div ref={observerRef} className="h-4" />
+                </SelectContent>
+            </Select>
+        </div>
+    )
+}
+
+
+export function ReuseableSingleSelectNationalityInput<T extends FieldValues>({
+    value,
+    onChange,
+    placeholder = "Select nationality...",
+    label,
+    required = false,
+    disabled = false,
+    className,
+}: ReuseableSingleSelectCountriesInputProps<T>) {
+
+    const [filter, optionsDispatcher] = useReducer(
+        ReusableReducer<TPaginationFilters & TFilterOptions>,
+        { ...FILTEROPTIONS, page: 1, pageSize: 15 }
+    )
+    const observerRef = useRef<HTMLDivElement | null>(null)
+    const { data, isLoading } = UseApiQuery<TCountryResponse>({
+        url: "taxonomies/geo/nationality",
         params: {
             direction: "asc",
             page: filter.page,
@@ -1156,7 +1339,8 @@ export function ReuseableSingleSelectAdminInput<T extends FieldValues>({
         params: { direction: "asc" },
         queryOptions: { enabled: true },
     })
-    const users = data?.data?.users ?? []
+    const users = data?.data ?? []
+
     return (
         <div className={`space-y-2 ${className ?? ""}`}>
             {label && (
@@ -1183,6 +1367,61 @@ export function ReuseableSingleSelectAdminInput<T extends FieldValues>({
                     {!isLoading && users.length === 0 && (
                         <div className="px-3 py-2 text-sm text-muted-foreground">
                             No users found
+                        </div>
+                    )}
+                </SelectContent>
+            </Select>
+        </div>
+    )
+}
+
+export function ReuseableSingleSelectOrganizationInput<T extends FieldValues>({
+    value,
+    onChange,
+    placeholder = "Select organization...",
+    label,
+    required = false,
+    disabled = false,
+    className,
+}: ReuseableSingleSelectCountriesInputProps<T>) {
+    const { data, isLoading } = UseApiQuery<SubmitResponse>({
+        url: "organization",
+        params: { direction: "asc" },
+        queryOptions: { enabled: true },
+    })
+
+    const organizations = data?.data ?? []
+
+    return (
+        <div className={`space-y-2 ${className ?? ""}`}>
+            {label && (
+                <Label>
+                    {label}
+                    {required && <span className="text-destructive ml-1">*</span>}
+                </Label>
+            )}
+            <Select
+                value={value}
+                onValueChange={onChange}
+                disabled={disabled || isLoading}
+            >
+                <SelectTrigger className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]">
+                    <SelectValue
+                        placeholder={isLoading ? "Loading organizations..." : placeholder}
+                    />
+                </SelectTrigger>
+                <SelectContent>
+                    {organizations.map((org: any) => (
+                        <SelectItem
+                            key={org?.organization_id ?? org?.id}
+                            value={String(org?.organization_id ?? org?.id)}
+                        >
+                            {org?.organization_name ?? org?.name}
+                        </SelectItem>
+                    ))}
+                    {!isLoading && organizations.length === 0 && (
+                        <div className="px-3 py-2 text-sm text-muted-foreground">
+                            No organizations found
                         </div>
                     )}
                 </SelectContent>

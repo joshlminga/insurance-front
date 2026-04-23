@@ -10,9 +10,12 @@ import {
     PaymentDetailsSchema,
     ResendOtpPayloadSchema,
     OrganizationSchema,
+    OrganizationEditSchema,
     UsersSchema,
     AddLocationSchema,
     EditLocationSchema,
+    OrganizationLocationCreateSchema,
+    OrganizationLocationEditSchema,
     CreateCoverTypeSchema,
     CreateProductSchema,
     EditProductSchema,
@@ -44,9 +47,12 @@ export type InvoicePaymentFormValues = z.infer<typeof InvoicePaymentSchema>
 export type PaymentFormValues = z.infer<typeof PaymentDetailsSchema>
 
 export type OrganizationFormValues = z.infer<typeof OrganizationSchema>
+export type OrganizationEditFormValues = z.infer<typeof OrganizationEditSchema>
 export type UsersFormValues = z.infer<typeof UsersSchema>
 export type AddLocationFormValues = z.infer<typeof AddLocationSchema>
 export type EditLocationFormValues = z.infer<typeof EditLocationSchema>
+export type OrganizationLocationCreateFormValues = z.infer<typeof OrganizationLocationCreateSchema>
+export type OrganizationLocationEditFormValues = z.infer<typeof OrganizationLocationEditSchema>
 export type CreateCoverTypeFormValues = z.infer<typeof CreateCoverTypeSchema>
 export type MotorCreateCoveringFormValues = z.infer<typeof CreateCoveringSchema>
 export type CreateVehicleClassesFormValues = z.infer<typeof CreateVehicleClassesSchema>
