@@ -127,7 +127,7 @@ const OrganizationsPage = () => {
     <div>
       <PageHeader
         title="Organizations"
-        description="Manage organizations, their details, and associated users"
+        description="Manage organizations, their details, and associated Admins"
         actions={[
           {
             icon: Plus,

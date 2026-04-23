@@ -1,11 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CardFooter } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import {
     Button,
-    ReusableCountriesInputMultiselect,
     ReusableSelect,
     ReuseableInput,
     ReuseableSingleSelectAdminInput,
+    ReuseableSingleSelectCountriesInput,
 } from '@/dev/core'
 import { UseApiMutation } from '@/hooks/hooks'
 import { OrganizationSchema } from '@/types/form-schema'
@@ -27,10 +29,10 @@ export const CreateOrganizationModal = ({ handleDialogContextSwitch, componentPr
             name: "",
             organization_type: "",
             domain: "",
+            hq_location: "",
             admin_id: "",
             initials: "",
             logo: undefined,
-            locations: [],
         },
     })
 
@@ -62,9 +64,9 @@ export const CreateOrganizationModal = ({ handleDialogContextSwitch, componentPr
         formData.append("domain", data.domain)
         formData.append("admin_id", data.admin_id)
         formData.append("initials", data.initials)
-        data.locations.forEach((location) => {
-            formData.append("locations[]", location)
-        })
+        if (data.hq_location) {
+            formData.append("locations[]", data.hq_location)
+        }
         if (data.logo instanceof File) {
             formData.append("logo", data.logo)
         }
@@ -84,62 +86,118 @@ export const CreateOrganizationModal = ({ handleDialogContextSwitch, componentPr
 
             <form
                 onSubmit={form.handleSubmit(onSubmit)}
-                className="grid gap-4">
-                <ReuseableInput
-                    control={form.control}
-                    name="name"
-                    label="Organization Name"
-                    className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
-                />
-                <ReusableSelect
-                    control={form.control}
-                    name="organization_type"
-                    label="Organization Type"
-                    options={ORGANIZATIONTYPES}
-                />
-                <ReuseableInput
-                    control={form.control}
-                    name="domain"
-                    label="Domain"
-                    className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
-                />
-                <Controller
-                    control={form.control}
-                    name="admin_id"
-                    render={({ field }) => (
-                        <ReuseableSingleSelectAdminInput
-                            label="Admin"
-                            required
-                            value={field.value}
-                            onChange={field.onChange}
-                        />
-                    )}
-                />
-                <ReuseableInput
-                    control={form.control}
-                    name="initials"
-                    label="Initials"
-                    className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
-                />
-                <ReuseableInput
-                    className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] sm:col-span-2 lg:col-span-1"
-                    control={form.control}
-                    type='file'
-                    name="logo"
-                    label="Attach Logo"
-                />
-                <Controller
-                    control={form.control}
-                    name="locations"
-                    render={({ field }) => (
-                        <ReusableCountriesInputMultiselect
-                            label="Locations"
-                            required
-                            value={field.value}
-                            onChange={field.onChange}
-                        />
-                    )}
-                />
+                className="grid grid-cols-6 gap-4"
+            >
+                <div className="col-span-6 sm:col-span-4">
+                    <ReuseableInput
+                        control={form.control}
+                        name="name"
+                        label="Organization Name"
+                        className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                        required
+                    />
+                </div>
+
+                <div className="col-span-6 sm:col-span-2">
+                    <ReuseableInput
+                        control={form.control}
+                        name="initials"
+                        label="Organization Initials"
+                        className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                        required
+                    />
+                </div>
+
+                <div className="col-span-6">
+                    <ReusableSelect
+                        control={form.control}
+                        name="organization_type"
+                        label="Organization Type"
+                        options={ORGANIZATIONTYPES}
+                        triggerClassName="rounded-[5px] border border-[#ADABAB]"
+                    />
+                </div>
+
+                <div className="col-span-6">
+                    <Controller
+                        control={form.control}
+                        name="admin_id"
+                        render={({ field }) => (
+                            <ReuseableSingleSelectAdminInput
+                                label="Admin"
+                                required
+                                value={field.value}
+                                onChange={field.onChange}
+                            />
+                        )}
+                    />
+                </div>
+
+                <div className="col-span-6 sm:col-span-3">
+                    <Controller
+                        control={form.control}
+                        name="domain"
+                        render={({ field, fieldState }) => (
+                            <div className="space-y-2">
+                                <Label>
+                                    Acensure Subdomain
+                                    <span className="text-destructive ml-1">*</span>
+                                </Label>
+                                <div className="flex items-center gap-2">
+                                    <Input
+                                        value={field.value ?? ""}
+                                        onChange={(e) => {
+                                            const raw = e.target.value
+                                                .toLowerCase()
+                                                .replace(/[^a-z0-9-]/g, "")
+                                            field.onChange(raw)
+                                        }}
+                                        placeholder="e.g. acme"
+                                        className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                                    />
+                                    <span className="text-sm text-muted-foreground whitespace-nowrap">
+                                        .acensure.com
+                                    </span>
+                                </div>
+                                {fieldState.error?.message && (
+                                    <p className="text-sm text-red-500">
+                                        {fieldState.error.message}
+                                    </p>
+                                )}
+                            </div>
+                        )}
+                    />
+                </div>
+
+                <div className="col-span-6 sm:col-span-3">
+                    <Controller
+                        control={form.control}
+                        name="hq_location"
+                        render={({ field }) => (
+                            <ReuseableSingleSelectCountriesInput
+                                label="HQ location"
+                                required
+                                value={field.value}
+                                onChange={field.onChange}
+                            />
+                        )}
+                    />
+                </div>
+
+                <div className="col-span-6">
+                    <ReuseableInput
+                        className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                        control={form.control}
+                        type="file"
+                        name="logo"
+                        label="Organization Main Logo"
+                        required
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                        Logo used in HQ country.
+                    </p>
+                </div>
+
                 <CardFooter className="flex flex-col sm:flex-row justify-between gap-3 mt-2 px-0">
                     <Button
                         type="button"

@@ -258,7 +258,15 @@ export const OrganizationSchema = z.object({
     .max(100, "Organization type is too long"),
   domain: z
     .string()
-    .min(2, "Domain is required"),
+    .min(2, "Acensure subdomain is required")
+    .max(63, "Subdomain is too long")
+    .regex(
+      /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/,
+      "Use lowercase letters, numbers, and hyphens only (no dots/spaces)"
+    ),
+  hq_location: z
+    .string()
+    .min(1, "HQ location is required"),
   admin_id: z
     .string()
     .min(1, "Admin ID is required"),
@@ -273,9 +281,6 @@ export const OrganizationSchema = z.object({
       (file) => ACCEPTED_IMAGE_TYPES.includes(file.type),
       "Logo must be jpeg, png, jpg, or webp"
     ),
-  locations: z
-    .array(z.string())
-    .min(1, "At least one location must be selected"),
 })
 
 export const UsersSchema = z.object({

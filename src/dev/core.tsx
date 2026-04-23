@@ -376,7 +376,7 @@ export function ReusableSelect<T extends FieldValues>({
                             <SelectTrigger
                                 aria-invalid={fieldState.invalid}
                                 className={cn(
-                                    "w-full h-12.75 rounded-[5px]]",
+                                    "w-full h-12.75 rounded-[5px] border border-[#ADABAB]",
                                     fieldState.invalid &&
                                     "border-red-500 focus:ring-red-500",
                                     triggerClassName
@@ -1307,7 +1307,8 @@ export function ReuseableSingleSelectAdminInput<T extends FieldValues>({
         params: { direction: "asc" },
         queryOptions: { enabled: true },
     })
-    const users = data?.data?.users ?? []
+    const users = data?.data ?? []
+
     return (
         <div className={`space-y-2 ${className ?? ""}`}>
             {label && (
