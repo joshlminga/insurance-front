@@ -343,7 +343,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                             {benefitGroups.map(({ group, items }) => {
                                 const fieldName = benefitGroupFormKey(group)
                                 const options = [
-                                    { value: BENEFIT_SELECT_NONE, label: 'No add-on' },
+                                    // { value: BENEFIT_SELECT_NONE, label: 'No add-on' },
                                     ...items.map((item) => ({
                                         value: String(item.id),
                                         label: benefitOptionLabel(item),
