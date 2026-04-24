@@ -14,6 +14,8 @@ export type T = {
   ReactNode?: ReactNode;
 }
 
+export type TPageTitleProps = { title: string } & Partial<TClassType>;
+
 export interface ReusableStepperProps {
   steps: {
     title: string
@@ -639,3 +641,9 @@ export type BenefitGroup = {
     group: string
     items: MotorBenefitOption[]
 }
+
+export type TLoaderProps = Partial<TClassType> &
+  Partial<Pick<TPageTitleProps, "title">> & {
+    isError?: boolean
+    children?: ReactNode
+  };

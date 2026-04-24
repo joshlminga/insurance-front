@@ -34,7 +34,8 @@ import type {
     ReusableSingleSelectApiInputProps,
     ReusableApiMultiSelectProps,
     TFilterOptions,
-    TPaginationFilters
+    TPaginationFilters,
+    TLoaderProps
 } from "@/types/types";
 import {
     Stepper,
@@ -56,7 +57,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Fragment } from "react/jsx-runtime";
 import React, { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { Button as ShadButton } from "@/components/ui/button"
-import { Loader2 } from "lucide-react";
+import { Loader2, OctagonAlert } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Controller, type FieldValues } from "react-hook-form";
@@ -298,7 +299,6 @@ export function ReuseableInput<T extends FieldValues>({
     rows,
 }: RHFInputProps<T>) {
     const toRawNumberString = (value: string) => {
-        // Keep digits and at most one decimal point.
         const cleaned = value.replace(/,/g, "").replace(/[^\d.]/g, "")
         const [intPart, ...rest] = cleaned.split(".")
         if (rest.length === 0) return intPart
@@ -322,7 +322,7 @@ export function ReuseableInput<T extends FieldValues>({
 
                 return (
                     <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel htmlFor={id}>{label}</FieldLabel>
+                        <FieldLabel htmlFor={id}>{label}  {required && <span className="ml-1 text-red-500">*</span>}</FieldLabel>
                         <Input
                             {...(!isFile ? field : {})}
                             id={id}
@@ -457,8 +457,8 @@ export const ReusableCheckboxGrid = ({
                        data-[state=checked]:bg-[#C20C0C]
                        data-[state=checked]:border-[#C20C0C]"
                     />
-                    <label 
-                        htmlFor={`checkbox-${option.id}`} 
+                    <label
+                        htmlFor={`checkbox-${option.id}`}
                         className="cursor-pointer max-w-112.25 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                         {option?.name}
                     </label>
@@ -2073,7 +2073,7 @@ export const SkeletonCard: React.FC = () => (
 export const EmptyState: React.FC = () => (
     <div className="col-span-full flex flex-col items-center justify-center py-16 text-center">
         <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
-            <svg
+            {/* <svg
                 className="h-8 w-8 text-gray-400"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -2084,7 +2084,8 @@ export const EmptyState: React.FC = () => (
                     strokeLinejoin="round"
                     d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z"
                 />
-            </svg>
+            </svg> */}
+            <OctagonAlert className="h-8 w-8 text-gray-400" />
         </div>
         <p className="text-sm font-medium text-gray-700">No quotations available</p>
         <p className="mt-1 text-xs text-gray-400">
@@ -2092,3 +2093,27 @@ export const EmptyState: React.FC = () => (
         </p>
     </div>
 )
+
+export const CustomLoader: React.FC<TLoaderProps> = ({
+    title = "Fetching data...",
+    className = "h-full",
+    isError = false,
+    children,
+}) => (
+    <div
+        className={cn(
+            "w-full flex flex-col justify-center items-center gap-3 text-center",
+            className
+        )}>
+        {children ?? (
+            isError ? (
+                <p className="">{title}</p>
+            ) : (
+                <div role="status" className="flex flex-col items-center gap-3">
+                    <Loader2 className="h-12 w-12 animate-spin text-gray-500" aria-hidden />
+                    <p className="text-sm text-muted-foreground">{title}</p>
+                </div>
+            )
+        )}
+    </div>
+);

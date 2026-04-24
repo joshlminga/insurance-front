@@ -43,7 +43,7 @@ export const UsersColumns: ColumnDef<any>[] = [
             const isActive: boolean = row.getValue("is_active");
             return (
                 <Badge
-                    className={`rounded-full text-white font-semibold ${isActive ? "bg-green-500" : "bg-red-500"
+                    className={`rounded-full font-semibold ${isActive ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
                         }`}>
                     {isActive ? "Active" : "Inactive"}
                 </Badge>

@@ -49,7 +49,7 @@ export const MotorProductsColumns: ColumnDef<any>[] = [
             const isPublic: boolean = row.getValue("for_public");
             return (
                 <Badge
-                    className={`rounded-lg text-white font-semibold ${isPublic ? "bg-gray-400" : "bg-cyan-500"
+                    className={`rounded-lg font-semibold ${isPublic ? "bg-gray-200 text-gray-800" : "bg-cyan-200 text-cyan-800"
                         }`}>
                     {isPublic ? "Public" : "Private"}
                 </Badge>
