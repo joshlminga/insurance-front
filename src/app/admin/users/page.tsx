@@ -33,7 +33,7 @@ export const UsersPage = () => {
             data?: any;
         }>();
 
-    const { data, isLoading, refetch } = UseApiQuery<SubmitResponse>({
+    const { data, isLoading, refetch, isError } = UseApiQuery<SubmitResponse>({
         url: 'user',
         params: {
             page: filter.page,
@@ -183,6 +183,7 @@ export const UsersPage = () => {
                         pageSize: data?.pagination?.per_page ?? filter?.pageSize,
                         page:  data?.pagination?.current_page ?? filter.page,
                         isLoading: isLoading,
+                        isError: isError,
                     }}
                 />
             </div>

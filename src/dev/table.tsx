@@ -1,15 +1,42 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Table as TableType, flexRender, getCoreRowModel, getFilteredRowModel, useReactTable } from '@tanstack/react-table';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { 
+    Table as TableType, 
+    flexRender, 
+    getCoreRowModel, 
+    getFilteredRowModel, 
+    useReactTable 
+} from '@tanstack/react-table';
+import { 
+    Table, 
+    TableBody, 
+    TableCell, 
+    TableHead, 
+    TableHeader, 
+    TableRow 
+} from "@/components/ui/table";
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { ArrowRightIcon, ListFilter, SearchIcon, XIcon } from 'lucide-react';
+import { 
+    ArrowRightIcon, 
+    ListFilter, 
+    SearchIcon, 
+    XIcon 
+} from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { useRef } from 'react';
-import { TableComponentHeadings, TReusablePagination } from './core';
-import { StatusPillProps, TQueryFieldProps, TSearchToolProps, TTableReusableComponent } from '@/types/types';
+import { 
+    CustomLoader, 
+    TableComponentHeadings, 
+    TReusablePagination 
+} from './core';
+import { 
+    StatusPillProps, 
+    TQueryFieldProps, 
+    TSearchToolProps, 
+    TTableReusableComponent 
+} from '@/types/types';
 
 
 export const DataTable = ({
@@ -64,96 +91,99 @@ export const DataTable = ({
                             <TableCell
                                 colSpan={table.getAllColumns().length}
                                 className='h-24 text-center'>
-                                {/* <CustomLoader
-									{...{
-										...(isError ? { title: 'Error fetching data.' } : {}),
-									}}
-								/> */}
+                                <CustomLoader
+                                    isError={!!isError}
+                                    title={
+                                        isError ? 'Error fetching data.' : 'Fetching data...'
+                                    }
+                                />
+                        </TableCell>
+                        </TableRow>
+                ) : (
+                <>
+                    {table.getRowModel().rows?.length ? (
+                        table.getRowModel().rows.map((row, index) => (
+                            <TableRow
+                                key={`tableBody-${index}`}
+                                {...{
+                                    ...(onClick
+                                        ? {
+                                            onClick: () => onClick(row),
+                                        }
+                                        : {}),
+                                }}
+                                className='h-14 overflow-auto pb-px border-b border-table-border-color px-6 py-4'
+                                data-state={row.getIsSelected() && 'selected'}>
+                                {row.getVisibleCells().map((cell, index) => (
+                                    <TableCell key={`cell-index-${index}`} align={'left'}>
+                                        {flexRender(
+                                            cell.column.columnDef.cell,
+                                            cell.getContext()
+                                        )}
+                                    </TableCell>
+                                ))}
+                            </TableRow>
+                        ))
+                    ) : (
+                        <TableRow>
+                            <TableCell
+                                colSpan={table.getAllColumns().length}
+                                className='h-24 text-center'>
+                                No data to display.
                             </TableCell>
                         </TableRow>
-                    ) : (
-                        <>
-                            {table.getRowModel().rows?.length ? (
-                                table.getRowModel().rows.map((row, index) => (
-                                    <TableRow
-                                        key={`tableBody-${index}`}
-                                        {...{
-                                            ...(onClick
-                                                ? {
-                                                    onClick: () => onClick(row),
-                                                }
-                                                : {}),
-                                        }}
-                                        className='h-14 overflow-auto pb-px border-b border-table-border-color px-6 py-4'
-                                        data-state={row.getIsSelected() && 'selected'}>
-                                        {row.getVisibleCells().map((cell, index) => (
-                                            <TableCell key={`cell-index-${index}`} align={'left'}>
-                                                {flexRender(
-                                                    cell.column.columnDef.cell,
-                                                    cell.getContext()
-                                                )}
-                                            </TableCell>
-                                        ))}
-                                    </TableRow>
-                                ))
-                            ) : (
-                                <TableRow>
-                                    <TableCell
-                                        colSpan={table.getAllColumns().length}
-                                        className='h-24 text-center'>
-                                        No data to display.
-                                    </TableCell>
-                                </TableRow>
-                            )}
-                        </>
                     )}
-                </TableBody>
-            </Table>
+                </>
+                    )}
+            </TableBody>
+        </Table>
 
-            {showPagination && table.getRowModel().rows?.length > 0 ? (
-                <div className='flex gap-5 justify-between p-5'>
-                    <Button
-                        className='flex gap-2 items-center'
+            {
+        showPagination && table.getRowModel().rows?.length > 0 ? (
+            <div className='flex gap-5 justify-between p-5'>
+                <Button
+                    className='flex gap-2 items-center'
+                    {...{
+                        onClick: () => onPageChange(page > 1 ? page - 1 : page),
+                        ...(page <= 1 ? { disabled: true } : {}),
+                        variant: 'outline',
+                    }}>
+                    <ArrowRightIcon
                         {...{
-                            onClick: () => onPageChange(page > 1 ? page - 1 : page),
-                            ...(page <= 1 ? { disabled: true } : {}),
-                            variant: 'outline',
-                        }}>
-                        <ArrowRightIcon
-                            {...{
-                                svgElementClassName: 'stroke-black hover:stroke-black/2',
-                                className: 'w-5 h-5 rotate-180',
-                            }}
-                        />
+                            svgElementClassName: 'stroke-black hover:stroke-black/2',
+                            className: 'w-5 h-5 rotate-180',
+                        }}
+                    />
 
-                        <p className='text-sm font-semibold leading-5 text-filter-stroke-color'>
-                            Previous
-                        </p>
-                    </Button>
+                    <p className='text-sm font-semibold leading-5 text-filter-stroke-color'>
+                        Previous
+                    </p>
+                </Button>
 
-                    <TReusablePagination {...{ onPageChange, page, pageCount }} />
+                <TReusablePagination {...{ onPageChange, page, pageCount }} />
 
-                    <Button
-                        className='flex gap-2 items-center'
+                <Button
+                    className='flex gap-2 items-center'
+                    {...{
+                        onClick: () => onPageChange(page < pageCount ? page + 1 : page),
+                        variant: 'outline',
+                        ...(page >= pageCount ? { disabled: true } : {}),
+                    }}>
+                    <p className='text-sm font-semibold leading-5 text-filter-stroke-color'>
+                        Next
+                    </p>
+
+                    <ArrowRightIcon
                         {...{
-                            onClick: () => onPageChange(page < pageCount ? page + 1 : page),
-                            variant: 'outline',
-                            ...(page >= pageCount ? { disabled: true } : {}),
-                        }}>
-                        <p className='text-sm font-semibold leading-5 text-filter-stroke-color'>
-                            Next
-                        </p>
-
-                        <ArrowRightIcon
-                            {...{
-                                svgElementClassName: 'stroke-black hover:stroke-black/2',
-                                className: 'w-5 h-5',
-                            }}
-                        />
-                    </Button>
-                </div>
-            ) : null}
-        </div>
+                            svgElementClassName: 'stroke-black hover:stroke-black/2',
+                            className: 'w-5 h-5',
+                        }}
+                    />
+                </Button>
+            </div>
+        ) : null
+    }
+        </div >
     );
 };
 
@@ -251,64 +281,64 @@ export const StatusPill = ({ status, label }: StatusPillProps) => {
 };
 
 export const SearchTools = ({
-	className = 'border-primary',
-	placeholder = 'Search',
-	includeFilter = false,
-	advancedHandler,
-	onChange,
+    className = 'border-primary',
+    placeholder = 'Search',
+    includeFilter = false,
+    advancedHandler,
+    onChange,
 }: TSearchToolProps) => {
-	return (
-		<div className='flex gap-4 flex-wrap items-center select-none'>
-			<ProductQueryField {...{ onChange, placeholder, className }} />
-			{includeFilter && <ReusableFilterButton {...{ advancedHandler }} />}
-		</div>
-	);
+    return (
+        <div className='flex gap-4 flex-wrap items-center select-none'>
+            <ProductQueryField {...{ onChange, placeholder, className }} />
+            {includeFilter && <ReusableFilterButton {...{ advancedHandler }} />}
+        </div>
+    );
 };
 
 export const ProductQueryField = ({
-	className = 'bg-secondary border-primary',
-	placeholder,
-	onChange,
+    className = 'bg-secondary border-primary',
+    placeholder,
+    onChange,
 }: TQueryFieldProps) => {
-	const inputRef = useRef<HTMLInputElement>(null);
-	return (
-		<div className='relative'>
-			<Input
-				className={cn(
-					'rounded-lg w-55 h-8 pl-10 outline-accent border border-accent focus:border-primary focus:outline-primary',
-					className
-				)}
-				{...{
-					onChange: (e) => onChange(e.currentTarget.value.trim()),
-					ref: inputRef,
-					placeholder,
-					type: 'text',
-				}}
-			/>
-			<SearchIcon
-				className='absolute h-4 w-4 left-4 top-[calc(calc(100%-1rem)/2)] cursor-pointer stroke-gray-400'
-				{...{
-					onClick: () => inputRef.current?.focus(),
-				}}
-			/>
-		</div>
-	);
+    const inputRef = useRef<HTMLInputElement>(null);
+    return (
+        <div className='relative'>
+            <Input
+                className={cn(
+                    'rounded-lg w-55 h-8 pl-10 outline-accent border border-accent focus:border-primary focus:outline-primary',
+                    className
+                )}
+                {...{
+                    onChange: (e) => onChange(e.currentTarget.value.trim()),
+                    ref: inputRef,
+                    placeholder,
+                    type: 'text',
+                }}
+            />
+            <SearchIcon
+                className='absolute h-4 w-4 left-4 top-[calc(calc(100%-1rem)/2)] cursor-pointer stroke-gray-400'
+                {...{
+                    onClick: () => inputRef.current?.focus(),
+                }}
+            />
+        </div>
+    );
 };
 
 export const ReusableFilterButton = ({
-	advancedHandler,
+    advancedHandler,
 }: Partial<Pick<TSearchToolProps, 'advancedHandler'>>) => {
-	return (
-		<div className='border border-neutral-300 bg-neutral-100 py-1 px-3 flex gap-2 items-center rounded-xl w-28 select-none cursor-pointer h-8'>
-			<ListFilter className='size-6' />
-			<p className='font-medium text-sm leading-4 text-gray-600'>Filter</p>
-			<Separator
-				className='w-4 h-4 my-4 bg-gray-300'
-				{...{
-					orientation: 'vertical',
-				}}
-			/>
-			<XIcon className='size-6' />
-		</div>
-	);
+    return (
+        <div className='border border-neutral-300 bg-neutral-100 py-1 px-3 flex gap-2 items-center rounded-xl w-28 select-none cursor-pointer h-8'>
+            <ListFilter className='size-6' />
+            <p className='font-medium text-sm leading-4 text-gray-600'>Filter</p>
+            <Separator
+                className='w-4 h-4 my-4 bg-gray-300'
+                {...{
+                    orientation: 'vertical',
+                }}
+            />
+            <XIcon className='size-6' />
+        </div>
+    );
 };

@@ -56,7 +56,7 @@ const OrganizationLocationPage = () => {
       data?: any
     }>()
 
-  const { data, isLoading, refetch } = UseApiQuery<SubmitResponse>({
+  const { data, isLoading, refetch, isError } = UseApiQuery<SubmitResponse>({
     url: "organization-location",
     params: {
       page: filter.page,
@@ -276,6 +276,7 @@ const OrganizationLocationPage = () => {
               (data as any)?.pagination?.current_page ??
               1,
             isLoading,
+            isError: isError
           }}
         />
       </div>
@@ -298,8 +299,7 @@ const OrganizationLocationPage = () => {
         open={deleteTarget !== null}
         onOpenChange={(open) => {
           if (!open) setDeleteTarget(null)
-        }}
-      >
+        }}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete organization location?</AlertDialogTitle>

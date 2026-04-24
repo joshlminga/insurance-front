@@ -57,7 +57,7 @@ export const OrganizationLocationColumns: ColumnDef<any>[] = [
       const isDefault = getIsDefaultFromRow(row.original)
       return (
         <Badge
-          className={`rounded-lg text-white font-semibold ${isDefault ? "bg-green-500" : "bg-red-500"
+          className={`rounded-lg font-semibold ${isDefault ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
             }`}
         >
           {isDefault ? "Yes" : "No"}
@@ -72,7 +72,7 @@ export const OrganizationLocationColumns: ColumnDef<any>[] = [
       const isActive = getIsActiveFromRow(row.original)
       return (
         <Badge
-          className={`rounded-lg text-white font-semibold ${isActive ? "bg-green-400" : "bg-red-500"
+          className={`rounded-lg font-semibold ${isActive ? "bg-green-100 text-green-800" : "bg-red-100 text-green-800"
             }`}
         >
           {isActive ? "Active" : "Inactive"}

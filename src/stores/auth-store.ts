@@ -4,7 +4,36 @@ import type { AuthProviderState, AuthState, Guest, Tuser } from '@/types/types'
 
 const AUTH_STORAGE_KEY = 'auth-storage'
 
+function readPersistedAuth(): string | null {
+  if (typeof window === 'undefined') return null
+  try {
+    const fromLocal = localStorage.getItem(AUTH_STORAGE_KEY)
+    if (fromLocal) return fromLocal
+    const fromSession = sessionStorage.getItem(AUTH_STORAGE_KEY)
+    if (fromSession) {
+      localStorage.setItem(AUTH_STORAGE_KEY, fromSession)
+      sessionStorage.removeItem(AUTH_STORAGE_KEY)
+    }
+    return fromSession
+  } catch {
+    return null
+  }
+}
 
+function writePersistedAuth(payload: string | null) {
+  if (typeof window === 'undefined') return
+  try {
+    if (payload == null) {
+      localStorage.removeItem(AUTH_STORAGE_KEY)
+      sessionStorage.removeItem(AUTH_STORAGE_KEY)
+    } else {
+      localStorage.setItem(AUTH_STORAGE_KEY, payload)
+      sessionStorage.removeItem(AUTH_STORAGE_KEY)
+    }
+  } catch {
+    /* ignore quota / private mode */
+  }
+}
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
@@ -38,15 +67,7 @@ export function initAuthStore() {
 
   if (!useAuthStore.getState().hasHydrated) {
     try {
-      let raw = sessionStorage.getItem(AUTH_STORAGE_KEY)
-      if (!raw && typeof localStorage !== 'undefined') {
-        const legacy = localStorage.getItem(AUTH_STORAGE_KEY)
-        if (legacy) {
-          sessionStorage.setItem(AUTH_STORAGE_KEY, legacy)
-          localStorage.removeItem(AUTH_STORAGE_KEY)
-          raw = legacy
-        }
-      }
+      const raw = readPersistedAuth()
       if (raw) {
         const parsed = JSON.parse(raw) as {
           user?: Tuser | null
@@ -62,26 +83,70 @@ export function initAuthStore() {
         })
       }
     } catch {
-      sessionStorage.removeItem(AUTH_STORAGE_KEY)
+      writePersistedAuth(null)
     }
     useAuthStore.setState({ hasHydrated: true })
   }
 
   if (authListenerAttached) return
   authListenerAttached = true
+
+  const applyPersistedPayload = (raw: string | null) => {
+    if (raw == null) {
+      useAuthStore.setState({
+        user: null,
+        token: null,
+        guest: null,
+        isGeneral: null,
+      })
+      return
+    }
+    try {
+      const parsed = JSON.parse(raw) as {
+        user?: Tuser | null
+        token?: string | null
+        guest?: Guest | null
+        isGeneral?: boolean | null
+      }
+      useAuthStore.setState({
+        user: parsed.user ?? null,
+        token: parsed.token ?? null,
+        guest: parsed.guest ?? null,
+        isGeneral: parsed.isGeneral ?? null,
+      })
+    } catch {
+      writePersistedAuth(null)
+    }
+  }
+
+  window.addEventListener('storage', (e) => {
+    if (e.key !== AUTH_STORAGE_KEY || e.storageArea !== localStorage) return
+    applyPersistedPayload(e.newValue)
+  })
+
   useAuthStore.subscribe((state) => {
     if (state.user || state.token || state.guest) {
-      sessionStorage.setItem(
-        AUTH_STORAGE_KEY,
-        JSON.stringify({
-          user: state.user,
-          token: state.token,
-          guest: state.guest,
-          isGeneral: state.isGeneral,
-        })
-      )
+      const next = JSON.stringify({
+        user: state.user,
+        token: state.token,
+        guest: state.guest,
+        isGeneral: state.isGeneral,
+      })
+      try {
+        if (localStorage.getItem(AUTH_STORAGE_KEY) !== next) {
+          writePersistedAuth(next)
+        }
+      } catch {
+        writePersistedAuth(next)
+      }
     } else {
-      sessionStorage.removeItem(AUTH_STORAGE_KEY)
+      try {
+        if (localStorage.getItem(AUTH_STORAGE_KEY) != null) {
+          writePersistedAuth(null)
+        }
+      } catch {
+        writePersistedAuth(null)
+      }
     }
   })
 }
