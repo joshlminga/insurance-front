@@ -420,7 +420,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                                     key={item?.id ?? `quotation-${itemIndex}`}
                                     header={{
                                         type: 'image',
-                                        src: `${import.meta.env.VITE_BASE_URL}/${item?.product?.organization?.logo}`,
+                                        src: item?.product?.organization?.logo,
                                         alt: item?.product?.organization?.name ?? 'Insurer logo',
                                     }}
                                     rootClassName=""
