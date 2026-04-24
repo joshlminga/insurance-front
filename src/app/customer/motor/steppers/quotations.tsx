@@ -275,20 +275,24 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
         },
         mutationOptions: {
             onSuccess: (data) => {
-                const blob = new Blob([data], { type: 'application/pdf' })
-                const url = window.URL.createObjectURL(blob)
-                const link = document.createElement('a')
-                link.href = url
-                link.download = `comparison-${quoteSessionId}.pdf`
-                document.body.appendChild(link)
-                link.click()
-                link.remove()
-                window.URL.revokeObjectURL(url)
-                ShowToast.success("Comparison PDF downloaded")
+                const blob = new Blob([data], { type: 'application/pdf' });
+                const url = window.URL.createObjectURL(blob);
+                const width = 1000;
+                const height = 900;
+                const left = (window.screen.width / 2) - (width / 2);
+                const top = (window.screen.height / 2) - (height / 2);
+                const popup = window.open(
+                    url,
+                    'PDF Preview',
+                    `width=${width},height=${height},top=${top},left=${left},resizable=yes,scrollbars=yes`
+                );
+                if (!popup) {
+                    ShowToast.error("Popup blocked!");
+                }
             },
             onError: (error: unknown) => {
                 const message = extractErrorMessage(error);
-                ShowToast.error(message || "Download failed!");
+                ShowToast.error(message || "Failed to generate preview!");
             },
         },
     });
@@ -339,7 +343,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                             {benefitGroups.map(({ group, items }) => {
                                 const fieldName = benefitGroupFormKey(group)
                                 const options = [
-                                    { value: BENEFIT_SELECT_NONE, label: 'No add-on' },
+                                    // { value: BENEFIT_SELECT_NONE, label: 'No add-on' },
                                     ...items.map((item) => ({
                                         value: String(item.id),
                                         label: benefitOptionLabel(item),

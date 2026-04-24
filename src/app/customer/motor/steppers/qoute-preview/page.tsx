@@ -69,7 +69,7 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
         }
     }, [])
 
-     const data = {
+    const data = {
         'product_id': componentProps?.data?.product_id,
         'rate_id': componentProps?.data?.rate_id,
     };
@@ -84,21 +84,22 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
             onSuccess: (data) => {
                 const blob = new Blob([data], { type: 'application/pdf' });
                 const url = window.URL.createObjectURL(blob);
-                const link = document.createElement('a');
-
-                link.href = url;
-                link.download = `quote-${quoteSessionId}.pdf`;
-                document.body.appendChild(link);
-                link.click();
-
-                link.remove();
-                window.URL.revokeObjectURL(url);
-
-                ShowToast.success("Download started");
+                const width = 1000;
+                const height = 900;
+                const left = (window.screen.width / 2) - (width / 2);
+                const top = (window.screen.height / 2) - (height / 2);
+                const popup = window.open(
+                    url,
+                    'PDF Preview',
+                    `width=${width},height=${height},top=${top},left=${left},resizable=yes,scrollbars=yes`
+                );
+                if (!popup) {
+                    ShowToast.error("Popup blocked!");
+                }
             },
             onError: (error: unknown) => {
                 const message = extractErrorMessage(error);
-                ShowToast.error(message || "Download failed!");
+                ShowToast.error(message || "Failed to generate preview!");
             },
         },
     });
@@ -116,7 +117,7 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
         method: EMETHODS.POST,
         mutationOptions: {
             onSuccess: (data) => {
-                 const purchaseId = data?.data?.purchase_id
+                const purchaseId = data?.data?.purchase_id
                 sessionStorage.setItem(PURCHASE_SESSION_STORAGE_KEY, String(purchaseId))
                 goToNextStep?.();
                 ShowToast.success(data?.message ?? "Purchase started");
@@ -198,8 +199,8 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
                     <Button
                         variant="outline"
                         leftIcon={<Download />}
-                        onClick={() => {onSubmit(data)}}
-                         loading={submitMutation.isPending}
+                        onClick={() => { onSubmit(data) }}
+                        loading={submitMutation.isPending}
                         className="w-full sm:w-auto">
                         Download
                     </Button>
