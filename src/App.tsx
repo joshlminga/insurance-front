@@ -53,6 +53,7 @@ const StaffPage = lazy(() => import("./app/staff/page"))
 const StaffDetailPage = lazy(() => import("./app/staff/[id]/page"))
 const SettingsPage = lazy(() => import("./app/settings/page"))
 const OrganizationsPage = lazy(() => import("./app/admin/organizations/page"))
+const OrganizationLocationsPage = lazy(() => import("./app/admin/organization-location/page"))
 const UsersPage = lazy(() => import("./app/admin/users/page").then(m => ({ default: m.UsersPage })))
 const MotorProductPage = lazy(() => import("./app/admin/product/motor/motor-product/page").then(m => ({ default: m.MotorProductPage })))
 const MotorCoverTypePage = lazy(() => import("./app/admin/product/motor/cover_types/page").then(m => ({ default: m.MotorCoverTypePage })))
@@ -338,6 +339,10 @@ export const router = createBrowserRouter([
       {
         path: "organization",
         element: <S><OrganizationsPage /></S>,
+      },
+      {
+        path: "organization-location",
+        element: <S><OrganizationLocationsPage /></S>,
       },
       // Users
       {

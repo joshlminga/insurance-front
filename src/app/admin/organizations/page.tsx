@@ -1,6 +1,17 @@
 /* eslint-disable no-extra-boolean-cast */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { PageHeader } from '@/components/shared'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import { buttonVariants } from '@/components/ui/button'
 import { ActionColumn } from '@/dev/columns';
 import { CustomDialogComponent } from '@/dev/core';
 import { CustomBaseTable, SearchTools } from '@/dev/table'
@@ -8,7 +19,7 @@ import { useCustomDialogContextFactory, useDebounce } from '@/hooks';
 import { UseApiMutation, UseApiQuery } from '@/hooks/hooks';
 import { SingleActionsHandler, SubmitResponse, TFilterOptions, TPaginationFilters } from '@/types/types';
 import { FILTEROPTIONS, ReusableReducer } from '@/utils/constatnts';
-import { useReducer } from 'react'
+import { useReducer, useState } from 'react'
 import CreateOrganizationModal from './modals/create';
 import { OrganizationsColumns } from '@/dev/columns/admin/organizations';
 import { EditOrganizationModal } from './modals/edit';
@@ -19,6 +30,11 @@ import { ViewOrganizationModal } from './modals/view';
 import { Plus } from 'lucide-react';
 
 const OrganizationsPage = () => {
+  const [deleteTarget, setDeleteTarget] = useState<{
+    id: number | string
+    label: string
+  } | null>(null)
+
   const [filter, optionsDispatcher] = useReducer(
     ReusableReducer<TPaginationFilters & TFilterOptions>,
     { ...FILTEROPTIONS, page: 1, pageSize: 15 }
@@ -95,8 +111,11 @@ const OrganizationsPage = () => {
     {
       label: 'Delete',
       onSelect: (data) => {
-        deleteOrganizationMutation.mutate({
-          id: data?.organization_id,
+        const id = data?.organization_id
+        if (!id) return
+        setDeleteTarget({
+          id,
+          label: data?.organization_name ?? 'this organization',
         })
       },
       conditional: (data) => Boolean(data?.organization_id),
@@ -127,7 +146,7 @@ const OrganizationsPage = () => {
     <div>
       <PageHeader
         title="Organizations"
-        description="Manage organizations, their details, and associated users"
+        description="Manage organizations, their details, and associated Admins"
         actions={[
           {
             icon: Plus,
@@ -192,6 +211,36 @@ const OrganizationsPage = () => {
           />
         )}
       </CustomDialogComponent>
+
+      <AlertDialog
+        open={deleteTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTarget(null)
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete organization?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. You are about to delete &quot;
+              {deleteTarget?.label}&quot;. Are you sure?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className={buttonVariants({ variant: 'destructive' })}
+              disabled={deleteOrganizationMutation.isPending}
+              onClick={() => {
+                if (!deleteTarget) return
+                deleteOrganizationMutation.mutate({ id: deleteTarget.id })
+              }}
+            >
+              {deleteOrganizationMutation.isPending ? 'Deleting…' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
     </div>
   )

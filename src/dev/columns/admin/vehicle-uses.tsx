@@ -54,7 +54,7 @@ export const VehicleUsesColumns: ColumnDef<any>[] = [
             const isActive: boolean = row.getValue("is_active");
             return (
                 <Badge
-                    className={`rounded-lg text-white font-semibold ${isActive ? "bg-green-400" : "bg-red-500"
+                    className={`rounded-lg font-semibold ${isActive ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
                         }`}>
                     {isActive ? "Active" : "Inactive"}
                 </Badge>
