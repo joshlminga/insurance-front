@@ -157,9 +157,19 @@ const navData = {
       ],
     },
     {
-      title: "Organizations",
+      title: "Organization",
       url: EROUTES.ORGANIZATION,
       icon: UserCog,
+      items: [
+        {
+          title: "Manage",
+          url: EROUTES.ORGANIZATION,
+        },
+        {
+          title: "Location",
+          url: EROUTES.ORGANIZATION_LOCATION,
+        },
+      ],
     },
     {
       title: "Users",

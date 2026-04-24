@@ -2,44 +2,19 @@
 import { CardFooter } from '@/components/ui/card'
 import {
     Button,
-    ReusableCountriesInputMultiselect,
     ReusableSelect,
     ReuseableInput,
     ReuseableSingleSelectAdminInput,
 } from '@/dev/core'
 import { UseApiMutation } from '@/hooks/hooks'
-import { OrganizationSchema } from '@/types/form-schema'
-import { OrganizationFormValues } from '@/types/schema'
+import { OrganizationEditSchema } from '@/types/form-schema'
+import { OrganizationEditFormValues } from '@/types/schema'
 import { SubmitResponse } from '@/types/types'
 import { EMETHODS, ORGANIZATIONTYPES } from '@/utils/constatnts'
 import { extractErrorMessage } from '@/utils/helpers'
 import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Controller, useForm } from 'react-hook-form'
-
-const mapLocationsToIds = (locations: any): string[] => {
-    if (!Array.isArray(locations)) return []
-    return locations
-        .map((location) => {
-            if (typeof location === 'string' || typeof location === 'number') {
-                return String(location)
-            }
-            const nestedCountryId =
-                location?.country?.id ??
-                location?.country?.country_id ??
-                location?.country?.value
-
-            return String(
-                location?.id ??
-                nestedCountryId ??
-                location?.location_id ??
-                location?.country_id ??
-                location?.value ??
-                ''
-            )
-        })
-        .filter(Boolean)
-}
 
 export const EditOrganizationModal = ({
     componentProps,
@@ -51,28 +26,28 @@ export const EditOrganizationModal = ({
     }
     handleDialogContextSwitch: (context?: any) => void
 }) => {
-    const organization = componentProps?.data ?? {}
-    const form = useForm<OrganizationFormValues>({
-        resolver: zodResolver(OrganizationSchema),
+
+    const organizationId =
+        componentProps?.data?.organization_id ??
+        componentProps?.data?.id
+
+    const form = useForm<OrganizationEditFormValues>({
+        resolver: zodResolver(OrganizationEditSchema),
         defaultValues: {
-            name: organization?.name ?? organization?.organization_name ?? '',
-            organization_type: organization?.organization_type ?? '',
-            domain: organization?.domain ?? '',
-            admin_id: organization?.organization_admin_id ? String(organization?.organization_admin_id) : '',
-            initials: organization?.initials ?? '',
-            logo: organization?.logo ?? undefined,
-            locations: mapLocationsToIds(organization?.organization_location) ?? [],
+            name: componentProps?.data?.organization_name ?? '',
+            organization_type: componentProps?.data?.organization_type ?? '',
+            admin_id: String(componentProps?.data?.organization_admin_id ?? ''),
         },
     })
 
     const updateMutation = UseApiMutation<SubmitResponse, FormData>({
-        url: `organization/${organization?.organization_id}`,
+        url: `organization/${organizationId}`,
         config: {
             headers: {
                 "Content-Type": "multipart/form-data",
             },
         },
-        method: EMETHODS.PATCH,
+        method: EMETHODS.POST,
         mutationOptions: {
             onSuccess: (response) => {
                 ShowToast.success(response?.message || 'Organization updated successfully')
@@ -85,24 +60,15 @@ export const EditOrganizationModal = ({
         },
     })
 
-    const onSubmit = (data: OrganizationFormValues) => {
-        if (!organization?.organization_id) {
+    const onSubmit = (data: OrganizationEditFormValues) => {
+        if (!organizationId) {
             ShowToast.error('Unable to update organization: missing organization id')
             return
         }
         const formData = new FormData()
         formData.append("name", data.name)
         formData.append("organization_type", data.organization_type)
-        formData.append("domain", data.domain)
         formData.append("admin_id", data.admin_id)
-        formData.append("initials", data.initials)
-
-        data.locations.forEach((location) => {
-            formData.append("locations[]", location)
-        })
-        if (data.logo instanceof File) {
-            formData.append("logo", data.logo)
-        }
         updateMutation.mutate(formData)
     }
 
@@ -115,62 +81,47 @@ export const EditOrganizationModal = ({
                 </p>
             </div>
 
-            <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
-                <ReuseableInput
-                    control={form.control}
-                    name="name"
-                    label="Organization Name"
-                    className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
-                />
-                <ReusableSelect
-                    control={form.control}
-                    name="organization_type"
-                    label="Organization Type"
-                    options={ORGANIZATIONTYPES}
-                />
-                <ReuseableInput
-                    control={form.control}
-                    name="domain"
-                    label="Domain"
-                    className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
-                />
-                <Controller
-                    control={form.control}
-                    name="admin_id"
-                    render={({ field }) => (
-                        <ReuseableSingleSelectAdminInput
-                            label="Admin"
-                            required
-                            value={field.value}
-                            onChange={field.onChange}
-                        />
-                    )}
-                />
-                <ReuseableInput
-                    control={form.control}
-                    name="initials"
-                    label="Initials"
-                    className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
-                />
-                <ReuseableInput
-                    className="w-full h-[51px] rounded-[5px] border border-[#ADABAB] sm:col-span-2 lg:col-span-1"
-                    control={form.control}
-                    type="file"
-                    name="logo"
-                    label="Attach Logo"
-                />
-                <Controller
-                    control={form.control}
-                    name="locations"
-                    render={({ field }) => (
-                        <ReusableCountriesInputMultiselect
-                            label="Locations"
-                            required
-                            value={field.value}
-                            onChange={field.onChange}
-                        />
-                    )}
-                />
+            {!organizationId && (
+                <div className="text-sm text-destructive">
+                    Unable to load organization details: missing organization id.
+                </div>
+            )}
+
+            <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-6 gap-4">
+                <div className="col-span-6">
+                    <ReuseableInput
+                        control={form.control}
+                        name="name"
+                        label="Organization Name"
+                        className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                        required
+                    />
+                </div>
+
+                <div className="col-span-6 sm:col-span-3">
+                    <ReusableSelect
+                        control={form.control}
+                        name="organization_type"
+                        label="Organization Type"
+                        options={ORGANIZATIONTYPES}
+                        triggerClassName="rounded-[5px] border border-[#ADABAB]"
+                    />
+                </div>
+
+                <div className="col-span-6 sm:col-span-3">
+                    <Controller
+                        control={form.control}
+                        name="admin_id"
+                        render={({ field }) => (
+                            <ReuseableSingleSelectAdminInput
+                                label="Admin"
+                                required
+                                value={field.value ?? ''}
+                                onChange={field.onChange}
+                            />
+                        )}
+                    />
+                </div>
                 <CardFooter className="flex flex-col sm:flex-row justify-between gap-3 mt-2 px-0">
                     <Button
                         type="button"
@@ -182,6 +133,7 @@ export const EditOrganizationModal = ({
                     <Button
                         type="submit"
                         className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
+                        disabled={!organizationId || updateMutation.isPending}
                         loading={updateMutation.isPending}>
                         Save Changes
                     </Button>

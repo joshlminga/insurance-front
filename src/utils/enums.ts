@@ -75,6 +75,7 @@ export const EROUTES = {
   MOTORDETAILEDBENEFIT: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/detailed-benefit`,
 
   ORGANIZATION: `/${EPREFIX.DASHBOARD}/organization`,
+  ORGANIZATION_LOCATION: `/${EPREFIX.DASHBOARD}/organization-location`,
   USERS: `/${EPREFIX.DASHBOARD}/users`,
 } as const
 
