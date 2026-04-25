@@ -722,3 +722,15 @@ export const EditProductSchema = z.object({
       path: ["expiry_date"],
     }
   )
+
+  export const SendViaEmailSchema = z.object({
+    email: z.string().email("Invalid email address").optional().or(z.literal("")),
+    is_self: z.boolean().or(z.literal("")),
+    quote_type: z.string().min(1, "Quote type is required").or(z.literal("")),
+    product_id: z.string().min(1, "Product ID is required").or(z.literal("")),
+    rate_id: z.string().min(1, "Rate ID is required").or(z.literal("")),
+    products: z.array(z.object({
+      product_id: z.string().optional().or(z.literal("")),
+      rate_id: z.string().optional().or(z.literal("")),
+    }))
+  })

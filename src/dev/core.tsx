@@ -62,7 +62,13 @@ import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Controller, type FieldValues } from "react-hook-form";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue
+} from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
     Pagination,
@@ -91,14 +97,22 @@ import {
     MultiSelectTrigger,
     MultiSelectValue
 } from "@/components/ui/multi-select";
-import { UseApiQuery } from "@/hooks/hooks";
+import { UseApiMutation, UseApiQuery } from "@/hooks/hooks";
 import { Label } from "@/components/ui/label";
-import { EORGANIZATIONTYPES, FILTEROPTIONS, ReusableReducer } from "@/utils/constatnts";
+import {
+    EMETHODS,
+    EORGANIZATIONTYPES,
+    FILTEROPTIONS,
+    MOTOR_QUOTE_SESSION_STORAGE_KEY,
+    ReusableReducer
+} from "@/utils/constatnts";
 import {
     Popover,
     PopoverContent,
     PopoverTrigger
 } from "@/components/ui/popover";
+import { ShowToast } from "@/utils/utils";
+import { extractErrorMessage } from "@/utils/helpers";
 
 const formatSegment = (segment: string) => {
     return segment
@@ -111,7 +125,6 @@ export const BreadCrumbComponent = () => {
     const location = useLocation();
     const rawSegments = location.pathname.split('/').filter(Boolean);
     const pathSegments = rawSegments[0] === "dashboard" ? rawSegments.slice(1) : rawSegments;
-
     return (
         <div className="w-auto">
             <Breadcrumb>
@@ -2073,18 +2086,6 @@ export const SkeletonCard: React.FC = () => (
 export const EmptyState: React.FC = () => (
     <div className="col-span-full flex flex-col items-center justify-center py-16 text-center">
         <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
-            {/* <svg
-                className="h-8 w-8 text-gray-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={1.5}>
-                <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z"
-                />
-            </svg> */}
             <OctagonAlert className="h-8 w-8 text-gray-400" />
         </div>
         <p className="text-sm font-medium text-gray-700">No quotations available</p>
@@ -2117,3 +2118,101 @@ export const CustomLoader: React.FC<TLoaderProps> = ({
         )}
     </div>
 );
+
+
+export const SendDocumentsViaEmail = ({
+    componentProps,
+    handleDialogContextSwitch
+}: {
+    handleDialogContextSwitch: (context?: any) => void
+    componentProps?: any
+}) => {
+    const [quoteSessionId, setQuoteSessionId] = useState<number | null>(null)
+    const [isSelf, setIsSelf] = useState(false)
+    const [email, setEmail] = useState("")
+
+    useEffect(() => {
+        const storedSessionId = Number(sessionStorage.getItem(MOTOR_QUOTE_SESSION_STORAGE_KEY))
+        if (Number.isFinite(storedSessionId) && storedSessionId > 0) {
+            setQuoteSessionId(storedSessionId)
+        } else {
+            setQuoteSessionId(null)
+        }
+    }, [])
+
+    const submitMutation = UseApiMutation<SubmitResponse, FormData>({
+        url: `document/motor/send-quote-via-email/${quoteSessionId}`,
+        method: EMETHODS.POST,
+        mutationOptions: {
+            onSuccess: (data) => {
+                ShowToast.success(data.message || "Sent successfully!")
+                setEmail("")
+                setIsSelf(false)
+                componentProps?.refetch?.()
+                handleDialogContextSwitch({ refetch: true })
+            },
+            onError: (error: unknown) => {
+                const message = extractErrorMessage(error)
+                ShowToast.error(message || "Sending failed!")
+            },
+        },
+    })
+
+    const onSubmit = (e: React.FormEvent) => {
+        e.preventDefault()
+        const data = {
+            email: isSelf ? "" : email,
+            product_id: componentProps?.data?.product_id ?? "",
+            rate_id: componentProps?.data?.rate_id ?? "",
+            is_self: isSelf,
+            quote_type: componentProps?.data?.quote_type ?? "single",
+        }
+        submitMutation.mutate(data as any)
+    }
+
+    return (
+        <div className="w-full min-w-[300px] max-w-[400px] space-y-6 p-6">
+            <div className="border-b pb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h2 className="text-xl font-semibold">Share Via Email To Either Self or Another User</h2>
+                    <p className="text-sm text-muted-foreground mt-1">
+                        Enter the email address you want to share the documents with. You can also choose to send the documents to yourself.
+                    </p>
+                </div>
+            </div>
+            <form onSubmit={onSubmit} className="space-y-6">
+                <div className="flex items-center space-x-2">
+                    <Checkbox
+                        id="is_self"
+                        checked={isSelf}
+                        onCheckedChange={(checked) => setIsSelf(checked === true)}
+                    />
+                    <Label htmlFor="is_self" className="cursor-pointer font-bold text-lg">
+                        Send to my email
+                    </Label>
+                </div>
+
+                {!isSelf && (
+                    <div className="space-y-2">
+                        <Label htmlFor="email">Email Address</Label>
+                        <input
+                            id="email"
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder="Enter email"
+                            className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] px-3"
+                            required={!isSelf}
+                        />
+                    </div>
+                )}
+                <Button
+                    type="submit"
+                    className="w-full bg-[#C20C0C]/80 hover:bg-[#C20C0C]"
+                    loading={submitMutation.isPending}>
+                    Send
+                </Button>
+            </form>
+        </div>
+    )
+}
