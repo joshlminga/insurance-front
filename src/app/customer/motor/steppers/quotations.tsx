@@ -133,6 +133,8 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
 
     const quotationItems = data?.data?.results ?? []
     const benefitsAvailable = (data?.data?.benefits?.available ?? []) as MotorBenefitOption[]
+    const benefitsSelected = (data?.data?.benefits?.selected ?? []) as MotorBenefitOption[]
+    const benefitsListed = (data?.data?.benefits?.listed ?? []) as MotorBenefitOption[]
 
     const benefitGroups = useMemo<BenefitGroup[]>(() => {
         const map = new Map<string, MotorBenefitOption[]>()
@@ -473,10 +475,48 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                                                 {formatCurrency(item?.calculated_premium?.basic_premium)}
                                             </span>
                                         </div>
+                                        {/* Benefits Place Holders (Excess Protector,Political Violence & Terrorism,Personal Accident) */}
                                         <div className="flex justify-between gap-2">
                                             <span className="text-xs text-gray-500 sm:text-sm">
+                                                Excess Protector
+                                            </span>
+                                            <span className="text-xs font-medium text-gray-900 sm:text-sm">
+                                                demo
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between gap-2">
+                                            <span className="text-xs text-gray-500 sm:text-sm">
+                                                Political Violence & Terrorism
+                                            </span>
+                                            <span className="text-xs font-medium text-gray-900 sm:text-sm">
+                                                demo
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between gap-2">
+                                            <span className="text-xs text-gray-500 sm:text-sm">
+                                                Personal Accident
+                                            </span>
+                                            <span className="text-xs font-medium text-gray-900 sm:text-sm">
+                                                demo
+                                            </span>
+                                        </div>
+
+                                        {/* Duty */}
+                                        <div className="flex justify-between gap-2">    
+                                            <span className="text-xs text-gray-500 sm:text-sm">
+                                                PHCF, TL & Stamp Duty
+                                            </span>
+                                            <span className="text-xs font-medium text-gray-900 sm:text-sm">
+                                                {formatCurrency(item?.calculated_premium?.total_duty)}
+                                            </span>
+                                        </div>
+
+
+                                        <div className="flex justify-between gap-2 border-t border-b border-gray-200 pt-2">
+                                            <span className="text-xs text-gray-500 font-bold sm:text-sm ">
                                                 Total Premium
                                             </span>
+                                       
                                             <span className="text-xs font-semibold text-[#C20C0C] sm:text-sm">
                                                 {formatCurrency(item?.calculated_premium?.total_premium)}
                                             </span>
