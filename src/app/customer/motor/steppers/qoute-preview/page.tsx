@@ -8,7 +8,7 @@ import {
     CardHeader
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Button, ReusableDropdown } from "@/dev/core";
+import { Button, CustomDialogComponent, ReusableDropdown, SendDocumentsViaEmail } from "@/dev/core";
 import { usePurchaseStepper } from "@/hooks/use-purchase-stepper";
 import { formatCurrency } from "@/lib/format";
 import { EPREFIX, EROUTES } from "@/utils/enums";
@@ -36,11 +36,12 @@ import {
 import { ShowToast } from "@/utils/utils";
 import { UseApiMutation } from "@/hooks/hooks";
 import { extractErrorMessage } from "@/utils/helpers";
+import { useCustomDialogContextFactory } from "@/hooks";
 
 export const QuotePreviewPage: React.FC<premiumPreview> = ({
     componentProps,
     goToNextStep: goToNextStepProp,
-    handleDialogContextSwitch,
+    // handleDialogContextSwitch,
 }) => {
 
     const { currentStep } = usePurchaseStepper('motor');
@@ -48,8 +49,6 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
     const location = useLocation();
     const { isAuthenticated } = UseAuth();
     const item = componentProps?.data;
-
-    console.log(componentProps);
 
     const goToNextStep = goToNextStepProp ?? componentProps?.goToNextStep;
     const org = item?.product?.organization;
@@ -69,7 +68,7 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
         }
     }, [])
 
-     const data = {
+    const data = {
         'product_id': componentProps?.data?.product_id,
         'rate_id': componentProps?.data?.rate_id,
     };
@@ -84,21 +83,22 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
             onSuccess: (data) => {
                 const blob = new Blob([data], { type: 'application/pdf' });
                 const url = window.URL.createObjectURL(blob);
-                const link = document.createElement('a');
-
-                link.href = url;
-                link.download = `quote-${quoteSessionId}.pdf`;
-                document.body.appendChild(link);
-                link.click();
-
-                link.remove();
-                window.URL.revokeObjectURL(url);
-
-                ShowToast.success("Download started");
+                const width = 1000;
+                const height = 900;
+                const left = (window.screen.width / 2) - (width / 2);
+                const top = (window.screen.height / 2) - (height / 2);
+                const popup = window.open(
+                    url,
+                    'PDF Preview',
+                    `width=${width},height=${height},top=${top},left=${left},resizable=yes,scrollbars=yes`
+                );
+                if (!popup) {
+                    ShowToast.error("Popup blocked!");
+                }
             },
             onError: (error: unknown) => {
                 const message = extractErrorMessage(error);
-                ShowToast.error(message || "Download failed!");
+                ShowToast.error(message || "Failed to generate preview!");
             },
         },
     });
@@ -116,7 +116,7 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
         method: EMETHODS.POST,
         mutationOptions: {
             onSuccess: (data) => {
-                 const purchaseId = data?.data?.purchase_id
+                const purchaseId = data?.data?.purchase_id
                 sessionStorage.setItem(PURCHASE_SESSION_STORAGE_KEY, String(purchaseId))
                 goToNextStep?.();
                 ShowToast.success(data?.message ?? "Purchase started");
@@ -136,6 +136,12 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
         submitPurchaseMutation.mutate(data)
     }
 
+    const { handleDialogContextSwitch, dialogContent, dialogOpen } =
+        useCustomDialogContextFactory<{
+            refetch?: () => Promise<any>
+            data?: any
+        }>()
+
     return (
         <>
             <div className="mx-auto max-w-125 min-w-125 px-4 space-y-6">
@@ -152,7 +158,6 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="grid grid-cols-2 gap-y-3 text-sm">
-
                             <span className="text-muted-foreground">Basic Premium</span>
                             <span className="font-medium text-right">
                                 {formatCurrency(premium?.basic_premium)}
@@ -198,8 +203,8 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
                     <Button
                         variant="outline"
                         leftIcon={<Download />}
-                        onClick={() => {onSubmit(data)}}
-                         loading={submitMutation.isPending}
+                        onClick={() => { onSubmit(data) }}
+                        loading={submitMutation.isPending}
                         className="w-full sm:w-auto">
                         Download
                     </Button>
@@ -212,8 +217,21 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
                             </Button>
                         }
                         items={[
-                            { label: "Email", icon: <Mail className="w-4 h-4" />, onClick: () => console.log("Email") },
-                            { label: "WhatsApp", icon: <Share2 className="w-4 h-4" />, onClick: () => console.log("WhatsApp") },
+                            { 
+                                label: "Email", 
+                                icon: <Mail className="w-4 h-4" />, 
+                                onClick: () => {
+                                     handleDialogContextSwitch({
+                                              componentProps: { data: data },
+                                              Component: SendDocumentsViaEmail,
+                                            })
+                                }
+                            },
+                            { 
+                                label: "WhatsApp", 
+                                icon: <Share2 className="w-4 h-4" />, 
+                                onClick: () => console.log("WhatsApp") 
+                            },
                         ]}
                     />
                 </div>
@@ -242,6 +260,19 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
                     </Link>
                 )}
             </CardFooter>
+
+            <CustomDialogComponent
+                {...{ handleDialogContextSwitch, dialogOpen }}
+                className='sm:max-w-fit w-[95vw] sm:w-auto p-4 sm:p-6'>
+                {dialogContent?.Component && (
+                    <dialogContent.Component
+                        {...{
+                            componentProps: dialogContent.componentProps,
+                            handleDialogContextSwitch,
+                        }}
+                    />
+                )}
+            </CustomDialogComponent>
         </>
     );
 };

@@ -31,6 +31,7 @@ import { usePurchaseStepper } from '@/hooks/use-purchase-stepper'
 import {
     EMETHODS,
     FILTEROPTIONS,
+    MAX_COMPARISONS,
     MOTOR_QUOTE_SESSION_STORAGE_KEY,
     PURCHASE_SESSION_STORAGE_KEY,
     ReusableReducer
@@ -111,7 +112,6 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
     goToNextStep,
     goToPrevStep,
 }) => {
-    const MAX_COMPARISONS = 3
     const [quoteSessionId, setQuoteSessionId] = useState<number | null>(null)
     const [selectedQuotes, setSelectedQuotes] = useState<{ product_id: string | number; rate_id: string | number }[]>([])
     const [purchasingRateId, setPurchasingRateId] = useState<string | number | null>(null)
@@ -299,6 +299,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                     componentProps: {
                         data,
                         onDownload: () => onComparison(true),
+                        products: selectedQuotes,
                     },
                     Component: PostComparisonPage,
                 })
@@ -320,25 +321,43 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
         },
         mutationOptions: {
             onSuccess: (data) => {
-                const blob = new Blob([data], { type: 'application/pdf' })
-                const url = window.URL.createObjectURL(blob)
-                const link = document.createElement('a')
-                link.href = url
-                link.download = `comparison-${quoteSessionId}.pdf`
-                document.body.appendChild(link)
-                link.click()
-                link.remove()
-                window.URL.revokeObjectURL(url)
-                ShowToast.success("Comparison PDF downloaded")
+                const blob = new Blob([data], { type: 'application/pdf' });
+                const url = window.URL.createObjectURL(blob);
+                const width = 1000;
+                const height = 900;
+                const left = (window.screen.width / 2) - (width / 2);
+                const top = (window.screen.height / 2) - (height / 2);
+                const popup = window.open(
+                    url,
+                    'PDF Preview',
+                    `width=${width},height=${height},top=${top},left=${left},resizable=yes,scrollbars=yes`
+                );
+                if (!popup) {
+                    ShowToast.error("Popup blocked!");
+                }
             },
             onError: (error: unknown) => {
                 const message = extractErrorMessage(error);
-                ShowToast.error(message || "Download failed!");
+                ShowToast.error(message || "Failed to generate preview!");
             },
         },
     });
 
-    const onComparison = (isDownload = false) => {
+     const submitSendQuoteViaEmailMutation = UseApiMutation<SubmitResponse, FormData>({
+            url: `document/motor/send-quote-via-email/${quoteSessionId}`,
+            method: EMETHODS.POST,
+            mutationOptions: {
+                onSuccess: (data) => {
+                    ShowToast.success(data.message || "Sent successfully!")
+                },
+                onError: (error: unknown) => {
+                    const message = extractErrorMessage(error)
+                    ShowToast.error(message || "Sending failed!")
+                },
+            },
+        })
+
+    const onComparison = (isDownload = false, isSendViaEmail = false) => {
         if (!quoteSessionId) {
             ShowToast.error("No active quote session found.")
             return
@@ -349,10 +368,19 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
         }
         const payload = {
             is_download: isDownload,
+            is_send_via_email: isSendViaEmail,
             products: selectedQuotes,
         }
         if (isDownload) {
             submitComparisonDownloadMutation.mutate(payload)
+
+        if (isSendViaEmail) {
+            submitSendQuoteViaEmailMutation.mutate({
+                quote_type: 'comparison',
+                products: selectedQuotes,
+
+            })
+        }
         } else {
             submitComparisonMutation.mutate(payload)
         }
@@ -384,7 +412,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                             {benefitGroups.map(({ group, items }) => {
                                 const fieldName = benefitGroupFormKey(group)
                                 const options = [
-                                    { value: BENEFIT_SELECT_NONE, label: 'No add-on' },
+                                    // { value: BENEFIT_SELECT_NONE, label: 'No add-on' },
                                     ...items.map((item) => ({
                                         value: String(item.id),
                                         label: benefitOptionLabel(item),

@@ -92,7 +92,6 @@ export const ViewOrganizationLocationModal = ({
             value={
               logoUrl ? (
                 <div className="flex items-center gap-3">
-                  {/* eslint-disable-next-line jsx-a11y/alt-text */}
                   <img
                     src={logoUrl}
                     className="h-20 w-20 rounded border object-contain bg-white"

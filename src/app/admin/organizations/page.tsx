@@ -216,8 +216,8 @@ const OrganizationsPage = () => {
         open={deleteTarget !== null}
         onOpenChange={(open) => {
           if (!open) setDeleteTarget(null)
-        }}
-      >
+        }}>
+
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete organization?</AlertDialogTitle>
@@ -234,8 +234,7 @@ const OrganizationsPage = () => {
               onClick={() => {
                 if (!deleteTarget) return
                 deleteOrganizationMutation.mutate({ id: deleteTarget.id })
-              }}
-            >
+              }}>
               {deleteOrganizationMutation.isPending ? 'Deleting…' : 'Delete'}
             </AlertDialogAction>
           </AlertDialogFooter>

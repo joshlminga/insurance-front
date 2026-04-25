@@ -220,3 +220,5 @@ export const BENEFIT_SECTIONS: { type: BenefitType; key: "compulsory" | "inclusi
     { type: "inclusive", key: "inclusive" },
     { type: "optional", key: "optional" },
 ];
+
+export const MAX_COMPARISONS = 3

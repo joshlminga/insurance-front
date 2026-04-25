@@ -2,9 +2,11 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Button, EmptyState } from "@/dev/core";
-import { ArrowDown, MoveLeft } from "lucide-react";
+import { Button, CustomDialogComponent, EmptyState, ReusableDropdown, SendDocumentsViaEmail } from "@/dev/core";
+import { useCustomDialogContextFactory } from "@/hooks";
+import { ArrowDown, Forward, Mail, MoveLeft, Share2 } from "lucide-react";
 import React from "react";
+import { ShowToast } from "@/utils/utils";
 
 const PREMIUM_KEYS = new Set(["Basic Premium", "Gross Premium", "Levies"])
 
@@ -18,12 +20,22 @@ function getBadgeClass(status: string): string {
 
 export const PostComparisonPage = ({
     componentProps,
-    handleDialogContextSwitch,
 }: {
     handleDialogContextSwitch: (context?: any) => void
     componentProps?: any
 }) => {
     const comparisons: any[] = componentProps?.data?.data?.comparison ?? []
+
+    const { handleDialogContextSwitch, dialogContent, dialogOpen } =
+        useCustomDialogContextFactory<{
+            refetch?: () => Promise<any>
+            data?: any
+        }>()
+
+    const emailComponentData = {
+        quote_type: "comparison" as const,
+        products: componentProps?.products ?? [],
+    }
 
     return (
         <div className="space-y-6">
@@ -32,7 +44,7 @@ export const PostComparisonPage = ({
                     type="button"
                     className="rounded-md p-1 bg-transparent hover:bg-muted"
                     leftIcon={<MoveLeft className="h-7 w-7 text-primary" />}
-                    onClick={() => handleDialogContextSwitch()}
+                    onClick={() => handleDialogContextSwitch({ state: false })}
                 />
                 Insurer Comparison
             </h1>
@@ -49,14 +61,6 @@ export const PostComparisonPage = ({
 
                         return (
                             <div key={`${item.rate_id}-${idx}`} className="space-y-4">
-                                {/* <Card className="flex items-center justify-center py-6">
-                                    <img
-                                        src={`${import.meta.env.VITE_BASE_URL}/${item.insuerer_logo}`}
-                                        alt={item.insurer_name}
-                                        className="w-36 h-16 object-contain"
-                                    />
-                                </Card> */}
-
                                 <Card>
                                     <CardHeader className="pb-2">
                                         <h3 className="text-lg font-semibold">{item.insurer_name}</h3>
@@ -105,7 +109,39 @@ export const PostComparisonPage = ({
                 </div>
             )}
 
-            <CardFooter className="flex justify-end px-0">
+            <CardFooter className="flex gap-4 justify-end px-0">
+                <ReusableDropdown
+                    trigger={
+                        <Button
+                            className="w-full sm:w-auto bg-[#209BFF] hover:bg-[#209BFF]/80"
+                            leftIcon={<Forward />}>
+                            Share
+                        </Button>
+                    }
+                    items={[
+                        {
+                            label: "Email",
+                            icon: <Mail className="w-4 h-4" />,
+                            onClick: () => {
+                                const list = emailComponentData.products
+                                if (!Array.isArray(list) || list.length < 2) {
+                                    ShowToast.error("Comparison products are missing. Generate the comparison again.")
+                                    return
+                                }
+                                handleDialogContextSwitch({
+                                    componentProps: { data: emailComponentData },
+                                    Component: SendDocumentsViaEmail,
+                                })
+                            }
+                        },
+                        {
+                            label: "WhatsApp",
+                            icon: <Share2 className="w-4 h-4" />,
+                            onClick: () => console.log("WhatsApp")
+                        },
+                    ]}
+                />
+
                 <Button
                     type="button"
                     className="bg-[#C20C0C] hover:bg-[#C20C0C]/70"
@@ -114,6 +150,20 @@ export const PostComparisonPage = ({
                     Download Comparison
                 </Button>
             </CardFooter>
+
+            <CustomDialogComponent
+                {...{ handleDialogContextSwitch, dialogOpen }}
+                className='sm:max-w-fit w-[95vw] sm:w-auto p-4 sm:p-6'>
+                {dialogContent?.Component && (
+                    <dialogContent.Component
+                        {...{
+                            componentProps: dialogContent.componentProps,
+                            handleDialogContextSwitch,
+                        }}
+                    />
+                )}
+            </CustomDialogComponent>
+
         </div>
     );
 };
