@@ -88,7 +88,9 @@ function resolveListedBenefitValue(item: any, listedBenefitId: number): string {
     const selectedMatch = selected.find((b) => Number(b?.benefit_id) === listedBenefitId)
     if (selectedMatch) return formatPremiumC(selectedMatch?.premium)
 
-    return '-'
+    const availableRaw = (benefits?.available ?? []) as Array<number | string>
+    const availableIds = availableRaw.map(Number).filter((n) => Number.isFinite(n))
+    return availableIds.includes(listedBenefitId) ? 'N/A' : 'N/O'
 }
 
 
