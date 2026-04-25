@@ -108,8 +108,7 @@ const OrganizationLocationPage = () => {
 
   const setDefaultLocationMutation = UseApiMutation<
     SubmitResponse,
-    { id: number | string; override: true }
-  >({
+    { id: number | string; override: true }>({
     url: ({ id }) => `organization-location/${id}/default`,
     method: EMETHODS.PATCH,
     mutationOptions: {

@@ -31,6 +31,7 @@ import { usePurchaseStepper } from '@/hooks/use-purchase-stepper'
 import {
     EMETHODS,
     FILTEROPTIONS,
+    MAX_COMPARISONS,
     MOTOR_QUOTE_SESSION_STORAGE_KEY,
     PURCHASE_SESSION_STORAGE_KEY,
     ReusableReducer
@@ -67,7 +68,6 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
     goToNextStep,
     goToPrevStep,
 }) => {
-    const MAX_COMPARISONS = 3
     const [quoteSessionId, setQuoteSessionId] = useState<number | null>(null)
     const [selectedQuotes, setSelectedQuotes] = useState<{ product_id: string | number; rate_id: string | number }[]>([])
     const [purchasingRateId, setPurchasingRateId] = useState<string | number | null>(null)
@@ -254,6 +254,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                     componentProps: {
                         data,
                         onDownload: () => onComparison(true),
+                        products: selectedQuotes,
                     },
                     Component: PostComparisonPage,
                 })
@@ -297,7 +298,21 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
         },
     });
 
-    const onComparison = (isDownload = false) => {
+     const submitSendQuoteViaEmailMutation = UseApiMutation<SubmitResponse, FormData>({
+            url: `document/motor/send-quote-via-email/${quoteSessionId}`,
+            method: EMETHODS.POST,
+            mutationOptions: {
+                onSuccess: (data) => {
+                    ShowToast.success(data.message || "Sent successfully!")
+                },
+                onError: (error: unknown) => {
+                    const message = extractErrorMessage(error)
+                    ShowToast.error(message || "Sending failed!")
+                },
+            },
+        })
+
+    const onComparison = (isDownload = false, isSendViaEmail = false) => {
         if (!quoteSessionId) {
             ShowToast.error("No active quote session found.")
             return
@@ -308,10 +323,19 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
         }
         const payload = {
             is_download: isDownload,
+            is_send_via_email: isSendViaEmail,
             products: selectedQuotes,
         }
         if (isDownload) {
             submitComparisonDownloadMutation.mutate(payload)
+
+        if (isSendViaEmail) {
+            submitSendQuoteViaEmailMutation.mutate({
+                quote_type: 'comparison',
+                products: selectedQuotes,
+
+            })
+        }
         } else {
             submitComparisonMutation.mutate(payload)
         }

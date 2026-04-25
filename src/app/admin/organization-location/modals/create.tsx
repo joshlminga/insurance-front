@@ -18,6 +18,7 @@ export const CreateOrganizationLocationModal = ({
   handleDialogContextSwitch: (context?: any) => void
   componentProps?: any
 }) => {
+
   const form = useForm<OrganizationLocationCreateFormValues>({
     resolver: zodResolver(OrganizationLocationCreateSchema),
     defaultValues: {
@@ -118,8 +119,7 @@ export const CreateOrganizationLocationModal = ({
           <Button
             type="button"
             className="w-full sm:w-auto rounded-full border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
-            onClick={() => handleDialogContextSwitch({})}
-          >
+            onClick={() => handleDialogContextSwitch({})}>
             Cancel
           </Button>
 

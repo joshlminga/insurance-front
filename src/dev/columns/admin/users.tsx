@@ -59,9 +59,9 @@ export const UsersColumns: ColumnDef<any>[] = [
             return (
                 <Badge
                     variant="outline"
-                    className={`rounded-full px-3 py-1 border-none text-white font-medium shadow-sm transition-colors ${is_general
-                        ? "bg-emerald-500"
-                        : "bg-indigo-600"
+                    className={`rounded-full px-3 py-1 border-none font-medium shadow-sm transition-colors ${is_general
+                        ? "bg-emerald-100 text-emerald-800"
+                        : "bg-indigo-100 text-indigo-800"
                         }`}
                 >
                     {is_general ? "General" : "Admin"}

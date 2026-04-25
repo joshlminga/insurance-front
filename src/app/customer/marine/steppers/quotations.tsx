@@ -30,8 +30,6 @@ export const MarineQuotationsPage: React.FC<CustomerVerificationDetailsProps> = 
                             Additional Benefits:
                         </h1>
                         <hr className="mb-4 sm:mb-6" />
-
-                        {/* Checkbox Grid - responsive columns handled by component */}
                         <div className="overflow-x-auto">
                             <ReusableCheckboxGrid
                                 options={QUOTATIONCHECKBOX}
@@ -40,8 +38,6 @@ export const MarineQuotationsPage: React.FC<CustomerVerificationDetailsProps> = 
                         </div>
 
                         <hr className="my-4 sm:mb-6" />
-
-                        {/* Additional Inputs - 1 col mobile, 2 col sm+ */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8">
                             <ReuseableInput
                                 className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"

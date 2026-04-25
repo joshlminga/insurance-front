@@ -8,7 +8,7 @@ import {
     CardHeader
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Button, ReusableDropdown } from "@/dev/core";
+import { Button, CustomDialogComponent, ReusableDropdown, SendDocumentsViaEmail } from "@/dev/core";
 import { usePurchaseStepper } from "@/hooks/use-purchase-stepper";
 import { formatCurrency } from "@/lib/format";
 import { EPREFIX, EROUTES } from "@/utils/enums";
@@ -36,11 +36,12 @@ import {
 import { ShowToast } from "@/utils/utils";
 import { UseApiMutation } from "@/hooks/hooks";
 import { extractErrorMessage } from "@/utils/helpers";
+import { useCustomDialogContextFactory } from "@/hooks";
 
 export const QuotePreviewPage: React.FC<premiumPreview> = ({
     componentProps,
     goToNextStep: goToNextStepProp,
-    handleDialogContextSwitch,
+    // handleDialogContextSwitch,
 }) => {
 
     const { currentStep } = usePurchaseStepper('motor');
@@ -48,8 +49,6 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
     const location = useLocation();
     const { isAuthenticated } = UseAuth();
     const item = componentProps?.data;
-
-    console.log(componentProps);
 
     const goToNextStep = goToNextStepProp ?? componentProps?.goToNextStep;
     const org = item?.product?.organization;
@@ -137,6 +136,12 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
         submitPurchaseMutation.mutate(data)
     }
 
+    const { handleDialogContextSwitch, dialogContent, dialogOpen } =
+        useCustomDialogContextFactory<{
+            refetch?: () => Promise<any>
+            data?: any
+        }>()
+
     return (
         <>
             <div className="mx-auto max-w-125 min-w-125 px-4 space-y-6">
@@ -153,7 +158,6 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="grid grid-cols-2 gap-y-3 text-sm">
-
                             <span className="text-muted-foreground">Basic Premium</span>
                             <span className="font-medium text-right">
                                 {formatCurrency(premium?.basic_premium)}
@@ -213,8 +217,21 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
                             </Button>
                         }
                         items={[
-                            { label: "Email", icon: <Mail className="w-4 h-4" />, onClick: () => console.log("Email") },
-                            { label: "WhatsApp", icon: <Share2 className="w-4 h-4" />, onClick: () => console.log("WhatsApp") },
+                            { 
+                                label: "Email", 
+                                icon: <Mail className="w-4 h-4" />, 
+                                onClick: () => {
+                                     handleDialogContextSwitch({
+                                              componentProps: { data: data },
+                                              Component: SendDocumentsViaEmail,
+                                            })
+                                }
+                            },
+                            { 
+                                label: "WhatsApp", 
+                                icon: <Share2 className="w-4 h-4" />, 
+                                onClick: () => console.log("WhatsApp") 
+                            },
                         ]}
                     />
                 </div>
@@ -243,6 +260,19 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
                     </Link>
                 )}
             </CardFooter>
+
+            <CustomDialogComponent
+                {...{ handleDialogContextSwitch, dialogOpen }}
+                className='sm:max-w-fit w-[95vw] sm:w-auto p-4 sm:p-6'>
+                {dialogContent?.Component && (
+                    <dialogContent.Component
+                        {...{
+                            componentProps: dialogContent.componentProps,
+                            handleDialogContextSwitch,
+                        }}
+                    />
+                )}
+            </CustomDialogComponent>
         </>
     );
 };
