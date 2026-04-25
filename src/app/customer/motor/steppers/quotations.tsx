@@ -31,6 +31,7 @@ import { usePurchaseStepper } from '@/hooks/use-purchase-stepper'
 import {
     EMETHODS,
     FILTEROPTIONS,
+    MAX_COMPARISONS,
     MOTOR_QUOTE_SESSION_STORAGE_KEY,
     PURCHASE_SESSION_STORAGE_KEY,
     ReusableReducer
@@ -67,7 +68,6 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
     goToNextStep,
     goToPrevStep,
 }) => {
-    const MAX_COMPARISONS = 3
     const [quoteSessionId, setQuoteSessionId] = useState<number | null>(null)
     const [selectedQuotes, setSelectedQuotes] = useState<{ product_id: string | number; rate_id: string | number }[]>([])
     const [purchasingRateId, setPurchasingRateId] = useState<string | number | null>(null)
@@ -333,7 +333,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
             submitSendQuoteViaEmailMutation.mutate({
                 quote_type: 'comparison',
                 products: selectedQuotes,
-                
+
             })
         }
         } else {
