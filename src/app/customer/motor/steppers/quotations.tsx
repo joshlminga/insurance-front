@@ -36,7 +36,7 @@ import {
     ReusableReducer
 } from '@/utils/constatnts'
 import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
-import { formatCurrency } from '@/lib/format'
+import { formatCurrency, formatNumber } from '@/lib/format'
 import { serializeMotorPremiumParams } from '@/lib/motor-premium-params'
 import { ShowToast } from '@/utils/utils'
 import { extractErrorMessage } from '@/utils/helpers'
@@ -60,6 +60,35 @@ function benefitOptionLabel(item: MotorBenefitOption): string {
         (item.reference ? `Ref ${item.reference}` : null) ??
         `Benefit ${item.id}`
     return String(base)
+}
+
+function formatPremiumC(premium: unknown): string {
+    const n = typeof premium === 'number' ? premium : parseFloat(String(premium))
+    if (!Number.isFinite(n)) return '-'
+    return `${formatNumber(n)}c`
+}
+
+function resolveListedBenefitValue(item: any, listedBenefitId: number): string {
+    const benefits = item?.benefits
+
+    const compulsory = (benefits?.compulsory ?? []) as any[]
+    const compulsoryMatch = compulsory.find((b) => Number(b?.benefit_id) === listedBenefitId)
+    if (compulsoryMatch) return formatPremiumC(compulsoryMatch?.premium)
+
+    const inclusive = (benefits?.inclusive ?? []) as any[]
+    const inclusiveMatch = inclusive.find((b) => Number(b?.benefit_id) === listedBenefitId)
+    if (inclusiveMatch) {
+        const raw = inclusiveMatch?.premium
+        const n = typeof raw === 'number' ? raw : parseFloat(String(raw))
+        if (!Number.isFinite(n) || n === 0) return 'inclusive'
+        return formatPremiumC(raw)
+    }
+
+    const selected = (benefits?.selected ?? []) as any[]
+    const selectedMatch = selected.find((b) => Number(b?.benefit_id) === listedBenefitId)
+    if (selectedMatch) return formatPremiumC(selectedMatch?.premium)
+
+    return '-'
 }
 
 
@@ -133,7 +162,6 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
 
     const quotationItems = data?.data?.results ?? []
     const benefitsAvailable = (data?.data?.benefits?.available ?? []) as MotorBenefitOption[]
-    const benefitsSelected = (data?.data?.benefits?.selected ?? []) as MotorBenefitOption[]
     const benefitsListed = (data?.data?.benefits?.listed ?? []) as MotorBenefitOption[]
 
     const benefitGroups = useMemo<BenefitGroup[]>(() => {
@@ -472,34 +500,26 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                                                 Basic Premium
                                             </span>
                                             <span className="text-xs font-medium text-gray-900 sm:text-sm">
-                                                {formatCurrency(item?.calculated_premium?.basic_premium)}
+                                                {formatCurrency(item?.calculated_premium?.vehicle_premium)}
                                             </span>
                                         </div>
-                                        {/* Benefits Place Holders (Excess Protector,Political Violence & Terrorism,Personal Accident) */}
-                                        <div className="flex justify-between gap-2">
-                                            <span className="text-xs text-gray-500 sm:text-sm">
-                                                Excess Protector
-                                            </span>
-                                            <span className="text-xs font-medium text-gray-900 sm:text-sm">
-                                                demo
-                                            </span>
-                                        </div>
-                                        <div className="flex justify-between gap-2">
-                                            <span className="text-xs text-gray-500 sm:text-sm">
-                                                Political Violence & Terrorism
-                                            </span>
-                                            <span className="text-xs font-medium text-gray-900 sm:text-sm">
-                                                demo
-                                            </span>
-                                        </div>
-                                        <div className="flex justify-between gap-2">
-                                            <span className="text-xs text-gray-500 sm:text-sm">
-                                                Personal Accident
-                                            </span>
-                                            <span className="text-xs font-medium text-gray-900 sm:text-sm">
-                                                demo
-                                            </span>
-                                        </div>
+
+                                        {benefitsListed.map((benefit) => {
+                                            const label =
+                                                (benefit?.name ?? benefit?.label ?? '').trim() ||
+                                                `Benefit ${benefit?.id}`
+                                            const value = resolveListedBenefitValue(item, benefit.id)
+                                            return (
+                                                <div key={benefit.id} className="flex justify-between gap-2">
+                                                    <span className="text-xs text-gray-500 sm:text-sm">
+                                                        {label}
+                                                    </span>
+                                                    <span className="text-xs font-medium text-gray-900 sm:text-sm">
+                                                        {value}
+                                                    </span>
+                                                </div>
+                                            )
+                                        })}
 
                                         {/* Duty */}
                                         <div className="flex justify-between gap-2">    
