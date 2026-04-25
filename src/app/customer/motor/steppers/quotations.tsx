@@ -235,7 +235,8 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
             if (Number.isFinite(n)) ids.push(n)
         }
         if (ids.length === 0) {
-            ShowToast.error('Choose at least one add-on from the dropdowns, then tap Add benefit.')
+            setAppliedBenefitIds([])
+            ShowToast.info('Benefits removed. Recalculating premiums…')
             return
         }
         setAppliedBenefitIds(ids)
@@ -419,7 +420,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                             {benefitGroups.map(({ group, items }) => {
                                 const fieldName = benefitGroupFormKey(group)
                                 const options = [
-                                    // { value: BENEFIT_SELECT_NONE, label: 'No add-on' },
+                                    { value: BENEFIT_SELECT_NONE, label: '-- none --' },
                                     ...items.map((item) => ({
                                         value: String(item.id),
                                         label: benefitOptionLabel(item),
