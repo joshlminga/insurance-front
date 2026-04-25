@@ -5,6 +5,8 @@ import { Separator } from "@/components/ui/separator";
 import { Button, CustomDialogComponent, EmptyState, ReusableDropdown, SendDocumentsViaEmail } from "@/dev/core";
 import { useCustomDialogContextFactory } from "@/hooks";
 import { ArrowDown, Forward, Mail, MoveLeft, Share2 } from "lucide-react";
+import React from "react";
+import { ShowToast } from "@/utils/utils";
 
 const PREMIUM_KEYS = new Set(["Basic Premium", "Gross Premium", "Levies"])
 
@@ -30,11 +32,10 @@ export const PostComparisonPage = ({
             data?: any
         }>()
 
-    const data = {
-        'product_id': componentProps?.data?.product_id,
-        'rate_id': componentProps?.data?.rate_id,
-        'quote_type': 'comparison',
-    };
+    const emailComponentData = {
+        quote_type: "comparison" as const,
+        products: componentProps?.products ?? [],
+    }
 
     return (
         <div className="space-y-6">
@@ -122,8 +123,13 @@ export const PostComparisonPage = ({
                             label: "Email",
                             icon: <Mail className="w-4 h-4" />,
                             onClick: () => {
+                                const list = emailComponentData.products
+                                if (!Array.isArray(list) || list.length < 2) {
+                                    ShowToast.error("Comparison products are missing. Generate the comparison again.")
+                                    return
+                                }
                                 handleDialogContextSwitch({
-                                    componentProps: { data: data },
+                                    componentProps: { data: emailComponentData },
                                     Component: SendDocumentsViaEmail,
                                 })
                             }

@@ -2160,14 +2160,35 @@ export const SendDocumentsViaEmail = ({
 
     const onSubmit = (e: React.FormEvent) => {
         e.preventDefault()
-        const data = {
-            email: isSelf ? "" : email,
-            product_id: componentProps?.data?.product_id ?? "",
-            rate_id: componentProps?.data?.rate_id ?? "",
-            is_self: isSelf,
-            quote_type: componentProps?.data?.quote_type ?? "single",
+        if (!quoteSessionId) {
+            ShowToast.error("No active quote session found.")
+            return
         }
-        submitMutation.mutate(data as any)
+        const quoteType = componentProps?.data?.quote_type ?? "single"
+        const isComparison = quoteType === "comparison"
+        if (isComparison) {
+            const products = componentProps?.data?.products
+            if (!Array.isArray(products) || products.length < 2) {
+                ShowToast.error("At least two quotations are required to share a comparison by email.")
+                return
+            }
+        }
+        const productId = componentProps?.data?.product_id ?? componentProps?.data?.product?.id
+        const rateId = componentProps?.data?.rate_id
+        const base: Record<string, unknown> = {
+            is_self: isSelf,
+            quote_type: quoteType,
+        }
+        if (!isSelf) {
+            base.email = email
+        }
+        if (isComparison) {
+            base.products = componentProps?.data?.products
+        } else {
+            base.product_id = productId ?? ""
+            base.rate_id = rateId ?? ""
+        }
+        submitMutation.mutate(base as any)
     }
 
     return (
