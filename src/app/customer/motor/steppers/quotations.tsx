@@ -70,10 +70,16 @@ type ListedBenefitResolved = {
     status: ListedBenefitStatus
 }
 
-function formatPremiumC(premium: unknown): string {
+function formatPremium(premium: unknown): string {
     const n = typeof premium === 'number' ? premium : parseFloat(String(premium))
     if (!Number.isFinite(n)) return '-'
-    return `${formatNumber(n)} (c)`
+    return formatNumber(n)
+}
+
+function formatCompulsoryPremium(premium: unknown): string {
+    const base = formatPremium(premium)
+    if (base === '-') return '-'
+    return `${base} (c)`
 }
 
 function resolveListedBenefitValue(item: any, listedBenefitId: number): ListedBenefitResolved {
@@ -82,7 +88,7 @@ function resolveListedBenefitValue(item: any, listedBenefitId: number): ListedBe
     const compulsory = (benefits?.compulsory ?? []) as any[]
     const compulsoryMatch = compulsory.find((b) => Number(b?.benefit_id) === listedBenefitId)
     if (compulsoryMatch) {
-        return { text: formatPremiumC(compulsoryMatch?.premium), status: 'compulsory' }
+        return { text: formatCompulsoryPremium(compulsoryMatch?.premium), status: 'compulsory' }
     }
 
     const inclusive = (benefits?.inclusive ?? []) as any[]
@@ -91,13 +97,13 @@ function resolveListedBenefitValue(item: any, listedBenefitId: number): ListedBe
         const raw = inclusiveMatch?.premium
         const n = typeof raw === 'number' ? raw : parseFloat(String(raw))
         if (!Number.isFinite(n) || n === 0) return { text: 'Inclusive', status: 'inclusive' }
-        return { text: formatPremiumC(raw), status: 'inclusive' }
+        return { text: formatPremium(raw), status: 'inclusive' }
     }
 
     const selected = (benefits?.selected ?? []) as any[]
     const selectedMatch = selected.find((b) => Number(b?.benefit_id) === listedBenefitId)
     if (selectedMatch) {
-        return { text: formatPremiumC(selectedMatch?.premium), status: 'selected' }
+        return { text: formatPremium(selectedMatch?.premium), status: 'selected' }
     }
 
     const availableRaw = (benefits?.available ?? []) as Array<number | string>
@@ -133,6 +139,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
             data?: any
             goToNextStep?: CustomerVerificationDetailsProps['goToNextStep']
             onDownload?: () => void
+            products?: { product_id: string | number; rate_id: string | number }[]
         }>()
 
     useEffect(() => {
@@ -343,7 +350,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
         },
     });
 
-     const submitSendQuoteViaEmailMutation = UseApiMutation<SubmitResponse, FormData>({
+     const submitSendQuoteViaEmailMutation = UseApiMutation<SubmitResponse, any>({
             url: `document/motor/send-quote-via-email/${quoteSessionId}`,
             method: EMETHODS.POST,
             mutationOptions: {
