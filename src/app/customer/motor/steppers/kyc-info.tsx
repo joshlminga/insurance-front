@@ -216,7 +216,6 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToPrevSt
                     type="submit"
                     className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
                     rightIcon={<ArrowRightCircle />}
-                    // onClick={() => goToNextStep?.()}
                     loading={submitMutation.isPending}>
                     Invoice Cover Quotation
                 </Button>

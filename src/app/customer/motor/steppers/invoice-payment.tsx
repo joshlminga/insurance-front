@@ -103,7 +103,6 @@ export const InvoicePayment: React.FC<CustomerVerificationDetailsProps> = ({ goT
                         type="submit"
                         className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
                         rightIcon={<ArrowRightCircle />}
-                        // onClick={() => goToNextStep?.()}
                         loading={submitMutation.isPending}>
                         Complete Payment
                     </Button>

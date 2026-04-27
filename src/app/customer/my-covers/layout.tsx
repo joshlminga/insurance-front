@@ -89,7 +89,6 @@ export function MyCoversLayout() {
             )}
             <Navbar className='bg-[#ADABAB30] w-full h-auto lg:h-43.75 rounded-2xl backdrop-blur-[3.379px]' textStyle='text-[#141414]' navTextStyle="text-[#000000]" />
             <div className="pt-24 sm:pt-48 lg:pt-64 w-[95vw] sm:w-[90vw] lg:w-[80vw] mx-auto">
-                {/* Mobile sidebar toggle */}
                 <div className="lg:hidden mb-4">
                     <Button
                         variant="outline"
@@ -109,13 +108,13 @@ export function MyCoversLayout() {
                 </div>
 
                 <div className="mx-auto w-full flex gap-6">
-                    {/* Desktop sidebar */}
                     <Card className="w-56 shrink-0 self-start hidden lg:block">
                         <CardContent className="p-2">
                             {sidebarNav}
                         </CardContent>
                     </Card>
                     <Card className="flex-1 min-w-0">
+
                         <CardContent className="p-4 sm:p-6">
                             <Outlet />
                         </CardContent>
