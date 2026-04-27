@@ -153,10 +153,10 @@ export const KycSchema = z.object({
   tax_pin: z.string().min(1, "Tax Number is required"),
   color: z.string().min(1, "Car color is required"),
   chassis_number: z.string().min(1, "Vehicle chassis number is required"),
-  engine_cc: z.string().min(1, "Vehicle engine capacity is required"),
+  engine_cc: z.string().min(1, "Vehicle engine capacity is required").max(5, "Engine capacity must be less than 99999 cc"),
   engine_number: z.string().min(1, "Engine number is required"),
-  total_seats: z.string().min(1, "Number of seats is required"),
-  tonage_capacity: z.string().min(1, "Vehicle tonage capacity is required"),
+  total_seats: z.string().min(1, "Number of seats is required").max(2, "Total seats must be less than 100"),
+  tonage_capacity: z.string().min(1, "Vehicle tonage capacity is required").max(5, "Tonnage capacity must be less than 99999 Tones"),
   logbook: z
     .any()
     .refine((file) => file instanceof File, "Attach a logbook"),

@@ -221,20 +221,20 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
                             </Button>
                         }
                         items={[
-                            { 
-                                label: "Email", 
-                                icon: <Mail className="w-4 h-4" />, 
+                            {
+                                label: "Email",
+                                icon: <Mail className="w-4 h-4" />,
                                 onClick: () => {
-                                     handleDialogContextSwitch({
-                                              componentProps: { data: data },
-                                              Component: SendDocumentsViaEmail,
-                                            })
+                                    handleDialogContextSwitch({
+                                        componentProps: { data: data },
+                                        Component: SendDocumentsViaEmail,
+                                    })
                                 }
                             },
-                            { 
-                                label: "WhatsApp", 
-                                icon: <Share2 className="w-4 h-4" />, 
-                                onClick: () => console.log("WhatsApp") 
+                            {
+                                label: "WhatsApp",
+                                icon: <Share2 className="w-4 h-4" />,
+                                onClick: () => console.log("WhatsApp")
                             },
                         ]}
                     />

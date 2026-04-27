@@ -427,3 +427,27 @@ export const claims: ClaimItem[] = [
     status: 'approved',
   },
 ]
+
+export const myCoversTestData = [
+  {
+    Cover: "KCW 123S",
+    Renewal: "2026-11-15",
+    value: "KES 45,000",
+    claims: "0",
+    is_active: true,
+  },
+  {
+    Cover: "KCA 054Y",
+    Renewal: "2026-05-20",
+    value: "KES 350,000",
+    claims: "KES100,000",
+    is_active: true,
+  },
+  {
+    Cover: "KDN 154A",
+    Renewal: "2026-01-10",
+    value: "KES 1,000,000",
+    claims: "0",
+    is_active: false,
+  },
+];
