@@ -161,12 +161,13 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToPrevSt
                         className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
                         control={form.control}
                         name="engine_cc"
-                        label="Vehicle Engine Capacity"
+                        label="Vehicle Engine Capacity (CC)"
                     />
                     <ReuseableInput
                         className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
                         control={form.control}
                         name="total_seats"
+                         type='number'
                         label="Vehicle Total Seat Number"
                     />
                     <ReuseableInput
@@ -174,7 +175,7 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToPrevSt
                         control={form.control}
                         type='number'
                         name="tonage_capacity"
-                        label="Vehicle Tonage Capacity"
+                        label="Vehicle Tonage Capacity (Tones)"
                     />
                 </div>
 
