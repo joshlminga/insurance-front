@@ -24,7 +24,7 @@ export const MpesaPageTab: React.FC = () => {
     return (
         <div className='w-full max-w- mx-auto p-1'>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-                <div className="w-full p-2 rounded-[20px] border border-[#ADABAB]/30 bg-white shadow-sm">
+                <div className="w-full rounded-[20px] border border-[#ADABAB]/30 bg-white shadow-sm p-3">
                     <FieldGroup>
                         <div className="mb-6 p-4 h-auto min-h-8.5 rounded-[15px] border border-[#ADABAB]/70 bg-green-50/30">
                             <span className="text-sm text-muted-foreground uppercase tracking-wider">Total to Pay:</span>
