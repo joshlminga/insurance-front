@@ -209,16 +209,19 @@ export const INVOICE_SESSION_STORAGE_KEY = "invoice_purchase_session_id"
 export const INVOICE_ID_KEY = "invoice_id"
 
 export const BENEFIT_TYPE_CONFIG = {
+    selected: { label: "Selected", color: "bg-[#209BFF]" },
     inclusive: { label: "Inclusive", color: "bg-[#0CC258]" },
     compulsory: { label: "Compulsory", color: "bg-[#C20C0C]" },
     optional: { label: "Optional", color: "bg-[#209BFF]" },
 } as const;
 
 
-export const BENEFIT_SECTIONS: { type: BenefitType; key: "compulsory" | "inclusive" | "optional" }[] = [
+export const BENEFIT_SECTIONS: { type: BenefitType; key: "compulsory" | "inclusive" | "selected" }[] = [
     { type: "compulsory", key: "compulsory" },
     { type: "inclusive", key: "inclusive" },
-    { type: "optional", key: "optional" },
+    { type: "selected", key: "selected" },
+
+    // { type: "optional", key: "optional" },
 ];
 
 export const MAX_COMPARISONS = 3

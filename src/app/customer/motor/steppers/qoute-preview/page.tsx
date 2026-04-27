@@ -158,9 +158,9 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="grid grid-cols-2 gap-y-3 text-sm">
-                            <span className="text-muted-foreground">Basic Premium</span>
+                            <span className="text-muted-foreground">Premium</span>
                             <span className="font-medium text-right">
-                                {formatCurrency(premium?.basic_premium)}
+                                {formatCurrency(premium?.vehicle_premium)}
                             </span>
                             <Separator className="col-span-2 my-1" />
                             {allBenefits.map((benefit: any) => {
@@ -191,6 +191,10 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
                             })}
                         </div>
                         <Separator />
+                        <div className="grid grid-cols-2 text-sm font-semibold">
+                            <span className="text-xs text-muted-foreground">PHCF, TL & Stamp Duty</span>
+                            <span className="text-right text-xs">{formatCurrency(premium?.total_duty)}</span>
+                        </div>
                         <div className="grid grid-cols-2 text-sm font-semibold">
                             <span>Total Premium</span>
                             <span className="text-right">{formatCurrency(premium?.total_premium)}</span>
