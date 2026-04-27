@@ -109,7 +109,6 @@ export function MyCoversLayout() {
                 </div>
 
                 <div className="mx-auto w-full flex gap-6">
-                    {/* Desktop sidebar */}
                     <Card className="w-56 shrink-0 self-start hidden lg:block">
                         <CardContent className="p-2">
                             {sidebarNav}
