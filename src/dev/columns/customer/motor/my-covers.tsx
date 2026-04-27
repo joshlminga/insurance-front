@@ -20,7 +20,7 @@ export const MyCoversColumns: ColumnDef<any>[] = [
     },
     {
         accessorKey: "value",
-        header: () => <div>Insured Value Date</div>,
+        header: () => <div>Insured Value</div>,
         cell: ({ row }) => {
             const value: string = row.getValue("value");
             return <div>{value}</div>;

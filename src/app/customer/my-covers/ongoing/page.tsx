@@ -6,6 +6,7 @@ import { useReducer } from 'react'
 import { FILTEROPTIONS, ReusableReducer } from '@/utils/constatnts'
 import { MyCoversColumns } from '@/dev/columns/customer/motor/my-covers'
 import { useDebounce } from '@/hooks'
+import { myCoversTestData } from '@/utils/enums'
 
 export function CoversPage() {
     const [filter, optionsDispatcher] = useReducer(
@@ -19,7 +20,7 @@ export function CoversPage() {
 
 
     const ActionsHandlerMapping: SingleActionsHandler<any>[] = [];
-    
+
     return (
         <div className='w-full'>
             <CustomBaseTable
@@ -43,7 +44,7 @@ export function CoversPage() {
                         ActionColumn({ ActionsHandlerMapping }),
                     ],
                     // OtherTools: SearchTools,
-                    data: [],
+                    data: myCoversTestData ?? [],
                     pageCount: 1,
                     title: 'Covers',
                     showPagination: true,
