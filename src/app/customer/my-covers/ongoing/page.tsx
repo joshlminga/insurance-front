@@ -1,9 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CustomBaseTable } from '@/dev/table'
 import { ActionColumn } from '@/dev/columns'
-import { SingleActionsHandler, TFilterOptions, TPaginationFilters } from '@/types/types'
+import { 
+    SingleActionsHandler, 
+    TFilterOptions, 
+    TPaginationFilters 
+} from '@/types/types'
 import { useReducer } from 'react'
-import { FILTEROPTIONS, ReusableReducer } from '@/utils/constatnts'
+import { 
+    FILTEROPTIONS, 
+    ReusableReducer 
+} from '@/utils/constatnts'
 import { MyCoversColumns } from '@/dev/columns/customer/motor/my-covers'
 import { useDebounce } from '@/hooks'
 import { myCoversTestData } from '@/utils/enums'
@@ -17,7 +24,6 @@ export function CoversPage() {
     const optionsDispatcherDebounce = useDebounce({
         debounceCallback: optionsDispatcher,
     });
-
 
     const ActionsHandlerMapping: SingleActionsHandler<any>[] = [];
 

@@ -10,6 +10,7 @@ import { createHeroPopoverItems, myAccounttLinks, sidebarLinks } from '@/utils/c
 import { EPREFIX, EROUTES } from '@/utils/enums'
 import { ChevronDown } from 'lucide-react'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { StatsCard, StatsGrid } from '@/components/shared'
 
 export function MyCoversLayout() {
     const { isAuthenticated, logout, user } = UseAuth()
@@ -115,7 +116,39 @@ export function MyCoversLayout() {
                     </Card>
                     <Card className="flex-1 min-w-0">
 
-                        <CardContent className="p-4 sm:p-6">
+                        <div className='px-3'>
+                            <StatsGrid columns={4}>
+                                <StatsCard
+                                    title="Active Covers"
+                                    value={3}
+                                    description={`1 expiring soon`}
+                                //   icon={Users}
+                                //   trend={{ value: dashboardStats.memberGrowth, isPositive: true }}
+                                />
+                                <StatsCard
+                                    title="Total Coverage"
+                                    value={30000}
+                                    description="Across all policies"
+                                // icon={Wallet}
+                                // trend={{ value: dashboardStats.savingsGrowth, isPositive: true }}
+                                />
+                                <StatsCard
+                                    title="Monthly Premium"
+                                    value={90000}
+                                description="Next  Mar 1, 2026"
+                                // icon={ShieldCheck}
+                                />
+                                <StatsCard
+                                    title="Claims"
+                                    value={0}
+                                description={`Monday,23 Feb 2026 . `}
+                                // icon={TrendingUp}
+                                // trend={{ value: 0.5, isPositive: false }}
+                                />
+                            </StatsGrid>
+                        </div>
+
+                        <CardContent className="sm:p-6">
                             <Outlet />
                         </CardContent>
                     </Card>
