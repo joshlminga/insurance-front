@@ -21,7 +21,7 @@ import type {
 } from '@/types/types'
 import { EPREFIX, EROUTES } from '@/utils/enums'
 import { ArrowLeftCircle, ArrowRightCircle, Plus } from 'lucide-react'
-import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useReducer, useState, useRef } from 'react'
 import type { FieldValues, Path } from 'react-hook-form'
 import { useForm } from 'react-hook-form'
 import { Link, useLocation } from 'react-router-dom'
@@ -171,7 +171,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
         [filter.page, filter.pageSize, appliedBenefitIds]
     )
 
-    const { data, isPending, isFetching } = UseApiQuery<SubmitResponse>({
+    const { data, isPending, isFetching, refetch: refetchPremium } = UseApiQuery<SubmitResponse>({
         url: premiumUrl,
         params: premiumQueryParams as Record<string, unknown>,
         config: {
@@ -185,6 +185,17 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
     const quotationItems = data?.data?.results ?? []
     const benefitsAvailable = (data?.data?.benefits?.available ?? []) as MotorBenefitOption[]
     const benefitsListed = (data?.data?.benefits?.listed ?? []) as MotorBenefitOption[]
+    const selectedBenefitIds = useMemo(() => {
+        const raw = (data?.data?.benefits?.selected ?? []) as any[]
+        const ids = raw
+            .map((s) => {
+                if (s == null) return null
+                if (typeof s === 'number' || typeof s === 'string') return Number(s)
+                return Number(s?.id ?? s?.benefit_id)
+            })
+            .filter((n) => Number.isFinite(n)) as number[]
+        return new Set<number>(ids)
+    }, [data?.data?.benefits?.selected])
 
     const benefitGroups = useMemo<BenefitGroup[]>(() => {
         const map = new Map<string, MotorBenefitOption[]>()
@@ -212,13 +223,17 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
         [benefitGroups]
     )
 
+    const hasInitializedBenefitFormRef = useRef(false)
+
     useEffect(() => {
         if (benefitGroups.length === 0) return
+        if (hasInitializedBenefitFormRef.current) return
         const next: FieldValues = {}
         for (const { group } of benefitGroups) {
             next[benefitGroupFormKey(group)] = BENEFIT_SELECT_NONE
         }
         benefitForm.reset(next)
+        hasInitializedBenefitFormRef.current = true
     }, [benefitGroupsResetKey])
 
     const currentPage = data?.pagination?.current_page ?? filter.page
@@ -234,14 +249,20 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
             const n = Number(raw)
             if (Number.isFinite(n)) ids.push(n)
         }
+
         if (ids.length === 0) {
+            const alreadyEmpty = appliedBenefitIds.length === 0
             setAppliedBenefitIds([])
             ShowToast.info('Benefits removed. Recalculating premiums…')
+            // If state didn't change, TanStack Query won't auto-refetch; do it manually.
+            if (alreadyEmpty) {
+                refetchPremium()
+            }
             return
         }
         setAppliedBenefitIds(ids)
         ShowToast.success('Recalculating premiums with your add-ons…')
-    }, [benefitForm, benefitGroups])
+    }, [benefitForm, benefitGroups, appliedBenefitIds.length, refetchPremium])
 
     const isQuoteSelected = useCallback(
         (rateId: string | number) => selectedQuotes.some((q) => q.rate_id === rateId),
@@ -560,6 +581,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                                                 (benefit?.name ?? benefit?.label ?? '').trim() ||
                                                 `Benefit ${benefit?.id}`
                                             const resolved = resolveListedBenefitValue(item, benefit.id)
+                                            const isSelectedInRequest = selectedBenefitIds.has(Number(benefit.id))
                                             const badgeClassName =
                                                 resolved.status === 'compulsory'
                                                     ? 'bg-blue-100 text-blue-700'
@@ -570,7 +592,11 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                                                         : 'bg-gray-100 text-gray-600'
                                             return (
                                                 <div key={benefit.id} className="flex justify-between gap-2">
-                                                    <span className="text-xs text-gray-500 sm:text-sm">
+                                                    <span
+                                                        className={[
+                                                            'text-xs sm:text-sm',
+                                                            isSelectedInRequest ? 'font-medium text-green-700' : 'text-gray-500',
+                                                        ].join(' ')}>
                                                         {label}
                                                     </span>
                                                     <span
