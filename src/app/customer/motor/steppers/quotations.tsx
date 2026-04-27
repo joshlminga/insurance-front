@@ -37,7 +37,7 @@ import {
     ReusableReducer
 } from '@/utils/constatnts'
 import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
-import { formatCurrency } from '@/lib/format'
+import { formatCurrency, formatNumber } from '@/lib/format'
 import { serializeMotorPremiumParams } from '@/lib/motor-premium-params'
 import { ShowToast } from '@/utils/utils'
 import { extractErrorMessage } from '@/utils/helpers'
@@ -61,6 +61,56 @@ function benefitOptionLabel(item: MotorBenefitOption): string {
         (item.reference ? `Ref ${item.reference}` : null) ??
         `Benefit ${item.id}`
     return String(base)
+}
+
+type ListedBenefitStatus = 'compulsory' | 'inclusive' | 'selected' | 'na' | 'no'
+
+type ListedBenefitResolved = {
+    text: string
+    status: ListedBenefitStatus
+}
+
+function formatPremium(premium: unknown): string {
+    const n = typeof premium === 'number' ? premium : parseFloat(String(premium))
+    if (!Number.isFinite(n)) return '-'
+    return formatNumber(n)
+}
+
+function formatCompulsoryPremium(premium: unknown): string {
+    const base = formatPremium(premium)
+    if (base === '-') return '-'
+    return `${base} (c)`
+}
+
+function resolveListedBenefitValue(item: any, listedBenefitId: number): ListedBenefitResolved {
+    const benefits = item?.benefits
+
+    const compulsory = (benefits?.compulsory ?? []) as any[]
+    const compulsoryMatch = compulsory.find((b) => Number(b?.benefit_id) === listedBenefitId)
+    if (compulsoryMatch) {
+        return { text: formatCompulsoryPremium(compulsoryMatch?.premium), status: 'compulsory' }
+    }
+
+    const inclusive = (benefits?.inclusive ?? []) as any[]
+    const inclusiveMatch = inclusive.find((b) => Number(b?.benefit_id) === listedBenefitId)
+    if (inclusiveMatch) {
+        const raw = inclusiveMatch?.premium
+        const n = typeof raw === 'number' ? raw : parseFloat(String(raw))
+        if (!Number.isFinite(n) || n === 0) return { text: 'Inclusive', status: 'inclusive' }
+        return { text: formatPremium(raw), status: 'inclusive' }
+    }
+
+    const selected = (benefits?.selected ?? []) as any[]
+    const selectedMatch = selected.find((b) => Number(b?.benefit_id) === listedBenefitId)
+    if (selectedMatch) {
+        return { text: formatPremium(selectedMatch?.premium), status: 'selected' }
+    }
+
+    const availableRaw = (benefits?.available ?? []) as Array<number | string>
+    const availableIds = availableRaw.map(Number).filter((n) => Number.isFinite(n))
+    return availableIds.includes(listedBenefitId)
+        ? { text: 'N/A', status: 'na' }
+        : { text: 'N/O', status: 'no' }
 }
 
 
@@ -89,6 +139,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
             data?: any
             goToNextStep?: CustomerVerificationDetailsProps['goToNextStep']
             onDownload?: () => void
+            products?: { product_id: string | number; rate_id: string | number }[]
         }>()
 
     useEffect(() => {
@@ -133,6 +184,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
 
     const quotationItems = data?.data?.results ?? []
     const benefitsAvailable = (data?.data?.benefits?.available ?? []) as MotorBenefitOption[]
+    const benefitsListed = (data?.data?.benefits?.listed ?? []) as MotorBenefitOption[]
 
     const benefitGroups = useMemo<BenefitGroup[]>(() => {
         const map = new Map<string, MotorBenefitOption[]>()
@@ -183,7 +235,8 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
             if (Number.isFinite(n)) ids.push(n)
         }
         if (ids.length === 0) {
-            ShowToast.error('Choose at least one add-on from the dropdowns, then tap Add benefit.')
+            setAppliedBenefitIds([])
+            ShowToast.info('Benefits removed. Recalculating premiums…')
             return
         }
         setAppliedBenefitIds(ids)
@@ -298,7 +351,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
         },
     });
 
-     const submitSendQuoteViaEmailMutation = UseApiMutation<SubmitResponse, FormData>({
+     const submitSendQuoteViaEmailMutation = UseApiMutation<SubmitResponse, any>({
             url: `document/motor/send-quote-via-email/${quoteSessionId}`,
             method: EMETHODS.POST,
             mutationOptions: {
@@ -367,7 +420,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                             {benefitGroups.map(({ group, items }) => {
                                 const fieldName = benefitGroupFormKey(group)
                                 const options = [
-                                    // { value: BENEFIT_SELECT_NONE, label: 'No add-on' },
+                                    { value: BENEFIT_SELECT_NONE, label: '-- none --' },
                                     ...items.map((item) => ({
                                         value: String(item.id),
                                         label: benefitOptionLabel(item),
@@ -448,7 +501,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                                     key={item?.id ?? `quotation-${itemIndex}`}
                                     header={{
                                         type: 'image',
-                                        src: `${import.meta.env.VITE_BASE_URL}/${item?.product?.organization?.logo}`,
+                                        src: item?.product?.organization?.logo,
                                         alt: item?.product?.organization?.name ?? 'Insurer logo',
                                     }}
                                     rootClassName=""
@@ -498,13 +551,55 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                                                 Basic Premium
                                             </span>
                                             <span className="text-xs font-medium text-gray-900 sm:text-sm">
-                                                {formatCurrency(item?.calculated_premium?.basic_premium)}
+                                                {formatCurrency(item?.calculated_premium?.vehicle_premium)}
                                             </span>
                                         </div>
-                                        <div className="flex justify-between gap-2">
+
+                                        {benefitsListed.map((benefit) => {
+                                            const label =
+                                                (benefit?.name ?? benefit?.label ?? '').trim() ||
+                                                `Benefit ${benefit?.id}`
+                                            const resolved = resolveListedBenefitValue(item, benefit.id)
+                                            const badgeClassName =
+                                                resolved.status === 'compulsory'
+                                                    ? 'bg-blue-100 text-blue-700'
+                                                    : resolved.status === 'inclusive' || resolved.status === 'selected'
+                                                      ? 'bg-green-100 text-green-700'
+                                                      : resolved.status === 'no'
+                                                        ? 'bg-red-100 text-red-700'
+                                                        : 'bg-gray-100 text-gray-600'
+                                            return (
+                                                <div key={benefit.id} className="flex justify-between gap-2">
+                                                    <span className="text-xs text-gray-500 sm:text-sm">
+                                                        {label}
+                                                    </span>
+                                                    <span
+                                                        className={[
+                                                            'inline-flex items-center rounded-sm px-2 py-0.5 text-xs font-medium',
+                                                            badgeClassName,
+                                                        ].join(' ')}>
+                                                        {resolved.text}
+                                                    </span>
+                                                </div>
+                                            )
+                                        })}
+
+                                        {/* Duty */}
+                                        <div className="flex justify-between gap-2">    
                                             <span className="text-xs text-gray-500 sm:text-sm">
+                                                PHCF, TL & Stamp Duty
+                                            </span>
+                                            <span className="text-xs font-medium text-gray-900 sm:text-sm">
+                                                {formatCurrency(item?.calculated_premium?.total_duty)}
+                                            </span>
+                                        </div>
+
+
+                                        <div className="flex justify-between gap-2 border-t border-b border-gray-200 pt-2">
+                                            <span className="text-xs text-gray-500 font-bold sm:text-sm ">
                                                 Total Premium
                                             </span>
+                                       
                                             <span className="text-xs font-semibold text-[#C20C0C] sm:text-sm">
                                                 {formatCurrency(item?.calculated_premium?.total_premium)}
                                             </span>

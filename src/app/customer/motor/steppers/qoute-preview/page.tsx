@@ -148,7 +148,7 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
                 <h1 className="text-2xl font-bold">Quote Preview</h1>
                 <Card className="flex items-center justify-center py-6">
                     <img
-                        src={`${import.meta.env.VITE_BASE_URL}/${org?.logo}`}
+                        src={org?.logo}
                         className="w-36 h-16 object-contain"
                     />
                 </Card>

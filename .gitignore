@@ -26,3 +26,11 @@ dist-ssr
 .guide
 
 .env
+.agents
+.ai
+.claude
+.codex
+.cursor
+.cursor*
+package-lock.json
+yarn.lock
