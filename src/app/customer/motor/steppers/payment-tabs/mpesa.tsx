@@ -23,7 +23,7 @@ export const MpesaPageTab: React.FC = () => {
 
     return (
         <div className='w-full max-w-6xl mx-auto p-1'>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
                 <div className="w-full p-2 rounded-[20px] border border-[#ADABAB]/30 bg-white shadow-sm">
                     <FieldGroup>
                         <div className="mb-6 p-4 h-auto min-h-8.5 rounded-[15px] border border-[#ADABAB]/70 bg-green-50/30">
@@ -71,7 +71,7 @@ export const MpesaPageTab: React.FC = () => {
                     </FieldGroup>
                 </div>
                 
-                <div className="w-full p-6 bg-gray-50 rounded-[20px] border border-dashed border-[#ADABAB]">
+                {/* <div className="w-full p-6 bg-gray-50 rounded-[20px] border border-dashed border-[#ADABAB]">
                     <span className="font-bold text-gray-700 text-sm sm:text-base block mb-4 underline decoration-[#0CC258] underline-offset-4">
                         Option 2: Pay via Lipa na M-Pesa
                     </span>
@@ -85,7 +85,7 @@ export const MpesaPageTab: React.FC = () => {
                         <li className="pl-2">Enter your <span className="font-semibold">PIN</span> and press OK</li>
                         <li className="pl-2">Wait for the confirmation SMS</li>
                     </ol>
-                </div>
+                </div> */}
 
             </div>
         </div>
