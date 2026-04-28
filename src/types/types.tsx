@@ -124,16 +124,13 @@ export type RHFInputProps<T extends FieldValues> = {
   placeholder?: string
   type?: string
   step?: string | number
-  /**
-   * When true, the input displays thousands separators (e.g. 12,345)
-   * but the value stored in React Hook Form is the raw number string (e.g. "12345").
-   */
   thousandsSeparator?: boolean
   autoComplete?: string
   required?: boolean
   className?: string
   rows?: number
-  disabled?: boolean
+  disabled?: boolean,
+  accept?: string
 }
 
 export interface AuthProviderState {
@@ -629,17 +626,17 @@ export type AuthState = {
 }
 
 export type MotorBenefitOption = {
-    id: number
-    group?: string | null
-    type?: string | null
-    name?: string | null
-    label?: string | null
-    reference?: string | null
+  id: number
+  group?: string | null
+  type?: string | null
+  name?: string | null
+  label?: string | null
+  reference?: string | null
 }
 
 export type BenefitGroup = {
-    group: string
-    items: MotorBenefitOption[]
+  group: string
+  items: MotorBenefitOption[]
 }
 
 export type TLoaderProps = Partial<TClassType> &
@@ -647,3 +644,20 @@ export type TLoaderProps = Partial<TClassType> &
     isError?: boolean
     children?: ReactNode
   };
+
+export interface ConfirmationDialogProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  title: string
+  description?: string
+  confirmButtonText?: string
+  cancelButtonText?: string
+  /** Merged after defaults; use for brand colors (e.g. primary action). */
+  confirmButtonClassName?: string
+  /** Merged after defaults; use for brand colors (e.g. outline cancel). */
+  cancelButtonClassName?: string
+  onConfirm: () => void | Promise<void>
+  onCancel?: () => void
+  isPending?: boolean
+  icon?: ReactNode
+}

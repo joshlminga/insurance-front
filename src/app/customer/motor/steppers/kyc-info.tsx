@@ -97,13 +97,6 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToPrevSt
                             />
                         )}
                     />
-                    {/* <ReusableSelect
-                        control={control}
-                        name="ownership"
-                        label="ownership"
-                        placeholder="Select ownership"
-                        options={OWNERSHIPOPTIONS}
-                    /> */}
                     <ReusableSelect
                         control={form.control}
                         name="id_type"
@@ -115,14 +108,9 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToPrevSt
                         className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
                         control={form.control}
                         name="id_number"
+                        placeholder='Enter passport or ID number'
                         label="Passport/ID Number"
                     />
-                    {/* <ReuseableInput
-                        className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
-                        control={form.control}
-                        name="color"
-                        label="Color"
-                    /> */}
                     <Controller
                         control={form.control}
                         name="color"
@@ -144,30 +132,35 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToPrevSt
                         control={form.control}
                         name="tax_pin"
                         label="Personal Tax Pin"
+                        placeholder="Enter Personal Tax Pin"
                     />
                     <ReuseableInput
                         className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
                         control={form.control}
                         name="chassis_number"
+                        placeholder='Enter chassis number'
                         label="Vehicle Chassis Number"
                     />
                     <ReuseableInput
                         className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
                         control={form.control}
                         name="engine_number"
+                        placeholder='Enter engine number'
                         label="Vehicle Engine Number"
                     />
                     <ReuseableInput
                         className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
                         control={form.control}
                         name="engine_cc"
+                        placeholder='Enter engine capacity in CCs'
                         label="Vehicle Engine Capacity (CC)"
                     />
                     <ReuseableInput
                         className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
                         control={form.control}
                         name="total_seats"
-                         type='number'
+                        type='number'
+                        placeholder='Enter number of seats'
                         label="Vehicle Total Seat Number"
                     />
                     <ReuseableInput
@@ -175,6 +168,7 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToPrevSt
                         control={form.control}
                         type='number'
                         name="tonage_capacity"
+                        placeholder='Enter capacity in tones'
                         label="Vehicle Tonage Capacity (Tones)"
                     />
                 </div>
@@ -186,12 +180,14 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToPrevSt
                         control={form.control}
                         type='file'
                         name="logbook"
+                        accept=".pdf,.jpg,.jpeg,.png"
                         label="Attach Logbook"
                     />
                     <ReuseableInput
                         className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
                         control={form.control}
                         type='file'
+                        accept=".pdf,.jpg,.jpeg,.png"
                         name="tax_certificate"
                         label="Attach Tax Certificate"
                     />
@@ -200,6 +196,7 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToPrevSt
                         control={form.control}
                         type='file'
                         name="id_document"
+                        accept=".pdf,.jpg,.jpeg,.png"
                         label="Attach ID/Passport"
                     />
                 </div>

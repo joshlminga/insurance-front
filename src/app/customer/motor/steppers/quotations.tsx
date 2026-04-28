@@ -329,6 +329,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                         data,
                         onDownload: () => onComparison(true),
                         products: selectedQuotes,
+                        goToNextStep
                     },
                     Component: PostComparisonPage,
                 })
@@ -537,6 +538,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                                             {isAuthenticated ? (
                                                 <Button
                                                     type="button"
+                                                    //  leftIcon={<ShoppingCart />}
                                                     onClick={() => onPurchase(item?.product?.id, item?.rate_id)}
                                                     loading={submitPurchaseMutation.isPending && purchasingRateId === item?.rate_id}
                                                     disabled={submitPurchaseMutation.isPending && purchasingRateId !== item?.rate_id}

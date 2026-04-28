@@ -35,7 +35,8 @@ import type {
     ReusableApiMultiSelectProps,
     TFilterOptions,
     TPaginationFilters,
-    TLoaderProps
+    TLoaderProps,
+    ConfirmationDialogProps
 } from "@/types/types";
 import {
     Stepper,
@@ -100,6 +101,8 @@ import {
 import { UseApiMutation, UseApiQuery } from "@/hooks/hooks";
 import { Label } from "@/components/ui/label";
 import {
+    CONFIRMATION_DIALOG_CANCEL_CLASSES,
+    CONFIRMATION_DIALOG_CONFIRM_CLASSES,
     EMETHODS,
     EORGANIZATIONTYPES,
     FILTEROPTIONS,
@@ -113,6 +116,16 @@ import {
 } from "@/components/ui/popover";
 import { ShowToast } from "@/utils/utils";
 import { extractErrorMessage } from "@/utils/helpers";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const formatSegment = (segment: string) => {
     return segment
@@ -310,6 +323,7 @@ export function ReuseableInput<T extends FieldValues>({
     disabled = false,
     className,
     rows,
+    accept,
 }: RHFInputProps<T>) {
     const toRawNumberString = (value: string) => {
         const cleaned = value.replace(/,/g, "").replace(/[^\d.]/g, "")
@@ -346,6 +360,7 @@ export function ReuseableInput<T extends FieldValues>({
                             aria-invalid={fieldState.invalid}
                             required={required}
                             disabled={disabled}
+                            accept={accept}
                             className={cn(
                                 className,
                                 fieldState.invalid &&
@@ -2235,5 +2250,50 @@ export const SendDocumentsViaEmail = ({
                 </Button>
             </form>
         </div>
+    )
+}
+
+export const ConfirmationDialog = ({
+    open,
+    onOpenChange,
+    title,
+    description,
+    confirmButtonText = "Confirm",
+    cancelButtonText = "Cancel",
+    confirmButtonClassName,
+    cancelButtonClassName,
+    onConfirm,
+    onCancel,
+    isPending = false,
+    icon,
+}: ConfirmationDialogProps) => {
+    return (
+        <AlertDialog open={open} onOpenChange={onOpenChange}>
+            <AlertDialogContent size="sm">
+                <AlertDialogHeader>
+                    {icon && <div className="mb-2 flex justify-center">{icon}</div>}
+                    <AlertDialogTitle>{title}</AlertDialogTitle>
+                    {description && (
+                        <AlertDialogDescription>{description}</AlertDialogDescription>
+                    )}
+                </AlertDialogHeader>
+
+                <AlertDialogFooter>
+                    <AlertDialogCancel
+                        variant="ghost"
+                        onClick={onCancel}
+                        className={cn(CONFIRMATION_DIALOG_CANCEL_CLASSES, cancelButtonClassName)}>
+                        {cancelButtonText}
+                    </AlertDialogCancel>
+                    <AlertDialogAction
+                        variant="ghost"
+                        className={cn(CONFIRMATION_DIALOG_CONFIRM_CLASSES, confirmButtonClassName)}
+                        onClick={onConfirm}
+                        disabled={isPending}>
+                        {isPending ? "Processing..." : confirmButtonText}
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
     )
 }

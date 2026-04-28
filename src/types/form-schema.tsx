@@ -1,5 +1,5 @@
 // form-schema.ts
-import { ACCEPTED_IMAGE_TYPES } from "@/utils/constatnts"
+import { ACCEPTED_FILE_TYPES, ACCEPTED_IMAGE_TYPES } from "@/utils/constatnts"
 import { z } from "zod"
 
 export const CustomerDetailsSchema = z.object({
@@ -159,13 +159,25 @@ export const KycSchema = z.object({
   tonage_capacity: z.string().min(1, "Vehicle tonage capacity is required").max(5, "Tonnage capacity must be less than 99999 Tones"),
   logbook: z
     .any()
-    .refine((file) => file instanceof File, "Attach a logbook"),
+    .refine((file) => file instanceof File, "Attach a logbook")
+    .refine(
+      (file) => ACCEPTED_FILE_TYPES.includes(file?.type),
+      "Only .jpg, .jpeg, .png and .pdf formats are supported."
+    ),
   tax_certificate: z
     .any()
-    .refine((file) => file instanceof File, "Attach a tax certificate"),
+    .refine((file) => file instanceof File, "Attach a tax certificate")
+    .refine(
+      (file) => ACCEPTED_FILE_TYPES.includes(file?.type),
+      "Only .jpg, .jpeg, .png and .pdf formats are supported."
+    ),
   id_document: z
     .any()
-    .refine((file) => file instanceof File, "Attach ID/Passport"),
+    .refine((file) => file instanceof File, "Attach ID/Passport")
+    .refine(
+      (file) => ACCEPTED_FILE_TYPES.includes(file?.type),
+      "Only .jpg, .jpeg, .png and .pdf formats are supported."
+    ),
 })
 
 export const InvoicePaymentSchema = z.object({

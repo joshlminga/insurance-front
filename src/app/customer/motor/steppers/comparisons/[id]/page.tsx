@@ -1,19 +1,37 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import {
+    Card,
+    CardContent,
+    CardFooter,
+    CardHeader
+} from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Button, CustomDialogComponent, EmptyState, ReusableDropdown, SendDocumentsViaEmail } from "@/dev/core";
+import {
+    Button,
+    CustomDialogComponent,
+    EmptyState,
+    ReusableDropdown,
+    SendDocumentsViaEmail
+} from "@/dev/core";
 import { useCustomDialogContextFactory } from "@/hooks";
-import { ArrowDown, Forward, Mail, Share2 } from "lucide-react";
+import { ArrowDown, Forward, Mail, Share2, ShoppingCart } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { ShowToast } from "@/utils/utils";
 import { UseApiMutation } from "@/hooks/hooks";
-import { SubmitResponse } from "@/types/types";
-import { EMETHODS, MOTOR_QUOTE_SESSION_STORAGE_KEY, PURCHASE_SESSION_STORAGE_KEY } from "@/utils/constatnts";
+import { premiumPreview, SubmitResponse } from "@/types/types";
+import {
+    EMETHODS,
+    MOTOR_QUOTE_SESSION_STORAGE_KEY,
+    PURCHASE_SESSION_STORAGE_KEY
+} from "@/utils/constatnts";
 import { extractErrorMessage } from "@/utils/helpers";
 import { UseAuth } from "@/stores/auth-store";
 import { Link } from "react-router-dom";
-import { EPREFIX, EROUTES } from "@/utils/enums";
+import {
+    EPREFIX,
+    EROUTES
+} from "@/utils/enums";
 import { usePurchaseStepper } from "@/hooks/use-purchase-stepper";
 import { cn } from "@/lib/utils";
 
@@ -27,19 +45,17 @@ function getBadgeClass(status: string): string {
     return "bg-[#9CA3AF]"
 }
 
-export const PostComparisonPage = ({
+export const PostComparisonPage: React.FC<premiumPreview> = ({
     componentProps,
-    goToNextStep,
-}: {
-    handleDialogContextSwitch: (context?: any) => void
-    componentProps?: any,
-    goToNextStep?: () => void,
+    goToNextStep: goToNextStepProp,
 }) => {
     const comparisons: any[] = componentProps?.data?.data?.comparison ?? [];
     const [quoteSessionId, setQuoteSessionId] = useState<number | null>(null);
     const [purchasingRateId, setPurchasingRateId] = useState<string | number | null>(null);
     const { isAuthenticated } = UseAuth()
     const { currentStep } = usePurchaseStepper('motor')
+
+    const goToNextStep = goToNextStepProp ?? componentProps?.goToNextStep;
 
     useEffect(() => {
         const storedSessionId = Number(sessionStorage.getItem(MOTOR_QUOTE_SESSION_STORAGE_KEY))
@@ -96,7 +112,6 @@ export const PostComparisonPage = ({
         })
     }
 
-    console.log("Comparisons data:", comparisons)
     return (
         <div className="space-y-6">
             <h1 className="flex items-center gap-2 px-3 text-2xl font-bold">
@@ -156,9 +171,7 @@ export const PostComparisonPage = ({
                                                 {breakdown["Levies"] ?? "—"}
                                             </span>
                                         </div>
-
                                         <Separator />
-
                                         <div className="grid grid-cols-2 text-sm font-semibold">
                                             <span>Total Premium</span>
                                             <span className="text-right">
@@ -170,10 +183,11 @@ export const PostComparisonPage = ({
                                         {isAuthenticated ? (
                                             <Button
                                                 type="button"
-                                                onClick={() => onPurchase(item?.product?.id, item?.rate_id)}
+                                                 leftIcon={<ShoppingCart />}
+                                                onClick={() => onPurchase(item?.product_id, item?.rate_id)}
                                                 loading={submitPurchaseMutation.isPending && purchasingRateId === item?.rate_id}
                                                 disabled={submitPurchaseMutation.isPending && purchasingRateId !== item?.rate_id}
-                                                className="w-full rounded-md border border-[#D9D9D9] bg-[#0CC258] px-4 py-2 text-sm font-medium text-white hover:bg-[#0CC258]/90 lg:w-auto">
+                                                className="w-full rounded-md border border-[#D9D9D9] bg-[#0CC258] px-4 py-2 text-sm font-medium text-white hover:bg-[#0CC258]/90">
                                                 Purchase Cover
                                             </Button>
                                         ) : (
@@ -186,7 +200,7 @@ export const PostComparisonPage = ({
                                                 className="w-full lg:w-auto">
                                                 <Button
                                                     type="button"
-                                                    className="w-full rounded-md border border-[#D9D9D9] bg-[#0CC258] px-4 py-2 text-sm font-medium text-white hover:bg-[#0CC258]/90 lg:w-auto">
+                                                    className="w-full rounded-md border border-[#D9D9D9] bg-[#0CC258] px-4 py-2 text-sm font-medium text-white hover:bg-[#0CC258]/90">
                                                     Purchase Cover
                                                 </Button>
                                             </Link>
