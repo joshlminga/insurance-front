@@ -484,12 +484,6 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                             Generate Comparison {selectedQuotes.length > 0 && `(${selectedQuotes.length}/${MAX_COMPARISONS})`}
                         </Button>
                     </div>
-                    {/* {appliedBenefitIds.length > 0 && (
-                        <p className="text-xs text-muted-foreground">
-                            Active add-on IDs sent to pricing: {appliedBenefitIds.join(', ')} — adjust
-                            dropdowns and tap <strong>Add benefit</strong> again to update.
-                        </p>
-                    )} */}
                 </form>
             </section>
             <section className="space-y-4">
