@@ -4,9 +4,18 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator";
 import { Button, CustomDialogComponent, EmptyState, ReusableDropdown, SendDocumentsViaEmail } from "@/dev/core";
 import { useCustomDialogContextFactory } from "@/hooks";
-import { ArrowDown, Forward, Mail, MoveLeft, Share2 } from "lucide-react";
-import React from "react";
+import { ArrowDown, Forward, Mail, Share2 } from "lucide-react";
+import React, { useEffect, useState } from "react";
 import { ShowToast } from "@/utils/utils";
+import { UseApiMutation } from "@/hooks/hooks";
+import { SubmitResponse } from "@/types/types";
+import { EMETHODS, MOTOR_QUOTE_SESSION_STORAGE_KEY, PURCHASE_SESSION_STORAGE_KEY } from "@/utils/constatnts";
+import { extractErrorMessage } from "@/utils/helpers";
+import { UseAuth } from "@/stores/auth-store";
+import { Link } from "react-router-dom";
+import { EPREFIX, EROUTES } from "@/utils/enums";
+import { usePurchaseStepper } from "@/hooks/use-purchase-stepper";
+import { cn } from "@/lib/utils";
 
 const PREMIUM_KEYS = new Set(["Basic Premium", "Gross Premium", "Levies"])
 
@@ -20,11 +29,26 @@ function getBadgeClass(status: string): string {
 
 export const PostComparisonPage = ({
     componentProps,
+    goToNextStep,
 }: {
     handleDialogContextSwitch: (context?: any) => void
-    componentProps?: any
+    componentProps?: any,
+    goToNextStep?: () => void,
 }) => {
-    const comparisons: any[] = componentProps?.data?.data?.comparison ?? []
+    const comparisons: any[] = componentProps?.data?.data?.comparison ?? [];
+    const [quoteSessionId, setQuoteSessionId] = useState<number | null>(null);
+    const [purchasingRateId, setPurchasingRateId] = useState<string | number | null>(null);
+    const { isAuthenticated } = UseAuth()
+    const { currentStep } = usePurchaseStepper('motor')
+
+    useEffect(() => {
+        const storedSessionId = Number(sessionStorage.getItem(MOTOR_QUOTE_SESSION_STORAGE_KEY))
+        if (Number.isFinite(storedSessionId) && storedSessionId > 0) {
+            setQuoteSessionId(storedSessionId)
+        } else {
+            setQuoteSessionId(null)
+        }
+    }, [])
 
     const { handleDialogContextSwitch, dialogContent, dialogOpen } =
         useCustomDialogContextFactory<{
@@ -37,16 +61,46 @@ export const PostComparisonPage = ({
         products: componentProps?.products ?? [],
     }
 
+    const submitPurchaseMutation = UseApiMutation<SubmitResponse, any>({
+        url: `purchase/motor/${quoteSessionId}`,
+        method: EMETHODS.POST,
+        mutationOptions: {
+            onSuccess: (data) => {
+                setPurchasingRateId(null)
+                const purchaseId = data?.data?.purchase_id
+                if (purchaseId === undefined) {
+                    ShowToast.error("Purchase session could not be initialized. Please try again.")
+                    return
+                }
+                sessionStorage.setItem(PURCHASE_SESSION_STORAGE_KEY, String(purchaseId))
+                goToNextStep?.();
+                ShowToast.success(data?.message ?? "Purchase started");
+            },
+            onError: (error: unknown) => {
+                setPurchasingRateId(null)
+                const message = extractErrorMessage(error);
+                ShowToast.error(message || "Purchase failed!");
+            },
+        },
+    });
+
+    const onPurchase = (productId: number | string, rateId: number | string) => {
+        if (!quoteSessionId) {
+            ShowToast.error("No active quote session found.")
+            return
+        }
+        setPurchasingRateId(rateId)
+        submitPurchaseMutation.mutate({
+            'product_id': productId,
+            'rate_id': rateId,
+        })
+    }
+
+    console.log("Comparisons data:", comparisons)
     return (
         <div className="space-y-6">
             <h1 className="flex items-center gap-2 px-3 text-2xl font-bold">
-                <Button
-                    type="button"
-                    className="rounded-md p-1 bg-transparent hover:bg-muted"
-                    leftIcon={<MoveLeft className="h-7 w-7 text-primary" />}
-                    onClick={() => handleDialogContextSwitch({ state: false })}
-                />
-                Insurer Comparison
+                Quotation Comparisons
             </h1>
 
             {comparisons.length === 0 ? (
@@ -62,8 +116,18 @@ export const PostComparisonPage = ({
                         return (
                             <div key={`${item.rate_id}-${idx}`} className="space-y-4">
                                 <Card>
-                                    <CardHeader className="pb-2">
-                                        <h3 className="text-lg font-semibold">{item.insurer_name}</h3>
+                                    <CardHeader className="pb-2 items-center justify-center">
+                                        <div className="w-27.25 h-15 flex">
+                                            <img
+                                                src={item.insuerer_logo}
+                                                alt={item.insurer_name ?? ''}
+                                                className={cn(
+                                                    'max-w-full max-h-full object-contain',
+                                                    // header.className
+                                                )}
+                                            />
+                                        </div>
+                                        {/* <h3 className="text-lg font-semibold">{item.insurer_name}</h3> */}
                                     </CardHeader>
                                     <CardContent className="space-y-4">
                                         <div className="grid grid-cols-2 gap-y-3 text-sm">
@@ -102,6 +166,32 @@ export const PostComparisonPage = ({
                                             </span>
                                         </div>
                                     </CardContent>
+                                    <CardFooter className="w-full">
+                                        {isAuthenticated ? (
+                                            <Button
+                                                type="button"
+                                                onClick={() => onPurchase(item?.product?.id, item?.rate_id)}
+                                                loading={submitPurchaseMutation.isPending && purchasingRateId === item?.rate_id}
+                                                disabled={submitPurchaseMutation.isPending && purchasingRateId !== item?.rate_id}
+                                                className="w-full rounded-md border border-[#D9D9D9] bg-[#0CC258] px-4 py-2 text-sm font-medium text-white hover:bg-[#0CC258]/90 lg:w-auto">
+                                                Purchase Cover
+                                            </Button>
+                                        ) : (
+                                            <Link
+                                                to={`/${EPREFIX.AUTH}${EROUTES.SIGNUP}`}
+                                                state={{
+                                                    returnTo: location.pathname,
+                                                    stepperStep: currentStep,
+                                                }}
+                                                className="w-full lg:w-auto">
+                                                <Button
+                                                    type="button"
+                                                    className="w-full rounded-md border border-[#D9D9D9] bg-[#0CC258] px-4 py-2 text-sm font-medium text-white hover:bg-[#0CC258]/90 lg:w-auto">
+                                                    Purchase Cover
+                                                </Button>
+                                            </Link>
+                                        )}
+                                    </CardFooter>
                                 </Card>
                             </div>
                         )
