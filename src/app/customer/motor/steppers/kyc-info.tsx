@@ -97,13 +97,6 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToPrevSt
                             />
                         )}
                     />
-                    {/* <ReusableSelect
-                        control={control}
-                        name="ownership"
-                        label="ownership"
-                        placeholder="Select ownership"
-                        options={OWNERSHIPOPTIONS}
-                    /> */}
                     <ReusableSelect
                         control={form.control}
                         name="id_type"
@@ -118,12 +111,6 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToPrevSt
                         placeholder='Enter passport or ID number'
                         label="Passport/ID Number"
                     />
-                    {/* <ReuseableInput
-                        className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
-                        control={form.control}
-                        name="color"
-                        label="Color"
-                    /> */}
                     <Controller
                         control={form.control}
                         name="color"
@@ -193,12 +180,14 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToPrevSt
                         control={form.control}
                         type='file'
                         name="logbook"
+                        accept=".pdf,.jpg,.jpeg,.png"
                         label="Attach Logbook"
                     />
                     <ReuseableInput
                         className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
                         control={form.control}
                         type='file'
+                        accept=".pdf,.jpg,.jpeg,.png"
                         name="tax_certificate"
                         label="Attach Tax Certificate"
                     />
@@ -207,6 +196,7 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToPrevSt
                         control={form.control}
                         type='file'
                         name="id_document"
+                        accept=".pdf,.jpg,.jpeg,.png"
                         label="Attach ID/Passport"
                     />
                 </div>

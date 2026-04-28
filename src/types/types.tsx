@@ -124,16 +124,13 @@ export type RHFInputProps<T extends FieldValues> = {
   placeholder?: string
   type?: string
   step?: string | number
-  /**
-   * When true, the input displays thousands separators (e.g. 12,345)
-   * but the value stored in React Hook Form is the raw number string (e.g. "12345").
-   */
   thousandsSeparator?: boolean
   autoComplete?: string
   required?: boolean
   className?: string
   rows?: number
-  disabled?: boolean
+  disabled?: boolean,
+  accept?: string
 }
 
 export interface AuthProviderState {

@@ -50,6 +50,8 @@ export const ACCEPTED_IMAGE_TYPES = [
   "image/webp",
 ]
 
+export const ACCEPTED_FILE_TYPES = ["image/jpeg", "image/png", "image/jpg", "application/pdf"];
+
 export type EMETHODS = typeof EMETHODS[keyof typeof EMETHODS]
 
 export const baseFactoryReducer = <S>(state: S, action: TActionType<S>): S => ({
