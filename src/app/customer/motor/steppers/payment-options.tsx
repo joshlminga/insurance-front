@@ -1,22 +1,32 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CardFooter } from '@/components/ui/card'
-import { Button, ReusableDropdown, ReusableSelect, ReuseableInput, ReuseableRadioChoiceGroup } from '@/dev/core'
+import { Field, FieldError } from '@/components/ui/field'
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
+import { Button, ConfirmationDialog, ReusableDropdown, ReuseableInput, ReuseableRadioChoiceGroup } from '@/dev/core'
 import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
 import type { CustomerVerificationDetailsProps, MpesaPayload, MpesaPollResponse, SubmitResponse } from '@/types/types'
-import { EMETHODS, INVOICE_SESSION_STORAGE_KEY, PAYMENTPLANS, POLL_INTERVAL_MS, POLL_TIMEOUT_MS } from '@/utils/constatnts'
+import { 
+    EMETHODS, 
+    INVOICE_SESSION_STORAGE_KEY, 
+    PAYMENTPLANS, POLL_INTERVAL_MS, POLL_TIMEOUT_MS } from '@/utils/constatnts'
 import { EPAYMENTTABS } from '@/utils/steps-config'
 import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowLeftCircle, ArrowRightCircle, Eye, Mail, Share2 } from 'lucide-react'
 import React from 'react'
-import { FormProvider, useForm } from 'react-hook-form'
+import { Controller, FormProvider, useForm } from 'react-hook-form'
 import { PaymentDetailsSchema } from '@/types/form-schema'
 import type { PaymentFormValues } from '@/types/schema'
 import { extractErrorMessage } from '@/utils/helpers'
 import { cn } from '@/lib/utils'
 
-/** PAYMENTPLANS `value` → how many readonly installment amount fields to show */
+
 const INSTALLMENT_FIELDS_VISIBLE: Record<string, number> = {
     Full: 1,
     Two_Installment: 2,
@@ -29,6 +39,11 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
     const [pollMessage, setPollMessage] = React.useState('')
     const [checkoutRequestId, setCheckoutRequestId] = React.useState<string | null>(null)
     const [purchaseSessionId, setPurchaseSessionId] = React.useState<string | null>(null)
+    const [isPlanConfirmOpen, setIsPlanConfirmOpen] = React.useState(false)
+
+    const lastAppliedPlanRef = React.useRef<string>('')
+    const pendingPlanRef = React.useRef<string | null>(null)
+    const isConfirmingPlanRef = React.useRef(false)
 
     const stopPolling = React.useCallback(() => {
         setIsPolling(false)
@@ -143,7 +158,8 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
         url: `purchase/motor/${purchaseSessionId}/payment-plan`,
         method: EMETHODS.POST,
         mutationOptions: {
-            onSuccess: (data) => {
+            onSuccess: (data, variables) => {
+                lastAppliedPlanRef.current = variables.payment_plan
                 const schedule = data?.data?.payment_breakdown?.schedule
                 form.setValue('first_installment', schedule?.[0]?.amount?.toString() ?? '')
                 form.setValue('second_installment', schedule?.[1]?.amount?.toString() ?? '')
@@ -161,7 +177,6 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
     })
 
     const selectedPaymentPlan = form.watch('payment_plans')
-    const prevPlanRef = React.useRef(selectedPaymentPlan)
 
     const visibleInstallmentCount = selectedPaymentPlan
         ? INSTALLMENT_FIELDS_VISIBLE[selectedPaymentPlan] ?? 0
@@ -177,12 +192,28 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
         }
     }, [selectedPaymentPlan, form])
 
-    React.useEffect(() => {
-        if (!selectedPaymentPlan || !purchaseSessionId || selectedPaymentPlan === prevPlanRef.current) return
-        prevPlanRef.current = selectedPaymentPlan
-        paymentPlanMutation.mutate({ payment_plan: selectedPaymentPlan })
-    }, [selectedPaymentPlan, purchaseSessionId])
+    const cancelPlanChange = React.useCallback(() => {
+        pendingPlanRef.current = null
+        setIsPlanConfirmOpen(false)
+    }, [])
 
+    const confirmPlanChange = React.useCallback(async () => {
+        isConfirmingPlanRef.current = true
+        try {
+            const nextPlan = pendingPlanRef.current
+            if (!nextPlan || !purchaseSessionId) return
+            form.setValue('payment_plans', nextPlan)
+            try {
+                await paymentPlanMutation.mutateAsync({ payment_plan: nextPlan })
+            } catch {
+                form.setValue('payment_plans', lastAppliedPlanRef.current)
+            }
+        } finally {
+            isConfirmingPlanRef.current = false
+            pendingPlanRef.current = null
+            setIsPlanConfirmOpen(false)
+        }
+    }, [form, paymentPlanMutation, purchaseSessionId])
 
     const handlePaymentMethodChange = (value: string) => {
         setSelectedPaymentMethod(value)
@@ -233,13 +264,49 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                 Payment Plans:
                             </label>
                             <div className="w-full sm:w-fit sm:min-w-50 h-auto">
-                                <ReusableSelect
-                                    className="w-full"
-                                    triggerClassName="h-full rounded-[3px] border border-[#ADABAB] bg-white text-sm"
+                                <Controller
                                     name="payment_plans"
-                                    label=""
-                                    options={PAYMENTPLANS}
                                     control={form.control}
+                                    render={({ field, fieldState }) => (
+                                        <Field
+                                            data-invalid={fieldState.invalid}
+                                            className="w-full">
+                                            <Select
+                                                value={field.value || undefined}
+                                                onValueChange={(value) => {
+                                                    const previous = field.value ?? ''
+                                                    if (value === previous) return
+                                                    if (!purchaseSessionId) {
+                                                        field.onChange(value)
+                                                        return
+                                                    }
+                                                    pendingPlanRef.current = value
+                                                    setIsPlanConfirmOpen(true)
+                                                }}>
+                                                <SelectTrigger
+                                                    aria-invalid={fieldState.invalid}
+                                                    className={cn(
+                                                        'w-full h-12.75 rounded-[3px] border border-[#ADABAB] bg-white text-sm',
+                                                        fieldState.invalid &&
+                                                            'border-red-500 focus:ring-red-500'
+                                                    )}>
+                                                    <SelectValue placeholder="Select an option" />
+                                                </SelectTrigger>
+                                                <SelectContent className="">
+                                                    {PAYMENTPLANS.map((option) => (
+                                                        <SelectItem key={option.value} value={option.value}>
+                                                            {option.label}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                            {fieldState.error && (
+                                                <FieldError className="mt-1 text-sm text-red-500">
+                                                    {fieldState.error.message}
+                                                </FieldError>
+                                            )}
+                                        </Field>
+                                    )}
                                 />
                             </div>
                         </div>
@@ -262,6 +329,7 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                                 : '1st installment'
                                         }
                                         disabled
+                                        thousandsSeparator
                                     />
                                 )}
                                 {visibleInstallmentCount >= 2 && (
@@ -271,6 +339,7 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                         name="second_installment"
                                         label="2nd installment"
                                         disabled
+                                        thousandsSeparator
                                     />
                                 )}
                                 {visibleInstallmentCount >= 3 && (
@@ -280,6 +349,7 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                         name="third_installment"
                                         label="3rd installment"
                                         disabled
+                                        thousandsSeparator
                                     />
                                 )}
                             </div>
@@ -303,6 +373,23 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
                         items={EPAYMENTTABS}
                     />
                 </div>
+
+                <ConfirmationDialog
+                    open={isPlanConfirmOpen}
+                    onOpenChange={(open) => {
+                        setIsPlanConfirmOpen(open)
+                        if (!open && !isConfirmingPlanRef.current) {
+                            pendingPlanRef.current = null
+                        }
+                    }}
+                    title="Change payment plan?"
+                    description="This will recalculate your installment schedule on the invoice."
+                    confirmButtonText="Yes, change"
+                    cancelButtonText="Cancel"
+                    onConfirm={confirmPlanChange}
+                    onCancel={cancelPlanChange}
+                    isPending={paymentPlanMutation.isPending}
+                />
 
                 {isPolling && (
                     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">

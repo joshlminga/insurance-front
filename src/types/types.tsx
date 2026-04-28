@@ -626,17 +626,17 @@ export type AuthState = {
 }
 
 export type MotorBenefitOption = {
-    id: number
-    group?: string | null
-    type?: string | null
-    name?: string | null
-    label?: string | null
-    reference?: string | null
+  id: number
+  group?: string | null
+  type?: string | null
+  name?: string | null
+  label?: string | null
+  reference?: string | null
 }
 
 export type BenefitGroup = {
-    group: string
-    items: MotorBenefitOption[]
+  group: string
+  items: MotorBenefitOption[]
 }
 
 export type TLoaderProps = Partial<TClassType> &
@@ -644,3 +644,20 @@ export type TLoaderProps = Partial<TClassType> &
     isError?: boolean
     children?: ReactNode
   };
+
+export interface ConfirmationDialogProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  title: string
+  description?: string
+  confirmButtonText?: string
+  cancelButtonText?: string
+  /** Merged after defaults; use for brand colors (e.g. primary action). */
+  confirmButtonClassName?: string
+  /** Merged after defaults; use for brand colors (e.g. outline cancel). */
+  cancelButtonClassName?: string
+  onConfirm: () => void | Promise<void>
+  onCancel?: () => void
+  isPending?: boolean
+  icon?: ReactNode
+}

@@ -48,3 +48,11 @@ export const twoDecimalformatter = (value: number | string): string => {
     maximumFractionDigits: 2,
   }).format(num);
 };
+
+export const formatCurrency = (amount: string | number) => {
+    if (!amount) return ''
+    return new Intl.NumberFormat('en-KE', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    }).format(Number(amount))
+}
