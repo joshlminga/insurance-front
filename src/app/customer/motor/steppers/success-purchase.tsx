@@ -72,32 +72,17 @@ export const SuccessPurchase: React.FC<CustomerVerificationDetailsProps> = ({
                 onSuccess: (data) => {
                     const blob = new Blob([data], { type: 'application/pdf' })
                     const url = window.URL.createObjectURL(blob)
-                    const width = 800;
+                    const width = 1000;
                     const height = 900;
                     const left = (window.screen.width / 2) - (width / 2);
                     const top = (window.screen.height / 2) - (height / 2);
-
-                    const windowFeatures = `
-                    scrollbars=yes,
-                    resizable=yes,
-                    status=no,
-                    location=no,
-                    toolbar=no,
-                    menubar=no,
-                    width=${width},
-                    height=${height},
-                    top=${top},
-                    left=${left}
-                `;
-
-                    const previewWindow = window.open(url, 'DocumentPreview', windowFeatures);
-
+                
+                    const previewWindow = window.open(url, 'DocumentPreview', `width=${width},height=${height},top=${top},left=${left},resizable=yes,scrollbars=yes`);
                     if (previewWindow) {
                         previewWindow.focus();
                     } else {
                         ShowToast.error("Pop-up blocked! Please allow pop-ups to preview the document.");
                     }
-
                     ShowToast.success(`${docType.charAt(0).toUpperCase() + docType.slice(1)} preview opened`);
                 },
                 onError: (error: unknown) => {
