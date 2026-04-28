@@ -117,8 +117,7 @@ export const SuccessPurchase: React.FC<CustomerVerificationDetailsProps> = ({
                         <Button
                             className='bg-[#43A047]/80 hover:bg-[#43A047] rounded-full text-white'
                             onClick={() => downloadDocument('receipt')}
-                            loading={receiptMutation.isPending}
-                        >
+                            loading={receiptMutation.isPending}>
                             Download Receipt
                         </Button>
                     </Card>

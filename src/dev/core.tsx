@@ -2286,7 +2286,7 @@ export const ConfirmationDialog = ({
                         {cancelButtonText}
                     </AlertDialogCancel>
                     <AlertDialogAction
-                        variant="ghost"
+                        variant="destructive"
                         className={cn(CONFIRMATION_DIALOG_CONFIRM_CLASSES, confirmButtonClassName)}
                         onClick={onConfirm}
                         disabled={isPending}>

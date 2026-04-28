@@ -226,3 +226,10 @@ export const BENEFIT_SECTIONS: { type: BenefitType; key: "compulsory" | "inclusi
 export const MAX_COMPARISONS = 3
 export const CONFIRMATION_DIALOG_CONFIRM_CLASSES = "rounded-full bg-[#C20C0C]/80 text-white shadow-none hover:bg-[#C20C0C] hover:text-white"
 export const CONFIRMATION_DIALOG_CANCEL_CLASSES = "rounded-full border border-[#C20C0C] bg-transparent text-[#C20C0C] shadow-none hover:bg-[#C20C0C]/10 hover:text-[#C20C0C]"
+
+export const INSTALLMENT_FIELDS_VISIBLE: Record<string, number> = {
+    Full: 1,
+    Two_Installment: 2,
+    Three_Installment: 3,
+}
+

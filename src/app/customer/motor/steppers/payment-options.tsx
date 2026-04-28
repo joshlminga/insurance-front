@@ -13,6 +13,7 @@ import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
 import type { CustomerVerificationDetailsProps, MpesaPayload, MpesaPollResponse, SubmitResponse } from '@/types/types'
 import { 
     EMETHODS, 
+    INSTALLMENT_FIELDS_VISIBLE, 
     INVOICE_SESSION_STORAGE_KEY, 
     PAYMENTPLANS, POLL_INTERVAL_MS, POLL_TIMEOUT_MS } from '@/utils/constatnts'
 import { EPAYMENTTABS } from '@/utils/steps-config'
@@ -27,11 +28,6 @@ import { extractErrorMessage } from '@/utils/helpers'
 import { cn } from '@/lib/utils'
 
 
-const INSTALLMENT_FIELDS_VISIBLE: Record<string, number> = {
-    Full: 1,
-    Two_Installment: 2,
-    Three_Installment: 3,
-}
 
 export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goToNextStep, goToPrevStep }) => {
     const [selectedPaymentMethod, setSelectedPaymentMethod] = React.useState<string>('mpesa')
@@ -61,7 +57,7 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
         url: 'mpesa/status',
         params: checkoutRequestId ? { checkout_request_id: checkoutRequestId } : undefined,
         queryOptions: {
-            enabled: isPolling && Boolean(checkoutRequestId),
+            enabled: isPolling && !!checkoutRequestId,
             refetchInterval: isPolling ? POLL_INTERVAL_MS : false,
             refetchIntervalInBackground: true,
             retry: 1,
@@ -408,6 +404,7 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
                         </div>
                     </div>
                 )}
+
                 <CardFooter className="w-full flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mt-3 px-0">
                     <Button
                         type="button"
