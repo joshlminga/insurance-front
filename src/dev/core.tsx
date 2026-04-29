@@ -2307,6 +2307,7 @@ export const SendInvoiceViaEmail = ({
 }) => {
     const [isSelf, setIsSelf] = useState(false)
     const [email, setEmail] = useState("")
+    const [isSingle, setIsSingle] = useState(false)
 
     const submitMutation = UseApiMutation<SubmitResponse, FormData>({
         url: `document/motor/send-invoice-via-email`,
@@ -2332,10 +2333,10 @@ export const SendInvoiceViaEmail = ({
             ShowToast.error("No active purchase session found.")
             return
         }
-        const invoice_type = "single"
+        const is_single = isSingle;
         const base: Record<string, unknown> = {
             is_self: isSelf,
-            invoice_type: invoice_type,
+            is_single: is_single,
         }
         if (!isSelf) {
             base.email = email
@@ -2363,6 +2364,17 @@ export const SendInvoiceViaEmail = ({
                     />
                     <Label htmlFor="is_self" className="cursor-pointer font-bold text-lg">
                         Send to my email
+                    </Label>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                    <Checkbox
+                        id="is_single"
+                        checked={isSingle}
+                        onCheckedChange={(checked) => setIsSingle(checked === true)}
+                    />
+                    <Label htmlFor="is_single" className="cursor-pointer font-bold text-lg">
+                        Send as a single invoice
                     </Label>
                 </div>
 
