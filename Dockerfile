@@ -5,7 +5,9 @@ WORKDIR /app
 
 # Install dependencies first (layer caching)
 COPY package*.json ./
-RUN npm install
+RUN npm installz
+
+RUN npm update -g npm
 
 # Copy source and build
 COPY . .
