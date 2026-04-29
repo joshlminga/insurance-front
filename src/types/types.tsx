@@ -659,3 +659,10 @@ export interface ConfirmationDialogProps {
   isPending?: boolean
   icon?: ReactNode
 }
+
+export type ListedBenefitStatus = 'compulsory' | 'inclusive' | 'selected' | 'na' | 'no'
+
+export type ListedBenefitResolved = {
+    text: string
+    status: ListedBenefitStatus
+}

@@ -76,7 +76,7 @@ export const SuccessPurchase: React.FC<CustomerVerificationDetailsProps> = ({
                     const height = 900;
                     const left = (window.screen.width / 2) - (width / 2);
                     const top = (window.screen.height / 2) - (height / 2);
-                
+
                     const previewWindow = window.open(url, 'DocumentPreview', `width=${width},height=${height},top=${top},left=${left},resizable=yes,scrollbars=yes`);
                     if (previewWindow) {
                         previewWindow.focus();
@@ -90,7 +90,7 @@ export const SuccessPurchase: React.FC<CustomerVerificationDetailsProps> = ({
                     ShowToast.error(message || "Download failed!")
                 },
             },
-        })
+    })
 
     const receiptMutation = createDownloadMutation('receipt')
     const certificateMutation = createDownloadMutation('certificate')

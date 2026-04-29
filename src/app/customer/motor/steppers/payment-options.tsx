@@ -8,14 +8,16 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
-import { Button, ConfirmationDialog, ReusableDropdown, ReuseableInput, ReuseableRadioChoiceGroup } from '@/dev/core'
+import { Button, ConfirmationDialog, CustomDialogComponent, ReusableDropdown, ReuseableInput, ReuseableRadioChoiceGroup, SendInvoiceViaEmail } from '@/dev/core'
 import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
 import type { CustomerVerificationDetailsProps, MpesaPayload, MpesaPollResponse, SubmitResponse } from '@/types/types'
-import { 
-    EMETHODS, 
-    INSTALLMENT_FIELDS_VISIBLE, 
-    INVOICE_SESSION_STORAGE_KEY, 
-    PAYMENTPLANS, POLL_INTERVAL_MS, POLL_TIMEOUT_MS } from '@/utils/constatnts'
+import {
+    EMETHODS,
+    INSTALLMENT_FIELDS_VISIBLE,
+    INVOICE_SESSION_STORAGE_KEY,
+    PAYMENTPLANS, POLL_INTERVAL_MS, POLL_TIMEOUT_MS,
+    PURCHASE_SESSION_STORAGE_KEY
+} from '@/utils/constatnts'
 import { EPAYMENTTABS } from '@/utils/steps-config'
 import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -26,20 +28,20 @@ import { PaymentDetailsSchema } from '@/types/form-schema'
 import type { PaymentFormValues } from '@/types/schema'
 import { extractErrorMessage } from '@/utils/helpers'
 import { cn } from '@/lib/utils'
-
+import { useCustomDialogContextFactory } from '@/hooks'
 
 
 export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goToNextStep, goToPrevStep }) => {
-    const [selectedPaymentMethod, setSelectedPaymentMethod] = React.useState<string>('mpesa')
-    const [isPolling, setIsPolling] = React.useState(false)
-    const [pollMessage, setPollMessage] = React.useState('')
-    const [checkoutRequestId, setCheckoutRequestId] = React.useState<string | null>(null)
-    const [purchaseSessionId, setPurchaseSessionId] = React.useState<string | null>(null)
-    const [isPlanConfirmOpen, setIsPlanConfirmOpen] = React.useState(false)
-
-    const lastAppliedPlanRef = React.useRef<string>('')
-    const pendingPlanRef = React.useRef<string | null>(null)
-    const isConfirmingPlanRef = React.useRef(false)
+    const [selectedPaymentMethod, setSelectedPaymentMethod] = React.useState<string>('mpesa');
+    const [isPolling, setIsPolling] = React.useState(false);
+    const [pollMessage, setPollMessage] = React.useState('');
+    const [checkoutRequestId, setCheckoutRequestId] = React.useState<string | null>(null);
+    const [purchaseSessionId, setPurchaseSessionId] = React.useState<string | null>(null);
+    const [isPlanConfirmOpen, setIsPlanConfirmOpen] = React.useState(false);
+    const lastAppliedPlanRef = React.useRef<string>('');
+    const pendingPlanRef = React.useRef<string | null>(null);
+    const isConfirmingPlanRef = React.useRef(false);
+    const [purchaseId, setPurchaseId] = React.useState<string | null>(null)
 
     const stopPolling = React.useCallback(() => {
         setIsPolling(false)
@@ -65,6 +67,15 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
     })
 
     React.useEffect(() => {
+        const storedPurchaseKey = String(sessionStorage.getItem(PURCHASE_SESSION_STORAGE_KEY))
+        if (storedPurchaseKey) {
+            setPurchaseId(storedPurchaseKey)
+        } else {
+            setPurchaseId(null)
+        }
+    }, [])
+
+    React.useEffect(() => {
         const storedPurchaseKey = String(sessionStorage.getItem(INVOICE_SESSION_STORAGE_KEY))
         if (storedPurchaseKey) {
             setPurchaseSessionId(storedPurchaseKey)
@@ -72,6 +83,8 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
             setPurchaseSessionId(null)
         }
     }, [])
+
+    // console.log('Purchase ID:', purchaseId);
 
     React.useEffect(() => {
         if (!isPolling) return
@@ -85,7 +98,6 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
 
     React.useEffect(() => {
         if (!isPolling || !pollQuery.data) return
-
         const payload = pollQuery.data.data ?? pollQuery.data
         const statusRaw = payload.status?.toLowerCase()
         const resultCode = payload.ResultCode
@@ -101,7 +113,6 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
             goToNextStep?.()
             return
         }
-
         if (isFailed) {
             stopPolling()
             setTimeout(() => {
@@ -250,210 +261,266 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
         submitMutation.mutate(payload)
     }
 
+    const createDownloadMutation = (purchaseId: string) =>
+        UseApiMutation<Blob, string>({
+            url: `document/motor/invoice-all/${purchaseId}`,
+            method: EMETHODS.GET,
+            config: {
+                responseType: 'blob',
+            },
+            mutationOptions: {
+                onSuccess: (data) => {
+                    const blob = new Blob([data], { type: 'application/pdf' })
+                    const url = window.URL.createObjectURL(blob)
+                    const width = 1000;
+                    const height = 900;
+                    const left = (window.screen.width / 2) - (width / 2);
+                    const top = (window.screen.height / 2) - (height / 2);
+
+                    const previewWindow = window.open(url, 'DocumentPreview', `width=${width},height=${height},top=${top},left=${left},resizable=yes,scrollbars=yes`);
+                    if (previewWindow) {
+                        previewWindow.focus();
+                    } else {
+                        ShowToast.error("Pop-up blocked! Please allow pop-ups to preview the document.");
+                    }
+                    ShowToast.success(`Invoice preview opened`);
+                },
+                onError: (error: unknown) => {
+                    const message = extractErrorMessage(error)
+                    ShowToast.error(message || "Download failed!")
+                },
+            },
+        })
+    const InvoiceViewMutation = createDownloadMutation(String(purchaseId))
+
+    const { handleDialogContextSwitch, dialogContent, dialogOpen } =
+        useCustomDialogContextFactory<{
+            refetch?: () => Promise<any>
+            data?: any
+        }>()
+
     return (
-        <FormProvider {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="w-full mx-auto bg-transparent">
-                <div className='w-full items-center justify-center p-2 sm:p-4'>
-                    <div className="w-full min-h-45.5 h-auto rounded-[3px] bg-[#D9D9D95E] shadow-[0px_4px_4px_0px_#00000040] p-4 sm:p-6 mb-4">
-                        <div className="w-full sm:w-auto mb-4">
-                            <label htmlFor="payment_plans" className="font-medium text-[15px] text-black block mb-2">
-                                Payment Plans:
-                            </label>
-                            <div className="w-full sm:w-fit sm:min-w-50 h-auto">
-                                <Controller
-                                    name="payment_plans"
-                                    control={form.control}
-                                    render={({ field, fieldState }) => (
-                                        <Field
-                                            data-invalid={fieldState.invalid}
-                                            className="w-full">
-                                            <Select
-                                                value={field.value || undefined}
-                                                onValueChange={(value) => {
-                                                    const previous = field.value ?? ''
-                                                    if (value === previous) return
-                                                    if (!purchaseSessionId) {
-                                                        field.onChange(value)
-                                                        return
-                                                    }
-                                                    pendingPlanRef.current = value
-                                                    setIsPlanConfirmOpen(true)
-                                                }}>
-                                                <SelectTrigger
-                                                    aria-invalid={fieldState.invalid}
-                                                    className={cn(
-                                                        'w-full h-12.75 rounded-[3px] border border-[#ADABAB] bg-white text-sm',
-                                                        fieldState.invalid &&
+        <>
+            <FormProvider {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="w-full mx-auto bg-transparent">
+                    <div className='w-full items-center justify-center p-2 sm:p-4'>
+                        <div className="w-full min-h-45.5 h-auto rounded-[3px] bg-[#D9D9D95E] shadow-[0px_4px_4px_0px_#00000040] p-4 sm:p-6 mb-4">
+                            <div className="w-full sm:w-auto mb-4">
+                                <label htmlFor="payment_plans" className="font-medium text-[15px] text-black block mb-2">
+                                    Payment Plans:
+                                </label>
+                                <div className="w-full sm:w-fit sm:min-w-50 h-auto">
+                                    <Controller
+                                        name="payment_plans"
+                                        control={form.control}
+                                        render={({ field, fieldState }) => (
+                                            <Field
+                                                data-invalid={fieldState.invalid}
+                                                className="w-full">
+                                                <Select
+                                                    value={field.value || undefined}
+                                                    onValueChange={(value) => {
+                                                        const previous = field.value ?? ''
+                                                        if (value === previous) return
+                                                        if (!purchaseSessionId) {
+                                                            field.onChange(value)
+                                                            return
+                                                        }
+                                                        pendingPlanRef.current = value
+                                                        setIsPlanConfirmOpen(true)
+                                                    }}>
+                                                    <SelectTrigger
+                                                        aria-invalid={fieldState.invalid}
+                                                        className={cn(
+                                                            'w-full h-12.75 rounded-[3px] border border-[#ADABAB] bg-white text-sm',
+                                                            fieldState.invalid &&
                                                             'border-red-500 focus:ring-red-500'
-                                                    )}>
-                                                    <SelectValue placeholder="Select an option" />
-                                                </SelectTrigger>
-                                                <SelectContent className="">
-                                                    {PAYMENTPLANS.map((option) => (
-                                                        <SelectItem key={option.value} value={option.value}>
-                                                            {option.label}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                            {fieldState.error && (
-                                                <FieldError className="mt-1 text-sm text-red-500">
-                                                    {fieldState.error.message}
-                                                </FieldError>
-                                            )}
-                                        </Field>
+                                                        )}>
+                                                        <SelectValue placeholder="Select an option" />
+                                                    </SelectTrigger>
+                                                    <SelectContent className="">
+                                                        {PAYMENTPLANS.map((option) => (
+                                                            <SelectItem key={option.value} value={option.value}>
+                                                                {option.label}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                                {fieldState.error && (
+                                                    <FieldError className="mt-1 text-sm text-red-500">
+                                                        {fieldState.error.message}
+                                                    </FieldError>
+                                                )}
+                                            </Field>
+                                        )}
+                                    />
+                                </div>
+                            </div>
+                            {visibleInstallmentCount > 0 ? (
+                                <div
+                                    className={cn(
+                                        'grid gap-3 sm:gap-4',
+                                        visibleInstallmentCount === 1 && 'grid-cols-1 sm:max-w-md',
+                                        visibleInstallmentCount === 2 && 'grid-cols-1 sm:grid-cols-2',
+                                        visibleInstallmentCount >= 3 && 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
+                                    )}>
+                                    {visibleInstallmentCount >= 1 && (
+                                        <ReuseableInput
+                                            className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] bg-white text-black"
+                                            control={form.control}
+                                            name="first_installment"
+                                            label={
+                                                selectedPaymentPlan === 'Full'
+                                                    ? 'Full installment'
+                                                    : '1st installment'
+                                            }
+                                            disabled
+                                            thousandsSeparator
+                                        />
                                     )}
-                                />
-                            </div>
+                                    {visibleInstallmentCount >= 2 && (
+                                        <ReuseableInput
+                                            className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] bg-white text-black"
+                                            control={form.control}
+                                            name="second_installment"
+                                            label="2nd installment"
+                                            disabled
+                                            thousandsSeparator
+                                        />
+                                    )}
+                                    {visibleInstallmentCount >= 3 && (
+                                        <ReuseableInput
+                                            className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] bg-white text-black"
+                                            control={form.control}
+                                            name="third_installment"
+                                            label="3rd installment"
+                                            disabled
+                                            thousandsSeparator
+                                        />
+                                    )}
+                                </div>
+                            ) : (
+                                <p className="text-sm text-muted-foreground">
+                                    Select a payment plan above to see the installment schedule.
+                                </p>
+                            )}
                         </div>
-                        {visibleInstallmentCount > 0 ? (
-                            <div
-                                className={cn(
-                                    'grid gap-3 sm:gap-4',
-                                    visibleInstallmentCount === 1 && 'grid-cols-1 sm:max-w-md',
-                                    visibleInstallmentCount === 2 && 'grid-cols-1 sm:grid-cols-2',
-                                    visibleInstallmentCount >= 3 && 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
-                                )}>
-                                {visibleInstallmentCount >= 1 && (
-                                    <ReuseableInput
-                                        className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] bg-white text-black"
-                                        control={form.control}
-                                        name="first_installment"
-                                        label={
-                                            selectedPaymentPlan === 'Full'
-                                                ? 'Full installment'
-                                                : '1st installment'
-                                        }
-                                        disabled
-                                        thousandsSeparator
-                                    />
-                                )}
-                                {visibleInstallmentCount >= 2 && (
-                                    <ReuseableInput
-                                        className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] bg-white text-black"
-                                        control={form.control}
-                                        name="second_installment"
-                                        label="2nd installment"
-                                        disabled
-                                        thousandsSeparator
-                                    />
-                                )}
-                                {visibleInstallmentCount >= 3 && (
-                                    <ReuseableInput
-                                        className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] bg-white text-black"
-                                        control={form.control}
-                                        name="third_installment"
-                                        label="3rd installment"
-                                        disabled
-                                        thousandsSeparator
-                                    />
-                                )}
-                            </div>
-                        ) : (
-                            <p className="text-sm text-muted-foreground">
-                                Select a payment plan above to see the installment schedule.
-                            </p>
-                        )}
-                    </div>
-                    <div className="w-full py-3">
-                        <h6 className='text-base sm:text-lg font-bold'>Please Select Your Preferred Payment Option</h6>
-                    </div>
-                    <ReuseableRadioChoiceGroup
-                        variant="tabs"
-                        layout="horizontal"
-                        activeColor="#D3EDFF"
-                        selectorPosition="left"
-                        showSelector={true}
-                        value={selectedPaymentMethod}
-                        onValueChange={handlePaymentMethodChange}
-                        items={EPAYMENTTABS}
-                    />
-                </div>
-
-                <ConfirmationDialog
-                    open={isPlanConfirmOpen}
-                    onOpenChange={(open) => {
-                        setIsPlanConfirmOpen(open)
-                        if (!open && !isConfirmingPlanRef.current) {
-                            pendingPlanRef.current = null
-                        }
-                    }}
-                    title="Change payment plan?"
-                    description="This will recalculate your installment schedule on the invoice."
-                    confirmButtonText="Yes, change"
-                    cancelButtonText="Cancel"
-                    onConfirm={confirmPlanChange}
-                    onCancel={cancelPlanChange}
-                    isPending={paymentPlanMutation.isPending}
-                />
-
-                {isPolling && (
-                    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-                        <div className="bg-white rounded-2xl p-8 flex flex-col items-center gap-4 shadow-xl max-w-sm mx-4">
-                            <div className="w-12 h-12 border-4 border-[#0CC258] border-t-transparent rounded-full animate-spin" />
-                            <p className="text-center font-medium text-gray-700">{pollMessage}</p>
-                            <p className="text-center text-sm text-gray-500">
-                                Please enter your PIN on the M-Pesa prompt on your phone.
-                            </p>
-                            <button
-                                type="button"
-                                onClick={stopPolling}
-                                className="text-sm text-red-500 underline mt-2">
-                                Cancel
-                            </button>
+                        <div className="w-full py-3">
+                            <h6 className='text-base sm:text-lg font-bold'>Please Select Your Preferred Payment Option</h6>
                         </div>
+                        <ReuseableRadioChoiceGroup
+                            variant="tabs"
+                            layout="horizontal"
+                            activeColor="#D3EDFF"
+                            selectorPosition="left"
+                            showSelector={true}
+                            value={selectedPaymentMethod}
+                            onValueChange={handlePaymentMethodChange}
+                            items={EPAYMENTTABS}
+                        />
                     </div>
-                )}
 
-                <CardFooter className="w-full flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mt-3 px-0">
-                    <Button
-                        type="button"
-                        className="w-full sm:w-auto rounded-full border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
-                        leftIcon={<ArrowLeftCircle />}
-                        onClick={() => goToPrevStep?.()}>
-                        Previous
-                    </Button>
-
-                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                        <ReusableDropdown
-                            trigger={
-                                <Button
-                                    className="w-full sm:w-auto bg-[#0CC258] hover:bg-[#0CC258]/80">
-                                    Generate Invoice
-                                </Button>
+                    <ConfirmationDialog
+                        open={isPlanConfirmOpen}
+                        onOpenChange={(open) => {
+                            setIsPlanConfirmOpen(open)
+                            if (!open && !isConfirmingPlanRef.current) {
+                                pendingPlanRef.current = null
                             }
-                            items={[
-                                {
-                                    label: "WhatsApp",
-                                    icon: <Share2 className="w-4 h-4" />,
-                                    onClick: () => console.log("WhatsApp"),
-                                },
-                                {
-                                    label: "Email",
-                                    icon: <Mail className="w-4 h-4" />,
-                                    onClick: () => console.log("Email"),
-                                },
-                                {
-                                    label: "View Online",
-                                    icon: <Eye className="w-4 h-4" />,
-                                    onClick: () => console.log("view online"),
-                                },
-                                {
-                                    label: "Select All",
-                                    icon: <Eye className="w-4 h-4" />,
-                                    onClick: () => console.log("select all"),
-                                },
-                            ]} />
+                        }}
+                        title="Change payment plan?"
+                        description="This will recalculate your installment schedule on the invoice."
+                        confirmButtonText="Yes, change"
+                        cancelButtonText="Cancel"
+                        onConfirm={confirmPlanChange}
+                        onCancel={cancelPlanChange}
+                        isPending={paymentPlanMutation.isPending}
+                    />
+
+                    {isPolling && (
+                        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-2xl p-8 flex flex-col items-center gap-4 shadow-xl max-w-sm mx-4">
+                                <div className="w-12 h-12 border-4 border-[#0CC258] border-t-transparent rounded-full animate-spin" />
+                                <p className="text-center font-medium text-gray-700">{pollMessage}</p>
+                                <p className="text-center text-sm text-gray-500">
+                                    Please enter your PIN on the M-Pesa prompt on your phone.
+                                </p>
+                                <button
+                                    type="button"
+                                    onClick={stopPolling}
+                                    className="text-sm text-red-500 underline mt-2">
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    <CardFooter className="w-full flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mt-3 px-0">
                         <Button
-                            type="submit"
-                            disabled={isPolling}
-                            className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
-                            rightIcon={<ArrowRightCircle />}>
-                            {isPolling ? 'Processing...' : 'Proceed To Payment'}
+                            type="button"
+                            className="w-full sm:w-auto rounded-full border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
+                            leftIcon={<ArrowLeftCircle />}
+                            onClick={() => goToPrevStep?.()}>
+                            Previous
                         </Button>
-                    </div>
-                </CardFooter>
-            </form>
-        </FormProvider>
+
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                            <ReusableDropdown
+                                trigger={
+                                    <Button
+                                        className="w-full sm:w-auto bg-[#0CC258] hover:bg-[#0CC258]/80">
+                                        Generate Invoice
+                                    </Button>
+                                }
+                                items={[
+                                    {
+                                        label: "WhatsApp",
+                                        icon: <Share2 className="w-4 h-4" />,
+                                        onClick: () => console.log("WhatsApp"),
+                                    },
+                                    {
+                                        label: "Email",
+                                        icon: <Mail className="w-4 h-4" />,
+                                        onClick: () => {
+                                            handleDialogContextSwitch({
+                                                componentProps: { data: purchaseId },
+                                                Component: SendInvoiceViaEmail,
+                                            })
+                                        }
+                                    },
+                                    {
+                                        label: "View Online",
+                                        icon: <Eye className="w-4 h-4" />,
+                                        onClick: () => {
+                                            InvoiceViewMutation.mutate(String(purchaseId))
+                                        },
+                                    }
+                                ]} />
+                            <Button
+                                type="submit"
+                                disabled={isPolling}
+                                className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
+                                rightIcon={<ArrowRightCircle />}>
+                                {isPolling ? 'Processing...' : 'Proceed To Payment'}
+                            </Button>
+                        </div>
+                    </CardFooter>
+                </form>
+            </FormProvider>
+
+            <CustomDialogComponent
+                {...{ handleDialogContextSwitch, dialogOpen }}
+                className='sm:max-w-fit w-[95vw] sm:w-auto p-4 sm:p-6'>
+                {dialogContent?.Component && (
+                    <dialogContent.Component
+                        {...{
+                            componentProps: dialogContent.componentProps,
+                            handleDialogContextSwitch,
+                        }}
+                    />
+                )}
+            </CustomDialogComponent>
+
+        </>
     )
 }

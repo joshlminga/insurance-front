@@ -235,4 +235,5 @@ export const INSTALLMENT_FIELDS_VISIBLE: Record<string, number> = {
     Two_Installment: 2,
     Three_Installment: 3,
 }
+export const BENEFIT_SELECT_NONE = '__none__'
 
