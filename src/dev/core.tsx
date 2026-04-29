@@ -2134,7 +2134,6 @@ export const CustomLoader: React.FC<TLoaderProps> = ({
     </div>
 );
 
-
 export const SendDocumentsViaEmail = ({
     componentProps,
     handleDialogContextSwitch
@@ -2227,7 +2226,6 @@ export const SendDocumentsViaEmail = ({
                         Send to my email
                     </Label>
                 </div>
-
                 {!isSelf && (
                     <div className="space-y-2">
                         <Label htmlFor="email">Email Address</Label>
@@ -2295,5 +2293,104 @@ export const ConfirmationDialog = ({
                 </AlertDialogFooter>
             </AlertDialogContent>
         </AlertDialog>
+    )
+}
+
+
+export const SendInvoiceViaEmail = ({
+    componentProps,
+    handleDialogContextSwitch
+}: {
+    handleDialogContextSwitch: (context?: any) => void
+    componentProps?: any
+}) => {
+    const [isSelf, setIsSelf] = useState(false)
+    const [email, setEmail] = useState("")
+
+    const submitMutation = UseApiMutation<SubmitResponse, FormData>({
+        url: `document/motor/send-invoice-via-email`,
+        method: EMETHODS.POST,
+        mutationOptions: {
+            onSuccess: (data) => {
+                ShowToast.success(data.message || "Sent successfully!")
+                setEmail("")
+                setIsSelf(false)
+                componentProps?.refetch?.()
+                handleDialogContextSwitch({ refetch: true })
+            },
+            onError: (error: unknown) => {
+                const message = extractErrorMessage(error)
+                ShowToast.error(message || "Sending failed!")
+            },
+        },
+    })
+
+    console.log(componentProps?.data);
+
+const purchaseId = componentProps?.data;
+
+    const onSubmit = (e: React.FormEvent) => {
+        e.preventDefault()
+        if (!purchaseId) {
+            ShowToast.error("No active purchase session found.")
+            return
+        }
+        const invoice_type = "single"
+        const base: Record<string, unknown> = {
+            is_self: isSelf,
+            invoice_type: invoice_type,
+        }
+        if (!isSelf) {
+            base.email = email
+        }
+        base.purchase_id = purchaseId ?? "";
+
+        submitMutation.mutate(base as any)
+    }
+
+    return (
+        <div className="w-full min-w-[300px] max-w-[400px] space-y-6 p-6">
+            <div className="border-b pb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h2 className="text-xl font-semibold">Share Via Email To Either Self or Another User</h2>
+                    <p className="text-sm text-muted-foreground mt-1">
+                        Enter the email address you want to share the documents with. You can also choose to send the documents to yourself.
+                    </p>
+                </div>
+            </div>
+            <form onSubmit={onSubmit} className="space-y-6">
+                <div className="flex items-center space-x-2">
+                    <Checkbox
+                        id="is_self"
+                        checked={isSelf}
+                        onCheckedChange={(checked) => setIsSelf(checked === true)}
+                    />
+                    <Label htmlFor="is_self" className="cursor-pointer font-bold text-lg">
+                        Send to my email
+                    </Label>
+                </div>
+
+                {!isSelf && (
+                    <div className="space-y-2">
+                        <Label htmlFor="email">Email Address</Label>
+                        <input
+                            id="email"
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder="Enter email"
+                            className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] px-3"
+                            required={!isSelf}
+                        />
+                    </div>
+                )}
+                <Button
+                    type="submit"
+                    className="w-full bg-[#C20C0C]/80 hover:bg-[#C20C0C]"
+                    loading={submitMutation.isPending}>
+                    Send
+                </Button>
+            </form>
+        </div>
     )
 }

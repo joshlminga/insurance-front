@@ -267,7 +267,6 @@ export const PostComparisonPage: React.FC<premiumPreview> = ({
                     />
                 )}
             </CustomDialogComponent>
-
         </div>
     );
 };

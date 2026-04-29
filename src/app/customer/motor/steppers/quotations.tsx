@@ -14,6 +14,7 @@ import { useCustomDialogContextFactory } from '@/hooks'
 import type {
     BenefitGroup,
     CustomerVerificationDetailsProps,
+    ListedBenefitResolved,
     MotorBenefitOption,
     SubmitResponse,
     TFilterOptions,
@@ -29,6 +30,7 @@ import { QuotePreviewPage } from './qoute-preview/page'
 import { UseAuth } from '@/stores/auth-store'
 import { usePurchaseStepper } from '@/hooks/use-purchase-stepper'
 import {
+    BENEFIT_SELECT_NONE,
     EMETHODS,
     FILTEROPTIONS,
     MAX_COMPARISONS,
@@ -42,8 +44,6 @@ import { serializeMotorPremiumParams } from '@/lib/motor-premium-params'
 import { ShowToast } from '@/utils/utils'
 import { extractErrorMessage } from '@/utils/helpers'
 import { PostComparisonPage } from './comparisons/[id]/page'
-
-const BENEFIT_SELECT_NONE = '__none__'
 
 function benefitGroupFormKey(groupLabel: string): string {
     const slug =
@@ -63,12 +63,6 @@ function benefitOptionLabel(item: MotorBenefitOption): string {
     return String(base)
 }
 
-type ListedBenefitStatus = 'compulsory' | 'inclusive' | 'selected' | 'na' | 'no'
-
-type ListedBenefitResolved = {
-    text: string
-    status: ListedBenefitStatus
-}
 
 function formatPremium(premium: unknown): string {
     const n = typeof premium === 'number' ? premium : parseFloat(String(premium))
@@ -352,19 +346,19 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
         },
     });
 
-     const submitSendQuoteViaEmailMutation = UseApiMutation<SubmitResponse, any>({
-            url: `document/motor/send-quote-via-email/${quoteSessionId}`,
-            method: EMETHODS.POST,
-            mutationOptions: {
-                onSuccess: (data) => {
-                    ShowToast.success(data.message || "Sent successfully!")
-                },
-                onError: (error: unknown) => {
-                    const message = extractErrorMessage(error)
-                    ShowToast.error(message || "Sending failed!")
-                },
+    const submitSendQuoteViaEmailMutation = UseApiMutation<SubmitResponse, any>({
+        url: `document/motor/send-quote-via-email/${quoteSessionId}`,
+        method: EMETHODS.POST,
+        mutationOptions: {
+            onSuccess: (data) => {
+                ShowToast.success(data.message || "Sent successfully!")
             },
-        })
+            onError: (error: unknown) => {
+                const message = extractErrorMessage(error)
+                ShowToast.error(message || "Sending failed!")
+            },
+        },
+    })
 
     const onComparison = (isDownload = false, isSendViaEmail = false) => {
         if (!quoteSessionId) {
@@ -383,13 +377,13 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
         if (isDownload) {
             submitComparisonDownloadMutation.mutate(payload)
 
-        if (isSendViaEmail) {
-            submitSendQuoteViaEmailMutation.mutate({
-                quote_type: 'comparison',
-                products: selectedQuotes,
+            if (isSendViaEmail) {
+                submitSendQuoteViaEmailMutation.mutate({
+                    quote_type: 'comparison',
+                    products: selectedQuotes,
 
-            })
-        }
+                })
+            }
         } else {
             submitComparisonMutation.mutate(payload)
         }
@@ -560,10 +554,10 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                                                 resolved.status === 'compulsory'
                                                     ? 'bg-blue-100 text-blue-700'
                                                     : resolved.status === 'inclusive' || resolved.status === 'selected'
-                                                      ? 'bg-green-100 text-green-700'
-                                                      : resolved.status === 'no'
-                                                        ? 'bg-red-100 text-red-700'
-                                                        : 'bg-gray-100 text-gray-600'
+                                                        ? 'bg-green-100 text-green-700'
+                                                        : resolved.status === 'no'
+                                                            ? 'bg-red-100 text-red-700'
+                                                            : 'bg-gray-100 text-gray-600'
                                             return (
                                                 <div key={benefit.id} className="flex justify-between gap-2">
                                                     <span className="text-xs text-gray-500 sm:text-sm">
@@ -581,7 +575,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                                         })}
 
                                         {/* Duty */}
-                                        <div className="flex justify-between gap-2">    
+                                        <div className="flex justify-between gap-2">
                                             <span className="text-xs text-gray-500 sm:text-sm">
                                                 PHCF, TL & Stamp Duty
                                             </span>
@@ -595,7 +589,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                                             <span className="text-xs text-gray-500 font-bold sm:text-sm ">
                                                 Total Premium
                                             </span>
-                                       
+
                                             <span className="text-xs font-semibold text-[#C20C0C] sm:text-sm">
                                                 {formatCurrency(item?.calculated_premium?.total_premium)}
                                             </span>
