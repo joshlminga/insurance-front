@@ -2237,6 +2237,7 @@ export const SendDocumentsViaEmail = ({
                             placeholder="Enter email"
                             className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] px-3"
                             required={!isSelf}
+                            autoComplete="off"
                         />
                     </div>
                 )}
@@ -2323,12 +2324,8 @@ export const SendInvoiceViaEmail = ({
                 ShowToast.error(message || "Sending failed!")
             },
         },
-    })
-
-    console.log(componentProps?.data);
-
-const purchaseId = componentProps?.data;
-
+    });
+    const purchaseId = componentProps?.data;
     const onSubmit = (e: React.FormEvent) => {
         e.preventDefault()
         if (!purchaseId) {
@@ -2344,7 +2341,6 @@ const purchaseId = componentProps?.data;
             base.email = email
         }
         base.purchase_id = purchaseId ?? "";
-
         submitMutation.mutate(base as any)
     }
 
@@ -2381,6 +2377,7 @@ const purchaseId = componentProps?.data;
                             placeholder="Enter email"
                             className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] px-3"
                             required={!isSelf}
+                            autoComplete="off"
                         />
                     </div>
                 )}
