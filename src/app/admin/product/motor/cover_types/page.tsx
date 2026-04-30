@@ -180,7 +180,6 @@ export const MotorCoverTypePage = () => {
                     />
                 )}
             </CustomDialogComponent>
-
         </div>
     )
 }

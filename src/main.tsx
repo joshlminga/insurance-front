@@ -11,8 +11,8 @@ import {
   MOTOR_QUOTE_SESSION_STORAGE_KEY,
   PURCHASE_SESSION_STORAGE_KEY,
 } from './utils/constatnts'
+import ChatFloatingButton from './dev/core.tsx'
 
-/** One-time copy from legacy localStorage so in-flight motor checkout keeps working after this change. */
 function migrateLegacyLocalStorageKeys(keys: readonly string[]) {
   if (typeof window === 'undefined' || typeof localStorage === 'undefined') return
   for (const key of keys) {
@@ -37,6 +37,7 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryProvider>
       <RouterProvider router={router} />
+      <ChatFloatingButton />
     </QueryProvider>
   </StrictMode>,
 )
