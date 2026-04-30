@@ -126,6 +126,8 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useCustomDialogContextFactory } from "@/hooks";
+import { ChatIndexPage } from "@/app/chat-components/page";
 
 const formatSegment = (segment: string) => {
     return segment
@@ -2402,4 +2404,56 @@ export const SendInvoiceViaEmail = ({
             </form>
         </div>
     )
+}
+
+export default function ChatFloatingButton() {
+    // const { handleDialogContextSwitch, dialogContent, dialogOpen } =
+    //     useCustomDialogContextFactory<{
+    //         refetch?: () => Promise<any>;
+    //         data?: any;
+    //     }>();
+    return (
+        <>
+            <div className="fixed bottom-6 right-6 z-1000">
+                <Button
+                    className="transition-all duration-200 hover:brightness-110"
+                    // onClick={() => {
+                    //     handleDialogContextSwitch({
+                    //         Component: ChatIndexPage,
+                    //     })
+                    // }}
+                    style={{
+                        width: '80px',
+                        height: '80px',
+                        opacity: 1,
+                        borderTopLeftRadius: '30px',
+                        borderTopRightRadius: '0px',
+                        borderBottomRightRadius: '30px',
+                        borderBottomLeftRadius: '30px',
+                        background: '#FFFFFF',
+                        border: '1px solid #BF203175',
+                        boxShadow: '0px 4px 4px 0px #00000040',
+                    }}
+                    size="icon">
+                    <img
+                        src='/logo/logo3.png'
+                        alt="App Logo"
+                        className={`h-8 w-auto object-cover`}
+                    />
+                </Button>
+            </div >
+            {/* <CustomDialogComponent
+                {...{ handleDialogContextSwitch, dialogOpen }}
+                className='sm:max-w-fit w-[95vw] sm:w-auto p-4 sm:p-6'>
+                {dialogContent?.Component && (
+                    <dialogContent.Component
+                        {...{
+                            componentProps: dialogContent.componentProps,
+                            handleDialogContextSwitch,
+                        }}
+                    />
+                )}
+            </CustomDialogComponent> */}
+        </>
+    );
 }
