@@ -126,6 +126,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { ChatIndexPage } from "@/app/chat-components/page";
 
 const formatSegment = (segment: string) => {
     return segment
@@ -2402,4 +2403,37 @@ export const SendInvoiceViaEmail = ({
             </form>
         </div>
     )
+}
+
+export default function ChatFloatingButton() {
+    const [isOpen, setIsOpen] = useState(false);
+    return (
+        <>
+            <div className="fixed bottom-6 right-6 z-1000">
+                <Button
+                    className="transition-all duration-200 hover:brightness-110"
+                    onClick={() => setIsOpen(true)}
+                    style={{
+                        width: '80px',
+                        height: '80px',
+                        opacity: 1,
+                        borderTopLeftRadius: '30px',
+                        borderTopRightRadius: '0px',
+                        borderBottomRightRadius: '30px',
+                        borderBottomLeftRadius: '30px',
+                        background: '#FFFFFF',
+                        border: '1px solid #BF203175',
+                        boxShadow: '0px 4px 4px 0px #00000040',
+                    }}
+                    size="icon">
+                    <img
+                        src='/logo/logo3.png'
+                        alt="App Logo"
+                        className={`h-8 w-auto object-cover`}
+                    />
+                </Button>
+            </div >
+            {isOpen && <ChatIndexPage isOpen={isOpen} setIsOpen={setIsOpen} />}
+        </>
+    );
 }

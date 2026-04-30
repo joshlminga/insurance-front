@@ -7,7 +7,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 
-RUN npm update -g npm
+# RUN npm update -g npm
 
 # Copy source and build
 COPY . .
