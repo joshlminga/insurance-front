@@ -15,6 +15,7 @@ import type {
   DashboardStats,
   ChartDataPoint,
 } from '@/types/insurance';
+import { TMessages } from '@/types/types';
 
 // Helper to generate IDs
 const generateId = () => Math.random().toString(36).substr(2, 9);
@@ -1064,4 +1065,38 @@ export const loanStatusData: ChartDataPoint[] = [
   { name: 'Approved', value: 25 },
   { name: 'Under Review', value: 12 },
   { name: 'Defaulted', value: 8 },
+];
+
+
+export const mockMessages: TMessages[] = [
+    {
+        id: 1,
+        text: "Hello! How can we assist you today?",
+        sender: "agent",
+        createdAt: "10:00 AM",
+    },
+    {
+        id: 2,
+        text: "Hi, I'm having trouble with my account login.",
+        sender: "user",
+        createdAt: "10:01 AM",
+    },
+    {
+        id: 3,
+        text: "Sorry to hear that. Are you getting any error message?",
+        sender: "agent",
+        createdAt: "10:01 AM",
+    },
+    {
+        id: 4,
+        text: "Yes, it says invalid credentials.",
+        sender: "user",
+        createdAt: "10:02 AM",
+    },
+    {
+        id: 5,
+        text: "Please try resetting your password using the 'Forgot Password' option.",
+        sender: "agent",
+        createdAt: "10:02 AM",
+    },
 ];

@@ -32,7 +32,8 @@ import {
     CreateMotorRateExcessBenefitsSchema,
     ForgotPasswordSchema,
     ResetPasswordSchema,
-    SendViaEmailSchema
+    SendViaEmailSchema,
+    SendMessageSchema
 } from "./form-schema";
 
 export type CustomerFormValues = z.infer<typeof CustomerDetailsSchema>
@@ -71,3 +72,4 @@ export type EditProductFormValues = z.infer<typeof EditProductSchema>
 export type UpdateProfileFormValues = z.infer<typeof UpdateProfileSchema>
 export type UpdatePasswordFormValues = z.infer<typeof UpdatePasswordSchema>
 export type SendViaEmailFormValues = z.infer<typeof SendViaEmailSchema>
+export type SendMessageValues = z.infer<typeof SendMessageSchema>
