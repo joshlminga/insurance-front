@@ -746,3 +746,7 @@ export const EditProductSchema = z.object({
       rate_id: z.string().optional().or(z.literal("")),
     }))
   })
+
+    export const SendMessageSchema = z.object({
+    message: z.string().min(2, "Message must be at least 2 characters").max(1000, "Message is too long").optional().or(z.literal("")),
+  })

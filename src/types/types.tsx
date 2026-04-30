@@ -666,3 +666,10 @@ export type ListedBenefitResolved = {
     text: string
     status: ListedBenefitStatus
 }
+
+export type TMessages = {
+    id: number;
+    text: string;
+    sender: 'user' | 'agent';
+    createdAt: string;
+};
