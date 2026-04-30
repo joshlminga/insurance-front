@@ -126,7 +126,6 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useCustomDialogContextFactory } from "@/hooks";
 import { ChatIndexPage } from "@/app/chat-components/page";
 
 const formatSegment = (segment: string) => {
@@ -2407,21 +2406,13 @@ export const SendInvoiceViaEmail = ({
 }
 
 export default function ChatFloatingButton() {
-    // const { handleDialogContextSwitch, dialogContent, dialogOpen } =
-    //     useCustomDialogContextFactory<{
-    //         refetch?: () => Promise<any>;
-    //         data?: any;
-    //     }>();
+    const [isOpen, setIsOpen] = useState(false);
     return (
         <>
             <div className="fixed bottom-6 right-6 z-1000">
                 <Button
                     className="transition-all duration-200 hover:brightness-110"
-                    // onClick={() => {
-                    //     handleDialogContextSwitch({
-                    //         Component: ChatIndexPage,
-                    //     })
-                    // }}
+                    onClick={() => setIsOpen(true)}
                     style={{
                         width: '80px',
                         height: '80px',
@@ -2442,18 +2433,7 @@ export default function ChatFloatingButton() {
                     />
                 </Button>
             </div >
-            {/* <CustomDialogComponent
-                {...{ handleDialogContextSwitch, dialogOpen }}
-                className='sm:max-w-fit w-[95vw] sm:w-auto p-4 sm:p-6'>
-                {dialogContent?.Component && (
-                    <dialogContent.Component
-                        {...{
-                            componentProps: dialogContent.componentProps,
-                            handleDialogContextSwitch,
-                        }}
-                    />
-                )}
-            </CustomDialogComponent> */}
+            {isOpen && <ChatIndexPage isOpen={isOpen} setIsOpen={setIsOpen} />}
         </>
     );
 }
