@@ -58,7 +58,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Fragment } from "react/jsx-runtime";
 import React, { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { Button as ShadButton } from "@/components/ui/button"
-import { Loader2, OctagonAlert } from "lucide-react";
+import { Loader2, OctagonAlert, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Controller, type FieldValues } from "react-hook-form";
@@ -2410,29 +2410,55 @@ export default function ChatFloatingButton() {
     return (
         <>
             <div className="fixed bottom-6 right-6 z-1000">
-                <Button
-                    className="transition-all duration-200 hover:brightness-110"
-                    onClick={() => setIsOpen(true)}
-                    style={{
-                        width: '80px',
-                        height: '80px',
-                        opacity: 1,
-                        borderTopLeftRadius: '30px',
-                        borderTopRightRadius: '0px',
-                        borderBottomRightRadius: '30px',
-                        borderBottomLeftRadius: '30px',
-                        background: '#FFFFFF',
-                        border: '1px solid #BF203175',
-                        boxShadow: '0px 4px 4px 0px #00000040',
-                    }}
-                    size="icon">
-                    <img
-                        src='/logo/logo3.png'
-                        alt="App Logo"
-                        className={`h-8 w-auto object-cover`}
-                    />
-                </Button>
-            </div >
+                {isOpen ? (
+                    <Button
+                        className="transition-all duration-200 hover:brightness-110"
+                        onClick={() => setIsOpen(false)}
+                        style={{
+                            width: '80px',
+                            height: '80px',
+                            opacity: 1,
+                            borderTopLeftRadius: '30px',
+                            borderTopRightRadius: '0px',
+                            borderBottomRightRadius: '30px',
+                            borderBottomLeftRadius: '30px',
+                            background: '#FFFFFF',
+                            border: '1px solid #BF203175',
+                            boxShadow: '0px 4px 4px 0px #00000040',
+                        }}
+                        size="icon">
+                        <X
+                            {...{
+                                size: 15,
+                                className: "h-15 w-auto text-red-500"
+                            }}
+                        />
+                    </Button>
+                ) : (
+                    <Button
+                        className="transition-all duration-200 hover:brightness-110"
+                        onClick={() => setIsOpen(true)}
+                        style={{
+                            width: '80px',
+                            height: '80px',
+                            opacity: 1,
+                            borderTopLeftRadius: '30px',
+                            borderTopRightRadius: '0px',
+                            borderBottomRightRadius: '30px',
+                            borderBottomLeftRadius: '30px',
+                            background: '#FFFFFF',
+                            border: '1px solid #BF203175',
+                            boxShadow: '0px 4px 4px 0px #00000040',
+                        }}
+                        size="icon">
+                        <img
+                            src='/logo/logo3.png'
+                            alt="App Logo"
+                            className={`h-8 w-auto object-cover`}
+                        />
+                    </Button>
+                )}
+            </div>
             {isOpen && <ChatIndexPage isOpen={isOpen} setIsOpen={setIsOpen} />}
         </>
     );
