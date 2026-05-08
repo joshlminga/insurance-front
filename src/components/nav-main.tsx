@@ -41,8 +41,6 @@ export function NavMain({
           const isActive = location.pathname === item.url ||
             location.pathname.startsWith(item.url + "/") ||
             item.items?.some(sub => location.pathname === sub.url)
-
-          // If no sub-items, render as direct link
           if (!item.items || item.items.length === 0) {
             return (
               <SidebarMenuItem key={item.title}>
@@ -59,15 +57,12 @@ export function NavMain({
               </SidebarMenuItem>
             )
           }
-
-          // With sub-items, render collapsible
           return (
             <Collapsible
               key={item.title}
               asChild
               defaultOpen={isActive}
-              className="group/collapsible"
-            >
+              className="group/collapsible">
               <SidebarMenuItem>
                 <CollapsibleTrigger asChild>
                   <SidebarMenuButton tooltip={item.title} isActive={isActive}>
@@ -82,8 +77,7 @@ export function NavMain({
                       <SidebarMenuSubItem key={subItem.title}>
                         <SidebarMenuSubButton
                           asChild
-                          isActive={location.pathname === subItem.url}
-                        >
+                          isActive={location.pathname === subItem.url}>
                           <Link to={subItem.url}>
                             <span>{subItem.title}</span>
                           </Link>
