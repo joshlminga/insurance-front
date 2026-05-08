@@ -17,6 +17,7 @@ import { UseAuth } from "@/stores/auth-store";
 
 export default function OTPVerificationPage({ goToNextStep, goToPrevStep }: CustomerVerificationDetailsProps) {
   const { login, guest } = UseAuth();
+  
   const methods = useForm<OTPFormValues>({
     resolver: zodResolver(OTPVerificationSchema),
     defaultValues: {

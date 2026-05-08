@@ -5,6 +5,7 @@ import { createBrowserRouter, Navigate } from "react-router-dom"
 import { EPREFIX, EROUTES } from "./utils/enums"
 import { ProtectedRoute, PublicRoute, CustomerPublicRoute } from "./hooks/hooks"
 import Layout from "./Layout"
+import { OtpVerificationAuthForm } from "./auth/components/otp-verification-form"
 
 const Loader = () => (
   <div className="flex h-screen w-full items-center justify-center">
@@ -201,6 +202,20 @@ export const router = createBrowserRouter([
                 title="Reset Password"
                 description="Enter your new password below.">
                 <ResetPasswordForm />
+              </AuthLayoutPage>
+            </S>
+          </PublicRoute>
+        ),
+      },
+      {
+        path: EROUTES.VERIFY_EMAIL.slice(1),
+        element: (
+          <PublicRoute>
+            <S>
+              <AuthLayoutPage
+                title="Verify Your Email"
+                description="Code has been sent to your email, kindly check.">
+                <OtpVerificationAuthForm />
               </AuthLayoutPage>
             </S>
           </PublicRoute>

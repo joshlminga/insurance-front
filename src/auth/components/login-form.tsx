@@ -26,9 +26,9 @@ export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const [show, setShow] = useState(false);
 
-  const { login } = UseAuth()
+  const [show, setShow] = useState(false);
+  const { login, setGuest } = UseAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const returnTo = (location.state as any)?.returnTo
@@ -50,8 +50,11 @@ export function LoginForm({
           navigate(returnTo)
         } else if (data.is_general) {
           navigate(EROUTES.LANDING)
-        } else {
-          navigate(EROUTES.DASHBOARD)
+         }else if(data.status === 'NOT_VERIFIED'){
+          setGuest(data?.data?.guest);
+          navigate(EROUTES.VERIFY_EMAIL);
+         }else {
+          navigate(EROUTES.DASHBOARD);
         }
       },
       onError: (error: any) => {
@@ -115,8 +118,7 @@ export function LoginForm({
             <Button
               className="w-full h-12 bg-[#C20C0C] hover:bg-[#C20C0C]/80"
               type="submit"
-              loading={loginMutation.isPending}
-            >
+              loading={loginMutation.isPending}>
               <span className="font-semibold text-sm">Login</span>
             </Button>
           </Field>

@@ -29,7 +29,7 @@ export function SignupForm({
 
   const navigate = useNavigate()
   const location = useLocation()
-  const returnTo = (location.state as any)?.returnTo
+  // const returnTo = (location.state as any)?.returnTo
   const form = useForm<SignUpFormValues>({
     resolver: zodResolver(SignUpSchema),
     defaultValues: {
@@ -46,7 +46,8 @@ export function SignupForm({
     mutationOptions: {
       onSuccess: (data: any) => {
         ShowToast.success(data.message || "Signup successful!")
-        navigate(returnTo || EROUTES.LANDING)
+        // navigate(returnTo || EROUTES.LANDING)
+         navigate(EROUTES.VERIFY_EMAIL)
       },
       onError: (error: any) => {
         const message = extractErrorMessage(error);
