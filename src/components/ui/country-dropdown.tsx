@@ -28,7 +28,7 @@ import { CircleFlag } from "react-circle-flags";
 import { countries } from "country-data-list";
 import { TCountry } from "@/types/types";
 
-const ALLOWED_COUNTRY_CODES = new Set(["KE", "UG", "RW", "TZ", "BW", "ZM", "CD"]);
+const ALLOWED_COUNTRY_CODES = new Set(["KE", "UG", "RW", "TZ", "BW", "ZM"]);
 
 const allowedCountries = countries.all.filter(
   (country: TCountry) =>
@@ -88,7 +88,7 @@ const CountryDropdownComponent = (
   );
 
   const triggerClasses = cn(
-    "flex h-9 items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
+    "flex h-9 items-center justify-between whitespace-nowrap rounded-md bg-transparent px-3 py-2 text-sm cursor-pointer disabled:opacity-50",
     slim ? "w-20" : "w-full min-w-[140px]"
   );
 
@@ -96,25 +96,24 @@ const CountryDropdownComponent = (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
         ref={ref}
-        className={triggerClasses}
+        className={cn(triggerClasses, "w-38 flex items-center justify-between px-3")}
         disabled={disabled}
         {...props}>
         {selectedCountry ? (
           <div className="flex items-center gap-2 overflow-hidden flex-1 min-w-0">
-            {selectedCountry.emoji ? (
-              <span className="text-base leading-none shrink-0">
-                {selectedCountry.emoji}
-              </span>
-            ) : (
-              <div className="inline-flex items-center justify-center w-5 h-5 shrink-0 overflow-hidden rounded-full">
+            <span className="shrink-0">
+              {selectedCountry.emoji ? (
+                <span className="text-base leading-none bg-transparent rounded-full">{selectedCountry.emoji}</span>
+              ) : (
                 <CircleFlag
                   countryCode={selectedCountry.alpha2?.toLowerCase() || ""}
                   height={20}
+                  className="rounded-full"
                 />
-              </div>
-            )}
+              )}
+            </span>
             {slim === false && (
-              <span className="overflow-hidden text-ellipsis whitespace-nowrap text-sm">
+              <span className="truncate text-sm flex-1 text-left">
                 {selectedCountry.name}
               </span>
             )}
@@ -123,19 +122,19 @@ const CountryDropdownComponent = (
           <div className="flex items-center gap-2 text-muted-foreground flex-1 min-w-0">
             <Globe size={16} className="shrink-0" />
             {slim === false && (
-              <span className="overflow-hidden text-ellipsis whitespace-nowrap text-sm">
+              <span className="truncate text-sm flex-1 text-left">
                 {placeholder}
               </span>
             )}
           </div>
         )}
-        <ChevronDown size={16} className="shrink-0 ml-1 opacity-60" />
+        <ChevronDown size={16} className="shrink-0 ml-1 opacity-60 transition-transform duration-200 [[data-state=open]>&]:rotate-180"
+        />
       </PopoverTrigger>
+
       <PopoverContent
         collisionPadding={10}
-        side="bottom"
-        className="min-w-[--radix-popper-anchor-width] p-0"
-      >
+        side="bottom" className="min-w-[--radix-popper-anchor-width] p-0">
         <Command className="w-full max-h-50 sm:max-h-67.5">
           <CommandList>
             <div className="sticky top-0 z-10 bg-popover">
@@ -149,8 +148,7 @@ const CountryDropdownComponent = (
                   <CommandItem
                     className="flex items-center w-full gap-2"
                     key={key}
-                    onSelect={() => handleSelect(option)}
-                  >
+                    onSelect={() => handleSelect(option)}>
                     <div className="flex items-center flex-1 min-w-0 gap-2 overflow-hidden">
                       {option.emoji ? (
                         <span className="text-base leading-none shrink-0">{option.emoji}</span>
