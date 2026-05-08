@@ -980,7 +980,7 @@ export const PageForPagination = ({
     active?: boolean;
 }) => (
     <div className={`rounded-xl selection:bg-inherit flex items-center justify-center leading-6 hover:bg-[#F9F5FF] text-[14px] 
-    font-medium text-center cursor-pointer w-10 h-10 ${active ? 'bg-[#F9F5FF] text-[#7F56D9]' : 'text-main-orange'
+    font-medium text-center cursor-pointer w-10 h-10 ${active ? 'bg-[#F9F5FF] text-[#D11F3E]' : 'text-main-orange'
         }`}
         onClick={handler}>
         {content}
