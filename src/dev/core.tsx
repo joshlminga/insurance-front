@@ -41,7 +41,6 @@ import type {
 import {
     Stepper,
     StepperContent,
-    StepperIndicator,
     StepperItem,
     StepperNav,
     StepperPanel,
@@ -58,7 +57,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Fragment } from "react/jsx-runtime";
 import React, { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { Button as ShadButton } from "@/components/ui/button"
-import { Loader2, OctagonAlert } from "lucide-react";
+import { Loader2, OctagonAlert, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Controller, type FieldValues } from "react-hook-form";
@@ -246,6 +245,8 @@ export function ReusableStepper({
         }
     }
     const goToStep = (step: number) => handleStepChange(step)
+    console.log(value);
+
     return (
         <Stepper value={currentStep} onValueChange={handleStepChange} className={className}>
             <StepperNav className="flex items-start gap-1 sm:gap-1 mb-2 sm:mb-3 overflow-x-auto pb-1 scrollbar-hide">
@@ -257,15 +258,13 @@ export function ReusableStepper({
                             step={stepNumber}
                             className="relative flex-1 min-w-15 sm:min-w-0 items-start">
                             <StepperTrigger className="flex flex-col items-center justify-center gap-0.5 sm:gap-1 grow">
-                                <StepperIndicator
-                                    className={cn("h-2 sm:h-4.25 w-full max-w-20 sm:max-w-31 rounded-[10px] transition-all",
-                                        "bg-gray-300 data-[state=active]:bg-linear-to-r from-[#FFB3B3] via-[#FF8383] to-[#FF4545]")} />
+                                {/* <StepperIndicator
+                                    className={cn("hidden sm:block h-2 sm:h-4.25 w-full max-w-20 sm:max-w-31 rounded-[20px] transition-all",
+                                        "bg-gray-300 data-[state=active]:bg-linear-to-r from-[#FFB3B3] via-[#FF8383] to-[#FF4545]")} /> */}
+
                                 <StepperTitle className="hidden sm:block text-start text-xs lg:text-sm font-semibold group-data-[state=inactive]/step:text-muted-foreground truncate max-w-25 lg:max-w-none">
                                     {step.title}
                                 </StepperTitle>
-                                <span className="sm:hidden text-[10px] font-medium text-muted-foreground">
-                                    {stepNumber}
-                                </span>
                             </StepperTrigger>
                         </StepperItem>
                     )
@@ -980,7 +979,7 @@ export const PageForPagination = ({
     active?: boolean;
 }) => (
     <div className={`rounded-xl selection:bg-inherit flex items-center justify-center leading-6 hover:bg-[#F9F5FF] text-[14px] 
-    font-medium text-center cursor-pointer w-10 h-10 ${active ? 'bg-[#F9F5FF] text-[#7F56D9]' : 'text-main-orange'
+    font-medium text-center cursor-pointer w-10 h-10 ${active ? 'bg-[#F9F5FF] text-[#D11F3E]' : 'text-main-orange'
         }`}
         onClick={handler}>
         {content}
@@ -2410,29 +2409,55 @@ export default function ChatFloatingButton() {
     return (
         <>
             <div className="fixed bottom-6 right-6 z-1000">
-                <Button
-                    className="transition-all duration-200 hover:brightness-110"
-                    onClick={() => setIsOpen(true)}
-                    style={{
-                        width: '80px',
-                        height: '80px',
-                        opacity: 1,
-                        borderTopLeftRadius: '30px',
-                        borderTopRightRadius: '0px',
-                        borderBottomRightRadius: '30px',
-                        borderBottomLeftRadius: '30px',
-                        background: '#FFFFFF',
-                        border: '1px solid #BF203175',
-                        boxShadow: '0px 4px 4px 0px #00000040',
-                    }}
-                    size="icon">
-                    <img
-                        src='/logo/logo3.png'
-                        alt="App Logo"
-                        className={`h-8 w-auto object-cover`}
-                    />
-                </Button>
-            </div >
+                {isOpen ? (
+                    <Button
+                        className="transition-all duration-200 hover:brightness-110"
+                        onClick={() => setIsOpen(false)}
+                        style={{
+                            width: '80px',
+                            height: '80px',
+                            opacity: 1,
+                            borderTopLeftRadius: '30px',
+                            borderTopRightRadius: '0px',
+                            borderBottomRightRadius: '30px',
+                            borderBottomLeftRadius: '30px',
+                            background: '#FFFFFF',
+                            border: '1px solid #BF203175',
+                            boxShadow: '0px 4px 4px 0px #00000040',
+                        }}
+                        size="icon">
+                        <X
+                            {...{
+                                size: 15,
+                                className: "h-15 w-auto text-red-500"
+                            }}
+                        />
+                    </Button>
+                ) : (
+                    <Button
+                        className="transition-all duration-200 hover:brightness-110"
+                        onClick={() => setIsOpen(true)}
+                        style={{
+                            width: '80px',
+                            height: '80px',
+                            opacity: 1,
+                            borderTopLeftRadius: '30px',
+                            borderTopRightRadius: '0px',
+                            borderBottomRightRadius: '30px',
+                            borderBottomLeftRadius: '30px',
+                            background: '#FFFFFF',
+                            border: '1px solid #BF203175',
+                            boxShadow: '0px 4px 4px 0px #00000040',
+                        }}
+                        size="icon">
+                        <img
+                            src='/logo/logo3.png'
+                            alt="App Logo"
+                            className={`h-8 w-auto object-cover`}
+                        />
+                    </Button>
+                )}
+            </div>
             {isOpen && <ChatIndexPage isOpen={isOpen} setIsOpen={setIsOpen} />}
         </>
     );

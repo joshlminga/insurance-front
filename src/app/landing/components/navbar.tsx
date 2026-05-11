@@ -36,7 +36,7 @@ const Dropdown = ({
             <DropdownMenuTrigger asChild>
                 <button
                     className={cn(
-                        "uppercase tracking-wider text-sm font-semibold hover:text-red-500 transition inline-flex items-center gap-1",
+                        "uppercase tracking-wider text-sm font-semibold hover:text-red-500 transition inline-flex items-center gap-1 cursor-pointer",
                         text
                     )}
                     aria-haspopup="true"
@@ -121,7 +121,7 @@ export const Navbar = (
         const primaryLang = selected.languages?.[0] ?? 'eng'
         setLocale(selected.name ?? '', primaryLang, selected.alpha2 ?? '')
     }
-    
+
     const dropdownItems = {
         generateQuote: [
             { name: "Motor Insurance", href: `/${EPREFIX.CUSTOMER}${EROUTES.MOTOR}` },
@@ -166,9 +166,9 @@ export const Navbar = (
                             </span>
                         </div>
                         <Link to={EROUTES.LANDING} className="hover:text-red-500 transition uppercase text-sm font-semibold py-2">Home</Link>
-                        <a className="hover:text-red-500 transition uppercase text-sm font-semibold py-2 cursor-pointer">News</a>
-                        <a className="hover:text-red-500 transition uppercase text-sm font-semibold py-2 cursor-pointer">Careers</a>
-                        <a className="hover:text-red-500 transition uppercase text-sm font-semibold py-2 cursor-pointer">Contact</a>
+                        <Link to='#' className="hover:text-red-500 transition uppercase text-sm font-semibold py-2 cursor-pointer">News</Link>
+                        <Link to='#' className="hover:text-red-500 transition uppercase text-sm font-semibold py-2 cursor-pointer">Careers</Link>
+                        <Link to='#' className="hover:text-red-500 transition uppercase text-sm font-semibold py-2 cursor-pointer">Contact</Link>
                         {isAuthenticated && (
                             <>
                                 {/* {isGeneral === true && (

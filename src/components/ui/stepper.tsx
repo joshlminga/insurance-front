@@ -274,7 +274,6 @@ function StepperTrigger({ asChild = false, className, children, tabIndex, ...pro
 function StepperIndicator({ children, className }: React.ComponentProps<'div'>) {
   const { state, isLoading } = useStepItem();
   const { indicators } = useStepper();
-
   return (
     <div
       data-slot="stepper-indicator"
@@ -282,18 +281,17 @@ function StepperIndicator({ children, className }: React.ComponentProps<'div'>) 
       className={cn(
         'relative flex items-center overflow-hidden justify-center size-6 shrink-0 border-background bg-accent text-accent-foreground rounded-full text-xs data-[state=completed]:bg-primary data-[state=completed]:text-primary-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground',
         className,
-      )}
-    >
+      )}>
       <div className="absolute">
         {indicators &&
-        ((isLoading && indicators.loading) ||
-          (state === 'completed' && indicators.completed) ||
-          (state === 'active' && indicators.active) ||
-          (state === 'inactive' && indicators.inactive))
-          ? (isLoading && indicators.loading) ||
+          ((isLoading && indicators.loading) ||
             (state === 'completed' && indicators.completed) ||
             (state === 'active' && indicators.active) ||
-            (state === 'inactive' && indicators.inactive)
+            (state === 'inactive' && indicators.inactive))
+          ? (isLoading && indicators.loading) ||
+          (state === 'completed' && indicators.completed) ||
+          (state === 'active' && indicators.active) ||
+          (state === 'inactive' && indicators.inactive)
           : children}
       </div>
     </div>
@@ -302,7 +300,6 @@ function StepperIndicator({ children, className }: React.ComponentProps<'div'>) 
 
 function StepperSeparator({ className }: React.ComponentProps<'div'>) {
   const { state } = useStepItem();
-
   return (
     <div
       data-slot="stepper-separator"

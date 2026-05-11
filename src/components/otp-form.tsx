@@ -18,6 +18,7 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp"
+import { cn } from "@/lib/utils"
 import { Controller, useFormContext } from "react-hook-form"
 
 export function OTPForm({ ...props }: React.ComponentProps<typeof Card> & { showFooter?: boolean }) {
@@ -29,7 +30,7 @@ export function OTPForm({ ...props }: React.ComponentProps<typeof Card> & { show
         <CardTitle>Verify Your Phone </CardTitle>
         <CardDescription>We’ve sent a 4-digit verification code to.</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className={cn('text-center')}>
         <FieldGroup>
           <Field>
             <FieldLabel htmlFor="otp">Enter Verification code</FieldLabel>

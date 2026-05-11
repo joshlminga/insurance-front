@@ -16,8 +16,11 @@ import { Link, useNavigate } from "react-router-dom"
 import { extractErrorMessage } from "@/utils/helpers"
 import { UseAuth } from "@/stores/auth-store"
 import { EPREFIX, EROUTES } from "@/utils/enums"
+import { useState } from "react"
 
 export const CustomerVerificationDetails = ({ goToNextStep, goToPrevStep }: CustomerVerificationDetailsProps) => {
+  const [isPolicy, setIsPolicy] = useState(false);
+  const [showPolicyState, setShowPolicyState] = useState(false)
   const { setGuest } = UseAuth();
   const navigate = useNavigate();
   const form = useForm<CustomerFormValues>({
@@ -55,7 +58,10 @@ export const CustomerVerificationDetails = ({ goToNextStep, goToPrevStep }: Cust
   })
 
   const onSubmit = (data: CustomerFormValues) => {
-    submitMutation.mutate(data)
+    if (isPolicy === true) {
+      submitMutation.mutate(data)
+    }
+    setShowPolicyState(true)
   }
 
   return (
@@ -104,6 +110,12 @@ export const CustomerVerificationDetails = ({ goToNextStep, goToPrevStep }: Cust
                 type="tel"
               />
             </div>
+
+            {showPolicyState && (
+              <div className="bg-red-200 rounded-lg w-full p-4">
+                <span className="text-red-500 font-semibold">Confirm terms and conditions below before you continue</span>
+              </div>
+            )}
           </FieldGroup>
           <CardFooter className="col-span-1 lg:col-span-2 flex flex-col sm:flex-row justify-between gap-3 mt-1 px-0">
             <Button
@@ -119,25 +131,26 @@ export const CustomerVerificationDetails = ({ goToNextStep, goToPrevStep }: Cust
               className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
               rightIcon={<ArrowRightCircle />}
               loading={submitMutation.isPending}
-            // onClick={()=>(goToNextStep?.())}
             >
               Next
             </Button>
           </CardFooter>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-stretch mt-6">
-          <Card className="h-auto sm:h-44.5 rounded-[10px] border border-[#D9D9D9] bg-[#DCFCE733]">
-            <CardContent className="flex flex-col sm:flex-row gap-4 p-4 h-full">
-              <div
-                className="w-13.5 h-13.5 rounded-full border border-[#D9D9D9] flex items-center justify-center shrink-0 mx-auto sm:mx-0">
-                <CircleCheck className="w-5 h-5 text-[#C20C0C]" />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6">
+          <Card className="rounded-[10px] border border-[#D9D9D9] bg-[#DCFCE733] h-full">
+            <CardContent className="flex flex-col sm:flex-row gap-4 p-4 md:p-5 h-full">
+              <div className="flex justify-center sm:justify-start shrink-0">
+                <div className="w-12 h-12 md:w-13.5 md:h-13.5 rounded-full border border-[#D9D9D9] flex items-center justify-center">
+                  <CircleCheck className="w-5 h-5 text-[#C20C0C]" />
+                </div>
               </div>
-              <div className="flex flex-col justify-between flex-1">
+              <div className="flex flex-col justify-between flex-1 min-w-0">
                 <div className="space-y-2 text-center sm:text-left">
-                  <h2 className="font-semibold leading-none">
-                    Streamlined <span className="text-[#43A047]">Claims Support</span>
+                  <h2 className="font-semibold leading-tight text-base md:text-lg">
+                    Streamlined{" "}
+                    <span className="text-[#43A047]">Claims Support</span>
                   </h2>
-                  <p className="text-sm">
+                  <p className="text-sm md:text-[15px] leading-relaxed wrap-break-word">
                     Experience hassle-free claims processing with our dedicated support
                     team available 24/7. Familiarize yourself with your policy coverage
                     and keep necessary documentation ready. Our experts will guide you
@@ -147,42 +160,55 @@ export const CustomerVerificationDetails = ({ goToNextStep, goToPrevStep }: Cust
                 <Button
                   type="button"
                   fullWidth
-                  className="bg-[#43A047] text-white hover:bg-[#388E3C] mt-2">
+                  className="bg-[#43A047] text-white hover:bg-[#388E3C] mt-4 sm:mt-3" >
                   File a Claim
                 </Button>
               </div>
             </CardContent>
           </Card>
-
-          <Card className="h-auto sm:h-44.5 rounded-[10px] border border-[#C7EED5]">
-            <CardContent className="flex flex-col sm:flex-row gap-4 p-4 h-full">
-              <div className="w-13.5 h-13.5 rounded-full border border-[#D9D9D9] flex items-center justify-center shrink-0 mx-auto sm:mx-0">
-                <ShieldCheck className="w-5 h-5 text-[#C20C0C]" />
+          <Card className="rounded-[10px] border border-[#C7EED5] h-full">
+            <CardContent className="flex flex-col sm:flex-row gap-4 p-4 md:p-5 h-full">
+              <div className="flex justify-center sm:justify-start shrink-0">
+                <div className="w-12 h-12 md:w-13.5 md:h-13.5 rounded-full border border-[#D9D9D9] flex items-center justify-center">
+                  <ShieldCheck className="w-5 h-5 text-[#C20C0C]" />
+                </div>
               </div>
-              <div className="flex flex-col justify-between flex-1">
+              <div className="flex flex-col justify-between flex-1 min-w-0">
                 <div className="space-y-2 text-center sm:text-left">
-                  <h2 className="leading-none">
-                    Your <span className="text-[#ED1E26]">Privacy Matters</span>
+                  <h2 className="leading-tight font-semibold text-base md:text-lg">
+                    Your{" "}
+                    <span className="text-[#ED1E26]">Privacy Matters</span>
                   </h2>
-                  <p className="text-sm">
+                  <p className="text-sm md:text-[15px] leading-relaxed wrap-break-word">
                     We collect and protect your personal information in compliance
                     with data protection regulations. Your data is encrypted,
                     securely stored, and used exclusively for insurance quote
                     generation and policy processing.
                   </p>
                 </div>
-                <div className="flex items-start gap-2 mt-2">
+                <div className="flex items-start gap-2 mt-4 sm:mt-3">
                   <Checkbox
-                    className="w-3.75 h-3.75 rounded-[3px] border border-[#D9D9D9] data-[state=checked]:bg-[#C20C0C] data-[state=checked]:border-[#C20C0C]" />
-                  <label className="cursor-pointer text-sm">
+                    onCheckedChange={(checked) => {
+                      if (checked === true) {
+                        setIsPolicy(true);
+                        setShowPolicyState(false);
+                      } else {
+                        setIsPolicy(false);
+                      }
+                    }}
+                    className={`w-4 h-4 rounded-[3px] border border-[#D9D9D9] mt-0.5 shrink-0 data-[state=checked]:bg-[#C20C0C] data-[state=checked]:border-[#C20C0C]`}
+                  />
+                  <label className={`${isPolicy ? 'cursor-pointer text-sm leading-relaxed wrap-break-word' : 'text-red-500'}`}>
                     I acknowledge and consent to the collection and processing of my
-                    personal data as outlined in the <Link to="#" className="underline"> Privacy Policy</Link>
+                    personal data as outlined in the
+                    <Link to="#" className="underline ml-1">
+                      Privacy Policy
+                    </Link>
                   </label>
                 </div>
               </div>
             </CardContent>
           </Card>
-
         </div>
       </form>
     </div>
