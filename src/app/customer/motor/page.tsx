@@ -26,8 +26,7 @@ export const MotorLandingPage = () => {
                         items={heroPopoverItems}
                     />
                 ) : (
-                    <Link
-                        to={`/${EPREFIX.AUTH}${EROUTES.SIGNIN}`}
+                    <Link to={`/${EPREFIX.AUTH}${EROUTES.SIGNIN}`}
                         className="absolute hidden lg:flex top-4.75 right-22 z-10 h-6.5 w-20.5 items-center justify-center rounded-[20px] border border-[#C20C0C] bg-white text-sm font-semibold text-slate-900">
                         Login
                     </Link>

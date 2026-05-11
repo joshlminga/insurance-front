@@ -32,6 +32,8 @@ export interface LoginResponse {
   user: any
   access_token: string
   is_general: boolean
+  status?:string;
+  data?:any
 }
 
 export type TNodeChildrentType<T = ReactNode> = {

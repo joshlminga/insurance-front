@@ -26,9 +26,9 @@ export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const [show, setShow] = useState(false);
 
-  const { login } = UseAuth()
+  const [show, setShow] = useState(false);
+  const { login, setGuest } = UseAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const returnTo = (location.state as any)?.returnTo
@@ -44,6 +44,12 @@ export function LoginForm({
     method: EMETHODS.POST,
     mutationOptions: {
       onSuccess: (data: LoginResponse) => {
+        if (data?.data?.status === 'NOT_VERIFIED') {
+          setGuest(data?.data?.guest);
+          ShowToast.info(data.message || "Please verify your email to continue.")
+          navigate(`/${EPREFIX.AUTH}${EROUTES.VERIFY_EMAIL}`);
+          return;
+        }
         ShowToast.success(data.message || "Login successful!")
         login(data.user, data.access_token, data.is_general)
         if (returnTo) {
@@ -51,7 +57,7 @@ export function LoginForm({
         } else if (data.is_general) {
           navigate(EROUTES.LANDING)
         } else {
-          navigate(EROUTES.DASHBOARD)
+          navigate(EROUTES.DASHBOARD);
         }
       },
       onError: (error: any) => {
@@ -105,7 +111,7 @@ export function LoginForm({
               <button
                 type="button"
                 onClick={() => setShow((prev) => !prev)}
-                className="absolute right-3 top-1/2 -translate-y-1/4 text-gray-500 hover:text-gray-700"
+                className="absolute right-3 top-3/5 -translate-y-1/10 text-gray-500 hover:text-gray-700"
                 aria-label={show ? "Hide password" : "Show password"}>
                 {show ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
@@ -115,8 +121,7 @@ export function LoginForm({
             <Button
               className="w-full h-12 bg-[#C20C0C] hover:bg-[#C20C0C]/80"
               type="submit"
-              loading={loginMutation.isPending}
-            >
+              loading={loginMutation.isPending}>
               <span className="font-semibold text-sm">Login</span>
             </Button>
           </Field>

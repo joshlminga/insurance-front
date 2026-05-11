@@ -28,6 +28,7 @@ export const EROUTES = {
   SIGNIN: '/signin',
   FORGOT_PASSWORD: '/forgot-password',
   RESET_PASSWORD: '/reset-password',
+  VERIFY_EMAIL: '/verify-email',
 
   // dashbaord
   DASHBOARD: `/${EPREFIX.DASHBOARD}`,

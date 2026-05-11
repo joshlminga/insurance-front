@@ -1,41 +1,41 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { 
-    Table as TableType, 
-    flexRender, 
-    getCoreRowModel, 
-    getFilteredRowModel, 
-    useReactTable 
+import {
+    Table as TableType,
+    flexRender,
+    getCoreRowModel,
+    getFilteredRowModel,
+    useReactTable
 } from '@tanstack/react-table';
-import { 
-    Table, 
-    TableBody, 
-    TableCell, 
-    TableHead, 
-    TableHeader, 
-    TableRow 
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow
 } from "@/components/ui/table";
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { 
-    ArrowRightIcon, 
-    ListFilter, 
-    SearchIcon, 
-    XIcon 
+import {
+    ArrowRightIcon,
+    ListFilter,
+    SearchIcon,
+    XIcon
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { useRef } from 'react';
-import { 
-    CustomLoader, 
-    TableComponentHeadings, 
-    TReusablePagination 
+import {
+    CustomLoader,
+    TableComponentHeadings,
+    TReusablePagination
 } from './core';
-import { 
-    StatusPillProps, 
-    TQueryFieldProps, 
-    TSearchToolProps, 
-    TTableReusableComponent 
+import {
+    StatusPillProps,
+    TQueryFieldProps,
+    TSearchToolProps,
+    TTableReusableComponent
 } from '@/types/types';
 
 
@@ -97,92 +97,89 @@ export const DataTable = ({
                                         isError ? 'Error fetching data.' : 'Fetching data...'
                                     }
                                 />
-                        </TableCell>
-                        </TableRow>
-                ) : (
-                <>
-                    {table.getRowModel().rows?.length ? (
-                        table.getRowModel().rows.map((row, index) => (
-                            <TableRow
-                                key={`tableBody-${index}`}
-                                {...{
-                                    ...(onClick
-                                        ? {
-                                            onClick: () => onClick(row),
-                                        }
-                                        : {}),
-                                }}
-                                className='h-14 overflow-auto pb-px border-b border-table-border-color px-6 py-4'
-                                data-state={row.getIsSelected() && 'selected'}>
-                                {row.getVisibleCells().map((cell, index) => (
-                                    <TableCell key={`cell-index-${index}`} align={'left'}>
-                                        {flexRender(
-                                            cell.column.columnDef.cell,
-                                            cell.getContext()
-                                        )}
-                                    </TableCell>
-                                ))}
-                            </TableRow>
-                        ))
-                    ) : (
-                        <TableRow>
-                            <TableCell
-                                colSpan={table.getAllColumns().length}
-                                className='h-24 text-center'>
-                                No data to display.
                             </TableCell>
                         </TableRow>
+                    ) : (
+                        <>
+                            {table.getRowModel().rows?.length ? (
+                                table.getRowModel().rows.map((row, index) => (
+                                    <TableRow
+                                        key={`tableBody-${index}`}
+                                        {...{
+                                            ...(onClick
+                                                ? {
+                                                    onClick: () => onClick(row),
+                                                }
+                                                : {}),
+                                        }}
+                                        className='h-14 overflow-auto pb-px border-b border-table-border-color px-6 py-4'
+                                        data-state={row.getIsSelected() && 'selected'}>
+                                        {row.getVisibleCells().map((cell, index) => (
+                                            <TableCell key={`cell-index-${index}`} align={'left'}>
+                                                {flexRender(
+                                                    cell.column.columnDef.cell,
+                                                    cell.getContext()
+                                                )}
+                                            </TableCell>
+                                        ))}
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell
+                                        colSpan={table.getAllColumns().length}
+                                        className='h-24 text-center'>
+                                        No data to display.
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </>
                     )}
-                </>
-                    )}
-            </TableBody>
-        </Table>
-
+                </TableBody>
+            </Table>
             {
-        showPagination && table.getRowModel().rows?.length > 0 ? (
-            <div className='flex gap-5 justify-between p-5'>
-                <Button
-                    className='flex gap-2 items-center'
-                    {...{
-                        onClick: () => onPageChange(page > 1 ? page - 1 : page),
-                        ...(page <= 1 ? { disabled: true } : {}),
-                        variant: 'outline',
-                    }}>
-                    <ArrowRightIcon
-                        {...{
-                            svgElementClassName: 'stroke-black hover:stroke-black/2',
-                            className: 'w-5 h-5 rotate-180',
-                        }}
-                    />
+                showPagination && table.getRowModel().rows?.length > 0 ? (
+                    <div className='flex gap-5 justify-between p-5'>
+                        <Button
+                            className='flex gap-2 items-center border'
+                            {...{
+                                onClick: () => onPageChange(page > 1 ? page - 1 : page),
+                                ...(page <= 1 ? { disabled: true } : {}),
+                                variant: 'outline',
+                            }}>
+                            <ArrowRightIcon
+                                {...{
+                                    svgElementClassName: 'stroke-black hover:stroke-black/2',
+                                    className: 'w-5 h-5 rotate-180',
+                                }}
+                            />
+                            <p className='text-sm font-semibold leading-5 text-filter-stroke-color'>
+                                Previous
+                            </p>
+                        </Button>
 
-                    <p className='text-sm font-semibold leading-5 text-filter-stroke-color'>
-                        Previous
-                    </p>
-                </Button>
+                        <TReusablePagination {...{ onPageChange, page, pageCount }} />
 
-                <TReusablePagination {...{ onPageChange, page, pageCount }} />
-
-                <Button
-                    className='flex gap-2 items-center'
-                    {...{
-                        onClick: () => onPageChange(page < pageCount ? page + 1 : page),
-                        variant: 'outline',
-                        ...(page >= pageCount ? { disabled: true } : {}),
-                    }}>
-                    <p className='text-sm font-semibold leading-5 text-filter-stroke-color'>
-                        Next
-                    </p>
-
-                    <ArrowRightIcon
-                        {...{
-                            svgElementClassName: 'stroke-black hover:stroke-black/2',
-                            className: 'w-5 h-5',
-                        }}
-                    />
-                </Button>
-            </div>
-        ) : null
-    }
+                        <Button
+                            className='flex gap-2 items-center'
+                            {...{
+                                onClick: () => onPageChange(page < pageCount ? page + 1 : page),
+                                variant: 'outline',
+                                ...(page >= pageCount ? { disabled: true } : {}),
+                            }}>
+                            <p className='text-sm font-semibold leading-5 text-filter-stroke-color'>
+                                Next
+                            </p>
+                            <ArrowRightIcon
+                                {...{
+                                    svgElementClassName: 'stroke-black hover:stroke-black/2',
+                                    className: 'w-5 h-5',
+                                }}
+                            />
+                        </Button>
+                    </div>
+                ) : null
+            }
         </div >
     );
 };

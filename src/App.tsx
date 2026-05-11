@@ -34,6 +34,9 @@ const LoginForm = lazy(() => import("./auth/components/login-form").then(m => ({
 const SignupForm = lazy(() => import("./auth/components/signup-form").then(m => ({ default: m.SignupForm })))
 const ForgotPasswordForm = lazy(() => import("./auth/components/forgot-password-form"))
 const ResetPasswordForm = lazy(() => import("./auth/components/rest-password-form").then(m => ({ default: m.ResetPasswordForm })))
+const OtpVerificationAuthForm = lazy(() => import("./auth/components/otp-verification-form").then(m => ({ default: m.OtpVerificationAuthForm })))
+
+
 
 // Admin / Dashboard pages
 const DashboardPage = lazy(() => import("./app/dashboard"))
@@ -201,6 +204,20 @@ export const router = createBrowserRouter([
                 title="Reset Password"
                 description="Enter your new password below.">
                 <ResetPasswordForm />
+              </AuthLayoutPage>
+            </S>
+          </PublicRoute>
+        ),
+      },
+      {
+        path: EROUTES.VERIFY_EMAIL.slice(1),
+        element: (
+          <PublicRoute>
+            <S>
+              <AuthLayoutPage
+                title="Verify Your Email"
+                description="Code has been sent to your email, kindly check.">
+                <OtpVerificationAuthForm />
               </AuthLayoutPage>
             </S>
           </PublicRoute>
