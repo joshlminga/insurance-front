@@ -44,16 +44,19 @@ export function LoginForm({
     method: EMETHODS.POST,
     mutationOptions: {
       onSuccess: (data: LoginResponse) => {
+        if (data?.data?.status === 'NOT_VERIFIED') {
+          setGuest(data?.data?.guest);
+          ShowToast.info(data.message || "Please verify your email to continue.")
+          navigate(`/${EPREFIX.AUTH}${EROUTES.VERIFY_EMAIL}`);
+          return;
+        }
         ShowToast.success(data.message || "Login successful!")
         login(data.user, data.access_token, data.is_general)
         if (returnTo) {
           navigate(returnTo)
         } else if (data.is_general) {
           navigate(EROUTES.LANDING)
-         }else if(data.status === 'NOT_VERIFIED'){
-          setGuest(data?.data?.guest);
-          navigate(EROUTES.VERIFY_EMAIL);
-         }else {
+        } else {
           navigate(EROUTES.DASHBOARD);
         }
       },
@@ -108,7 +111,7 @@ export function LoginForm({
               <button
                 type="button"
                 onClick={() => setShow((prev) => !prev)}
-                className="absolute right-3 top-1/2 -translate-y-1/4 text-gray-500 hover:text-gray-700"
+                className="absolute right-3 top-3/5 -translate-y-1/10 text-gray-500 hover:text-gray-700"
                 aria-label={show ? "Hide password" : "Show password"}>
                 {show ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>

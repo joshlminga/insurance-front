@@ -5,7 +5,6 @@ import { createBrowserRouter, Navigate } from "react-router-dom"
 import { EPREFIX, EROUTES } from "./utils/enums"
 import { ProtectedRoute, PublicRoute, CustomerPublicRoute } from "./hooks/hooks"
 import Layout from "./Layout"
-import { OtpVerificationAuthForm } from "./auth/components/otp-verification-form"
 
 const Loader = () => (
   <div className="flex h-screen w-full items-center justify-center">
@@ -35,6 +34,9 @@ const LoginForm = lazy(() => import("./auth/components/login-form").then(m => ({
 const SignupForm = lazy(() => import("./auth/components/signup-form").then(m => ({ default: m.SignupForm })))
 const ForgotPasswordForm = lazy(() => import("./auth/components/forgot-password-form"))
 const ResetPasswordForm = lazy(() => import("./auth/components/rest-password-form").then(m => ({ default: m.ResetPasswordForm })))
+const OtpVerificationAuthForm = lazy(() => import("./auth/components/otp-verification-form").then(m => ({ default: m.OtpVerificationAuthForm })))
+
+
 
 // Admin / Dashboard pages
 const DashboardPage = lazy(() => import("./app/dashboard"))
