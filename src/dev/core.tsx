@@ -2428,8 +2428,8 @@ export default function ChatFloatingButton() {
                         size="icon">
                         <X
                             {...{
-                                size: 15,
-                                className: "h-15 w-auto text-red-500"
+                                size: 20,
+                                className: "h-20 w-auto text-red-500"
                             }}
                         />
                     </Button>
@@ -2438,8 +2438,8 @@ export default function ChatFloatingButton() {
                         className="transition-all duration-200 hover:brightness-110"
                         onClick={() => setIsOpen(true)}
                         style={{
-                            width: '80px',
-                            height: '80px',
+                            width: '60px',
+                            height: '60px',
                             opacity: 1,
                             borderTopLeftRadius: '30px',
                             borderTopRightRadius: '0px',
