@@ -18,6 +18,8 @@ function S({ children }: { children: React.ReactNode }) {
 
 // customer-facing pages
 const Landingpage = lazy(() => import("./app/landing/page").then(m => ({ default: m.Landingpage })))
+const ContactUsPage = lazy(() => import("./app/landing/contact-us/page").then(m => ({ default: m.ContactUsPage })))
+
 const MotorLandingPage = lazy(() => import("./app/customer/motor/page").then(m => ({ default: m.MotorLandingPage })))
 const StepPage = lazy(() => import("./app/customer/motor/steppers/steppage").then(m => ({ default: m.StepPage })))
 const MarineLandingPage = lazy(() => import("./app/customer/marine/page").then(m => ({ default: m.MarineLandingPage })))
@@ -80,7 +82,14 @@ export const router = createBrowserRouter([
       </PublicRoute>
     ),
   },
-
+  {
+    path: EROUTES.CONTACT_US,
+    element: (
+      <PublicRoute>
+        <S><ContactUsPage /></S>
+      </PublicRoute>
+    ),
+  },
   // START-USERGENERAL = TRUE
   // Motor / Customer
   {
@@ -147,6 +156,7 @@ export const router = createBrowserRouter([
       },
     ],
   },
+
   // END-USERGENERAL = TRUE
 
   // Auth
@@ -225,7 +235,6 @@ export const router = createBrowserRouter([
       }
     ],
   },
-
   // START-USERGENERAL = FALSE
   // Admin - Dashboard & Nested Routes
   {

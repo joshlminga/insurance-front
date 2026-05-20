@@ -1,294 +1,507 @@
-import { cn } from "@/lib/utils";
-import { getInitials } from "@/lib/format";
-import { ELOGO, EPREFIX, EROUTES } from "@/utils/enums";
-import { ChevronDown, Menu, X, ShieldCheck, BarChart3, Settings, LogOut, Globe } from "lucide-react";
-import { useState } from "react";
-import { Link } from "react-router-dom";
-import { UseAuth } from "@/stores/auth-store";
+"use client";
+
+import React, { useEffect, useState, useCallback, useRef } from 'react'
+import { cn } from '@/lib/utils';
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
-import { CountryDropdown } from "@/components/ui/country-dropdown";
-import { TCountry } from "@/types/types";
+  ArrowRight,
+  Car,
+  Ship,
+  Bus,
+  User,
+  ChevronDown,
+  Menu,
+  X,
+  FileText,
+  Search,
+  BookOpen,
+  LifeBuoy,
+  PhoneCall,
+  LogOut,
+  ShieldCheck,
+  BarChart3,
+  Settings,
+} from 'lucide-react'
+import { motion, AnimatePresence, useInView } from "motion/react";
+import { ELOGO, EPREFIX, EROUTES } from '@/utils/enums';
+import { UseAuth } from '@/stores/auth-store';
+import { getInitials } from '@/lib/format';
+import { Link } from 'react-router-dom';
 
-const LANG_NAMES: Record<string, string> = {
-    eng: 'English',
-    swa: 'Swahili',
-    fra: 'French',
-    kin: 'Kinyarwanda',
-    tsn: 'Tswana',
+/* ─── Types ─────────────────────────────────────────────────────────────── */
+
+export type NavLinkItem = {
+  name: string
+  label?: string
+  href: string
+  isActive?: boolean
 }
 
-const Dropdown = ({
-    label,
-    items,
-    text = "text-white/90"
-}: {
-    label: string
-    items: { name: string; href: string }[],
-    text?: string
-}) => {
-    return (
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <button
-                    className={cn(
-                        "uppercase tracking-wider text-sm font-semibold hover:text-red-500 transition inline-flex items-center gap-1 cursor-pointer",
-                        text
-                    )}
-                    aria-haspopup="true"
-                    aria-expanded="false">
-                    {label}
-                    <ChevronDown className="h-3.5 w-3.5 opacity-70" />
-                </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-                align="start"
-                className="min-w-48 rounded-xl border border-gray-200/80 bg-white py-2 shadow-xl shadow-black/5 backdrop-blur-sm"
-                sideOffset={8}>
-                {items.map((item) => (
-                    <DropdownMenuItem key={item.name} asChild>
-                        <a
-                            href={item.href}
-                            className="block w-full cursor-pointer px-4 py-2.5 text-sm text-gray-700 outline-none focus:bg-red-500/10 focus:text-red-600 hover:bg-red-500/10 hover:text-red-600">
-                            {item.name}
-                        </a>
-                    </DropdownMenuItem>
-                ))}
-            </DropdownMenuContent>
-        </DropdownMenu>
-    )
+export interface NavLinkProps {
+  item: NavLinkItem
 }
 
-const MobileDropdown = ({
-    label,
-    items,
-    textStyle = "text-[#141414]",
-}: {
-    label: string
-    items: { name: string; href: string }[]
-    textStyle?: string
-}) => {
-    const [isOpen, setIsOpen] = useState(false);
+interface DropdownItem {
+  icon: React.ElementType
+  label: string
+  description: string
+  href: string
+}
 
-    return (
-        <div className="w-full border-b border-gray-200/60 last:border-b-0">
-            <button
-                onClick={() => setIsOpen(!isOpen)}
-                className={cn(
-                    "flex w-full items-center justify-between py-3 text-left uppercase tracking-wider text-sm font-semibold transition",
-                    textStyle,
-                    "hover:text-red-500"
-                )}
-                aria-expanded={isOpen}>
-                {label}
-                <ChevronDown className={cn("h-4 w-4 transition-transform", isOpen && "rotate-180")} />
-            </button>
-            {isOpen && (
-                <ul className="space-y-0.5 border-t border-gray-100 bg-gray-50/80 pb-3 pt-2">
-                    {items.map((item) => (
-                        <li key={item.name}>
-                            <Link
-                                to={item.href}
-                                className="block px-4 py-2.5 text-sm text-gray-600 transition hover:bg-red-500/5 hover:text-red-600">
-                                {item.name}
-                            </Link>
-                        </li>
-                    ))}
-                </ul>
-            )}
+interface NavItem {
+  label: string
+  href?: string
+  dropdown?: DropdownItem[]
+}
+
+/* ─── Nav config ─────────────────────────────────────────────────────────── */
+
+const NAV_ITEMS: NavItem[] = [
+  { label: 'Home', href: '/' },
+  {
+    label: 'Insurance',
+    dropdown: [
+      {
+        icon: Car,
+        label: 'Motor Insurance',
+        description: 'Cover for cars, trucks & motorcycles',
+        href: `/${EPREFIX.CUSTOMER}${EROUTES.MOTOR}`,
+      },
+      {
+        icon: Ship,
+        label: 'Marine Insurance',
+        description: 'Protection for cargo & shipping',
+        href: `/${EPREFIX.CUSTOMER}${EROUTES.MARINE}`,
+      },
+      {
+        icon: Bus,
+        label: 'Travel Insurance',
+        description: 'Worldwide travel peace of mind',
+        href: `/${EPREFIX.CUSTOMER}${EROUTES.TRAVEL}`,
+      },
+      {
+        icon: User,
+        label: 'Life Insurance',
+        description: "Secure your family's future",
+        href: `/${EPREFIX.CUSTOMER}${EROUTES.LIFE}`,
+      },
+    ],
+  },
+  {
+    label: 'Claims',
+    dropdown: [
+      {
+        icon: FileText,
+        label: 'File a Claim',
+        description: 'Submit a new insurance claim',
+        href: '#',
+      },
+      {
+        icon: Search,
+        label: 'Track a Claim',
+        description: 'Check status of existing claims',
+        href: '#',
+      },
+    ],
+  },
+  {
+    label: 'Resources',
+    dropdown: [
+      {
+        icon: BookOpen,
+        label: 'Blog & Guides',
+        description: 'Insurance tips and articles',
+        href: '#',
+      },
+      {
+        icon: LifeBuoy,
+        label: 'Help Centre',
+        description: 'FAQs and support articles',
+        href: '#',
+      },
+    ],
+  },
+  {
+    label: 'Contact',
+    dropdown: [
+      {
+        icon: PhoneCall,
+        label: 'Talk to Us',
+        description: 'Reach our support team',
+        href: EROUTES.CONTACT_US,
+      },
+      {
+        icon: User,
+        label: 'Find an Agent',
+        description: 'Connect with a local advisor',
+        href: '#',
+      },
+    ],
+  },
+]
+
+/* ─── Desktop mega-dropdown ──────────────────────────────────────────────── */
+
+const DesktopDropdown = ({ items }: { items: DropdownItem[] }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 8, scale: 0.97 }}
+    animate={{ opacity: 1, y: 0, scale: 1 }}
+    exit={{ opacity: 0, y: 8, scale: 0.97 }}
+    transition={{ duration: 0.18, ease: 'easeOut' }}
+    className="absolute top-full left-1/2 -translate-x-1/2 mt-3 z-50 min-w-64 rounded-2xl border border-gray-100 bg-white p-2 shadow-xl shadow-black/10">
+    {items.map((item) => (
+      <Link
+        key={item.label}
+        to={item.href}
+        className="flex items-start gap-3 rounded-xl px-3 py-3 transition-colors hover:bg-red-50 group"
+      >
+        <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-red-50 text-[#C20C0C] group-hover:bg-red-100 transition-colors">
+          <item.icon className="h-4 w-4" />
         </div>
-    )
-}
+        <div>
+          <p className="text-sm font-semibold text-gray-900 group-hover:text-[#C20C0C] transition-colors">
+            {item.label}
+          </p>
+          <p className="mt-0.5 text-xs text-gray-500 leading-snug">
+            {item.description}
+          </p>
+        </div>
+      </Link>
+    ))}
+  </motion.div>
+)
 
-export const Navbar = (
-    {
-        className = "w-full h-auto lg:h-43.75 rounded-2xl bg-white/40 backdrop-blur-[10px]",
-        textStyle = "text-[#141414]",
-        navTextStyle
-    }: {
-        className?: string,
-        textStyle?: string,
-        navTextStyle?: string
-    }) => {
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const { isAuthenticated, user, logout, alpha, lang, setLocale } = UseAuth();
+const DesktopNavItem = ({ item, isScrolled }: { item: NavItem; isScrolled: boolean }) => {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
 
-    const handleCountryChange = (selected: TCountry) => {
-        const primaryLang = selected.languages?.[0] ?? 'eng'
-        setLocale(selected.name ?? '', primaryLang, selected.alpha2 ?? '')
-    }
-
-    const dropdownItems = {
-        generateQuote: [
-            { name: "Motor Insurance", href: `/${EPREFIX.CUSTOMER}${EROUTES.MOTOR}` },
-            { name: "Travel Insurance", href: `/${EPREFIX.CUSTOMER}${EROUTES.TRAVEL}` },
-            { name: "Marine Insurance", href: `/${EPREFIX.CUSTOMER}${EROUTES.MARINE}` },
-            { name: "Life Insurance", href: `/${EPREFIX.CUSTOMER}${EROUTES.LIFE}` },
-        ],
-        claims: [
-            { name: "File Claim", href: "#" },
-            { name: "Track Claim", href: "#" },
-        ],
-        resources: [
-            { name: "Blog", href: "#" },
-            { name: "Guides", href: "#" },
-        ],
-        service: [
-            { name: "Support", href: "#" },
-            { name: "Contact Agent", href: "#" },
-        ],
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
 
+  const textClass = isScrolled
+    ? 'text-gray-700 hover:text-[#C20C0C]'
+    : 'text-gray-700 hover:text-[#C20C0C]';
+
+  if (item.href && !item.dropdown) {
     return (
-        <nav className="absolute top-4 sm:top-14.5 left-1/2 -translate-x-1/2 z-50 w-[95vw] lg:w-[80vw]">
-            <div
-                className={cn(className,
-                    "shadow-[0_8.45px_16.9px_rgba(0,0,0,0.12)] px-4 sm:px-9.25 flex flex-col"
-                )}>
-                <div className="h-15 lg:h-12.5 mt-4 lg:mt-6 flex items-center justify-between">
-                    <div className="flex items-center gap-3 w-30 sm:w-39.5 h-10 sm:h-12.5">
-                        <img src={ELOGO.NAVBARLOGO} alt="logo" className="h-full w-auto object-contain" />
-                    </div>
-                    <div className={cn(`hidden lg:flex items-center gap-6 xl:gap-10 text-sm font-semibold cursor-pointer ${textStyle}`)}>
-                        <div className="flex items-center gap-2 shrink-0">
-                            <CountryDropdown
-                                defaultValue={alpha}
-                                onChange={handleCountryChange}
-                                slim={false}
-                            />
-                            <span className="flex items-center gap-1 text-xs font-medium text-gray-500 whitespace-nowrap border-l border-gray-300 pl-2">
-                                <Globe className="w-3 h-3 shrink-0" />
-                                {LANG_NAMES[lang] ?? lang}
-                            </span>
-                        </div>
-                        <Link to={EROUTES.LANDING} className="hover:text-red-500 transition uppercase text-sm font-semibold py-2">Home</Link>
-                        <Link to='#' className="hover:text-red-500 transition uppercase text-sm font-semibold py-2 cursor-pointer">News</Link>
-                        <Link to='#' className="hover:text-red-500 transition uppercase text-sm font-semibold py-2 cursor-pointer">Careers</Link>
-                        <Link to='#' className="hover:text-red-500 transition uppercase text-sm font-semibold py-2 cursor-pointer">Contact</Link>
-                        {isAuthenticated && (
-                            <>
-                                {/* {isGeneral === true && (
-                                    <Link to={EROUTES.DASHBOARD} className="hover:text-red-500 transition uppercase">Dashboard</Link>
-                                )} */}
-                                {/* <button onClick={logout} className="hover:text-red-500 transition uppercase">Logout</button> */}
-                            </>
-                        )}
-                    </div>
-                    <button
-                        className="lg:hidden p-2 hover:bg-black/5 rounded-lg transition"
-                        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                        aria-label="Toggle menu">
-                        {mobileMenuOpen ? (
-                            <X className="w-6 h-6" />
-                        ) : (
-                            <Menu className="w-6 h-6" />
-                        )}
-                    </button>
-                </div>
-                <div className="hidden lg:block">
-                    <div className="absolute top-25.25 left-1/2 -translate-x-1/2 w-full h-px border-t border-[#F91520]" />
-                    <div className="ml-4 mb-6 flex left-2/4 w-full max-w-7xl pt-6 mt-3">
-                        <div className="flex gap-4 xl:gap-6 w-auto cursor-pointer flex-wrap">
-                            <Dropdown
-                                text="text-[#C20C0C]"
-                                label="Generate Quote"
-                                items={dropdownItems.generateQuote}
-                            />
-                            <Dropdown
-                                text={navTextStyle}
-                                label="Claims"
-                                items={dropdownItems.claims}
-                            />
-                            <Dropdown
-                                text={navTextStyle}
-                                label="Resources"
-                                items={dropdownItems.resources}
-                            />
-                            <Dropdown
-                                text={navTextStyle}
-                                label="Service"
-                                items={dropdownItems.service}
-                            />
-                        </div>
-                    </div>
-                </div>
-                {mobileMenuOpen && (
-                    <div className="lg:hidden flex flex-col py-4 border-t border-gray-200 mt-2 max-h-[70vh] overflow-y-auto">
-                        {isAuthenticated && user && (
-                            <div className="flex items-center gap-3 pb-4 mb-3 border-b border-gray-200">
-                                <div className="w-10 h-10 rounded-full bg-[#C20C0C] flex items-center justify-center text-white text-sm font-semibold shrink-0">
-                                    {getInitials(user.name ?? "User")}
-                                </div>
-                                <div className="min-w-0">
-                                    <p className="text-sm font-semibold text-gray-900 truncate">{user.name}</p>
-                                    <p className="text-xs text-gray-500 truncate">{user.email}</p>
-                                </div>
-                            </div>
-                        )}
-                        {/* Country & language selector */}
-                        <div className="flex items-center gap-3 pb-4 mb-3 border-b border-gray-200">
-                            <div className="flex-1 min-w-0">
-                                <CountryDropdown
-                                    defaultValue={alpha}
-                                    onChange={handleCountryChange}
-                                    slim={false}
-                                />
-                            </div>
-                            <span className="flex items-center gap-1 text-xs font-medium text-gray-500 whitespace-nowrap shrink-0">
-                                <Globe className="w-3 h-3" />
-                                {LANG_NAMES[lang] ?? lang}
-                            </span>
-                        </div>
-                        <div className={cn(`flex flex-col space-y-3 mb-4 ${textStyle}`)}>
-                            <Link to={EROUTES.LANDING} onClick={() => setMobileMenuOpen(false)} className="hover:text-red-500 transition uppercase text-sm font-semibold py-2">Home</Link>
-                            <a className="hover:text-red-500 transition uppercase text-sm font-semibold py-2 cursor-pointer">News</a>
-                            <a className="hover:text-red-500 transition uppercase text-sm font-semibold py-2 cursor-pointer">Careers</a>
-                            <a className="hover:text-red-500 transition uppercase text-sm font-semibold py-2 cursor-pointer">Contact</a>
-                        </div>
-                        <div className="border-t border-gray-200 pt-4 space-y-2">
-                            <MobileDropdown label="Generate Quote" items={dropdownItems.generateQuote} />
-                            <MobileDropdown label="Claims" items={dropdownItems.claims} />
-                            <MobileDropdown label="Resources" items={dropdownItems.resources} />
-                            <MobileDropdown label="Service" items={dropdownItems.service} />
-                        </div>
-                        {isAuthenticated ? (
-                            <div className="border-t border-gray-200 mt-4 pt-4 space-y-1">
-                                <Link to={`/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}`} onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-1 py-2.5 text-sm text-gray-700 hover:text-[#C20C0C] transition">
-                                    <ShieldCheck className="w-4 h-4" />
-                                    My Covers
-                                </Link>
-                                <Link to={EROUTES.REPORTS} onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-1 py-2.5 text-sm text-gray-700 hover:text-[#C20C0C] transition">
-                                    <BarChart3 className="w-4 h-4" />
-                                    Reports
-                                </Link>
-                                <Link to={EROUTES.SETTINGS} onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-1 py-2.5 text-sm text-gray-700 hover:text-[#C20C0C] transition">
-                                    <Settings className="w-4 h-4" />
-                                    Settings
-                                </Link>
-                                <button
-                                    onClick={() => { logout(); setMobileMenuOpen(false); }}
-                                    className="flex items-center gap-3 px-1 py-2.5 text-sm text-red-600 hover:text-red-700 transition w-full text-left mt-2 border-t border-gray-100 pt-3">
-                                    <LogOut className="w-4 h-4" />
-                                    Log out
-                                </button>
-                            </div>
-                        ) : (
-                            <div className="border-t border-gray-200 mt-4 pt-4">
-                                <Link
-                                    to={`/${EPREFIX.AUTH}${EROUTES.SIGNIN}`}
-                                    onClick={() => setMobileMenuOpen(false)}
-                                    className="flex items-center justify-center h-10 rounded-[20px] border border-[#C20C0C] bg-white text-sm font-semibold text-slate-900 hover:bg-gray-50 transition">
-                                    Login
-                                </Link>
-                            </div>
-                        )}
-                    </div>
-                )}
+      <Link
+        to={item.href}
+        className={cn(
+          'text-sm font-semibold transition-colors duration-200',
+          textClass
+        )}>
+        {item.label}
+      </Link>
+    );
+  }
+
+  return (
+    <div
+      ref={ref}
+      className="relative"
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}>
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className={cn('flex items-center gap-1 text-sm font-semibold transition-colors duration-200',
+          textClass
+        )}>
+        {item.label}
+        <ChevronDown
+          className={cn(
+            'h-3.5 w-3.5 transition-transform duration-200',
+            open && 'rotate-180'
+          )}
+        />
+      </button>
+      <AnimatePresence>
+        {open && item.dropdown && <DesktopDropdown items={item.dropdown} />}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+/* ─── Mobile nav item ────────────────────────────────────────────────────── */
+
+const MobileNavItem = ({
+  item,
+  onClose,
+}: {
+  item: NavItem;
+  onClose: () => void;
+}) => {
+  const [open, setOpen] = useState(false);
+
+  if (item.href && !item.dropdown) {
+    return (
+      <Link
+        to={item.href}
+        onClick={onClose}
+        className="block py-3 text-sm font-semibold text-gray-800 hover:text-[#C20C0C] border-b border-gray-100 transition-colors">
+        {item.label}
+      </Link>
+    );
+  }
+
+  return (
+    <div className="border-b border-gray-100">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center justify-between py-3 text-sm font-semibold text-gray-800 hover:text-[#C20C0C] transition-colors">
+        {item.label}
+        <ChevronDown
+          className={cn('h-4 w-4 transition-transform', open && 'rotate-180')}
+        />
+      </button>
+      <AnimatePresence>
+        {open && item.dropdown && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden"
+          >
+            <div className="pb-3 pl-2 space-y-1">
+              {item.dropdown.map((sub) => (
+                <Link
+                  key={sub.label}
+                  to={sub.href}
+                  onClick={onClose}
+                  className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-gray-600 hover:bg-red-50 hover:text-[#C20C0C] transition-colors">
+                  <sub.icon className="h-4 w-4 shrink-0 text-[#C20C0C]" />
+                  {sub.label}
+                </Link>
+              ))}
             </div>
-        </nav>
-    )
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+/* ─── Main Navbar ────────────────────────────────────────────────────────── */
+
+type NavbarProps = {
+  navData?: NavLinkItem[]
 }
+
+const Navbar: React.FC<NavbarProps> = () => {
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
+  const isInView = useInView(headerRef, { once: true, amount: 0.1 });
+
+  const { isAuthenticated, logout, user } = UseAuth();
+  const userName = user?.name ?? 'User';
+  const userEmail = user?.email ?? '';
+  const userInitials = getInitials(userName);
+
+  const handleScroll = useCallback(() => {
+    setIsScrolled(window.scrollY > 20);
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [handleScroll]);
+
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileOpen]);
+
+  return (
+    <motion.header
+      ref={headerRef}
+      initial={{ opacity: 0, y: -24 }}
+      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: -24 }}
+      transition={{ duration: 0.6, ease: 'easeOut' }}
+      className={cn(
+        'fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300',
+        isScrolled
+          ? 'bg-white/95 backdrop-blur-md shadow-md border-b border-gray-200/60'
+          : 'bg-white/90 text-gray-700 border-[#C20C0C] border-b-2 shadow-md'
+      )}>
+
+      <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-3.5">
+        <div className="flex items-center justify-between gap-6">
+
+          {/* Logo */}
+          <Link to={EROUTES.LANDING} className="shrink-0">
+            <img
+              src={ELOGO.NAVBARLOGO}
+              alt="Acentria"
+              className={cn('w-auto object-contain transition-all duration-300',
+                isScrolled ? 'h-8' : 'h-10'
+              )}
+            />
+          </Link>
+
+          {/* Desktop nav */}
+          <nav className="hidden lg:flex items-center gap-7">
+            {NAV_ITEMS.map((item) => (
+              <DesktopNavItem key={item.label} item={item} isScrolled={isScrolled} />
+            ))}
+          </nav>
+
+          {/* Desktop CTAs */}
+          <div className="hidden lg:flex items-center gap-3">
+            {isAuthenticated ? (
+              <div className="flex items-center gap-3">
+                {/* Avatar button */}
+                <div className="relative group">
+                  <button className="flex items-center gap-2.5 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm hover:border-gray-300 transition-colors">
+                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#C20C0C] text-[10px] font-bold text-white">
+                      {userInitials}
+                    </span>
+                    <span className="max-w-24 truncate">{userName}</span>
+                    <ChevronDown className="h-3.5 w-3.5 text-gray-400" />
+                  </button>
+                  {/* User dropdown */}
+                  <div className="absolute right-0 top-full mt-2 hidden w-52 rounded-xl border border-gray-100 bg-white p-1.5 shadow-xl shadow-black/10 group-hover:block">
+                    <div className="border-b border-gray-100 px-3 pb-2.5 pt-1 mb-1">
+                      <p className="text-xs font-semibold text-gray-900 truncate">{userName}</p>
+                      <p className="text-xs text-gray-400 truncate">{userEmail}</p>
+                    </div>
+                    <Link to={`/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}`} className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-[#C20C0C] transition-colors">
+                      <ShieldCheck className="h-4 w-4" /> My Covers
+                    </Link>
+                    <Link to={EROUTES.REPORTS} className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-[#C20C0C] transition-colors">
+                      <BarChart3 className="h-4 w-4" /> Reports
+                    </Link>
+                    <Link to={EROUTES.SETTINGS} className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-[#C20C0C] transition-colors">
+                      <Settings className="h-4 w-4" /> Settings
+                    </Link>
+                    <div className="border-t border-gray-100 mt-1 pt-1">
+                      <button
+                        onClick={logout}
+                        className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                      >
+                        <LogOut className="h-4 w-4" /> Log out
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <>
+                <Link
+                  to={`/${EPREFIX.AUTH}${EROUTES.SIGNIN}`}
+                  className={cn(
+                    'text-sm font-medium transition-colors duration-200',
+                    isScrolled ? 'text-gray-700 hover:text-[#C20C0C]' : 'text-black hover:text-black/80'
+                  )}
+                >
+                  Log in
+                </Link>
+                <Link
+                  to={`/${EPREFIX.CUSTOMER}${EROUTES.MOTOR}`}
+                  className="flex items-center gap-2 rounded-full bg-[#BF162E] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#BF162E]/80 transition-colors duration-200"
+                >
+                  Get a Quote
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              </>
+            )}
+          </div>
+
+          {/* Mobile hamburger */}
+          <button
+            className={cn(
+              'lg:hidden flex items-center justify-center h-9 w-9 rounded-xl transition-colors',
+              isScrolled ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-white/10'
+            )}
+            onClick={() => setMobileOpen((v) => !v)}
+            aria-label="Toggle menu"
+          >
+            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+        </div>
+      </div>
+
+      {/* ── Mobile drawer ──────────────────────────────────────────────── */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.2 }}
+            className="absolute top-full left-4 right-4 mt-2 rounded-2xl border border-gray-100 bg-white shadow-xl shadow-black/10 overflow-hidden lg:hidden"
+          >
+            <div className="max-h-[80vh] overflow-y-auto p-4">
+              {isAuthenticated && user && (
+                <div className="flex items-center gap-3 mb-4 pb-4 border-b border-gray-100">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#C20C0C] text-sm font-bold text-white">
+                    {userInitials}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-gray-900 truncate">{userName}</p>
+                    <p className="text-xs text-gray-400 truncate">{userEmail}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Nav items */}
+              <div className="space-y-0.5">
+                {NAV_ITEMS.map((item) => (
+                  <MobileNavItem
+                    key={item.label}
+                    item={item}
+                    onClose={() => setMobileOpen(false)}
+                  />
+                ))}
+              </div>
+              <div className="mt-4 pt-4 border-t border-gray-100 space-y-2">
+                {isAuthenticated ? (
+                  <>
+                    <Link
+                      to={`/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}`}
+                      onClick={() => setMobileOpen(false)}
+                      className="flex items-center gap-2.5 rounded-xl px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                      <ShieldCheck className="h-4 w-4 text-[#C20C0C]" /> My Covers
+                    </Link>
+                    <button
+                      onClick={() => { logout(); setMobileOpen(false); }}
+                      className="flex w-full items-center gap-2.5 rounded-xl px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+                    >
+                      <LogOut className="h-4 w-4" /> Log out
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      to={`/${EPREFIX.AUTH}${EROUTES.SIGNIN}`}
+                      onClick={() => setMobileOpen(false)}
+                      className="flex items-center justify-center h-10 w-full rounded-xl border border-gray-200 text-sm font-semibold text-gray-800 hover:bg-gray-50 transition-colors">
+                      Log in
+                    </Link>
+                    <Link
+                      to={`/${EPREFIX.CUSTOMER}${EROUTES.MOTOR}`}
+                      onClick={() => setMobileOpen(false)}
+                      className="flex items-center justify-center gap-2 h-10 w-full rounded-xl bg-[#BF162E] text-sm font-semibold text-white hover:bg-[#BF162E]/80 transition-colors">
+                      Get a Quote <ArrowRight className="h-3.5 w-3.5" />
+                    </Link>
+                  </>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.header>
+  );
+};
+
+export default Navbar;
