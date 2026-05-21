@@ -84,9 +84,9 @@ export const router = createBrowserRouter([
   },
   {
     path: EROUTES.CONTACT_US,
-    element: 
-    <S>
-      <ContactUsPage />
+    element:
+      <S>
+        <ContactUsPage />
       </S>,
   },
 
