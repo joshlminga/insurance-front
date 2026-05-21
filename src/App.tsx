@@ -84,11 +84,10 @@ export const router = createBrowserRouter([
   },
   {
     path: EROUTES.CONTACT_US,
-    element: (
-      <PublicRoute>
-        <S><ContactUsPage /></S>
-      </PublicRoute>
-    ),
+    element: 
+    <S>
+      <ContactUsPage />
+      </S>,
   },
 
 
@@ -109,7 +108,7 @@ export const router = createBrowserRouter([
     ],
   },
 
-  
+
   // My Covers / Customer Account — protected (authenticated only)
   {
     path: `${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}`,
