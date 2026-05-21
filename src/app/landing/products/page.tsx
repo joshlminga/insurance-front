@@ -24,7 +24,7 @@ import {
 
 const BRAND = '#BF162E'
 
-type ProductCategory = 'all' | 'car' | 'health' | 'travel' | 'life' | 'home' | 'business'
+type ProductCategory = 'all' | 'car' | 'health' | 'travel' | 'life' | 'home' | 'business' | 'marine'
 
 type ProductItem = {
   id: string
