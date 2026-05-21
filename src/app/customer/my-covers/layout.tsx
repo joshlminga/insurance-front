@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { Navbar } from '@/app/landing/components/navbar'
 import { UseAuth } from '@/stores/auth-store'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
@@ -11,6 +10,7 @@ import { EPREFIX, EROUTES } from '@/utils/enums'
 import { ChevronDown } from 'lucide-react'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { StatsCard, StatsGrid } from '@/components/shared'
+import Navbar from '@/app/landing/components/navbar'
 
 export function MyCoversLayout() {
     const { isAuthenticated, logout, user } = UseAuth()
@@ -88,8 +88,8 @@ export function MyCoversLayout() {
                     Login
                 </Link>
             )}
-            <Navbar className='bg-[#ADABAB30] w-full h-auto lg:h-43.75 rounded-2xl backdrop-blur-[3.379px]' textStyle='text-[#141414]' navTextStyle="text-[#000000]" />
-            <div className="pt-24 sm:pt-48 lg:pt-64 w-[95vw] sm:w-[90vw] lg:w-[80vw] mx-auto">
+            <Navbar />
+            <div className="pt-18 sm:pt-20 lg:pt-40 w-[95vw] sm:w-[90vw] lg:w-[80vw] mx-auto">
                 <div className="lg:hidden mb-4">
                     <Button
                         variant="outline"
@@ -135,13 +135,13 @@ export function MyCoversLayout() {
                                 <StatsCard
                                     title="Monthly Premium"
                                     value={90000}
-                                description="Next  Mar 1, 2026"
+                                    description="Next  Mar 1, 2026"
                                 // icon={ShieldCheck}
                                 />
                                 <StatsCard
                                     title="Claims"
                                     value={0}
-                                description={`Monday,23 Feb 2026 . `}
+                                    description={`Monday,23 Feb 2026 . `}
                                 // icon={TrendingUp}
                                 // trend={{ value: 0.5, isPositive: false }}
                                 />
