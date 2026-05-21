@@ -50,7 +50,6 @@ export function OtpVerificationAuthForm({
   }
 
   return (
-
     <FormProvider {...form}>
       <div className={cn("flex flex-col gap-6", className)} {...props}>
         <form onSubmit={form.handleSubmit(onSubmit)}

@@ -64,12 +64,11 @@ const ForgotPasswordForm = ({
                                 className="w-full h-12 rounded-md border border-gray-300"
                                 control={form.control}
                                 name="email"
-                                label="Email"
+                                label="Email Address"
                                 type="email"
                                 placeholder="Enter your registered email"
                             />
                         </Field>
-
                         <Field>
                             <Button
                                 className="w-full h-12 bg-[#C20C0C] hover:bg-[#C20C0C]/80"

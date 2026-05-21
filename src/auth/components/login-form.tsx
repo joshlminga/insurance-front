@@ -84,27 +84,25 @@ export function LoginForm({
               className="w-full h-12 rounded-md border border-gray-300"
               control={form.control}
               name="email"
-              label="Email"
+              label="Email Address"
               type="email"
               placeholder="Enter email address"
             />
           </Field>
-          <Field className="flex flex-col gap-2">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">Password</span>
+          <Field className="flex flex-col gap-1">
+            <div className="flex items-center justify-end">
               <Link
                 to={`/${EPREFIX.AUTH}${EROUTES.FORGOT_PASSWORD}`}
                 className="text-sm text-[#C20C0C] hover:underline">
                 Forgot Password?
               </Link>
             </div>
-
             <div className="relative">
               <ReuseableInput
                 className="w-full h-12 rounded-md border border-gray-300 pr-10"
                 control={form.control}
                 name="password"
-                label=""
+                label="Password"
                 type={show ? "text" : "password"}
                 placeholder="Enter your password"
               />

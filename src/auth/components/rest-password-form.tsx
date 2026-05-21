@@ -71,41 +71,35 @@ export const ResetPasswordForm = ({
             <form onSubmit={form.handleSubmit(onSubmit)}>
                 <FieldGroup className="flex flex-col gap-4">
                     <Field className="flex flex-col gap-2">
-                        <span className="text-sm font-medium">Password</span>
                         <div className="relative">
                             <ReuseableInput
                                 className="w-full h-12 rounded-md border border-gray-300 pr-10"
                                 control={form.control}
                                 name="password"
-                                label=""
+                                label="Password"
                                 type={show ? "text" : "password"}
                             />
                             <button
                                 type="button"
                                 onClick={() => setShow((prev) => !prev)}
-                                className="absolute right-3 top-1/2 -translate-y-1/4 text-gray-500 hover:text-gray-700"
-                            >
+                                 className="absolute right-3 top-3/5 -translate-y-1/10 text-gray-500 hover:text-gray-700">
                                 {show ? <EyeOff size={20} /> : <Eye size={20} />}
                             </button>
                         </div>
                     </Field>
                     <Field className="flex flex-col gap-2">
-                        <span className="text-sm font-medium">
-                            Confirm Password
-                        </span>
                         <div className="relative">
                             <ReuseableInput
                                 className="w-full h-12 rounded-md border border-gray-300 pr-10"
                                 control={form.control}
                                 name="password_confirmation"
-                                label=""
+                                label="Confirm Password"
                                 type={showConfirm ? "text" : "password"}
                             />
                             <button
                                 type="button"
                                 onClick={() => setShowConfirm((prev) => !prev)}
-                                className="absolute right-3 top-1/2 -translate-y-1/4 text-gray-500 hover:text-gray-700"
-                            >
+                                 className="absolute right-3 top-3/5 -translate-y-1/10 text-gray-500 hover:text-gray-700">
                                 {showConfirm ? (
                                     <EyeOff size={20} />
                                 ) : (
@@ -114,8 +108,6 @@ export const ResetPasswordForm = ({
                             </button>
                         </div>
                     </Field>
-
-                    {/* Submit */}
                     <Field>
                         <Button
                             className="w-full h-12 bg-[#C20C0C] hover:bg-[#C20C0C]/80"
@@ -128,8 +120,6 @@ export const ResetPasswordForm = ({
                     </Field>
                 </FieldGroup>
             </form>
-
-            {/* Footer */}
             <FieldDescription className="text-center text-sm">
                 Back to{" "}
                 <Link
@@ -138,8 +128,7 @@ export const ResetPasswordForm = ({
                     onClick={(e) => {
                         e.preventDefault();
                         navigate(`/${EPREFIX.AUTH}${EROUTES.SIGNIN}`);
-                    }}
-                >
+                    }}>
                     Login
                 </Link>
             </FieldDescription>
