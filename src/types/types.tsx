@@ -698,3 +698,17 @@ export interface NavItem {
 export type NavbarProps = {
   navData?: NavLinkItem[]
 }
+
+export interface MobileDrawerProps {
+  open: boolean;
+  onClose: () => void;
+  isAuthenticated: boolean;
+  user: { name?: string; email?: string } | null;
+  userInitials: string;
+  userName: string;
+  userEmail: string;
+  logout: () => void;
+  alpha: string;
+  lang: string;
+  handleCountryChange: (c: TCountry) => void;
+}
