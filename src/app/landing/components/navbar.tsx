@@ -147,7 +147,7 @@ const DesktopNavItem = ({ item }: { item: NavItem; isScrolled: boolean }) => {
 
 const MobileDrawer: React.FC<MobileDrawerProps> = ({
   open, onClose, isAuthenticated, user, userInitials, userName, userEmail, logout,
-  alpha, lang, handleCountryChange,
+  alpha, handleCountryChange,
 }) => {
   const [activePanel, setActivePanel] = useState<string | null>(null);
   useEffect(() => {
@@ -221,13 +221,20 @@ const MobileDrawer: React.FC<MobileDrawerProps> = ({
               <Link to={EROUTES.LANDING} onClick={closeAll} className="shrink-0">
                 <img src={ELOGO.NAVBARLOGO} alt="Acentria" className="h-8 w-auto object-contain" />
               </Link>
-              <Button
-                onClick={closeAll}
-                variant="ghost"
-                className="flex h-10 w-10 items-center justify-center rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
-                aria-label="Close menu">
-                <X className="h-5 w-5" />
-              </Button>
+              <div className="flex items-center gap-2">
+                <CountryDropdown
+                  defaultValue={alpha}
+                  onChange={handleCountryChange}
+                  slim={false}
+                />
+                <Button
+                  onClick={closeAll}
+                  variant="ghost"
+                  className="flex h-10 w-10 items-center justify-center rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
+                  aria-label="Close menu">
+                  <X className="h-5 w-5" />
+                </Button>
+              </div>
             </div>
             {isAuthenticated && user && (
               <div className="flex items-center gap-3 px-5 py-4 border-b bg-gray-50">
@@ -502,21 +509,29 @@ const Navbar: React.FC<NavbarProps> = () => {
                 </>
               )}
             </div>
-            <Button
-              variant="ghost"
-              className="lg:hidden flex h-10 w-10 items-center justify-center rounded-lg text-gray-700 hover:bg-gray-100 transition-colors focus-visible:outline-none"
-              onClick={() => setMobileOpen((v) => !v)}
-              aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
-              aria-expanded={mobileOpen}>
-              <div className="relative h-5 w-5">
-                <Menu className={cn('absolute inset-0 h-5 w-5 transition-all duration-200',
-                  mobileOpen ? 'rotate-90 opacity-0 scale-75' : 'rotate-0 opacity-100 scale-100'
-                )} />
-                <X className={cn('absolute inset-0 h-5 w-5 transition-all duration-200',
-                  mobileOpen ? 'rotate-0 opacity-100 scale-100' : '-rotate-90 opacity-0 scale-75'
-                )} />
-              </div>
-            </Button>
+
+            <div className="lg:hidden flex items-center gap-2">
+              <CountryDropdown
+                defaultValue={alpha}
+                onChange={handleCountryChange}
+                slim={false}
+              />
+              <Button
+                variant="ghost"
+                className="flex h-10 w-10 items-center justify-center rounded-lg text-gray-700 hover:bg-gray-100 transition-colors focus-visible:outline-none"
+                onClick={() => setMobileOpen((v) => !v)}
+                aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+                aria-expanded={mobileOpen}>
+                <div className="relative h-5 w-5">
+                  <Menu className={cn('absolute inset-0 h-5 w-5 transition-all duration-200',
+                    mobileOpen ? 'rotate-90 opacity-0 scale-75' : 'rotate-0 opacity-100 scale-100'
+                  )} />
+                  <X className={cn('absolute inset-0 h-5 w-5 transition-all duration-200',
+                    mobileOpen ? 'rotate-0 opacity-100 scale-100' : '-rotate-90 opacity-0 scale-75'
+                  )} />
+                </div>
+              </Button>
+            </div>
           </div>
         </div>
       </motion.header>
