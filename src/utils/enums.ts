@@ -18,6 +18,9 @@ export const EROUTES = {
   // Public
   LANDING: '/',
   CONTACT_US: '/contact-us',
+  PRODUCT_LIST: '/products',
+
+  // Customer
   MOTOR: '/motor',
   TRAVEL: '/travel',
   MARINE: '/marine',

@@ -19,6 +19,7 @@ function S({ children }: { children: React.ReactNode }) {
 // customer-facing pages
 const Landingpage = lazy(() => import("./app/landing/page").then(m => ({ default: m.Landingpage })))
 const ContactUsPage = lazy(() => import("./app/landing/contact-us/page").then(m => ({ default: m.ContactUsPage })))
+const ProductsListPage = lazy(() => import("./app/landing/products/page").then(m => ({ default: m.ProductsListPage })))
 
 const MotorLandingPage = lazy(() => import("./app/customer/motor/page").then(m => ({ default: m.MotorLandingPage })))
 const StepPage = lazy(() => import("./app/customer/motor/steppers/steppage").then(m => ({ default: m.StepPage })))
@@ -89,7 +90,13 @@ export const router = createBrowserRouter([
         <ContactUsPage />
       </S>,
   },
-
+ {
+    path: EROUTES.PRODUCT_LIST,
+    element:
+      <S>
+        <ProductsListPage />
+      </S>,
+  },
 
   // START-USERGENERAL = TRUE
   // Motor / Customer
