@@ -20,40 +20,16 @@ import {
   ShieldCheck,
   BarChart3,
   Settings,
+  Globe,
 } from 'lucide-react'
 import { motion, AnimatePresence, useInView } from "motion/react";
 import { ELOGO, EPREFIX, EROUTES } from '@/utils/enums';
 import { UseAuth } from '@/stores/auth-store';
 import { getInitials } from '@/lib/format';
 import { Link } from 'react-router-dom';
-
-/* ─── Types ─────────────────────────────────────────────────────────────── */
-
-export type NavLinkItem = {
-  name: string
-  label?: string
-  href: string
-  isActive?: boolean
-}
-
-export interface NavLinkProps {
-  item: NavLinkItem
-}
-
-interface DropdownItem {
-  icon: React.ElementType
-  label: string
-  description: string
-  href: string
-}
-
-interface NavItem {
-  label: string
-  href?: string
-  dropdown?: DropdownItem[]
-}
-
-/* ─── Nav config ─────────────────────────────────────────────────────────── */
+import { DropdownItem, NavbarProps, NavItem, TCountry } from '@/types/types';
+import { Button } from '@/components/ui/button';
+import { CountryDropdown } from '@/components/ui/country-dropdown';
 
 const NAV_ITEMS: NavItem[] = [
   { label: 'Home', href: '/' },
@@ -139,7 +115,14 @@ const NAV_ITEMS: NavItem[] = [
   },
 ]
 
-/* ─── Desktop mega-dropdown ──────────────────────────────────────────────── */
+const LANG_NAMES: Record<string, string> = {
+  eng: 'English',
+  swa: 'Swahili',
+  fra: 'French',
+  kin: 'Kinyarwanda',
+  tsn: 'Tswana',
+}
+
 
 const DesktopDropdown = ({ items }: { items: DropdownItem[] }) => (
   <motion.div
@@ -147,33 +130,35 @@ const DesktopDropdown = ({ items }: { items: DropdownItem[] }) => (
     animate={{ opacity: 1, y: 0, scale: 1 }}
     exit={{ opacity: 0, y: 8, scale: 0.97 }}
     transition={{ duration: 0.18, ease: 'easeOut' }}
-    className="absolute top-full left-1/2 -translate-x-1/2 mt-3 z-50 min-w-64 rounded-2xl border border-gray-100 bg-white p-2 shadow-xl shadow-black/10">
-    {items.map((item) => (
-      <Link
-        key={item.label}
-        to={item.href}
-        className="flex items-start gap-3 rounded-xl px-3 py-3 transition-colors hover:bg-red-50 group"
-      >
-        <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-red-50 text-[#C20C0C] group-hover:bg-red-100 transition-colors">
-          <item.icon className="h-4 w-4" />
-        </div>
-        <div>
-          <p className="text-sm font-semibold text-gray-900 group-hover:text-[#C20C0C] transition-colors">
-            {item.label}
-          </p>
-          <p className="mt-0.5 text-xs text-gray-500 leading-snug">
-            {item.description}
-          </p>
-        </div>
-      </Link>
-    ))}
+    className="fixed top-[65px] left-0 right-0 z-50 border-b border-gray-100 bg-white p-6 shadow-xl shadow-black/5">
+    <div className="mx-auto max-w-7xl">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
+        {items.map((item) => (
+          <Link
+            key={item.label}
+            to={item.href}
+            className="flex items-start gap-4 rounded-xl p-3 transition-colors hover:bg-red-50/50 group">
+            <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-red-50 text-[#C20C0C] group-hover:bg-red-100 transition-colors">
+              <item.icon className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-gray-900 group-hover:text-[#C20C0C] transition-colors">
+                {item.label}
+              </p>
+              <p className="mt-1 text-xs text-gray-500 leading-relaxed">
+                {item.description}
+              </p>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </div>
   </motion.div>
 )
 
 const DesktopNavItem = ({ item, isScrolled }: { item: NavItem; isScrolled: boolean }) => {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
@@ -198,14 +183,14 @@ const DesktopNavItem = ({ item, isScrolled }: { item: NavItem; isScrolled: boole
       </Link>
     );
   }
-
   return (
     <div
       ref={ref}
       className="relative"
       onMouseEnter={() => setOpen(true)}
       onMouseLeave={() => setOpen(false)}>
-      <button
+      <Button
+        variant='ghost'
         onClick={() => setOpen((v) => !v)}
         className={cn('flex items-center gap-1 text-sm font-semibold transition-colors duration-200',
           textClass
@@ -217,15 +202,13 @@ const DesktopNavItem = ({ item, isScrolled }: { item: NavItem; isScrolled: boole
             open && 'rotate-180'
           )}
         />
-      </button>
+      </Button>
       <AnimatePresence>
         {open && item.dropdown && <DesktopDropdown items={item.dropdown} />}
       </AnimatePresence>
     </div>
   );
 };
-
-/* ─── Mobile nav item ────────────────────────────────────────────────────── */
 
 const MobileNavItem = ({
   item,
@@ -235,7 +218,6 @@ const MobileNavItem = ({
   onClose: () => void;
 }) => {
   const [open, setOpen] = useState(false);
-
   if (item.href && !item.dropdown) {
     return (
       <Link
@@ -246,7 +228,6 @@ const MobileNavItem = ({
       </Link>
     );
   }
-
   return (
     <div className="border-b border-gray-100">
       <button
@@ -264,8 +245,7 @@ const MobileNavItem = ({
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="overflow-hidden"
-          >
+            className="overflow-hidden">
             <div className="pb-3 pl-2 space-y-1">
               {item.dropdown.map((sub) => (
                 <Link
@@ -286,18 +266,13 @@ const MobileNavItem = ({
 };
 
 /* ─── Main Navbar ────────────────────────────────────────────────────────── */
-
-type NavbarProps = {
-  navData?: NavLinkItem[]
-}
-
 const Navbar: React.FC<NavbarProps> = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
   const isInView = useInView(headerRef, { once: true, amount: 0.1 });
 
-  const { isAuthenticated, logout, user } = UseAuth();
+  const { isAuthenticated, logout, user, setLocale, alpha, lang, } = UseAuth();
   const userName = user?.name ?? 'User';
   const userEmail = user?.email ?? '';
   const userInitials = getInitials(userName);
@@ -320,6 +295,11 @@ const Navbar: React.FC<NavbarProps> = () => {
     return () => { document.body.style.overflow = ''; };
   }, [mobileOpen]);
 
+  const handleCountryChange = (selected: TCountry) => {
+    const primaryLang = selected.languages?.[0] ?? 'eng'
+    setLocale(selected.name ?? '', primaryLang, selected.alpha2 ?? '')
+  }
+
   return (
     <motion.header
       ref={headerRef}
@@ -335,8 +315,6 @@ const Navbar: React.FC<NavbarProps> = () => {
 
       <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-3.5">
         <div className="flex items-center justify-between gap-6">
-
-          {/* Logo */}
           <Link to={EROUTES.LANDING} className="shrink-0">
             <img
               src={ELOGO.NAVBARLOGO}
@@ -346,19 +324,27 @@ const Navbar: React.FC<NavbarProps> = () => {
               )}
             />
           </Link>
-
-          {/* Desktop nav */}
           <nav className="hidden lg:flex items-center gap-7">
             {NAV_ITEMS.map((item) => (
               <DesktopNavItem key={item.label} item={item} isScrolled={isScrolled} />
             ))}
+
+            <div className="flex items-center gap-2 shrink-0">
+              <CountryDropdown
+                defaultValue={alpha}
+                onChange={handleCountryChange}
+                slim={false}
+              />
+              <span className="flex items-center gap-1 text-xs font-medium text-gray-500 whitespace-nowrap border-l border-gray-300 pl-2">
+                <Globe className="w-3 h-3 shrink-0" />
+                {LANG_NAMES[lang] ?? lang}
+              </span>
+            </div>
           </nav>
 
-          {/* Desktop CTAs */}
           <div className="hidden lg:flex items-center gap-3">
             {isAuthenticated ? (
               <div className="flex items-center gap-3">
-                {/* Avatar button */}
                 <div className="relative group">
                   <button className="flex items-center gap-2.5 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm hover:border-gray-300 transition-colors">
                     <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#C20C0C] text-[10px] font-bold text-white">
@@ -367,7 +353,6 @@ const Navbar: React.FC<NavbarProps> = () => {
                     <span className="max-w-24 truncate">{userName}</span>
                     <ChevronDown className="h-3.5 w-3.5 text-gray-400" />
                   </button>
-                  {/* User dropdown */}
                   <div className="absolute right-0 top-full mt-2 hidden w-52 rounded-xl border border-gray-100 bg-white p-1.5 shadow-xl shadow-black/10 group-hover:block">
                     <div className="border-b border-gray-100 px-3 pb-2.5 pt-1 mb-1">
                       <p className="text-xs font-semibold text-gray-900 truncate">{userName}</p>
@@ -383,12 +368,11 @@ const Navbar: React.FC<NavbarProps> = () => {
                       <Settings className="h-4 w-4" /> Settings
                     </Link>
                     <div className="border-t border-gray-100 mt-1 pt-1">
-                      <button
-                        onClick={logout}
-                        className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
-                      >
+                      <Button onClick={logout}
+                        variant="ghost"
+                        className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
                         <LogOut className="h-4 w-4" /> Log out
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -400,36 +384,30 @@ const Navbar: React.FC<NavbarProps> = () => {
                   className={cn(
                     'text-sm font-medium transition-colors duration-200',
                     isScrolled ? 'text-gray-700 hover:text-[#C20C0C]' : 'text-black hover:text-black/80'
-                  )}
-                >
+                  )}>
                   Log in
                 </Link>
                 <Link
                   to={`/${EPREFIX.CUSTOMER}${EROUTES.MOTOR}`}
-                  className="flex items-center gap-2 rounded-full bg-[#BF162E] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#BF162E]/80 transition-colors duration-200"
-                >
+                  className="flex items-center gap-2 rounded-full bg-[#BF162E] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#BF162E]/80 transition-colors duration-200">
                   Get a Quote
                   <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
               </>
             )}
           </div>
-
-          {/* Mobile hamburger */}
           <button
             className={cn(
               'lg:hidden flex items-center justify-center h-9 w-9 rounded-xl transition-colors',
-              isScrolled ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-white/10'
+              isScrolled ? 'text-black hover:bg-gray-100' : 'text-black hover:bg-white/10'
             )}
             onClick={() => setMobileOpen((v) => !v)}
-            aria-label="Toggle menu"
-          >
+            aria-label="Toggle menu">
             {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
         </div>
       </div>
 
-      {/* ── Mobile drawer ──────────────────────────────────────────────── */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
@@ -437,8 +415,7 @@ const Navbar: React.FC<NavbarProps> = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.2 }}
-            className="absolute top-full left-4 right-4 mt-2 rounded-2xl border border-gray-100 bg-white shadow-xl shadow-black/10 overflow-hidden lg:hidden"
-          >
+            className="absolute top-full left-4 right-4 mt-2 rounded-2xl border border-gray-100 bg-white shadow-xl shadow-black/10 overflow-hidden lg:hidden">
             <div className="max-h-[80vh] overflow-y-auto p-4">
               {isAuthenticated && user && (
                 <div className="flex items-center gap-3 mb-4 pb-4 border-b border-gray-100">
@@ -451,8 +428,6 @@ const Navbar: React.FC<NavbarProps> = () => {
                   </div>
                 </div>
               )}
-
-              {/* Nav items */}
               <div className="space-y-0.5">
                 {NAV_ITEMS.map((item) => (
                   <MobileNavItem
@@ -468,16 +443,21 @@ const Navbar: React.FC<NavbarProps> = () => {
                     <Link
                       to={`/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}`}
                       onClick={() => setMobileOpen(false)}
-                      className="flex items-center gap-2.5 rounded-xl px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-                    >
+                      className="flex items-center gap-2.5 rounded-xl px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
                       <ShieldCheck className="h-4 w-4 text-[#C20C0C]" /> My Covers
                     </Link>
-                    <button
+                    <Link
+                      to={`/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}`}
+                      onClick={() => setMobileOpen(false)}
+                      className="flex gap-2.5 rounded-xl px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
+                      <ShieldCheck className="h-4 w-4 text-[#C20C0C]" /> My Covers
+                    </Link>
+                    <Button
+                      variant="ghost"
                       onClick={() => { logout(); setMobileOpen(false); }}
-                      className="flex w-full items-center gap-2.5 rounded-xl px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
-                    >
+                      className="flex gap-2.5 rounded-xl px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors">
                       <LogOut className="h-4 w-4" /> Log out
-                    </button>
+                    </Button>
                   </>
                 ) : (
                   <>
@@ -503,5 +483,4 @@ const Navbar: React.FC<NavbarProps> = () => {
     </motion.header>
   );
 };
-
 export default Navbar;
