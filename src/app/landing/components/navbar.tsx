@@ -364,7 +364,9 @@ const MobileDrawer: React.FC<MobileDrawerProps> = ({
 const Navbar: React.FC<NavbarProps> = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
+  const profileRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(headerRef, { once: true, amount: 0.1 });
 
   const { isAuthenticated, logout, user, setLocale, alpha, lang } = UseAuth();
@@ -385,6 +387,17 @@ const Navbar: React.FC<NavbarProps> = () => {
     document.body.style.overflow = mobileOpen ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
   }, [mobileOpen]);
+
+  useEffect(() => {
+    if (!profileOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+        setProfileOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [profileOpen]);
 
   const handleCountryChange = (selected: TCountry) => {
     const primaryLang = selected.languages?.[0] ?? 'eng';
@@ -430,36 +443,48 @@ const Navbar: React.FC<NavbarProps> = () => {
             </nav>
             <div className="hidden lg:flex items-center gap-3">
               {isAuthenticated ? (
-                <div className="relative group">
+                <div ref={profileRef} className="relative">
                   <Button
-                  variant="ghost"
-                   className="flex items-center gap-2.5 rounded-full border border-gray-200 bg-white px-3 py-3 text-sm font-medium text-gray-700 shadow-sm hover:border-gray-300 transition-colors">
+                    variant="ghost"
+                    onClick={() => setProfileOpen((v) => !v)}
+                    className="flex items-center gap-2.5 rounded-full border border-gray-200 bg-white px-3 py-3 text-sm font-medium text-gray-700 shadow-sm hover:border-gray-300 transition-colors"
+                  >
                     <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#C20C0C] text-[12px] font-bold text-white">
                       {userInitials}
                     </span>
                     <span className="max-w-24 truncate">{userName}</span>
-                    <ChevronDown className="h-3.5 w-3.5 text-gray-400" />
+                    <ChevronDown className={cn('h-3.5 w-3.5 text-gray-400 transition-transform duration-200', profileOpen && 'rotate-180')} />
                   </Button>
-                  <div className="absolute right-0 top-full mt-2 hidden w-52 rounded-xl border border-gray-100 bg-white p-1.5 shadow-xl shadow-black/10 group-hover:block">
-                    <div className="border-b border-gray-100 px-3 pb-2.5 pt-1 mb-1">
-                      <p className="text-xs font-semibold text-gray-900 truncate">{userName}</p>
-                      <p className="text-xs text-gray-400 truncate">{userEmail}</p>
-                    </div>
-                    <Link to={`/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}`} className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-[#C20C0C] transition-colors">
-                      <ShieldCheck className="h-4 w-4" /> My Covers
-                    </Link>
-                    <Link to={EROUTES.REPORTS} className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-[#C20C0C] transition-colors">
-                      <BarChart3 className="h-4 w-4" /> Reports
-                    </Link>
-                    <Link to={EROUTES.SETTINGS} className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-[#C20C0C] transition-colors">
-                      <Settings className="h-4 w-4" /> Settings
-                    </Link>
-                    <div className="border-t border-gray-100 mt-1 pt-1">
-                      <Button onClick={logout} variant="ghost" className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
-                        <LogOut className="h-4 w-4" /> Log out
-                      </Button>
-                    </div>
-                  </div>
+                  <AnimatePresence>
+                    {profileOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 6, scale: 0.97 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 6, scale: 0.97 }}
+                        transition={{ duration: 0.15, ease: 'easeOut' }}
+                        className="absolute right-0 top-full mt-2 w-52 rounded-xl border border-gray-100 bg-white p-1.5 shadow-xl shadow-black/10"
+                      >
+                        <div className="border-b border-gray-100 px-3 pb-2.5 pt-1 mb-1">
+                          <p className="text-xs font-semibold text-gray-900 truncate">{userName}</p>
+                          <p className="text-xs text-gray-400 truncate">{userEmail}</p>
+                        </div>
+                        <Link to={`/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}`} onClick={() => setProfileOpen(false)} className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-[#C20C0C] transition-colors">
+                          <ShieldCheck className="h-4 w-4" /> My Covers
+                        </Link>
+                        <Link to={EROUTES.REPORTS} onClick={() => setProfileOpen(false)} className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-[#C20C0C] transition-colors">
+                          <BarChart3 className="h-4 w-4" /> Reports
+                        </Link>
+                        <Link to={EROUTES.SETTINGS} onClick={() => setProfileOpen(false)} className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-[#C20C0C] transition-colors">
+                          <Settings className="h-4 w-4" /> Settings
+                        </Link>
+                        <div className="border-t border-gray-100 mt-1 pt-1">
+                          <Button onClick={() => { logout(); setProfileOpen(false); }} variant="ghost" className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                            <LogOut className="h-4 w-4" /> Log out
+                          </Button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               ) : (
                 <>
