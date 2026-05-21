@@ -36,7 +36,6 @@ export default function DashboardPage() {
         title="Insurance Marketplace Dashboard"
         description="Welcome back! Here's an overview of your insurance platform"
       />
-      {/* Stats Overview */}
       <StatsGrid columns={4}>
         <StatsCard
           title="Total Policyholders"

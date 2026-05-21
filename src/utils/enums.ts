@@ -17,6 +17,7 @@ export const EPREFIX = {
 export const EROUTES = {
   // Public
   LANDING: '/',
+  CONTACT_US: '/contact-us',
   MOTOR: '/motor',
   TRAVEL: '/travel',
   MARINE: '/marine',
