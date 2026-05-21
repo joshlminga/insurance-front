@@ -40,8 +40,7 @@ const FILTER_TABS: { id: ProductCategory; label: string; icon: LucideIcon }[] = 
   { id: 'health', label: 'Health', icon: HeartPulse },
   { id: 'travel', label: 'Travel', icon: Plane },
   { id: 'life', label: 'Life', icon: Shield },
-  { id: 'home', label: 'Home', icon: Home },
-  { id: 'business', label: 'Business', icon: Briefcase },
+  { id: 'marine', label: 'Marine', icon: Briefcase },
 ]
 
 const PRODUCTS: ProductItem[] = [
