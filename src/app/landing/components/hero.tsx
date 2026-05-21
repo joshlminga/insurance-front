@@ -1,7 +1,7 @@
 // import { UseAuth } from "@/stores/auth-store"
 import { Button, ReusableDropdown } from "@/dev/core"
 import { EPREFIX, EROUTES } from "@/utils/enums"
-import { useNavigate } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { useRef } from "react"
 import { useInView } from "motion/react"
 import { ArrowRight, Bus, Car, Ship, User } from "lucide-react";
@@ -14,28 +14,27 @@ const propertyFeatures = [
         icon: Car,
         label: "Motor Insurance",
         className: "border-e border-b",
-        url: "#"
+        url: EROUTES.MOTOR
     },
     {
         icon: Ship,
         label: "Marine Insurance",
         className: "border-b",
-        url: "#"
+        url: EROUTES.MARINE
     },
     {
         icon: Bus,
         label: "Travel Insurance",
         className: "border-e",
-        url: "#"
+        url: EROUTES.TRAVEL
     },
     {
         icon: User,
         label: "Life Insurance",
         className: "",
-        url: "#"
+        url: EROUTES.LIFE
     },
 ];
-
 
 export const HeroSection = () => {
     const Navigate = useNavigate();
@@ -98,7 +97,8 @@ export const HeroSection = () => {
                                 },
                             ]} />
                         <Button
-                            className="h-9 w-32 sm:w-36.25 rounded-[5px] border border-white bg-[#D9D9D9]/38 hover:bg-[#D9D9D9]/50 text-xs sm:text-sm font-semibold text-white transition-all">
+                        variant="outline"
+                           className="h-10 w-32 sm:w-36.25 sm:text-sm flex items-center justify-center gap-2 rounded-full bg-transparent border-[#BF162E] text-sm font-semibold text-[#BF162E] hover:border-[#BF162E]/80 transition-colors hover:text-[#BF162E]/80">
                             Work with Us
                         </Button>
                     </div>
@@ -126,7 +126,7 @@ export const HeroSection = () => {
                                             ease: "easeInOut",
                                         }}
                                         className="flex sm:gap-10">
-                                        <div className={`flex flex-col items-center gap-3 sm:py-0 sm:px-0 py-5 px-8 sm:border-0 border-gray-700 w-full ${item.className}`}>
+                                        <Link to={`/${EPREFIX.CUSTOMER}${item?.url}`} className={`flex flex-col items-center gap-3 sm:py-0 sm:px-0 py-5 px-8 sm:border-0 border-gray-700 w-full ${item.className}`}>
                                             {item.icon && (
                                                 <>
                                                     <item.icon
@@ -138,7 +138,7 @@ export const HeroSection = () => {
                                                     </p>
                                                 </>
                                             )}
-                                        </div>
+                                        </Link>
                                         {index < propertyFeatures.length - 1 && (
                                             <Separator
                                                 orientation="vertical"
