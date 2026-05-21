@@ -4,10 +4,8 @@ import React, { useEffect, useState, useCallback, useRef } from 'react'
 import { cn } from '@/lib/utils';
 import {
   ArrowRight,
-  Car, Ship, Bus, User,
   ChevronDown, ChevronRight,
   Menu, X, ArrowLeft,
-  FileText, Search, BookOpen, LifeBuoy, PhoneCall,
   LogOut, ShieldCheck, BarChart3, Settings,
   Globe,
 } from 'lucide-react'
@@ -19,46 +17,8 @@ import { Link } from 'react-router-dom';
 import { DropdownItem, MobileDrawerProps, NavbarProps, NavItem, TCountry } from '@/types/types';
 import { Button } from '@/components/ui/button';
 import { CountryDropdown } from '@/components/ui/country-dropdown';
+import { LANG_NAMES, NAV_ITEMS } from '@/utils/constatnts';
 
-/* ─── Nav data ───────────────────────────────────────────────────────────── */
-
-const NAV_ITEMS: NavItem[] = [
-  { label: 'Home', href: '/' },
-  {
-    label: 'Insurance',
-    dropdown: [
-      { icon: Car, label: 'Motor Insurance', description: 'Cover for cars, trucks & motorcycles', href: `/${EPREFIX.CUSTOMER}${EROUTES.MOTOR}` },
-      { icon: Ship, label: 'Marine Insurance', description: 'Protection for cargo & shipping', href: `/${EPREFIX.CUSTOMER}${EROUTES.MARINE}` },
-      { icon: Bus, label: 'Travel Insurance', description: 'Worldwide travel peace of mind', href: `/${EPREFIX.CUSTOMER}${EROUTES.TRAVEL}` },
-      { icon: User, label: 'Life Insurance', description: "Secure your family's future", href: `/${EPREFIX.CUSTOMER}${EROUTES.LIFE}` },
-    ],
-  },
-  {
-    label: 'Claims',
-    dropdown: [
-      { icon: FileText, label: 'File a Claim', description: 'Submit a new insurance claim', href: '#' },
-      { icon: Search, label: 'Track a Claim', description: 'Check status of existing claims', href: '#' },
-    ],
-  },
-  {
-    label: 'Resources',
-    dropdown: [
-      { icon: BookOpen, label: 'Blog & Guides', description: 'Insurance tips and articles', href: '#' },
-      { icon: LifeBuoy, label: 'Help Centre', description: 'FAQs and support articles', href: '#' },
-    ],
-  },
-  {
-    label: 'Contact',
-    dropdown: [
-      { icon: PhoneCall, label: 'Talk to Us', description: 'Reach our support team', href: EROUTES.CONTACT_US },
-      { icon: User, label: 'Find an Agent', description: 'Connect with a local advisor', href: '#' },
-    ],
-  },
-]
-
-const LANG_NAMES: Record<string, string> = {
-  eng: 'English', swa: 'Swahili', fra: 'French', kin: 'Kinyarwanda', tsn: 'Tswana',
-}
 
 const DesktopDropdown = ({ items }: { items: DropdownItem[] }) => (
   <motion.div
@@ -143,7 +103,6 @@ const DesktopNavItem = ({ item }: { item: NavItem; isScrolled: boolean }) => {
     </div>
   );
 };
-
 
 const MobileDrawer: React.FC<MobileDrawerProps> = ({
   open, onClose, isAuthenticated, user, userInitials, userName, userEmail, logout,
@@ -367,7 +326,6 @@ const MobileDrawer: React.FC<MobileDrawerProps> = ({
 };
 
 
-/* ─── Main Navbar ────────────────────────────────────────────────────────── */
 const Navbar: React.FC<NavbarProps> = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);

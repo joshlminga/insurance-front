@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { BenefitType, TActionType, TFilterOptions } from "@/types/types";
+import type { BenefitType, NavItem, TActionType, TFilterOptions } from "@/types/types";
 import { EPREFIX, EROUTES, SORT_ORDER } from "./enums";
-import { ShieldCheck, BarChart3, Settings, LogOut } from "lucide-react";
+import { ShieldCheck, BarChart3, Settings, LogOut, Car, Ship, Bus, User, FileText, BookOpen, LifeBuoy, PhoneCall } from "lucide-react";
+import { Search } from "@/components/search";
 
 // export 
 
@@ -236,4 +237,40 @@ export const INSTALLMENT_FIELDS_VISIBLE: Record<string, number> = {
     Three_Installment: 3,
 }
 export const BENEFIT_SELECT_NONE = '__none__'
+export const NAV_ITEMS: NavItem[] = [
+  { label: 'Home', href: '/' },
+  {
+    label: 'Insurance',
+    dropdown: [
+      { icon: Car, label: 'Motor Insurance', description: 'Cover for cars, trucks & motorcycles', href: `/${EPREFIX.CUSTOMER}${EROUTES.MOTOR}` },
+      { icon: Ship, label: 'Marine Insurance', description: 'Protection for cargo & shipping', href: `/${EPREFIX.CUSTOMER}${EROUTES.MARINE}` },
+      { icon: Bus, label: 'Travel Insurance', description: 'Worldwide travel peace of mind', href: `/${EPREFIX.CUSTOMER}${EROUTES.TRAVEL}` },
+      { icon: User, label: 'Life Insurance', description: "Secure your family's future", href: `/${EPREFIX.CUSTOMER}${EROUTES.LIFE}` },
+    ],
+  },
+  {
+    label: 'Claims',
+    dropdown: [
+      { icon: FileText, label: 'File a Claim', description: 'Submit a new insurance claim', href: '#' },
+      { icon: Search, label: 'Track a Claim', description: 'Check status of existing claims', href: '#' },
+    ],
+  },
+  {
+    label: 'Resources',
+    dropdown: [
+      { icon: BookOpen, label: 'Blog & Guides', description: 'Insurance tips and articles', href: '#' },
+      { icon: LifeBuoy, label: 'Help Centre', description: 'FAQs and support articles', href: '#' },
+    ],
+  },
+  {
+    label: 'Contact',
+    dropdown: [
+      { icon: PhoneCall, label: 'Talk to Us', description: 'Reach our support team', href: EROUTES.CONTACT_US },
+      { icon: User, label: 'Find an Agent', description: 'Connect with a local advisor', href: '#' },
+    ],
+  },
+]
 
+export const LANG_NAMES: Record<string, string> = {
+  eng: 'English', swa: 'Swahili', fra: 'French', kin: 'Kinyarwanda', tsn: 'Tswana',
+}
