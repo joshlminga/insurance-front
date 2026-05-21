@@ -131,7 +131,6 @@ const CountryDropdownComponent = (
         <ChevronDown size={16} className="shrink-0 ml-1 opacity-60 transition-transform duration-200 [[data-state=open]>&]:rotate-180"
         />
       </PopoverTrigger>
-
       <PopoverContent
         collisionPadding={10}
         side="bottom" className="min-w-[--radix-popper-anchor-width] p-0">

@@ -166,23 +166,23 @@ const MobileDrawer: React.FC<MobileDrawerProps> = ({
   const profileItem: NavItem = {
     label: 'Profile',
     dropdown: [
-      { 
-        icon: ShieldCheck, 
-        label: 'My Covers', 
-        description: 'View and manage your policies', 
-        href: `/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}` 
+      {
+        icon: ShieldCheck,
+        label: 'My Covers',
+        description: 'View and manage your policies',
+        href: `/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}`
       },
-      { 
-        icon: BarChart3, 
-        label: 'Reports', 
-        description: 'Your reports and statements', 
-        href: EROUTES.REPORTS 
+      {
+        icon: BarChart3,
+        label: 'Reports',
+        description: 'Your reports and statements',
+        href: EROUTES.REPORTS
       },
-      { 
-        icon: Settings, 
-        label: 'Settings', 
-        description: 'Account and app settings', 
-        href: EROUTES.SETTINGS 
+      {
+        icon: Settings,
+        label: 'Settings',
+        description: 'Account and app settings',
+        href: EROUTES.SETTINGS
       },
     ],
   };
@@ -213,10 +213,10 @@ const MobileDrawer: React.FC<MobileDrawerProps> = ({
         )}>
         <div className="relative flex-1 overflow-hidden">
           <div className={cn(
-              'absolute inset-0 flex flex-col',
-              'transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]',
-              activePanel ? '-translate-x-full' : 'translate-x-0',
-            )}>
+            'absolute inset-0 flex flex-col',
+            'transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]',
+            activePanel ? '-translate-x-full' : 'translate-x-0',
+          )}>
             <div className="flex h-16 shrink-0 items-center justify-between border-b border-[#C20C0C] px-5">
               <Link to={EROUTES.LANDING} onClick={closeAll} className="shrink-0">
                 <img src={ELOGO.NAVBARLOGO} alt="Acentria" className="h-8 w-auto object-contain" />
@@ -431,10 +431,10 @@ const Navbar: React.FC<NavbarProps> = () => {
                 <DesktopNavItem key={item.label} item={item} isScrolled={isScrolled} />
               ))}
               <div className="flex items-center gap-2 shrink-0 pl-2 border-l border-gray-200">
-                <CountryDropdown 
-                defaultValue={alpha} 
-                onChange={handleCountryChange} 
-                slim={false} />
+                <CountryDropdown
+                  defaultValue={alpha}
+                  onChange={handleCountryChange}
+                  slim={false} />
                 <span className="flex items-center gap-1 text-xs font-medium text-gray-500 whitespace-nowrap border-l border-gray-300 pl-2">
                   <Globe className="w-3 h-3 shrink-0" />
                   {LANG_NAMES[lang] ?? lang}
@@ -447,8 +447,7 @@ const Navbar: React.FC<NavbarProps> = () => {
                   <Button
                     variant="ghost"
                     onClick={() => setProfileOpen((v) => !v)}
-                    className="flex items-center gap-2.5 rounded-full border border-gray-200 bg-white px-3 py-3 text-sm font-medium text-gray-700 shadow-sm hover:border-gray-300 transition-colors"
-                  >
+                    className="flex items-center gap-2.5 rounded-full border border-gray-200 bg-white px-3 py-3 text-sm font-medium text-gray-700 shadow-sm hover:border-gray-300 transition-colors">
                     <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#C20C0C] text-[12px] font-bold text-white">
                       {userInitials}
                     </span>
@@ -537,5 +536,4 @@ const Navbar: React.FC<NavbarProps> = () => {
     </>
   );
 };
-
 export default Navbar;
