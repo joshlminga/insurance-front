@@ -1,7 +1,7 @@
 // import { UseAuth } from "@/stores/auth-store"
-import { Button, ReusableDropdown } from "@/dev/core"
+import { Button } from "@/dev/core"
 import { EPREFIX, EROUTES } from "@/utils/enums"
-import { Link, useNavigate } from "react-router-dom"
+import { Link} from "react-router-dom"
 import { useRef } from "react"
 import { useInView } from "motion/react"
 import { ArrowRight, Bus, Car, Ship, User } from "lucide-react";
@@ -37,10 +37,8 @@ const propertyFeatures = [
 ];
 
 export const HeroSection = () => {
-    const Navigate = useNavigate();
     const sectionRef = useRef<HTMLElement>(null);
     const isInView = useInView(sectionRef, { once: true, amount: 0.1 });
-
     return (
         <section ref={sectionRef} className="relative w-full overflow-hidden">
             <div className="relative z-10 flex min-h-screen flex-col justify-between bg-[url('/hero.webp')] bg-contain sm:bg-cover bg-center bg-repeat-x pt-24 sm:pt-32 lg:pt-0">
@@ -60,37 +58,13 @@ export const HeroSection = () => {
                         </p>
 
                         <div className="mt-6 sm:mt-8 flex flex-wrap items-center gap-4">
-                            <ReusableDropdown
-                                trigger={
-                                    <Button
-                                        className="h-11 px-6 sm:px-8 flex items-center justify-center gap-2 rounded-full bg-[#BF162E] text-sm font-semibold text-white hover:bg-[#BF162E]/90 transition-colors shadow-lg shadow-red-900/20"
-                                        rightIcon={<ArrowRight className="h-4 w-4" />}>
-                                        Generate Quote
-                                    </Button>
-                                }
-                                items={[
-                                    {
-                                        label: "Motor Insurance",
-                                        icon: <Car className="w-4 h-4" />,
-                                        onClick: () => Navigate(`/${EPREFIX.CUSTOMER}${EROUTES.MOTOR}`),
-                                    },
-                                    {
-                                        label: "Travel Insurance",
-                                        icon: <Bus className="w-4 h-4" />,
-                                        onClick: () => Navigate(`/${EPREFIX.CUSTOMER}${EROUTES.TRAVEL}`),
-                                    },
-                                    {
-                                        label: "Marine Insurance",
-                                        icon: <Ship className="w-4 h-4" />,
-                                        onClick: () => Navigate(`/${EPREFIX.CUSTOMER}${EROUTES.MARINE}`),
-                                    },
-                                    {
-                                        label: "Life Insurance",
-                                        icon: <User className="w-4 h-4" />,
-                                        onClick: () => Navigate(`/${EPREFIX.CUSTOMER}${EROUTES.LIFE}`),
-                                    },
-                                ]}
-                            />
+                            <Link to={`${EROUTES.PRODUCT_LIST}`}>
+                                <Button
+                                    className="h-11 px-6 sm:px-8 flex items-center justify-center gap-2 rounded-full bg-[#BF162E] text-sm font-semibold text-white hover:bg-[#BF162E]/90 transition-colors shadow-lg shadow-red-900/20"
+                                    rightIcon={<ArrowRight className="h-4 w-4" />}>
+                                    Generate Quote
+                                </Button>
+                            </Link>
                             <Button
                                 variant="outline"
                                 className="h-11 px-6 sm:px-8 flex items-center justify-center gap-2 rounded-full bg-transparent border-2 border-white text-sm font-semibold text-white hover:bg-white hover:text-slate-900 transition-all">
