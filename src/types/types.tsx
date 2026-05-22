@@ -719,3 +719,16 @@ export interface ProfileMenuItemProps {
   onClick: () => void;
   className?: string;
 }
+
+export interface ReusableSwitchToggleProps {
+  id: string
+  label: string
+  description?: string
+  checked?: boolean
+  defaultChecked?: boolean
+  disabled?: boolean
+  invalid?: boolean
+  orientation?: "horizontal" | "vertical"
+  className?: string
+  onCheckedChange?: (checked: boolean) => void
+}

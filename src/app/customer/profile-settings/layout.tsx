@@ -3,7 +3,7 @@ import Navbar from '@/app/landing/components/navbar'
 import React from 'react'
 import { Outlet } from 'react-router-dom'
 
-export const CustomerProfileLayout = () => {
+export const CustomerProfileLayout: React.FC = () => {
     return (
         <div className="min-h-screen">
             <Navbar />

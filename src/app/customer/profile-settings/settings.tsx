@@ -1,7 +1,8 @@
-import { Button, ReuseableInput } from '@/dev/core'
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Button, ReusableSwitchToggle, ReuseableInput } from '@/dev/core'
 import { UseApiMutation } from '@/hooks/hooks'
-import { CustomerDetailsSchema } from '@/types/form-schema'
-import { CustomerFormValues } from '@/types/schema'
+import { CustomerDetailsSchema, ResetPasswordSchema } from '@/types/form-schema'
+import { CustomerFormValues, ResetPasswordValues } from '@/types/schema'
 import { SubmitResponse } from '@/types/types'
 import { EMETHODS } from '@/utils/constatnts'
 import { extractErrorMessage } from '@/utils/helpers'
@@ -12,91 +13,99 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 export const AccountSettingsPage = () => {
-    const [show, setShow] = useState(false);
-    const [showConfirm, setShowConfirm] = useState(false);
-    const [showNewConfirm, setShowNewConfirm] = useState(false);
+    const [showOldPassword, setShowOldPassword] = useState(false)
+    const [showNewPassword, setShowNewPassword] = useState(false)
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+    const [twoFactorEnabled, setTwoFactorEnabled] = useState(false)
 
     const form = useForm<CustomerFormValues>({
         resolver: zodResolver(CustomerDetailsSchema),
         defaultValues: {
-            first_name: "",
-            last_name: "",
-            email: "",
-            phone: "",
+            first_name: '',
+            last_name: '',
+            email: '',
+            phone: '',
         },
+    })
 
-    })
-    const pass_form = useForm<CustomerFormValues>({
-        resolver: zodResolver(CustomerDetailsSchema),
+    const passForm = useForm<ResetPasswordValues>({
+        resolver: zodResolver(ResetPasswordSchema),
         defaultValues: {
-            first_name: "",
-            last_name: "",
-            email: "",
-            phone: "",
+            old_password: '',
+            password: '',
+            password_confirmation: '',
         },
     })
+
     const submitMutation = UseApiMutation<SubmitResponse, CustomerFormValues>({
         url: ``,
         method: EMETHODS.POST,
         mutationOptions: {
             onSuccess: (data) => {
-                ShowToast.success(data.message || "Submitted successfully!")
+                ShowToast.success(data.message || 'Profile updated successfully!')
             },
             onError: (error: any) => {
-                const message = extractErrorMessage(error);
-                ShowToast.error(message || "Submission failed!")
+                ShowToast.error(extractErrorMessage(error) || 'Profile update failed!')
             },
         },
     })
-    const onSubmit = (data: CustomerFormValues) => {
-        submitMutation.mutate(data)
-    }
 
-    const submitPasswordMutation = UseApiMutation<SubmitResponse, CustomerFormValues>({
+    const submitPasswordMutation = UseApiMutation<SubmitResponse, ResetPasswordValues>({
         url: ``,
         method: EMETHODS.POST,
         mutationOptions: {
             onSuccess: (data) => {
-                ShowToast.success(data.message || "Submitted successfully!")
+                ShowToast.success(data.message || 'Password updated successfully!')
+                passForm.reset()
             },
             onError: (error: any) => {
-                const message = extractErrorMessage(error);
-                ShowToast.error(message || "Submission failed!")
+                ShowToast.error(extractErrorMessage(error) || 'Password update failed!')
             },
         },
     })
-    const onSubmitPassword = (data: CustomerFormValues) => {
+
+    const onSubmit = (data: CustomerFormValues) => {
+        submitMutation.mutate(data)
+    }
+
+    const onSubmitPassword = (data: ResetPasswordValues) => {
         submitPasswordMutation.mutate(data)
     }
 
+    const handleTwoFactorChange = (enabled: boolean) => {
+        setTwoFactorEnabled(enabled)
+    }
+
     return (
-        <section className="">
-            <div className='grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 '>
-                <div className='lg:col-span-6 bg-white border border-[#EAEAEA] rounded-xl p-5 sm:p-8'>
-                    <h2 className="text-lg sm:text-xl font-bold text-[#111111] mb-1">Profile Settings</h2>
-                    <p className="text-sm text-[#71717A] mb-5 sm:mb-6">Update your profile information at any time.</p>
+        <section>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+                <div className="rounded-xl border border-[#EAEAEA] bg-white p-5 sm:p-8">
+                    <h2 className="text-lg sm:text-xl font-bold text-[#111111] mb-1">
+                        Account Details
+                    </h2>
+                    <p className="text-sm text-[#71717A] mb-5 sm:mb-6">
+                        Update your name, email, and phone number.
+                    </p>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                        <div className="grid grid-cols-1 sm:grid-cols-1 gap-4">
-                            <ReuseableInput
-                                className="w-full h-12 rounded-[5px] border border-[#ADABAB]"
-                                control={form.control}
-                                name="first_name"
-                                placeholder="Enter first name"
-                                label="First name"
-                            />
-                            <ReuseableInput
-                                className="w-full h-12 rounded-[5px] border border-[#ADABAB]"
-                                control={form.control}
-                                name="last_name"
-                                placeholder="Enter last name"
-                                label="Last name"
-                            />
-                        </div>
+                        <ReuseableInput
+                            className="w-full h-12 rounded-[5px] border border-[#ADABAB]"
+                            control={form.control}
+                            name="first_name"
+                            placeholder="Enter first name"
+                            label="First name"
+                        />
+                        <ReuseableInput
+                            className="w-full h-12 rounded-[5px] border border-[#ADABAB]"
+                            control={form.control}
+                            name="last_name"
+                            placeholder="Enter last name"
+                            label="Last name"
+                        />
                         <ReuseableInput
                             className="w-full h-12 rounded-[5px] border border-[#ADABAB]"
                             control={form.control}
                             name="email"
-                            type='email'
+                            type="email"
                             placeholder="Enter email"
                             label="Email"
                         />
@@ -104,76 +113,84 @@ export const AccountSettingsPage = () => {
                             className="w-full h-12 rounded-[5px] border border-[#ADABAB]"
                             control={form.control}
                             name="phone"
-                            type='tel'
+                            type="tel"
                             placeholder="Enter phone number"
                             label="Phone Number"
                         />
                         <Button
                             type="submit"
                             loading={submitMutation.isPending}
-                            className="w-full bg-[#C20C0C]/80 hover:bg-[#C20C0C] h-11 rounded-lg text-sm font-semibold">
+                            className="w-full bg-[#C20C0C]/80 hover:bg-[#C20C0C] h-11 rounded-lg text-sm font-semibold"
+                        >
                             Update Profile
                         </Button>
                     </form>
                 </div>
+                <div className="rounded-xl border border-[#EAEAEA] bg-white p-5 sm:p-8">
+                    <h2 className="text-lg sm:text-xl font-bold text-[#111111] mb-1">
+                        Security Settings
+                    </h2>
+                    <p className="text-sm text-[#71717A] mb-5 sm:mb-6">
+                        Manage your password and two-factor authentication.
+                    </p>
 
-                <div className='lg:col-span-6 bg-white border border-[#EAEAEA] rounded-xl p-5 sm:p-8'>
-                    <h2 className="text-lg sm:text-xl font-bold text-[#111111] mb-1">Security Settings</h2>
-                    <p className="text-sm text-[#71717A] mb-5 sm:mb-6">Update your security preferences at any time.</p>
-                    <form onSubmit={pass_form.handleSubmit(onSubmitPassword)} className="space-y-4">
-                        <div className="grid grid-cols-1 sm:grid-cols-1 gap-4">
-                            <div className="relative items-center justify-center">
-                                <ReuseableInput
-                                    className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] pr-10"
-                                    control={form.control}
-                                    name="old_password"
-                                    label="Old Password"
-                                    type={show ? "text" : "password"}
-                                    placeholder="Enter your old password"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => setShow(!show)}
-                                    className="absolute right-3 top-3/5 -translate-y-1/10 text-gray-500 hover:text-gray-700"
-                                    aria-label={show ? "Hide password" : "Show password"}>
-                                    {show ? <EyeOff size={20} /> : <Eye size={20} />}
-                                </button>
-                            </div>
-                            <div className="relative items-center justify-center">
-                                <ReuseableInput
-                                    className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] pr-10"
-                                    control={form.control}
-                                    name="new_password"
-                                    label="New Password"
-                                    type={showNewConfirm ? "text" : "password"}
-                                    placeholder="Enter your new password"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowNewConfirm(!showNewConfirm)}
-                                    className="absolute right-3 top-3/5 -translate-y-1/10 text-gray-500 hover:text-gray-700"
-                                    aria-label={showNewConfirm ? "Hide password" : "Show password"}>
-                                    {showNewConfirm ? <EyeOff size={20} /> : <Eye size={20} />}
-                                </button>
-                            </div>
-                            <div className="relative items-center justify-center">
-                                <ReuseableInput
-                                    className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] pr-10"
-                                    control={form.control}
-                                    name="confirm_password"
-                                    label="Confirm Password"
-                                    type={showConfirm ? "text" : "password"}
-                                    placeholder="Confirm your new password"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowConfirm(!showConfirm)}
-                                    className="absolute right-3 top-3/5 -translate-y-1/10 text-gray-500 hover:text-gray-700"
-                                    aria-label={showConfirm ? "Hide password" : "Show password"}>
-                                    {showConfirm ? <EyeOff size={20} /> : <Eye size={20} />}
-                                </button>
-                            </div>
+                    <form onSubmit={passForm.handleSubmit(onSubmitPassword)} className="space-y-4">
+                        <div className="relative">
+                            <ReuseableInput
+                                className="w-full h-12 rounded-[5px] border border-[#ADABAB] pr-10"
+                                control={passForm.control}
+                                name="old_password"
+                                label="Current Password"
+                                type={showOldPassword ? 'text' : 'password'}
+                                placeholder="Enter your current password"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowOldPassword((v) => !v)}
+                                className="absolute right-3 top-10 text-gray-500 hover:text-gray-700"
+                                aria-label={showOldPassword ? 'Hide password' : 'Show password'}>
+                                {showOldPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                            </button>
                         </div>
+
+                        <div className="relative">
+                            <ReuseableInput
+                                className="w-full h-12 rounded-[5px] border border-[#ADABAB] pr-10"
+                                control={passForm.control}
+                                name="password"
+                                label="New Password"
+                                type={showNewPassword ? 'text' : 'password'}
+                                placeholder="Enter your new password"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowNewPassword((v) => !v)}
+                                className="absolute right-3 top-10 text-gray-500 hover:text-gray-700"
+                                aria-label={showNewPassword ? 'Hide password' : 'Show password'}
+                            >
+                                {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                            </button>
+                        </div>
+
+                        <div className="relative">
+                            <ReuseableInput
+                                className="w-full h-12 rounded-[5px] border border-[#ADABAB] pr-10"
+                                control={passForm.control}
+                                name="password_confirmation"
+                                label="Confirm New Password"
+                                type={showConfirmPassword ? 'text' : 'password'}
+                                placeholder="Confirm your new password"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowConfirmPassword((v) => !v)}
+                                className="absolute right-3 top-10 text-gray-500 hover:text-gray-700"
+                                aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                            >
+                                {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                            </button>
+                        </div>
+
                         <Button
                             type="submit"
                             loading={submitPasswordMutation.isPending}
@@ -181,18 +198,16 @@ export const AccountSettingsPage = () => {
                             Update Password
                         </Button>
                     </form>
+                    <div className="mt-8 pt-6 border-t border-[#EAEAEA]">
+                        <ReusableSwitchToggle
+                            id="two-factor-auth"
+                            label="Two-Factor Authentication"
+                            description="Add an extra layer of security to your account."
+                            checked={twoFactorEnabled}
+                            onCheckedChange={handleTwoFactorChange}
+                        />
+                    </div>
                 </div>
-
-                <div className='lg:col-span-6 bg-white border border-[#EAEAEA] rounded-xl p-5 sm:p-8'>
-                    <h2 className="text-lg sm:text-xl font-bold text-[#111111] mb-1">2 Factor Authentication</h2>
-                    <p className="text-sm text-[#71717A] mb-5 sm:mb-6">Update your security preferences at any time.</p>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                        <div className="grid grid-cols-1 sm:grid-cols-1 gap-4">
-
-                        </div>
-                    </form>
-                </div>
-
             </div>
         </section>
     )
