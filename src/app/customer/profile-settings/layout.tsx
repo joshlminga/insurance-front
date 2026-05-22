@@ -2,12 +2,13 @@ import { Footer } from '@/app/landing/components/footer'
 import Navbar from '@/app/landing/components/navbar'
 import { cn } from '@/lib/utils'
 import { EPREFIX, EROUTES } from '@/utils/enums'
+import { BaggageClaim, Settings, Umbrella } from 'lucide-react'
 import { NavLink, Outlet } from 'react-router-dom'
 
 const profileLinks = [
-  { label: 'My Covers', to: `/${EPREFIX.CUSTOMER}${EROUTES.COVERS}` },
-  { label: 'My Claims', to: `/${EPREFIX.CUSTOMER}${EROUTES.CLAIMS}` },
-  { label: 'Account Settings', to: `/${EPREFIX.CUSTOMER}${EROUTES.ACCOUNTSETTINGS}` },
+  { label: 'My Covers', to: `/${EPREFIX.CUSTOMER}${EROUTES.COVERS}`, icon: Umbrella },
+  { label: 'My Claims', to: `/${EPREFIX.CUSTOMER}${EROUTES.CLAIMS}`, icon: BaggageClaim },
+  { label: 'Account Settings', to: `/${EPREFIX.CUSTOMER}${EROUTES.ACCOUNTSETTINGS}`, icon: Settings },
 ]
 
 export const CustomerProfileLayout = () => {
@@ -49,6 +50,7 @@ export const CustomerProfileLayout = () => {
                       : 'bg-white text-[#111111] border border-[#E4E4E7] hover:border-[#BF162E]/40 hover:text-[#BF162E]'
                   )
                 }>
+                    {item.icon && <item.icon className="mr-2 h-4 w-4" aria-hidden="true" />}
                 {item.label}
               </NavLink>
             ))}
