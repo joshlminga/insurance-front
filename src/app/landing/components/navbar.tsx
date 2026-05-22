@@ -258,10 +258,9 @@ const MobileDrawer: React.FC<MobileDrawerProps> = ({
                     Log in
                   </Link>
                   <Link
-                    to={`/${EPREFIX.CUSTOMER}${EROUTES.MOTOR}`}
+                     to={`${EROUTES.PRODUCT_LIST}`}
                     onClick={closeAll}
-                    className="flex w-full items-center justify-center gap-2 rounded-full bg-[#C20C0C] px-6 py-3 text-sm font-bold text-white hover:bg-[#a50a0a] transition-colors"
-                  >
+                    className="flex w-full items-center justify-center gap-2 rounded-full bg-[#C20C0C] px-6 py-3 text-sm font-bold text-white hover:bg-[#a50a0a] transition-colors">
                     Get a Quote <ArrowRight className="h-4 w-4" />
                   </Link>
                 </>
@@ -472,7 +471,7 @@ const Navbar: React.FC<NavbarProps> = () => {
                     Log in
                   </Link>
                   <Link
-                    to={`/${EPREFIX.CUSTOMER}${EROUTES.MOTOR}`}
+                    to={`${EROUTES.PRODUCT_LIST}`}
                     className="flex items-center gap-2 rounded-full bg-[#BF162E] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#BF162E]/80 transition-colors duration-200">
                     Get a Quote <ArrowRight className="h-3.5 w-3.5" />
                   </Link>

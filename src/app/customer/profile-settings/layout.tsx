@@ -34,9 +34,8 @@ export const CustomerProfileLayout = () => {
           </div>
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
-          <nav
-            aria-label="Profile sections"
-            className="flex flex-wrap gap-2 sm:gap-3 mb-8 sm:mb-10">
+          <nav aria-label="Profile sections"
+            className="flex flex-wrap gap-2 sm:gap-3 mb-3 sm:mb-10">
             {profileLinks.map((item) => (
               <NavLink
                 key={item.to}
@@ -48,9 +47,8 @@ export const CustomerProfileLayout = () => {
                     isActive
                       ? 'bg-[#BF162E] text-white'
                       : 'bg-white text-[#111111] border border-[#E4E4E7] hover:border-[#BF162E]/40 hover:text-[#BF162E]'
-                  )
-                }>
-                    {item.icon && <item.icon className="mr-2 h-4 w-4" aria-hidden="true" />}
+                  )}>
+                {item.icon && <item.icon className="mr-1 h-4 w-4 hidden sm:block" aria-hidden="true" />}
                 {item.label}
               </NavLink>
             ))}
