@@ -5,8 +5,16 @@ import { MyCoversColumns } from '@/dev/columns/customer/motor/my-covers';
 import { CustomBaseTable } from '@/dev/table';
 import { useDebounce } from '@/hooks';
 import { UseApiQuery } from '@/hooks/hooks';
-import { SingleActionsHandler, SubmitResponse, TFilterOptions, TPaginationFilters } from '@/types/types';
-import { FILTEROPTIONS, ReusableReducer } from '@/utils/constatnts';
+import { 
+    SingleActionsHandler, 
+    SubmitResponse, 
+    TFilterOptions, 
+    TPaginationFilters 
+} from '@/types/types';
+import { 
+    FILTEROPTIONS, 
+    ReusableReducer 
+} from '@/utils/constatnts';
 import { useReducer } from 'react'
 
 export const CustomerCoversPage = () => {
@@ -41,7 +49,7 @@ export const CustomerCoversPage = () => {
                     <p className="text-sm text-[#71717A] mb-5 sm:mb-6">
                         View and manage your covers.
                     </p>
-                    
+
                     <div className='w-full space-y-4 py-4 mb-5'>
                         <StatsGrid columns={4}>
                             <StatsCard
@@ -104,7 +112,6 @@ export const CustomerCoversPage = () => {
                             }}
                         />
                     </div>
-
                 </div>
             </div>
         </section>
