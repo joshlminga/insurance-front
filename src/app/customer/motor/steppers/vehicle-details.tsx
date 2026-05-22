@@ -119,7 +119,6 @@ const VehicleDetailsBox: React.FC = () => {
                             />
                         )}
                     />
-
                     <Controller
                         control={control}
                         name="vehicle_model_id"
@@ -142,7 +141,6 @@ const VehicleDetailsBox: React.FC = () => {
                             />
                         )}
                     />
-
                     <YearOfManufactureInput<VehicleFormValues>
                         className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
                         control={control}
@@ -150,9 +148,8 @@ const VehicleDetailsBox: React.FC = () => {
                         name="year"
                         comprehensiveId="1384"
                     />
-
                     <ReuseableInput
-                        className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                        className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] uppercase"
                         control={control}
                         name="vehicle_registration_number"
                         label="Vehicle Registration Number"
@@ -160,7 +157,6 @@ const VehicleDetailsBox: React.FC = () => {
                         required
                         placeholder="e.g. KAA 123A"
                     />
-
                     <ReuseableInput
                         className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
                         control={control}
@@ -171,7 +167,6 @@ const VehicleDetailsBox: React.FC = () => {
                         placeholder="vehicle value"
                     />
                 </div>
-
                 <div className="mt-5 overflow-x-auto">
                     <ReusableCheckboxGrid
                         className="text-[#C20C0C]"
@@ -435,8 +430,7 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
                                                         isSelected
                                                             ? 'border-[#C20C0C] bg-[#C20C0C]/[0.07] ring-2 ring-[#C20C0C]/20'
                                                             : 'border-[#E5E5E5] bg-white/90'
-                                                    )}
-                                                >
+                                                    )}>
                                                     <span
                                                         className={cn(
                                                             'flex h-12 w-12 items-center justify-center rounded-xl border transition-colors',
@@ -468,7 +462,6 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
                             <AnimatedSection show={hasSelectedClass}>
                                 <VehicleDetailsBox />
                             </AnimatedSection>
-
                             <AnimatedSection show={hasSelectedClass && hasCompletedVehicleDetails}>
                             <div className="flex flex-col gap-0.5 pb-3">
                                     <h2 className="text-base font-semibold sm:text-lg">
