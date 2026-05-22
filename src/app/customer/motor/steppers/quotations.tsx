@@ -470,14 +470,6 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                             }>
                             Add benefit
                         </Button>
-                        {/* <Button
-                            type="button"
-                            className="flex w-full items-center gap-1.5 rounded bg-[#C20C0C]/80 px-5 py-2 text-sm font-medium text-white hover:bg-[#C20C0C] sm:ml-auto sm:w-auto"
-                            onClick={() => onComparison(false)}
-                            loading={submitComparisonMutation.isPending || submitComparisonDownloadMutation.isPending}
-                            disabled={selectedQuotes.length < 2}>
-                            Generate Comparison {selectedQuotes.length > 0 && `(${selectedQuotes.length}/${MAX_COMPARISONS})`}
-                        </Button> */}
                     </div>
                 </form>
             </section>

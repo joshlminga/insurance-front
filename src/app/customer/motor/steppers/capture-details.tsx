@@ -71,14 +71,13 @@ export const CustomerVerificationDetails = ({
     }
     setShowPolicyState(true)
   }
-
   return (
-    <div className="w-full min-w-0 max-w-full mx-auto items-center justify-center px-2 sm:px-4 lg:px-6">
+    <div className="w-full min-w-0 max-w-full mx-auto items-center justify-center px-1 sm:px-2 lg:px-6">
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 sm:space-y-8">
         <section className="grid grid-cols-1 gap-6 sm:gap-8 lg:grid-cols-2 lg:items-center lg:gap-10 xl:gap-12">
           <div className="hidden lg:flex flex-col items-center justify-center w-full min-w-0 px-2 sm:block">
             <h1 className="text-2xl xl:text-[32px] font-bold leading-tight text-black text-center mb-4 xl:mb-6">
-              Get Motor Insurance
+              Motor Insurance
             </h1>
             <img
               src="/car.png"
@@ -135,7 +134,6 @@ export const CustomerVerificationDetails = ({
             )}
           </FieldGroup>
         </section>
-
         <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
           <Button
             type="button"
