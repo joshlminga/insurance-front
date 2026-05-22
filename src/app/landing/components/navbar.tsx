@@ -18,6 +18,7 @@ import { DropdownItem, MobileDrawerProps, NavbarProps, NavItem, TCountry } from 
 import { Button } from '@/components/ui/button';
 import { CountryDropdown } from '@/components/ui/country-dropdown';
 import { LANG_NAMES, NAV_ITEMS } from '@/utils/constatnts';
+import { ProfileMenuItem } from '@/dev/core';
 
 
 const DesktopDropdown = ({ items }: { items: DropdownItem[] }) => (
@@ -426,24 +427,35 @@ const Navbar: React.FC<NavbarProps> = () => {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 6, scale: 0.97 }}
                         transition={{ duration: 0.15, ease: 'easeOut' }}
-                        className="absolute right-0 top-full mt-2 w-52 rounded-xl border border-gray-100 bg-white p-1.5 shadow-xl shadow-black/10"
-                      >
-                        <div className="border-b border-gray-100 px-3 pb-2.5 pt-1 mb-1">
+                        className="absolute right-0 top-full mt-2 w-52 rounded-sm border border-gray-200 bg-accent py-1.5 shadow-xl shadow-black/10 flex flex-col items-start text-left">
+                        <div className="w-full border-b border-gray-100 px-4 pb-2.5 pt-1 mb-1">
                           <p className="text-xs font-semibold text-gray-900 truncate">{userName}</p>
                           <p className="text-xs text-gray-400 truncate">{userEmail}</p>
                         </div>
-                        <Link to={`/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}`} onClick={() => setProfileOpen(false)} className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-[#C20C0C] transition-colors">
-                          <ShieldCheck className="h-4 w-4" /> My Covers
-                        </Link>
-                        <Link to={EROUTES.REPORTS} onClick={() => setProfileOpen(false)} className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-[#C20C0C] transition-colors">
-                          <BarChart3 className="h-4 w-4" /> Reports
-                        </Link>
-                        <Link to={EROUTES.SETTINGS} onClick={() => setProfileOpen(false)} className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-[#C20C0C] transition-colors">
-                          <Settings className="h-4 w-4" /> Settings
-                        </Link>
-                        <div className="border-t border-gray-100 mt-1 pt-1">
-                          <Button onClick={() => { logout(); setProfileOpen(false); }} variant="ghost" className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
-                            <LogOut className="h-4 w-4" /> Log out
+                        <ProfileMenuItem
+                          to={`/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}`}
+                          icon={ShieldCheck}
+                          label="My Covers"
+                          onClick={() => setProfileOpen(false)}
+                        />
+                        <ProfileMenuItem
+                          to={EROUTES.REPORTS}
+                          icon={BarChart3}
+                          label="Reports"
+                          onClick={() => setProfileOpen(false)}
+                        />
+                        <ProfileMenuItem
+                          to={EROUTES.SETTINGS}
+                          icon={Settings}
+                          label="Settings"
+                          onClick={() => setProfileOpen(false)}
+                        />
+                        <div className="w-full mt-1">
+                          <Button
+                            onClick={() => { logout(); setProfileOpen(false); }}
+                            variant="ghost"
+                            className="flex w-full items-center justify-start gap-2.5 rounded-none px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                            <LogOut className="h-4 w-4 shrink-0" /> Log out
                           </Button>
                         </div>
                       </motion.div>

@@ -46,7 +46,6 @@ export function NavUser({
     <SidebarMenu>
       <SidebarMenuItem>
         <DropdownMenu>
-
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
