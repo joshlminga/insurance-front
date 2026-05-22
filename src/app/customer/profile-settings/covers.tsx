@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { StatsCard, StatsGrid } from '@/components/shared';
 import { ActionColumn } from '@/dev/columns';
 import { MyCoversColumns } from '@/dev/columns/customer/motor/my-covers';
 import { CustomBaseTable } from '@/dev/table';
@@ -40,8 +41,30 @@ export const CustomerCoversPage = () => {
                     <p className="text-sm text-[#71717A] mb-5 sm:mb-6">
                         View and manage your covers.
                     </p>
-                    <div>
-
+                    
+                    <div className='w-full space-y-4 py-4 mb-5'>
+                        <StatsGrid columns={4}>
+                            <StatsCard
+                                title="Active Covers"
+                                value={3}
+                                description={`1 expiring soon`}
+                            />
+                            <StatsCard
+                                title="Total Coverage"
+                                value={`KES 4.2M`}
+                                description="Across all policies"
+                            />
+                            <StatsCard
+                                title="Monthly Premium"
+                                value={`KES 8,400`}
+                                description={`Next  Mar 1, 2026`}
+                            />
+                            <StatsCard
+                                title="Claims"
+                                value={0}
+                                description={`Monday,23 Feb 2026 . `}
+                            />
+                        </StatsGrid>
                     </div>
 
                     <div className='w-full'>
@@ -68,7 +91,7 @@ export const CustomerCoversPage = () => {
                                 // OtherTools: SearchTools,
                                 data: data?.data ?? [],
                                 pageCount: data?.pagination?.last_page ?? 1,
-                                title: '',
+                                title: 'Covers',
                                 showPagination: true,
                                 setPageSize: (pageSize) =>
                                     optionsDispatcher({
