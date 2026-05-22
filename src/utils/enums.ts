@@ -25,7 +25,10 @@ export const EROUTES = {
   TRAVEL: '/travel',
   MARINE: '/marine',
   LIFE: '/life',
-  MY_COVERS: '/my-covers',
+  PROFILE: '/profile',
+  ACCOUNTSETTINGS: '/profile/account-settings',
+  CLAIMS: '/profile/my-claims',
+  COVERS: '/profile/my-covers',
 
   // Auth
   SIGNUP: '/signup',

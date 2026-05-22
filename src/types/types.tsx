@@ -712,3 +712,10 @@ export interface MobileDrawerProps {
   lang: string;
   handleCountryChange: (c: TCountry) => void;
 }
+export interface ProfileMenuItemProps {
+  to: string;
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  onClick: () => void;
+  className?: string;
+}

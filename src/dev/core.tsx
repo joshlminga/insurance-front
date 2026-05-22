@@ -36,6 +36,7 @@ import type {
     TFilterOptions,
     TPaginationFilters,
     TLoaderProps,
+    ProfileMenuItemProps,
     ConfirmationDialogProps
 } from "@/types/types";
 import {
@@ -2404,7 +2405,7 @@ export const SendInvoiceViaEmail = ({
     )
 }
 
-export default function ChatFloatingButton() {
+export const ChatFloatingButton = () => {
     const [isOpen, setIsOpen] = useState(false);
     return (
         <>
@@ -2461,4 +2462,22 @@ export default function ChatFloatingButton() {
             {isOpen && <ChatIndexPage isOpen={isOpen} setIsOpen={setIsOpen} />}
         </>
     );
+}
+
+export const ProfileMenuItem = ({
+  to,
+  icon: Icon,
+  label,
+  onClick,
+  className = "",
+}: ProfileMenuItemProps) => {
+  return (
+    <Link
+      to={to}
+      onClick={onClick}
+      className={`flex w-full items-center gap-2.5 border-b border-gray-100 px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-[#C20C0C] transition-colors ${className}`}>
+      <Icon className="h-4 w-4 shrink-0" />
+      <span>{label}</span>
+    </Link>
+  );
 }

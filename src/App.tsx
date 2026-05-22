@@ -25,11 +25,11 @@ const MotorLandingPage = lazy(() => import("./app/customer/motor/page").then(m =
 const StepPage = lazy(() => import("./app/customer/motor/steppers/steppage").then(m => ({ default: m.StepPage })))
 const MarineLandingPage = lazy(() => import("./app/customer/marine/page").then(m => ({ default: m.MarineLandingPage })))
 const MarineStepPage = lazy(() => import("./app/customer/marine/steppers/steppage").then(m => ({ default: m.MarineStepPage })))
-const MyCoversLayout = lazy(() => import("./app/customer/my-covers/layout").then(m => ({ default: m.MyCoversLayout })))
-const CoversPage = lazy(() => import("./app/customer/my-covers/ongoing/page").then(m => ({ default: m.CoversPage })))
-const CancelledCoversPage = lazy(() => import("./app/customer/my-covers/cancelled/page").then(m => ({ default: m.CancelledCoversPage })))
-const MyAccountManagementPage = lazy(() => import("./app/customer/my-covers/my-account/page").then(m => ({ default: m.MyAccountManagementPage })))
-const MyClaimsPage = lazy(() => import("./app/customer/my-covers/my-claims/page").then(m => ({ default: m.MyClaimsPage })))
+const CustomerProfileLayout = lazy(() => import("./app/customer/profile-settings/layout").then(m => ({ default: m.CustomerProfileLayout })))
+const AccountSettingsPage = lazy(() => import("./app/customer/profile-settings/settings").then(m => ({ default: m.AccountSettingsPage })))
+const CustomerClaimsPage = lazy(() => import("./app/customer/profile-settings/claims").then(m => ({ default: m.CustomerClaimsPage })))
+const CustomerCoversPage = lazy(() => import("./app/customer/profile-settings/covers").then(m => ({ default: m.CustomerCoversPage })))
+
 
 // Auth pages
 const AuthLayoutPage = lazy(() => import("./auth/layout"))
@@ -90,7 +90,7 @@ export const router = createBrowserRouter([
         <ContactUsPage />
       </S>,
   },
- {
+  {
     path: EROUTES.PRODUCT_LIST,
     element:
       <S>
@@ -118,34 +118,35 @@ export const router = createBrowserRouter([
 
   // My Covers / Customer Account — protected (authenticated only)
   {
-    path: `${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}`,
+    path: `${EPREFIX.CUSTOMER}${EROUTES.PROFILE}`,
     element: (
       <ProtectedRoute>
-        <S><MyCoversLayout /></S>
+        <S><CustomerProfileLayout /></S>
       </ProtectedRoute>
     ),
     children: [
       {
         index: true,
-        element: <S><CoversPage /></S>,
+        path: "my-covers",
+        element: <S><CustomerCoversPage /></S>,
+      },
+      // {
+      //   path: "cancelled",
+      //   element: <S><CoversPage /></S>,
+      //   children: [
+      //     {
+      //       index: true,
+      //       element: <S><CancelledCoversPage /></S>,
+      //     },
+      //   ],
+      // },
+      {
+        path: "my-claims",
+        element: <S><CustomerClaimsPage /></S>,
       },
       {
-        path: "cancelled",
-        element: <S><CoversPage /></S>,
-        children: [
-          {
-            index: true,
-            element: <S><CancelledCoversPage /></S>,
-          },
-        ],
-      },
-      {
-        path: "account",
-        element: <S><MyAccountManagementPage /></S>,
-      },
-      {
-        path: "claims",
-        element: <S><MyClaimsPage /></S>,
+        path: "account-settings",
+        element: <S><AccountSettingsPage /></S>,
       },
     ],
   },
