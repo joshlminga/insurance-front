@@ -26,6 +26,9 @@ const StepPage = lazy(() => import("./app/customer/motor/steppers/steppage").the
 const MarineLandingPage = lazy(() => import("./app/customer/marine/page").then(m => ({ default: m.MarineLandingPage })))
 const MarineStepPage = lazy(() => import("./app/customer/marine/steppers/steppage").then(m => ({ default: m.MarineStepPage })))
 const CustomerProfileLayout = lazy(() => import("./app/customer/profile-settings/layout").then(m => ({ default: m.CustomerProfileLayout })))
+const AccountSettingsPage = lazy(() => import("./app/customer/profile-settings/settings").then(m => ({ default: m.AccountSettingsPage })))
+const CustomerClaimsPage = lazy(() => import("./app/customer/profile-settings/claims").then(m => ({ default: m.CustomerClaimsPage })))
+const CustomerCoversPage = lazy(() => import("./app/customer/profile-settings/covers").then(m => ({ default: m.CustomerCoversPage })))
 
 
 // Auth pages
@@ -87,7 +90,7 @@ export const router = createBrowserRouter([
         <ContactUsPage />
       </S>,
   },
- {
+  {
     path: EROUTES.PRODUCT_LIST,
     element:
       <S>
@@ -121,30 +124,31 @@ export const router = createBrowserRouter([
         <S><CustomerProfileLayout /></S>
       </ProtectedRoute>
     ),
-    // children: [
-    //   {
-    //     index: true,
-    //     element: <S><CoversPage /></S>,
-    //   },
-    //   {
-    //     path: "cancelled",
-    //     element: <S><CoversPage /></S>,
-    //     children: [
-    //       {
-    //         index: true,
-    //         element: <S><CancelledCoversPage /></S>,
-    //       },
-    //     ],
-    //   },
-    //   {
-    //     path: "account",
-    //     element: <S><MyAccountManagementPage /></S>,
-    //   },
-    //   {
-    //     path: "claims",
-    //     element: <S><MyClaimsPage /></S>,
-    //   },
-    // ],
+    children: [
+      {
+        index: true,
+        path: "my-covers",
+        element: <S><CustomerCoversPage /></S>,
+      },
+      // {
+      //   path: "cancelled",
+      //   element: <S><CoversPage /></S>,
+      //   children: [
+      //     {
+      //       index: true,
+      //       element: <S><CancelledCoversPage /></S>,
+      //     },
+      //   ],
+      // },
+      {
+        path: "my-claims",
+        element: <S><CustomerClaimsPage /></S>,
+      },
+      {
+        path: "account-settings",
+        element: <S><AccountSettingsPage /></S>,
+      },
+    ],
   },
 
   // marine

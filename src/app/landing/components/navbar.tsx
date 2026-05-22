@@ -4,10 +4,16 @@ import React, { useEffect, useState, useCallback, useRef } from 'react'
 import { cn } from '@/lib/utils';
 import {
   ArrowRight,
-  ChevronDown, ChevronRight,
-  Menu, X, ArrowLeft,
-  LogOut, ShieldCheck, BarChart3, Settings,
+  ChevronDown, 
+  ChevronRight,
+  Menu, 
+  X, 
+  ArrowLeft,
+  LogOut, 
+  Settings,
   Globe,
+  BaggageClaim,
+  Umbrella,
 } from 'lucide-react'
 import { motion, AnimatePresence, useInView } from "motion/react";
 import { ELOGO, EPREFIX, EROUTES } from '@/utils/enums';
@@ -127,22 +133,22 @@ const MobileDrawer: React.FC<MobileDrawerProps> = ({
     label: 'Profile',
     dropdown: [
       {
-        icon: ShieldCheck,
-        label: 'My Covers',
+        icon: Umbrella,
+        label: 'Covers Report',
         description: 'View and manage your policies',
-        href: `/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}`
+        href: `/${EPREFIX.CUSTOMER}${EROUTES.COVERS}`
       },
       {
-        icon: BarChart3,
-        label: 'Reports',
+        icon: BaggageClaim,
+        label: 'Claims Report',
         description: 'Your reports and statements',
-        href: EROUTES.REPORTS
+        href: `/${EPREFIX.CUSTOMER}${EROUTES.CLAIMS}`
       },
       {
         icon: Settings,
-        label: 'Settings',
+        label: 'Account Settings',
         description: 'Account and app settings',
-        href: EROUTES.SETTINGS
+        href: `/${EPREFIX.CUSTOMER}${EROUTES.ACCOUNTSETTINGS}`
       },
     ],
   };
@@ -217,11 +223,6 @@ const MobileDrawer: React.FC<MobileDrawerProps> = ({
                         onClick={() => openSub(item.label)}
                         className="flex w-full items-center justify-between rounded-xl px-4 py-4 text-left text-base font-semibold text-gray-800 hover:bg-gray-50 hover:text-[#C20C0C] transition-colors">
                         <span className="flex items-center gap-3">
-                          {item.label === 'Profile' && (
-                            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#C20C0C] text-[11px] font-bold text-white shrink-0">
-                              {userInitials}
-                            </span>
-                          )}
                           {item.label}
                         </span>
                         <ChevronRight className="h-5 w-5 text-gray-400 shrink-0" />
@@ -267,7 +268,6 @@ const MobileDrawer: React.FC<MobileDrawerProps> = ({
               )}
             </div>
           </div>
-
           <div
             className={cn(
               'absolute inset-0 flex flex-col bg-white',
@@ -433,21 +433,21 @@ const Navbar: React.FC<NavbarProps> = () => {
                           <p className="text-xs text-gray-400 truncate">{userEmail}</p>
                         </div>
                         <ProfileMenuItem
-                          to={`/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}`}
-                          icon={ShieldCheck}
-                          label="My Covers"
+                          to={`/${EPREFIX.CUSTOMER}${EROUTES.COVERS}`}
+                          icon={Umbrella}
+                          label="Covers Report"
                           onClick={() => setProfileOpen(false)}
                         />
                         <ProfileMenuItem
-                          to={EROUTES.REPORTS}
-                          icon={BarChart3}
-                          label="Reports"
+                          to={`/${EPREFIX.CUSTOMER}${EROUTES.CLAIMS}`}
+                          icon={BaggageClaim}
+                          label="Claims Report"
                           onClick={() => setProfileOpen(false)}
                         />
                         <ProfileMenuItem
-                          to={EROUTES.SETTINGS}
+                          to={`/${EPREFIX.CUSTOMER}${EROUTES.ACCOUNTSETTINGS}`}
                           icon={Settings}
-                          label="Settings"
+                          label="Account Settings"
                           onClick={() => setProfileOpen(false)}
                         />
                         <div className="w-full mt-1">
