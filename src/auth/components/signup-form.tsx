@@ -65,7 +65,7 @@ export function SignupForm({
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <FieldGroup>
           <Field className="py-4">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 min-[400px]:grid-cols-2">
               <ReuseableInput
                 className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] pr-10"
                 control={form.control}

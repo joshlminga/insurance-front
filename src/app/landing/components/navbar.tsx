@@ -379,7 +379,7 @@ const Navbar: React.FC<NavbarProps> = () => {
         className={cn(
           'fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300',
           isScrolled
-            ? 'bg-white/95 backdrop-blur-md shadow-md border-b border-gray-200/60'
+            ? 'bg-white backdrop-blur-md shadow-md border-b border-gray-200/60'
             : 'bg-white/90 border-b-2 border-[#C20C0C] shadow-md',
         )}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5">
