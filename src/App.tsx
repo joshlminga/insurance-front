@@ -235,8 +235,8 @@ export const router = createBrowserRouter([
           <PublicRoute>
             <S>
               <AuthLayoutPage
-                title="Verify Your Email"
-                description="Code has been sent to your email, kindly check.">
+                title="Verify Your Account"
+                description="Verification code has been sent to your email. Please enter the code below to verify your account.">
                 <OtpVerificationAuthForm />
               </AuthLayoutPage>
             </S>
