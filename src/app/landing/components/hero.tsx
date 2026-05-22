@@ -56,7 +56,6 @@ export const HeroSection = () => {
                             Acensure is committed to empowering organizations with strategies that inspire confidence and drive growth.
                             Whether you're looking to optimize risk management, enhance financial performance, or embrace digital transformation, we are here to guide you every step of the way.
                         </p>
-
                         <div className="mt-6 sm:mt-8 flex flex-wrap items-center gap-4">
                             <Link to={`${EROUTES.PRODUCT_LIST}`}>
                                 <Button
