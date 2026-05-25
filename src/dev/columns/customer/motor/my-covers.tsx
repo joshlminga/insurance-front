@@ -12,7 +12,7 @@ export const MyCoversColumns: ColumnDef<any>[] = [
             return <div>{cover_type}</div>;
         },
     },
-     {
+    {
         accessorKey: "agency",
         header: () => <div>Agency</div>,
         cell: ({ row }) => {
@@ -21,11 +21,19 @@ export const MyCoversColumns: ColumnDef<any>[] = [
         },
     },
     {
-        accessorKey: "due_date",
-        header: () => <div>Renewal Date</div>,
+        accessorKey: "certificate",
+        header: () => <div>Issue Date</div>,
         cell: ({ row }) => {
-            const due_date: string = row.getValue("due_date");
-            return <div>{due_date}</div>;
+            const certificate: any = row.getValue("certificate");
+            return <div>{certificate?.issued_date}</div>;
+        },
+    },
+    {
+        accessorKey: "certificate",
+        header: () => <div>Expiry Date</div>,
+        cell: ({ row }) => {
+            const certificate: any = row.getValue("certificate");
+            return <div>{certificate?.expiry_date}</div>;
         },
     },
     {
@@ -34,20 +42,6 @@ export const MyCoversColumns: ColumnDef<any>[] = [
         cell: ({ row }) => {
             const installment_amount: string = row.getValue("installment_amount");
             return <div>{formatCurrency(installment_amount)}</div>;
-        },
-    },
-    {
-        accessorKey: "status",
-        header: () => <div>Payment</div>,
-        cell: ({ row }) => {
-            const status: string = row.getValue("status");
-            return (
-                <Badge
-                    className={`rounded-lg font-semibold ${status ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-                        }`}>
-                    {status ? "Paid" : "Not Paid"}
-                </Badge>
-            );
         },
     },
     {

@@ -2,6 +2,8 @@
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency } from "@/utils/helpers";
 import { ColumnDef } from "@tanstack/table-core";
+import { CopyCell } from "../..";
+import { formatDate } from "@/lib/format";
 
 export const MyPaymentHistory: ColumnDef<any>[] = [
     {
@@ -9,7 +11,7 @@ export const MyPaymentHistory: ColumnDef<any>[] = [
         header: () => <div>Receipt No.</div>,
         cell: ({ row }) => {
             const receipt_number: string = row.getValue("receipt_number");
-            return <div>{receipt_number}</div>;
+            return <CopyCell value={receipt_number} />;
         },
     },
      {
@@ -25,7 +27,7 @@ export const MyPaymentHistory: ColumnDef<any>[] = [
         header: () => <div>Payment Date</div>,
         cell: ({ row }) => {
             const created_at: string = row.getValue("created_at");
-            return <div>{created_at}</div>;
+            return <div>{formatDate(created_at)}</div>;
         },
     },
     {
