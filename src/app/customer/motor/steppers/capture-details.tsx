@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Card, CardContent, CardFooter } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button, ReuseableInput } from "@/dev/core"
 import { ArrowLeftCircle, ArrowRightCircle, CircleCheck, ShieldCheck } from "lucide-react"
 import { useForm } from "react-hook-form"
@@ -17,12 +17,20 @@ import { extractErrorMessage } from "@/utils/helpers"
 import { UseAuth } from "@/stores/auth-store"
 import { EPREFIX, EROUTES } from "@/utils/enums"
 import { useState } from "react"
+import { cn } from "@/lib/utils"
 
-export const CustomerVerificationDetails = ({ goToNextStep, goToPrevStep }: CustomerVerificationDetailsProps) => {
-  const [isPolicy, setIsPolicy] = useState(false);
+const inputClassName =
+  "w-full min-w-0 h-11 sm:h-12.75 rounded-[5px] border border-[#ADABAB]"
+
+export const CustomerVerificationDetails = ({
+  goToNextStep,
+  goToPrevStep,
+}: CustomerVerificationDetailsProps) => {
+  const [isPolicy, setIsPolicy] = useState(false)
   const [showPolicyState, setShowPolicyState] = useState(false)
-  const { setGuest } = UseAuth();
-  const navigate = useNavigate();
+  const { setGuest } = UseAuth()
+  const navigate = useNavigate()
+
   const form = useForm<CustomerFormValues>({
     resolver: zodResolver(CustomerDetailsSchema),
     defaultValues: {
@@ -38,20 +46,20 @@ export const CustomerVerificationDetails = ({ goToNextStep, goToPrevStep }: Cust
     method: EMETHODS.POST,
     mutationOptions: {
       onSuccess: (data) => {
-        setGuest(data?.data);
+        setGuest(data?.data)
         goToNextStep?.()
         ShowToast.success(data.message || "Submitted successfully!")
       },
       onError: (error: any) => {
-        const status = error?.response?.status;
+        const status = error?.response?.status
         if (status === 409) {
           setTimeout(() => {
-            ShowToast.info("Account already exists. Redirecting to login...");
-          }, 2000);
-          navigate(`/${EPREFIX.AUTH}${EROUTES.SIGNIN}`);
-          return;
+            ShowToast.info("Account already exists. Redirecting to login...")
+          }, 2000)
+          navigate(`/${EPREFIX.AUTH}${EROUTES.SIGNIN}`)
+          return
         }
-        const message = extractErrorMessage(error);
+        const message = extractErrorMessage(error)
         ShowToast.error(message || "Submission failed!")
       },
     },
@@ -63,94 +71,102 @@ export const CustomerVerificationDetails = ({ goToNextStep, goToPrevStep }: Cust
     }
     setShowPolicyState(true)
   }
-
   return (
-    <div className="max-w-full mx-auto border-0 bg-transparent">
-      <form onSubmit={form.handleSubmit(onSubmit)}>
-        <div className="grid grid-cols-1 lg:grid-cols-2 items-center gap-6 lg:gap-10">
-          <div className="hidden lg:flex flex-col items-center justify-center w-full max-w-145 h-auto aspect-video">
-            <h1 className="text-2xl xl:text-[32px] font-bold leading-none text-black text-center">
-              Get Motor Insurance
+    <div className="w-full min-w-0 max-w-full mx-auto items-center justify-center px-1 sm:px-2 lg:px-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 sm:space-y-8">
+        <section className="grid grid-cols-1 gap-6 sm:gap-8 lg:grid-cols-2 lg:items-center lg:gap-10 xl:gap-12">
+          <div className="hidden lg:flex flex-col items-center justify-center w-full min-w-0 px-2 sm:block">
+            <h1 className="text-2xl xl:text-[32px] font-bold leading-tight text-black text-center mb-4 xl:mb-6">
+              Motor Insurance
             </h1>
-            <img src="/car.png" alt="Car" className="w-full h-full object-contain rounded-xl" />
+            <img
+              src="/car.png"
+              alt="Car"
+              className="w-full max-w-md xl:max-w-lg h-auto object-contain rounded-xl"
+            />
           </div>
-          <FieldGroup className="w-full">
-            <h1 className="lg:hidden text-xl sm:text-2xl font-bold leading-none text-black mb-4">
-              Get Motor Insurance
-            </h1>
-            <h2 className="flex gap-1 flex-wrap font-poppins text-base sm:text-[20px] font-medium leading-none tracking-normal text-[#141414]">
-              <span>Proceed to add your</span>
-              <span className="text-[#C20C0C]">Details</span>
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+          <FieldGroup className="w-full min-w-0 space-y-4 sm:space-y-5">
+            <div className="space-y-3 sm:space-y-4">
+              <h1 className="lg:hidden text-xl sm:text-2xl md:text-[28px] font-bold leading-tight text-black text-center sm:text-left">
+                Get Motor Insurance
+              </h1>
+              <h2 className="flex flex-wrap items-baseline gap-x-1 gap-y-0.5 font-poppins text-base sm:text-lg md:text-[20px] font-medium leading-snug tracking-normal text-[#141414] justify-center sm:justify-start">
+                <span>Proceed to add your</span>
+                <span className="text-[#C20C0C]">Details</span>
+              </h2>
+            </div>
+            <div className="grid grid-cols-1 min-[480px]:grid-cols-2 gap-3 sm:gap-4">
               <ReuseableInput
-                className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                className={inputClassName}
                 control={form.control}
                 name="first_name"
                 label="First Name"
               />
               <ReuseableInput
-                className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                className={inputClassName}
                 control={form.control}
                 name="last_name"
                 label="Last Name"
               />
               <ReuseableInput
-                className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                className={inputClassName}
                 control={form.control}
                 name="email"
                 label="Email"
                 type="email"
               />
               <ReuseableInput
-                className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                className={inputClassName}
                 control={form.control}
                 name="phone"
                 label="Mobile Number"
                 type="tel"
               />
             </div>
-
             {showPolicyState && (
-              <div className="bg-red-200 rounded-lg w-full p-4">
-                <span className="text-red-500 font-semibold">Confirm terms and conditions below before you continue</span>
+              <div
+                role="alert"
+                className="w-full rounded-lg bg-red-100 border border-red-200 p-2 sm:p-4">
+                <span className="text-red-600 text-xs sm:text-sm font-semibold leading-relaxed">
+                  Confirm terms and conditions below before you continue
+                </span>
               </div>
             )}
           </FieldGroup>
-          <CardFooter className="col-span-1 lg:col-span-2 flex flex-col sm:flex-row justify-between gap-3 mt-1 px-0">
-            <Button
-              type="button"
-              disabled
-              className="w-full sm:w-auto rounded-full border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
-              leftIcon={<ArrowLeftCircle />}
-              onClick={() => goToPrevStep?.()}>
-              Previous
-            </Button>
-            <Button
-              type="submit"
-              className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
-              rightIcon={<ArrowRightCircle />}
-              loading={submitMutation.isPending}
-            >
-              Next
-            </Button>
-          </CardFooter>
+        </section>
+        <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+          <Button
+            type="button"
+            disabled
+            className="w-full sm:w-auto min-h-11 rounded-full border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10 px-6"
+            leftIcon={<ArrowLeftCircle className="shrink-0" />}
+            onClick={() => goToPrevStep?.()}>
+            Previous
+          </Button>
+          <Button
+            type="submit"
+            className="w-full sm:w-auto min-h-11 bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C] px-8"
+            rightIcon={<ArrowRightCircle className="shrink-0" />}
+            loading={submitMutation.isPending}>
+            Next
+          </Button>
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6">
-          <Card className="rounded-[10px] border border-[#D9D9D9] bg-[#DCFCE733] h-full">
-            <CardContent className="flex flex-col sm:flex-row gap-4 p-4 md:p-5 h-full">
+
+        <section className="grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2 md:items-stretch">
+          <Card className="rounded-[10px] border border-[#D9D9D9] bg-[#DCFCE733] h-full shadow-none hidden md:block">
+            <CardContent className="flex flex-col gap-4 p-4 sm:flex-row sm:gap-5 sm:p-5 md:p-5 h-full">
               <div className="flex justify-center sm:justify-start shrink-0">
-                <div className="w-12 h-12 md:w-13.5 md:h-13.5 rounded-full border border-[#D9D9D9] flex items-center justify-center">
+                <div className="w-11 h-11 sm:w-12 sm:h-12 md:w-13.5 md:h-13.5 rounded-full border border-[#D9D9D9] flex items-center justify-center">
                   <CircleCheck className="w-5 h-5 text-[#C20C0C]" />
                 </div>
               </div>
-              <div className="flex flex-col justify-between flex-1 min-w-0">
+              <div className="flex flex-col justify-between flex-1 min-w-0 gap-4">
                 <div className="space-y-2 text-center sm:text-left">
-                  <h2 className="font-semibold leading-tight text-base md:text-lg">
+                  <h2 className="font-semibold leading-snug text-base sm:text-lg">
                     Streamlined{" "}
                     <span className="text-[#43A047]">Claims Support</span>
                   </h2>
-                  <p className="text-sm md:text-[15px] leading-relaxed wrap-break-word">
+                  <p className="text-xs sm:text-sm md:text-[15px] leading-relaxed text-[#141414]/80">
                     Experience hassle-free claims processing with our dedicated support
                     team available 24/7. Familiarize yourself with your policy coverage
                     and keep necessary documentation ready. Our experts will guide you
@@ -160,48 +176,56 @@ export const CustomerVerificationDetails = ({ goToNextStep, goToPrevStep }: Cust
                 <Button
                   type="button"
                   fullWidth
-                  className="bg-[#43A047] text-white hover:bg-[#388E3C] mt-4 sm:mt-3" >
+                  className="bg-[#43A047] text-white hover:bg-[#388E3C] min-h-10 sm:min-h-11 w-full sm:w-auto sm:self-start"
+                >
                   File a Claim
                 </Button>
               </div>
             </CardContent>
           </Card>
-          <Card className="rounded-[10px] border border-[#C7EED5] h-full">
-            <CardContent className="flex flex-col sm:flex-row gap-4 p-4 md:p-5 h-full">
+
+          <Card className="rounded-[10px] border border-[#C7EED5] h-full shadow-none">
+            <CardContent className="flex flex-col gap-4 p-4 sm:flex-row sm:gap-5 sm:p-5 md:p-5 h-full">
               <div className="flex justify-center sm:justify-start shrink-0">
-                <div className="w-12 h-12 md:w-13.5 md:h-13.5 rounded-full border border-[#D9D9D9] flex items-center justify-center">
+                <div className="w-11 h-11 sm:w-12 sm:h-12 md:w-13.5 md:h-13.5 rounded-full border border-[#D9D9D9] flex items-center justify-center">
                   <ShieldCheck className="w-5 h-5 text-[#C20C0C]" />
                 </div>
               </div>
-              <div className="flex flex-col justify-between flex-1 min-w-0">
+              <div className="flex flex-col justify-between flex-1 min-w-0 gap-4">
                 <div className="space-y-2 text-center sm:text-left">
-                  <h2 className="leading-tight font-semibold text-base md:text-lg">
+                  <h2 className="leading-snug font-semibold text-base sm:text-lg">
                     Your{" "}
                     <span className="text-[#ED1E26]">Privacy Matters</span>
                   </h2>
-                  <p className="text-sm md:text-[15px] leading-relaxed wrap-break-word">
+                  <p className="text-xs sm:text-sm md:text-[15px] leading-relaxed text-[#141414]/80">
                     We collect and protect your personal information in compliance
                     with data protection regulations. Your data is encrypted,
                     securely stored, and used exclusively for insurance quote
                     generation and policy processing.
                   </p>
                 </div>
-                <div className="flex items-start gap-2 mt-4 sm:mt-3">
+                <div className="flex items-start gap-2.5 sm:gap-3 rounded-lg sm:rounded-none bg-[#f0fdf4]/50 sm:bg-transparent p-2 sm:p-0 -mx-1 sm:mx-0">
                   <Checkbox
+                    id="motor-privacy-consent"
                     onCheckedChange={(checked) => {
                       if (checked === true) {
-                        setIsPolicy(true);
-                        setShowPolicyState(false);
+                        setIsPolicy(true)
+                        setShowPolicyState(false)
                       } else {
-                        setIsPolicy(false);
+                        setIsPolicy(false)
                       }
                     }}
-                    className={`w-4 h-4 rounded-[3px] border border-[#D9D9D9] mt-0.5 shrink-0 data-[state=checked]:bg-[#C20C0C] data-[state=checked]:border-[#C20C0C]`}
+                    className="w-4 h-4 mt-0.5 shrink-0 rounded-[3px] border border-[#D9D9D9] data-[state=checked]:bg-[#C20C0C] data-[state=checked]:border-[#C20C0C]"
                   />
-                  <label className={`${isPolicy ? 'cursor-pointer text-sm leading-relaxed wrap-break-word' : 'text-red-500'}`}>
+                  <label
+                    htmlFor="motor-privacy-consent"
+                    className={cn(
+                      "text-xs sm:text-sm leading-relaxed cursor-pointer min-w-0",
+                      isPolicy ? "text-[#141414]" : "text-red-500",
+                    )}>
                     I acknowledge and consent to the collection and processing of my
-                    personal data as outlined in the
-                    <Link to="#" className="underline ml-1">
+                    personal data as outlined in the{" "}
+                    <Link to="#" className="underline underline-offset-2 hover:text-[#C20C0C]">
                       Privacy Policy
                     </Link>
                   </label>
@@ -209,7 +233,7 @@ export const CustomerVerificationDetails = ({ goToNextStep, goToPrevStep }: Cust
               </div>
             </CardContent>
           </Card>
-        </div>
+        </section>
       </form>
     </div>
   )

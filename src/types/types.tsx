@@ -433,8 +433,10 @@ export interface StatusPillProps {
 }
 
 export type SingleActionsHandler<T = string> = {
+  label?: string;
   conditional?: (payload: T) => boolean;
   condition?: any;
+  icon?: React.ComponentType<any>;
 } & TCommandOption<T> &
   Pick<TDropDownProps<T>, 'onSelect'>;
 
@@ -448,6 +450,7 @@ export type TDropDownProps<T = string> = {
 
 export type TActionColumnGenProps<T = string> = {
   ActionsHandlerMapping: SingleActionsHandler<T>[];
+  layout?: 'dropdown' | 'horizontal'
 };
 
 export type TReusableDropdownProp<T> = {

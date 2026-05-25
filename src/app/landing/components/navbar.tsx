@@ -14,6 +14,7 @@ import {
   Globe,
   BaggageClaim,
   Umbrella,
+  Wallet,
 } from 'lucide-react'
 import { motion, AnimatePresence, useInView } from "motion/react";
 import { ELOGO, EPREFIX, EROUTES } from '@/utils/enums';
@@ -441,6 +442,12 @@ const Navbar: React.FC<NavbarProps> = () => {
                           to={`/${EPREFIX.CUSTOMER}${EROUTES.CLAIMS}`}
                           icon={BaggageClaim}
                           label="Claims Report"
+                          onClick={() => setProfileOpen(false)}
+                        />
+                         <ProfileMenuItem
+                          to={`/${EPREFIX.CUSTOMER}${EROUTES.PAYMENTHISTORY}`}
+                          icon={Wallet}
+                          label="Transaction History"
                           onClick={() => setProfileOpen(false)}
                         />
                         <ProfileMenuItem

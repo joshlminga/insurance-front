@@ -2,7 +2,7 @@ import { Footer } from '@/app/landing/components/footer'
 import Navbar from '@/app/landing/components/navbar'
 import { cn } from '@/lib/utils'
 import { EPREFIX, EROUTES } from '@/utils/enums'
-import { BaggageClaim, Settings, Umbrella } from 'lucide-react'
+import { BaggageClaim, Settings, Umbrella, Wallet } from 'lucide-react'
 import { NavLink, Outlet } from 'react-router-dom'
 
 const profileLinks = [
@@ -15,6 +15,11 @@ const profileLinks = [
         label: 'My Claims',
         to: `/${EPREFIX.CUSTOMER}${EROUTES.CLAIMS}`,
         icon: BaggageClaim
+    },
+    {
+        label: 'Payment History',
+        to: `/${EPREFIX.CUSTOMER}${EROUTES.PAYMENTHISTORY}`,
+        icon: Wallet
     },
     {
         label: 'Account Settings',

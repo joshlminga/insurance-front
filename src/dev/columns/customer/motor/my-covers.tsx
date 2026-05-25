@@ -1,51 +1,63 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { Badge } from "@/components/ui/badge";
+import { formatCurrency } from "@/utils/helpers";
 import { ColumnDef } from "@tanstack/table-core";
 
 export const MyCoversColumns: ColumnDef<any>[] = [
     {
-        accessorKey: "Cover",
-        header: () => <div>Cover</div>,
+        accessorKey: "cover_type",
+        header: () => <div>Cover Type</div>,
         cell: ({ row }) => {
-            const Cover: string = row.getValue("Cover");
-            return <div>{Cover}</div>;
+            const cover_type: string = row.getValue("cover_type");
+            return <div>{cover_type}</div>;
         },
     },
     {
-        accessorKey: "Renewal",
-        header: () => <div>Renewal Date</div>,
+        accessorKey: "agency",
+        header: () => <div>Agency</div>,
         cell: ({ row }) => {
-            const Renewal: string = row.getValue("Renewal");
-            return <div>{Renewal}</div>;
+            const agency: any = row.getValue("agency");
+            return <div>{agency?.name}</div>;
         },
     },
     {
-        accessorKey: "value",
+        accessorKey: "certificate",
+        header: () => <div>Issue Date</div>,
+        cell: ({ row }) => {
+            const certificate: any = row.getValue("certificate");
+            return <div>{certificate?.issued_date}</div>;
+        },
+    },
+    {
+        accessorKey: "certificate",
+        header: () => <div>Expiry Date</div>,
+        cell: ({ row }) => {
+            const certificate: any = row.getValue("certificate");
+            return <div>{certificate?.expiry_date}</div>;
+        },
+    },
+    {
+        accessorKey: "installment_amount",
         header: () => <div>Insured Value</div>,
         cell: ({ row }) => {
-            const value: string = row.getValue("value");
-            return <div>{value}</div>;
+            const installment_amount: string = row.getValue("installment_amount");
+            return <div>{formatCurrency(installment_amount)}</div>;
         },
     },
     {
-        accessorKey: "claims",
-        header: () => <div>Claims</div>,
+        accessorKey: "cover_status",
+        header: () => <div>Cover Status</div>,
         cell: ({ row }) => {
-            const claims: string = row.getValue("claims");
-            return <div>{claims}</div>;
+            const status: string = row.getValue("cover_status");
+            const isIssued = status === 'issued';
+            return (
+                <Badge
+                    className={`rounded-lg font-semibold ${isIssued ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                        }`}
+                >
+                    {isIssued ? "Issued" : "Failed"}
+                </Badge>
+            );
         },
     },
-    // {
-    //     accessorKey: "is_active",
-    //     header: () => <div>Status</div>,
-    //     cell: ({ row }) => {
-    //         const isActive: boolean = row.getValue("is_active");
-    //         return (
-    //             <Badge
-    //                 className={`rounded-lg font-semibold ${isActive ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-    //                     }`}>
-    //                 {isActive ? "Active" : "Inactive"}
-    //             </Badge>
-    //         );
-    //     },
-    // },
 ];
