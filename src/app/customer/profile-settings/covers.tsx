@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { StatsCard, StatsGrid } from '@/components/shared';
+// import { StatsCard, StatsGrid } from '@/components/shared';
 import { ActionColumn } from '@/dev/columns';
 import { MyCoversColumns } from '@/dev/columns/customer/motor/my-covers';
 import { CustomBaseTable } from '@/dev/table';
@@ -28,7 +28,7 @@ export const CustomerCoversPage = () => {
     });
 
     const { data, isLoading } = UseApiQuery<SubmitResponse>({
-        url: '',
+        url: 'reports/motor/user/covers',
         params: {
             page: filter.page,
             pageSize: filter.pageSize,
@@ -39,6 +39,9 @@ export const CustomerCoversPage = () => {
         },
     })
     const ActionsHandlerMapping: SingleActionsHandler<any>[] = [];
+
+    console.log(data?.data);
+
     return (
         <section>
             <div className="grid grid-cols-1 lg:grid-cols-1">
@@ -50,7 +53,7 @@ export const CustomerCoversPage = () => {
                         View and manage your covers.
                     </p>
 
-                    <div className='w-full space-y-4 py-4 mb-5'>
+                    {/* <div className='w-full space-y-4 py-4 mb-5'>
                         <StatsGrid columns={4}>
                             <StatsCard
                                 title="Active Covers"
@@ -73,7 +76,7 @@ export const CustomerCoversPage = () => {
                                 description={`Monday,23 Feb 2026 . `}
                             />
                         </StatsGrid>
-                    </div>
+                    </div> */}
 
                     <div className='w-full'>
                         <CustomBaseTable
