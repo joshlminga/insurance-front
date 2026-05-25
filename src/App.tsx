@@ -29,7 +29,8 @@ const CustomerProfileLayout = lazy(() => import("./app/customer/profile-settings
 const AccountSettingsPage = lazy(() => import("./app/customer/profile-settings/settings").then(m => ({ default: m.AccountSettingsPage })))
 const CustomerClaimsPage = lazy(() => import("./app/customer/profile-settings/claims").then(m => ({ default: m.CustomerClaimsPage })))
 const CustomerCoversPage = lazy(() => import("./app/customer/profile-settings/covers").then(m => ({ default: m.CustomerCoversPage })))
-const CustomerPaymentHistoryPage = lazy(() => import("./app/customer/profile-settings/payment-history"))
+const CustomerPaymentHistoryPage = lazy(() => import("./app/customer/profile-settings/payment-history").then(m => ({ default: m.PaymentHistoryPage })))
+const CustomerSingleCustomerCoversPage = lazy(() => import("./app/customer/profile-settings/[id]/cover[id]").then(m => ({ default: m.SingleCoverPage })))
 
 
 // Auth pages
@@ -131,16 +132,10 @@ export const router = createBrowserRouter([
         path: "my-covers",
         element: <S><CustomerCoversPage /></S>,
       },
-      // {
-      //   path: "cancelled",
-      //   element: <S><CoversPage /></S>,
-      //   children: [
-      //     {
-      //       index: true,
-      //       element: <S><CancelledCoversPage /></S>,
-      //     },
-      //   ],
-      // },
+      {
+        path: "my-covers:id",
+        element: <S><CustomerSingleCustomerCoversPage /></S>,
+      },
       {
         path: "payment-history",
         element: <S><CustomerPaymentHistoryPage /></S>,

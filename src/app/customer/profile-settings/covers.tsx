@@ -15,11 +15,13 @@ import {
     FILTEROPTIONS,
     ReusableReducer
 } from '@/utils/constatnts';
+import { EPREFIX, EROUTES } from '@/utils/enums';
 import { Eye } from 'lucide-react';
 import { useReducer } from 'react'
+import { useNavigate } from 'react-router-dom';
 
 export const CustomerCoversPage = () => {
-
+    const navigate = useNavigate();
     const [filter, optionsDispatcher] = useReducer(
         ReusableReducer<TPaginationFilters & TFilterOptions>,
         { ...FILTEROPTIONS, page: 1, pageSize: 15 }
@@ -44,11 +46,7 @@ export const CustomerCoversPage = () => {
             label: 'View',
             icon: Eye,
             onSelect: (data) => {
-                console.log(data);
-                // handleDialogContextSwitch({
-                //   componentProps: { data, refetch },
-                //   Component: ViewOrganizationModal,
-                // })
+               navigate(`/${EPREFIX.CUSTOMER}${EROUTES.SINGLECOVER}/${data?.id}`);
             }
         },
     ];

@@ -45,15 +45,17 @@ export const MyCoversColumns: ColumnDef<any>[] = [
         },
     },
     {
-        accessorKey: "is_active",
-        header: () => <div>Status</div>,
+        accessorKey: "cover_status",
+        header: () => <div>Cover Status</div>,
         cell: ({ row }) => {
-            const isActive: boolean = row.getValue("is_active");
+            const status: string = row.getValue("cover_status");
+            const isIssued = status === 'issued';
             return (
                 <Badge
-                    className={`rounded-lg font-semibold ${isActive ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-                        }`}>
-                    {isActive ? "Active" : "Inactive"}
+                    className={`rounded-lg font-semibold ${isIssued ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                        }`}
+                >
+                    {isIssued ? "Issued" : "Failed"}
                 </Badge>
             );
         },

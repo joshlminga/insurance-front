@@ -9,7 +9,7 @@ import { FILTEROPTIONS, ReusableReducer } from '@/utils/constatnts';
 import { Eye } from 'lucide-react';
 import { useReducer } from 'react'
 
-const PaymentHistoryPage = () => {
+export const PaymentHistoryPage = () => {
     const [filter, optionsDispatcher] = useReducer(
         ReusableReducer<TPaginationFilters & TFilterOptions>,
         { ...FILTEROPTIONS, page: 1, pageSize: 15 }
@@ -99,5 +99,3 @@ const PaymentHistoryPage = () => {
         </section>
     )
 }
-
-export default PaymentHistoryPage;
