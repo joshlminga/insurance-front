@@ -5,61 +5,47 @@ import { ColumnDef } from "@tanstack/table-core";
 
 export const MyPaymentHistory: ColumnDef<any>[] = [
     {
-        accessorKey: "cover_type",
-        header: () => <div>Cover Type</div>,
+        accessorKey: "receipt_number",
+        header: () => <div>Receipt No.</div>,
         cell: ({ row }) => {
-            const cover_type: string = row.getValue("cover_type");
-            return <div>{cover_type}</div>;
+            const receipt_number: string = row.getValue("receipt_number");
+            return <div>{receipt_number}</div>;
         },
     },
      {
         accessorKey: "agency",
-        header: () => <div>Agency</div>,
+        header: () => <div>Paid To</div>,
         cell: ({ row }) => {
             const agency: any = row.getValue("agency");
             return <div>{agency?.name}</div>;
         },
     },
     {
-        accessorKey: "due_date",
-        header: () => <div>Renewal Date</div>,
+        accessorKey: "created_at",
+        header: () => <div>Payment Date</div>,
         cell: ({ row }) => {
-            const due_date: string = row.getValue("due_date");
-            return <div>{due_date}</div>;
+            const created_at: string = row.getValue("created_at");
+            return <div>{created_at}</div>;
         },
     },
     {
-        accessorKey: "installment_amount",
-        header: () => <div>Insured Value</div>,
+        accessorKey: "amount",
+        header: () => <div>Amount</div>,
         cell: ({ row }) => {
-            const installment_amount: string = row.getValue("installment_amount");
-            return <div>{formatCurrency(installment_amount)}</div>;
+            const amount: string = row.getValue("amount");
+            return <div>{formatCurrency(amount)}</div>;
         },
     },
     {
-        accessorKey: "status",
+        accessorKey: "invoice_status",
         header: () => <div>Payment</div>,
         cell: ({ row }) => {
-            const status: string = row.getValue("status");
+            const invoice_status: string = row.getValue("invoice_status");
             return (
                 <Badge
-                    className={`rounded-lg font-semibold ${status ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                    className={`rounded-lg font-semibold ${invoice_status ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
                         }`}>
-                    {status ? "Paid" : "Not Paid"}
-                </Badge>
-            );
-        },
-    },
-    {
-        accessorKey: "is_active",
-        header: () => <div>Status</div>,
-        cell: ({ row }) => {
-            const isActive: boolean = row.getValue("is_active");
-            return (
-                <Badge
-                    className={`rounded-lg font-semibold ${isActive ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-                        }`}>
-                    {isActive ? "Active" : "Inactive"}
+                    {invoice_status ? "Paid" : "Not Paid"}
                 </Badge>
             );
         },

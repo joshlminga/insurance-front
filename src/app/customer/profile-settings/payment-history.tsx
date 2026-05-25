@@ -19,7 +19,7 @@ const PaymentHistoryPage = () => {
     });
 
     const { data, isLoading } = UseApiQuery<SubmitResponse>({
-        url: 'reports/motor/user/transactions',
+        url: 'reports/motor/user/receipts',
         params: {
             page: filter.page,
             pageSize: filter.pageSize,
@@ -73,7 +73,9 @@ const PaymentHistoryPage = () => {
                                 },
                                 columns: [
                                     ...MyPaymentHistory,
-                                    ActionColumn({ ActionsHandlerMapping }),
+                                    ActionColumn({ ActionsHandlerMapping,
+                                        layout: 'horizontal'
+                                     }),
                                 ],
                                 // OtherTools: SearchTools,
                                 data: data?.data ?? [],
