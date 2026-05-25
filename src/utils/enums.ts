@@ -17,11 +17,20 @@ export const EPREFIX = {
 export const EROUTES = {
   // Public
   LANDING: '/',
+  CONTACT_US: '/contact-us',
+  PRODUCT_LIST: '/products',
+
+  // Customer
   MOTOR: '/motor',
   TRAVEL: '/travel',
   MARINE: '/marine',
   LIFE: '/life',
-  MY_COVERS: '/my-covers',
+  PROFILE: '/profile',
+  ACCOUNTSETTINGS: '/profile/account-settings',
+  CLAIMS: '/profile/my-claims',
+  COVERS: '/profile/my-covers',
+  PAYMENTHISTORY: '/profile/payment-history',
+  SINGLECOVER: 'my-covers:id',
 
   // Auth
   SIGNUP: '/signup',

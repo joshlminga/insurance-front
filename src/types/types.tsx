@@ -32,8 +32,8 @@ export interface LoginResponse {
   user: any
   access_token: string
   is_general: boolean
-  status?:string;
-  data?:any
+  status?: string;
+  data?: any
 }
 
 export type TNodeChildrentType<T = ReactNode> = {
@@ -433,8 +433,10 @@ export interface StatusPillProps {
 }
 
 export type SingleActionsHandler<T = string> = {
+  label?: string;
   conditional?: (payload: T) => boolean;
   condition?: any;
+  icon?: React.ComponentType<any>;
 } & TCommandOption<T> &
   Pick<TDropDownProps<T>, 'onSelect'>;
 
@@ -448,6 +450,7 @@ export type TDropDownProps<T = string> = {
 
 export type TActionColumnGenProps<T = string> = {
   ActionsHandlerMapping: SingleActionsHandler<T>[];
+  layout?: 'dropdown' | 'horizontal'
 };
 
 export type TReusableDropdownProp<T> = {
@@ -665,13 +668,70 @@ export interface ConfirmationDialogProps {
 export type ListedBenefitStatus = 'compulsory' | 'inclusive' | 'selected' | 'na' | 'no'
 
 export type ListedBenefitResolved = {
-    text: string
-    status: ListedBenefitStatus
+  text: string
+  status: ListedBenefitStatus
 }
 
 export type TMessages = {
-    id: number;
-    text: string;
-    sender: 'user' | 'agent';
-    createdAt: string;
+  id: number;
+  text: string;
+  sender: 'user' | 'agent';
+  createdAt: string;
 };
+export type NavLinkItem = {
+  name: string
+  label?: string
+  href: string
+  isActive?: boolean
+}
+export interface NavLinkProps {
+  item: NavLinkItem
+}
+export interface DropdownItem {
+  icon: React.ElementType
+  label: string
+  description: string
+  href: string
+}
+export interface NavItem {
+  label: string
+  href?: string
+  dropdown?: DropdownItem[]
+}
+export type NavbarProps = {
+  navData?: NavLinkItem[]
+}
+
+export interface MobileDrawerProps {
+  open: boolean;
+  onClose: () => void;
+  isAuthenticated: boolean;
+  user: { name?: string; email?: string } | null;
+  userInitials: string;
+  userName: string;
+  userEmail: string;
+  logout: () => void;
+  alpha: string;
+  lang: string;
+  handleCountryChange: (c: TCountry) => void;
+}
+export interface ProfileMenuItemProps {
+  to: string;
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  onClick: () => void;
+  className?: string;
+}
+
+export interface ReusableSwitchToggleProps {
+  id: string
+  label: string
+  description?: string
+  checked?: boolean
+  defaultChecked?: boolean
+  disabled?: boolean
+  invalid?: boolean
+  orientation?: "horizontal" | "vertical"
+  className?: string
+  onCheckedChange?: (checked: boolean) => void
+}

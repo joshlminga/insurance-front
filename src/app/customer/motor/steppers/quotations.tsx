@@ -470,18 +470,10 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                             }>
                             Add benefit
                         </Button>
-                        <Button
-                            type="button"
-                            className="flex w-full items-center gap-1.5 rounded bg-[#C20C0C]/80 px-5 py-2 text-sm font-medium text-white hover:bg-[#C20C0C] sm:ml-auto sm:w-auto"
-                            onClick={() => onComparison(false)}
-                            loading={submitComparisonMutation.isPending || submitComparisonDownloadMutation.isPending}
-                            disabled={selectedQuotes.length < 2}>
-                            Generate Comparison {selectedQuotes.length > 0 && `(${selectedQuotes.length}/${MAX_COMPARISONS})`}
-                        </Button>
                     </div>
                 </form>
             </section>
-            <section className="space-y-4">
+            <section className="space-y-4 bg-white rounded-lg border border-[#E5E7EB] px-4 py-5 sm:px-6 sm:py-6">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <h2 className="text-lg font-semibold text-gray-900">Quote Comparison</h2>
@@ -496,6 +488,14 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                             Fetching premium quotations…
                         </span>
                     )}
+                    <Button
+                        type="button"
+                        className="flex w-full items-center gap-1.5 rounded bg-[#C20C0C]/80 px-5 py-2 text-sm font-medium text-white hover:bg-[#C20C0C] sm:ml-auto sm:w-auto"
+                        onClick={() => onComparison(false)}
+                        loading={submitComparisonMutation.isPending || submitComparisonDownloadMutation.isPending}
+                        disabled={selectedQuotes.length < 2}>
+                        Generate Comparison {selectedQuotes.length > 0 && `(${selectedQuotes.length}/${MAX_COMPARISONS})`}
+                    </Button>
                 </div>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-6">
                     {isPending && !data
@@ -565,7 +565,6 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                                                 {formatCurrency(item?.calculated_premium?.vehicle_premium)}
                                             </span>
                                         </div>
-
                                         {benefitsListed.map((benefit) => {
                                             const label =
                                                 (benefit?.name ?? benefit?.label ?? '').trim() ||

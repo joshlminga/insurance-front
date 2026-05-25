@@ -18,15 +18,20 @@ function S({ children }: { children: React.ReactNode }) {
 
 // customer-facing pages
 const Landingpage = lazy(() => import("./app/landing/page").then(m => ({ default: m.Landingpage })))
+const ContactUsPage = lazy(() => import("./app/landing/contact-us/page").then(m => ({ default: m.ContactUsPage })))
+const ProductsListPage = lazy(() => import("./app/landing/products/page").then(m => ({ default: m.ProductsListPage })))
+
 const MotorLandingPage = lazy(() => import("./app/customer/motor/page").then(m => ({ default: m.MotorLandingPage })))
 const StepPage = lazy(() => import("./app/customer/motor/steppers/steppage").then(m => ({ default: m.StepPage })))
 const MarineLandingPage = lazy(() => import("./app/customer/marine/page").then(m => ({ default: m.MarineLandingPage })))
 const MarineStepPage = lazy(() => import("./app/customer/marine/steppers/steppage").then(m => ({ default: m.MarineStepPage })))
-const MyCoversLayout = lazy(() => import("./app/customer/my-covers/layout").then(m => ({ default: m.MyCoversLayout })))
-const CoversPage = lazy(() => import("./app/customer/my-covers/ongoing/page").then(m => ({ default: m.CoversPage })))
-const CancelledCoversPage = lazy(() => import("./app/customer/my-covers/cancelled/page").then(m => ({ default: m.CancelledCoversPage })))
-const MyAccountManagementPage = lazy(() => import("./app/customer/my-covers/my-account/page").then(m => ({ default: m.MyAccountManagementPage })))
-const MyClaimsPage = lazy(() => import("./app/customer/my-covers/my-claims/page").then(m => ({ default: m.MyClaimsPage })))
+const CustomerProfileLayout = lazy(() => import("./app/customer/profile-settings/layout").then(m => ({ default: m.CustomerProfileLayout })))
+const AccountSettingsPage = lazy(() => import("./app/customer/profile-settings/settings").then(m => ({ default: m.AccountSettingsPage })))
+const CustomerClaimsPage = lazy(() => import("./app/customer/profile-settings/claims").then(m => ({ default: m.CustomerClaimsPage })))
+const CustomerCoversPage = lazy(() => import("./app/customer/profile-settings/covers").then(m => ({ default: m.CustomerCoversPage })))
+const CustomerPaymentHistoryPage = lazy(() => import("./app/customer/profile-settings/payment-history").then(m => ({ default: m.PaymentHistoryPage })))
+const CustomerSingleCustomerCoversPage = lazy(() => import("./app/customer/profile-settings/[id]/cover[id]").then(m => ({ default: m.SingleCoverPage })))
+
 
 // Auth pages
 const AuthLayoutPage = lazy(() => import("./auth/layout"))
@@ -80,6 +85,20 @@ export const router = createBrowserRouter([
       </PublicRoute>
     ),
   },
+  {
+    path: EROUTES.CONTACT_US,
+    element:
+      <S>
+        <ContactUsPage />
+      </S>,
+  },
+  {
+    path: EROUTES.PRODUCT_LIST,
+    element:
+      <S>
+        <ProductsListPage />
+      </S>,
+  },
 
   // START-USERGENERAL = TRUE
   // Motor / Customer
@@ -98,36 +117,36 @@ export const router = createBrowserRouter([
     ],
   },
 
+
   // My Covers / Customer Account — protected (authenticated only)
   {
-    path: `${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}`,
+    path: `${EPREFIX.CUSTOMER}${EROUTES.PROFILE}`,
     element: (
       <ProtectedRoute>
-        <S><MyCoversLayout /></S>
+        <S><CustomerProfileLayout /></S>
       </ProtectedRoute>
     ),
     children: [
       {
         index: true,
-        element: <S><CoversPage /></S>,
+        path: "my-covers",
+        element: <S><CustomerCoversPage /></S>,
       },
       {
-        path: "cancelled",
-        element: <S><CoversPage /></S>,
-        children: [
-          {
-            index: true,
-            element: <S><CancelledCoversPage /></S>,
-          },
-        ],
+        path: "my-covers:id",
+        element: <S><CustomerSingleCustomerCoversPage /></S>,
       },
       {
-        path: "account",
-        element: <S><MyAccountManagementPage /></S>,
+        path: "payment-history",
+        element: <S><CustomerPaymentHistoryPage /></S>,
       },
       {
-        path: "claims",
-        element: <S><MyClaimsPage /></S>,
+        path: "my-claims",
+        element: <S><CustomerClaimsPage /></S>,
+      },
+      {
+        path: "account-settings",
+        element: <S><AccountSettingsPage /></S>,
       },
     ],
   },
@@ -147,6 +166,7 @@ export const router = createBrowserRouter([
       },
     ],
   },
+
   // END-USERGENERAL = TRUE
 
   // Auth
@@ -215,8 +235,8 @@ export const router = createBrowserRouter([
           <PublicRoute>
             <S>
               <AuthLayoutPage
-                title="Verify Your Email"
-                description="Code has been sent to your email, kindly check.">
+                title="Verify Your Account"
+                description="Verification code has been sent to your email. Please enter the code below to verify your account.">
                 <OtpVerificationAuthForm />
               </AuthLayoutPage>
             </S>
@@ -225,7 +245,6 @@ export const router = createBrowserRouter([
       }
     ],
   },
-
   // START-USERGENERAL = FALSE
   // Admin - Dashboard & Nested Routes
   {

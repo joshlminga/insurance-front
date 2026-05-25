@@ -108,15 +108,16 @@ export const ForgotPasswordSchema = z.object({
 });
 
 export const ResetPasswordSchema = z
-    .object({
-        password: z.string().min(6, "Password must be at least 6 characters"),
-        password_confirmation: z.string(),
-    })
-    .refine((data) => data.password === data.password_confirmation, {
-        message: "Passwords do not match",
-        path: ["password_confirmation"],
-    });
-    
+  .object({
+    password: z.string().min(6, "Password must be at least 6 characters"),
+    password_confirmation: z.string(),
+    old_password: z.string().optional(),
+  })
+  .refine((data) => data.password === data.password_confirmation, {
+    message: "Passwords do not match",
+    path: ["password_confirmation"],
+  });
+
 export const SignUpSchema = z
   .object({
     first_name: z.string().min(2, "First name is required").max(50),
@@ -735,18 +736,26 @@ export const EditProductSchema = z.object({
     }
   )
 
-  export const SendViaEmailSchema = z.object({
-    email: z.string().email("Invalid email address").optional().or(z.literal("")),
-    is_self: z.boolean().or(z.literal("")),
-    quote_type: z.string().min(1, "Quote type is required").or(z.literal("")),
-    product_id: z.string().min(1, "Product ID is required").or(z.literal("")),
-    rate_id: z.string().min(1, "Rate ID is required").or(z.literal("")),
-    products: z.array(z.object({
-      product_id: z.string().optional().or(z.literal("")),
-      rate_id: z.string().optional().or(z.literal("")),
-    }))
-  })
+export const SendViaEmailSchema = z.object({
+  email: z.string().email("Invalid email address").optional().or(z.literal("")),
+  is_self: z.boolean().or(z.literal("")),
+  quote_type: z.string().min(1, "Quote type is required").or(z.literal("")),
+  product_id: z.string().min(1, "Product ID is required").or(z.literal("")),
+  rate_id: z.string().min(1, "Rate ID is required").or(z.literal("")),
+  products: z.array(z.object({
+    product_id: z.string().optional().or(z.literal("")),
+    rate_id: z.string().optional().or(z.literal("")),
+  }))
+})
 
-    export const SendMessageSchema = z.object({
-    message: z.string().min(2, "Message must be at least 2 characters").max(1000, "Message is too long").optional().or(z.literal("")),
-  })
+export const SendMessageSchema = z.object({
+  message: z.string().min(2, "Message must be at least 2 characters").max(1000, "Message is too long").optional().or(z.literal("")),
+})
+
+export const ContactUsSchema = z.object({
+  first_name: z.string().min(2, "Name must be at least 2 characters").max(100, "Name is too long"),
+  last_name: z.string().min(2, "Name must be at least 2 characters").max(100, "Name is too long"),
+  email: z.string().email("Invalid email address").min(2, "Email must be at least 2 characters").max(100, "Email is too long"),
+  subject: z.string().min(2, "Subject must be at least 2 characters").max(200, "Subject is too long"),
+  message: z.string().min(5, "Message must be at least 5 characters").max(2000, "Message is too long"),
+});

@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { CardFooter } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { Button, ReuseableInput } from '@/dev/core'
 import { UseApiMutation } from '@/hooks/hooks'
@@ -89,7 +88,7 @@ export const InvoicePayment: React.FC<CustomerVerificationDetailsProps> = ({ goT
                     />
                 </div>
             </div>
-            <CardFooter className="w-full flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mt-3 px-0">
+            <div className="w-full flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mt-3 px-0">
                 <Button
                     type="button"
                     className="w-full sm:w-auto rounded-full border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
@@ -107,7 +106,7 @@ export const InvoicePayment: React.FC<CustomerVerificationDetailsProps> = ({ goT
                         Complete Payment
                     </Button>
                 </div>
-            </CardFooter>
+            </div>
         </form>
     )
 }

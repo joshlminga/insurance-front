@@ -36,7 +36,9 @@ import type {
     TFilterOptions,
     TPaginationFilters,
     TLoaderProps,
-    ConfirmationDialogProps
+    ProfileMenuItemProps,
+    ConfirmationDialogProps,
+    ReusableSwitchToggleProps
 } from "@/types/types";
 import {
     Stepper,
@@ -61,7 +63,7 @@ import { Loader2, OctagonAlert, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Controller, type FieldValues } from "react-hook-form";
-import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+import { Field, FieldContent, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field";
 import {
     Select,
     SelectContent,
@@ -126,6 +128,7 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { ChatIndexPage } from "@/app/chat-components/page";
+import { Switch } from "@/components/ui/switch";
 
 const formatSegment = (segment: string) => {
     return segment
@@ -968,7 +971,6 @@ export const TableComponentHeadings = ({ children }: TNodeChildrentType) => {
     );
 };
 
-
 export const PageForPagination = ({
     active = false,
     content,
@@ -1142,9 +1144,6 @@ export function ReuseableSingleSelectCountriesInput<T extends FieldValues>({
 
     const [filter, optionsDispatcher] = useReducer(
         ReusableReducer<TPaginationFilters & TFilterOptions>,
-        // NOTE: Select can only show the chosen item if it's in the loaded list.
-        // Loading more countries upfront avoids “not picked” when the selected id
-        // isn’t in the first small page.
         { ...FILTEROPTIONS, page: 1, pageSize: 300 }
     )
     const observerRef = useRef<HTMLDivElement | null>(null)
@@ -2404,7 +2403,7 @@ export const SendInvoiceViaEmail = ({
     )
 }
 
-export default function ChatFloatingButton() {
+export const ChatFloatingButton = () => {
     const [isOpen, setIsOpen] = useState(false);
     return (
         <>
@@ -2428,8 +2427,8 @@ export default function ChatFloatingButton() {
                         size="icon">
                         <X
                             {...{
-                                size: 15,
-                                className: "h-15 w-auto text-red-500"
+                                size: 20,
+                                className: "h-20 w-auto text-red-500"
                             }}
                         />
                     </Button>
@@ -2438,8 +2437,8 @@ export default function ChatFloatingButton() {
                         className="transition-all duration-200 hover:brightness-110"
                         onClick={() => setIsOpen(true)}
                         style={{
-                            width: '80px',
-                            height: '80px',
+                            width: '60px',
+                            height: '60px',
                             opacity: 1,
                             borderTopLeftRadius: '30px',
                             borderTopRightRadius: '0px',
@@ -2461,4 +2460,61 @@ export default function ChatFloatingButton() {
             {isOpen && <ChatIndexPage isOpen={isOpen} setIsOpen={setIsOpen} />}
         </>
     );
+}
+
+export const ProfileMenuItem = ({
+    to,
+    icon: Icon,
+    label,
+    onClick,
+    className = "",
+}: ProfileMenuItemProps) => {
+    return (
+        <Link
+            to={to}
+            onClick={onClick}
+            className={`flex w-full items-center gap-2.5 border-b border-gray-100 px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-[#C20C0C] transition-colors ${className}`}>
+            <Icon className="h-4 w-4 shrink-0" />
+            <span>{label}</span>
+        </Link>
+    );
+}
+
+export const ReusableSwitchToggle = ({
+    id,
+    label,
+    description,
+    checked,
+    defaultChecked,
+    disabled = false,
+    invalid = false,
+    orientation = "horizontal",
+    className = "",
+    onCheckedChange,
+}: ReusableSwitchToggleProps) => {
+    return (
+        <Field
+            orientation={orientation}
+            className={className}
+            data-invalid={invalid || undefined}>
+            <FieldContent>
+                <FieldLabel htmlFor={id}>
+                    {label}
+                </FieldLabel>
+                {description && (
+                    <FieldDescription>
+                        {description}
+                    </FieldDescription>
+                )}
+            </FieldContent>
+            <Switch
+                id={id}
+                checked={checked}
+                defaultChecked={defaultChecked}
+                disabled={disabled}
+                aria-invalid={invalid}
+                onCheckedChange={onCheckedChange}
+            />
+        </Field>
+    )
 }

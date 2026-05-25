@@ -33,7 +33,8 @@ import {
     ForgotPasswordSchema,
     ResetPasswordSchema,
     SendViaEmailSchema,
-    SendMessageSchema
+    SendMessageSchema,
+    ContactUsSchema
 } from "./form-schema";
 
 export type CustomerFormValues = z.infer<typeof CustomerDetailsSchema>
@@ -73,3 +74,6 @@ export type UpdateProfileFormValues = z.infer<typeof UpdateProfileSchema>
 export type UpdatePasswordFormValues = z.infer<typeof UpdatePasswordSchema>
 export type SendViaEmailFormValues = z.infer<typeof SendViaEmailSchema>
 export type SendMessageValues = z.infer<typeof SendMessageSchema>
+
+
+export type SendContactUsMessageValues = z.infer<typeof ContactUsSchema>
