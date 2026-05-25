@@ -29,6 +29,7 @@ export const EROUTES = {
   ACCOUNTSETTINGS: '/profile/account-settings',
   CLAIMS: '/profile/my-claims',
   COVERS: '/profile/my-covers',
+  PAYMENTHISTORY: '/profile/payment-history',
 
   // Auth
   SIGNUP: '/signup',
