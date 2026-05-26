@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CardFooter } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
-import { Button, ReusableSelect, ReusableSingleSelectApiInput, ReuseableInput, ReuseableSingleSelectNationalityInput } from '@/dev/core'
+import { Button, ReusableSelect, ReuseableInput, ReuseableSingleSelectNationalityInput } from '@/dev/core'
 import { UseApiMutation } from '@/hooks/hooks'
-import { KycSchema } from '@/types/form-schema'
-import type { KycFormValues } from '@/types/schema'
+import { MotorKycSchema } from '@/types/form-schema'
+import type { MotorKycFormValues } from '@/types/schema'
 import type { CustomerVerificationDetailsProps, SubmitResponse } from '@/types/types'
-import { EMETHODS, IDTYPES, INVOICE_SESSION_STORAGE_KEY, PURCHASE_SESSION_STORAGE_KEY, VEHICLE_DETAILS_SESSION_STORAGE_KEY, VEHICLE_OWNERSHIP_SESSION_STORAGE_KEY } from '@/utils/constatnts'
+import { EMETHODS, IDTYPES, INVOICE_SESSION_STORAGE_KEY, PURCHASE_SESSION_STORAGE_KEY, VEHICLE_DETAILS_SESSION_STORAGE_KEY } from '@/utils/constatnts'
 import { extractErrorMessage } from '@/utils/helpers'
 import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -16,24 +16,75 @@ import { Controller, useForm } from 'react-hook-form'
 
 type VehicleDetails = Record<string, unknown>
 
+const EMPTY_VEHICLE_VALUE = "Not available"
+
+type ReadOnlyVehicleFieldProps = {
+    label: string
+    value: string
+}
+
+const formatVehicleValue = (value: unknown): string | null => {
+    if (value === null || value === undefined) return null
+    if (typeof value === "string") return value.trim() || null
+    if (typeof value === "number" || typeof value === "boolean") return String(value)
+
+    if (typeof value === "object") {
+        const record = value as Record<string, unknown>
+        const readableKeys = ["name", "title", "label", "value", "description"]
+
+        for (const key of readableKeys) {
+            const formattedValue = formatVehicleValue(record[key])
+            if (formattedValue) return formattedValue
+        }
+    }
+
+    return null
+}
+
+const getVehicleValue = (details: VehicleDetails | null, keys: string[]) => {
+    if (!details) return null
+
+    for (const key of keys) {
+        const formattedValue = formatVehicleValue(details[key])
+        if (formattedValue) return formattedValue
+    }
+
+    return null
+}
+
+const showVehicleValue = (value: string | null) => value ?? EMPTY_VEHICLE_VALUE
+
+const redactVehicleNumber = (value: string | null) => {
+    if (!value) return EMPTY_VEHICLE_VALUE
+    if (value.length <= 5) return value
+
+    return `${value.slice(0, 3)}***${value.slice(-2)}`
+}
+
+const ReadOnlyVehicleField = ({ label, value }: ReadOnlyVehicleFieldProps) => (
+    <div className="flex flex-col gap-1.5">
+        <label className="text-sm font-medium text-foreground">{label}</label>
+        <input
+            type="text"
+            value={value}
+            readOnly
+            disabled
+            className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] bg-gray-100 px-3 text-sm text-gray-600 opacity-100 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-600"
+        />
+    </div>
+)
+
 export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToPrevStep, goToNextStep }) => {
     const [purchaseSessionId, setPurchaseSessionId] = useState<string | null>(null)
     const [vehicleDetails, setVehicleDetails] = useState<VehicleDetails | null>(null)
-    const [vehicleOwnership, setVehicleOwnership] = useState<string | null>(null)
 
-    const form = useForm<KycFormValues>({
-        resolver: zodResolver(KycSchema),
+    const form = useForm<MotorKycFormValues>({
+        resolver: zodResolver(MotorKycSchema),
         defaultValues: {
             nationality_id: "",
             id_type: "",
             id_number: "",
             tax_pin: "",
-            color: "",
-            chassis_number: "",
-            engine_cc: "",
-            engine_number: "",
-            total_seats: "",
-            tonage_capacity: "",
             logbook: undefined,
             tax_certificate: undefined,
             id_document: undefined,
@@ -43,10 +94,8 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToPrevSt
     useEffect(() => {
         const storedPurchaseKey = sessionStorage.getItem(PURCHASE_SESSION_STORAGE_KEY)
         const storedVehicleDetails = sessionStorage.getItem(VEHICLE_DETAILS_SESSION_STORAGE_KEY)
-        const storedVehicleOwnership = sessionStorage.getItem(VEHICLE_OWNERSHIP_SESSION_STORAGE_KEY)
 
         setPurchaseSessionId(storedPurchaseKey)
-        setVehicleOwnership(storedVehicleOwnership)
 
         if (!storedVehicleDetails) {
             setVehicleDetails(null)
@@ -80,7 +129,7 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToPrevSt
         },
     })
 
-    const onSubmit = (data: KycFormValues) => {
+    const onSubmit = (data: MotorKycFormValues) => {
         const formData = new FormData()
         Object.entries(data).forEach(([key, value]) => {
             if (value === undefined || value === null) return
@@ -93,7 +142,51 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToPrevSt
         submitMutation.mutate(formData)
     }
 
-    console.log(vehicleDetails);
+    const chassisNumber = getVehicleValue(vehicleDetails, ["chassisNumber", "chassis_number", "vehicle_chassis_number"])
+    const engineNumber = getVehicleValue(vehicleDetails, ["engineNumber", "engine_number", "vehicle_engine_number"])
+    const vehicleSummaryFields = [
+        {
+            label: "Vehicle Make",
+            value: showVehicleValue(getVehicleValue(vehicleDetails, ["vehicle_make", "vehicle_make_name", "make", "make_name"])),
+        },
+        {
+            label: "Model",
+            value: showVehicleValue(getVehicleValue(vehicleDetails, ["vehicle_model", "vehicle_model_name", "model", "model_name"])),
+        },
+        {
+            label: "Body Type",
+            value: showVehicleValue(getVehicleValue(vehicleDetails, ["bodytype", "body_type", "bodytype_name", "body_type_name", "vehicle_body_type"])),
+        },
+        {
+            label: "Registration Year",
+            value: showVehicleValue(getVehicleValue(vehicleDetails, ["registrationYear", "registration_year", "year", "yom"])),
+        },
+        {
+            label: "Color",
+            value: showVehicleValue(getVehicleValue(vehicleDetails, ["color", "vehicle_color", "vehicle_color_name"])),
+        },
+        {
+            label: "Registration Number",
+            value: showVehicleValue(getVehicleValue(vehicleDetails, ["registration_number", "vehicle_registration_number"])),
+        },
+        {
+            label: "Chassis Number",
+            value: redactVehicleNumber(chassisNumber),
+        },
+        {
+            label: "Engine Number",
+            value: redactVehicleNumber(engineNumber),
+        },
+        {
+            label: "Vehicle Tonnage",
+            value: showVehicleValue(getVehicleValue(vehicleDetails, ["vehicleTonnage", "vehicle_tonnage", "tonnage", "tonage", "tonage_capacity", "tonnage_capacity"])),
+        },
+        {
+            label: "Cubic Capacity",
+            value: showVehicleValue(getVehicleValue(vehicleDetails, ["cubicCapacity", "cubic_capacity", "engine_cc", "cc", "engine_capacity"])),
+        },
+    ]
+
     return (
         <form onSubmit={form.handleSubmit(onSubmit)} className="w-full mx-auto bg-transparent">
             <div className='items-center justify-center border p-3 sm:p-4'>
@@ -128,22 +221,6 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToPrevSt
                         placeholder='Enter passport or ID number'
                         label="Passport/ID Number"
                     />
-                    <Controller
-                        control={form.control}
-                        name="color"
-                        render={({ field }) => (
-                            <div>
-                                <ReusableSingleSelectApiInput
-                                    url="motor/vehicle-color"
-                                    value={field.value}
-                                    onChange={field.onChange}
-                                    label="Vehicle Color"
-                                    required
-                                    placeholder="Select Vehicle color..."
-                                />
-                            </div>
-                        )}
-                    />
                     <ReuseableInput
                         className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
                         control={form.control}
@@ -151,43 +228,25 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToPrevSt
                         label="Personal Tax Pin"
                         placeholder="Enter Personal Tax Pin"
                     />
-                    <ReuseableInput
-                        className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
-                        control={form.control}
-                        name="chassis_number"
-                        placeholder='Enter chassis number'
-                        label="Vehicle Chassis Number"
-                    />
-                    <ReuseableInput
-                        className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
-                        control={form.control}
-                        name="engine_number"
-                        placeholder='Enter engine number'
-                        label="Vehicle Engine Number"
-                    />
-                    <ReuseableInput
-                        className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
-                        control={form.control}
-                        name="engine_cc"
-                        placeholder='Enter engine capacity in CCs'
-                        label="Vehicle Engine Capacity (CC)"
-                    />
-                    <ReuseableInput
-                        className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
-                        control={form.control}
-                        name="total_seats"
-                        type='number'
-                        placeholder='Enter number of seats'
-                        label="Vehicle Total Seat Number"
-                    />
-                    <ReuseableInput
-                        className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
-                        control={form.control}
-                        type='number'
-                        name="tonage_capacity"
-                        placeholder='Enter capacity in tones'
-                        label="Vehicle Tonage Capacity (Tones)"
-                    />
+                </div>
+
+                <Separator className='my-4' />
+                <div className="space-y-3">
+                    <div>
+                        <h2 className="text-base font-semibold">Vehicle Details</h2>
+                        <p className="text-sm text-muted-foreground">
+                            These vehicle details are read-only and come from the selected quotation.
+                        </p>
+                    </div>
+                    <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5'>
+                        {vehicleSummaryFields.map((field) => (
+                            <ReadOnlyVehicleField
+                                key={field.label}
+                                label={field.label}
+                                value={field.value}
+                            />
+                        ))}
+                    </div>
                 </div>
 
                 <Separator className='my-4' />

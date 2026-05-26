@@ -181,6 +181,15 @@ export const KycSchema = z.object({
     ),
 })
 
+export const MotorKycSchema = KycSchema.omit({
+  color: true,
+  chassis_number: true,
+  engine_cc: true,
+  engine_number: true,
+  total_seats: true,
+  tonage_capacity: true,
+})
+
 export const InvoicePaymentSchema = z.object({
   name: z.string().min(1, "Customer Name is required"),
   email: z.email().min(1, "Email is required"),
