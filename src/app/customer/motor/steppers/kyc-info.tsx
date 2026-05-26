@@ -2,6 +2,7 @@
 import {
     AlertDialog,
     AlertDialogAction,
+    AlertDialogCancel,
     AlertDialogContent,
     AlertDialogDescription,
     AlertDialogFooter,
@@ -36,6 +37,11 @@ type ReadOnlyVehicleFieldProps = {
 type BoxHeaderProps = {
     title: string
     description?: string
+}
+
+type ServerFieldError = {
+    name: keyof MotorKycFormValues
+    message: string
 }
 
 const formatVehicleValue = (value: unknown): string | null => {
@@ -93,6 +99,26 @@ const readVehicleDetails = () => {
     }
 }
 
+const formatServerErrorValue = (value: unknown) => {
+    if (Array.isArray(value)) return value.filter(Boolean).join("\n")
+    if (typeof value === "string") return value
+    return null
+}
+
+const extractServerFieldErrors = (error: any): ServerFieldError[] => {
+    const errors = error?.response?.data?.errors
+    if (!errors || typeof errors !== "object" || Array.isArray(errors)) return []
+
+    return Object.entries(errors)
+        .map(([name, value]) => ({
+            name: name as keyof MotorKycFormValues,
+            message: formatServerErrorValue(value),
+        }))
+        .filter((fieldError): fieldError is ServerFieldError => Boolean(fieldError.message))
+}
+
+const invalidSelectClassName = "data-[invalid=true]:[&_[data-slot=select-trigger]]:border-red-500 data-[invalid=true]:[&_[data-slot=select-trigger]]:focus:ring-red-500"
+
 const ReadOnlyVehicleField = ({ label, value }: ReadOnlyVehicleFieldProps) => (
     <div className="flex flex-col gap-1.5">
         <label className="text-sm font-medium text-foreground">{label}</label>
@@ -149,7 +175,7 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToPrevSt
     const fileFields = new Set(["logbook", "tax_certificate", "id_document", "coi_certificate"])
 
     const submitMutation = UseApiMutation<SubmitResponse, FormData>({
-        url: `purchase/motor/${purchaseSessionId}/kyc`,
+        url: `alternative/purchase/motor/${purchaseSessionId}/kyc`,
         method: EMETHODS.POST,
         config: {
             headers: { "Content-Type": "multipart/form-data" },
@@ -161,13 +187,21 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToPrevSt
                 ShowToast.success(data.message || "Submitted successfully!")
             },
             onError: (error: any) => {
-                const message = extractErrorMessage(error);
+                const fieldErrors = extractServerFieldErrors(error)
+                fieldErrors.forEach(({ name, message }) => {
+                    form.setError(name, { type: "server", message })
+                })
+
+                const message = fieldErrors.length > 0
+                    ? "Please check the highlighted fields."
+                    : extractErrorMessage(error)
                 ShowToast.error(message || "Submission failed!")
             },
         },
     })
 
     const onSubmit = (data: MotorKycFormValues) => {
+        form.clearErrors()
         const formData = new FormData()
         Object.entries(data).forEach(([key, value]) => {
             if (value === undefined || value === null) return
@@ -182,6 +216,24 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToPrevSt
 
     const chassisNumber = getVehicleValue(vehicleDetails, ["chassisNumber", "chassis_number", "vehicle_chassis_number"])
     const engineNumber = getVehicleValue(vehicleDetails, ["engineNumber", "engine_number", "vehicle_engine_number"])
+    const hasAkiRegistrationIssue = [
+        getVehicleValue(vehicleDetails, ["registrationNumber", "registration_number", "vehicle_registration_number"]),
+        chassisNumber,
+        getVehicleValue(vehicleDetails, ["bodyType", "bodytype", "body_type", "bodytype_name", "body_type_name", "vehicle_body_type"]),
+        engineNumber,
+        getVehicleValue(vehicleDetails, ["make", "vehicleMake", "vehicle_make", "vehicle_make_name", "make_name"]),
+        getVehicleValue(vehicleDetails, ["model", "vehicleModel", "vehicle_model", "vehicle_model_name", "model_name"]),
+        getVehicleValue(vehicleDetails, ["passengerCapacity"]),
+    ].some((value) => !value)
+
+    const handleInvoiceCoverQuotation = () => {
+        if (hasAkiRegistrationIssue) {
+            setAkiDialogOpen(true)
+            return
+        }
+
+        form.handleSubmit(onSubmit)()
+    }
 
     const vehicleSummaryFields = [
         {
@@ -266,19 +318,26 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToPrevSt
                                     <Controller
                                         control={form.control}
                                         name="incorporated_in"
-                                        render={({ field }) => (
-                                            <ReusableSingleSelectApiInput
-                                                url="/taxonomies/geo/country"
-                                                queryParams={{
-                                                    sort_by: "name",
-                                                    direction: "asc",
-                                                }}
-                                                value={field.value}
-                                                onChange={field.onChange}
-                                                label="Incorporated In"
-                                                required
-                                                placeholder="Select country..."
-                                            />
+                                        render={({ field, fieldState }) => (
+                                            <div data-invalid={fieldState.invalid} className={invalidSelectClassName}>
+                                                <ReusableSingleSelectApiInput
+                                                    url="/taxonomies/geo/country"
+                                                    queryParams={{
+                                                        sort_by: "name",
+                                                        direction: "asc",
+                                                    }}
+                                                    value={field.value}
+                                                    onChange={field.onChange}
+                                                    label="Incorporated In"
+                                                    required
+                                                    placeholder="Select country..."
+                                                />
+                                                {fieldState.error ? (
+                                                    <p className="mt-1 text-sm text-red-500">
+                                                        {fieldState.error.message}
+                                                    </p>
+                                                ) : null}
+                                            </div>
                                         )}
                                     />
                                     <ReuseableInput
@@ -301,13 +360,20 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToPrevSt
                                     <Controller
                                         control={form.control}
                                         name="nationality_id"
-                                        render={({ field }) => (
-                                            <ReuseableSingleSelectNationalityInput
-                                                label="Nationality"
-                                                required
-                                                value={field.value}
-                                                onChange={field.onChange}
-                                            />
+                                        render={({ field, fieldState }) => (
+                                            <div data-invalid={fieldState.invalid} className={invalidSelectClassName}>
+                                                <ReuseableSingleSelectNationalityInput
+                                                    label="Nationality"
+                                                    required
+                                                    value={field.value}
+                                                    onChange={field.onChange}
+                                                />
+                                                {fieldState.error ? (
+                                                    <p className="mt-1 text-sm text-red-500">
+                                                        {fieldState.error.message}
+                                                    </p>
+                                                ) : null}
+                                            </div>
                                         )}
                                     />
                                     <ReusableSelect
@@ -431,7 +497,7 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToPrevSt
                     className="w-full rounded-full bg-[#C20C0C]/90 hover:bg-[#C20C0C] sm:w-auto"
                     rightIcon={<ArrowRightCircle />}
                     loading={submitMutation.isPending}
-                    onClick={() => setAkiDialogOpen(true)}>
+                    onClick={handleInvoiceCoverQuotation}>
                     Invoice Cover Quotation
                 </Button>
             </CardFooter>
@@ -444,6 +510,9 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToPrevSt
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
+                        <AlertDialogCancel>
+                            Close
+                        </AlertDialogCancel>
                         <AlertDialogAction
                             className="bg-[#C20C0C]/90 hover:bg-[#C20C0C]"
                             onClick={form.handleSubmit(onSubmit)}
