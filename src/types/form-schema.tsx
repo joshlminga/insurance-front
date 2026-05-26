@@ -181,13 +181,33 @@ export const KycSchema = z.object({
     ),
 })
 
-export const MotorKycSchema = KycSchema.omit({
-  color: true,
-  chassis_number: true,
-  engine_cc: true,
-  engine_number: true,
-  total_seats: true,
-  tonage_capacity: true,
+const OptionalKycFileSchema = z
+  .any()
+  .optional()
+  .refine(
+    (file) => !file || file instanceof File,
+    "Attach a valid file"
+  )
+  .refine(
+    (file) => !file || ACCEPTED_FILE_TYPES.includes(file?.type),
+    "Only .jpg, .jpeg, .png and .pdf formats are supported."
+  )
+
+export const MotorKycSchema = z.object({
+  nationality_id: z.string().optional(),
+  id_type: z.string().optional(),
+  id_number: z.string().optional(),
+  date_of_birth: z.string().optional(),
+  occupation: z.string().optional(),
+  company_name: z.string().optional(),
+  incorporated_in: z.string().optional(),
+  industry_category: z.string().optional(),
+  coi_number: z.string().optional(),
+  tax_pin: z.string().optional(),
+  logbook: OptionalKycFileSchema,
+  tax_certificate: OptionalKycFileSchema,
+  id_document: OptionalKycFileSchema,
+  coi_certificate: OptionalKycFileSchema,
 })
 
 export const InvoicePaymentSchema = z.object({
