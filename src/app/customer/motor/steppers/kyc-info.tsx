@@ -6,7 +6,7 @@ import { UseApiMutation } from '@/hooks/hooks'
 import { KycSchema } from '@/types/form-schema'
 import type { KycFormValues } from '@/types/schema'
 import type { CustomerVerificationDetailsProps, SubmitResponse } from '@/types/types'
-import { EMETHODS, IDTYPES, INVOICE_SESSION_STORAGE_KEY, PURCHASE_SESSION_STORAGE_KEY } from '@/utils/constatnts'
+import { EMETHODS, IDTYPES, INVOICE_SESSION_STORAGE_KEY, PURCHASE_SESSION_STORAGE_KEY, VEHICLE_DETAILS_SESSION_STORAGE_KEY, VEHICLE_OWNERSHIP_SESSION_STORAGE_KEY } from '@/utils/constatnts'
 import { extractErrorMessage } from '@/utils/helpers'
 import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -14,8 +14,12 @@ import { ArrowLeftCircle, ArrowRightCircle } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 
+type VehicleDetails = Record<string, unknown>
+
 export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToPrevStep, goToNextStep }) => {
     const [purchaseSessionId, setPurchaseSessionId] = useState<string | null>(null)
+    const [vehicleDetails, setVehicleDetails] = useState<VehicleDetails | null>(null)
+    const [vehicleOwnership, setVehicleOwnership] = useState<string | null>(null)
 
     const form = useForm<KycFormValues>({
         resolver: zodResolver(KycSchema),
@@ -37,11 +41,22 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToPrevSt
     })
 
     useEffect(() => {
-        const storedPurchaseKey = String(sessionStorage.getItem(PURCHASE_SESSION_STORAGE_KEY))
-        if (storedPurchaseKey) {
-            setPurchaseSessionId(storedPurchaseKey)
-        } else {
-            setPurchaseSessionId(null)
+        const storedPurchaseKey = sessionStorage.getItem(PURCHASE_SESSION_STORAGE_KEY)
+        const storedVehicleDetails = sessionStorage.getItem(VEHICLE_DETAILS_SESSION_STORAGE_KEY)
+        const storedVehicleOwnership = sessionStorage.getItem(VEHICLE_OWNERSHIP_SESSION_STORAGE_KEY)
+
+        setPurchaseSessionId(storedPurchaseKey)
+        setVehicleOwnership(storedVehicleOwnership)
+
+        if (!storedVehicleDetails) {
+            setVehicleDetails(null)
+            return
+        }
+
+        try {
+            setVehicleDetails(JSON.parse(storedVehicleDetails))
+        } catch {
+            setVehicleDetails(null)
         }
     }, [])
 
@@ -77,6 +92,8 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToPrevSt
         })
         submitMutation.mutate(formData)
     }
+
+    console.log(vehicleDetails);
     return (
         <form onSubmit={form.handleSubmit(onSubmit)} className="w-full mx-auto bg-transparent">
             <div className='items-center justify-center border p-3 sm:p-4'>
