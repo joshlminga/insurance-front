@@ -36,6 +36,8 @@ import {
     MAX_COMPARISONS,
     MOTOR_QUOTE_SESSION_STORAGE_KEY,
     PURCHASE_SESSION_STORAGE_KEY,
+    VEHICLE_DETAILS_SESSION_STORAGE_KEY,
+    VEHICLE_OWNERSHIP_SESSION_STORAGE_KEY,
     ReusableReducer
 } from '@/utils/constatnts'
 import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
@@ -289,7 +291,10 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                     ShowToast.error("Purchase session could not be initialized. Please try again.")
                     return
                 }
+                const vehicleInfo = data?.data?.vehicle_info
                 sessionStorage.setItem(PURCHASE_SESSION_STORAGE_KEY, String(purchaseId))
+                sessionStorage.setItem(VEHICLE_DETAILS_SESSION_STORAGE_KEY, vehicleInfo ? JSON.stringify(vehicleInfo) : "")
+                sessionStorage.setItem(VEHICLE_OWNERSHIP_SESSION_STORAGE_KEY, String(data?.data?.ownership))
                 goToNextStep?.();
                 ShowToast.success(data?.message ?? "Purchase started");
             },
@@ -299,7 +304,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                 ShowToast.error(message || "Purchase failed!");
             },
         },
-    });
+    });      
 
     const onPurchase = (productId: number | string, rateId: number | string) => {
         if (!quoteSessionId) {
