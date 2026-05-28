@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { StatsCard, StatsGrid } from '@/components/shared';
+// import { StatsCard, StatsGrid } from '@/components/shared';
 import { ActionColumn } from '@/dev/columns';
 import { MyCoversColumns } from '@/dev/columns/customer/motor/my-covers';
 import { CustomBaseTable } from '@/dev/table';
