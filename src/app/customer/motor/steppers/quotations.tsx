@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CardFooter } from '@/components/ui/card'
@@ -14,14 +16,14 @@ import { useCustomDialogContextFactory } from '@/hooks'
 import type {
     BenefitGroup,
     CustomerVerificationDetailsProps,
-    ListedBenefitResolved,
     MotorBenefitOption,
+    SelectedQuoteEntry,
     SubmitResponse,
     TFilterOptions,
     TPaginationFilters
 } from '@/types/types'
 import { EPREFIX, EROUTES } from '@/utils/enums'
-import { ArrowLeftCircle, ArrowRightCircle, Plus } from 'lucide-react'
+import { ArrowLeftCircle, ArrowRightCircle, X } from 'lucide-react'
 import React, { useCallback, useEffect, useMemo, useReducer, useState, useRef } from 'react'
 import type { FieldValues, Path } from 'react-hook-form'
 import { useForm } from 'react-hook-form'
@@ -41,76 +43,22 @@ import {
     ReusableReducer
 } from '@/utils/constatnts'
 import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
-import { formatCurrency, formatNumber } from '@/lib/format'
+import { formatCurrency } from '@/lib/format'
 import { serializeMotorPremiumParams } from '@/lib/motor-premium-params'
 import { ShowToast } from '@/utils/utils'
-import { extractErrorMessage } from '@/utils/helpers'
+import { 
+    benefitGroupFormKey, 
+    benefitIdsEqual, 
+    benefitOptionLabel, 
+    collectBenefitIdsFromValues, 
+    extractErrorMessage, 
+    resolveListedBenefitValue 
+} from '@/utils/helpers'
 import { PostComparisonPage } from './comparisons/[id]/page'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Slider } from '@/components/ui/slider'
 
-function benefitGroupFormKey(groupLabel: string): string {
-    const slug =
-        groupLabel
-            .trim()
-            .replace(/\s+/g, '_')
-            .replace(/[^a-zA-Z0-9_]/g, '') || 'Other'
-    return `benefit_${slug}`
-}
-
-function benefitOptionLabel(item: MotorBenefitOption): string {
-    const base =
-        item.name ??
-        item.label ??
-        (item.reference ? `Ref ${item.reference}` : null) ??
-        `Benefit ${item.id}`
-    return String(base)
-}
-
-
-function formatPremium(premium: unknown): string {
-    const n = typeof premium === 'number' ? premium : parseFloat(String(premium))
-    if (!Number.isFinite(n)) return '-'
-    return formatNumber(n)
-}
-
-function formatCompulsoryPremium(premium: unknown): string {
-    const base = formatPremium(premium)
-    if (base === '-') return '-'
-    return `${base} (c)`
-}
-
-function resolveListedBenefitValue(item: any, listedBenefitId: number): ListedBenefitResolved {
-    const benefits = item?.benefits
-
-    const compulsory = (benefits?.compulsory ?? []) as any[]
-    const compulsoryMatch = compulsory.find((b) => Number(b?.benefit_id) === listedBenefitId)
-    if (compulsoryMatch) {
-        return { text: formatCompulsoryPremium(compulsoryMatch?.premium), status: 'compulsory' }
-    }
-
-    const inclusive = (benefits?.inclusive ?? []) as any[]
-    const inclusiveMatch = inclusive.find((b) => Number(b?.benefit_id) === listedBenefitId)
-    if (inclusiveMatch) {
-        const raw = inclusiveMatch?.premium
-        const n = typeof raw === 'number' ? raw : parseFloat(String(raw))
-        if (!Number.isFinite(n) || n === 0) return { text: 'Inclusive', status: 'inclusive' }
-        return { text: formatPremium(raw), status: 'inclusive' }
-    }
-
-    const selected = (benefits?.selected ?? []) as any[]
-    const selectedMatch = selected.find((b) => Number(b?.benefit_id) === listedBenefitId)
-    if (selectedMatch) {
-        return { text: formatPremium(selectedMatch?.premium), status: 'selected' }
-    }
-
-    const availableRaw = (benefits?.available ?? []) as Array<number | string>
-    const availableIds = availableRaw.map(Number).filter((n) => Number.isFinite(n))
-    return availableIds.includes(listedBenefitId)
-        ? { text: 'N/A', status: 'na' }
-        : { text: 'N/O', status: 'no' }
-}
 
 
 export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
@@ -118,7 +66,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
     goToPrevStep,
 }) => {
     const [quoteSessionId, setQuoteSessionId] = useState<number | null>(null)
-    const [selectedQuotes, setSelectedQuotes] = useState<{ product_id: string | number; rate_id: string | number }[]>([])
+    const [selectedQuotes, setSelectedQuotes] = useState<SelectedQuoteEntry[]>([])
     const [purchasingRateId, setPurchasingRateId] = useState<string | number | null>(null)
     const [appliedBenefitIds, setAppliedBenefitIds] = useState<number[]>([])
     const [value, setValue] = useState([0, 100])
@@ -224,6 +172,8 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
     )
 
     const hasInitializedBenefitFormRef = useRef(false)
+    const skipBenefitAutoApplyRef = useRef(true)
+    const watchedBenefitValues = benefitForm.watch()
 
     useEffect(() => {
         if (benefitGroups.length === 0) return
@@ -234,55 +184,92 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
         }
         benefitForm.reset(next)
         hasInitializedBenefitFormRef.current = true
-    }, [benefitGroupsResetKey])
+        skipBenefitAutoApplyRef.current = true
+    }, [benefitGroupsResetKey, benefitForm, benefitGroups])
+
+    const applyBenefitIdsFromFormValues = useCallback(
+        (values: FieldValues) => {
+            const ids = collectBenefitIdsFromValues(values, benefitGroups)
+            if (benefitIdsEqual(ids, appliedBenefitIds)) return
+
+            if (ids.length === 0) {
+                setAppliedBenefitIds([])
+                return
+            }
+            setAppliedBenefitIds(ids)
+        },
+        [benefitGroups, appliedBenefitIds]
+    )
+
+    useEffect(() => {
+        if (!quoteSessionId || benefitGroups.length === 0) return
+        if (!hasInitializedBenefitFormRef.current) return
+        if (skipBenefitAutoApplyRef.current) {
+            skipBenefitAutoApplyRef.current = false
+            return
+        }
+        applyBenefitIdsFromFormValues(benefitForm.getValues())
+    }, [watchedBenefitValues, quoteSessionId, benefitGroups.length, applyBenefitIdsFromFormValues, benefitForm])
 
     const currentPage = data?.pagination?.current_page ?? filter.page
     const lastPage = data?.pagination?.last_page ?? 1
 
-    const applyBenefitSelections = useCallback(() => {
-        const values = benefitForm.getValues()
-        const ids: number[] = []
-        for (const { group } of benefitGroups) {
-            const key = benefitGroupFormKey(group)
-            const raw = values[key]
-            if (raw == null || raw === '' || raw === BENEFIT_SELECT_NONE) continue
-            const n = Number(raw)
-            if (Number.isFinite(n)) ids.push(n)
-        }
-
-        if (ids.length === 0) {
-            const alreadyEmpty = appliedBenefitIds.length === 0
-            setAppliedBenefitIds([])
-            ShowToast.info('Benefits removed. Recalculating premiums…')
-            // If state didn't change, TanStack Query won't auto-refetch; do it manually.
-            if (alreadyEmpty) {
-                refetchPremium()
+    const selectedQuotesDisplay = useMemo(() => {
+        return selectedQuotes.map((sel) => {
+            const item = quotationItems.find(
+                (q: any) => String(q?.rate_id) === String(sel.rate_id)
+            )
+            return {
+                ...sel,
+                insurerName:
+                    sel.insurerName ??
+                    item?.product?.organization?.name ??
+                    'Insurer',
+                logo: sel.logo ?? item?.product?.organization?.logo,
+                totalPremium:
+                    sel.totalPremium ??
+                    formatCurrency(item?.calculated_premium?.total_premium),
             }
-            return
-        }
-        setAppliedBenefitIds(ids)
-        ShowToast.success('Recalculating premiums with your add-ons…')
-    }, [benefitForm, benefitGroups, appliedBenefitIds.length, refetchPremium])
+        })
+    }, [selectedQuotes, quotationItems])
 
     const isQuoteSelected = useCallback(
-        (rateId: string | number) => selectedQuotes.some((q) => q.rate_id === rateId),
+        (rateId: string | number) =>
+            selectedQuotes.some((q) => String(q.rate_id) === String(rateId)),
         [selectedQuotes]
     )
 
     const toggleQuoteSelection = useCallback(
-        (productId: string | number, rateId: string | number) => {
+        (productId: string | number, rateId: string | number, item?: any) => {
             setSelectedQuotes((prev) => {
-                const exists = prev.some((q) => q.rate_id === rateId)
-                if (exists) return prev.filter((q) => q.rate_id !== rateId)
+                const exists = prev.some((q) => String(q.rate_id) === String(rateId))
+                if (exists) return prev.filter((q) => String(q.rate_id) !== String(rateId))
                 if (prev.length >= MAX_COMPARISONS) {
                     ShowToast.error(`You can select a maximum of ${MAX_COMPARISONS} quotations to compare.`)
                     return prev
                 }
-                return [...prev, { product_id: productId, rate_id: rateId }]
+                return [
+                    ...prev,
+                    {
+                        product_id: productId,
+                        rate_id: rateId,
+                        insurerName: item?.product?.organization?.name ?? 'Insurer',
+                        logo: item?.product?.organization?.logo,
+                        totalPremium: formatCurrency(
+                            item?.calculated_premium?.total_premium
+                        ),
+                    },
+                ]
             })
         },
         []
     )
+
+    const removeSelectedQuote = useCallback((rateId: string | number) => {
+        setSelectedQuotes((prev) =>
+            prev.filter((q) => String(q.rate_id) !== String(rateId))
+        )
+    }, [])
 
     const submitPurchaseMutation = UseApiMutation<SubmitResponse, any>({
         url: `purchase/motor/${quoteSessionId}`,
@@ -439,12 +426,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                             className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
                         />
                     </div>
-                    {/* <hr className="mb-5" /> */}
                     <h2 className="mb-1 text-lg font-semibold text-gray-900">Additional benefits</h2>
-                    {/* <p className="mb-4 text-sm text-gray-500">
-                        Each group lists add-ons returned for this quote. Pick one option per group (or leave
-                        &quot;No add-on&quot;), then add them to your premium calculation.
-                    </p> */}
                     <hr className="mb-5" />
                     <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
                         {!quoteSessionId ? null : isPending && !data && benefitGroups.length === 0 ? (
@@ -479,20 +461,6 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                                 })}
                             </div>
                         )}
-                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                            <Button
-                                type="button"
-                                className="flex w-full items-center gap-1.5 rounded border border-[#0CC2581F] bg-[#C7EED5] px-4 py-2 text-sm font-medium text-[#43A047] hover:bg-[#C7EED5]/90 sm:w-auto"
-                                leftIcon={<Plus className="h-4 w-4" />}
-                                onClick={applyBenefitSelections}
-                                disabled={
-                                    !quoteSessionId ||
-                                    benefitGroups.length === 0 ||
-                                    isFetching
-                                }>
-                                Add benefit
-                            </Button>
-                        </div>
                     </form>
                     <hr className="mb-5" />
                     <h2 className="mb-1 text-lg font-semibold text-gray-900">Price Range</h2>
@@ -516,16 +484,49 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
 
                 <section className="flex-1 min-w-0 space-y-4 px-4 py-5 sm:px-6 sm:py-6">
 
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                        <div className="flex items-center gap-3">
-                            <h2 className="text-lg font-semibold text-gray-900">Quote Comparison</h2>
-                            {selectedQuotes.length > 0 && (
-                                <span className="rounded-full bg-[#C20C0C]/10 px-2.5 py-0.5 text-xs font-medium text-[#C20C0C]">
-                                    {selectedQuotes.length}/{MAX_COMPARISONS} selected
-                                </span>
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                        <div className="flex min-w-0 flex-1 flex-col gap-2.5">
+                            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                                <h2 className="text-lg font-semibold text-gray-900">
+                                    Quote Comparison
+                                </h2>
+                                {selectedQuotes.length > 0 && (
+                                    <span className="rounded-full bg-[#C20C0C]/10 px-2.5 py-0.5 text-xs font-medium text-[#C20C0C]">
+                                        {selectedQuotes.length}/{MAX_COMPARISONS} selected
+                                    </span>
+                                )}
+                            </div>
+
+                            {selectedQuotesDisplay.length > 0 && (
+                                <div
+                                    className="flex flex-wrap gap-2"
+                                    role="list"
+                                    aria-label="Selected quotations for comparison">
+                                    {selectedQuotesDisplay.map((quote) => (
+                                        <div
+                                            key={String(quote.rate_id)}
+                                            role="listitem"
+                                            className="inline-flex max-w-full items-center gap-2 rounded-lg border border-[#C20C0C]/25 bg-[#C20C0C]/5 py-1.5 pl-2 pr-1.5 text-sm shadow-sm">
+                                            <div className="flex min-w-0 flex-col leading-tight">
+                                                <span className="truncate font-medium text-gray-900 max-w-40 sm:max-w-48">
+                                                    {quote.insurerName}
+                                                </span>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={() => removeSelectedQuote(quote.rate_id)}
+                                                className="shrink-0 rounded-full p-1 text-gray-500 transition-colors hover:bg-[#C20C0C]/15 hover:text-[#C20C0C]"
+                                                aria-label={`Remove ${quote.insurerName} from comparison`}
+                                            >
+                                                <X className="h-4 w-4" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
                             )}
                         </div>
-                        <div className="flex items-center justify-between gap-3 sm:justify-end">
+
+                        <div className="flex shrink-0 items-center justify-between gap-3 sm:justify-end">
                             {isFetching && (
                                 <span className="animate-pulse text-xs text-gray-400">
                                     Fetching premium quotations…
@@ -535,9 +536,15 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                                 type="button"
                                 className="rounded bg-[#C20C0C]/80 px-5 py-2 text-sm font-medium text-white hover:bg-[#C20C0C] sm:w-auto"
                                 onClick={() => onComparison(false)}
-                                loading={submitComparisonMutation.isPending || submitComparisonDownloadMutation.isPending}
-                                disabled={selectedQuotes.length < 2}>
-                                Generate Comparison {selectedQuotes.length > 0 && `(${selectedQuotes.length}/${MAX_COMPARISONS})`}
+                                loading={
+                                    submitComparisonMutation.isPending ||
+                                    submitComparisonDownloadMutation.isPending
+                                }
+                                disabled={selectedQuotes.length < 2}
+                            >
+                                Generate Comparison
+                                {selectedQuotes.length > 0 &&
+                                    ` (${selectedQuotes.length}/${MAX_COMPARISONS})`}
                             </Button>
                         </div>
                     </div>
@@ -551,7 +558,13 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                                 : quotationItems.map((item: any, itemIndex: number) => (
                                     <ReusableCard
                                         selected={isQuoteSelected(item?.rate_id)}
-                                        onChange={() => toggleQuoteSelection(item?.product?.id, item?.rate_id)}
+                                        onChange={() =>
+                                            toggleQuoteSelection(
+                                                item?.product?.id,
+                                                item?.rate_id,
+                                                item
+                                            )
+                                        }
                                         key={item?.id ?? `quotation-${itemIndex}`}
                                         header={{
                                             type: 'image',
@@ -668,7 +681,6 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                                 ))}
                     </div>
                 </section>
-
             </div>
 
             <CardFooter className="flex flex-col items-center justify-between gap-3 px-0 pt-2 sm:flex-row">
