@@ -184,7 +184,7 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
                                             <span className="text-xs text-muted-foreground">
                                                 {benefit?.premium === 0 ? "Included" : formatCurrency(benefit?.premium)}
                                             </span>
-                                            <Badge className={`${color} text-white`}>{label}</Badge>
+                                            <Badge className={`${color}`}>{label}</Badge>
                                         </div>
                                     </React.Fragment>
                                 );

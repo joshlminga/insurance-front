@@ -156,7 +156,7 @@ export const createHeroPopoverItems = (
 ) => [
     {
       label: "My Covers",
-      to: `/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}`,
+      to: '',
       icon: ShieldCheck,
     },
     {
@@ -177,23 +177,23 @@ export const createHeroPopoverItems = (
     },
   ]
 
-export const myAccounttLinks = [
-  { label: 'Account Management', to: `/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}/account` },
-  { label: 'Payment Settings', to: `/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}/payments` },
-  { label: 'Address Book', to: `/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}/addresses` },
-  // { label: 'Newsletter Preferences', to: `/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}/newsletters` },
-]
+// export const myAccounttLinks = [
+//   { label: 'Account Management', to: `/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}/account` },
+//   { label: 'Payment Settings', to: `/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}/payments` },
+//   { label: 'Address Book', to: `/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}/addresses` },
+//   // { label: 'Newsletter Preferences', to: `/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}/newsletters` },
+// ]
 
-export const sidebarLinks = [
-  { label: 'My Account', to: `/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}/account` },
-  { label: 'Covers', to: `/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}` },
-  // { label: 'Inbox', to: `/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}/inbox` },
-  // { label: 'Pending Reviews', to: `/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}/reviews` },
-  { label: 'Claims', to: `/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}/claims` },
-  // { label: 'Wishlist', to: `/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}/wishlist` },
-  // { label: 'Followed Sellers', to: `/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}/followed` },
-  // { label: 'Recently Viewed', to: `/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}/recent` },
-]
+// export const sidebarLinks = [
+//   { label: 'My Account', to: `/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}/account` },
+//   { label: 'Covers', to: `/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}` },
+//   // { label: 'Inbox', to: `/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}/inbox` },
+//   // { label: 'Pending Reviews', to: `/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}/reviews` },
+//   { label: 'Claims', to: `/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}/claims` },
+//   // { label: 'Wishlist', to: `/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}/wishlist` },
+//   // { label: 'Followed Sellers', to: `/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}/followed` },
+//   // { label: 'Recently Viewed', to: `/${EPREFIX.CUSTOMER}${EROUTES.MY_COVERS}/recent` },
+// ]
 
 export const RatesSteps = [
     { title: 'Product', fields: ['coverfor_id', 'covertype_id', 'covering_id', 'usedfor_id', 'bodytype_id', 'used_tonnage_id'] },
@@ -214,10 +214,10 @@ export const VEHICLE_OWNERSHIP_SESSION_STORAGE_KEY = "vehicle_ownership_session"
 export const INVOICE_ID_KEY = "invoice_id"
 
 export const BENEFIT_TYPE_CONFIG = {
-    selected: { label: "Selected", color: "bg-[#209BFF]" },
-    inclusive: { label: "Inclusive", color: "bg-[#0CC258]" },
-    compulsory: { label: "Compulsory", color: "bg-[#C20C0C]" },
-    optional: { label: "Optional", color: "bg-[#209BFF]" },
+    selected: { label: "Selected", color: "bg-red-100 text-red-700" },
+    inclusive: { label: "Inclusive", color: "bg-green-100 text-green-700" },
+    compulsory: { label: "Compulsory", color: "bg-blue-100 text-blue-700" },
+    optional: { label: "Optional", color: "bg-gray-100 text-gray-600" },
 } as const;
 
 
