@@ -214,10 +214,10 @@ export const VEHICLE_OWNERSHIP_SESSION_STORAGE_KEY = "vehicle_ownership_session"
 export const INVOICE_ID_KEY = "invoice_id"
 
 export const BENEFIT_TYPE_CONFIG = {
-    selected: { label: "Selected", color: "bg-red-100 text-red-700" },
-    inclusive: { label: "Inclusive", color: "bg-green-100 text-green-700" },
-    compulsory: { label: "Compulsory", color: "bg-blue-100 text-blue-700" },
-    optional: { label: "Optional", color: "bg-gray-100 text-gray-600" },
+    selected: { label: "Selected", color: "text-red-700", bg: "bg-red-100" },
+    inclusive: { label: "Inclusive", color: "text-green-700", bg: "bg-green-100" },
+    compulsory: { label: "Compulsory", color: "text-blue-700", bg:"bg-blue-100" },
+    optional: { label: "Optional", color: "text-gray-600", bg: "bg-gray-100" },
 } as const;
 
 

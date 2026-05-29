@@ -1,13 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { UseAuth } from "@/stores/auth-store";
-import { Badge } from "@/components/ui/badge";
 import {
     Card,
     CardContent,
     CardFooter,
 } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Button, CustomDialogComponent, ReusableDropdown, SendDocumentsViaEmail } from "@/dev/core";
+import {
+    Button,
+    CustomDialogComponent,
+    ReusableDropdown,
+    SendDocumentsViaEmail
+} from "@/dev/core";
 import { usePurchaseStepper } from "@/hooks/use-purchase-stepper";
 import { formatCurrency } from "@/lib/format";
 import { EPREFIX, EROUTES } from "@/utils/enums";
@@ -146,47 +149,35 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
             <div className="w-full mx-auto lg:max-w-100 lg:min-w-100 px-4 space-y-4">
                 <h1 className="text-2xl font-bold">Quote Preview</h1>
                 <Card className="flex items-center justify-center py-6 shadow-none border border-[#ADABAB]">
-                      <div className="w-27.25 h-15 flex">
-                    <img
-                        src={org?.logo}
-                        className='max-w-full max-h-full object-contain'
-                    />
+                    <div className="w-27.25 h-15 flex">
+                        <img
+                            src={org?.logo}
+                            className='max-w-full max-h-full object-contain'
+                        />
                     </div>
                     <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-y-3 text-sm">
-                            <span className="text-muted-foreground">Premium</span>
+                        <div className="grid grid-cols-2 gap-y-3 text-md">
+                            <span className="">Premium</span>
                             <span className="font-medium text-right">
                                 {formatCurrency(premium?.vehicle_premium)}
                             </span>
-                            <Separator className="col-span-2 my-1" />
                             {allBenefits.map((benefit: any) => {
-                                const { label, color } = BENEFIT_TYPE_CONFIG[benefit.type as BenefitType];
+                                const { bg, color } = BENEFIT_TYPE_CONFIG[benefit.type as BenefitType];
                                 const displayName = benefit.name ?? benefit.label;
-                                const hasRate = benefit?.rate != null;
-                                const hasMinimum = benefit?.minimum != null;
                                 return (
                                     <React.Fragment key={benefit?.id}>
-                                        <div className="flex flex-col gap-0.5">
-                                            <span className="text-muted-foreground">{displayName}</span>
-                                            {(hasRate || hasMinimum) && (
-                                                <span className="text-xs text-muted-foreground/70">
-                                                    {hasRate && `Rate: ${(parseFloat(benefit?.rate) * 100).toFixed(3)}%`}
-                                                    {hasRate && hasMinimum && " · "}
-                                                    {hasMinimum && `Min: ${formatCurrency(parseFloat(benefit?.minimum))}`}
-                                                </span>
-                                            )}
+                                        <div className={`flex flex-col gap-0.5 ${color}`}>
+                                            <span className="">{displayName}</span>
                                         </div>
-                                        <div className="flex items-center justify-end gap-2">
-                                            <span className="text-xs text-muted-foreground">
+                                        <div className={`flex items-center justify-end gap-2 ${color}`}>
+                                            <span className={` p-0.5 rounded-lg ${bg}`}>
                                                 {benefit?.premium === 0 ? "Included" : formatCurrency(benefit?.premium)}
                                             </span>
-                                            <Badge className={`${color}`}>{label}</Badge>
                                         </div>
                                     </React.Fragment>
                                 );
                             })}
                         </div>
-                        <Separator />
                         <div className="grid grid-cols-2 text-sm font-semibold">
                             <span className="text-xs text-muted-foreground">PHCF, TL & Stamp Duty</span>
                             <span className="text-right text-xs">{formatCurrency(premium?.total_duty)}</span>
@@ -198,20 +189,20 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
                     </CardContent>
                 </Card>
             </div>
-            <CardFooter className="flex flex-col gap-2 px-0 mt-2">
-                <div className="flex gap-2 w-full">
+            <CardFooter className="flex flex-col gap-2 px-0 mt-2 2xl:flex-row 2xl:items-center 2xl:justify-between">
+                <div className="flex gap-2 w-full 2xl:w-auto">
                     <Button
                         variant="outline"
                         leftIcon={<Download />}
                         onClick={() => { onSubmit(data) }}
                         loading={submitMutation.isPending}
-                        className="flex-1 border-neutral-300 bg-white text-neutral-700 hover:border-neutral-400 hover:bg-neutral-100 hover:text-neutral-900">
+                        className="flex-1 2xl:flex-none border-neutral-300 bg-white text-neutral-700 hover:border-neutral-400 hover:bg-neutral-100 hover:text-neutral-900">
                         Download
                     </Button>
                     <ReusableDropdown
                         trigger={
                             <Button
-                                className="flex-1 bg-[#C20C0C] text-white hover:bg-[#A30A0A] focus-visible:ring-[#C20C0C]/30"
+                                className="flex-1 2xl:flex-none bg-[#C20C0C] text-white hover:bg-[#A30A0A] focus-visible:ring-[#C20C0C]/30"
                                 leftIcon={<Forward />}>
                                 Share
                             </Button>
@@ -244,14 +235,14 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
                             onPurchase(data);
                         }}
                         loading={submitPurchaseMutation.isPending}
-                        className="w-full border-[#C20C0C] bg-[#FFF5F5] text-[#C20C0C] hover:bg-[#C20C0C] hover:text-white focus-visible:ring-[#C20C0C]/30">
+                        className="w-full 2xl:w-auto border-[#C20C0C] bg-[#FFF5F5] text-[#C20C0C] hover:bg-[#C20C0C] hover:text-white focus-visible:ring-[#C20C0C]/30">
                         Purchase Cover
                     </Button>
                 ) : (
                     <Link
                         to={`/${EPREFIX.AUTH}${EROUTES.SIGNUP}`}
                         state={{ returnTo: location.pathname, stepperStep: currentStep }}
-                        className="w-full">
+                        className="w-full 2xl:w-auto">
                         <Button
                             type="button"
                             className="w-full border-[#C20C0C] bg-[#FFF5F5] text-[#C20C0C] hover:bg-[#C20C0C] hover:text-white focus-visible:ring-[#C20C0C]/30">
