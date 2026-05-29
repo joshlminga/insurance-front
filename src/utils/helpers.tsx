@@ -1,3 +1,12 @@
+import { formatNumber } from "@/lib/format";
+import { 
+  BenefitGroup, 
+  ListedBenefitResolved, 
+  MotorBenefitOption 
+} from "@/types/types";
+import { FieldValues } from "react-hook-form";
+import { BENEFIT_SELECT_NONE } from "./constatnts";
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export const currentDate = (): string => {
   return new Intl.DateTimeFormat("en-US", {
@@ -55,4 +64,89 @@ export const formatCurrency = (amount: string | number) => {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
     }).format(Number(amount))
+}
+
+
+export function benefitGroupFormKey(groupLabel: string): string {
+    const slug =
+        groupLabel
+            .trim()
+            .replace(/\s+/g, '_')
+            .replace(/[^a-zA-Z0-9_]/g, '') || 'Other'
+    return `benefit_${slug}`
+}
+
+export function benefitOptionLabel(item: MotorBenefitOption): string {
+    const base =
+        item.name ??
+        item.label ??
+        (item.reference ? `Ref ${item.reference}` : null) ??
+        `Benefit ${item.id}`
+    return String(base)
+}
+
+
+export function formatPremium(premium: unknown): string {
+    const n = typeof premium === 'number' ? premium : parseFloat(String(premium))
+    if (!Number.isFinite(n)) return '-'
+    return formatNumber(n)
+}
+
+function formatCompulsoryPremium(premium: unknown): string {
+    const base = formatPremium(premium)
+    if (base === '-') return '-'
+    return `${base} (c)`
+}
+
+export function resolveListedBenefitValue(item: any, listedBenefitId: number): ListedBenefitResolved {
+    const benefits = item?.benefits
+
+    const compulsory = (benefits?.compulsory ?? []) as any[]
+    const compulsoryMatch = compulsory.find((b) => Number(b?.benefit_id) === listedBenefitId)
+    if (compulsoryMatch) {
+        return { text: formatCompulsoryPremium(compulsoryMatch?.premium), status: 'compulsory' }
+    }
+
+    const inclusive = (benefits?.inclusive ?? []) as any[]
+    const inclusiveMatch = inclusive.find((b) => Number(b?.benefit_id) === listedBenefitId)
+    if (inclusiveMatch) {
+        const raw = inclusiveMatch?.premium
+        const n = typeof raw === 'number' ? raw : parseFloat(String(raw))
+        if (!Number.isFinite(n) || n === 0) return { text: 'Inclusive', status: 'inclusive' }
+        return { text: formatPremium(raw), status: 'inclusive' }
+    }
+
+    const selected = (benefits?.selected ?? []) as any[]
+    const selectedMatch = selected.find((b) => Number(b?.benefit_id) === listedBenefitId)
+    if (selectedMatch) {
+        return { text: formatPremium(selectedMatch?.premium), status: 'selected' }
+    }
+
+    const availableRaw = (benefits?.available ?? []) as Array<number | string>
+    const availableIds = availableRaw.map(Number).filter((n) => Number.isFinite(n))
+    return availableIds.includes(listedBenefitId)
+        ? { text: 'N/A', status: 'na' }
+        : { text: 'N/O', status: 'no' }
+}
+
+export function collectBenefitIdsFromValues(
+    values: FieldValues,
+    groups: BenefitGroup[]
+): number[] {
+    const ids: number[] = []
+    for (const { group } of groups) {
+        const key = benefitGroupFormKey(group)
+        const raw = values[key]
+        if (raw == null || raw === '' || raw === BENEFIT_SELECT_NONE) continue
+        const n = Number(raw)
+        if (Number.isFinite(n)) ids.push(n)
+    }
+    return ids
+}
+
+export function benefitIdsEqual(a: number[], b: number[]): boolean {
+    if (a.length !== b.length) return false
+    const sortedA = [...a].sort((x, y) => x - y)
+    const sortedB = [...b].sort((x, y) => x - y)
+    return sortedA.every((id, i) => id === sortedB[i])
 }

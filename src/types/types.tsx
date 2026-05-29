@@ -735,3 +735,11 @@ export interface ReusableSwitchToggleProps {
   className?: string
   onCheckedChange?: (checked: boolean) => void
 }
+
+export type SelectedQuoteEntry = {
+    product_id: string | number
+    rate_id: string | number
+    insurerName?: string
+    logo?: string
+    totalPremium?: string
+}
