@@ -235,7 +235,6 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
                         ]}
                     />
                 </div>
-
                 {isAuthenticated ? (
                     <Button
                         variant="outline"
@@ -261,7 +260,6 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
                     </Link>
                 )}
             </CardFooter>
-
             <CustomDialogComponent
                 {...{ handleDialogContextSwitch, dialogOpen }}
                 className='sm:max-w-fit w-[95vw] sm:w-auto p-4 sm:p-6'>
