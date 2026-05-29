@@ -46,6 +46,9 @@ import { serializeMotorPremiumParams } from '@/lib/motor-premium-params'
 import { ShowToast } from '@/utils/utils'
 import { extractErrorMessage } from '@/utils/helpers'
 import { PostComparisonPage } from './comparisons/[id]/page'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Slider } from '@/components/ui/slider'
 
 function benefitGroupFormKey(groupLabel: string): string {
     const slug =
@@ -118,6 +121,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
     const [selectedQuotes, setSelectedQuotes] = useState<{ product_id: string | number; rate_id: string | number }[]>([])
     const [purchasingRateId, setPurchasingRateId] = useState<string | number | null>(null)
     const [appliedBenefitIds, setAppliedBenefitIds] = useState<number[]>([])
+    const [value, setValue] = useState([0, 100])
 
     const benefitForm = useForm<FieldValues>({ defaultValues: {} })
     const { isAuthenticated } = UseAuth()
@@ -304,7 +308,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                 ShowToast.error(message || "Purchase failed!");
             },
         },
-    });      
+    });
 
     const onPurchase = (productId: number | string, rateId: number | string) => {
         if (!quoteSessionId) {
@@ -422,213 +426,249 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                     <strong>Quote session not found.</strong> Go back to Vehicle Details and submit again.
                 </div>
             )}
-            <section className="rounded-lg border border-[#E5E7EB] bg-white px-4 py-5 sm:px-6 sm:py-6">
-                <h2 className="mb-1 text-lg font-semibold text-gray-900">Additional benefits</h2>
-                <p className="mb-4 text-sm text-gray-500">
-                    Each group lists add-ons returned for this quote. Pick one option per group (or leave
-                    &quot;No add-on&quot;), then add them to your premium calculation.
-                </p>
-                <hr className="mb-5" />
-                <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
-                    {!quoteSessionId ? null : isPending && !data && benefitGroups.length === 0 ? (
-                        <p className="text-sm text-muted-foreground">Loading benefit options…</p>
-                    ) : benefitGroups.length === 0 ? (
-                        <p className="text-sm text-muted-foreground">
-                            No optional benefits are available for this quote yet.
-                        </p>
-                    ) : (
-                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-                            {benefitGroups.map(({ group, items }) => {
-                                const fieldName = benefitGroupFormKey(group)
-                                const options = [
-                                    { value: BENEFIT_SELECT_NONE, label: '-- none --' },
-                                    ...items.map((item) => ({
-                                        value: String(item.id),
-                                        label: benefitOptionLabel(item),
-                                    })),
-                                ]
-                                return (
-                                    <ReusableSelect
-                                        key={group}
-                                        control={benefitForm.control}
-                                        name={fieldName as Path<FieldValues>}
-                                        label={group}
-                                        placeholder={`Choose in ${group}`}
-                                        options={options}
-                                        disabled={isFetching}
-                                        triggerClassName="border-[#ADABAB]"
-                                    />
-                                )
-                            })}
-                        </div>
-                    )}
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                        <Button
-                            type="button"
-                            className="flex w-full items-center gap-1.5 rounded border border-[#0CC2581F] bg-[#C7EED5] px-4 py-2 text-sm font-medium text-[#43A047] hover:bg-[#C7EED5]/90 sm:w-auto"
-                            leftIcon={<Plus className="h-4 w-4" />}
-                            onClick={applyBenefitSelections}
-                            disabled={
-                                !quoteSessionId ||
-                                benefitGroups.length === 0 ||
-                                isFetching
-                            }>
-                            Add benefit
-                        </Button>
+
+            <div className='flex gap-2'>
+
+                <section className="w-72 shrink-0 px-4 py-5 sm:px-6 sm:py-6 flex flex-col">
+                    <div className="grid gap-2 mb-5">
+                        <Label htmlFor="search">Search by Insurer</Label>
+                        <Input
+                            id="search"
+                            name="search"
+                            type="text"
+                            placeholder="Enter insurer name..."
+                            className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                        />
                     </div>
-                </form>
-            </section>
-            <section className="space-y-4 bg-white rounded-lg border border-[#E5E7EB] px-4 py-5 sm:px-6 sm:py-6">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <h2 className="text-lg font-semibold text-gray-900">Quote Comparison</h2>
-                        {selectedQuotes.length > 0 && (
-                            <span className="rounded-full bg-[#C20C0C]/10 px-2.5 py-0.5 text-xs font-medium text-[#C20C0C]">
-                                {selectedQuotes.length}/{MAX_COMPARISONS} selected
+                    {/* <hr className="mb-5" /> */}
+                    <h2 className="mb-1 text-lg font-semibold text-gray-900">Additional benefits</h2>
+                    {/* <p className="mb-4 text-sm text-gray-500">
+                        Each group lists add-ons returned for this quote. Pick one option per group (or leave
+                        &quot;No add-on&quot;), then add them to your premium calculation.
+                    </p> */}
+                    <hr className="mb-5" />
+                    <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
+                        {!quoteSessionId ? null : isPending && !data && benefitGroups.length === 0 ? (
+                            <p className="text-sm text-muted-foreground">Loading benefit options…</p>
+                        ) : benefitGroups.length === 0 ? (
+                            <p className="text-sm text-muted-foreground">
+                                No optional benefits are available for this quote yet.
+                            </p>
+                        ) : (
+                            <div className="grid grid-cols-1 gap-4 md:grid-cols-1 xl:grid-cols-1">
+                                {benefitGroups.map(({ group, items }) => {
+                                    const fieldName = benefitGroupFormKey(group)
+                                    const options = [
+                                        { value: BENEFIT_SELECT_NONE, label: '-- none --' },
+                                        ...items.map((item) => ({
+                                            value: String(item.id),
+                                            label: benefitOptionLabel(item),
+                                        })),
+                                    ]
+                                    return (
+                                        <ReusableSelect
+                                            key={group}
+                                            control={benefitForm.control}
+                                            name={fieldName as Path<FieldValues>}
+                                            label={group}
+                                            placeholder={`Choose in ${group}`}
+                                            options={options}
+                                            disabled={isFetching}
+                                            triggerClassName="border-[#ADABAB]"
+                                        />
+                                    )
+                                })}
+                            </div>
+                        )}
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                            <Button
+                                type="button"
+                                className="flex w-full items-center gap-1.5 rounded border border-[#0CC2581F] bg-[#C7EED5] px-4 py-2 text-sm font-medium text-[#43A047] hover:bg-[#C7EED5]/90 sm:w-auto"
+                                leftIcon={<Plus className="h-4 w-4" />}
+                                onClick={applyBenefitSelections}
+                                disabled={
+                                    !quoteSessionId ||
+                                    benefitGroups.length === 0 ||
+                                    isFetching
+                                }>
+                                Add benefit
+                            </Button>
+                        </div>
+                    </form>
+                    <hr className="mb-5" />
+                    <h2 className="mb-1 text-lg font-semibold text-gray-900">Price Range</h2>
+                    <div className="mx-auto grid w-full max-w-xs gap-3">
+                        <div className="flex items-center justify-between gap-2">
+                            <Label htmlFor="slider-demo-temperature">Price</Label>
+                            <span className="text-sm text-muted-foreground">
+                                {value.join(", ")}
+                            </span>
+                        </div>
+                        <Slider
+                            id="slider-demo-temperature"
+                            value={value}
+                            onValueChange={setValue}
+                            min={0}
+                            max={100}
+                            step={0.1}
+                        />
+                    </div>
+                </section>
+
+                <section className="flex-1 min-w-0 space-y-4 px-4 py-5 sm:px-6 sm:py-6">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <h2 className="text-lg font-semibold text-gray-900">Quote Comparison</h2>
+                            {selectedQuotes.length > 0 && (
+                                <span className="rounded-full bg-[#C20C0C]/10 px-2.5 py-0.5 text-xs font-medium text-[#C20C0C]">
+                                    {selectedQuotes.length}/{MAX_COMPARISONS} selected
+                                </span>
+                            )}
+                        </div>
+                        {isFetching && (
+                            <span className="animate-pulse text-xs text-gray-400">
+                                Fetching premium quotations…
                             </span>
                         )}
+                        <Button
+                            type="button"
+                            className="flex w-full items-center gap-1.5 rounded bg-[#C20C0C]/80 px-5 py-2 text-sm font-medium text-white hover:bg-[#C20C0C] sm:ml-auto sm:w-auto"
+                            onClick={() => onComparison(false)}
+                            loading={submitComparisonMutation.isPending || submitComparisonDownloadMutation.isPending}
+                            disabled={selectedQuotes.length < 2}>
+                            Generate Comparison {selectedQuotes.length > 0 && `(${selectedQuotes.length}/${MAX_COMPARISONS})`}
+                        </Button>
                     </div>
-                    {isFetching && (
-                        <span className="animate-pulse text-xs text-gray-400">
-                            Fetching premium quotations…
-                        </span>
-                    )}
-                    <Button
-                        type="button"
-                        className="flex w-full items-center gap-1.5 rounded bg-[#C20C0C]/80 px-5 py-2 text-sm font-medium text-white hover:bg-[#C20C0C] sm:ml-auto sm:w-auto"
-                        onClick={() => onComparison(false)}
-                        loading={submitComparisonMutation.isPending || submitComparisonDownloadMutation.isPending}
-                        disabled={selectedQuotes.length < 2}>
-                        Generate Comparison {selectedQuotes.length > 0 && `(${selectedQuotes.length}/${MAX_COMPARISONS})`}
-                    </Button>
-                </div>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-6">
-                    {isPending && !data
-                        ? Array.from({ length: filter.pageSize }).map((_, i) => (
-                            <SkeletonCard key={`skeleton-${i}`} />
-                        ))
-                        : quotationItems.length === 0
-                            ? <EmptyState />
-                            : quotationItems.map((item: any, itemIndex: number) => (
-                                <ReusableCard
-                                    selected={isQuoteSelected(item?.rate_id)}
-                                    onChange={() => toggleQuoteSelection(item?.product?.id, item?.rate_id)}
-                                    key={item?.id ?? `quotation-${itemIndex}`}
-                                    header={{
-                                        type: 'image',
-                                        src: item?.product?.organization?.logo,
-                                        alt: item?.product?.organization?.name ?? 'Insurer logo',
-                                    }}
-                                    rootClassName=""
-                                    footerClassName="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between"
-                                    footer={
-                                        <>
-                                            <Button
-                                                type="button"
-                                                onClick={() =>
-                                                    handleDialogContextSwitch({
-                                                        componentProps: { data: item, goToNextStep },
-                                                        Component: QuotePreviewPage,
-                                                    })
-                                                }
-                                                className="w-full rounded-md border border-[#D9D9D9] bg-[#C20C0C] px-4 py-2 text-sm font-medium text-white hover:bg-[#C20C0C]/90 lg:w-auto">
-                                                Get Quote
-                                            </Button>
-                                            {isAuthenticated ? (
+
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 sm:gap-6">
+                        {isPending && !data
+                            ? Array.from({ length: filter.pageSize }).map((_, i) => (
+                                <SkeletonCard key={`skeleton-${i}`} />
+                            ))
+                            : quotationItems.length === 0
+                                ? <EmptyState />
+                                : quotationItems.map((item: any, itemIndex: number) => (
+                                    <ReusableCard
+                                        selected={isQuoteSelected(item?.rate_id)}
+                                        onChange={() => toggleQuoteSelection(item?.product?.id, item?.rate_id)}
+                                        key={item?.id ?? `quotation-${itemIndex}`}
+                                        header={{
+                                            type: 'image',
+                                            src: item?.product?.organization?.logo,
+                                            alt: item?.product?.organization?.name ?? 'Insurer logo',
+                                        }}
+                                        rootClassName=""
+                                        footerClassName="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between"
+                                        footer={
+                                            <>
                                                 <Button
                                                     type="button"
-                                                    //  leftIcon={<ShoppingCart />}
-                                                    onClick={() => onPurchase(item?.product?.id, item?.rate_id)}
-                                                    loading={submitPurchaseMutation.isPending && purchasingRateId === item?.rate_id}
-                                                    disabled={submitPurchaseMutation.isPending && purchasingRateId !== item?.rate_id}
-                                                    className="w-full rounded-md border border-[#D9D9D9] bg-[#0CC258] px-4 py-2 text-sm font-medium text-white hover:bg-[#0CC258]/90 lg:w-auto">
-                                                    Purchase Cover
+                                                    onClick={() =>
+                                                        handleDialogContextSwitch({
+                                                            componentProps: { data: item, goToNextStep },
+                                                            Component: QuotePreviewPage,
+                                                        })
+                                                    }
+                                                    className="w-full rounded-md border border-[#D9D9D9] bg-[#C20C0C] px-4 py-2 text-sm font-medium text-white hover:bg-[#C20C0C]/90 lg:w-auto">
+                                                    Get Quote
                                                 </Button>
-                                            ) : (
-                                                <Link
-                                                    to={`/${EPREFIX.AUTH}${EROUTES.SIGNUP}`}
-                                                    state={{
-                                                        returnTo: location.pathname,
-                                                        stepperStep: currentStep,
-                                                    }}
-                                                    className="w-full lg:w-auto">
+                                                {isAuthenticated ? (
                                                     <Button
+                                                        variant="outline"
                                                         type="button"
-                                                        className="w-full rounded-md border border-[#D9D9D9] bg-[#0CC258] px-4 py-2 text-sm font-medium text-white hover:bg-[#0CC258]/90 lg:w-auto">
+                                                        onClick={() => onPurchase(item?.product?.id, item?.rate_id)}
+                                                        loading={submitPurchaseMutation.isPending && purchasingRateId === item?.rate_id}
+                                                        disabled={submitPurchaseMutation.isPending && purchasingRateId !== item?.rate_id}
+                                                        className=" w-full lg:w-auto border-[#C20C0C] bg-[#FFF5F5] text-[#C20C0C] hover:bg-[#C20C0C] hover:text-white focus-visible:ring-[#C20C0C]/30">
                                                         Purchase Cover
                                                     </Button>
-                                                </Link>
-                                            )}
-                                        </>
-                                    }>
-                                    <div className="space-y-1.5 px-1">
-                                        <div className="flex justify-between gap-2">
-                                            <span className="text-xs text-gray-500 sm:text-sm">
-                                                Basic Premium
-                                            </span>
-                                            <span className="text-xs font-medium text-gray-900 sm:text-sm">
-                                                {formatCurrency(item?.calculated_premium?.vehicle_premium)}
-                                            </span>
+                                                ) : (
+                                                    <Link
+                                                        to={`/${EPREFIX.AUTH}${EROUTES.SIGNUP}`}
+                                                        state={{
+                                                            returnTo: location.pathname,
+                                                            stepperStep: currentStep,
+                                                        }}
+                                                        className="w-full lg:w-auto">
+                                                        <Button
+                                                            type="button"
+                                                            className=" w-full lg:w-auto border-[#C20C0C] bg-[#FFF5F5] text-[#C20C0C] hover:bg-[#C20C0C] hover:text-white focus-visible:ring-[#C20C0C]/30">
+                                                            Purchase Cover
+                                                        </Button>
+                                                    </Link>
+                                                )}
+                                            </>
+                                        }>
+                                        <div className="space-y-1.5 px-1">
+                                            <div className="flex justify-between gap-2">
+                                                <span className="text-xs text-gray-500 sm:text-sm">
+                                                    Basic Premium
+                                                </span>
+                                                <span className="text-xs font-medium text-gray-900 sm:text-sm">
+                                                    {formatCurrency(item?.calculated_premium?.vehicle_premium)}
+                                                </span>
+                                            </div>
+                                            {benefitsListed.map((benefit) => {
+                                                const label =
+                                                    (benefit?.name ?? benefit?.label ?? '').trim() ||
+                                                    `Benefit ${benefit?.id}`
+                                                const resolved = resolveListedBenefitValue(item, benefit.id)
+                                                const isSelectedInRequest = selectedBenefitIds.has(Number(benefit.id))
+                                                const badgeClassName =
+                                                    resolved.status === 'compulsory'
+                                                        ? 'bg-blue-100 text-blue-700'
+                                                        : resolved.status === 'inclusive' || resolved.status === 'selected'
+                                                            ? 'bg-green-100 text-green-700'
+                                                            : resolved.status === 'no'
+                                                                ? 'bg-red-100 text-red-700'
+                                                                : 'bg-gray-100 text-gray-600'
+                                                return (
+                                                    <div key={benefit.id} className="flex justify-between gap-2">
+                                                        <span
+                                                            className={[
+                                                                'text-xs sm:text-sm',
+                                                                isSelectedInRequest ? 'font-medium text-green-700' : 'text-gray-500',
+                                                            ].join(' ')}>
+                                                            {label}
+                                                        </span>
+                                                        <span
+                                                            className={[
+                                                                'inline-flex items-center rounded-sm px-2 py-0.5 text-xs font-medium',
+                                                                badgeClassName,
+                                                            ].join(' ')}>
+                                                            {resolved.text}
+                                                        </span>
+                                                    </div>
+                                                )
+                                            })}
+
+                                            {/* Duty */}
+                                            <div className="flex justify-between gap-2">
+                                                <span className="text-xs text-gray-500 sm:text-sm">
+                                                    PHCF, TL & Stamp Duty
+                                                </span>
+                                                <span className="text-xs font-medium text-gray-900 sm:text-sm">
+                                                    {formatCurrency(item?.calculated_premium?.total_duty)}
+                                                </span>
+                                            </div>
+
+
+                                            <div className="flex justify-between gap-2 border-t border-b border-gray-200 pt-2">
+                                                <span className="text-xs text-gray-500 font-bold sm:text-sm ">
+                                                    Total Premium
+                                                </span>
+
+                                                <span className="text-xs font-semibold text-[#C20C0C] sm:text-sm">
+                                                    {formatCurrency(item?.calculated_premium?.total_premium)}
+                                                </span>
+                                            </div>
                                         </div>
-                                        {benefitsListed.map((benefit) => {
-                                            const label =
-                                                (benefit?.name ?? benefit?.label ?? '').trim() ||
-                                                `Benefit ${benefit?.id}`
-                                            const resolved = resolveListedBenefitValue(item, benefit.id)
-                                            const isSelectedInRequest = selectedBenefitIds.has(Number(benefit.id))
-                                            const badgeClassName =
-                                                resolved.status === 'compulsory'
-                                                    ? 'bg-blue-100 text-blue-700'
-                                                    : resolved.status === 'inclusive' || resolved.status === 'selected'
-                                                        ? 'bg-green-100 text-green-700'
-                                                        : resolved.status === 'no'
-                                                            ? 'bg-red-100 text-red-700'
-                                                            : 'bg-gray-100 text-gray-600'
-                                            return (
-                                                <div key={benefit.id} className="flex justify-between gap-2">
-                                                    <span
-                                                        className={[
-                                                            'text-xs sm:text-sm',
-                                                            isSelectedInRequest ? 'font-medium text-green-700' : 'text-gray-500',
-                                                        ].join(' ')}>
-                                                        {label}
-                                                    </span>
-                                                    <span
-                                                        className={[
-                                                            'inline-flex items-center rounded-sm px-2 py-0.5 text-xs font-medium',
-                                                            badgeClassName,
-                                                        ].join(' ')}>
-                                                        {resolved.text}
-                                                    </span>
-                                                </div>
-                                            )
-                                        })}
+                                    </ReusableCard>
+                                ))}
+                    </div>
+                </section>
 
-                                        {/* Duty */}
-                                        <div className="flex justify-between gap-2">
-                                            <span className="text-xs text-gray-500 sm:text-sm">
-                                                PHCF, TL & Stamp Duty
-                                            </span>
-                                            <span className="text-xs font-medium text-gray-900 sm:text-sm">
-                                                {formatCurrency(item?.calculated_premium?.total_duty)}
-                                            </span>
-                                        </div>
-
-
-                                        <div className="flex justify-between gap-2 border-t border-b border-gray-200 pt-2">
-                                            <span className="text-xs text-gray-500 font-bold sm:text-sm ">
-                                                Total Premium
-                                            </span>
-
-                                            <span className="text-xs font-semibold text-[#C20C0C] sm:text-sm">
-                                                {formatCurrency(item?.calculated_premium?.total_premium)}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </ReusableCard>
-                            ))}
-                </div>
-            </section>
+            </div>
 
             <CardFooter className="flex flex-col items-center justify-between gap-3 px-0 pt-2 sm:flex-row">
                 <Button
