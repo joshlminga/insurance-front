@@ -144,15 +144,15 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
 
     return (
         <>
-            <div className="mx-auto max-w-125 min-w-125 px-4 space-y-6">
+            <div className="mx-auto max-w-125 min-w-125 px-4 space-y-2">
                 <h1 className="text-2xl font-bold">Quote Preview</h1>
-                <Card className="flex items-center justify-center py-6">
+                <Card className="flex items-center justify-center py-6 shadow-none">
                     <img
                         src={org?.logo}
                         className="w-36 h-16 object-contain"
                     />
                 </Card>
-                <Card>
+                <Card className="shadow-none">
                     <CardHeader className="pb-2">
                         <h3 className="text-lg font-semibold">Coverage Details</h3>
                     </CardHeader>
@@ -184,7 +184,7 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
                                             <span className="text-xs text-muted-foreground">
                                                 {benefit?.premium === 0 ? "Included" : formatCurrency(benefit?.premium)}
                                             </span>
-                                            <Badge className={`${color} text-white`}>{label}</Badge>
+                                            <Badge className={`${color}`}>{label}</Badge>
                                         </div>
                                     </React.Fragment>
                                 );
@@ -209,13 +209,13 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
                         leftIcon={<Download />}
                         onClick={() => { onSubmit(data) }}
                         loading={submitMutation.isPending}
-                        className="w-full sm:w-auto">
+                        className=" w-full sm:w-auto border-neutral-300 bg-white text-neutral-700 hover:border-neutral-400 hover:bg-neutral-100 hover:text-neutral-900">
                         Download
                     </Button>
                     <ReusableDropdown
                         trigger={
                             <Button
-                                className="w-full sm:w-auto bg-[#209BFF] hover:bg-[#209BFF]/80"
+                                className=" w-full sm:w-auto bg-[#C20C0C] text-white hover:bg-[#A30A0A] focus-visible:ring-[#C20C0C]/30"
                                 leftIcon={<Forward />}>
                                 Share
                             </Button>
@@ -248,7 +248,7 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
                             onPurchase(data);
                         }}
                         loading={submitPurchaseMutation.isPending}
-                        className="w-full sm:w-auto text-white hover:text-white bg-[#0CC258] hover:bg-[#0CC258]/80">
+                        className=" w-full lg:w-auto border-[#C20C0C] bg-[#FFF5F5] text-[#C20C0C] hover:bg-[#C20C0C] hover:text-white focus-visible:ring-[#C20C0C]/30">
                         Purchase Cover
                     </Button>
                 ) : (
@@ -258,7 +258,7 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
                         className="w-full lg:w-auto">
                         <Button
                             type="button"
-                            className="w-full lg:w-auto rounded-md border border-[#D9D9D9] bg-[#0CC258] hover:bg-[#0CC258]/90 font-medium text-white">
+                            className=" w-full lg:w-auto border-[#C20C0C] bg-[#FFF5F5] text-[#C20C0C] hover:bg-[#C20C0C] hover:text-white focus-visible:ring-[#C20C0C]/30">
                             Purchase Cover
                         </Button>
                     </Link>
