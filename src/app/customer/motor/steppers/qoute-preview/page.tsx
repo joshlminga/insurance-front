@@ -5,7 +5,6 @@ import {
     Card,
     CardContent,
     CardFooter,
-    CardHeader
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Button, CustomDialogComponent, ReusableDropdown, SendDocumentsViaEmail } from "@/dev/core";
@@ -144,18 +143,15 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
 
     return (
         <>
-            <div className="mx-auto max-w-125 min-w-125 px-4 space-y-2">
+            <div className="w-full mx-auto lg:max-w-100 lg:min-w-100 px-4 space-y-4">
                 <h1 className="text-2xl font-bold">Quote Preview</h1>
-                <Card className="flex items-center justify-center py-6 shadow-none">
+                <Card className="flex items-center justify-center py-6 shadow-none border border-[#ADABAB]">
+                      <div className="w-27.25 h-15 flex">
                     <img
                         src={org?.logo}
-                        className="w-36 h-16 object-contain"
+                        className='max-w-full max-h-full object-contain'
                     />
-                </Card>
-                <Card className="shadow-none">
-                    <CardHeader className="pb-2">
-                        <h3 className="text-lg font-semibold">Coverage Details</h3>
-                    </CardHeader>
+                    </div>
                     <CardContent className="space-y-4">
                         <div className="grid grid-cols-2 gap-y-3 text-sm">
                             <span className="text-muted-foreground">Premium</span>
@@ -202,20 +198,20 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
                     </CardContent>
                 </Card>
             </div>
-            <CardFooter className="w-full flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-0 mt-2">
-                <div className="flex flex-col px-3 gap-2 sm:flex-row sm:items-center w-full sm:w-auto">
+            <CardFooter className="flex flex-col gap-2 px-0 mt-2">
+                <div className="flex gap-2 w-full">
                     <Button
                         variant="outline"
                         leftIcon={<Download />}
                         onClick={() => { onSubmit(data) }}
                         loading={submitMutation.isPending}
-                        className=" w-full sm:w-auto border-neutral-300 bg-white text-neutral-700 hover:border-neutral-400 hover:bg-neutral-100 hover:text-neutral-900">
+                        className="flex-1 border-neutral-300 bg-white text-neutral-700 hover:border-neutral-400 hover:bg-neutral-100 hover:text-neutral-900">
                         Download
                     </Button>
                     <ReusableDropdown
                         trigger={
                             <Button
-                                className=" w-full sm:w-auto bg-[#C20C0C] text-white hover:bg-[#A30A0A] focus-visible:ring-[#C20C0C]/30"
+                                className="flex-1 bg-[#C20C0C] text-white hover:bg-[#A30A0A] focus-visible:ring-[#C20C0C]/30"
                                 leftIcon={<Forward />}>
                                 Share
                             </Button>
@@ -239,6 +235,7 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
                         ]}
                     />
                 </div>
+
                 {isAuthenticated ? (
                     <Button
                         variant="outline"
@@ -248,17 +245,17 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
                             onPurchase(data);
                         }}
                         loading={submitPurchaseMutation.isPending}
-                        className=" w-full lg:w-auto border-[#C20C0C] bg-[#FFF5F5] text-[#C20C0C] hover:bg-[#C20C0C] hover:text-white focus-visible:ring-[#C20C0C]/30">
+                        className="w-full border-[#C20C0C] bg-[#FFF5F5] text-[#C20C0C] hover:bg-[#C20C0C] hover:text-white focus-visible:ring-[#C20C0C]/30">
                         Purchase Cover
                     </Button>
                 ) : (
                     <Link
                         to={`/${EPREFIX.AUTH}${EROUTES.SIGNUP}`}
                         state={{ returnTo: location.pathname, stepperStep: currentStep }}
-                        className="w-full lg:w-auto">
+                        className="w-full">
                         <Button
                             type="button"
-                            className=" w-full lg:w-auto border-[#C20C0C] bg-[#FFF5F5] text-[#C20C0C] hover:bg-[#C20C0C] hover:text-white focus-visible:ring-[#C20C0C]/30">
+                            className="w-full border-[#C20C0C] bg-[#FFF5F5] text-[#C20C0C] hover:bg-[#C20C0C] hover:text-white focus-visible:ring-[#C20C0C]/30">
                             Purchase Cover
                         </Button>
                     </Link>
