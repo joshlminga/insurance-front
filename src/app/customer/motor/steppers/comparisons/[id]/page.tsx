@@ -222,11 +222,11 @@ export const PostComparisonPage: React.FC<premiumPreview> = ({
                 </div>
             )}
 
-            <CardFooter className="flex gap-4 justify-end px-0">
+            <CardFooter className="flex flex-col gap-3 px-0 sm:flex-row sm:justify-end">
                 <ReusableDropdown
                     trigger={
                         <Button
-                        variant="outline"
+                            variant="outline"
                             className="w-full sm:w-auto border-[#C20C0C] bg-[#FFF] hover:bg-[#C20C0C] hover:text-white focus-visible:ring-[#C20C0C]/30"
                             leftIcon={<Forward />}>
                             Share
@@ -255,10 +255,9 @@ export const PostComparisonPage: React.FC<premiumPreview> = ({
                         },
                     ]}
                 />
-
                 <Button
                     type="button"
-                    className="bg-[#C20C0C] hover:bg-[#C20C0C]/70"
+                    className="w-full sm:w-auto bg-[#C20C0C] hover:bg-[#C20C0C]/70"
                     leftIcon={<ArrowDown />}
                     onClick={() => componentProps?.onDownload?.()}>
                     Download Comparison

@@ -427,9 +427,8 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                 </div>
             )}
 
-            <div className='flex gap-2'>
-
-                <section className="w-72 shrink-0 px-4 py-5 sm:px-6 sm:py-6 flex flex-col">
+            <div className='2xl:flex gap-2'>
+                <section className="hidden w-72 shrink-0 px-4 py-5 sm:px-6 sm:py-6 2xl:flex 2xl:flex-col">
                     <div className="grid gap-2 mb-5">
                         <Label htmlFor="search">Search by Insurer</Label>
                         <Input
@@ -516,7 +515,8 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                 </section>
 
                 <section className="flex-1 min-w-0 space-y-4 px-4 py-5 sm:px-6 sm:py-6">
-                    <div className="flex items-center justify-between">
+
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <div className="flex items-center gap-3">
                             <h2 className="text-lg font-semibold text-gray-900">Quote Comparison</h2>
                             {selectedQuotes.length > 0 && (
@@ -525,21 +525,22 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                                 </span>
                             )}
                         </div>
-                        {isFetching && (
-                            <span className="animate-pulse text-xs text-gray-400">
-                                Fetching premium quotations…
-                            </span>
-                        )}
-                        <Button
-                            type="button"
-                            className="flex w-full items-center gap-1.5 rounded bg-[#C20C0C]/80 px-5 py-2 text-sm font-medium text-white hover:bg-[#C20C0C] sm:ml-auto sm:w-auto"
-                            onClick={() => onComparison(false)}
-                            loading={submitComparisonMutation.isPending || submitComparisonDownloadMutation.isPending}
-                            disabled={selectedQuotes.length < 2}>
-                            Generate Comparison {selectedQuotes.length > 0 && `(${selectedQuotes.length}/${MAX_COMPARISONS})`}
-                        </Button>
+                        <div className="flex items-center justify-between gap-3 sm:justify-end">
+                            {isFetching && (
+                                <span className="animate-pulse text-xs text-gray-400">
+                                    Fetching premium quotations…
+                                </span>
+                            )}
+                            <Button
+                                type="button"
+                                className="rounded bg-[#C20C0C]/80 px-5 py-2 text-sm font-medium text-white hover:bg-[#C20C0C] sm:w-auto"
+                                onClick={() => onComparison(false)}
+                                loading={submitComparisonMutation.isPending || submitComparisonDownloadMutation.isPending}
+                                disabled={selectedQuotes.length < 2}>
+                                Generate Comparison {selectedQuotes.length > 0 && `(${selectedQuotes.length}/${MAX_COMPARISONS})`}
+                            </Button>
+                        </div>
                     </div>
-
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 sm:gap-6">
                         {isPending && !data
                             ? Array.from({ length: filter.pageSize }).map((_, i) => (
