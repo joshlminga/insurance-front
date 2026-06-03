@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { StatsCard, StatsGrid } from '@/components/shared';
+// import { StatsCard, StatsGrid } from '@/components/shared';
 import { ActionColumn } from '@/dev/columns';
 import { MyCoversColumns } from '@/dev/columns/customer/motor/my-covers';
 import { CustomBaseTable } from '@/dev/table';
@@ -24,7 +24,7 @@ export const CustomerCoversPage = () => {
     const navigate = useNavigate();
     const [filter, optionsDispatcher] = useReducer(
         ReusableReducer<TPaginationFilters & TFilterOptions>,
-        { ...FILTEROPTIONS, page: 1, pageSize: 15 }
+        { ...FILTEROPTIONS, page: 1, pageSize: 10 }
     );
     const optionsDispatcherDebounce = useDebounce({
         debounceCallback: optionsDispatcher,
@@ -45,13 +45,13 @@ export const CustomerCoversPage = () => {
         {
             label: 'View',
             icon: Eye,
-            onSelect: (data) => {
-               navigate(`/${EPREFIX.CUSTOMER}${EROUTES.SINGLECOVER}/${data?.id}`);
+            onSelect: (row) => {
+                const purchaseId = row?.purchase_id ?? row?.id
+                if (!purchaseId) return
+                navigate(`/${EPREFIX.CUSTOMER}${EROUTES.SINGLECOVER}/${purchaseId}`)
             }
         },
     ];
-
-    console.log(data?.data);
 
     return (
         <section>
@@ -64,7 +64,7 @@ export const CustomerCoversPage = () => {
                         View and manage your covers.
                     </p>
 
-                    <div className='w-full space-y-4 py-4 mb-5'>
+                    {/* <div className='w-full space-y-4 py-4 mb-5'>
                         <StatsGrid columns={4}>
                             <StatsCard
                                 title="Active Covers"
@@ -87,7 +87,7 @@ export const CustomerCoversPage = () => {
                                 description={`Monday,23 Feb 2026 . `}
                             />
                         </StatsGrid>
-                    </div>
+                    </div> */}
 
                     <div className='w-full'>
                         <CustomBaseTable

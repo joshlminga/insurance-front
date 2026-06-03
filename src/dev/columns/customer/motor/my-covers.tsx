@@ -3,6 +3,28 @@ import { Badge } from "@/components/ui/badge";
 import { formatCurrency } from "@/utils/helpers";
 import { ColumnDef } from "@tanstack/table-core";
 
+export const COVER_STATUS_DISPLAY: Record<
+    string,
+    { label: string; className: string }
+> = {
+    waiting_payment: {
+        label: "Payment Pending",
+        className: "bg-black text-white",
+    },
+    pending: {
+        label: "AKI Pending Issuing",
+        className: "bg-blue-600 text-white",
+    },
+    issued: {
+        label: "Issued",
+        className: "bg-green-100 text-green-800",
+    },
+    failed: {
+        label: "Failed",
+        className: "bg-red-100 text-red-800",
+    },
+};
+
 export const MyCoversColumns: ColumnDef<any>[] = [
     {
         accessorKey: "cover_type",
@@ -49,13 +71,13 @@ export const MyCoversColumns: ColumnDef<any>[] = [
         header: () => <div>Cover Status</div>,
         cell: ({ row }) => {
             const status: string = row.getValue("cover_status");
-            const isIssued = status === 'issued';
+            const display =
+                COVER_STATUS_DISPLAY[status] ?? COVER_STATUS_DISPLAY.failed;
             return (
                 <Badge
-                    className={`rounded-lg font-semibold ${isIssued ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-                        }`}
+                    className={`rounded-lg font-semibold ${display.className}`}
                 >
-                    {isIssued ? "Issued" : "Failed"}
+                    {display.label}
                 </Badge>
             );
         },

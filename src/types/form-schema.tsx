@@ -53,14 +53,12 @@ export const VehicleDetailsSchema = z.object({
 
   covertype_id: z.string().min(1, "Cover Type is required"),
   covering_id: z.string().min(1, "Covering is required"),
-  vehicle_make_id: z.string().min(1, "Vehicle make is required"),
-  vehicle_model_id: z.string().min(1, "Vehicle model is required"),
-  used_for_id: z.string().optional().or(z.literal("")),
+  vehicle_make_id: z.string().optional().or(z.literal("")),
+  vehicle_model_id: z.string().optional().or(z.literal("")),
+  used_for_id: z.string().min(1, "Vehicle use is required"),
   bodytype_id: z.string().optional().or(z.literal("")),
   country_id: z.string().optional().or(z.literal("")),
-  year: z
-    .string()
-    .min(1, "YOM is required"),
+  year: z.string().optional().or(z.literal("")),
 
   ownership: z.string().min(1, "Ownarship is required"),
   vehicle_value: z.string().optional().or(z.literal("")),
@@ -76,6 +74,7 @@ export const VehicleDetailsSchema = z.object({
     const defaultMinYear = currentYear - 50
 
     if (String(data.covertype_id ?? "").trim().length === 0) return
+    if (!String(data.year ?? "").trim()) return
 
     const isComprehensive = String(data.covertype_id) === comprehensiveCoverTypeId
     const minYear = isComprehensive ? currentYear - 15 : defaultMinYear
@@ -181,6 +180,35 @@ export const KycSchema = z.object({
     ),
 })
 
+const OptionalKycFileSchema = z
+  .any()
+  .optional()
+  .refine(
+    (file) => !file || file instanceof File,
+    "Attach a valid file"
+  )
+  .refine(
+    (file) => !file || ACCEPTED_FILE_TYPES.includes(file?.type),
+    "Only .jpg, .jpeg, .png and .pdf formats are supported."
+  )
+
+export const MotorKycSchema = z.object({
+  nationality_id: z.string().optional(),
+  id_type: z.string().optional(),
+  id_number: z.string().optional(),
+  date_of_birth: z.string().optional(),
+  occupation: z.string().optional(),
+  company_name: z.string().optional(),
+  incorporated_in: z.string().optional(),
+  industry_category: z.string().optional(),
+  coi_number: z.string().optional(),
+  tax_pin: z.string().optional(),
+  logbook: OptionalKycFileSchema,
+  tax_certificate: OptionalKycFileSchema,
+  id_document: OptionalKycFileSchema,
+  coi_certificate: OptionalKycFileSchema,
+})
+
 export const InvoicePaymentSchema = z.object({
   name: z.string().min(1, "Customer Name is required"),
   email: z.email().min(1, "Email is required"),
@@ -188,7 +216,13 @@ export const InvoicePaymentSchema = z.object({
   phone: z.string().min(1, "Phone number is required"),
   covering: z.string().optional(),
   provider: z.string().optional(),
-  cover_start_date: z.string().min(1, "Cover Start Date is required"),
+  cover_start_date: z
+    .string()
+    .min(1, "Cover Start Date is required")
+    .refine(
+      (date) => date >= new Date().toISOString().split("T")[0],
+      "Cover start date must be today or later",
+    ),
   // total_payable: z.string().min(1, "Total payable is required"),
 })
 

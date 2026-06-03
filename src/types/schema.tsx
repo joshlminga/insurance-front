@@ -6,6 +6,7 @@ import {
     LoginSchema,
     SignUpSchema,
     KycSchema,
+    MotorKycSchema,
     InvoicePaymentSchema,
     PaymentDetailsSchema,
     ResendOtpPayloadSchema,
@@ -46,6 +47,7 @@ export type SignUpFormValues = z.infer<typeof SignUpSchema>
 export type ForgotPasswordValues = z.infer<typeof ForgotPasswordSchema>;
 export type ResetPasswordValues = z.infer<typeof ResetPasswordSchema>;
 export type KycFormValues = z.infer<typeof KycSchema>
+export type MotorKycFormValues = z.infer<typeof MotorKycSchema>
 export type InvoicePaymentFormValues = z.infer<typeof InvoicePaymentSchema>
 export type PaymentFormValues = z.infer<typeof PaymentDetailsSchema>
 

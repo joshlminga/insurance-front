@@ -11,7 +11,6 @@ import React, { useEffect, useMemo, useState } from 'react'
 import type {
     CustomerVerificationDetailsProps,
     SubmitResponse,
-    TTabItem,
     VehicleClassItem
 } from '@/types/types'
 import { CardFooter } from '@/components/ui/card'
@@ -27,7 +26,7 @@ import {
     Truck,
     type LucideIcon,
 } from 'lucide-react'
-import { Controller, useForm, FormProvider, useFormContext, useWatch } from 'react-hook-form'
+import { Controller, useForm, FormProvider, useFormContext } from 'react-hook-form'
 import type { VehicleFormValues } from '@/types/schema'
 import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -39,13 +38,13 @@ import { extractErrorMessage } from '@/utils/helpers'
 import { cn } from '@/lib/utils'
 import { OWNERSHIPOPTIONS } from '@/utils/constatnts'
 import { PROFFESIONALVALUATIONCHECKBOX } from '@/utils/enums'
-import { MotorCommercialPage } from './tabs/motor-commercial'
-import { MotorPrivatePage } from './tabs/motor-private'
-import { MotorPsvPage } from './tabs/motor-psv'
-import { MotorSpecialVehicle } from './tabs/motor-special-vehicle'
-import { YearOfManufactureInput } from './components/year-of-manufacture-input'
+import { VehicleUseInput } from './components/vehicle-use-input'
 
-type MotorClassTab = TTabItem & { slug: string }
+type MotorClassTab = {
+    value: string
+    label: string
+    slug: string
+}
 
 function canonicalizeMotorClassKey(input: string | null | undefined): string {
     const normalized = String(input ?? '')
@@ -85,14 +84,7 @@ const SLUG_ICON: Record<string, LucideIcon> = {
 }
 
 const VehicleDetailsBox: React.FC = () => {
-    const { control, setValue } = useFormContext<VehicleFormValues>()
-    const selectedMakeId = useWatch({ control, name: 'vehicle_make_id' })
-    const selectedCoverTypeId = useWatch({ control, name: 'covertype_id' })
-    const canFetchModels = Boolean(selectedMakeId)
-
-    useEffect(() => {
-        setValue('vehicle_model_id', '')
-    }, [selectedMakeId, setValue])
+    const { control } = useFormContext<VehicleFormValues>()
 
     return (
         <>
@@ -105,49 +97,6 @@ const VehicleDetailsBox: React.FC = () => {
 
             <div className="rounded-2xl border border-[#ADABAB]/35 bg-white/95 p-3 sm:p-5">
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    <Controller
-                        control={control}
-                        name="vehicle_make_id"
-                        render={({ field }) => (
-                            <ReusableSingleSelectApiInput
-                                url="taxonomies/vehicle/makes"
-                                value={field.value}
-                                onChange={field.onChange}
-                                label="Vehicle Make"
-                                required
-                                placeholder="Select make..."
-                            />
-                        )}
-                    />
-                    <Controller
-                        control={control}
-                        name="vehicle_model_id"
-                        render={({ field }) => (
-                            <ReusableSingleSelectApiInput
-                                url={canFetchModels ? 'taxonomies/vehicle/models' : ''}
-                                queryParams={
-                                    canFetchModels
-                                        ? {
-                                              make_id: selectedMakeId,
-                                          }
-                                        : {}
-                                }
-                                value={field.value}
-                                onChange={field.onChange}
-                                label="Vehicle Model"
-                                required
-                                disabled={!canFetchModels}
-                                placeholder={canFetchModels ? 'Select model...' : 'Select make first'}
-                            />
-                        )}
-                    />
-                    <YearOfManufactureInput<VehicleFormValues>
-                        className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
-                        control={control}
-                        covertypeId={selectedCoverTypeId}
-                        name="year"
-                        comprehensiveId="1384"
-                    />
                     <ReuseableInput
                         className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] uppercase"
                         control={control}
@@ -166,6 +115,7 @@ const VehicleDetailsBox: React.FC = () => {
                         thousandsSeparator
                         placeholder="vehicle value"
                     />
+                    <VehicleUseInput />
                 </div>
                 <div className="mt-5 overflow-x-auto">
                     <ReusableCheckboxGrid
@@ -267,12 +217,6 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
     )
 
     const motoTabs = useMemo<MotorClassTab[]>(() => {
-        const componentBySlug = {
-            private: MotorPrivatePage,
-            commercial: MotorCommercialPage,
-            psv: MotorPsvPage,
-            specialvehicle: MotorSpecialVehicle,
-        }
         return activeVehicleClasses.map((item) => {
             const cleanedSlug =
                 canonicalizeMotorClassKey(item.slug) ||
@@ -282,19 +226,10 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
                 value: String(item.id),
                 label: item.name,
                 slug: cleanedSlug,
-                component:
-                    componentBySlug[cleanedSlug as keyof typeof componentBySlug] ??
-                    MotorPrivatePage,
             }
         })
     }, [activeVehicleClasses])
     const isClassTabsLoading = isLoading
-
-    const activeTab = useMemo(
-        () => motoTabs.find((t) => t.value === selectedTabValue),
-        [motoTabs, selectedTabValue]
-    )
-    const ActiveFormPanel = activeTab?.component
 
     const form = useForm<VehicleFormValues>({
         resolver: zodResolver(VehicleDetailsSchema),
@@ -306,15 +241,10 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
             covertype_id: "",
             covering_id: "",
             ownership: "",
-            vehicle_make_id: "",
-            vehicle_model_id: "",
             vehicle_class_id: "",
             used_for_id: "",
-            bodytype_id: "",
             registration_number: "",
             vehicle_registration_number: "",
-            vehicle_model: "",
-            year: "",
             valued_by_professional: false
         },
     })
@@ -323,20 +253,10 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
         form.setValue("country_id", alpha || "KE")
     }, [alpha, form])
 
-    const vehicleMakeId = useWatch({ control: form.control, name: 'vehicle_make_id' })
-    const vehicleModelId = useWatch({ control: form.control, name: 'vehicle_model_id' })
-    const year = useWatch({ control: form.control, name: 'year' })
-    const vehicleRegistrationNumber = useWatch({ control: form.control, name: 'vehicle_registration_number' })
-
     const hasSelectedClass = Boolean(selectedTabValue)
-    const hasCompletedVehicleDetails =
-        Boolean(String(vehicleMakeId ?? '').trim()) &&
-        Boolean(String(vehicleModelId ?? '').trim()) &&
-        Boolean(String(year ?? '').trim()) &&
-        Boolean(String(vehicleRegistrationNumber ?? '').trim())
 
     const submitMutation = UseApiMutation<SubmitResponse, Record<string, any>>({
-        url: "quotation/motor",
+        url: "alternative/quotation/motor",
         method: EMETHODS.POST,
         mutationOptions: {
             onSuccess: (data) => {
@@ -361,10 +281,30 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
             String(data.valued_by_professional).toLowerCase() === "true"
 
         submitMutation.mutate({
-            ...data,
-            country_id: String(data.country_id ?? "").trim() || alpha || "KE",
-            coverfor_id: data.vehicle_class_id,
+            // Active UI fields
+            user_id: (data.user_id || user?.id) ?? "",
             valued_by_professional: valuedByProfessional,
+            covertype_id: data.covertype_id,
+            covering_id: data.covering_id,
+            ownership: data.ownership,
+            vehicle_registration_number: data.vehicle_registration_number,
+            vehicle_value: data.vehicle_value,
+            vehicle_class_id: data.vehicle_class_id,
+            used_for_id: data.used_for_id,
+            // Legacy fields — null until UI collects them again (old API compatibility)
+            registration_number: null,
+            vehicle_model: null,
+            vehicle_make: null,
+            yom: null,
+            insurance_type: null,
+            vehicle_make_id: null,
+            vehicle_model_id: null,
+            bodytype_id: null,
+            country_id: null,
+            year: null,
+            number_of_passengers: null,
+            tonnage: null,
+            coverfor_id: null,
         })
     }
 
@@ -461,19 +401,6 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
                         <div className="mt-8 space-y-3">
                             <AnimatedSection show={hasSelectedClass}>
                                 <VehicleDetailsBox />
-                            </AnimatedSection>
-                            <AnimatedSection show={hasSelectedClass && hasCompletedVehicleDetails}>
-                            <div className="flex flex-col gap-0.5 pb-3">
-                                    <h2 className="text-base font-semibold sm:text-lg">
-                                        Details for {activeTab?.label}
-                                    </h2>
-                                    <p className="text-xs text-muted-foreground sm:text-sm">
-                                        Complete the fields below, then continue.
-                                    </p>
-                                </div>
-                                <div className="rounded-2xl border border-[#ADABAB]/35 bg-white/95 p-3 sm:p-5">
-                                    {ActiveFormPanel ? <ActiveFormPanel /> : null}
-                                </div>
                             </AnimatedSection>
                         </div>
                     ) : null}

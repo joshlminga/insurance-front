@@ -39,16 +39,27 @@ const PREMIUM_KEYS = new Set(["Basic Premium", "Gross Premium", "Levies"])
 
 function getBadgeClass(status: string): string {
     const lower = status.toLowerCase()
-    if (lower === "inclusive" || lower === "covered") return "bg-[#0CC258]"
-    if (lower === "optional") return "bg-[#209BFF]"
-    if (lower === "compulsory") return "bg-[#C20C0C]"
-    return "bg-[#9CA3AF]"
+    if (lower === "inclusive" || lower === "covered") return "bg-green-100 text-green-700"
+    if (lower === "optional") return "bg-[#209BFF]/80 text-[#209BFF]"
+    if (lower === "compulsory") return "bg-blue-100 text-blue-700"
+    return "bg-gray-100 text-gray-600"
 }
 
 export const PostComparisonPage: React.FC<premiumPreview> = ({
     componentProps,
     goToNextStep: goToNextStepProp,
 }) => {
+
+    const comparisonCount = componentProps?.data?.data?.comparison?.length ?? 0;
+    const gridCols =
+        comparisonCount === 1
+            ? "grid-cols-1"
+            : comparisonCount === 2
+                ? "grid-cols-1 md:grid-cols-2"
+                : comparisonCount === 3
+                    ? "grid-cols-1 md:grid-cols-2 xl:grid-cols-3"
+                    : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4";
+
     const comparisons: any[] = componentProps?.data?.data?.comparison ?? [];
     const [quoteSessionId, setQuoteSessionId] = useState<number | null>(null);
     const [purchasingRateId, setPurchasingRateId] = useState<string | number | null>(null);
@@ -121,16 +132,15 @@ export const PostComparisonPage: React.FC<premiumPreview> = ({
             {comparisons.length === 0 ? (
                 <EmptyState />
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                <div className={cn("grid gap-6", gridCols)}>
                     {comparisons.map((item, idx) => {
                         const breakdown = item.breakdown ?? {}
                         const coverages = Object.entries(breakdown).filter(
                             ([key]) => !PREMIUM_KEYS.has(key)
                         )
-
                         return (
                             <div key={`${item.rate_id}-${idx}`} className="space-y-4">
-                                <Card>
+                                <Card className="shadow-none border border-[#ADABAB]">
                                     <CardHeader className="pb-2 items-center justify-center">
                                         <div className="w-27.25 h-15 flex">
                                             <img
@@ -142,7 +152,6 @@ export const PostComparisonPage: React.FC<premiumPreview> = ({
                                                 )}
                                             />
                                         </div>
-                                        {/* <h3 className="text-lg font-semibold">{item.insurer_name}</h3> */}
                                     </CardHeader>
                                     <CardContent className="space-y-4">
                                         <div className="grid grid-cols-2 gap-y-3 text-sm">
@@ -150,14 +159,12 @@ export const PostComparisonPage: React.FC<premiumPreview> = ({
                                             <span className="font-medium text-right">
                                                 {breakdown["Basic Premium"] ?? "—"}
                                             </span>
-
                                             <Separator className="col-span-2 my-1" />
-
                                             {coverages.map(([label, status], covIdx) => (
                                                 <React.Fragment key={covIdx}>
                                                     <span className="text-muted-foreground">{label}</span>
                                                     <div className="flex items-center justify-end gap-2">
-                                                        <Badge className={`${getBadgeClass(status as string)} text-white`}>
+                                                        <Badge className={`${getBadgeClass(status as string)}`}>
                                                             {status as string}
                                                         </Badge>
                                                     </div>
@@ -182,12 +189,13 @@ export const PostComparisonPage: React.FC<premiumPreview> = ({
                                     <CardFooter className="w-full">
                                         {isAuthenticated ? (
                                             <Button
+                                                variant="outline"
                                                 type="button"
-                                                 leftIcon={<ShoppingCart />}
+                                                leftIcon={<ShoppingCart />}
                                                 onClick={() => onPurchase(item?.product_id, item?.rate_id)}
                                                 loading={submitPurchaseMutation.isPending && purchasingRateId === item?.rate_id}
                                                 disabled={submitPurchaseMutation.isPending && purchasingRateId !== item?.rate_id}
-                                                className="w-full rounded-md border border-[#D9D9D9] bg-[#0CC258] px-4 py-2 text-sm font-medium text-white hover:bg-[#0CC258]/90">
+                                                className=" w-full border-[#C20C0C] bg-[#FFF5F5] text-[#C20C0C] hover:bg-[#C20C0C] hover:text-white focus-visible:ring-[#C20C0C]/30">
                                                 Purchase Cover
                                             </Button>
                                         ) : (
@@ -199,8 +207,9 @@ export const PostComparisonPage: React.FC<premiumPreview> = ({
                                                 }}
                                                 className="w-full lg:w-auto">
                                                 <Button
+                                                    variant="outline"
                                                     type="button"
-                                                    className="w-full rounded-md border border-[#D9D9D9] bg-[#0CC258] px-4 py-2 text-sm font-medium text-white hover:bg-[#0CC258]/90">
+                                                    className=" w-full lg:w-auto border-[#C20C0C] bg-[#FFF5F5] text-[#C20C0C] hover:bg-[#C20C0C] hover:text-white focus-visible:ring-[#C20C0C]/30">
                                                     Purchase Cover
                                                 </Button>
                                             </Link>
@@ -213,11 +222,12 @@ export const PostComparisonPage: React.FC<premiumPreview> = ({
                 </div>
             )}
 
-            <CardFooter className="flex gap-4 justify-end px-0">
+            <CardFooter className="flex flex-col gap-3 px-0 sm:flex-row sm:justify-end">
                 <ReusableDropdown
                     trigger={
                         <Button
-                            className="w-full sm:w-auto bg-[#209BFF] hover:bg-[#209BFF]/80"
+                            variant="outline"
+                            className="w-full sm:w-auto border-[#C20C0C] bg-[#FFF] hover:bg-[#C20C0C] hover:text-white focus-visible:ring-[#C20C0C]/30"
                             leftIcon={<Forward />}>
                             Share
                         </Button>
@@ -245,10 +255,9 @@ export const PostComparisonPage: React.FC<premiumPreview> = ({
                         },
                     ]}
                 />
-
                 <Button
                     type="button"
-                    className="bg-[#C20C0C] hover:bg-[#C20C0C]/70"
+                    className="w-full sm:w-auto bg-[#C20C0C] hover:bg-[#C20C0C]/70"
                     leftIcon={<ArrowDown />}
                     onClick={() => componentProps?.onDownload?.()}>
                     Download Comparison

@@ -14,12 +14,8 @@ import { CardsTabPage } from "@/app/customer/motor/steppers/payment-tabs/card";
 import { MpesaPageTab } from "@/app/customer/motor/steppers/payment-tabs/mpesa";
 import { QuotationsPage } from "@/app/customer/motor/steppers/quotations";
 import { SuccessPurchase } from "@/app/customer/motor/steppers/success-purchase";
-import { MotorCommercialPage } from "@/app/customer/motor/steppers/tabs/motor-commercial";
-import { MotorPrivatePage } from "@/app/customer/motor/steppers/tabs/motor-private";
-import { MotorPsvPage } from "@/app/customer/motor/steppers/tabs/motor-psv";
-import { MotorSpecialVehicle } from "@/app/customer/motor/steppers/tabs/motor-special-vehicle";
 import { VehicleDetailsPage } from "@/app/customer/motor/steppers/vehicle-details";
-import { ArrowUpToLine, Car, Download, Truck, Van } from "lucide-react";
+import { ArrowUpToLine, Download } from "lucide-react";
 
 export const getMotorSteps = (isAuthenticated: boolean) => {
     const allSteps = [
@@ -101,37 +97,6 @@ export const EMARINESTEPS = [
     {
         title: "",
         content: SuccessPurchase,
-    },
-]
-
-export const EMOTORTABS = [
-    {
-        value: "private",
-        label: "Private",
-        icon: Car,
-        iconSize: 10,
-        component: MotorPrivatePage,
-    },
-    {
-        value: "commercial",
-        label: "Commercial",
-        icon: Truck,
-        iconSize: 10,
-        component: MotorCommercialPage,
-    },
-    {
-        value: "psv",
-        label: "PSV",
-        icon: Van,
-        iconSize: 16,
-        component: MotorPsvPage,
-    },
-     {
-        value: "specialvehicle",
-        label: "Special Vehicle",
-        icon: Van,
-        iconSize: 16,
-        component: MotorSpecialVehicle,
     },
 ]
 
