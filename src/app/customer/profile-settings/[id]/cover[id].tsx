@@ -69,6 +69,13 @@ const redDocButtonClass =
 const installmentText = (invoice: MotorUserCoverInvoice) =>
     `Installment ${invoice.installment_number} of ${invoice.total_installments}`
 
+/** Receipt exists only after payment is completed. */
+const isInvoicePaid = (invoice: MotorUserCoverInvoice) => {
+    const paymentStatus = invoice.payment_status?.toLowerCase()
+    const status = invoice.status?.toLowerCase()
+    return paymentStatus === 'paid' || status === 'paid'
+}
+
 const CoverStatusBadge = ({ status }: { status: string }) => {
     const display =
         COVER_STATUS_DISPLAY[status] ?? COVER_STATUS_DISPLAY.failed
@@ -83,7 +90,7 @@ type InvoiceDownloadActionsProps = {
     invoice: MotorUserCoverInvoice
 }
 
-/** Per-invoice download buttons (invoice, receipt, certificate when issued). */
+/** Per-invoice download buttons (invoice always; receipt when paid; certificate when issued). */
 const InvoiceDownloadActions = ({ invoice }: InvoiceDownloadActionsProps) => {
     const invoiceId = invoice?.id ? String(invoice.id) : ''
 
@@ -111,6 +118,7 @@ const InvoiceDownloadActions = ({ invoice }: InvoiceDownloadActionsProps) => {
         mutation.mutate(invoiceId)
     }
 
+    const showReceipt = isInvoicePaid(invoice)
     const showCertificate = invoice.cover_status === 'issued'
 
     return (
@@ -126,17 +134,19 @@ const InvoiceDownloadActions = ({ invoice }: InvoiceDownloadActionsProps) => {
             >
                 View Invoice
             </Button>
-            <Button
-                type="button"
-                size="sm"
-                className={blackDocButtonClass}
-                leftIcon={<ReceiptText className="h-3.5 w-3.5" />}
-                loading={receiptMutation.isPending}
-                disabled={!invoiceId}
-                onClick={() => download(receiptMutation, 'Receipt')}
-            >
-                View Receipt
-            </Button>
+            {showReceipt ? (
+                <Button
+                    type="button"
+                    size="sm"
+                    className={blackDocButtonClass}
+                    leftIcon={<ReceiptText className="h-3.5 w-3.5" />}
+                    loading={receiptMutation.isPending}
+                    disabled={!invoiceId}
+                    onClick={() => download(receiptMutation, 'Receipt')}
+                >
+                    View Receipt
+                </Button>
+            ) : null}
             {showCertificate ? (
                 <Button
                     type="button"
