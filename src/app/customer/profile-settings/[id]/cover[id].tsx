@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
     Table,
     TableBody,
@@ -28,7 +27,7 @@ const coversListPath = `/${EPREFIX.CUSTOMER}${EROUTES.COVERS}`
 
 type InfoField = { label: string; value?: ReactNode }
 
-/** Compact grid: "Label : value" with 3–5 items per row on larger screens. */
+/** Compact grid: "Label : value" — max 4 items per row. */
 const CompactInfoGrid = ({
     items,
     className,
@@ -38,7 +37,7 @@ const CompactInfoGrid = ({
 }) => (
     <ul
         className={cn(
-            'grid grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5',
+            'grid grid-cols-1 gap-x-4 gap-y-2.5 sm:grid-cols-2 lg:grid-cols-4',
             className
         )}
     >
@@ -47,8 +46,8 @@ const CompactInfoGrid = ({
                 key={`${label}-${index}`}
                 className="min-w-0 text-sm text-[#111111]"
             >
-                <span className="text-[#71717A]">{label}:</span>{' '}
-                <span className="font-medium break-words">
+                <span className="font-medium text-[#C20C0C]">{label}:</span>{' '}
+                <span className="break-words text-foreground">
                     {value !== undefined && value !== null && value !== ''
                         ? value
                         : '-'}
@@ -60,6 +59,12 @@ const CompactInfoGrid = ({
 
 const money = (amount?: number | null, currency = 'Ksh') =>
     amount != null ? `${currency} ${formatCurrency(amount)}` : '-'
+
+const blackDocButtonClass =
+    'rounded-full bg-neutral-900 text-white text-xs hover:bg-black border-0'
+
+const redDocButtonClass =
+    'rounded-full bg-[#C20C0C]/90 text-white text-xs hover:bg-[#C20C0C] border-0'
 
 const installmentText = (invoice: MotorUserCoverInvoice) =>
     `Installment ${invoice.installment_number} of ${invoice.total_installments}`
@@ -112,40 +117,37 @@ const InvoiceDownloadActions = ({ invoice }: InvoiceDownloadActionsProps) => {
         <div className="flex flex-wrap gap-2">
             <Button
                 type="button"
-                variant="outline"
                 size="sm"
-                className="rounded-full text-xs"
+                className={blackDocButtonClass}
                 leftIcon={<FileText className="h-3.5 w-3.5" />}
                 loading={invoiceMutation.isPending}
                 disabled={!invoiceId}
                 onClick={() => download(invoiceMutation, 'Invoice')}
             >
-                Invoice
+                View Invoice
             </Button>
             <Button
                 type="button"
-                variant="outline"
                 size="sm"
-                className="rounded-full text-xs"
+                className={blackDocButtonClass}
                 leftIcon={<ReceiptText className="h-3.5 w-3.5" />}
                 loading={receiptMutation.isPending}
                 disabled={!invoiceId}
                 onClick={() => download(receiptMutation, 'Receipt')}
             >
-                Receipt
+                View Receipt
             </Button>
             {showCertificate ? (
                 <Button
                     type="button"
-                    variant="outline"
                     size="sm"
-                    className="rounded-full text-xs"
+                    className={redDocButtonClass}
                     leftIcon={<Shield className="h-3.5 w-3.5" />}
                     loading={certificateMutation.isPending}
                     disabled={!invoiceId}
                     onClick={() => download(certificateMutation, 'Certificate')}
                 >
-                    Certificate
+                    View Certificate
                 </Button>
             ) : null}
         </div>
@@ -154,19 +156,29 @@ const InvoiceDownloadActions = ({ invoice }: InvoiceDownloadActionsProps) => {
 
 const SectionCard = ({
     title,
+    titleAccent,
     children,
 }: {
     title: string
+    /** Word highlighted in brand red (like KYC "Info") */
+    titleAccent?: string
     children: ReactNode
 }) => (
-    <Card className="gap-0 border-[#EAEAEA] py-0 shadow-none">
-        <CardHeader className="border-b border-[#EAEAEA] px-5 py-4">
-            <CardTitle className="text-base font-semibold text-[#111111]">
-                {title}
-            </CardTitle>
-        </CardHeader>
-        <CardContent className="px-5 py-4">{children}</CardContent>
-    </Card>
+    <div className="rounded-2xl border border-[#ADABAB]/35 bg-white/95 p-3 shadow-sm sm:p-5">
+        <div className="flex flex-col gap-0.5 pb-3">
+            <h3 className="text-base font-semibold sm:text-lg text-[#111111]">
+                {titleAccent ? (
+                    <>
+                        {title}{' '}
+                        <span className="text-[#C20C0C]">{titleAccent}</span>
+                    </>
+                ) : (
+                    <span>{title}</span>
+                )}
+            </h3>
+        </div>
+        {children}
+    </div>
 )
 
 export const SingleCoverPage = () => {
@@ -202,26 +214,24 @@ export const SingleCoverPage = () => {
     }
 
     return (
-        <section>
-            <div className="rounded-xl border border-[#EAEAEA] bg-white p-5 sm:p-8">
-                <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                    <div>
-                        <Link
-                            to={coversListPath}
-                            className="mb-3 inline-flex items-center text-sm font-medium text-[#71717A] hover:text-[#BF162E]"
-                        >
-                            <ArrowLeft className="mr-1 h-4 w-4" />
-                            Back to My Covers
-                        </Link>
-                        <h2 className="text-lg font-bold text-[#111111] sm:text-xl">
-                            Cover Details
-                        </h2>
-                        {cover?.quote_code ? (
-                            <p className="mt-1 text-sm text-[#71717A]">
-                                {cover.quote_code}
-                            </p>
-                        ) : null}
-                    </div>
+        <section className="w-full mx-auto bg-transparent">
+            <div className="rounded-2xl border border-[#ADABAB]/50 bg-linear-to-b from-white to-neutral-50/90 p-4 shadow-sm sm:p-6">
+                <div className="mb-5 w-full pb-2">
+                    <Link
+                        to={coversListPath}
+                        className="mb-3 inline-flex items-center text-sm font-medium text-[#71717A] hover:text-[#C20C0C]"
+                    >
+                        <ArrowLeft className="mr-1 h-4 w-4" />
+                        Back to My Covers
+                    </Link>
+                    <h1 className="text-xl font-bold leading-tight tracking-tight sm:text-2xl">
+                        Cover <span className="text-[#C20C0C]">Details</span>
+                    </h1>
+                    {cover?.quote_code ? (
+                        <p className="mt-2 text-sm text-muted-foreground sm:text-base">
+                            {cover.quote_code}
+                        </p>
+                    ) : null}
                 </div>
 
                 {isLoading ? (
@@ -231,8 +241,8 @@ export const SingleCoverPage = () => {
                         Unable to load cover details. Please try again later.
                     </p>
                 ) : (
-                    <div className="space-y-5">
-                        <SectionCard title="Policy & Parties">
+                    <div className="mt-5 space-y-5">
+                        <SectionCard title="Policy &" titleAccent="Parties">
                             <CompactInfoGrid
                                 items={[
                                     { label: 'Purchase ID', value: cover.purchase_id },
@@ -289,7 +299,7 @@ export const SingleCoverPage = () => {
                             />
                         </SectionCard>
 
-                        <SectionCard title="Premium & Dates">
+                        <SectionCard title="Premium &" titleAccent="Dates">
                             <CompactInfoGrid
                                 items={[
                                     {
@@ -300,10 +310,6 @@ export const SingleCoverPage = () => {
                                         ),
                                     },
                                     {
-                                        label: 'Start Date',
-                                        value: formatDate(coverDates?.start_date),
-                                    },
-                                    {
                                         label: 'Issued Date',
                                         value: formatDate(coverDates?.issued_date),
                                     },
@@ -311,16 +317,12 @@ export const SingleCoverPage = () => {
                                         label: 'Expiry Date',
                                         value: formatDate(coverDates?.expiry_date),
                                     },
-                                    {
-                                        label: 'End Date',
-                                        value: formatDate(coverDates?.end_date),
-                                    },
                                 ]}
                             />
                             {benefits.length > 0 ? (
-                                <div className="mt-4 border-t border-[#EAEAEA] pt-4">
-                                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-[#71717A]">
-                                        Benefits
+                                <div className="mt-4 border-t border-[#ADABAB]/35 pt-4">
+                                    <p className="mb-2 text-sm font-semibold text-[#111111]">
+                                        <span className="text-[#C20C0C]">Benefits</span>
                                     </p>
                                     <CompactInfoGrid
                                         items={benefits.map((benefit) => ({
