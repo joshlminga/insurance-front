@@ -327,6 +327,8 @@ export function ReuseableInput<T extends FieldValues>({
     className,
     rows,
     accept,
+    min,
+    max,
 }: RHFInputProps<T>) {
     const toRawNumberString = (value: string) => {
         const cleaned = value.replace(/,/g, "").replace(/[^\d.]/g, "")
@@ -364,6 +366,8 @@ export function ReuseableInput<T extends FieldValues>({
                             required={required}
                             disabled={disabled}
                             accept={accept}
+                            min={min}
+                            max={max}
                             className={cn(
                                 className,
                                 fieldState.invalid &&

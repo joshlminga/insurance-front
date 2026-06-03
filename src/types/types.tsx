@@ -133,6 +133,8 @@ export type RHFInputProps<T extends FieldValues> = {
   rows?: number
   disabled?: boolean,
   accept?: string
+  min?: string
+  max?: string
 }
 
 export interface AuthProviderState {

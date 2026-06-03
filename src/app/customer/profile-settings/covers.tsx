@@ -24,7 +24,7 @@ export const CustomerCoversPage = () => {
     const navigate = useNavigate();
     const [filter, optionsDispatcher] = useReducer(
         ReusableReducer<TPaginationFilters & TFilterOptions>,
-        { ...FILTEROPTIONS, page: 1, pageSize: 15 }
+        { ...FILTEROPTIONS, page: 1, pageSize: 10 }
     );
     const optionsDispatcherDebounce = useDebounce({
         debounceCallback: optionsDispatcher,
@@ -45,8 +45,10 @@ export const CustomerCoversPage = () => {
         {
             label: 'View',
             icon: Eye,
-            onSelect: (data) => {
-               navigate(`/${EPREFIX.CUSTOMER}${EROUTES.SINGLECOVER}/${data?.id}`);
+            onSelect: (row) => {
+                const purchaseId = row?.purchase_id ?? row?.id
+                if (!purchaseId) return
+                navigate(`/${EPREFIX.CUSTOMER}${EROUTES.SINGLECOVER}/${purchaseId}`)
             }
         },
     ];
