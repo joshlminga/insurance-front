@@ -133,7 +133,7 @@ export const router = createBrowserRouter([
         element: <S><CustomerCoversPage /></S>,
       },
       {
-        path: "my-covers:id",
+        path: "my-covers/:id",
         element: <S><CustomerSingleCustomerCoversPage /></S>,
       },
       {

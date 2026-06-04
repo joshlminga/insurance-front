@@ -5,26 +5,34 @@ import { EPREFIX, EROUTES } from '@/utils/enums'
 import { BaggageClaim, Settings, Umbrella, Wallet } from 'lucide-react'
 import { NavLink, Outlet } from 'react-router-dom'
 
-const profileLinks = [
+type ProfileLink = {
+    label: string
+    to: string
+    icon: typeof Umbrella
+    matchNested?: boolean
+}
+
+const profileLinks: ProfileLink[] = [
     {
         label: 'My Covers',
         to: `/${EPREFIX.CUSTOMER}${EROUTES.COVERS}`,
-        icon: Umbrella
+        icon: Umbrella,
+        matchNested: true,
     },
     {
         label: 'My Claims',
         to: `/${EPREFIX.CUSTOMER}${EROUTES.CLAIMS}`,
-        icon: BaggageClaim
+        icon: BaggageClaim,
     },
     {
         label: 'Payment History',
         to: `/${EPREFIX.CUSTOMER}${EROUTES.PAYMENTHISTORY}`,
-        icon: Wallet
+        icon: Wallet,
     },
     {
         label: 'Account Settings',
         to: `/${EPREFIX.CUSTOMER}${EROUTES.ACCOUNTSETTINGS}`,
-        icon: Settings
+        icon: Settings,
     },
 ]
 
@@ -57,7 +65,7 @@ export const CustomerProfileLayout = () => {
                             <NavLink
                                 key={item.to}
                                 to={item.to}
-                                end
+                                end={!item.matchNested}
                                 className={({ isActive }) =>
                                     cn(
                                         'inline-flex items-center rounded-full px-4 py-2 text-sm font-medium transition-colors',

@@ -398,7 +398,7 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToPrevSt
                                         type="date"
                                         name="date_of_birth"
                                         label="Date of Birth"
-                                        required
+                                        
                                     />
                                     <ReuseableInput
                                         className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"

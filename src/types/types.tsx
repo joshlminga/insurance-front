@@ -133,6 +133,8 @@ export type RHFInputProps<T extends FieldValues> = {
   rows?: number
   disabled?: boolean,
   accept?: string
+  min?: string
+  max?: string
 }
 
 export interface AuthProviderState {
@@ -742,4 +744,68 @@ export type SelectedQuoteEntry = {
     insurerName?: string
     logo?: string
     totalPremium?: string
+}
+
+/** Single motor cover from reports/motor/user/covers/{purchase_id} */
+export interface MotorUserCoverBenefit {
+    id: number
+    benefit_id: number
+    name: string
+    premium: number
+}
+
+export interface MotorUserCoverInvoice {
+    id: number
+    purchase_id: number
+    invoice_number: string
+    cover_status: string
+    plan_type: string
+    installment_number: number
+    total_installments: number
+    gross_premium: number
+    installment_amount: number
+    percentage: number
+    payment_status: string
+    status: string
+    due_date: string
+    is_active: boolean
+    is_overdue: boolean
+}
+
+export interface MotorUserCoverDetail {
+    purchase_id: number
+    quote_session_id: number
+    quote_code: string
+    purchase_status: string
+    product: string
+    currency: string
+    cover_type: string
+    covering: string
+    vehicle_use: string
+    provider: { name: string; product_name?: string }
+    agency: { name: string }
+    vehicle: {
+        registration_number: string
+        chassis_number: string
+        engine_number: string
+        make: string
+        model: string
+        body_type: string
+        color: string
+        year: number
+        seats: number
+        number_of_passengers: number
+        cubic_capacity: number
+        tonnage: number
+    }
+    vehicle_valuated_value: number
+    total_premium: number
+    cover_dates: {
+        start_date: string
+        issued_date: string
+        expiry_date: string
+        end_date: string
+    }
+    benefits: MotorUserCoverBenefit[]
+    invoices: MotorUserCoverInvoice[]
 }

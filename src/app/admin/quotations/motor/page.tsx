@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { PageHeader } from '@/components/shared'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button, ReuseableInput } from '@/dev/core'
 import { FieldGroup } from '@/components/ui/field'
 import { CustomerDetailsSchema, VehicleDetailsSchema } from '@/types/form-schema'
@@ -10,15 +10,17 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect, useMemo, useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { UseApiQuery } from '@/hooks/hooks'
-import type { SubmitResponse, TTabItem, VehicleClassItem } from '@/types/types'
+import type { SubmitResponse, VehicleClassItem } from '@/types/types'
 import { Loader2 } from 'lucide-react'
-import { MotorCommercialPage } from '@/app/customer/motor/steppers/tabs/motor-commercial'
-import { MotorPrivatePage } from '@/app/customer/motor/steppers/tabs/motor-private'
-import { MotorPsvPage } from '@/app/customer/motor/steppers/tabs/motor-psv'
-import { MotorSpecialVehicle } from '@/app/customer/motor/steppers/tabs/motor-special-vehicle'
 
 const MotorQuotationSchema = CustomerDetailsSchema.omit({ country: true }).merge(VehicleDetailsSchema)
 type MotorQuotationFormValues = Omit<CustomerFormValues, 'country'> & VehicleFormValues
+
+type VehicleClassTab = {
+    value: string
+    label: string
+    disabled?: boolean
+}
 
 export const MotorQuotationPage = () => {
 
@@ -35,25 +37,11 @@ export const MotorQuotationPage = () => {
         [vehicleClasses]
     )
 
-    const motoTabs = useMemo<TTabItem[]>(() => {
-        const componentBySlug = {
-            private: MotorPrivatePage,
-            commercial: MotorCommercialPage,
-            psv: MotorPsvPage,
-            specialvehicle: MotorSpecialVehicle,
-        }
-        const normalizeSlug = (slug: string) =>
-            slug.replace(/[^a-zA-Z0-9]/g, '').toLowerCase()
-        return activeVehicleClasses.map((item) => {
-            const cleanedSlug = normalizeSlug(item.slug)
-            return {
-                value: String(item.id),
-                label: item.name,
-                component:
-                    componentBySlug[cleanedSlug as keyof typeof componentBySlug] ??
-                    MotorPrivatePage,
-            }
-        })
+    const motoTabs = useMemo<VehicleClassTab[]>(() => {
+        return activeVehicleClasses.map((item) => ({
+            value: String(item.id),
+            label: item.name,
+        }))
     }, [activeVehicleClasses])
 
     const form = useForm<MotorQuotationFormValues>({
@@ -68,17 +56,11 @@ export const MotorQuotationPage = () => {
             covertype_id: '',
             covering_id: '',
             ownership: '',
-            vehicle_make_id: '',
-            vehicle_model_id: '',
             vehicle_class_id: '',
             used_for_id: '',
-            bodytype_id: '',
             registration_number: '',
-            vehicle_model: '',
-            year: '',
+            vehicle_registration_number: '',
             vehicle_value: '',
-            number_of_passengers: '',
-            tonnage: '',
             valued_by_professional: false,
         },
     })
@@ -157,7 +139,6 @@ export const MotorQuotationPage = () => {
                         </CardContent>
                     </Card>
 
-                    {/* Vehicle Details - split across 2 cards, wrapped in Tabs */}
                     {isLoading ? (
                         <Card>
                             <CardContent className="py-8">
@@ -179,9 +160,8 @@ export const MotorQuotationPage = () => {
                         <Tabs
                             value={selectedTabValue}
                             onValueChange={handleTabChange}
-                            className="w-full space-y-6"
+                            className="w-full"
                         >
-                            {/* Card 2a: Cover Type Selection */}
                             <Card>
                                 <CardHeader>
                                     <h2 className="text-lg font-semibold">
@@ -206,30 +186,6 @@ export const MotorQuotationPage = () => {
                                             </TabsTrigger>
                                         ))}
                                     </TabsList>
-                                </CardContent>
-                            </Card>
-
-                            {/* Card 2b: Vehicle Information */}
-                            <Card>
-                                <CardHeader>
-                                    <h2 className="text-lg font-semibold">
-                                        Vehicle Information
-                                    </h2>
-                                </CardHeader>
-                                <CardContent>
-                                    {motoTabs.map((tab) => {
-                                        const TabComponent = tab.component
-                                        return (
-                                            <TabsContent
-                                                key={tab.value}
-                                                value={tab.value}
-                                                className="mt-0 w-full data-[state=inactive]:hidden"
-                                                forceMount
-                                            >
-                                                <TabComponent form={form} />
-                                            </TabsContent>
-                                        )
-                                    })}
                                 </CardContent>
                             </Card>
                         </Tabs>
