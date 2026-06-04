@@ -98,8 +98,8 @@ const VehicleDetailsBox: React.FC = () => {
     return (
         <>
             <div className="flex flex-col gap-0.5 pb-3">
-                <h3 className="text-base font-semibold sm:text-lg">Vehicle Details</h3>
-                <p className="text-xs text-muted-foreground sm:text-sm">
+                <h3 className="text-sm font-semibold sm:text-base">Vehicle Details</h3>
+                <p className="text-xs text-muted-foreground">
                     Provide vehicle related details.
                 </p>
             </div>
@@ -348,11 +348,13 @@ export const MotorQuotationPage = () => {
     }
 
     return (
-        <div className="space-y-6">
-            <PageHeader
-                title="Motor Quotations"
-                description="Manage motor Quotations for comprehensive or 3rd party"
-            />
+        <div className="space-y-6 text-sm pb-[max(5vh,4.5rem)] mb-[5vh]">
+            <div className="[&_h1]:text-lg [&_h1]:leading-7 [&_p]:text-sm [&_p]:leading-5">
+                <PageHeader
+                    title="Motor Quotations"
+                    description="Manage motor Quotations for comprehensive or 3rd party"
+                />
+            </div>
 
             <FormProvider {...form}>
                 <form
@@ -361,15 +363,15 @@ export const MotorQuotationPage = () => {
                 >
                     <div className="rounded-2xl border border-[#ADABAB]/50 bg-linear-to-b from-white to-neutral-50/90 p-4 shadow-sm sm:p-6">
                         <div className="w-full pb-4">
-                            <h2 className="text-xl font-bold leading-tight tracking-tight sm:text-2xl">
+                            <h2 className="text-lg font-bold leading-tight tracking-tight sm:text-xl">
                                 Customer{' '}
                                 <span className="text-[#C20C0C]">details</span>
                             </h2>
-                            <p className="mt-2 max-w-2xl text-sm text-muted-foreground sm:text-base">
+                            <p className="mt-1.5 max-w-2xl text-xs text-muted-foreground sm:text-sm">
                                 Enter customer contact information for this quotation.
                             </p>
                         </div>
-                        <FieldGroup>
+                        <FieldGroup className="[&_label]:text-sm [&_input]:text-sm">
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                 <ReuseableInput
                                     className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
@@ -396,15 +398,15 @@ export const MotorQuotationPage = () => {
 
                     <div className="rounded-2xl border border-[#ADABAB]/50 bg-linear-to-b from-white to-neutral-50/90 p-4 shadow-sm sm:p-6">
                         <div className="w-full pb-4">
-                            <h2 className="text-xl font-bold leading-tight tracking-tight sm:text-2xl">
+                            <h2 className="text-lg font-bold leading-tight tracking-tight sm:text-xl">
                                 Office{' '}
                                 <span className="text-[#C20C0C]">use</span>
                             </h2>
-                            <p className="mt-2 max-w-2xl text-sm text-muted-foreground sm:text-base">
+                            <p className="mt-1.5 max-w-2xl text-xs text-muted-foreground sm:text-sm">
                                 Country, organization, and referral details for internal processing.
                             </p>
                         </div>
-                        <div className="space-y-4">
+                        <div className="space-y-4 [&_label]:text-sm [&_input]:text-sm [&_button]:text-sm">
                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                                 <Controller
                                     control={form.control}
@@ -459,7 +461,7 @@ export const MotorQuotationPage = () => {
                                 <label
                                     htmlFor="admin-organization-override"
                                     className={cn(
-                                        'text-sm font-medium leading-snug',
+                                        'text-xs font-medium leading-snug sm:text-sm',
                                         !canLoadOrganizations && 'cursor-not-allowed opacity-70'
                                     )}
                                 >
@@ -469,8 +471,8 @@ export const MotorQuotationPage = () => {
                             </div>
 
                             <div className="rounded-2xl border border-[#ADABAB]/35 bg-white/95 p-3 sm:p-5">
-                                <p className="text-sm font-semibold text-[#C20C0C]">Office Use:</p>
-                                <p className="mt-1 text-sm text-muted-foreground">
+                                <p className="text-xs font-semibold text-[#C20C0C]">Office Use:</p>
+                                <p className="mt-1 text-xs text-muted-foreground">
                                     If you&apos;re applying for organization not in the list
                                     select &apos;Acentria admin override&apos;
                                 </p>
@@ -478,33 +480,33 @@ export const MotorQuotationPage = () => {
                         </div>
                     </div>
 
-                    <div className="rounded-2xl border border-[#ADABAB]/50 bg-linear-to-b from-white to-neutral-50/90 p-4 shadow-sm sm:p-6">
+                    <div className="rounded-2xl border border-[#ADABAB]/50 bg-linear-to-b from-white to-neutral-50/90 p-4 shadow-sm sm:p-6 [&_label]:text-sm [&_input]:text-sm [&_button]:text-sm">
                         <div className="w-full pb-2">
-                            <h2 className="text-xl font-bold leading-tight tracking-tight sm:text-2xl">
+                            <h2 className="text-lg font-bold leading-tight tracking-tight sm:text-xl">
                                 Vehicle{' '}
                                 <span className="text-[#C20C0C]">details</span>
                             </h2>
-                            <p className="mt-2 max-w-2xl text-sm text-muted-foreground sm:text-base">
+                            <p className="mt-1.5 max-w-2xl text-xs text-muted-foreground sm:text-sm">
                                 Choose the class that best describes the vehicle. The right
                                 fields appear next.
                             </p>
                         </div>
 
                         <div className="mt-5">
-                            <Label className="text-base font-semibold text-foreground">
+                            <Label className="text-sm font-semibold text-foreground">
                                 Vehicle class
                             </Label>
-                            <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
+                            <p className="mt-1 text-xs text-muted-foreground">
                                 Tap one option — only one class applies.
                             </p>
 
                             {isClassTabsLoading ? (
-                                <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
+                                <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
                                     <Loader2 className="h-4 w-4 animate-spin" />
                                     Loading vehicle classes…
                                 </div>
                             ) : motoTabs.length === 0 ? (
-                                <div className="mt-4 rounded-xl border border-dashed border-muted-foreground/30 bg-muted/20 px-4 py-8 text-center text-sm text-muted-foreground">
+                                <div className="mt-4 rounded-xl border border-dashed border-muted-foreground/30 bg-muted/20 px-4 py-8 text-center text-xs text-muted-foreground">
                                     No active vehicle classes found.
                                 </div>
                             ) : (
@@ -550,7 +552,7 @@ export const MotorQuotationPage = () => {
                                                                 strokeWidth={1.75}
                                                             />
                                                         </span>
-                                                        <span className="text-xs font-semibold leading-snug sm:text-sm">
+                                                        <span className="text-[11px] font-semibold leading-snug sm:text-xs">
                                                             {tab.label}
                                                         </span>
                                                     </Label>
@@ -574,10 +576,10 @@ export const MotorQuotationPage = () => {
                             </div>
                         ) : null}
 
-                        <div className="mt-8 flex w-full justify-end border-t border-[#ADABAB]/30 pt-6">
+                        <div className="mt-8 flex w-full justify-end border-t border-[#ADABAB]/30 pt-6 pb-2">
                             <Button
                                 type="submit"
-                                className="w-full rounded-full bg-[#C20C0C]/90 hover:bg-[#C20C0C] sm:w-auto"
+                                className="w-full rounded-full bg-[#C20C0C]/90 text-sm hover:bg-[#C20C0C] sm:w-auto"
                                 rightIcon={<ArrowRightCircle />}
                                 disabled={
                                     isClassTabsLoading ||

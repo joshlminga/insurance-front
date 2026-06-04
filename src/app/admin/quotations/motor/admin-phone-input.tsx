@@ -115,7 +115,7 @@ export function AdminPhoneInput<T extends FieldValues>({
                         )}
                     >
                         <span
-                            className="flex shrink-0 items-center border-r border-[#ADABAB] bg-neutral-50 px-3 text-sm font-medium text-muted-foreground"
+                            className="flex shrink-0 items-center border-r border-[#ADABAB] bg-neutral-50 px-3 text-xs font-medium text-muted-foreground"
                             aria-hidden
                         >
                             {isLoading && countryId ? (
@@ -133,7 +133,7 @@ export function AdminPhoneInput<T extends FieldValues>({
                             disabled={disabled || !countryId || isLoading}
                             aria-invalid={fieldState.invalid}
                             className={cn(
-                                'h-full min-w-0 flex-1 rounded-none border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0',
+                                'h-full min-w-0 flex-1 rounded-none border-0 text-sm shadow-none focus-visible:ring-0 focus-visible:ring-offset-0',
                                 fieldState.invalid && 'focus-visible:ring-red-500'
                             )}
                             value={field.value ?? ''}
