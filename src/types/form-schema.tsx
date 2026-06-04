@@ -108,8 +108,11 @@ export const AdminMotorQuotationSchema = CustomerDetailsSchema
       .min(2, "Full name is required")
       .max(100),
     country_id: z.string().optional().or(z.literal("")),
-    organization_location_id: z.string().min(1, "Organization is required"),
+    organization_id: z.string().optional().or(z.literal("")),
+    agency_id: z.string().min(1, "Your agency is required"),
     referral_code: z.string().optional().or(z.literal("")),
+    /** When customer is not found: checked = create account (is_guest false on submit). */
+    create_customer_account: z.boolean().optional(),
   })
 
 export const LoginSchema = z.object({

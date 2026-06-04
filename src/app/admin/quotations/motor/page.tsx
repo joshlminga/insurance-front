@@ -1,7 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { PageHeader } from '@/components/shared'
 import { Checkbox } from '@/components/ui/checkbox'
-import { FieldGroup } from '@/components/ui/field'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { VehicleUseInput } from '@/app/customer/motor/steppers/components/vehicle-use-input'
@@ -12,14 +11,16 @@ import {
     ReusableSingleSelectApiInput,
     ReuseableInput,
 } from '@/dev/core'
-import { UseApiQuery } from '@/hooks/hooks'
+import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
 import { cn } from '@/lib/utils'
 import { UseAuth } from '@/stores/auth-store'
 import { AdminMotorQuotationSchema } from '@/types/form-schema'
 import type { AdminMotorQuotationFormValues } from '@/types/schema'
 import type { SubmitResponse, VehicleClassItem } from '@/types/types'
-import { PROFFESIONALVALUATIONCHECKBOX } from '@/utils/enums'
-import { OWNERSHIPOPTIONS } from '@/utils/constatnts'
+import { EROUTES, PROFFESIONALVALUATIONCHECKBOX } from '@/utils/enums'
+import { EMETHODS, MOTOR_QUOTE_SESSION_STORAGE_KEY, OWNERSHIPOPTIONS } from '@/utils/constatnts'
+import { extractErrorMessage } from '@/utils/helpers'
+import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
     ArrowRightCircle,
@@ -31,6 +32,7 @@ import {
     type LucideIcon,
 } from 'lucide-react'
 import React, { useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
     Controller,
     FormProvider,
@@ -38,7 +40,13 @@ import {
     useFormContext,
     useWatch,
 } from 'react-hook-form'
-import { AdminPhoneInput } from './admin-phone-input'
+import {
+    resolveDialCode,
+    type CountryGeoMeta,
+} from './admin-phone-input'
+import { CustomerDetailsSection } from './customer-details-section'
+import { motorFormFieldStyles, motorInputClassName } from './motor-field-styles'
+import { buildMotorQuotationPayload } from './motor-quotation-payload'
 import { OrganizationLocationInput } from './organization-location-input'
 import { OfficeCountrySelect } from './office-country-select'
 
@@ -107,7 +115,7 @@ const VehicleDetailsBox: React.FC = () => {
             <div className="rounded-2xl border border-[#ADABAB]/35 bg-white/95 p-3 sm:p-5">
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     <ReuseableInput
-                        className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] uppercase"
+                        className={cn(motorInputClassName, 'uppercase')}
                         control={control}
                         name="vehicle_registration_number"
                         label="Vehicle Registration Number"
@@ -116,7 +124,7 @@ const VehicleDetailsBox: React.FC = () => {
                         placeholder="e.g. KAA 123A"
                     />
                     <ReuseableInput
-                        className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                        className={motorInputClassName}
                         control={control}
                         name="vehicle_value"
                         label="Vehicle Value"
@@ -209,18 +217,19 @@ function AnimatedSection({ show, children, className }: AnimatedSectionProps) {
 }
 
 export const MotorQuotationPage = () => {
+    const navigate = useNavigate()
     const { user } = UseAuth()
     const [selectedTabValue, setSelectedTabValue] = useState<string>('')
     const [adminOrganizationOverride, setAdminOrganizationOverride] = useState(false)
 
-    const { data: userProfileData, isLoading: isUserProfileLoading } =
+    const { data: adminProfileData, isLoading: isAdminProfileLoading } =
         UseApiQuery<SubmitResponse>({
             url: 'user/search',
             params: { user_id: user?.id },
             queryOptions: { enabled: user?.id != null },
         })
 
-    const userProfile = (userProfileData?.data ?? null) as UserSearchProfile | null
+    const userProfile = (adminProfileData?.data ?? null) as UserSearchProfile | null
     const profileCountry = userProfile?.country ?? null
 
     const { data: vehicleClassesData, isLoading: isVehicleClassesLoading } =
@@ -257,7 +266,8 @@ export const MotorQuotationPage = () => {
             phone: '',
             user_id: '',
             country_id: '',
-            organization_location_id: '',
+            organization_id: '',
+            agency_id: '',
             referral_code: '',
             covertype_id: '',
             covering_id: '',
@@ -268,6 +278,7 @@ export const MotorQuotationPage = () => {
             vehicle_registration_number: '',
             vehicle_value: '',
             valued_by_professional: false,
+            create_customer_account: false,
         },
     })
 
@@ -281,15 +292,22 @@ export const MotorQuotationPage = () => {
         return ''
     }, [formCountryId, profileCountry?.id])
 
+    const { data: selectedCountryGeoData } = UseApiQuery<SubmitResponse>({
+        url: 'taxonomies/geo/country',
+        params: { country_id: effectiveCountryId },
+        queryOptions: { enabled: Boolean(effectiveCountryId) },
+    })
+
+    const selectedCountryGeo = (selectedCountryGeoData?.data ?? [])[0] as
+        | CountryGeoMeta
+        | undefined
+    const dialCode = resolveDialCode(selectedCountryGeo)
+
     const selectedCountryName = useMemo(() => {
-        if (formCountryId && String(formCountryId) === String(profileCountry?.id)) {
-            return profileCountry?.name ?? 'selected country'
-        }
-        if (!formCountryId && profileCountry?.name) {
-            return profileCountry.name
-        }
-        return profileCountry?.name ?? 'selected country'
-    }, [formCountryId, profileCountry])
+        if (selectedCountryGeo?.name) return selectedCountryGeo.name
+        if (!formCountryId && profileCountry?.name) return profileCountry.name
+        return 'selected country'
+    }, [selectedCountryGeo?.name, formCountryId, profileCountry?.name])
 
     const canLoadOrganizations = Boolean(effectiveCountryId)
     const hasSelectedClass = Boolean(selectedTabValue)
@@ -305,46 +323,48 @@ export const MotorQuotationPage = () => {
 
     const handleCountryChange = (value: string) => {
         form.setValue('country_id', value, { shouldValidate: true, shouldDirty: true })
-        form.setValue('organization_location_id', '', { shouldValidate: true })
+        form.setValue('organization_id', '', { shouldValidate: true })
+        form.setValue('agency_id', '', { shouldValidate: true })
         form.setValue('phone', '', { shouldValidate: true })
     }
 
+    const submitMutation = UseApiMutation<
+        SubmitResponse,
+        ReturnType<typeof buildMotorQuotationPayload>
+    >({
+        url: 'auto/quotation/motor',
+        method: EMETHODS.POST,
+        mutationOptions: {
+            onSuccess: (response) => {
+                const quoteSessionId = Number(response?.data?.id)
+                if (!Number.isFinite(quoteSessionId) || quoteSessionId <= 0) {
+                    ShowToast.error(
+                        'Quote session could not be initialized. Please try again.'
+                    )
+                    return
+                }
+                sessionStorage.setItem(
+                    MOTOR_QUOTE_SESSION_STORAGE_KEY,
+                    String(quoteSessionId)
+                )
+                ShowToast.success(
+                    response?.message || 'Quotation started successfully.'
+                )
+                navigate(EROUTES.MOTOR_QUOTATION_RESULTS)
+            },
+            onError: (error) => {
+                ShowToast.error(extractErrorMessage(error))
+            },
+        },
+    })
+
     const onSubmit = (data: AdminMotorQuotationFormValues) => {
-        const valuedByProfessional =
-            data.valued_by_professional === true ||
-            String(data.valued_by_professional).toLowerCase() === 'true'
-
-        const payload = {
-            full_name: data.full_name,
-            email: data.email,
-            phone: data.phone,
-            country_id: data.country_id || (profileCountry?.id != null ? String(profileCountry.id) : null),
-            organization_location_id: data.organization_location_id,
-            referral_code: data.referral_code?.trim() || null,
-            user_id: data.user_id,
-            valued_by_professional: valuedByProfessional,
-            covertype_id: data.covertype_id,
-            covering_id: data.covering_id,
-            ownership: data.ownership,
-            vehicle_registration_number: data.vehicle_registration_number,
-            vehicle_value: data.vehicle_value,
-            vehicle_class_id: data.vehicle_class_id,
-            used_for_id: data.used_for_id,
-            registration_number: null,
-            vehicle_model: null,
-            vehicle_make: null,
-            yom: null,
-            insurance_type: null,
-            vehicle_make_id: null,
-            vehicle_model_id: null,
-            bodytype_id: null,
-            year: null,
-            number_of_passengers: null,
-            tonnage: null,
-            coverfor_id: null,
-        }
-
-        console.log('Form data:', payload)
+        const payload = buildMotorQuotationPayload({
+            data,
+            profileCountryId: profileCountry?.id,
+            dialCode,
+        })
+        submitMutation.mutate(payload)
     }
 
     return (
@@ -359,42 +379,9 @@ export const MotorQuotationPage = () => {
             <FormProvider {...form}>
                 <form
                     onSubmit={form.handleSubmit(onSubmit)}
-                    className="space-y-6"
+                    className={cn('space-y-6', motorFormFieldStyles)}
                 >
-                    <div className="rounded-2xl border border-[#ADABAB]/50 bg-linear-to-b from-white to-neutral-50/90 p-4 shadow-sm sm:p-6">
-                        <div className="w-full pb-4">
-                            <h2 className="text-lg font-bold leading-tight tracking-tight sm:text-xl">
-                                Customer{' '}
-                                <span className="text-[#C20C0C]">details</span>
-                            </h2>
-                            <p className="mt-1.5 max-w-2xl text-xs text-muted-foreground sm:text-sm">
-                                Enter customer contact information for this quotation.
-                            </p>
-                        </div>
-                        <FieldGroup className="[&_label]:text-sm [&_input]:text-sm">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                <ReuseableInput
-                                    className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
-                                    control={form.control}
-                                    name="email"
-                                    label="Email"
-                                    type="email"
-                                />
-                                <AdminPhoneInput
-                                    control={form.control}
-                                    name="phone"
-                                    countryId={effectiveCountryId}
-                                    label="Mobile Number"
-                                />
-                                <ReuseableInput
-                                    className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
-                                    control={form.control}
-                                    name="full_name"
-                                    label="Full Name"
-                                />
-                            </div>
-                        </FieldGroup>
-                    </div>
+                    <CustomerDetailsSection countryId={effectiveCountryId} />
 
                     <div className="rounded-2xl border border-[#ADABAB]/50 bg-linear-to-b from-white to-neutral-50/90 p-4 shadow-sm sm:p-6">
                         <div className="w-full pb-4">
@@ -403,11 +390,12 @@ export const MotorQuotationPage = () => {
                                 <span className="text-[#C20C0C]">use</span>
                             </h2>
                             <p className="mt-1.5 max-w-2xl text-xs text-muted-foreground sm:text-sm">
-                                Country, organization, and referral details for internal processing.
+                                Country, your agency, optional on-behalf organization, and referral
+                                details for internal processing.
                             </p>
                         </div>
                         <div className="space-y-4 [&_label]:text-sm [&_input]:text-sm [&_button]:text-sm">
-                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                                 <Controller
                                     control={form.control}
                                     name="country_id"
@@ -417,29 +405,46 @@ export const MotorQuotationPage = () => {
                                             onChange={handleCountryChange}
                                             defaultCountryName={profileCountry?.name}
                                             label="Country"
-                                            disabled={isUserProfileLoading}
+                                            disabled={isAdminProfileLoading}
                                         />
                                     )}
                                 />
 
                                 <Controller
                                     control={form.control}
-                                    name="organization_location_id"
+                                    name="agency_id"
                                     render={({ field }) => (
                                         <OrganizationLocationInput
+                                            variant="agency"
                                             countryId={effectiveCountryId}
-                                            override={adminOrganizationOverride}
                                             value={field.value}
                                             onChange={field.onChange}
-                                            label="Organization"
+                                            label="Your Agency"
                                             required
                                             disabled={!canLoadOrganizations}
                                         />
                                     )}
                                 />
 
+                                <Controller
+                                    control={form.control}
+                                    name="organization_id"
+                                    render={({ field }) => (
+                                        <OrganizationLocationInput
+                                            variant="onBehalf"
+                                            countryId={effectiveCountryId}
+                                            override={adminOrganizationOverride}
+                                            value={field.value}
+                                            onChange={field.onChange}
+                                            label="On behalf of"
+                                            required={false}
+                                            disabled={!canLoadOrganizations}
+                                        />
+                                    )}
+                                />
+
                                 <ReuseableInput
-                                    className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                                    className={motorInputClassName}
                                     control={form.control}
                                     name="referral_code"
                                     label="Referral Code"
@@ -465,7 +470,7 @@ export const MotorQuotationPage = () => {
                                         !canLoadOrganizations && 'cursor-not-allowed opacity-70'
                                     )}
                                 >
-                                    Admin Override: Pull all Organization in{' '}
+                                    Admin Override (On behalf of): Pull all organizations in{' '}
                                     {selectedCountryName}
                                 </label>
                             </div>
@@ -473,8 +478,9 @@ export const MotorQuotationPage = () => {
                             <div className="rounded-2xl border border-[#ADABAB]/35 bg-white/95 p-3 sm:p-5">
                                 <p className="text-xs font-semibold text-[#C20C0C]">Office Use:</p>
                                 <p className="mt-1 text-xs text-muted-foreground">
-                                    If you&apos;re applying for organization not in the list
-                                    select &apos;Acentria admin override&apos;
+                                    If the on-behalf organization is not in the list, enable admin
+                                    override. Your Agency is always limited to your Agent and
+                                    Organization locations.
                                 </p>
                             </div>
                         </div>

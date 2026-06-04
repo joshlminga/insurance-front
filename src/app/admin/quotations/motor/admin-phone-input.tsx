@@ -6,8 +6,9 @@ import type { SubmitResponse } from '@/types/types'
 import { Loader2 } from 'lucide-react'
 import { useMemo } from 'react'
 import { Controller, type Control, type FieldValues, type Path } from 'react-hook-form'
+import { normalizeLocalPhoneDigits } from './customer-lookup-utils'
 
-type CountryGeoMeta = {
+export type CountryGeoMeta = {
     id?: number | string
     name?: string
     country_code?: string
@@ -26,9 +27,10 @@ type AdminPhoneInputProps<T extends FieldValues> = {
     required?: boolean
     disabled?: boolean
     className?: string
+    onBlur?: () => void
 }
 
-function resolveDialCode(country: CountryGeoMeta | undefined): string {
+export function resolveDialCode(country: CountryGeoMeta | undefined): string {
     return (
         country?.country_dial_code ??
         country?.meta?.country_dial_code ??
@@ -76,6 +78,7 @@ export function AdminPhoneInput<T extends FieldValues>({
     required = false,
     disabled = false,
     className,
+    onBlur,
 }: AdminPhoneInputProps<T>) {
     const { data, isLoading } = UseApiQuery<SubmitResponse>({
         url: 'taxonomies/geo/country',
@@ -109,7 +112,7 @@ export function AdminPhoneInput<T extends FieldValues>({
 
                     <div
                         className={cn(
-                            'flex h-12.75 w-full overflow-hidden rounded-[5px] border border-[#ADABAB] bg-white',
+                            'flex h-10 w-full overflow-hidden rounded-[5px] border border-[#ADABAB] bg-white',
                             fieldState.invalid && 'border-red-500',
                             (disabled || !countryId) && 'opacity-70'
                         )}
@@ -138,8 +141,14 @@ export function AdminPhoneInput<T extends FieldValues>({
                             )}
                             value={field.value ?? ''}
                             onChange={(e) => {
-                                const digits = e.target.value.replace(/\D/g, '')
+                                const digits = normalizeLocalPhoneDigits(
+                                    e.target.value.replace(/\D/g, '')
+                                )
                                 field.onChange(digits.slice(0, maxDigits))
+                            }}
+                            onBlur={() => {
+                                field.onBlur()
+                                onBlur?.()
                             }}
                         />
                     </div>
