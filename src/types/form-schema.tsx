@@ -98,6 +98,16 @@ export const VehicleDetailsSchema = z.object({
     }
   })
 
+export const AdminMotorQuotationSchema = CustomerDetailsSchema
+  .omit({ country: true })
+  .merge(VehicleDetailsSchema)
+  // Zod 4: cannot .extend() after merge with a schema that has .superRefine()
+  .safeExtend({
+    country_id: z.string().optional().or(z.literal("")),
+    organization_location_id: z.string().min(1, "Organization is required"),
+    referral_code: z.string().optional().or(z.literal("")),
+  })
+
 export const LoginSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(1, "Password is required"),
