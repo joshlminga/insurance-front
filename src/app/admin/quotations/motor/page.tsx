@@ -587,10 +587,12 @@ export const MotorQuotationPage = () => {
                                 type="submit"
                                 className="w-full rounded-full bg-[#C20C0C]/90 text-sm hover:bg-[#C20C0C] sm:w-auto"
                                 rightIcon={<ArrowRightCircle />}
+                                loading={submitMutation.isPending}
                                 disabled={
                                     isClassTabsLoading ||
                                     motoTabs.length === 0 ||
-                                    !selectedTabValue
+                                    !selectedTabValue ||
+                                    submitMutation.isPending
                                 }
                             >
                                 Start Quotation

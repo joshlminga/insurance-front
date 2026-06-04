@@ -191,6 +191,8 @@ export interface SubmitResponse {
 export interface CustomerVerificationDetailsProps {
   goToNextStep?: () => void
   goToPrevStep?: () => void
+  /** Label for the step to return to when quote session is missing (e.g. admin flow). */
+  missingSessionBackLabel?: string
 }
 
 export interface premiumPreview {
