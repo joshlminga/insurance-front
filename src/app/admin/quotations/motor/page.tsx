@@ -1,6 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { PageHeader } from '@/components/shared'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { FieldGroup } from '@/components/ui/field'
 import { Label } from '@/components/ui/label'
@@ -23,6 +22,7 @@ import { PROFFESIONALVALUATIONCHECKBOX } from '@/utils/enums'
 import { OWNERSHIPOPTIONS } from '@/utils/constatnts'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
+    ArrowRightCircle,
     Bus,
     Car,
     Container,
@@ -38,6 +38,7 @@ import {
     useFormContext,
     useWatch,
 } from 'react-hook-form'
+import { AdminPhoneInput } from './admin-phone-input'
 import { OrganizationLocationInput } from './organization-location-input'
 import { OfficeCountrySelect } from './office-country-select'
 
@@ -251,8 +252,7 @@ export const MotorQuotationPage = () => {
     const form = useForm<AdminMotorQuotationFormValues>({
         resolver: zodResolver(AdminMotorQuotationSchema),
         defaultValues: {
-            first_name: '',
-            last_name: '',
+            full_name: '',
             email: '',
             phone: '',
             user_id: '',
@@ -306,6 +306,7 @@ export const MotorQuotationPage = () => {
     const handleCountryChange = (value: string) => {
         form.setValue('country_id', value, { shouldValidate: true, shouldDirty: true })
         form.setValue('organization_location_id', '', { shouldValidate: true })
+        form.setValue('phone', '', { shouldValidate: true })
     }
 
     const onSubmit = (data: AdminMotorQuotationFormValues) => {
@@ -314,8 +315,7 @@ export const MotorQuotationPage = () => {
             String(data.valued_by_professional).toLowerCase() === 'true'
 
         const payload = {
-            first_name: data.first_name,
-            last_name: data.last_name,
+            full_name: data.full_name,
             email: data.email,
             phone: data.phone,
             country_id: data.country_id || (profileCountry?.id != null ? String(profileCountry.id) : null),
@@ -359,51 +359,52 @@ export const MotorQuotationPage = () => {
                     onSubmit={form.handleSubmit(onSubmit)}
                     className="space-y-6"
                 >
-                    <Card>
-                        <CardHeader>
-                            <h2 className="text-lg font-semibold">
-                                Customer Details
+                    <div className="rounded-2xl border border-[#ADABAB]/50 bg-linear-to-b from-white to-neutral-50/90 p-4 shadow-sm sm:p-6">
+                        <div className="w-full pb-4">
+                            <h2 className="text-xl font-bold leading-tight tracking-tight sm:text-2xl">
+                                Customer{' '}
+                                <span className="text-[#C20C0C]">details</span>
                             </h2>
-                        </CardHeader>
-                        <CardContent>
-                            <FieldGroup>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                    <ReuseableInput
-                                        className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
-                                        control={form.control}
-                                        name="email"
-                                        label="Email"
-                                        type="email"
-                                    />
-                                    <ReuseableInput
-                                        className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
-                                        control={form.control}
-                                        name="phone"
-                                        label="Mobile Number"
-                                        type="tel"
-                                    />
-                                    <ReuseableInput
-                                        className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
-                                        control={form.control}
-                                        name="first_name"
-                                        label="First Name"
-                                    />
-                                    <ReuseableInput
-                                        className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
-                                        control={form.control}
-                                        name="last_name"
-                                        label="Last Name"
-                                    />
-                                </div>
-                            </FieldGroup>
-                        </CardContent>
-                    </Card>
+                            <p className="mt-2 max-w-2xl text-sm text-muted-foreground sm:text-base">
+                                Enter customer contact information for this quotation.
+                            </p>
+                        </div>
+                        <FieldGroup>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <ReuseableInput
+                                    className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                                    control={form.control}
+                                    name="email"
+                                    label="Email"
+                                    type="email"
+                                />
+                                <AdminPhoneInput
+                                    control={form.control}
+                                    name="phone"
+                                    countryId={effectiveCountryId}
+                                    label="Mobile Number"
+                                />
+                                <ReuseableInput
+                                    className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                                    control={form.control}
+                                    name="full_name"
+                                    label="Full Name"
+                                />
+                            </div>
+                        </FieldGroup>
+                    </div>
 
-                    <Card>
-                        <CardHeader>
-                            <h2 className="text-lg font-semibold">Office Use</h2>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
+                    <div className="rounded-2xl border border-[#ADABAB]/50 bg-linear-to-b from-white to-neutral-50/90 p-4 shadow-sm sm:p-6">
+                        <div className="w-full pb-4">
+                            <h2 className="text-xl font-bold leading-tight tracking-tight sm:text-2xl">
+                                Office{' '}
+                                <span className="text-[#C20C0C]">use</span>
+                            </h2>
+                            <p className="mt-2 max-w-2xl text-sm text-muted-foreground sm:text-base">
+                                Country, organization, and referral details for internal processing.
+                            </p>
+                        </div>
+                        <div className="space-y-4">
                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                                 <Controller
                                     control={form.control}
@@ -468,14 +469,14 @@ export const MotorQuotationPage = () => {
                             </div>
 
                             <div className="rounded-2xl border border-[#ADABAB]/35 bg-white/95 p-3 sm:p-5">
-                                <p className="text-sm font-semibold">Office Use:</p>
+                                <p className="text-sm font-semibold text-[#C20C0C]">Office Use:</p>
                                 <p className="mt-1 text-sm text-muted-foreground">
                                     If you&apos;re applying for organization not in the list
                                     select &apos;Acentria admin override&apos;
                                 </p>
                             </div>
-                        </CardContent>
-                    </Card>
+                        </div>
+                    </div>
 
                     <div className="rounded-2xl border border-[#ADABAB]/50 bg-linear-to-b from-white to-neutral-50/90 p-4 shadow-sm sm:p-6">
                         <div className="w-full pb-2">
@@ -572,20 +573,21 @@ export const MotorQuotationPage = () => {
                                 </AnimatedSection>
                             </div>
                         ) : null}
-                    </div>
 
-                    <div className="flex justify-end">
-                        <Button
-                            type="submit"
-                            className="bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
-                            disabled={
-                                isClassTabsLoading ||
-                                motoTabs.length === 0 ||
-                                !selectedTabValue
-                            }
-                        >
-                            Save
-                        </Button>
+                        <div className="mt-8 flex w-full justify-end border-t border-[#ADABAB]/30 pt-6">
+                            <Button
+                                type="submit"
+                                className="w-full rounded-full bg-[#C20C0C]/90 hover:bg-[#C20C0C] sm:w-auto"
+                                rightIcon={<ArrowRightCircle />}
+                                disabled={
+                                    isClassTabsLoading ||
+                                    motoTabs.length === 0 ||
+                                    !selectedTabValue
+                                }
+                            >
+                                Start Quotation
+                            </Button>
+                        </div>
                     </div>
                 </form>
             </FormProvider>
