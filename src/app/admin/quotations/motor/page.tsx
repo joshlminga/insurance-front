@@ -45,7 +45,12 @@ import {
     type CountryGeoMeta,
 } from './admin-phone-input'
 import { CustomerDetailsSection } from './customer-details-section'
-import { motorFormFieldStyles, motorInputClassName } from './motor-field-styles'
+import {
+    motorCheckboxLabelAccentClassName,
+    motorCheckboxLabelClassName,
+    motorFormFieldStyles,
+    motorInputClassName,
+} from './motor-field-styles'
 import { buildMotorQuotationPayload } from './motor-quotation-payload'
 import { OrganizationLocationInput } from './organization-location-input'
 import { OfficeCountrySelect } from './office-country-select'
@@ -405,6 +410,7 @@ export const MotorQuotationPage = () => {
                                             onChange={handleCountryChange}
                                             defaultCountryName={profileCountry?.name}
                                             label="Country"
+                                            required
                                             disabled={isAdminProfileLoading}
                                         />
                                     )}
@@ -466,12 +472,18 @@ export const MotorQuotationPage = () => {
                                 <label
                                     htmlFor="admin-organization-override"
                                     className={cn(
-                                        'text-xs font-medium leading-snug sm:text-sm',
-                                        !canLoadOrganizations && 'cursor-not-allowed opacity-70'
+                                        motorCheckboxLabelClassName,
+                                        !canLoadOrganizations &&
+                                            'cursor-not-allowed opacity-70'
                                     )}
                                 >
-                                    Admin Override (On behalf of): Pull all organizations in{' '}
-                                    {selectedCountryName}
+                                    <span className={motorCheckboxLabelAccentClassName}>
+                                        Admin Override
+                                    </span>{' '}
+                                    (On behalf of): Pull all organizations in{' '}
+                                    <span className={motorCheckboxLabelAccentClassName}>
+                                        {selectedCountryName}
+                                    </span>
                                 </label>
                             </div>
 

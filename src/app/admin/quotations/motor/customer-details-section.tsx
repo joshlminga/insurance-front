@@ -38,7 +38,12 @@ import {
     stripDialCode,
     type CustomerSearchUser,
 } from './customer-lookup-utils'
-import { motorInputClassName } from './motor-field-styles'
+import {
+    motorCheckboxLabelAccentClassName,
+    motorCheckboxLabelClassName,
+    motorClearActionClassName,
+    motorInputClass,
+} from './motor-field-styles'
 
 type CustomerDetailsSectionProps = {
     countryId: string
@@ -186,13 +191,22 @@ export function CustomerDetailsSection({ countryId }: CustomerDetailsSectionProp
                     <Button
                         type="button"
                         variant="outline"
-                        className="shrink-0 rounded-full border-[#ADABAB] text-sm"
+                        className={motorClearActionClassName}
                         onClick={clearCustomerLock}
                     >
                         Clear details
                     </Button>
                 )}
             </div>
+
+            {isCustomerLocked && (
+                <p className="mb-3 text-xs font-medium text-[#8B0A0A]">
+                    These fields were auto-filled from an existing customer and are locked.
+                    Use <span className="font-semibold text-[#C20C0C]">Clear details</span> to
+                    edit manually.
+                </p>
+            )}
+
             <FieldGroup className="[&_label]:text-sm [&_input]:text-sm">
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     <Controller
@@ -214,7 +228,7 @@ export function CustomerDetailsSection({ countryId }: CustomerDetailsSectionProp
                                     disabled={isCustomerLocked || isSearchingEmail}
                                     aria-invalid={fieldState.invalid}
                                     className={cn(
-                                        motorInputClassName,
+                                        motorInputClass(isCustomerLocked),
                                         fieldState.invalid &&
                                             'border-red-500 focus-visible:ring-red-500'
                                     )}
@@ -244,12 +258,13 @@ export function CustomerDetailsSection({ countryId }: CustomerDetailsSectionProp
                             countryId={countryId}
                             label="Mobile Number"
                             disabled={isCustomerLocked || isSearchingPhone}
+                            autofilled={isCustomerLocked}
                             onBlur={() => void handlePhoneBlur()}
                         />
                     </div>
 
                     <ReuseableInput
-                        className={motorInputClassName}
+                        className={motorInputClass(isCustomerLocked)}
                         control={control}
                         name="full_name"
                         label="Full Name"
@@ -262,7 +277,7 @@ export function CustomerDetailsSection({ countryId }: CustomerDetailsSectionProp
                         control={control}
                         name="create_customer_account"
                         render={({ field }) => (
-                            <div className="mt-4 flex items-start gap-2.5 rounded-xl border border-[#ADABAB]/40 bg-white/80 p-3 sm:p-4">
+                            <div className="mt-4 flex items-start gap-2.5 rounded-xl border border-[#C20C0C]/25 bg-[#FFFBFB] p-3 sm:p-4">
                                 <Checkbox
                                     id="create-customer-account"
                                     checked={Boolean(field.value)}
@@ -273,9 +288,12 @@ export function CustomerDetailsSection({ countryId }: CustomerDetailsSectionProp
                                 />
                                 <label
                                     htmlFor="create-customer-account"
-                                    className="cursor-pointer text-sm leading-snug text-foreground"
+                                    className={motorCheckboxLabelClassName}
                                 >
-                                    Create account for this customer
+                                    <span className={motorCheckboxLabelAccentClassName}>
+                                        Create account
+                                    </span>{' '}
+                                    for this customer
                                 </label>
                             </div>
                         )}

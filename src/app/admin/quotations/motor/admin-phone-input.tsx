@@ -7,6 +7,7 @@ import { Loader2 } from 'lucide-react'
 import { useMemo } from 'react'
 import { Controller, type Control, type FieldValues, type Path } from 'react-hook-form'
 import { normalizeLocalPhoneDigits } from './customer-lookup-utils'
+import { motorAutofillHighlightClassName } from './motor-field-styles'
 
 export type CountryGeoMeta = {
     id?: number | string
@@ -26,6 +27,8 @@ type AdminPhoneInputProps<T extends FieldValues> = {
     label?: string
     required?: boolean
     disabled?: boolean
+    /** Visual state when values came from customer lookup. */
+    autofilled?: boolean
     className?: string
     onBlur?: () => void
 }
@@ -77,6 +80,7 @@ export function AdminPhoneInput<T extends FieldValues>({
     label = 'Mobile Number',
     required = false,
     disabled = false,
+    autofilled = false,
     className,
     onBlur,
 }: AdminPhoneInputProps<T>) {
@@ -114,11 +118,15 @@ export function AdminPhoneInput<T extends FieldValues>({
                         className={cn(
                             'flex h-10 w-full overflow-hidden rounded-[5px] border border-[#ADABAB] bg-white',
                             fieldState.invalid && 'border-red-500',
-                            (disabled || !countryId) && 'opacity-70'
+                            autofilled && motorAutofillHighlightClassName,
+                            !autofilled && (disabled || !countryId) && 'opacity-70'
                         )}
                     >
                         <span
-                            className="flex shrink-0 items-center border-r border-[#ADABAB] bg-neutral-50 px-3 text-xs font-medium text-muted-foreground"
+                            className={cn(
+                                'flex shrink-0 items-center border-r border-[#ADABAB] px-3 text-xs font-medium text-muted-foreground',
+                                autofilled ? 'bg-[#C20C0C]/[0.06]' : 'bg-neutral-50'
+                            )}
                             aria-hidden
                         >
                             {isLoading && countryId ? (
