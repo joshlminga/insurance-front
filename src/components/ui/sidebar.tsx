@@ -527,7 +527,6 @@ function SidebarMenuButton({
       children: tooltip,
     }
   }
-
   return (
     <Tooltip>
       <TooltipTrigger asChild>{button}</TooltipTrigger>
