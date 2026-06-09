@@ -14,7 +14,13 @@ import { extractErrorMessage } from "@/utils/helpers"
 import { ShowToast } from "@/utils/utils"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useEffect, useMemo, useState } from "react"
-import { Controller, useForm } from "react-hook-form"
+import { Controller, Resolver, useForm } from "react-hook-form"
+
+import {
+  appendProductsToFormData,
+  mapApiProductsToEditRows,
+} from "../organization-location-products"
+import { OrganizationLocationProductsField } from "./products-field"
 
 const getLocationId = (location: Record<string, any>) =>
   location?.organization_location_id ?? location?.organizationLocationId ?? location?.id
@@ -43,13 +49,20 @@ export const EditOrganizationLocationModal = ({
 
   const countryId = String(location?.country?.id ?? location?.country_id ?? "")
   const initials = String(location?.meta?.initials ?? location?.initials ?? "")
+  const productRows = useMemo(
+    () => mapApiProductsToEditRows(location?.products),
+    [location?.products]
+  )
 
   const form = useForm<OrganizationLocationEditFormValues>({
-    resolver: zodResolver(OrganizationLocationEditSchema),
+    resolver: zodResolver(
+      OrganizationLocationEditSchema
+    ) as Resolver<OrganizationLocationEditFormValues>,
     defaultValues: {
       initials,
       country_id: countryId,
       logo: undefined,
+      product: productRows,
     },
   })
 
@@ -58,9 +71,10 @@ export const EditOrganizationLocationModal = ({
       initials,
       country_id: countryId,
       logo: undefined,
+      product: productRows,
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initials, countryId])
+  }, [initials, countryId, productRows])
 
   const [removeLogo, setRemoveLogo] = useState(false)
 
@@ -104,6 +118,7 @@ export const EditOrganizationLocationModal = ({
       formData.append("logo", data.logo)
     }
 
+    appendProductsToFormData(formData, data.product ?? [], { includeStatus: true })
     updateMutation.mutate(formData)
   }
 
@@ -168,6 +183,12 @@ export const EditOrganizationLocationModal = ({
           label="Logo"
           disabled={removeLogo}
           className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+        />
+
+        <OrganizationLocationProductsField
+          control={form.control}
+          name="product"
+          showStatus
         />
 
         <CardFooter className="flex flex-col sm:flex-row justify-between gap-3 mt-2 px-0">

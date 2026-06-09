@@ -150,6 +150,15 @@ export const IDTYPES = [
   { label: "Millitary ID", value: "MillitaryID" },
 ]
 
+export const PRODUCT_TYPES = [
+  { label: "Motor", value: "Motor" },
+  { label: "Medical", value: "Medical" },
+  { label: "Travel", value: "Travel" },
+  { label: "Life", value: "Life" },
+  { label: "Home", value: "Home" },
+  { label: "Marine", value: "Marine" },
+]
+
 export const RatesSteps = [
     { title: 'Product', fields: ['coverfor_id', 'covertype_id', 'covering_id', 'usedfor_id', 'bodytype_id', 'used_tonnage_id'] },
     { title: 'Vehicle Info', fields: ['valued_from', 'valued_to', 'age_from', 'age_to', 'rate', 'minimum', 'pll'] },

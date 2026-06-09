@@ -51,6 +51,32 @@ export const OrganizationLocationColumns: ColumnDef<any>[] = [
     },
   },
   {
+    id: "products",
+    header: () => <div>Products</div>,
+    cell: ({ row }) => {
+      const products = Array.isArray(row.original?.products)
+        ? row.original.products
+        : []
+
+      if (!products.length) {
+        return <div>-</div>
+      }
+
+      return (
+        <div className="flex flex-wrap gap-1">
+          {products.map((item: any, index: number) => (
+            <Badge
+              key={`${item?.product ?? "product"}-${index}`}
+              className="rounded-lg bg-slate-100 font-semibold text-slate-800"
+            >
+              {item?.product ?? "N/A"}
+            </Badge>
+          ))}
+        </div>
+      )
+    },
+  },
+  {
     id: "default",
     header: () => <div>Default</div>,
     cell: ({ row }) => {

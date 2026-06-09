@@ -427,52 +427,118 @@ export const EditLocationSchema = z.object({
     ),
 })
 
-export const OrganizationLocationCreateSchema = z.object({
-  organization_id: z
-    .union([z.string(), z.number()])
-    .refine((value) => String(value).trim().length > 0, "Organization is required"),
-  initials: z
-    .string()
-    .optional()
-    .or(z.literal(""))
-    .refine((value) => String(value ?? "").length === 0 || String(value).length >= 2, {
-      message: "Initials must be at least 2 characters",
-    })
-    .refine((value) => String(value ?? "").length === 0 || String(value).length <= 10, {
-      message: "Initials cannot exceed 10 characters",
-    }),
-  country_id: z.string().min(1, "Country is required"),
-  logo: z
-    .any()
-    .optional()
-    .refine((file) => !file || file instanceof File, "Logo must be a valid file")
-    .refine(
-      (file) => !file || ACCEPTED_IMAGE_TYPES.includes(file.type),
-      "Logo must be jpeg, png, jpg, or webp"
-    ),
+const ORGANIZATION_LOCATION_PRODUCT_TYPES = [
+  "Motor",
+  "Medical",
+  "Travel",
+  "Life",
+  "Home",
+  "Marine",
+] as const
+
+const refineUniqueOrganizationLocationProducts = (
+  rows: Array<{ product: string }>,
+  ctx: z.RefinementCtx,
+  pathPrefix: (string | number)[] = ["product"]
+) => {
+  const seen = new Set<string>()
+  rows.forEach((row, index) => {
+    const value = String(row.product ?? "").trim()
+    if (!value) return
+
+    if (
+      !ORGANIZATION_LOCATION_PRODUCT_TYPES.includes(
+        value as (typeof ORGANIZATION_LOCATION_PRODUCT_TYPES)[number]
+      )
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Invalid product type",
+        path: [...pathPrefix, index, "product"],
+      })
+      return
+    }
+
+    if (seen.has(value)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "This product type is already selected",
+        path: [...pathPrefix, index, "product"],
+      })
+      return
+    }
+
+    seen.add(value)
+  })
+}
+
+const OrganizationLocationProductCreateRowSchema = z.object({
+  product: z.string(),
+  access_public: z.boolean(),
 })
 
-export const OrganizationLocationEditSchema = z.object({
-  initials: z
-    .string()
-    .optional()
-    .or(z.literal(""))
-    .refine((value) => String(value ?? "").length === 0 || String(value).length >= 2, {
-      message: "Initials must be at least 2 characters",
-    })
-    .refine((value) => String(value ?? "").length === 0 || String(value).length <= 10, {
-      message: "Initials cannot exceed 10 characters",
-    }),
-  country_id: z.string().min(1, "Country is required"),
-  logo: z
-    .any()
-    .optional()
-    .refine((file) => !file || file instanceof File, "Logo must be a valid file")
-    .refine(
-      (file) => !file || ACCEPTED_IMAGE_TYPES.includes(file.type),
-      "Logo must be jpeg, png, jpg, or webp"
-    ),
+const OrganizationLocationProductEditRowSchema = z.object({
+  product: z.string(),
+  access_public: z.boolean(),
+  product_status: z.boolean(),
 })
+
+export const OrganizationLocationCreateSchema = z
+  .object({
+    organization_id: z
+      .union([z.string(), z.number()])
+      .refine((value) => String(value).trim().length > 0, "Organization is required"),
+    initials: z
+      .string()
+      .optional()
+      .or(z.literal(""))
+      .refine((value) => String(value ?? "").length === 0 || String(value).length >= 2, {
+        message: "Initials must be at least 2 characters",
+      })
+      .refine((value) => String(value ?? "").length === 0 || String(value).length <= 10, {
+        message: "Initials cannot exceed 10 characters",
+      }),
+    country_id: z.string().min(1, "Country is required"),
+    logo: z
+      .any()
+      .optional()
+      .refine((file) => !file || file instanceof File, "Logo must be a valid file")
+      .refine(
+        (file) => !file || ACCEPTED_IMAGE_TYPES.includes(file.type),
+        "Logo must be jpeg, png, jpg, or webp"
+      ),
+    product: z.array(OrganizationLocationProductCreateRowSchema),
+  })
+  .superRefine((data, ctx) => {
+    refineUniqueOrganizationLocationProducts(data.product, ctx)
+  })
+
+export const OrganizationLocationEditSchema = z
+  .object({
+    initials: z
+      .string()
+      .optional()
+      .or(z.literal(""))
+      .refine((value) => String(value ?? "").length === 0 || String(value).length >= 2, {
+        message: "Initials must be at least 2 characters",
+      })
+      .refine((value) => String(value ?? "").length === 0 || String(value).length <= 10, {
+        message: "Initials cannot exceed 10 characters",
+      }),
+    country_id: z.string().min(1, "Country is required"),
+    logo: z
+      .any()
+      .optional()
+      .refine((file) => !file || file instanceof File, "Logo must be a valid file")
+      .refine(
+        (file) => !file || ACCEPTED_IMAGE_TYPES.includes(file.type),
+        "Logo must be jpeg, png, jpg, or webp"
+      ),
+    product: z.array(OrganizationLocationProductEditRowSchema),
+  })
+  .superRefine((data, ctx) => {
+    refineUniqueOrganizationLocationProducts(data.product, ctx)
+  })
 
 const ACCEPTED_BROCHURE_MIME_TYPES = [
   "application/pdf",

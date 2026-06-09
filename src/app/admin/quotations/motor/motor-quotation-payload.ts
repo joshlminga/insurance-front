@@ -16,24 +16,25 @@ export function mapFullNameToApiNames(fullName: string): {
     }
 }
 
+/** Keys ordered to match auto/quotation/motor Swagger contract. */
 export type MotorQuotationApiPayload = {
+    user_id: string | number | null
     country_id: string | null
-    valued_by_professional: boolean
-    vehicle_registration_number: string
-    covertype_id: string
-    covering_id: string
-    ownership: string
-    vehicle_value: string
-    vehicle_class_id: string
-    used_for_id: string
-    organization_id: string | null
-    agent_id: string
-    user_id?: string | number
     first_name?: string
     last_name?: string
     email?: string
     phone?: string
     is_guest?: boolean
+    vehicle_class_id: string
+    covertype_id: string
+    covering_id: string
+    ownership: string
+    vehicle_registration_number: string
+    vehicle_value: string
+    used_for_id: string
+    valued_by_professional: boolean
+    organization_id: string | null
+    agency_id: string
 }
 
 function resolveValuedByProfessional(data: AdminMotorQuotationFormValues): boolean {
@@ -49,6 +50,35 @@ type BuildMotorQuotationPayloadInput = {
     dialCode: string
 }
 
+function buildSharedVehicleAndOfficeFields(
+    data: AdminMotorQuotationFormValues
+): Pick<
+    MotorQuotationApiPayload,
+    | 'vehicle_class_id'
+    | 'covertype_id'
+    | 'covering_id'
+    | 'ownership'
+    | 'vehicle_registration_number'
+    | 'vehicle_value'
+    | 'used_for_id'
+    | 'valued_by_professional'
+    | 'organization_id'
+    | 'agency_id'
+> {
+    return {
+        vehicle_class_id: data.vehicle_class_id,
+        covertype_id: data.covertype_id,
+        covering_id: data.covering_id,
+        ownership: data.ownership,
+        vehicle_registration_number: data.vehicle_registration_number ?? '',
+        vehicle_value: data.vehicle_value ?? '',
+        used_for_id: data.used_for_id,
+        valued_by_professional: resolveValuedByProfessional(data),
+        organization_id: data.organization_id?.trim() || null,
+        agency_id: data.agency_id,
+    }
+}
+
 export function buildMotorQuotationPayload({
     data,
     profileCountryId,
@@ -60,23 +90,24 @@ export function buildMotorQuotationPayload({
             ? String(profileCountryId)
             : null)
 
-    const base: MotorQuotationApiPayload = {
-        country_id,
-        valued_by_professional: resolveValuedByProfessional(data),
-        vehicle_registration_number: data.vehicle_registration_number ?? '',
-        covertype_id: data.covertype_id,
-        covering_id: data.covering_id,
-        ownership: data.ownership,
-        vehicle_value: data.vehicle_value ?? '',
-        vehicle_class_id: data.vehicle_class_id,
-        used_for_id: data.used_for_id,
-        organization_id: data.organization_id?.trim() || null,
-        agent_id: data.agency_id,
-    }
-
+    const vehicleAndOffice = buildSharedVehicleAndOfficeFields(data)
     const hasExistingCustomer = Boolean(String(data.user_id ?? '').trim())
+
     if (hasExistingCustomer) {
-        return { ...base, user_id: data.user_id }
+        return {
+            user_id: data.user_id,
+            country_id,
+            vehicle_class_id: vehicleAndOffice.vehicle_class_id,
+            covertype_id: vehicleAndOffice.covertype_id,
+            covering_id: vehicleAndOffice.covering_id,
+            ownership: vehicleAndOffice.ownership,
+            vehicle_registration_number: vehicleAndOffice.vehicle_registration_number,
+            vehicle_value: vehicleAndOffice.vehicle_value,
+            used_for_id: vehicleAndOffice.used_for_id,
+            valued_by_professional: vehicleAndOffice.valued_by_professional,
+            organization_id: vehicleAndOffice.organization_id,
+            agency_id: vehicleAndOffice.agency_id,
+        }
     }
 
     const { first_name, last_name } = mapFullNameToApiNames(data.full_name)
@@ -86,11 +117,22 @@ export function buildMotorQuotationPayload({
         : localPhone
 
     return {
-        ...base,
+        user_id: null,
+        country_id,
         first_name,
         ...(last_name ? { last_name } : {}),
         email: String(data.email ?? '').trim(),
         phone,
         is_guest: !data.create_customer_account,
+        vehicle_class_id: vehicleAndOffice.vehicle_class_id,
+        covertype_id: vehicleAndOffice.covertype_id,
+        covering_id: vehicleAndOffice.covering_id,
+        ownership: vehicleAndOffice.ownership,
+        vehicle_registration_number: vehicleAndOffice.vehicle_registration_number,
+        vehicle_value: vehicleAndOffice.vehicle_value,
+        used_for_id: vehicleAndOffice.used_for_id,
+        valued_by_professional: vehicleAndOffice.valued_by_professional,
+        organization_id: vehicleAndOffice.organization_id,
+        agency_id: vehicleAndOffice.agency_id,
     }
 }
