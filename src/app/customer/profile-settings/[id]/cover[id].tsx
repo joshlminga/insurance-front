@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Badge } from '@/components/ui/badge'
 import {
     Table,
@@ -9,19 +8,25 @@ import {
     TableRow,
 } from '@/components/ui/table'
 import { Button } from '@/dev/core'
-import { COVER_STATUS_DISPLAY } from '@/dev/columns/customer/motor/my-covers'
 import { UseApiQuery } from '@/hooks/hooks'
-import type { MotorUserCoverDetail, MotorUserCoverInvoice, SubmitResponse } from '@/types/types'
+import type {
+    MotorUserCoverDetail,
+    MotorUserCoverInvoice,
+    SubmitResponse,
+    TFilterOptions,
+    TPaginationFilters
+} from '@/types/types'
 import { EPREFIX, EROUTES } from '@/utils/enums'
-import { formatCurrency, formatDate } from '@/utils/helpers'
+import { formatCurrency, formatDate, installmentText } from '@/utils/helpers'
 import {
     useMotorDocumentDownload,
 } from '@/utils/motor-document-download'
 import { ShowToast } from '@/utils/utils'
 import { ArrowLeft, FileText, ReceiptText, Shield } from 'lucide-react'
-import type { ReactNode } from 'react'
+import { useReducer, type ReactNode } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { cn } from '@/lib/utils'
+import { COVER_STATUS_DISPLAY, FILTEROPTIONS, ReusableReducer } from '@/utils/constatnts'
 
 const coversListPath = `/${EPREFIX.CUSTOMER}${EROUTES.COVERS}`
 
@@ -47,7 +52,7 @@ const CompactInfoGrid = ({
                 className="min-w-0 text-sm text-[#111111]"
             >
                 <span className="font-medium text-[#C20C0C]">{label}:</span>{' '}
-                <span className="break-words text-foreground">
+                <span className="wrap-break-word text-foreground">
                     {value !== undefined && value !== null && value !== ''
                         ? value
                         : '-'}
@@ -66,8 +71,6 @@ const blackDocButtonClass =
 const redDocButtonClass =
     'rounded-full bg-[#C20C0C]/90 text-white text-xs hover:bg-[#C20C0C] border-0'
 
-const installmentText = (invoice: MotorUserCoverInvoice) =>
-    `Installment ${invoice.installment_number} of ${invoice.total_installments}`
 
 /** Receipt exists only after payment is completed. */
 const isInvoicePaid = (invoice: MotorUserCoverInvoice) => {
@@ -164,17 +167,12 @@ const InvoiceDownloadActions = ({ invoice }: InvoiceDownloadActionsProps) => {
     )
 }
 
-const SectionCard = ({
-    title,
-    titleAccent,
-    children,
-}: {
+const SectionCard = ({ title, titleAccent, children, }: {
     title: string
-    /** Word highlighted in brand red (like KYC "Info") */
     titleAccent?: string
     children: ReactNode
 }) => (
-    <div className="rounded-2xl border border-[#ADABAB]/35 bg-white/95 p-3 shadow-sm sm:p-5">
+    <div className="rounded-2xl border border-[#ADABAB]/35 bg-white/95 p-3 shadow-none sm:p-5">
         <div className="flex flex-col gap-0.5 pb-3">
             <h3 className="text-base font-semibold sm:text-lg text-[#111111]">
                 {titleAccent ? (
@@ -193,20 +191,82 @@ const SectionCard = ({
 
 export const SingleCoverPage = () => {
     const { id } = useParams<{ id: string }>()
-
+    const [filter] = useReducer(
+        ReusableReducer<TPaginationFilters & TFilterOptions>,
+        { ...FILTEROPTIONS, page: 1, pageSize: 15 }
+    );
+    // const optionsDispatcherDebounce = useDebounce({
+    //     debounceCallback: optionsDispatcher,
+    // });
     const { data, isLoading, isError } = UseApiQuery<SubmitResponse>({
         url: `reports/motor/user/covers/${id}`,
+        params: {
+            page: filter?.page,
+            pageSize: filter.pageSize,
+            term: filter.term,
+        },
         queryOptions: {
-            enabled: Boolean(id),
-            retry: 1,
+            enabled: !!id,
+            retry: 3,
         },
     })
-
     const cover = data?.data as MotorUserCoverDetail | undefined
     const vehicle = cover?.vehicle
     const coverDates = cover?.cover_dates
     const benefits = cover?.benefits ?? []
     const invoices = cover?.invoices ?? []
+
+    //  const invoiceId = invoice?.id ? String(invoice.id) : ''
+    // const invoiceMutation = useMotorDocumentDownload(
+    //     (id) => `document/motor/invoice/${id}`,
+    //     'Invoice'
+    // )
+    // const receiptMutation = useMotorDocumentDownload(
+    //     (id) => `document/motor/receipt/${id}`,
+    //     'Receipt'
+    // )
+    // const certificateMutation = useMotorDocumentDownload(
+    //     (id) => `dmvic/motor/certificates/${id}`,
+    //     'Certificate'
+    // )
+
+    // const download = (
+    //     mutation: ReturnType<typeof useMotorDocumentDownload>,
+    //     label: string
+    // ) => {
+    //     if (!invoiceId) {
+    //         ShowToast.error(`No invoice found for ${label}.`)
+    //         return
+    //     }
+    //     mutation.mutate(invoiceId)
+    // }
+
+    // const ActionsHandlerMapping: SingleActionsHandler<any>[] = [
+    //     {
+    //         label: "View Invoice",
+    //         onSelect: (data) => {
+    //             invoiceMutation(data)
+    //         },
+    //     },
+    //     {
+    //         label: "View Receipt",
+    //         onSelect: (data) => {
+    //             // handleDialogContextSwitch({
+    //             //   componentProps: { data: rowData, refetch },
+    //             //   Component: ViewOrganizationLocationModal,
+    //             // })
+    //         },
+    //     },
+    //     {
+    //         label: "View Certificate",
+    //         onSelect: (data) => {
+    //             // handleDialogContextSwitch({
+    //             //   componentProps: { data: rowData, refetch },
+    //             //   Component: ViewOrganizationLocationModal,
+    //             // })
+    //         },
+    //     },
+    // ];
 
     if (!id) {
         return (
@@ -225,7 +285,7 @@ export const SingleCoverPage = () => {
 
     return (
         <section className="w-full mx-auto bg-transparent">
-            <div className="rounded-2xl border border-[#ADABAB]/50 bg-linear-to-b from-white to-neutral-50/90 p-4 shadow-sm sm:p-6">
+            <div className="rounded-xl border border-[#EAEAEA] bg-white p-5 sm:p-8">
                 <div className="mb-5 w-full pb-2">
                     <Link
                         to={coversListPath}
@@ -255,8 +315,6 @@ export const SingleCoverPage = () => {
                         <SectionCard title="Policy &" titleAccent="Parties">
                             <CompactInfoGrid
                                 items={[
-                                    { label: 'Purchase ID', value: cover.purchase_id },
-                                    { label: 'Quote Code', value: cover.quote_code },
                                     { label: 'Product', value: cover.product },
                                     { label: 'Cover Type', value: cover.cover_type },
                                     { label: 'Covering', value: cover.covering },
@@ -315,17 +373,17 @@ export const SingleCoverPage = () => {
                                     {
                                         label: 'Total Premium',
                                         value: money(
-                                            cover.total_premium,
+                                            cover?.total_premium,
                                             cover.currency
                                         ),
                                     },
                                     {
                                         label: 'Issued Date',
-                                        value: formatDate(coverDates?.issued_date),
+                                        value: formatDate(coverDates?.issued_date ?? ''),
                                     },
                                     {
                                         label: 'Expiry Date',
-                                        value: formatDate(coverDates?.expiry_date),
+                                        value: formatDate(coverDates?.expiry_date ?? ''),
                                     },
                                 ]}
                             />
@@ -336,8 +394,8 @@ export const SingleCoverPage = () => {
                                     </p>
                                     <CompactInfoGrid
                                         items={benefits.map((benefit) => ({
-                                            label: benefit.name,
-                                            value: formatCurrency(benefit.premium),
+                                            label: benefit?.name,
+                                            value: formatCurrency(benefit?.premium ?? ''),
                                         }))}
                                     />
                                 </div>
@@ -345,6 +403,44 @@ export const SingleCoverPage = () => {
                         </SectionCard>
 
                         <SectionCard title="Invoices">
+                            {/* <CustomBaseTable
+                                {...{
+                                    onPageChange: (page) =>
+                                        optionsDispatcher({
+                                            payload: { page },
+                                            type: 'page',
+                                        }),
+                                    OtherToolsProps: {
+                                        onChange: (data: any) =>
+                                            optionsDispatcherDebounce({
+                                                payload: { term: data },
+                                                type: 'term',
+                                            }),
+                                        placeholder: 'Search',
+                                        includeFilter: true,
+                                    },
+                                    columns: MyInvoiceColumns,
+                                    // columns: [
+                                    //     ...MyInvoiceColumns,
+                                    //     ActionColumn({
+                                    //         ActionsHandlerMapping,
+                                    //         layout: 'horizontal'
+                                    //     }),
+                                    // ],
+                                    data: invoices ?? [],
+                                    pageCount: 1,
+                                    title: '',
+                                    showPagination: false,
+                                    setPageSize: (pageSize) =>
+                                        optionsDispatcher({
+                                            payload: { pageSize },
+                                            type: 'pageSize',
+                                        }),
+                                    pageSize: data?.pagination?.per_page ?? 10,
+                                    page: data?.pagination?.current_page ?? 1,
+                                    isLoading: isLoading,
+                                }}
+                            /> */}
                             {invoices.length === 0 ? (
                                 <p className="text-sm text-[#71717A]">
                                     No invoices for this cover.
@@ -387,8 +483,7 @@ export const SingleCoverPage = () => {
                                                                 invoice.is_overdue
                                                                     ? 'border-red-200 bg-red-50 text-red-800'
                                                                     : 'border-green-200 bg-green-50 text-green-800'
-                                                            }
-                                                        >
+                                                            }>
                                                             {invoice.is_overdue
                                                                 ? 'Yes'
                                                                 : 'No'}
@@ -412,6 +507,7 @@ export const SingleCoverPage = () => {
                                     </Table>
                                 </div>
                             )}
+
                         </SectionCard>
                     </div>
                 )}
