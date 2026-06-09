@@ -6,6 +6,14 @@ import { ColumnDef } from "@tanstack/table-core";
 
 
 export const MyCoversColumns: ColumnDef<any>[] = [
+     {
+        accessorKey: "cover_type",
+        header: () => <div>Class</div>,
+        cell: ({ row }) => {
+            const cover_type: string = row.getValue("cover_type");
+            return <div>{cover_type}</div>;
+        },
+    },
     {
         accessorKey: "cover_type",
         header: () => <div>Cover Type</div>,
