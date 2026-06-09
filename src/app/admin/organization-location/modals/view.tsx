@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { isOrganizationLocationProductActive } from "@/app/admin/organization-location/organization-location-query"
 import { DetailGrid, DetailItem } from "@/components/shared"
 import { Badge } from "@/components/ui/badge"
 import { UseApiQuery } from "@/hooks/hooks"
+import { cn } from "@/lib/utils"
 import { SubmitResponse } from "@/types/types"
 
 const getLocationId = (location: Record<string, any>) =>
@@ -122,11 +124,17 @@ export const ViewOrganizationLocationModal = ({
                   </thead>
                   <tbody>
                     {products.map((item: any, index: number) => {
-                      const productIsActive = Boolean(item?.is_active)
+                      const productIsActive = isOrganizationLocationProductActive(item)
                       const isPublic = Boolean(item?.access_public)
 
                       return (
-                        <tr key={`${item?.product ?? "product"}-${index}`} className="border-b last:border-b-0">
+                        <tr
+                          key={`${item?.product ?? "product"}-${index}`}
+                          className={cn(
+                            "border-b last:border-b-0",
+                            !productIsActive && "border-l-4 border-l-red-500"
+                          )}
+                        >
                           <td className="px-3 py-2">{item?.product ?? "N/A"}</td>
                           <td className="px-3 py-2">
                             <Badge

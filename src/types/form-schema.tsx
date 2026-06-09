@@ -1,5 +1,9 @@
 // form-schema.ts
-import { ACCEPTED_FILE_TYPES, ACCEPTED_IMAGE_TYPES } from "@/utils/constatnts"
+import {
+  ACCEPTED_FILE_TYPES,
+  ACCEPTED_IMAGE_TYPES,
+  PRODUCT_TYPE_VALUES,
+} from "@/utils/constatnts"
 import { z } from "zod"
 
 export const CustomerDetailsSchema = z.object({
@@ -427,15 +431,6 @@ export const EditLocationSchema = z.object({
     ),
 })
 
-const ORGANIZATION_LOCATION_PRODUCT_TYPES = [
-  "Motor",
-  "Medical",
-  "Travel",
-  "Life",
-  "Home",
-  "Marine",
-] as const
-
 const refineUniqueOrganizationLocationProducts = (
   rows: Array<{ product: string }>,
   ctx: z.RefinementCtx,
@@ -447,8 +442,8 @@ const refineUniqueOrganizationLocationProducts = (
     if (!value) return
 
     if (
-      !ORGANIZATION_LOCATION_PRODUCT_TYPES.includes(
-        value as (typeof ORGANIZATION_LOCATION_PRODUCT_TYPES)[number]
+      !PRODUCT_TYPE_VALUES.includes(
+        value as (typeof PRODUCT_TYPE_VALUES)[number]
       )
     ) {
       ctx.addIssue({

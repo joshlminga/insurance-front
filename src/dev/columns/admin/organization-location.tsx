@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { isOrganizationLocationProductActive } from "@/app/admin/organization-location/organization-location-query"
 import { Badge } from "@/components/ui/badge"
+import { cn } from "@/lib/utils"
 import { ColumnDef } from "@tanstack/table-core"
 
 const getIsDefaultFromRow = (rowData: any) => {
@@ -64,14 +66,23 @@ export const OrganizationLocationColumns: ColumnDef<any>[] = [
 
       return (
         <div className="flex flex-wrap gap-1">
-          {products.map((item: any, index: number) => (
-            <Badge
-              key={`${item?.product ?? "product"}-${index}`}
-              className="rounded-lg bg-slate-100 font-semibold text-slate-800"
-            >
-              {item?.product ?? "N/A"}
-            </Badge>
-          ))}
+          {products.map((item: any, index: number) => {
+            const isActive = isOrganizationLocationProductActive(item)
+
+            return (
+              <Badge
+                key={`${item?.product ?? "product"}-${index}`}
+                className={cn(
+                  "rounded-lg border font-semibold",
+                  isActive
+                    ? "border-transparent bg-slate-100 text-slate-800"
+                    : "border-red-500 bg-red-50 text-red-800"
+                )}
+              >
+                {item?.product ?? "N/A"}
+              </Badge>
+            )
+          })}
         </div>
       )
     },

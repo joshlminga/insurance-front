@@ -157,7 +157,10 @@ export const PRODUCT_TYPES = [
   { label: "Life", value: "Life" },
   { label: "Home", value: "Home" },
   { label: "Marine", value: "Marine" },
-]
+] as const
+
+/** API payload uses PRODUCT_TYPES `value` (e.g. "Motor"), not the display label. */
+export const PRODUCT_TYPE_VALUES = PRODUCT_TYPES.map((item) => item.value)
 
 export const RatesSteps = [
     { title: 'Product', fields: ['coverfor_id', 'covertype_id', 'covering_id', 'usedfor_id', 'bodytype_id', 'used_tonnage_id'] },
