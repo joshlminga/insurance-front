@@ -33,8 +33,9 @@ export type MotorQuotationApiPayload = {
     vehicle_value: string
     used_for_id: string
     valued_by_professional: boolean
-    organization_id: string | null
-    agency_id: string
+    processed_by_organization_id: string
+    agency_id: string | null
+    referral_id: string | null
 }
 
 function resolveValuedByProfessional(data: AdminMotorQuotationFormValues): boolean {
@@ -62,8 +63,9 @@ function buildSharedVehicleAndOfficeFields(
     | 'vehicle_value'
     | 'used_for_id'
     | 'valued_by_professional'
-    | 'organization_id'
+    | 'processed_by_organization_id'
     | 'agency_id'
+    | 'referral_id'
 > {
     return {
         vehicle_class_id: data.vehicle_class_id,
@@ -74,8 +76,9 @@ function buildSharedVehicleAndOfficeFields(
         vehicle_value: data.vehicle_value ?? '',
         used_for_id: data.used_for_id,
         valued_by_professional: resolveValuedByProfessional(data),
-        organization_id: data.organization_id?.trim() || null,
-        agency_id: data.agency_id,
+        processed_by_organization_id: data.processed_by_organization_id,
+        agency_id: data.agency_id?.trim() || null,
+        referral_id: data.referral_id?.trim() || null,
     }
 }
 
@@ -105,8 +108,9 @@ export function buildMotorQuotationPayload({
             vehicle_value: vehicleAndOffice.vehicle_value,
             used_for_id: vehicleAndOffice.used_for_id,
             valued_by_professional: vehicleAndOffice.valued_by_professional,
-            organization_id: vehicleAndOffice.organization_id,
+            processed_by_organization_id: vehicleAndOffice.processed_by_organization_id,
             agency_id: vehicleAndOffice.agency_id,
+            referral_id: vehicleAndOffice.referral_id,
         }
     }
 
@@ -132,7 +136,8 @@ export function buildMotorQuotationPayload({
         vehicle_value: vehicleAndOffice.vehicle_value,
         used_for_id: vehicleAndOffice.used_for_id,
         valued_by_professional: vehicleAndOffice.valued_by_professional,
-        organization_id: vehicleAndOffice.organization_id,
+        processed_by_organization_id: vehicleAndOffice.processed_by_organization_id,
         agency_id: vehicleAndOffice.agency_id,
+        referral_id: vehicleAndOffice.referral_id,
     }
 }

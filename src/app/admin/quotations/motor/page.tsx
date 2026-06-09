@@ -271,9 +271,9 @@ export const MotorQuotationPage = () => {
             phone: '',
             user_id: '',
             country_id: '',
-            organization_id: '',
+            processed_by_organization_id: '',
             agency_id: '',
-            referral_code: '',
+            referral_id: '',
             covertype_id: '',
             covering_id: '',
             ownership: '',
@@ -328,7 +328,7 @@ export const MotorQuotationPage = () => {
 
     const handleCountryChange = (value: string) => {
         form.setValue('country_id', value, { shouldValidate: true, shouldDirty: true })
-        form.setValue('organization_id', '', { shouldValidate: true })
+        form.setValue('processed_by_organization_id', '', { shouldValidate: true })
         form.setValue('agency_id', '', { shouldValidate: true })
         form.setValue('phone', '', { shouldValidate: true })
     }
@@ -418,7 +418,7 @@ export const MotorQuotationPage = () => {
 
                                 <Controller
                                     control={form.control}
-                                    name="agency_id"
+                                    name="processed_by_organization_id"
                                     render={({ field }) => (
                                         <OrganizationLocationInput
                                             variant="agency"
@@ -434,7 +434,7 @@ export const MotorQuotationPage = () => {
 
                                 <Controller
                                     control={form.control}
-                                    name="organization_id"
+                                    name="agency_id"
                                     render={({ field }) => (
                                         <OrganizationLocationInput
                                             variant="onBehalf"
@@ -452,7 +452,7 @@ export const MotorQuotationPage = () => {
                                 <ReuseableInput
                                     className={motorInputClassName}
                                     control={form.control}
-                                    name="referral_code"
+                                    name="referral_id"
                                     label="Referral Code"
                                     type="text"
                                     placeholder="Optional"
