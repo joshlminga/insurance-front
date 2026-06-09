@@ -172,7 +172,7 @@ const SectionCard = ({ title, titleAccent, children, }: {
     titleAccent?: string
     children: ReactNode
 }) => (
-    <div className="rounded-2xl border border-[#ADABAB]/35 bg-white/95 p-3 shadow-sm sm:p-5">
+    <div className="rounded-2xl border border-[#ADABAB]/35 bg-white/95 p-3 shadow-none sm:p-5">
         <div className="flex flex-col gap-0.5 pb-3">
             <h3 className="text-base font-semibold sm:text-lg text-[#111111]">
                 {titleAccent ? (
@@ -285,7 +285,7 @@ export const SingleCoverPage = () => {
 
     return (
         <section className="w-full mx-auto bg-transparent">
-            <div className="rounded-2xl border border-[#ADABAB]/50 bg-linear-to-b from-white to-neutral-50/90 p-4 shadow-sm sm:p-6">
+            <div className="rounded-xl border border-[#EAEAEA] bg-white p-5 sm:p-8">
                 <div className="mb-5 w-full pb-2">
                     <Link
                         to={coversListPath}
