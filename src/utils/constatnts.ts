@@ -232,3 +232,26 @@ export const NAV_ITEMS: NavItem[] = [
 export const LANG_NAMES: Record<string, string> = {
   eng: 'English', swa: 'Swahili', fra: 'French', kin: 'Kinyarwanda', tsn: 'Tswana',
 }
+
+export const COVER_STATUS_DISPLAY: Record<string, any> = {
+    waiting_payment: {
+        label: "Payment Pending",
+        className:
+            "border border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-50",
+    },
+    pending: {
+        label: "AKI Pending Issuing",
+        className:
+            "border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-50",
+    },
+    issued: {
+        label: "Issued",
+        className:
+            "border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-50",
+    },
+    failed: {
+        label: "Failed",
+        className:
+            "border border-red-200 bg-red-50 text-red-700 hover:bg-red-50",
+    },
+};

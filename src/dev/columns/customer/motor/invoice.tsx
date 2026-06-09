@@ -1,9 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { Badge } from "@/components/ui/badge";
-import { COVER_STATUS_DISPLAY } from "@/utils/constatnts";
-import { formatCurrency } from "@/utils/helpers";
-import { ColumnDef } from "@tanstack/table-core";
-
 
 export const MyCoversColumns: ColumnDef<any>[] = [
     {
