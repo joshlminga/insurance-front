@@ -1,4 +1,3 @@
-
 import { Badge } from '@/components/ui/badge'
 import {
     Table,
@@ -10,15 +9,15 @@ import {
 } from '@/components/ui/table'
 import { Button } from '@/dev/core'
 import { UseApiQuery } from '@/hooks/hooks'
-import type { 
-    MotorUserCoverDetail, 
-    MotorUserCoverInvoice, 
-    SubmitResponse, 
-    TFilterOptions, 
+import type {
+    MotorUserCoverDetail,
+    MotorUserCoverInvoice,
+    SubmitResponse,
+    TFilterOptions,
     TPaginationFilters
 } from '@/types/types'
 import { EPREFIX, EROUTES } from '@/utils/enums'
-import { formatCurrency, formatDate } from '@/utils/helpers'
+import { formatCurrency, formatDate, installmentText } from '@/utils/helpers'
 import {
     useMotorDocumentDownload,
 } from '@/utils/motor-document-download'
@@ -28,8 +27,6 @@ import { useReducer, type ReactNode } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { COVER_STATUS_DISPLAY, FILTEROPTIONS, ReusableReducer } from '@/utils/constatnts'
-import { CustomBaseTable } from '@/dev/table'
-import { useDebounce } from '@/hooks'
 
 const coversListPath = `/${EPREFIX.CUSTOMER}${EROUTES.COVERS}`
 
@@ -74,8 +71,6 @@ const blackDocButtonClass =
 const redDocButtonClass =
     'rounded-full bg-[#C20C0C]/90 text-white text-xs hover:bg-[#C20C0C] border-0'
 
-const installmentText = (invoice: MotorUserCoverInvoice) =>
-    `Installment ${invoice.installment_number} of ${invoice.total_installments}`
 
 /** Receipt exists only after payment is completed. */
 const isInvoicePaid = (invoice: MotorUserCoverInvoice) => {
@@ -172,13 +167,8 @@ const InvoiceDownloadActions = ({ invoice }: InvoiceDownloadActionsProps) => {
     )
 }
 
-const SectionCard = ({
-    title,
-    titleAccent,
-    children,
-}: {
+const SectionCard = ({ title, titleAccent, children, }: {
     title: string
-    /** Word highlighted in brand red (like KYC "Info") */
     titleAccent?: string
     children: ReactNode
 }) => (
@@ -201,14 +191,13 @@ const SectionCard = ({
 
 export const SingleCoverPage = () => {
     const { id } = useParams<{ id: string }>()
- const [filter, optionsDispatcher] = useReducer(
+    const [filter] = useReducer(
         ReusableReducer<TPaginationFilters & TFilterOptions>,
         { ...FILTEROPTIONS, page: 1, pageSize: 15 }
     );
-    const optionsDispatcherDebounce = useDebounce({
-        debounceCallback: optionsDispatcher,
-    });
-
+    // const optionsDispatcherDebounce = useDebounce({
+    //     debounceCallback: optionsDispatcher,
+    // });
     const { data, isLoading, isError } = UseApiQuery<SubmitResponse>({
         url: `reports/motor/user/covers/${id}`,
         params: {
@@ -221,12 +210,63 @@ export const SingleCoverPage = () => {
             retry: 3,
         },
     })
-
     const cover = data?.data as MotorUserCoverDetail | undefined
     const vehicle = cover?.vehicle
     const coverDates = cover?.cover_dates
     const benefits = cover?.benefits ?? []
     const invoices = cover?.invoices ?? []
+
+    //  const invoiceId = invoice?.id ? String(invoice.id) : ''
+    // const invoiceMutation = useMotorDocumentDownload(
+    //     (id) => `document/motor/invoice/${id}`,
+    //     'Invoice'
+    // )
+    // const receiptMutation = useMotorDocumentDownload(
+    //     (id) => `document/motor/receipt/${id}`,
+    //     'Receipt'
+    // )
+    // const certificateMutation = useMotorDocumentDownload(
+    //     (id) => `dmvic/motor/certificates/${id}`,
+    //     'Certificate'
+    // )
+
+    // const download = (
+    //     mutation: ReturnType<typeof useMotorDocumentDownload>,
+    //     label: string
+    // ) => {
+    //     if (!invoiceId) {
+    //         ShowToast.error(`No invoice found for ${label}.`)
+    //         return
+    //     }
+    //     mutation.mutate(invoiceId)
+    // }
+
+    // const ActionsHandlerMapping: SingleActionsHandler<any>[] = [
+    //     {
+    //         label: "View Invoice",
+    //         onSelect: (data) => {
+    //             invoiceMutation(data)
+    //         },
+    //     },
+    //     {
+    //         label: "View Receipt",
+    //         onSelect: (data) => {
+    //             // handleDialogContextSwitch({
+    //             //   componentProps: { data: rowData, refetch },
+    //             //   Component: ViewOrganizationLocationModal,
+    //             // })
+    //         },
+    //     },
+    //     {
+    //         label: "View Certificate",
+    //         onSelect: (data) => {
+    //             // handleDialogContextSwitch({
+    //             //   componentProps: { data: rowData, refetch },
+    //             //   Component: ViewOrganizationLocationModal,
+    //             // })
+    //         },
+    //     },
+    // ];
 
     if (!id) {
         return (
@@ -363,43 +403,45 @@ export const SingleCoverPage = () => {
                         </SectionCard>
 
                         <SectionCard title="Invoices">
-                             <CustomBaseTable
-                                                        {...{
-                                                            onPageChange: (page) =>
-                                                                optionsDispatcher({
-                                                                    payload: { page },
-                                                                    type: 'page',
-                                                                }),
-                                                            OtherToolsProps: {
-                                                                onChange: (data: any) =>
-                                                                    optionsDispatcherDebounce({
-                                                                        payload: { term: data },
-                                                                        type: 'term',
-                                                                    }),
-                                                                placeholder: 'Search',
-                                                                includeFilter: true,
-                                                            },
-                                                            coulumns: ,
-                                                            // columns: [
-                                                            //     ...MyCoversColumns,
-                                                            //     ActionColumn({ ActionsHandlerMapping }),
-                                                            // ],
-                                                            // OtherTools: SearchTools,
-                                                            data: data?.data ?? [],
-                                                            pageCount: data?.pagination?.last_page ?? 1,
-                                                            title: 'Claims',
-                                                            showPagination: true,
-                                                            setPageSize: (pageSize) =>
-                                                                optionsDispatcher({
-                                                                    payload: { pageSize },
-                                                                    type: 'pageSize',
-                                                                }),
-                                                            pageSize: data?.pagination?.per_page ?? 10,
-                                                            page: data?.pagination?.current_page ?? 1,
-                                                            isLoading: isLoading,
-                                                        }}
-                                                    />
-                            {/* {invoices.length === 0 ? (
+                            {/* <CustomBaseTable
+                                {...{
+                                    onPageChange: (page) =>
+                                        optionsDispatcher({
+                                            payload: { page },
+                                            type: 'page',
+                                        }),
+                                    OtherToolsProps: {
+                                        onChange: (data: any) =>
+                                            optionsDispatcherDebounce({
+                                                payload: { term: data },
+                                                type: 'term',
+                                            }),
+                                        placeholder: 'Search',
+                                        includeFilter: true,
+                                    },
+                                    columns: MyInvoiceColumns,
+                                    // columns: [
+                                    //     ...MyInvoiceColumns,
+                                    //     ActionColumn({
+                                    //         ActionsHandlerMapping,
+                                    //         layout: 'horizontal'
+                                    //     }),
+                                    // ],
+                                    data: invoices ?? [],
+                                    pageCount: 1,
+                                    title: '',
+                                    showPagination: false,
+                                    setPageSize: (pageSize) =>
+                                        optionsDispatcher({
+                                            payload: { pageSize },
+                                            type: 'pageSize',
+                                        }),
+                                    pageSize: data?.pagination?.per_page ?? 10,
+                                    page: data?.pagination?.current_page ?? 1,
+                                    isLoading: isLoading,
+                                }}
+                            /> */}
+                            {invoices.length === 0 ? (
                                 <p className="text-sm text-[#71717A]">
                                     No invoices for this cover.
                                 </p>
@@ -441,8 +483,7 @@ export const SingleCoverPage = () => {
                                                                 invoice.is_overdue
                                                                     ? 'border-red-200 bg-red-50 text-red-800'
                                                                     : 'border-green-200 bg-green-50 text-green-800'
-                                                            }
-                                                        >
+                                                            }>
                                                             {invoice.is_overdue
                                                                 ? 'Yes'
                                                                 : 'No'}
@@ -465,7 +506,7 @@ export const SingleCoverPage = () => {
                                         </TableBody>
                                     </Table>
                                 </div>
-                            )} */}
+                            )}
 
                         </SectionCard>
                     </div>

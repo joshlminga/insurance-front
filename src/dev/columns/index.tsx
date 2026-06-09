@@ -4,7 +4,8 @@ import { TActionColumnGenProps } from "@/types/types";
 import { ColumnDef } from "@tanstack/table-core";
 import { Check, ChevronDownCircle, Copy } from "lucide-react";
 import React, { useState } from "react";
-import { Button, ReusableDropDownComponent } from "../core";
+import { ReusableDropDownComponent } from "../core";
+import { cn } from "@/lib/utils";
 
 export const ActionColumn = <T,>({
 	ActionsHandlerMapping,
@@ -22,16 +23,16 @@ export const ActionColumn = <T,>({
 			if (layout === 'horizontal') {
                 return (
                     <div className="flex items-center gap-2">
-                        {availableActions.map(({ label, onSelect, icon: Icon }, index) => (
-                            <Button
-							variant="ghost"
+                        {availableActions.map(({ label, onSelect, icon: Icon, className }, index) => (
+                            <button
                                 key={index}
                                 onClick={() => onSelect(data)}
-                                className="text-[#BF162E] hover:text-[#BF162E]/80 bg-none "
+                                className={cn(className)}
                                 title={label}
                                 aria-label={label}>
-                                {Icon ? <Icon className="h-5 w-5" /> : <span>{label}</span>}
-                            </Button>
+                                {Icon && <Icon className="h-5 w-5" />}
+                                 <span>{label}</span>
+                            </button>
                         ))}
                     </div>
                 );

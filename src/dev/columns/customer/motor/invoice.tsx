@@ -1,43 +1,60 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Badge } from "@/components/ui/badge";
+import { COVER_STATUS_DISPLAY } from "@/utils/constatnts";
+import { formatCurrency } from "@/utils/helpers";
+import { ColumnDef } from "@tanstack/table-core";
 
-export const MyCoversColumns: ColumnDef<any>[] = [
+export const MyInvoiceColumns: ColumnDef<any>[] = [
     {
-        accessorKey: "cover_type",
-        header: () => <div>Cover Type</div>,
+        accessorKey: "invoice_number",
+        header: () => <div>Invoice #</div>,
         cell: ({ row }) => {
-            const cover_type: string = row.getValue("cover_type");
-            return <div>{cover_type}</div>;
+            const invoice_number: string = row.getValue("invoice_number");
+            return <div>{invoice_number}</div>;
         },
     },
     {
-        accessorKey: "agency",
-        header: () => <div>Agency</div>,
+        accessorKey: "installment_text",
+        header: () => <div>Installment</div>,
         cell: ({ row }) => {
-            const agency: any = row.getValue("agency");
-            return <div>{agency?.name}</div>;
-        },
-    },
-    {
-        accessorKey: "certificate",
-        header: () => <div>Issue Date</div>,
-        cell: ({ row }) => {
-            const certificate: any = row.getValue("certificate");
-            return <div>{certificate?.issued_date}</div>;
-        },
-    },
-    {
-        accessorKey: "certificate",
-        header: () => <div>Expiry Date</div>,
-        cell: ({ row }) => {
-            const certificate: any = row.getValue("certificate");
-            return <div>{certificate?.expiry_date}</div>;
+            const invoice = row.original;
+            return (<div> {invoice?.installment_text} ({invoice?.installment_number} of {invoice?.total_installments})</div>);
         },
     },
     {
         accessorKey: "installment_amount",
-        header: () => <div>Insured Value</div>,
+        header: () => <div>Amount</div>,
         cell: ({ row }) => {
             const installment_amount: string = row.getValue("installment_amount");
             return <div>{formatCurrency(installment_amount)}</div>;
+        },
+    },
+    {
+        accessorKey: "payment_status",
+        header: () => <div>Payment</div>,
+        cell: ({ row }) => {
+            const payment_status: string = row.getValue("payment_status");
+            return <div>{payment_status}</div>;
+        },
+    },
+    {
+        accessorKey: "is_overdue",
+        header: () => <div>Overdue</div>,
+        cell: ({ row }) => {
+            const is_overdue: string = row.getValue("is_overdue");
+            return <div>
+                <Badge
+                    variant="outline"
+                    className={
+                        is_overdue
+                            ? 'border-red-200 bg-red-50 text-red-800'
+                            : 'border-green-200 bg-green-50 text-green-800'
+                    }>
+                    {is_overdue
+                        ? 'Yes'
+                        : 'No'}
+                </Badge>
+            </div>;
         },
     },
     {
