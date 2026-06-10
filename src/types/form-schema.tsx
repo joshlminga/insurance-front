@@ -107,10 +107,13 @@ export const AdminMotorQuotationSchema = CustomerDetailsSchema
   .merge(VehicleDetailsSchema)
   // Zod 4: cannot .extend() after merge with a schema that has .superRefine()
   .safeExtend({
-    full_name: z
+    full_name: z.string().max(100).optional().or(z.literal("")),
+    email: z
       .string()
-      .min(2, "Full name is required")
-      .max(100),
+      .email("Invalid email address")
+      .max(32)
+      .optional()
+      .or(z.literal("")),
     country_id: z.string().optional().or(z.literal("")),
     processed_by_organization_id: z.string().min(1, "Your agency is required"),
     agency_id: z.string().optional().or(z.literal("")),

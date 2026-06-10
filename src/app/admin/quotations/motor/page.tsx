@@ -1,5 +1,15 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { PageHeader } from '@/components/shared'
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
@@ -204,6 +214,15 @@ type AnimatedSectionProps = {
     className?: string
 }
 
+function isCustomerContactMissing(data: AdminMotorQuotationFormValues): boolean {
+    if (String(data.user_id ?? '').trim()) return false
+
+    const email = String(data.email ?? '').trim()
+    const phoneDigits = String(data.phone ?? '').replace(/\D/g, '')
+
+    return !email && !phoneDigits
+}
+
 function AnimatedSection({ show, children, className }: AnimatedSectionProps) {
     return (
         <div
@@ -226,6 +245,9 @@ export const MotorQuotationPage = () => {
     const { user } = UseAuth()
     const [selectedTabValue, setSelectedTabValue] = useState<string>('')
     const [adminOrganizationOverride, setAdminOrganizationOverride] = useState(false)
+    const [showSelfCoverSubmitWarning, setShowSelfCoverSubmitWarning] = useState(false)
+    const [pendingSubmitData, setPendingSubmitData] =
+        useState<AdminMotorQuotationFormValues | null>(null)
 
     const { data: adminProfileData, isLoading: isAdminProfileLoading } =
         UseApiQuery<SubmitResponse>({
@@ -363,13 +385,40 @@ export const MotorQuotationPage = () => {
         },
     })
 
-    const onSubmit = (data: AdminMotorQuotationFormValues) => {
+    const loggedInUserName =
+        user?.name?.trim() || user?.email?.trim() || 'your account'
+
+    const submitQuotation = (data: AdminMotorQuotationFormValues) => {
         const payload = buildMotorQuotationPayload({
             data,
             profileCountryId: profileCountry?.id,
             dialCode,
         })
         submitMutation.mutate(payload)
+    }
+
+    const onSubmit = (data: AdminMotorQuotationFormValues) => {
+        if (isCustomerContactMissing(data)) {
+            setPendingSubmitData(data)
+            setShowSelfCoverSubmitWarning(true)
+            return
+        }
+
+        submitQuotation(data)
+    }
+
+    const handleConfirmSelfCoverSubmit = (event: React.MouseEvent) => {
+        event.preventDefault()
+        const data = pendingSubmitData
+        if (!data) return
+        setPendingSubmitData(null)
+        setShowSelfCoverSubmitWarning(false)
+        submitQuotation(data)
+    }
+
+    const handleCancelSelfCoverSubmit = () => {
+        setPendingSubmitData(null)
+        setShowSelfCoverSubmitWarning(false)
     }
 
     return (
@@ -613,6 +662,38 @@ export const MotorQuotationPage = () => {
                     </div>
                 </form>
             </FormProvider>
+
+            <AlertDialog
+                open={showSelfCoverSubmitWarning}
+                onOpenChange={(open) => {
+                    if (!open) handleCancelSelfCoverSubmit()
+                }}
+            >
+                <AlertDialogContent size="sm" className="sm:max-w-md">
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>No customer contact details</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Email and phone were not provided. The system will process this
+                            cover as belonging to{' '}
+                            <span className="font-semibold text-foreground">
+                                {loggedInUserName}
+                            </span>
+                            . Do you want to continue?
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={handleCancelSelfCoverSubmit}>
+                            Go back
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                            className="rounded-full bg-[#C20C0C] hover:bg-[#C20C0C]/90"
+                            onClick={handleConfirmSelfCoverSubmit}
+                        >
+                            Continue
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     )
 }
