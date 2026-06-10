@@ -31,7 +31,7 @@ export const NotificationToggle = () => {
                 </Button>
             }
             children={
-                <div className="max-w-100 max-h-96 overflow-hidden mr-10">
+                <div className="max-w-96 max-h-96 overflow-hidden mr-10">
                     <div className="flex items-center justify-between px-4 py-3 bg-slate-50 border-b border-slate-200">
                         <h3 className="font-medium text-slate-900">
                             Notifications
