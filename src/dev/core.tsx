@@ -38,7 +38,8 @@ import type {
     TLoaderProps,
     ProfileMenuItemProps,
     ConfirmationDialogProps,
-    ReusableSwitchToggleProps
+    ReusableSwitchToggleProps,
+    ReusablePopoverProps
 } from "@/types/types";
 import {
     Stepper,
@@ -2100,22 +2101,22 @@ export const CustomLoader: React.FC<TLoaderProps> = ({
     children,
 }) => (
     <div
-    className={cn(
-        "w-full flex justify-center items-center",
-        className
-    )}
->
-    {children ?? (
-        isError ? (
-            <p>{title}</p>
-        ) : (
-            <div role="status" className="flex flex-row items-center justify-center gap-3">
-                <Loader2 className="h-8 w-8 animate-spin text-[#C20C0C]" aria-hidden/>
-                <p className="text-md font-semibold text-muted-foreground">{title}</p>
-            </div>
-        )
-    )}
-</div>
+        className={cn(
+            "w-full flex justify-center items-center",
+            className
+        )}
+    >
+        {children ?? (
+            isError ? (
+                <p>{title}</p>
+            ) : (
+                <div role="status" className="flex flex-row items-center justify-center gap-3">
+                    <Loader2 className="h-8 w-8 animate-spin text-[#C20C0C]" aria-hidden />
+                    <p className="text-md font-semibold text-muted-foreground">{title}</p>
+                </div>
+            )
+        )}
+    </div>
 );
 
 export const SendDocumentsViaEmail = ({
@@ -2503,4 +2504,26 @@ export const ReusableSwitchToggle = ({
             />
         </Field>
     )
+}
+
+export function ReusablePopover({
+    trigger,
+    children,
+    className,
+    align = "center",
+    side = "bottom",
+}: ReusablePopoverProps) {
+    return (
+        <Popover>
+            <PopoverTrigger asChild>
+                {trigger}
+            </PopoverTrigger>
+            <PopoverContent
+                align={align}
+                side={side}
+                className={cn("min-w-30 w-fit p-0", className)}>
+                {children}
+            </PopoverContent>
+        </Popover>
+    );
 }

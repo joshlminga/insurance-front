@@ -810,3 +810,21 @@ export interface MotorUserCoverDetail {
     benefits: MotorUserCoverBenefit[]
     invoices: MotorUserCoverInvoice[]
 }
+
+export interface ReusablePopoverProps {
+    trigger: React.ReactNode;
+    children: React.ReactNode;
+    className?: string;
+    align?: "start" | "center" | "end";
+    side?: "top" | "right" | "bottom" | "left";
+}
+
+export type TNotifs = {
+  id?:string;
+  message: string;
+  unread: boolean;
+  avatar?: string;
+  color: string;
+  time: string;
+  type: string;
+}
