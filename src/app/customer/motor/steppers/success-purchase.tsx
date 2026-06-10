@@ -156,13 +156,13 @@ export const SuccessPurchase: React.FC<CustomerVerificationDetailsProps> = ({
                                 <p className="mb-4 text-xs text-muted-foreground sm:text-sm">
                                     It takes 5 minutes for Certificate to be issued by AKI
                                 </p>
-                                <Button
+                                {/* <Button
                                     className={primaryButtonClassName}
                                     onClick={() => downloadDocument('certificate')}
                                     loading={certificateMutation.isPending}
                                 >
                                     View Certificate Process
-                                </Button>
+                                </Button> */}
                             </div>
                             <div className="flex flex-col items-center rounded-xl border border-[#ADABAB]/40 bg-neutral-50/80 px-4 py-6 text-center">
                                 <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full border border-[#ADABAB]/50 bg-white">
