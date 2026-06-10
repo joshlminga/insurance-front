@@ -149,7 +149,6 @@ export const CustomerVerificationDetails = ({
                 </Link>
               </label>
             </div>
-
             {showPolicyState && (
               <div
                 role="alert"
