@@ -13,11 +13,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
+import { ReusablePopover } from "@/dev/core"
 
 const languages = [
   { label: "English", value: "en" },
@@ -36,8 +32,8 @@ export function LanguageSwitcher() {
   const [value, setValue] = React.useState("en")
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
+    <ReusablePopover
+      trigger={
         <Button
           variant="ghost"
           role="combobox"
@@ -46,12 +42,14 @@ export function LanguageSwitcher() {
         >
           <Globe className="mr-2 h-4 w-4" />
           {value
-            ? languages.find((language) => language.value === value)?.label
-            : "Select language..."}
+            ? languages.find(
+              (language) => language.value === value
+            )?.label
+            : "language..."}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-50 p-0">
+      }
+      children={
         <Command>
           <CommandInput placeholder="Search language..." />
           <CommandList>
@@ -64,8 +62,7 @@ export function LanguageSwitcher() {
                   onSelect={(currentValue) => {
                     setValue(currentValue === value ? "" : currentValue)
                     setOpen(false)
-                  }}
-                >
+                  }} >
                   <Check
                     className={cn(
                       "mr-2 h-4 w-4",
@@ -78,7 +75,7 @@ export function LanguageSwitcher() {
             </CommandGroup>
           </CommandList>
         </Command>
-      </PopoverContent>
-    </Popover>
+      }
+    />
   )
 }
