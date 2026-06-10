@@ -2,7 +2,7 @@
 // import { StatsCard, StatsGrid } from '@/components/shared';
 import { ActionColumn } from '@/dev/columns';
 import { MyCoversColumns } from '@/dev/columns/customer/motor/my-covers';
-import { CustomBaseTable } from '@/dev/table';
+import { CustomBaseTable, SearchTools } from '@/dev/table';
 import { useDebounce } from '@/hooks';
 import { UseApiQuery } from '@/hooks/hooks';
 import {
@@ -113,7 +113,7 @@ export const CustomerCoversPage = () => {
                                         layout: 'horizontal'
                                     }),
                                 ],
-                                // OtherTools: SearchTools,
+                                OtherTools: SearchTools,
                                 data: data?.data ?? [],
                                 pageCount: data?.pagination?.last_page ?? 1,
                                 title: 'Covers',
