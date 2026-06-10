@@ -123,6 +123,32 @@ export const CustomerVerificationDetails = ({
                 type="tel"
               />
             </div>
+            <div className="flex items-start gap-2.5 sm:gap-3 rounded-lg sm:rounded-none bg-[#f0fdf4]/50 sm:bg-transparent p-2 sm:p-0 -mx-1 sm:mx-0">
+              <Checkbox
+                id="motor-privacy-consent"
+                onCheckedChange={(checked) => {
+                  if (checked === true) {
+                    setIsPolicy(true)
+                    setShowPolicyState(false)
+                  } else {
+                    setIsPolicy(false)
+                  }
+                }}
+                className="w-4 h-4 mt-0.5 shrink-0 rounded-[3px] border border-[#D9D9D9] data-[state=checked]:bg-[#C20C0C] data-[state=checked]:border-[#C20C0C]"
+              />
+              <label
+                htmlFor="motor-privacy-consent"
+                className={cn(
+                  "text-xs sm:text-sm leading-relaxed cursor-pointer min-w-0",
+                  isPolicy ? "text-[#141414]" : "text-red-500",
+                )}>
+                I acknowledge and consent to the collection and processing of my
+                personal data as outlined in the{" "}
+                <Link to="#" className="underline underline-offset-2 hover:text-[#C20C0C]">
+                  Privacy Policy
+                </Link>
+              </label>
+            </div>
             {showPolicyState && (
               <div
                 role="alert"
@@ -173,13 +199,10 @@ export const CustomerVerificationDetails = ({
                     through every step of the claims journey.
                   </p>
                 </div>
-                <Button
-                  type="button"
-                  fullWidth
-                  className="bg-[#43A047] text-white hover:bg-[#388E3C] min-h-10 sm:min-h-11 w-full sm:w-auto sm:self-start"
-                >
+                <Link to='#'
+                  className="hover:underline hover:text-[#C20C0C]">
                   File a Claim
-                </Button>
+                </Link>
               </div>
             </CardContent>
           </Card>
@@ -203,32 +226,6 @@ export const CustomerVerificationDetails = ({
                     securely stored, and used exclusively for insurance quote
                     generation and policy processing.
                   </p>
-                </div>
-                <div className="flex items-start gap-2.5 sm:gap-3 rounded-lg sm:rounded-none bg-[#f0fdf4]/50 sm:bg-transparent p-2 sm:p-0 -mx-1 sm:mx-0">
-                  <Checkbox
-                    id="motor-privacy-consent"
-                    onCheckedChange={(checked) => {
-                      if (checked === true) {
-                        setIsPolicy(true)
-                        setShowPolicyState(false)
-                      } else {
-                        setIsPolicy(false)
-                      }
-                    }}
-                    className="w-4 h-4 mt-0.5 shrink-0 rounded-[3px] border border-[#D9D9D9] data-[state=checked]:bg-[#C20C0C] data-[state=checked]:border-[#C20C0C]"
-                  />
-                  <label
-                    htmlFor="motor-privacy-consent"
-                    className={cn(
-                      "text-xs sm:text-sm leading-relaxed cursor-pointer min-w-0",
-                      isPolicy ? "text-[#141414]" : "text-red-500",
-                    )}>
-                    I acknowledge and consent to the collection and processing of my
-                    personal data as outlined in the{" "}
-                    <Link to="#" className="underline underline-offset-2 hover:text-[#C20C0C]">
-                      Privacy Policy
-                    </Link>
-                  </label>
                 </div>
               </div>
             </CardContent>
