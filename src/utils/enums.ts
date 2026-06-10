@@ -12,6 +12,8 @@ export const EPREFIX = {
   DASHBOARD: "dashboard",
   PRODUCTS: "products",
   QUOTATIONS: "quotations",
+
+  ERRORS: 'errors'
 } as const
 
 export const EROUTES = {
@@ -87,6 +89,9 @@ export const EROUTES = {
   ORGANIZATION: `/${EPREFIX.DASHBOARD}/organization`,
   ORGANIZATION_LOCATION: `/${EPREFIX.DASHBOARD}/organization-location`,
   USERS: `/${EPREFIX.DASHBOARD}/users`,
+
+  ERROR404: `/${EPREFIX.ERRORS}/errors404`
+
 } as const
 
 export const SORT_ORDER = {

@@ -2100,21 +2100,22 @@ export const CustomLoader: React.FC<TLoaderProps> = ({
     children,
 }) => (
     <div
-        className={cn(
-            "w-full flex flex-col justify-center items-center gap-3 text-center",
-            className
-        )}>
-        {children ?? (
-            isError ? (
-                <p className="">{title}</p>
-            ) : (
-                <div role="status" className="flex flex-col items-center gap-3">
-                    <Loader2 className="h-12 w-12 animate-spin text-gray-500" aria-hidden />
-                    <p className="text-sm text-muted-foreground">{title}</p>
-                </div>
-            )
-        )}
-    </div>
+    className={cn(
+        "w-full flex justify-center items-center",
+        className
+    )}
+>
+    {children ?? (
+        isError ? (
+            <p>{title}</p>
+        ) : (
+            <div role="status" className="flex flex-row items-center justify-center gap-3">
+                <Loader2 className="h-8 w-8 animate-spin text-[#C20C0C]" aria-hidden/>
+                <p className="text-md font-semibold text-muted-foreground">{title}</p>
+            </div>
+        )
+    )}
+</div>
 );
 
 export const SendDocumentsViaEmail = ({
