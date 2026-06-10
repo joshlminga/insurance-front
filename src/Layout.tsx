@@ -13,9 +13,10 @@ export default function Layout() {
       <ThemeSync />
       <SidebarProvider>
         <AppSidebar />
-        <SidebarInset>
+        <SidebarInset className="flex h-svh flex-col overflow-hidden">
           <Header />
-          <div className="flex flex-1 flex-col gap-4 px-4 py-6">
+          <div data-slot="main-scroll"
+            className="py-10 flex flex-1 flex-col gap-4 overflow-y-auto p-4 pt-0">
             <Outlet />
           </div>
         </SidebarInset>

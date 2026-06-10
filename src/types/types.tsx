@@ -818,3 +818,13 @@ export interface ReusablePopoverProps {
     align?: "start" | "center" | "end";
     side?: "top" | "right" | "bottom" | "left";
 }
+
+export type TNotifs = {
+  id?:string;
+  message: string;
+  unread: boolean;
+  avatar?: string;
+  color: string;
+  time: string;
+  type: string;
+}
