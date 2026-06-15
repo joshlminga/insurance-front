@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ActionColumn } from '@/dev/columns';
+// import { ActionColumn } from '@/dev/columns';
 import { MyPaymentHistory } from '@/dev/columns/customer/motor/payment-history';
-import { CustomBaseTable } from '@/dev/table';
+import { CustomBaseTable, SearchTools } from '@/dev/table';
 import { useDebounce } from '@/hooks';
 import { UseApiQuery } from '@/hooks/hooks';
-import { SingleActionsHandler, SubmitResponse, TFilterOptions, TPaginationFilters } from '@/types/types';
+import { SubmitResponse, TFilterOptions, TPaginationFilters } from '@/types/types';
 import { FILTEROPTIONS, ReusableReducer } from '@/utils/constatnts';
-import { Eye } from 'lucide-react';
+// import { Eye } from 'lucide-react';
 import { useReducer } from 'react'
 
 export const PaymentHistoryPage = () => {
@@ -29,19 +29,19 @@ export const PaymentHistoryPage = () => {
             enabled: true,
         },
     })
-    const ActionsHandlerMapping: SingleActionsHandler<any>[] = [
-        {
-            label: 'View',
-            icon: Eye,
-            onSelect: (data) => {
-                console.log(data);
-                // handleDialogContextSwitch({
-                //   componentProps: { data, refetch },
-                //   Component: ViewOrganizationModal,
-                // })
-            }
-        },
-    ];
+    // const ActionsHandlerMapping: SingleActionsHandler<any>[] = [
+    //     {
+    //         label: 'View',
+    //         icon: Eye,
+    //         onSelect: (data) => {
+    //             console.log(data);
+    //             handleDialogContextSwitch({
+    //               componentProps: { data, refetch },
+    //               Component: ViewOrganizationModal,
+    //             })
+    //         }
+    //     },
+    // ];
 
     return (
         <section>
@@ -71,13 +71,14 @@ export const PaymentHistoryPage = () => {
                                     placeholder: 'Search',
                                     includeFilter: true,
                                 },
-                                columns: [
-                                    ...MyPaymentHistory,
-                                    ActionColumn({ ActionsHandlerMapping,
-                                        layout: 'horizontal'
-                                     }),
-                                ],
-                                // OtherTools: SearchTools,
+                                columns: MyPaymentHistory,
+                                // columns: [
+                                //     ...MyPaymentHistory,
+                                //     ActionColumn({ ActionsHandlerMapping,
+                                //         layout: 'horizontal'
+                                //      }),
+                                // ],
+                                OtherTools: SearchTools,
                                 data: data?.data ?? [],
                                 pageCount: data?.pagination?.last_page ?? 1,
                                 title: 'Payment History',

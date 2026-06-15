@@ -8,9 +8,10 @@ import Layout from "./Layout"
 
 const Loader = () => (
   <div className="flex h-screen w-full items-center justify-center">
-    <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-[#C20C0C]" />
+    <div className="h-12 w-12 animate-spin rounded-full border-dotted border-4 border-[#C20C0C] border-t-[#C20C0C] animation-duration-[4s]" />
   </div>
 )
+
 
 function S({ children }: { children: React.ReactNode }) {
   return <Suspense fallback={<Loader />}>{children}</Suspense>

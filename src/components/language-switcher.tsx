@@ -2,7 +2,6 @@
 
 import * as React from "react"
 import { Check, ChevronsUpDown, Globe } from "lucide-react"
-
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -13,11 +12,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
+import { ReusablePopover } from "@/dev/core"
 
 const languages = [
   { label: "English", value: "en" },
@@ -34,24 +29,22 @@ const languages = [
 export function LanguageSwitcher() {
   const [open, setOpen] = React.useState(false)
   const [value, setValue] = React.useState("en")
-
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
+    <ReusablePopover
+      trigger={
         <Button
           variant="ghost"
           role="combobox"
           aria-expanded={open}
-          className="w-35 justify-between"
-        >
+          className="w-fit justify-between">
           <Globe className="mr-2 h-4 w-4" />
           {value
             ? languages.find((language) => language.value === value)?.label
-            : "Select language..."}
+            : "Select"}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-50 p-0">
+      }
+      children={
         <Command>
           <CommandInput placeholder="Search language..." />
           <CommandList>
@@ -64,8 +57,7 @@ export function LanguageSwitcher() {
                   onSelect={(currentValue) => {
                     setValue(currentValue === value ? "" : currentValue)
                     setOpen(false)
-                  }}
-                >
+                  }} >
                   <Check
                     className={cn(
                       "mr-2 h-4 w-4",
@@ -78,7 +70,7 @@ export function LanguageSwitcher() {
             </CommandGroup>
           </CommandList>
         </Command>
-      </PopoverContent>
-    </Popover>
+      }
+    />
   )
 }

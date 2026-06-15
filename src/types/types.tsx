@@ -440,6 +440,7 @@ export type SingleActionsHandler<T = string> = {
   label?: string;
   conditional?: (payload: T) => boolean;
   condition?: any;
+  className?: TKeyValueAnyType;
   icon?: React.ComponentType<any>;
 } & TCommandOption<T> &
   Pick<TDropDownProps<T>, 'onSelect'>;
@@ -454,7 +455,7 @@ export type TDropDownProps<T = string> = {
 
 export type TActionColumnGenProps<T = string> = {
   ActionsHandlerMapping: SingleActionsHandler<T>[];
-  layout?: 'dropdown' | 'horizontal'
+  layout?: 'dropdown' | 'horizontal',
 };
 
 export type TReusableDropdownProp<T> = {
@@ -810,4 +811,22 @@ export interface MotorUserCoverDetail {
     }
     benefits: MotorUserCoverBenefit[]
     invoices: MotorUserCoverInvoice[]
+}
+
+export interface ReusablePopoverProps {
+    trigger: React.ReactNode;
+    children: React.ReactNode;
+    className?: string;
+    align?: "start" | "center" | "end";
+    side?: "top" | "right" | "bottom" | "left";
+}
+
+export type TNotifs = {
+  id?:string;
+  message: string;
+  unread: boolean;
+  avatar?: string;
+  color: string;
+  time: string;
+  type: string;
 }

@@ -2,7 +2,8 @@ import { formatNumber } from "@/lib/format";
 import { 
   BenefitGroup, 
   ListedBenefitResolved, 
-  MotorBenefitOption 
+  MotorBenefitOption, 
+  MotorUserCoverInvoice
 } from "@/types/types";
 import { FieldValues } from "react-hook-form";
 import { BENEFIT_SELECT_NONE } from "./constatnts";
@@ -150,3 +151,6 @@ export function benefitIdsEqual(a: number[], b: number[]): boolean {
     const sortedB = [...b].sort((x, y) => x - y)
     return sortedA.every((id, i) => id === sortedB[i])
 }
+
+export const installmentText = (invoice: MotorUserCoverInvoice) =>
+    `Installment ${invoice.installment_number} of ${invoice.total_installments}`

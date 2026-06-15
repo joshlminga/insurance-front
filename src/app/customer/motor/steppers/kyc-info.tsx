@@ -397,15 +397,15 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToPrevSt
                                         control={form.control}
                                         type="date"
                                         name="date_of_birth"
-                                        label="Date of Birth"
+                                        label="Date of Birth (Optional)"
                                         
                                     />
                                     <ReuseableInput
                                         className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
                                         control={form.control}
                                         name="occupation"
-                                        label="Occupation"
-                                        placeholder="Enter occupation"
+                                        label="Occupation (Optional)"
+                                        placeholder="Enter occupation "
                                     />
                                 </>
                             )}

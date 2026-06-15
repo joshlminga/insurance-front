@@ -1,9 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react'
-// import { StatsCard, StatsGrid } from '@/components/shared';
 import { ActionColumn } from '@/dev/columns';
-import { MyCoversColumns } from '@/dev/columns/customer/motor/my-covers';
-import { CustomBaseTable } from '@/dev/table';
+import { CustomBaseTable, SearchTools } from '@/dev/table';
 import { useDebounce } from '@/hooks';
 import { UseApiQuery } from '@/hooks/hooks';
 import {
@@ -17,6 +15,7 @@ import {
     ReusableReducer
 } from '@/utils/constatnts';
 import { useReducer } from 'react'
+import { MyClaimsColumns } from '@/dev/columns/customer/motor/my-claims';
 
 export const CustomerClaimsPage: React.FC = () => {
     const [filter, optionsDispatcher] = useReducer(
@@ -28,7 +27,7 @@ export const CustomerClaimsPage: React.FC = () => {
     });
 
     const { data, isLoading } = UseApiQuery<SubmitResponse>({
-        url: '',
+        url: 'claims',
         params: {
             page: filter.page,
             pageSize: filter.pageSize,
@@ -93,10 +92,10 @@ export const CustomerClaimsPage: React.FC = () => {
                                     includeFilter: true,
                                 },
                                 columns: [
-                                    ...MyCoversColumns,
+                                    ...MyClaimsColumns,
                                     ActionColumn({ ActionsHandlerMapping }),
                                 ],
-                                // OtherTools: SearchTools,
+                                OtherTools: SearchTools,
                                 data: data?.data ?? [],
                                 pageCount: data?.pagination?.last_page ?? 1,
                                 title: 'Claims',

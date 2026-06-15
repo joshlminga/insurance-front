@@ -11,7 +11,7 @@ import {
   MOTOR_QUOTE_SESSION_STORAGE_KEY,
   PURCHASE_SESSION_STORAGE_KEY,
 } from './utils/constatnts'
-import { ChatFloatingButton } from './dev/core.tsx'
+// import { ChatFloatingButton } from './dev/core.tsx'
 
 function migrateLegacyLocalStorageKeys(keys: readonly string[]) {
   if (typeof window === 'undefined' || typeof localStorage === 'undefined') return
@@ -37,7 +37,7 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryProvider>
       <RouterProvider router={router} />
-      <ChatFloatingButton />
+      {/* <ChatFloatingButton /> */}
     </QueryProvider>
   </StrictMode>,
 )

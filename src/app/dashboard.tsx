@@ -30,10 +30,18 @@ export default function DashboardPage() {
   const recentTransactions = transactions.slice(0, 5)
   const unreadNotifications = notifications.filter((n) => !n.isRead).slice(0, 4)
 
+  const currentDateTime = new Intl.DateTimeFormat("en-KE", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "Africa/Nairobi",
+  }).format(new Date());
+
   return (
     <>
       <PageHeader
-        title="Insurance Marketplace Dashboard"
+        title={`Marketplace Dashboard • ${currentDateTime}`}
         description="Welcome back! Here's an overview of your insurance platform"
       />
       <StatsGrid columns={4}>
@@ -173,11 +181,10 @@ export default function DashboardPage() {
                 >
                   <div className="flex items-center gap-3">
                     <div
-                      className={`flex h-8 w-8 items-center justify-center rounded-full ${
-                        txn.type === "deposit" || txn.type === "loan_repayment"
-                          ? "bg-green-100 dark:bg-green-900"
-                          : "bg-red-100 dark:bg-red-900"
-                      }`}
+                      className={`flex h-8 w-8 items-center justify-center rounded-full ${txn.type === "deposit" || txn.type === "loan_repayment"
+                        ? "bg-green-100 dark:bg-green-900"
+                        : "bg-red-100 dark:bg-red-900"
+                        }`}
                     >
                       {txn.type === "deposit" || txn.type === "loan_repayment" ? (
                         <ArrowDownRight className="h-4 w-4 text-green-600 dark:text-green-400" />
@@ -194,11 +201,10 @@ export default function DashboardPage() {
                   </div>
                   <div className="text-right">
                     <p
-                      className={`text-sm font-medium ${
-                        txn.type === "deposit" || txn.type === "loan_repayment"
-                          ? "text-green-600 dark:text-green-400"
-                          : "text-red-600 dark:text-red-400"
-                      }`}
+                      className={`text-sm font-medium ${txn.type === "deposit" || txn.type === "loan_repayment"
+                        ? "text-green-600 dark:text-green-400"
+                        : "text-red-600 dark:text-red-400"
+                        }`}
                     >
                       {txn.type === "deposit" || txn.type === "loan_repayment"
                         ? "+"
@@ -238,15 +244,14 @@ export default function DashboardPage() {
                     className="flex items-start gap-3 border-b pb-3 last:border-0 last:pb-0"
                   >
                     <div
-                      className={`flex h-8 w-8 items-center justify-center rounded-full ${
-                        notification.type === "error"
-                          ? "bg-red-100 dark:bg-red-900"
-                          : notification.type === "warning"
+                      className={`flex h-8 w-8 items-center justify-center rounded-full ${notification.type === "error"
+                        ? "bg-red-100 dark:bg-red-900"
+                        : notification.type === "warning"
                           ? "bg-yellow-100 dark:bg-yellow-900"
                           : notification.type === "success"
-                          ? "bg-green-100 dark:bg-green-900"
-                          : "bg-blue-100 dark:bg-blue-900"
-                      }`}
+                            ? "bg-green-100 dark:bg-green-900"
+                            : "bg-blue-100 dark:bg-blue-900"
+                        }`}
                     >
                       {notification.type === "error" ? (
                         <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" />

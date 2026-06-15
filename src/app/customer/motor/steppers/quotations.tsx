@@ -542,8 +542,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                                     submitComparisonMutation.isPending ||
                                     submitComparisonDownloadMutation.isPending
                                 }
-                                disabled={selectedQuotes.length < 2}
-                            >
+                                disabled={selectedQuotes.length < 2}>
                                 Generate Comparison
                                 {selectedQuotes.length > 0 &&
                                     ` (${selectedQuotes.length}/${MAX_COMPARISONS})`}

@@ -40,13 +40,13 @@ export const MarineQuotationsPage: React.FC<CustomerVerificationDetailsProps> = 
                         <hr className="my-4 sm:mb-6" />
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8">
                             <ReuseableInput
-                                className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                                className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
                                 control={form.control}
                                 name="courtesy_car"
                                 label="Courtesy Car"
                             />
                             <ReuseableInput
-                                className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                                className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
                                 control={form.control}
                                 name="road_rescue"
                                 label="Road Rescue"
@@ -99,7 +99,7 @@ export const MarineQuotationsPage: React.FC<CustomerVerificationDetailsProps> = 
                                         <Link
                                             to={`/${EPREFIX?.AUTH}${EROUTES.SIGNUP}`}
                                             className="w-full lg:w-auto">
-                                            <Button type="button" className="w-full lg:w-auto rounded-md border border-[#D9D9D9] bg-[#0CC258] hover:bg-[#0CC258]/90 font-medium text-white">
+                                            <Button type="button" className="w-full lg:w-auto rounded-md border border-[#D9D9D9] bg-[#C20C0C] hover:bg-[#C20C0C]/90 font-medium text-white">
                                                 Purchase Cover
                                             </Button>
                                         </Link>

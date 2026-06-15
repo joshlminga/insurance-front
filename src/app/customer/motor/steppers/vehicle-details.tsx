@@ -189,7 +189,7 @@ function AnimatedSection({ show, children, className }: AnimatedSectionProps) {
             className={cn(
                 'transition-all duration-300 ease-out',
                 show
-                    ? 'opacity-100 translate-y-0 max-h-[2000px]'
+                    ? 'opacity-100 translate-y-0 max-h-500'
                     : 'pointer-events-none opacity-0 -translate-y-1 max-h-0 overflow-hidden',
                 className
             )}

@@ -468,7 +468,8 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
                             <ReusableDropdown
                                 trigger={
                                     <Button
-                                        className="w-full sm:w-auto bg-[#0CC258] hover:bg-[#0CC258]/80">
+                                        variant="outline"
+                                        className=" w-full lg:w-auto border-[#C20C0C] bg-[#FFF5F5] text-[#C20C0C] hover:bg-[#C20C0C] hover:text-white focus-visible:ring-[#C20C0C]/30">
                                         Generate Invoice
                                     </Button>
                                 }
