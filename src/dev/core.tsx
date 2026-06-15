@@ -109,6 +109,7 @@ import {
     EORGANIZATIONTYPES,
     FILTEROPTIONS,
     MOTOR_QUOTE_SESSION_STORAGE_KEY,
+    ADMIN_MOTOR_CUSTOMER_EMAIL_KEY,
     ReusableReducer
 } from "@/utils/constatnts";
 import {
@@ -2126,6 +2127,7 @@ export const SendDocumentsViaEmail = ({
     handleDialogContextSwitch: (context?: any) => void
     componentProps?: any
 }) => {
+    const requireRecipientEmail = componentProps?.requireRecipientEmail === true
     const [quoteSessionId, setQuoteSessionId] = useState<number | null>(null)
     const [isSelf, setIsSelf] = useState(false)
     const [email, setEmail] = useState("")
@@ -2139,13 +2141,22 @@ export const SendDocumentsViaEmail = ({
         }
     }, [])
 
+    useEffect(() => {
+        if (!requireRecipientEmail) return
+        const prefilled =
+            componentProps?.defaultEmail?.trim() ||
+            sessionStorage.getItem(ADMIN_MOTOR_CUSTOMER_EMAIL_KEY)?.trim() ||
+            ""
+        if (prefilled) setEmail(prefilled)
+    }, [requireRecipientEmail, componentProps?.defaultEmail])
+
     const submitMutation = UseApiMutation<SubmitResponse, FormData>({
         url: `document/motor/send-quote-via-email/${quoteSessionId}`,
         method: EMETHODS.POST,
         mutationOptions: {
             onSuccess: (data) => {
                 ShowToast.success(data.message || "Sent successfully!")
-                setEmail("")
+                setEmail(requireRecipientEmail ? email : "")
                 setIsSelf(false)
                 componentProps?.refetch?.()
                 handleDialogContextSwitch({ refetch: true })
@@ -2172,14 +2183,20 @@ export const SendDocumentsViaEmail = ({
                 return
             }
         }
+        const trimmedEmail = email.trim()
+        if (requireRecipientEmail && !trimmedEmail) {
+            ShowToast.error("Please enter the customer email address.")
+            return
+        }
         const productId = componentProps?.data?.product_id ?? componentProps?.data?.product?.id
         const rateId = componentProps?.data?.rate_id
+        const sendToSelf = requireRecipientEmail ? false : isSelf
         const base: Record<string, unknown> = {
-            is_self: isSelf,
+            is_self: sendToSelf,
             quote_type: quoteType,
         }
-        if (!isSelf) {
-            base.email = email
+        if (!sendToSelf) {
+            base.email = trimmedEmail
         }
         if (isComparison) {
             base.products = componentProps?.data?.products
@@ -2194,26 +2211,36 @@ export const SendDocumentsViaEmail = ({
         <div className="w-full min-w-75 max-w-100 space-y-6 p-6">
             <div className="border-b pb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h2 className="text-xl font-semibold">Share Via Email To Either Self or Another User</h2>
+                    <h2 className="text-xl font-semibold">
+                        {requireRecipientEmail
+                            ? "Send quote to customer email"
+                            : "Share Via Email To Either Self or Another User"}
+                    </h2>
                     <p className="text-sm text-muted-foreground mt-1">
-                        Enter the email address you want to share the documents with. You can also choose to send the documents to yourself.
+                        {requireRecipientEmail
+                            ? "Enter the customer email address. The quote will be sent to this address."
+                            : "Enter the email address you want to share the documents with. You can also choose to send the documents to yourself."}
                     </p>
                 </div>
             </div>
             <form onSubmit={onSubmit} className="space-y-6">
-                <div className="flex items-center space-x-2">
-                    <Checkbox
-                        id="is_self"
-                        checked={isSelf}
-                        onCheckedChange={(checked) => setIsSelf(checked === true)}
-                    />
-                    <Label htmlFor="is_self" className="cursor-pointer font-bold text-lg">
-                        Send to my email
-                    </Label>
-                </div>
-                {!isSelf && (
+                {!requireRecipientEmail && (
+                    <div className="flex items-center space-x-2">
+                        <Checkbox
+                            id="is_self"
+                            checked={isSelf}
+                            onCheckedChange={(checked) => setIsSelf(checked === true)}
+                        />
+                        <Label htmlFor="is_self" className="cursor-pointer font-bold text-lg">
+                            Send to my email
+                        </Label>
+                    </div>
+                )}
+                {(requireRecipientEmail || !isSelf) && (
                     <div className="space-y-2">
-                        <Label htmlFor="email">Email Address</Label>
+                        <Label htmlFor="email">
+                            {requireRecipientEmail ? "Customer Email Address" : "Email Address"}
+                        </Label>
                         <input
                             id="email"
                             type="email"
@@ -2221,7 +2248,7 @@ export const SendDocumentsViaEmail = ({
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder="Enter email"
                             className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] px-3"
-                            required={!isSelf}
+                            required
                             autoComplete="off"
                         />
                     </div>
@@ -2290,9 +2317,19 @@ export const SendInvoiceViaEmail = ({
     handleDialogContextSwitch: (context?: any) => void
     componentProps?: any
 }) => {
+    const requireRecipientEmail = componentProps?.requireRecipientEmail === true
     const [isSelf, setIsSelf] = useState(false)
     const [email, setEmail] = useState("")
     const [isSingle, setIsSingle] = useState(false)
+
+    useEffect(() => {
+        if (!requireRecipientEmail) return
+        const prefilled =
+            componentProps?.defaultEmail?.trim() ||
+            sessionStorage.getItem(ADMIN_MOTOR_CUSTOMER_EMAIL_KEY)?.trim() ||
+            ""
+        if (prefilled) setEmail(prefilled)
+    }, [requireRecipientEmail, componentProps?.defaultEmail])
 
     const submitMutation = UseApiMutation<SubmitResponse, FormData>({
         url: `document/motor/send-invoice-via-email`,
@@ -2300,7 +2337,7 @@ export const SendInvoiceViaEmail = ({
         mutationOptions: {
             onSuccess: (data) => {
                 ShowToast.success(data.message || "Sent successfully!")
-                setEmail("")
+                setEmail(requireRecipientEmail ? email : "")
                 setIsSelf(false)
                 componentProps?.refetch?.()
                 handleDialogContextSwitch({ refetch: true })
@@ -2318,13 +2355,19 @@ export const SendInvoiceViaEmail = ({
             ShowToast.error("No active purchase session found.")
             return
         }
+        const trimmedEmail = email.trim()
+        if (requireRecipientEmail && !trimmedEmail) {
+            ShowToast.error("Please enter the customer email address.")
+            return
+        }
         const is_single = isSingle;
+        const sendToSelf = requireRecipientEmail ? false : isSelf
         const base: Record<string, unknown> = {
-            is_self: isSelf,
+            is_self: sendToSelf,
             is_single: is_single,
         }
-        if (!isSelf) {
-            base.email = email
+        if (!sendToSelf) {
+            base.email = trimmedEmail
         }
         base.purchase_id = purchaseId ?? "";
         submitMutation.mutate(base as any)
@@ -2334,23 +2377,31 @@ export const SendInvoiceViaEmail = ({
         <div className="w-full min-w-75 max-w-100 space-y-6 p-6">
             <div className="border-b pb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h2 className="text-xl font-semibold">Share Via Email To Either Self or Another User</h2>
+                    <h2 className="text-xl font-semibold">
+                        {requireRecipientEmail
+                            ? "Send invoice to customer email"
+                            : "Share Via Email To Either Self or Another User"}
+                    </h2>
                     <p className="text-sm text-muted-foreground mt-1">
-                        Enter the email address you want to share the documents with. You can also choose to send the documents to yourself.
+                        {requireRecipientEmail
+                            ? "Enter the customer email address. The invoice will be sent to this address."
+                            : "Enter the email address you want to share the documents with. You can also choose to send the documents to yourself."}
                     </p>
                 </div>
             </div>
             <form onSubmit={onSubmit} className="space-y-6">
-                <div className="flex items-center space-x-2">
-                    <Checkbox
-                        id="is_self"
-                        checked={isSelf}
-                        onCheckedChange={(checked) => setIsSelf(checked === true)}
-                    />
-                    <Label htmlFor="is_self" className="cursor-pointer font-bold text-lg">
-                        Send to my email
-                    </Label>
-                </div>
+                {!requireRecipientEmail && (
+                    <div className="flex items-center space-x-2">
+                        <Checkbox
+                            id="is_self"
+                            checked={isSelf}
+                            onCheckedChange={(checked) => setIsSelf(checked === true)}
+                        />
+                        <Label htmlFor="is_self" className="cursor-pointer font-bold text-lg">
+                            Send to my email
+                        </Label>
+                    </div>
+                )}
 
                 <div className="flex items-center space-x-2">
                     <Checkbox
@@ -2363,9 +2414,11 @@ export const SendInvoiceViaEmail = ({
                     </Label>
                 </div>
 
-                {!isSelf && (
+                {(requireRecipientEmail || !isSelf) && (
                     <div className="space-y-2">
-                        <Label htmlFor="email">Email Address</Label>
+                        <Label htmlFor="email">
+                            {requireRecipientEmail ? "Customer Email Address" : "Email Address"}
+                        </Label>
                         <input
                             id="email"
                             type="email"
@@ -2373,7 +2426,7 @@ export const SendInvoiceViaEmail = ({
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder="Enter email"
                             className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] px-3"
-                            required={!isSelf}
+                            required
                             autoComplete="off"
                         />
                     </div>

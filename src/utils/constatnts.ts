@@ -178,6 +178,9 @@ export const PURCHASE_SESSION_STORAGE_KEY = "purchase_session_id"
 export const INVOICE_SESSION_STORAGE_KEY = "invoice_purchase_session_id"
 export const VEHICLE_DETAILS_SESSION_STORAGE_KEY = "vehicle_info_session"
 export const VEHICLE_OWNERSHIP_SESSION_STORAGE_KEY = "vehicle_ownership_session"
+export const ADMIN_MOTOR_CUSTOMER_EMAIL_KEY = "admin_motor_customer_email"
+export const ADMIN_MOTOR_CUSTOMER_NAME_KEY = "admin_motor_customer_name"
+export const ADMIN_MOTOR_CUSTOMER_PHONE_KEY = "admin_motor_customer_phone"
 export const INVOICE_ID_KEY = "invoice_id"
 
 export const BENEFIT_TYPE_CONFIG = {
