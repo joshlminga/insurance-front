@@ -12,9 +12,22 @@ import { SubmitResponse } from "@/types/types"
 import { EMETHODS } from "@/utils/constatnts"
 import { extractErrorMessage } from "@/utils/helpers"
 import { ShowToast } from "@/utils/utils"
+import { useQueryClient } from "@tanstack/react-query"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useEffect, useMemo, useState } from "react"
-import { Controller, useForm } from "react-hook-form"
+import { Controller, Resolver, useForm } from "react-hook-form"
+
+import {
+  appendProductsToFormData,
+  mapApiProductsToEditRows,
+} from "../organization-location-products"
+import {
+  getOrganizationLocationFromResponse,
+  isOrganizationLocationMutationSuccess,
+  refreshOrganizationLocationList,
+  refreshOrganizationLocationShowCache,
+} from "../organization-location-query"
+import { OrganizationLocationProductsField } from "./products-field"
 
 const getLocationId = (location: Record<string, any>) =>
   location?.organization_location_id ?? location?.organizationLocationId ?? location?.id
@@ -31,7 +44,9 @@ export const EditOrganizationLocationModal = ({
 }) => {
   const locationId = getLocationId(componentProps?.data ?? {})
 
-  const { data: showData } = UseApiQuery<SubmitResponse>({
+  const queryClient = useQueryClient()
+
+  const { data: showData, refetch: refetchShow } = UseApiQuery<SubmitResponse>({
     url: `organization-location/${locationId}`,
     queryOptions: { enabled: Boolean(locationId) },
   })
@@ -43,13 +58,20 @@ export const EditOrganizationLocationModal = ({
 
   const countryId = String(location?.country?.id ?? location?.country_id ?? "")
   const initials = String(location?.meta?.initials ?? location?.initials ?? "")
+  const productRows = useMemo(
+    () => mapApiProductsToEditRows(location?.products),
+    [location?.products]
+  )
 
   const form = useForm<OrganizationLocationEditFormValues>({
-    resolver: zodResolver(OrganizationLocationEditSchema),
+    resolver: zodResolver(
+      OrganizationLocationEditSchema
+    ) as Resolver<OrganizationLocationEditFormValues>,
     defaultValues: {
       initials,
       country_id: countryId,
       logo: undefined,
+      product: productRows,
     },
   })
 
@@ -58,9 +80,10 @@ export const EditOrganizationLocationModal = ({
       initials,
       country_id: countryId,
       logo: undefined,
+      product: productRows,
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initials, countryId])
+  }, [initials, countryId, productRows])
 
   const [removeLogo, setRemoveLogo] = useState(false)
 
@@ -73,11 +96,44 @@ export const EditOrganizationLocationModal = ({
       },
     },
     mutationOptions: {
-      onSuccess: (response) => {
+      onSuccess: async (response) => {
+        if (!isOrganizationLocationMutationSuccess(response)) {
+          ShowToast.error(
+            response?.message || "Organization location update failed"
+          )
+          return
+        }
+
+        if (locationId) {
+          await refreshOrganizationLocationShowCache(
+            queryClient,
+            locationId,
+            response,
+            refetchShow
+          )
+
+          const updatedLocation = getOrganizationLocationFromResponse(response)
+
+          if (updatedLocation) {
+            form.reset({
+              initials: String(
+                updatedLocation?.meta?.initials ?? updatedLocation?.initials ?? ""
+              ),
+              country_id: String(
+                updatedLocation?.country?.id ?? updatedLocation?.country_id ?? ""
+              ),
+              logo: undefined,
+              product: mapApiProductsToEditRows(updatedLocation?.products),
+            })
+            setRemoveLogo(false)
+          }
+        }
+
         ShowToast.success(
           response?.message || "Organization location updated successfully"
         )
-        componentProps?.refetch?.()
+        await refreshOrganizationLocationList(queryClient)
+        await componentProps?.refetch?.()
         handleDialogContextSwitch({})
       },
       onError: (error) => {
@@ -104,6 +160,7 @@ export const EditOrganizationLocationModal = ({
       formData.append("logo", data.logo)
     }
 
+    appendProductsToFormData(formData, data.product ?? [])
     updateMutation.mutate(formData)
   }
 
@@ -168,6 +225,12 @@ export const EditOrganizationLocationModal = ({
           label="Logo"
           disabled={removeLogo}
           className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+        />
+
+        <OrganizationLocationProductsField
+          control={form.control}
+          name="product"
+          showStatus
         />
 
         <CardFooter className="flex flex-col sm:flex-row justify-between gap-3 mt-2 px-0">

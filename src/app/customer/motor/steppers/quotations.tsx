@@ -64,6 +64,7 @@ import { Slider } from '@/components/ui/slider'
 export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
     goToNextStep,
     goToPrevStep,
+    missingSessionBackLabel = 'Vehicle Details',
 }) => {
     const [quoteSessionId, setQuoteSessionId] = useState<number | null>(null)
     const [selectedQuotes, setSelectedQuotes] = useState<SelectedQuoteEntry[]>([])
@@ -410,7 +411,8 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
         <div className="space-y-6">
             {!quoteSessionId && (
                 <div className="rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-                    <strong>Quote session not found.</strong> Go back to Vehicle Details and submit again.
+                    <strong>Quote session not found.</strong> Go back to {missingSessionBackLabel} and
+                    submit again.
                 </div>
             )}
 

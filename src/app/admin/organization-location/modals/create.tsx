@@ -11,6 +11,12 @@ import { ShowToast } from "@/utils/utils"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
 
+import {
+  appendProductsToFormData,
+  DEFAULT_ORG_LOCATION_PRODUCT_CREATE_ROW,
+} from "../organization-location-products"
+import { OrganizationLocationProductsField } from "./products-field"
+
 export const CreateOrganizationLocationModal = ({
   handleDialogContextSwitch,
   componentProps,
@@ -26,6 +32,7 @@ export const CreateOrganizationLocationModal = ({
       initials: "",
       country_id: "",
       logo: undefined,
+      product: [{ ...DEFAULT_ORG_LOCATION_PRODUCT_CREATE_ROW }],
     },
   })
 
@@ -40,7 +47,13 @@ export const CreateOrganizationLocationModal = ({
     mutationOptions: {
       onSuccess: (data) => {
         ShowToast.success(data.message || "Submitted successfully!")
-        form.reset()
+        form.reset({
+          organization_id: "",
+          initials: "",
+          country_id: "",
+          logo: undefined,
+          product: [{ ...DEFAULT_ORG_LOCATION_PRODUCT_CREATE_ROW }],
+        })
         componentProps?.refetch?.()
         handleDialogContextSwitch({ refetch: true })
       },
@@ -61,11 +74,12 @@ export const CreateOrganizationLocationModal = ({
     if (data.logo instanceof File) {
       formData.append("logo", data.logo)
     }
+    appendProductsToFormData(formData, data.product ?? [])
     submitMutation.mutate(formData)
   }
 
   return (
-    <div className="w-full min-w-150 max-w-150 p-6 space-y-6">
+    <div className="w-full min-w-[600px] max-w-[700px] p-6 space-y-6">
       <div className="border-b pb-3">
         <h2 className="text-xl font-semibold">Add Organization Location</h2>
         <p className="text-sm text-muted-foreground mt-1">
@@ -113,6 +127,11 @@ export const CreateOrganizationLocationModal = ({
           type="file"
           label="Logo"
           className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+        />
+
+        <OrganizationLocationProductsField
+          control={form.control}
+          name="product"
         />
 
         <CardFooter className="flex flex-col sm:flex-row justify-between gap-3 mt-2 px-0">
