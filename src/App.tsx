@@ -8,9 +8,10 @@ import Layout from "./Layout"
 
 const Loader = () => (
   <div className="flex h-screen w-full items-center justify-center">
-    <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-[#C20C0C]" />
+    <div className="h-12 w-12 animate-spin rounded-full border-dotted border-4 border-[#C20C0C] border-t-[#C20C0C] animation-duration-[4s]" />
   </div>
 )
+
 
 function S({ children }: { children: React.ReactNode }) {
   return <Suspense fallback={<Loader />}>{children}</Suspense>
@@ -73,6 +74,11 @@ const MotorDetailedBenefitPage = lazy(() => import("./app/admin/product/motor/mo
 const MotorTonangePage = lazy(() => import("./app/admin/product/motor/motor-tonage/page").then(m => ({ default: m.MotorTonangePage })))
 const MotorProductRatesPage = lazy(() => import("./app/admin/product/motor/motor-rates/page").then(m => ({ default: m.MotorProductRatesPage })))
 const MotorQuotationPage = lazy(() => import("./app/admin/quotations/motor/page").then(m => ({ default: m.MotorQuotationPage })))
+const AdminMotorQuotationResultsPage = lazy(() =>
+  import("./app/admin/quotations/motor/results/page").then(m => ({
+    default: m.AdminMotorQuotationResultsPage,
+  }))
+)
 
 export const router = createBrowserRouter([
 
@@ -331,6 +337,10 @@ export const router = createBrowserRouter([
       {
         path: "quotations/motor-quotations",
         element: <S><MotorQuotationPage /></S>,
+      },
+      {
+        path: "quotations/motor-quotations/results",
+        element: <S><AdminMotorQuotationResultsPage /></S>,
       },
       // products
       // motor

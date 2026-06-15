@@ -38,7 +38,8 @@ import type {
     TLoaderProps,
     ProfileMenuItemProps,
     ConfirmationDialogProps,
-    ReusableSwitchToggleProps
+    ReusableSwitchToggleProps,
+    ReusablePopoverProps
 } from "@/types/types";
 import {
     Stepper,
@@ -129,6 +130,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { ChatIndexPage } from "@/app/chat-components/page";
 import { Switch } from "@/components/ui/switch";
+import { EPREFIX, EROUTES } from "@/utils/enums";
 
 const formatSegment = (segment: string) => {
     return segment
@@ -139,61 +141,40 @@ const formatSegment = (segment: string) => {
 
 export const BreadCrumbComponent = () => {
     const location = useLocation();
-    const rawSegments = location.pathname.split('/').filter(Boolean);
-    const pathSegments = rawSegments[0] === "dashboard" ? rawSegments.slice(1) : rawSegments;
+    const pathSegments = location.pathname.split("/").filter(Boolean);
+    const isDashboardArea =
+        pathSegments[0] === EPREFIX.DASHBOARD.slice(1);
+    const segments = isDashboardArea ? pathSegments.slice(1) : pathSegments;
+    const basePath = isDashboardArea ? EPREFIX.DASHBOARD : "";
+
     return (
-        <div className="w-auto">
+        <div className="min-w-0 w-auto overflow-hidden">
             <Breadcrumb>
-                <BreadcrumbList>
+                <BreadcrumbList className="flex-nowrap">
                     <BreadcrumbItem>
                         <BreadcrumbLink asChild>
-                            <Link to="/">Dashboard</Link>
+                            <Link to={EROUTES.DASHBOARD}>Dashboard</Link>
                         </BreadcrumbLink>
                     </BreadcrumbItem>
-                    {pathSegments.flatMap((segment, index) => {
-                        if (segment === "organization-location") {
-                            const isLast = index === pathSegments.length - 1
-                            return [
-                                <Fragment key="/dashboard/organization">
-                                    <BreadcrumbSeparator />
-                                    <BreadcrumbItem>
-                                        <BreadcrumbLink asChild>
-                                            <Link to="/dashboard/organization">Organization</Link>
-                                        </BreadcrumbLink>
-                                    </BreadcrumbItem>
-                                </Fragment>,
-                                <Fragment key="/dashboard/organization-location">
-                                    <BreadcrumbSeparator />
-                                    <BreadcrumbItem>
-                                        {isLast ? (
-                                            <BreadcrumbPage>Location</BreadcrumbPage>
-                                        ) : (
-                                            <BreadcrumbLink asChild>
-                                                <Link to="/dashboard/organization-location">Location</Link>
-                                            </BreadcrumbLink>
-                                        )}
-                                    </BreadcrumbItem>
-                                </Fragment>,
-                            ]
-                        }
-
-                        const href = '/dashboard/' + pathSegments.slice(0, index + 1).join('/');
-                        const isLast = index === pathSegments.length - 1;
+                    {segments.map((segment, index) => {
+                        const href = `${basePath}/${segments.slice(0, index + 1).join("/")}`;
+                        const isLast = index === segments.length - 1;
                         const title = formatSegment(segment);
-                        return [
+
+                        return (
                             <Fragment key={href}>
                                 <BreadcrumbSeparator />
-                                <BreadcrumbItem>
+                                <BreadcrumbItem className="max-w-32 truncate sm:max-w-48">
                                     {isLast ? (
-                                        <BreadcrumbPage>{title}</BreadcrumbPage>
+                                        <BreadcrumbPage className="truncate">{title}</BreadcrumbPage>
                                     ) : (
                                         <BreadcrumbLink asChild>
-                                            <Link to={href}>{title}</Link>
+                                            <Link to={href} className="truncate">{title}</Link>
                                         </BreadcrumbLink>
                                     )}
                                 </BreadcrumbItem>
                             </Fragment>
-                        ];
+                        );
                     })}
                 </BreadcrumbList>
             </Breadcrumb>
@@ -2121,16 +2102,17 @@ export const CustomLoader: React.FC<TLoaderProps> = ({
 }) => (
     <div
         className={cn(
-            "w-full flex flex-col justify-center items-center gap-3 text-center",
+            "w-full flex justify-center items-center",
             className
-        )}>
+        )}
+    >
         {children ?? (
             isError ? (
-                <p className="">{title}</p>
+                <p>{title}</p>
             ) : (
-                <div role="status" className="flex flex-col items-center gap-3">
-                    <Loader2 className="h-12 w-12 animate-spin text-gray-500" aria-hidden />
-                    <p className="text-sm text-muted-foreground">{title}</p>
+                <div role="status" className="flex flex-row items-center justify-center gap-3">
+                    <Loader2 className="h-8 w-8 animate-spin text-[#C20C0C]" aria-hidden />
+                    <p className="text-md font-semibold text-muted-foreground">{title}</p>
                 </div>
             )
         )}
@@ -2209,7 +2191,7 @@ export const SendDocumentsViaEmail = ({
     }
 
     return (
-        <div className="w-full min-w-[300px] max-w-[400px] space-y-6 p-6">
+        <div className="w-full min-w-75 max-w-100 space-y-6 p-6">
             <div className="border-b pb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <h2 className="text-xl font-semibold">Share Via Email To Either Self or Another User</h2>
@@ -2349,7 +2331,7 @@ export const SendInvoiceViaEmail = ({
     }
 
     return (
-        <div className="w-full min-w-[300px] max-w-[400px] space-y-6 p-6">
+        <div className="w-full min-w-75 max-w-100 space-y-6 p-6">
             <div className="border-b pb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <h2 className="text-xl font-semibold">Share Via Email To Either Self or Another User</h2>
@@ -2477,7 +2459,8 @@ export const ProfileMenuItem = ({
         <Link
             to={to}
             onClick={onClick}
-            className={`flex w-full items-center gap-2.5 border-b border-gray-100 px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-[#C20C0C] transition-colors ${className}`}>
+            className={`flex w-full items-center gap-2.5 border-b 
+            border-gray-100 px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-[#C20C0C] transition-colors ${className}`}>
             <Icon className="h-4 w-4 shrink-0" />
             <span>{label}</span>
         </Link>
@@ -2521,4 +2504,26 @@ export const ReusableSwitchToggle = ({
             />
         </Field>
     )
+}
+
+export function ReusablePopover({
+    trigger,
+    children,
+    className,
+    align = "center",
+    side = "bottom",
+}: ReusablePopoverProps) {
+    return (
+        <Popover>
+            <PopoverTrigger asChild>
+                {trigger}
+            </PopoverTrigger>
+            <PopoverContent
+                align={align}
+                side={side}
+                className={cn("min-w-30 w-fit p-0", className)}>
+                {children}
+            </PopoverContent>
+        </Popover>
+    );
 }

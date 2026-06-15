@@ -19,6 +19,7 @@ import { extractErrorMessage } from "@/utils/helpers";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export function SignupForm({
   className,
@@ -26,6 +27,8 @@ export function SignupForm({
 }: React.ComponentProps<"div">) {
   const [show, setShow] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [isPolicy, setIsPolicy] = useState(false)
+  const [showPolicyState, setShowPolicyState] = useState(false)
 
   const navigate = useNavigate()
   const location = useLocation()
@@ -47,7 +50,7 @@ export function SignupForm({
       onSuccess: (data: any) => {
         ShowToast.success(data.message || "Signup successful!")
         // navigate(returnTo || EROUTES.LANDING)
-          navigate(`/${EPREFIX.AUTH}${EROUTES.VERIFY_EMAIL}`)
+        navigate(`/${EPREFIX.AUTH}${EROUTES.VERIFY_EMAIL}`)
       },
       onError: (error: any) => {
         const message = extractErrorMessage(error);
@@ -57,7 +60,10 @@ export function SignupForm({
   })
 
   const onSubmit = async (data: SignUpFormValues) => {
-    loginMutation.mutate(data)
+    if (isPolicy === true) {
+      loginMutation.mutate(data)
+    }
+    setShowPolicyState(true)
   }
 
   return (
@@ -124,6 +130,41 @@ export function SignupForm({
               </button>
             </div>
 
+            <div className="flex items-start gap-2.5 sm:gap-3 rounded-lg sm:rounded-none bg-[#f0fdf4]/50 sm:bg-transparent p-2 sm:p-0 -mx-1 sm:mx-0">
+              <Checkbox
+                id="motor-privacy-consent"
+                onCheckedChange={(checked) => {
+                  if (checked === true) {
+                    setIsPolicy(true)
+                    setShowPolicyState(false)
+                  } else {
+                    setIsPolicy(false)
+                  }
+                }}
+                className="w-4 h-4 mt-0.5 shrink-0 rounded-[3px] border border-[#D9D9D9] data-[state=checked]:bg-[#C20C0C] data-[state=checked]:border-[#C20C0C]"
+              />
+              <label
+                htmlFor="motor-privacy-consent"
+                className={cn(
+                  "text-xs sm:text-sm leading-relaxed cursor-pointer min-w-0",
+                  isPolicy ? "text-[#141414]" : "text-red-500",
+                )}>
+                I acknowledge and consent to the collection and processing of my
+                personal data as outlined in the{" "}
+                <Link to="#" className="underline underline-offset-2 hover:text-[#C20C0C]">
+                  Privacy Policy
+                </Link>
+              </label>
+            </div>
+            {showPolicyState && (
+              <div
+                role="alert"
+                className="w-full rounded-lg bg-red-100 border border-red-200 p-2 sm:p-4">
+                <span className="text-red-600 text-xs sm:text-sm font-semibold leading-relaxed">
+                  Confirm terms and conditions below before you continue
+                </span>
+              </div>
+            )}
           </Field>
           <Field>
             <Button

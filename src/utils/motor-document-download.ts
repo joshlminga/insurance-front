@@ -25,7 +25,6 @@ const previewPdfBlob = (data: Blob, label: string) => {
     ShowToast.success(`${label} preview opened`)
 }
 
-/** GET blob by URL template; `id` is substituted into the path. */
 export const useMotorDocumentDownload = (urlTemplate: (id: string) => string, label: string) =>
     UseApiMutation<Blob, string>({
         url: urlTemplate,

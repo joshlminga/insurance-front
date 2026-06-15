@@ -1,18 +1,31 @@
 import { Button } from "@/components/ui/button"
-import { BreadCrumbComponent } from "@/dev/core"
-import type { PageHeaderProps } from "@/types/types"
+import type { LucideIcon } from "lucide-react"
 import { Link } from "react-router-dom"
 
+interface PageHeaderAction {
+  label: string
+  icon?: LucideIcon
+  href?: string
+  onClick?: () => void
+  variant?: "default" | "outline" | "secondary" | "ghost"
+}
+
+interface PageHeaderProps {
+  title: string
+  description?: string
+  actions?: PageHeaderAction[]
+  children?: React.ReactNode
+}
 
 export function PageHeader({ title, description, actions, children }: PageHeaderProps) {
   return (
-    <div className="w-full">
-      <title>{`${title} - Accensure Insurance Marketplace`}</title>
+    <div className="mb-4 p-2">
+      <title>{`${title} - Admin`}</title>
       {description && <meta name="description" content={description} />}
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-col gap-1">
-            <h1 className="text-xl font-semibold text-primary leading-8">
+            <h1 className="text-2xl font-semibold text-primary leading-8">
               {title}
             </h1>
             {description && (
@@ -21,38 +34,37 @@ export function PageHeader({ title, description, actions, children }: PageHeader
               </p>
             )}
           </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <BreadCrumbComponent />
-          </div>
-        </div>
-        <div className="flex items-center justify-end gap-2 shrink-0">
-          {actions?.map((action, index) => {
-            const Icon = action.icon
-            const buttonContent = (
-              <>
-                {Icon && <Icon className="h-4 w-4" />}
-                {action.label}
-              </>
-            )
-            if (action.href) {
+          {actions && actions.length > 0 && (
+          <div className="flex shrink-0 items-center gap-2">
+            {actions.map((action, index) => {
+              const Icon = action.icon
+              const buttonContent = (
+                <>
+                  {Icon && <Icon className="h-4 w-4" />}
+                  {action.label}
+                </>
+              )
+              if (action.href) {
+                return (
+                  <Button
+                    key={index}
+                    variant={action.variant || "default"}
+                    asChild>
+                    <Link to={action.href}>{buttonContent}</Link>
+                  </Button>
+                )
+              }
               return (
                 <Button
                   key={index}
                   variant={action.variant || "default"}
-                  asChild>
-                  <Link to={action.href}>{buttonContent}</Link>
+                  onClick={action.onClick}>
+                  {buttonContent}
                 </Button>
               )
-            }
-            return (
-              <Button
-                key={index}
-                variant={action.variant || "default"}
-                onClick={action.onClick}>
-                {buttonContent}
-              </Button>
-            )
-          })}
+            })}
+          </div>
+          )}
         </div>
         {children}
       </div>

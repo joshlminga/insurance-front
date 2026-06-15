@@ -1,31 +1,19 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Badge } from "@/components/ui/badge";
+import { COVER_STATUS_DISPLAY } from "@/utils/constatnts";
 import { formatCurrency } from "@/utils/helpers";
 import { ColumnDef } from "@tanstack/table-core";
 
-export const COVER_STATUS_DISPLAY: Record<
-    string,
-    { label: string; className: string }
-> = {
-    waiting_payment: {
-        label: "Payment Pending",
-        className: "bg-black text-white",
-    },
-    pending: {
-        label: "AKI Pending Issuing",
-        className: "bg-blue-600 text-white",
-    },
-    issued: {
-        label: "Issued",
-        className: "bg-green-100 text-green-800",
-    },
-    failed: {
-        label: "Failed",
-        className: "bg-red-100 text-red-800",
-    },
-};
 
 export const MyCoversColumns: ColumnDef<any>[] = [
+     {
+        accessorKey: "cover_type",
+        header: () => <div>Class</div>,
+        cell: ({ row }) => {
+            const cover_type: string = row.getValue("cover_type");
+            return <div>{cover_type}</div>;
+        },
+    },
     {
         accessorKey: "cover_type",
         header: () => <div>Cover Type</div>,
@@ -75,8 +63,8 @@ export const MyCoversColumns: ColumnDef<any>[] = [
                 COVER_STATUS_DISPLAY[status] ?? COVER_STATUS_DISPLAY.failed;
             return (
                 <Badge
-                    className={`rounded-lg font-semibold ${display.className}`}
-                >
+                    variant="outline"
+                    className={`rounded-md px-2.5 py-0.5 text-xs font-medium ${display.className}`}>
                     {display.label}
                 </Badge>
             );

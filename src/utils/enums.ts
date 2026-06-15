@@ -12,6 +12,8 @@ export const EPREFIX = {
   DASHBOARD: "dashboard",
   PRODUCTS: "products",
   QUOTATIONS: "quotations",
+
+  ERRORS: 'errors'
 } as const
 
 export const EROUTES = {
@@ -73,6 +75,7 @@ export const EROUTES = {
   // Quotations
   QUOTATIONS: `/${EPREFIX.DASHBOARD}/${EPREFIX.QUOTATIONS}`,
   MOTORQUOTATIONS: `/${EPREFIX.DASHBOARD}/${EPREFIX.QUOTATIONS}/motor-quotations`,
+  MOTOR_QUOTATION_RESULTS: `/${EPREFIX.DASHBOARD}/${EPREFIX.QUOTATIONS}/motor-quotations/results`,
   // products
   // Motor
   PRODUCTS: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor`,
@@ -87,6 +90,9 @@ export const EROUTES = {
   ORGANIZATION: `/${EPREFIX.DASHBOARD}/organization`,
   ORGANIZATION_LOCATION: `/${EPREFIX.DASHBOARD}/organization-location`,
   USERS: `/${EPREFIX.DASHBOARD}/users`,
+
+  ERROR404: `/${EPREFIX.ERRORS}/errors404`
+
 } as const
 
 export const SORT_ORDER = {
