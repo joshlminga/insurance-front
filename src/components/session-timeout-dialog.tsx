@@ -30,7 +30,6 @@ import { ShowToast } from '@/utils/utils'
 
 const REMEMBER_EMAIL_KEY = 'session-timeout-remember-email'
 const signupPath = `/${EPREFIX.AUTH}${EROUTES.SIGNUP}`
-const verifyEmailPath = `/${EPREFIX.AUTH}${EROUTES.VERIFY_EMAIL}`
 
 /**
  * Global dialog shown when the API returns 401 (session expired).
@@ -75,8 +74,6 @@ export function SessionTimeoutDialog() {
         if (data?.data?.status === 'NOT_VERIFIED') {
           setGuest(data?.data?.guest)
           ShowToast.info(data.message || 'Please verify your email to continue.')
-          close()
-          window.location.href = verifyEmailPath
           return
         }
 
@@ -189,6 +186,8 @@ export function SessionTimeoutDialog() {
           <a
             href={signupPath}
             className="text-[#C20C0C] font-medium hover:underline"
+            target="_blank"
+            rel="noreferrer"
           >
             Click to register
           </a>
