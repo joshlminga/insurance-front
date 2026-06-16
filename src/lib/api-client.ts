@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { emitSessionExpired } from '@/stores/session-timeout-store'
 import { EPREFIX, EROUTES } from '@/utils/enums'
 
 const API_BASE_URL = import.meta.env.VITE_DEBUG ==='true'
@@ -40,11 +41,12 @@ apiClient.interceptors.response.use(
         const status = error?.response?.status
         const requestUrl = error?.config?.url ?? ''
         const isLoginRequest = typeof requestUrl === 'string' && requestUrl.includes('auth/login')
+
+        // Login After 401 Error
         const loginPath = `${EPREFIX.AUTH}${EROUTES.SIGNIN}`
         const isOnLoginPage = window.location.pathname === loginPath
         if (status === 401 && !isLoginRequest && !isOnLoginPage) {
-            localStorage.removeItem(AUTH_STORAGE_KEY)
-            window.location.replace(loginPath)
+            emitSessionExpired()
         }
         return Promise.reject(error)
     }
