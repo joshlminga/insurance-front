@@ -830,6 +830,9 @@ export const ReuseableRadioChoiceGroup: React.FC<RadioChoiceGroupProps> = ({
     activeColor = "#3771C8",
     showSelector = true,
     selectorPosition = "right",
+    imagePriority = false,
+    borderOnlyActive = false,
+    neutralSelector = false,
     className,
 }) => {
     const [internalValue, setInternalValue] =
@@ -858,37 +861,61 @@ export const ReuseableRadioChoiceGroup: React.FC<RadioChoiceGroupProps> = ({
                         <label
                             key={item.value}
                             className={cn(
-                                "cursor-pointer rounded-lg border p-4 transition-all",
-                                contentPosition === "inline"
-                                    ? "flex items-center justify-between gap-4"
-                                    : "flex flex-col gap-3",
+                                "cursor-pointer rounded-lg border transition-all",
+                                imagePriority
+                                    ? "relative flex min-h-20 min-w-24 items-center justify-center overflow-hidden bg-white p-0 shadow-sm"
+                                    : cn(
+                                        "p-4",
+                                        contentPosition === "inline"
+                                            ? "flex items-center justify-between gap-4"
+                                            : "flex flex-col gap-3",
+                                    ),
+                                borderOnlyActive && isActive && "shadow-md",
+                                (borderOnlyActive || imagePriority) && "bg-white",
+                                !imagePriority && !borderOnlyActive && "transition-all",
                                 item.disabled &&
                                 "opacity-50 cursor-not-allowed"
                             )}
                             style={{
                                 borderColor: isActive ? activeColor : undefined,
-                                backgroundColor: isActive
-                                    ? `${activeColor}10`
-                                    : undefined,
+                                ...(!borderOnlyActive && isActive && !imagePriority
+                                    ? { backgroundColor: `${activeColor}10` }
+                                    : {}),
                             }}>
                             {showSelector && selectorPosition === "left" && (
                                 <RadioGroupItem
                                     value={item.value}
                                     disabled={item.disabled}
-                                    className="mr-3"
-                                    style={{
-                                        borderColor: isActive
-                                            ? activeColor
-                                            : undefined,
-                                    }}
+                                    className={cn(
+                                        imagePriority
+                                            ? "absolute top-1.5 left-1.5 z-10 mr-0"
+                                            : "mr-3",
+                                    )}
+                                    style={
+                                        neutralSelector
+                                            ? undefined
+                                            : {
+                                                borderColor: isActive
+                                                    ? activeColor
+                                                    : undefined,
+                                            }
+                                    }
                                 />
                             )}
-                            <div className="flex items-center gap-3 flex-1">
+                            <div
+                                className={cn(
+                                    "flex items-center flex-1",
+                                    imagePriority ? "h-full w-full justify-center" : "gap-3",
+                                )}>
                                 {item.image && (
                                     <img
                                         src={item.image}
-                                        alt={item.label}
-                                        className="h-8 w-20 object-contain"
+                                        alt={item.label ?? item.value}
+                                        className={cn(
+                                            imagePriority
+                                                ? "h-full w-full min-h-20 object-contain p-1.5"
+                                                : "h-8 w-20 object-contain",
+                                        )}
                                     />
                                 )}
 
@@ -896,9 +923,12 @@ export const ReuseableRadioChoiceGroup: React.FC<RadioChoiceGroupProps> = ({
                                     <Icon
                                         size={item.iconSize ?? 18}
                                         color={
-                                            isActive ? activeColor : undefined
+                                            isActive && !neutralSelector
+                                                ? activeColor
+                                                : undefined
                                         }
                                     />)}
+                                {!imagePriority && (
                                 <div>
                                     <div
                                         className="font-semibold"
@@ -915,17 +945,22 @@ export const ReuseableRadioChoiceGroup: React.FC<RadioChoiceGroupProps> = ({
                                         </div>
                                     )}
                                 </div>
+                                )}
                             </div>
                             {showSelector &&
                                 selectorPosition === "right" && (
                                     <RadioGroupItem
                                         value={item.value}
                                         disabled={item.disabled}
-                                        style={{
-                                            borderColor: isActive
-                                                ? activeColor
-                                                : undefined,
-                                        }}
+                                        style={
+                                            neutralSelector
+                                                ? undefined
+                                                : {
+                                                    borderColor: isActive
+                                                        ? activeColor
+                                                        : undefined,
+                                                }
+                                        }
                                     />
                                 )}
                         </label>

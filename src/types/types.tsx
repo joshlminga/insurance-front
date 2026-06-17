@@ -395,6 +395,13 @@ export type RadioChoiceGroupProps = {
   showSelector?: boolean
   selectorPosition?: "left" | "right"
 
+  /** Image fills the option box (payment logos). */
+  imagePriority?: boolean
+  /** Active state: border + shadow only, no tinted background. */
+  borderOnlyActive?: boolean
+  /** Keep radio circle default styling instead of activeColor. */
+  neutralSelector?: boolean
+
   className?: string
 }
 
@@ -602,6 +609,33 @@ export type MpesaPollResponse = {
     CheckoutRequestID?: string
     checkout_request_id?: string
   }
+}
+
+export type CreditSummaryResponse = {
+  available_credit?: string | number
+  unsettled_credit?: string | number
+  unsettled_credit_limit?: string | number
+  data?: CreditSummaryResponse
+}
+
+export type CashPaymentOption = {
+  title: string
+  steps: string[]
+}
+
+export type BankPaymentDetailsResponse = {
+  payment_options?: CashPaymentOption[]
+  bank_payment_details?: {
+    bank_name?: string
+    account_name?: string
+    account_number?: string
+    branch?: string
+  }
+  cheque?: string
+  swift_code?: string
+  eft?: string
+  office_location?: string
+  data?: BankPaymentDetailsResponse
 }
 
 export type ClaimStatus = 'pending' | 'approved' | 'rejected'

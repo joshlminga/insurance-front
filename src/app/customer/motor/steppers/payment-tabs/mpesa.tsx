@@ -2,11 +2,12 @@ import { FieldGroup, Field, FieldLabel, FieldError } from '@/components/ui/field
 import { Input } from '@/components/ui/input'
 import React from 'react'
 import { useFormContext, Controller } from 'react-hook-form'
-import type { PaymentFormValues } from '@/types/schema'
+import type { PaymentFormInput } from '@/types/schema'
 import { CircleAlert } from 'lucide-react'
+import { PaymentAmountSummary } from './payment-amount-summary'
 
 export const MpesaPageTab: React.FC = () => {
-    const { control, watch } = useFormContext<PaymentFormValues>()
+    const { control, watch } = useFormContext<PaymentFormInput>()
     const amount = watch('amount')
     const formattedAmount = Number(amount || 0).toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 
@@ -26,36 +27,37 @@ export const MpesaPageTab: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
                 <div className="w-full rounded-lg border border-black/20 bg-white shadow-sm p-3">
                     <FieldGroup>
-                        <div className="p-3 h-auto rounded-sm border border-black/20 bg-white">
-                            <span className="text-xs text-black/70 uppercase tracking-wider">Total to Pay:</span>
-                            <h1 className='text-[#BF162E] font-bold text-xl sm:text-2xl'>Ksh {formattedAmount}</h1>
-                        </div>
+                        <PaymentAmountSummary label="Total to Pay:" />
                         <Controller
                             name="phone_number"
                             control={control}
                             render={({ field, fieldState }) => (
-                                <Field data-invalid={fieldState.invalid}>
-                                    <FieldLabel className="text-sm sm:text-base font-semibold mb-1">
-                                        Mobile Number
-                                    </FieldLabel>
-                                    <Input
-                                        {...field}
-                                        type="tel"
-                                        inputMode="numeric"
-                                        placeholder="0712345678"
-                                        autoComplete='off'
-                                        className={`w-full h-10 rounded-sm border border-black/30 text-black ${fieldState.invalid ? 'border-[#BF162E] ring-1 ring-[#BF162E]' : 'focus:ring-[#BF162E]'
-                                            }`}
-                                        onChange={(e) => {
-                                            const formatted = formatPhoneNumber(e.target.value)
-                                            field.onChange(formatted)
-                                        }}
-                                    />
-                                    {fieldState.error && (
-                                        <FieldError className="text-[#BF162E] text-xs mt-1 italic">
-                                            {fieldState.error.message}
-                                        </FieldError>
-                                    )}
+                                <Field data-invalid={fieldState.invalid} className="w-full">
+                                    <div className="flex flex-row items-center gap-3">
+                                        <FieldLabel className="mb-0 shrink-0 whitespace-nowrap text-sm font-semibold sm:text-base">
+                                            Mobile Number
+                                        </FieldLabel>
+                                        <div className="min-w-0 flex-1">
+                                            <Input
+                                                {...field}
+                                                type="tel"
+                                                inputMode="numeric"
+                                                placeholder="0712345678"
+                                                autoComplete='off'
+                                                className={`w-full h-10 rounded-sm border border-black/30 text-black ${fieldState.invalid ? 'border-[#BF162E] ring-1 ring-[#BF162E]' : 'focus:ring-[#BF162E]'
+                                                    }`}
+                                                onChange={(e) => {
+                                                    const formatted = formatPhoneNumber(e.target.value)
+                                                    field.onChange(formatted)
+                                                }}
+                                            />
+                                            {fieldState.error && (
+                                                <FieldError className="text-[#BF162E] text-xs mt-1 italic">
+                                                    {fieldState.error.message}
+                                                </FieldError>
+                                            )}
+                                        </div>
+                                    </div>
                                 </Field>
                             )}
                         />
@@ -84,6 +86,31 @@ export const MpesaPageTab: React.FC = () => {
                         <li className="pl-2">Enter your <span className="font-semibold">PIN</span> and press OK</li>
                         <li className="pl-2">Wait for the confirmation SMS</li>
                     </ol>
+
+                    <Controller
+                        name="mpesa_transaction_code"
+                        control={control}
+                        render={({ field, fieldState }) => (
+                            <Field data-invalid={fieldState.invalid} className="mt-4 w-full">
+                                <FieldLabel className="text-sm font-semibold mb-1">
+                                    M-Pesa Transaction Code
+                                </FieldLabel>
+                                <Input
+                                    {...field}
+                                    value={field.value ?? ''}
+                                    placeholder="e.g. QGH1A2B3C4"
+                                    autoComplete="off"
+                                    className={`w-full h-10 rounded-sm border border-black/30 text-black ${fieldState.invalid ? 'border-[#BF162E] ring-1 ring-[#BF162E]' : 'focus:ring-[#BF162E]'
+                                        }`}
+                                />
+                                {fieldState.error && (
+                                    <FieldError className="text-[#BF162E] text-xs mt-1 italic">
+                                        {fieldState.error.message}
+                                    </FieldError>
+                                )}
+                            </Field>
+                        )}
+                    />
                 </div>
 
             </div>

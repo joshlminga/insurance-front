@@ -23,9 +23,9 @@ import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowLeftCircle, ArrowRightCircle, Eye, Mail, Share2 } from 'lucide-react'
 import React from 'react'
-import { Controller, FormProvider, useForm } from 'react-hook-form'
+import { Controller, FormProvider, useForm, type Resolver } from 'react-hook-form'
 import { PaymentDetailsSchema } from '@/types/form-schema'
-import type { PaymentFormValues } from '@/types/schema'
+import type { PaymentFormInput } from '@/types/schema'
 import { extractErrorMessage } from '@/utils/helpers'
 import { cn } from '@/lib/utils'
 import { useCustomDialogContextFactory } from '@/hooks'
@@ -38,8 +38,8 @@ type BoxHeaderProps = {
 }
 
 const BoxHeader = ({ title, description }: BoxHeaderProps) => (
-    <div className="flex flex-col gap-0.5 pb-3">
-        <h2 className="text-base font-semibold sm:text-lg">{title}</h2>
+    <div className="flex flex-col gap-0.5 pb-2">
+        <h2 className="text-sm font-semibold sm:text-lg">{title}</h2>
         {description ? (
             <p className="text-xs text-muted-foreground sm:text-sm">
                 {description}
@@ -47,6 +47,9 @@ const BoxHeader = ({ title, description }: BoxHeaderProps) => (
         ) : null}
     </div>
 )
+
+const compactFieldClass =
+    'w-full h-9.5 rounded-[4px] border border-black/30 bg-white text-sm text-black'
 
 export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
     goToNextStep,
@@ -158,8 +161,8 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
         },
     })
 
-    const form = useForm<PaymentFormValues>({
-        resolver: zodResolver(PaymentDetailsSchema),
+    const form = useForm<PaymentFormInput>({
+        resolver: zodResolver(PaymentDetailsSchema) as Resolver<PaymentFormInput>,
         defaultValues: {
             payment_method: 'mpesa',
             amount: 1.00,
@@ -169,6 +172,14 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
             first_installment: '',
             second_installment: '',
             third_installment: '',
+            card_provider: 'paystack',
+            paypal_email: '',
+            available_credit: '',
+            unsettled_credit: '',
+            unsettled_credit_limit: '',
+            credit_acknowledged: false,
+            mpesa_transaction_code: '',
+            payment_proof_receipt: undefined,
         },
     })
 
@@ -270,15 +281,15 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
         },
     })
 
-    const onSubmit = (data: PaymentFormValues) => {
+    const onSubmit = (data: PaymentFormInput) => {
         if (data.payment_method !== 'mpesa') {
             goToNextStep?.()
             return
         }
         const payload: MpesaPayload = {
-            phone: data.phone_number,
-            amount: data.amount,
-            invoice_id: data.invoice_id,
+            phone: data.phone_number ?? '',
+            amount: data.amount ?? 0,
+            invoice_id: data.invoice_id ?? '',
         }
         submitMutation.mutate(payload)
     }
@@ -337,13 +348,13 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
                             </p>
                         </div>
 
-                        <div className="mt-5 space-y-5">
-                            <div className="rounded-2xl border border-black/20 bg-white p-3 sm:p-5">
+                        <div className="mt-4 space-y-4">
+                            <div className="rounded-xl border border-black/20 bg-white p-2.5 sm:p-4">
                                 <BoxHeader
                                     title="Payment Plans"
                                     description="Select an installment schedule and review the amounts due."
                                 />
-                                <div className="w-full sm:w-fit sm:min-w-50">
+                                <div className="w-full sm:w-fit sm:min-w-37.5">
                                     <Controller
                                         name="payment_plans"
                                         control={form.control}
@@ -366,7 +377,7 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
                                                     <SelectTrigger
                                                         aria-invalid={fieldState.invalid}
                                                         className={cn(
-                                                            'w-full h-12.75 rounded-[5px] border border-black/30 bg-white text-sm text-black',
+                                                            compactFieldClass,
                                                             fieldState.invalid &&
                                                             'border-[#BF162E] focus:ring-[#BF162E]'
                                                         )}>
@@ -392,14 +403,15 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
                                 {visibleInstallmentCount > 0 ? (
                                     <div
                                         className={cn(
-                                            'mt-4 grid gap-4 sm:gap-5',
-                                            visibleInstallmentCount === 1 && 'grid-cols-1 sm:max-w-md',
+                                            'mt-2.5 grid gap-2.5 sm:gap-4 [&_[data-slot=field-label]]:text-sm [&_[data-slot=field-label]]:mb-1',
+                                            visibleInstallmentCount === 1 && 'grid-cols-1 sm:grid-cols-2',
                                             visibleInstallmentCount === 2 && 'grid-cols-1 sm:grid-cols-2',
                                             visibleInstallmentCount >= 3 && 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
                                         )}>
                                         {visibleInstallmentCount >= 1 && (
+                                            <div className={cn(visibleInstallmentCount === 1 && 'sm:max-w-[37.5%]')}>
                                             <ReuseableInput
-                                                className="w-full h-12.75 rounded-[5px] border border-black/30 bg-white text-black"
+                                                className={compactFieldClass}
                                                 control={form.control}
                                                 name="first_installment"
                                                 label={
@@ -410,10 +422,11 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
                                                 disabled
                                                 thousandsSeparator
                                             />
+                                            </div>
                                         )}
                                         {visibleInstallmentCount >= 2 && (
                                             <ReuseableInput
-                                                className="w-full h-12.75 rounded-[5px] border border-black/30 bg-white text-black"
+                                                className={compactFieldClass}
                                                 control={form.control}
                                                 name="second_installment"
                                                 label="2nd installment"
@@ -423,7 +436,7 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
                                         )}
                                         {visibleInstallmentCount >= 3 && (
                                             <ReuseableInput
-                                                className="w-full h-12.75 rounded-[5px] border border-black/30 bg-white text-black"
+                                                className={compactFieldClass}
                                                 control={form.control}
                                                 name="third_installment"
                                                 label="3rd installment"
@@ -433,13 +446,13 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
                                         )}
                                     </div>
                                 ) : (
-                                    <p className="mt-4 text-sm text-black/70">
+                                    <p className="mt-2.5 text-sm text-black/70">
                                         Select a payment plan above to see the installment schedule.
                                     </p>
                                 )}
                             </div>
 
-                            <div className="rounded-2xl border border-black/20 bg-white p-3 sm:p-5 [&_h2]:text-black [&_p]:text-black/70">
+                            <div className="rounded-xl border border-black/20 bg-white p-2.5 sm:p-4 [&_h2]:text-black [&_p]:text-black/70 [&_.mt-6]:mt-4.5">
                                 <BoxHeader
                                     title="Preferred Payment Method"
                                     description="Choose how the customer will complete this payment."
@@ -450,9 +463,13 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
                                     activeColor="#BF162E"
                                     selectorPosition="left"
                                     showSelector={true}
+                                    imagePriority
+                                    borderOnlyActive
+                                    neutralSelector
                                     value={selectedPaymentMethod}
                                     onValueChange={handlePaymentMethodChange}
                                     items={EPAYMENTTABS}
+                                    className="gap-4.5 flex-wrap"
                                 />
                             </div>
                         </div>

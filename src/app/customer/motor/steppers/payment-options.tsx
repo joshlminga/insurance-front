@@ -23,9 +23,9 @@ import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowLeftCircle, ArrowRightCircle, Eye, Mail, Share2 } from 'lucide-react'
 import React from 'react'
-import { Controller, FormProvider, useForm } from 'react-hook-form'
+import { Controller, FormProvider, useForm, type Resolver } from 'react-hook-form'
 import { PaymentDetailsSchema } from '@/types/form-schema'
-import type { PaymentFormValues } from '@/types/schema'
+import type { PaymentFormInput } from '@/types/schema'
 import { extractErrorMessage } from '@/utils/helpers'
 import { cn } from '@/lib/utils'
 import { useCustomDialogContextFactory } from '@/hooks'
@@ -136,8 +136,8 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
         },
     })
 
-    const form = useForm<PaymentFormValues>({
-        resolver: zodResolver(PaymentDetailsSchema),
+    const form = useForm<PaymentFormInput>({
+        resolver: zodResolver(PaymentDetailsSchema) as Resolver<PaymentFormInput>,
         defaultValues: {
             payment_method: 'mpesa',
             amount: 1.00,
@@ -147,6 +147,14 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
             first_installment: '',
             second_installment: '',
             third_installment: '',
+            card_provider: 'paystack',
+            paypal_email: '',
+            available_credit: '',
+            unsettled_credit: '',
+            unsettled_credit_limit: '',
+            credit_acknowledged: false,
+            mpesa_transaction_code: '',
+            payment_proof_receipt: undefined,
         },
     })
 
@@ -248,15 +256,15 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
         },
     })
 
-    const onSubmit = (data: PaymentFormValues) => {
+    const onSubmit = (data: PaymentFormInput) => {
         if (data.payment_method !== 'mpesa') {
             goToNextStep?.()
             return
         }
         const payload: MpesaPayload = {
-            phone: data.phone_number,
-            amount: data.amount,
-            invoice_id: data.invoice_id,
+            phone: data.phone_number ?? '',
+            amount: data.amount ?? 0,
+            invoice_id: data.invoice_id ?? '',
         }
         submitMutation.mutate(payload)
     }
