@@ -83,7 +83,7 @@ export const CreditTabPage: React.FC = () => {
                         />
                     </div>
 
-                    <div className="mt-4 space-y-3">
+                    <div className="mt-4 w-full rounded-lg border border-black/20 bg-white shadow-sm p-3 space-y-3">
                         <p className="text-sm text-black/80">
                             <span className="font-semibold uppercase text-[#BF162E]">Notice:</span>{' '}
                             You will be responsible for recovering funds for this transaction.

@@ -120,7 +120,7 @@ export const CashTabPage: React.FC = () => {
                         )}
                     </div>
 
-                    <div className="mt-4 w-full sm:w-1/2 lg:w-4/12">
+                    <div className="mt-4 w-full rounded-lg border border-black/20 bg-white shadow-sm p-3">
                         <ReuseableInput
                             className="w-full rounded-sm border border-black/30 bg-white text-black"
                             control={control}
