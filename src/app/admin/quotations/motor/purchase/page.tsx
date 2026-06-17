@@ -69,7 +69,7 @@ export const AdminMotorQuotationPurchasePage = () => {
             <div className="[&_h1]:text-lg [&_h1]:leading-7 [&_p]:text-sm [&_p]:leading-5">
                 <PageHeader
                     title="Complete motor purchase"
-                    description={`Step ${step} of ${PURCHASE_STEPS.length}: ${current.title}`}
+                    description=""
                 />
             </div>
 

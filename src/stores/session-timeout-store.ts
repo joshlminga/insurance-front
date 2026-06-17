@@ -11,7 +11,11 @@ type SessionTimeoutState = {
 
 export const useSessionTimeoutStore = create<SessionTimeoutState>((set) => ({
   isOpen: false,
-  open: () => set({ isOpen: true }),
+  open: () =>
+    set((state) => {
+      if (state.isOpen) return state
+      return { isOpen: true }
+    }),
   close: () => set({ isOpen: false }),
 }))
 

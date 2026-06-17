@@ -52,7 +52,10 @@ export function SessionTimeoutDialog() {
   // Listen for 401 events from the axios interceptor and open this dialog.
   useEffect(() => {
     const handleSessionExpired = () => {
-      logout()
+      // Do NOT logout here: logging out clears auth state and triggers ProtectedRoute redirects,
+      // which makes users lose in-progress form input. We keep them on the same page and let
+      // them re-auth via this dialog instead.
+      if (useSessionTimeoutStore.getState().isOpen) return
       const savedEmail = localStorage.getItem(REMEMBER_EMAIL_KEY)
       form.reset({
         email: savedEmail ?? '',
@@ -64,7 +67,7 @@ export function SessionTimeoutDialog() {
 
     window.addEventListener(SESSION_EXPIRED_EVENT, handleSessionExpired)
     return () => window.removeEventListener(SESSION_EXPIRED_EVENT, handleSessionExpired)
-  }, [form, logout, open])
+  }, [form, open])
 
   const loginMutation = UseApiMutation<LoginResponse, LoginFormValues>({
     url: 'auth/login',

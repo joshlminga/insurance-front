@@ -147,7 +147,7 @@ export const AdminMotorQuotePreviewPage: React.FC<premiumPreview> = ({
     return (
         <>
             <div className="w-full mx-auto lg:max-w-100 lg:min-w-100 px-4 space-y-4">
-                <h1 className="text-2xl font-bold">Quote Preview</h1>
+                <h1 className="text-xl font-bold">Quote Preview</h1>
                 <Card className="flex items-center justify-center py-6 shadow-none border border-[#ADABAB]">
                     <div className="w-27.25 h-15 flex">
                         <img
