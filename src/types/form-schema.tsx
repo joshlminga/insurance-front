@@ -256,8 +256,16 @@ const BasePaymentSchema = z.object({
   first_installment: z.string().optional(),
   second_installment: z.string().optional(),
   third_installment: z.string().optional(),
-  payment_method: z.enum(["mpesa", "card", "pesapal"]),
+  payment_method: z.enum(["mpesa", "card", "pesapal", "paypal", "credit", "cash"]),
 })
+
+const PaymentProofFileSchema = z
+  .any()
+  .refine((file) => file instanceof File, "Upload receipt or proof of payment")
+  .refine(
+    (file) => ACCEPTED_FILE_TYPES.includes(file?.type),
+    "Only .jpg, .jpeg, .png and .pdf formats are supported."
+  )
 
 // Mpesa specific fields
 const MpesaPaymentSchema = BasePaymentSchema.extend({
@@ -267,43 +275,15 @@ const MpesaPaymentSchema = BasePaymentSchema.extend({
     .min(10, "Phone number must be at least 10 digits")
     .regex(/^(?:\+254|254|0)?[17]\d{8}$/, "Invalid Kenyan phone number"),
   amount: z.number().positive("Amount must be greater than 0"),
-  // amount: z.number().positive().refine((val) => /^\d+(\.\d{1,2})?$/.test(val.toString()),
-  //   "Amount cannot have more than 2 decimal places"
-  // )
+  mpesa_transaction_code: z.string().optional().or(z.literal("")),
 })
 
-// Card specific fields with validation
+// Card payment provider selection
 const CardPaymentSchema = BasePaymentSchema.extend({
   payment_method: z.literal("card"),
-  card_number: z.string()
-    .min(16, "Card number must be 16 digits")
-    .max(19, "Card number too long")
-    .regex(/^[\d\s]+$/, "Card number must contain only digits")
-    .refine((val) => {
-      // Luhn algorithm validation
-      const digits = val.replace(/\s/g, '').split('').reverse().map(Number)
-      const sum = digits.reduce((acc, digit, idx) => {
-        if (idx % 2 === 1) {
-          const doubled = digit * 2
-          return acc + (doubled > 9 ? doubled - 9 : doubled)
-        }
-        return acc + digit
-      }, 0)
-      return sum % 10 === 0
-    }, "Invalid card number"),
-  expiry_date: z.string()
-    .regex(/^(0[1-9]|1[0-2])\/\d{2}$/, "Expiry date must be in MM/YY format")
-    .refine((val) => {
-      const [month, year] = val.split('/').map(Number)
-      const now = new Date()
-      const currentYear = now.getFullYear() % 100
-      const currentMonth = now.getMonth() + 1
-      return year > currentYear || (year === currentYear && month >= currentMonth)
-    }, "Card has expired"),
-  cvv: z.string()
-    .min(3, "CVV must be 3-4 digits")
-    .max(4, "CVV must be 3-4 digits")
-    .regex(/^\d{3,4}$/, "CVV must be numeric"),
+  card_provider: z.enum(["paystack", "pesapal", "dpo"], {
+    error: "Select a payment provider",
+  }),
 })
 
 // Pesapal specific fields
@@ -311,11 +291,34 @@ const PesapalPaymentSchema = BasePaymentSchema.extend({
   payment_method: z.literal("pesapal"),
 })
 
+const PaypalPaymentSchema = BasePaymentSchema.extend({
+  payment_method: z.literal("paypal"),
+  paypal_email: z.string().email("Enter a valid PayPal email address"),
+})
+
+const CreditPaymentSchema = BasePaymentSchema.extend({
+  payment_method: z.literal("credit"),
+  available_credit: z.string().optional().or(z.literal("")),
+  unsettled_credit: z.string().optional().or(z.literal("")),
+  unsettled_credit_limit: z.string().optional().or(z.literal("")),
+  credit_acknowledged: z.boolean().refine((val) => val === true, {
+    message: "You must acknowledge the credit terms to proceed",
+  }),
+})
+
+const CashPaymentSchema = BasePaymentSchema.extend({
+  payment_method: z.literal("cash"),
+  payment_proof_receipt: PaymentProofFileSchema,
+})
+
 // Discriminated union for payment methods
 export const PaymentDetailsSchema = z.discriminatedUnion("payment_method", [
   MpesaPaymentSchema,
   CardPaymentSchema,
   PesapalPaymentSchema,
+  PaypalPaymentSchema,
+  CreditPaymentSchema,
+  CashPaymentSchema,
 ])
 
 export const OrganizationSchema = z.object({

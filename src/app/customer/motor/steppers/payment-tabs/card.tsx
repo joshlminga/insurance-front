@@ -1,145 +1,70 @@
-import { FieldGroup } from '@/components/ui/field'
-import { Input } from '@/components/ui/input'
-import { Field, FieldError, FieldLabel } from '@/components/ui/field'
-import React, { useRef } from 'react'
-import { useFormContext, Controller } from 'react-hook-form'
-import type { PaymentFormValues } from '@/types/schema'
+import { Field, FieldError, FieldGroup } from '@/components/ui/field'
+import { Label } from '@/components/ui/label'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { cn } from '@/lib/utils'
+import type { PaymentFormInput } from '@/types/schema'
+import React from 'react'
+import { Controller, useFormContext } from 'react-hook-form'
+import { PaymentAmountSummary } from './payment-amount-summary'
+
+const CARD_PROVIDERS = [
+    { value: 'paystack', label: 'PayStack', image: '/paystack.png' },
+    { value: 'pesapal', label: 'PesaPal', image: '/pesapal.png' },
+    { value: 'dpo', label: 'DPO', image: '/dpo.png' },
+] as const
 
 export const CardsTabPage: React.FC = () => {
-    const { control, watch } = useFormContext<PaymentFormValues>()
-    const amount = watch('amount')
-    const formattedAmount = Number(amount || 0).toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-    const expiryRef = useRef<HTMLInputElement>(null)
-    const cvvRef = useRef<HTMLInputElement>(null)
-
-    const formatCardNumber = (value: string): string => {
-        const digits = value.replace(/\D/g, '').slice(0, 16)
-        return digits.replace(/(\d{4})(?=\d)/g, '$1 ')
-    }
-
-    const formatExpiryDate = (value: string): string => {
-        const digits = value.replace(/\D/g, '').slice(0, 4)
-        if (digits.length >= 2) {
-            return `${digits.slice(0, 2)}/${digits.slice(2)}`
-        }
-        return digits
-    }
-    const handleCardNumberChange = (
-        e: React.ChangeEvent<HTMLInputElement>,
-        onChange: (value: string) => void
-    ) => {
-        const formatted = formatCardNumber(e.target.value)
-        onChange(formatted)
-        const digitsOnly = formatted.replace(/\s/g, '')
-        if (digitsOnly.length === 16) {
-            expiryRef.current?.focus()
-        }
-    }
-
-    const handleExpiryChange = (
-        e: React.ChangeEvent<HTMLInputElement>,
-        onChange: (value: string) => void
-    ) => {
-        const formatted = formatExpiryDate(e.target.value)
-        onChange(formatted)
-        if (formatted.length === 5) {
-            cvvRef.current?.focus()
-        }
-    }
-
-    const handleCvvChange = (
-        e: React.ChangeEvent<HTMLInputElement>,
-        onChange: (value: string) => void
-    ) => {
-        const digits = e.target.value.replace(/\D/g, '').slice(0, 4)
-        onChange(digits)
-    }
+    const { control } = useFormContext<PaymentFormInput>()
 
     return (
-        <div className='w-full flex justify-center items-center'>
-            <div className="w-full max-w-5xl mx-auto">
+        <div className="w-full">
+            <div className="mx-auto">
                 <FieldGroup>
-                    <div className="w-full p-4 h-auto min-h-18.5 rounded-[20px] border border-[#ADABAB]/70 bg-white">
-                        <span className="text-sm text-muted-foreground">You will Pay:</span>
-                        <h1 className='text-[#0CC258] font-bold text-xl sm:text-2xl'>Ksh {formattedAmount}</h1>
-                    </div>
-                    <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4'>
-                        <div className="col-span-1 sm:col-span-2">
-                            <Controller
-                                name="card_number"
-                                control={control}
-                                render={({ field, fieldState }) => (
-                                    <Field data-invalid={fieldState.invalid}>
-                                        <FieldLabel>Card Number</FieldLabel>
-                                        <Input
-                                            {...field}
-                                            type="text"
-                                            inputMode="numeric"
-                                            placeholder="0000 0000 0000 0000"
-                                            autoComplete="cc-number"
-                                            maxLength={19}
-                                            className={`w-full h-12.75 rounded-[5px] border border-[#ADABAB] ${
-                                                fieldState.invalid ? 'border-red-500 focus-visible:ring-red-500' : ''
-                                            }`}
-                                            onChange={(e) => handleCardNumberChange(e, field.onChange)}
-                                        />
-                                        {fieldState.error && (
-                                            <FieldError className="text-red-500 text-sm mt-1">
-                                                {fieldState.error.message}
-                                            </FieldError>
-                                        )}
-                                    </Field>
-                                )}
-                            />
-                        </div>
+                    <PaymentAmountSummary />
+
+                    <div className="mt-4">
+                        <p className="text-xs font-semibold text-black">
+                            Choose a payment provider
+                        </p>
                         <Controller
-                            name="expiry_date"
+                            name="card_provider"
                             control={control}
                             render={({ field, fieldState }) => (
-                                <Field data-invalid={fieldState.invalid}>
-                                    <FieldLabel>Expiry Date</FieldLabel>
-                                    <Input
-                                        {...field}
-                                        ref={expiryRef}
-                                        type="text"
-                                        inputMode="numeric"
-                                        placeholder="MM/YY"
-                                        autoComplete="cc-exp"
-                                        maxLength={5}
-                                        className={`w-full h-12.75 rounded-[5px] border border-[#ADABAB] ${
-                                            fieldState.invalid ? 'border-red-500 focus-visible:ring-red-500' : ''
-                                        }`}
-                                        onChange={(e) => handleExpiryChange(e, field.onChange)}
-                                    />
+                                <Field data-invalid={fieldState.invalid} className="mt-2.5">
+                                    <RadioGroup
+                                        value={field.value ?? 'paystack'}
+                                        onValueChange={field.onChange}
+                                        className="grid w-full grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6"
+                                    >
+                                        {CARD_PROVIDERS.map((provider) => {
+                                            const inputId = `card-provider-${provider.value}`
+                                            const isSelected = field.value === provider.value
+                                            return (
+                                                <div key={provider.value} className="relative w-full">
+                                                    <RadioGroupItem
+                                                        value={provider.value}
+                                                        id={inputId}
+                                                        className="sr-only"
+                                                    />
+                                                    <Label
+                                                        htmlFor={inputId}
+                                                        className={cn(
+                                                            'flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg border border-black/20 bg-white p-1 shadow-sm transition hover:border-[#BF162E] hover:shadow-md',
+                                                            isSelected && 'border-[#BF162E] shadow-md'
+                                                        )}
+                                                    >
+                                                        <img
+                                                            src={provider.image}
+                                                            alt={provider.label}
+                                                            className="h-auto w-20 object-contain"
+                                                        />
+                                                    </Label>
+                                                </div>
+                                            )
+                                        })}
+                                    </RadioGroup>
                                     {fieldState.error && (
-                                        <FieldError className="text-red-500 text-sm mt-1">
-                                            {fieldState.error.message}
-                                        </FieldError>
-                                    )}
-                                </Field>
-                            )}
-                        />
-                        <Controller
-                            name="cvv"
-                            control={control}
-                            render={({ field, fieldState }) => (
-                                <Field data-invalid={fieldState.invalid}>
-                                    <FieldLabel>CVV</FieldLabel>
-                                    <Input
-                                        {...field}
-                                        ref={cvvRef}
-                                        type="text"
-                                        inputMode="numeric"
-                                        placeholder="123"
-                                        autoComplete="cc-csc"
-                                        maxLength={4}
-                                        className={`w-full h-12.75 rounded-[5px] border border-[#ADABAB] ${
-                                            fieldState.invalid ? 'border-red-500 focus-visible:ring-red-500' : ''
-                                        }`}
-                                        onChange={(e) => handleCvvChange(e, field.onChange)}
-                                    />
-                                    {fieldState.error && (
-                                        <FieldError className="text-red-500 text-sm mt-1">
+                                        <FieldError className="mt-2 text-xs text-[#BF162E]">
                                             {fieldState.error.message}
                                         </FieldError>
                                     )}

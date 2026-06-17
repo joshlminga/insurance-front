@@ -53,6 +53,26 @@ export type MotorKycFormValues = z.infer<typeof MotorKycSchema>
 export type InvoicePaymentFormValues = z.infer<typeof InvoicePaymentSchema>
 export type PaymentFormValues = z.infer<typeof PaymentDetailsSchema>
 
+/** Flat form shape for react-hook-form (all payment-method fields in one object) */
+export type PaymentFormInput = {
+  payment_method: "mpesa" | "card" | "pesapal" | "paypal" | "credit" | "cash"
+  payment_plans?: string
+  first_installment?: string
+  second_installment?: string
+  third_installment?: string
+  invoice_id?: string
+  phone_number?: string
+  amount?: number
+  mpesa_transaction_code?: string
+  card_provider?: "paystack" | "pesapal" | "dpo"
+  paypal_email?: string
+  available_credit?: string
+  unsettled_credit?: string
+  unsettled_credit_limit?: string
+  credit_acknowledged?: boolean
+  payment_proof_receipt?: File
+}
+
 export type OrganizationFormValues = z.infer<typeof OrganizationSchema>
 export type OrganizationEditFormValues = z.infer<typeof OrganizationEditSchema>
 export type UsersFormValues = z.infer<typeof UsersSchema>

@@ -79,6 +79,11 @@ const AdminMotorQuotationResultsPage = lazy(() =>
     default: m.AdminMotorQuotationResultsPage,
   }))
 )
+const AdminMotorQuotationPurchasePage = lazy(() =>
+  import("./app/admin/quotations/motor/purchase/page").then(m => ({
+    default: m.AdminMotorQuotationPurchasePage,
+  }))
+)
 
 export const router = createBrowserRouter([
 
@@ -341,6 +346,10 @@ export const router = createBrowserRouter([
       {
         path: "quotations/motor-quotations/results",
         element: <S><AdminMotorQuotationResultsPage /></S>,
+      },
+      {
+        path: "quotations/motor-quotations/purchase",
+        element: <S><AdminMotorQuotationPurchasePage /></S>,
       },
       // products
       // motor
