@@ -11,7 +11,10 @@ import { KycInfo } from "@/app/customer/motor/steppers/kyc-info";
 import OTPVerificationPage from "@/app/customer/motor/steppers/otp-verification";
 import { PaymentOptions } from "@/app/customer/motor/steppers/payment-options";
 import { CardsTabPage } from "@/app/customer/motor/steppers/payment-tabs/card";
+import { CashTabPage } from "@/app/customer/motor/steppers/payment-tabs/cash";
+import { CreditTabPage } from "@/app/customer/motor/steppers/payment-tabs/credit";
 import { MpesaPageTab } from "@/app/customer/motor/steppers/payment-tabs/mpesa";
+import { PaypalTabPage } from "@/app/customer/motor/steppers/payment-tabs/paypal";
 import { QuotationsPage } from "@/app/customer/motor/steppers/quotations";
 import { SuccessPurchase } from "@/app/customer/motor/steppers/success-purchase";
 import { VehicleDetailsPage } from "@/app/customer/motor/steppers/vehicle-details";
@@ -120,18 +123,28 @@ export const EMARINETABS = [
 export const EPAYMENTTABS = [
     {
         value: "mpesa",
-        // label: "Mpesa",
         image: '/mpesa.png',
-        // iconSize: 18,
         component: MpesaPageTab,
     },
     {
         value: "card",
-        // label: "Card",
-        image: '/card.png',
-        // icon: CreditCard,
-        // iconSize: 20,
+        image: '/visamastercard.png',
         component: CardsTabPage,
+    },
+    {
+        value: "paypal",
+        image: '/paypal.png',
+        component: PaypalTabPage,
+    },
+    {
+        value: "credit",
+        image: '/paycredit.png',
+        component: CreditTabPage,
+    },
+    {
+        value: "cash",
+        image: '/paycash.png',
+        component: CashTabPage,
     },
     // {
     //     value: "pesapal",

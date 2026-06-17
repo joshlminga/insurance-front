@@ -9,9 +9,9 @@ import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowLeftCircle, ArrowRightCircle } from 'lucide-react'
 import React from 'react'
-import { FormProvider, useForm } from 'react-hook-form'
+import { FormProvider, useForm, type Resolver } from 'react-hook-form'
 import { PaymentDetailsSchema } from '@/types/form-schema'
-import type { PaymentFormValues } from '@/types/schema'
+import type { PaymentFormInput } from '@/types/schema'
 import { extractErrorMessage } from '@/utils/helpers'
 
 
@@ -83,8 +83,8 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
         setPollMessage('Still checking payment status...')
     }, [isPolling, pollQuery.isError])
 
-    const form = useForm<PaymentFormValues>({
-        resolver: zodResolver(PaymentDetailsSchema),
+    const form = useForm<PaymentFormInput>({
+        resolver: zodResolver(PaymentDetailsSchema) as Resolver<PaymentFormInput>,
         defaultValues: {
             payment_method: 'mpesa',
             payment_plans: '',
@@ -92,12 +92,20 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
             second_installment: '',
             third_installment: '',
             amount: 1,
-            phone_number: ''
+            phone_number: '',
+            card_provider: 'paystack',
+            paypal_email: '',
+            available_credit: '',
+            unsettled_credit: '',
+            unsettled_credit_limit: '',
+            credit_acknowledged: false,
+            mpesa_transaction_code: '',
+            payment_proof_receipt: undefined,
         },
     })
     const handlePaymentMethodChange = (value: string) => {
         setSelectedPaymentMethod(value)
-        form.setValue('payment_method', value as 'mpesa' | 'card' | 'pesapal')
+        form.setValue('payment_method', value as 'mpesa' | 'card' | 'pesapal' | 'paypal' | 'credit' | 'cash')
         form.clearErrors()
     }
     const submitMutation = UseApiMutation<SubmitResponse, MpesaPayload>({
@@ -121,14 +129,14 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
         },
     })
 
-    const onSubmit = (data: PaymentFormValues) => {
+    const onSubmit = (data: PaymentFormInput) => {
         if (data.payment_method !== 'mpesa') {
             goToNextStep?.()
             return
         }
         const payload: MpesaPayload = {
-            phone: data.phone_number,
-            amount: data.amount,
+            phone: data.phone_number ?? '',
+            amount: data.amount ?? 0,
             account_reference: 'POLICY-PAYMENT',
             transaction_desc: 'Policy payment',
         }

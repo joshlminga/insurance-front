@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/select'
 import { Button, ConfirmationDialog, CustomDialogComponent, ReusableDropdown, ReuseableInput, ReuseableRadioChoiceGroup, SendInvoiceViaEmail } from '@/dev/core'
 import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
-import type { CustomerVerificationDetailsProps, MpesaPayload, MpesaPollResponse, SubmitResponse } from '@/types/types'
+import type { MpesaPayload, MpesaPollResponse, SubmitResponse } from '@/types/types'
 import {
     EMETHODS,
     INSTALLMENT_FIELDS_VISIBLE,
@@ -29,9 +29,34 @@ import type { PaymentFormInput } from '@/types/schema'
 import { extractErrorMessage } from '@/utils/helpers'
 import { cn } from '@/lib/utils'
 import { useCustomDialogContextFactory } from '@/hooks'
+import type { AdminMotorStepProps } from '../admin-step-props'
+import { readAdminMotorCustomerContact } from '../admin-motor-session'
 
+type BoxHeaderProps = {
+    title: string
+    description?: string
+}
 
-export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goToNextStep, goToPrevStep }) => {
+const BoxHeader = ({ title, description }: BoxHeaderProps) => (
+    <div className="flex flex-col gap-0.5 pb-2">
+        <h2 className="text-sm font-semibold sm:text-lg">{title}</h2>
+        {description ? (
+            <p className="text-xs text-muted-foreground sm:text-sm">
+                {description}
+            </p>
+        ) : null}
+    </div>
+)
+
+const compactFieldClass =
+    'w-full h-9.5 rounded-[4px] border border-black/30 bg-white text-sm text-black'
+
+export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
+    goToNextStep,
+    goToPrevStep,
+    defaultCustomerContact,
+}) => {
+    const customerEmail = defaultCustomerContact?.email ?? readAdminMotorCustomerContact().email
     const [selectedPaymentMethod, setSelectedPaymentMethod] = React.useState<string>('mpesa');
     const [isPolling, setIsPolling] = React.useState(false);
     const [pollMessage, setPollMessage] = React.useState('');
@@ -305,19 +330,31 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
         useCustomDialogContextFactory<{
             refetch?: () => Promise<any>
             data?: any
+            requireRecipientEmail?: boolean
+            defaultEmail?: string
         }>()
 
     return (
         <>
             <FormProvider {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="w-full mx-auto bg-transparent">
-                    <div className='w-full items-center justify-center p-2 sm:p-4'>
-                        <div className="w-full min-h-45.5 h-auto rounded-[3px] bg-[#D9D9D95E] shadow-[0px_4px_4px_0px_#00000040] p-4 sm:p-6 mb-4">
-                            <div className="w-full sm:w-auto mb-4">
-                                <label htmlFor="payment_plans" className="font-medium text-[15px] text-black block mb-2">
-                                    Payment Plans:
-                                </label>
-                                <div className="w-full sm:w-fit sm:min-w-50 h-auto">
+                    <div className="rounded-2xl border border-[#ADABAB]/50 bg-linear-to-b from-white to-neutral-50/90 p-4 shadow-sm sm:p-6">
+                        <div className="w-full pb-2">
+                            <h1 className="text-xl font-bold leading-tight tracking-tight sm:text-2xl">
+                                Payment <span className="text-[#BF162E]">Options</span>
+                            </h1>
+                            <p className="mt-2 max-w-2xl text-sm text-black/70 sm:text-base">
+                                Choose a payment plan and select how the customer will pay for this motor cover.
+                            </p>
+                        </div>
+
+                        <div className="mt-4 space-y-4">
+                            <div className="rounded-xl border border-black/20 bg-white p-2.5 sm:p-4">
+                                <BoxHeader
+                                    title="Payment Plans"
+                                    description="Select an installment schedule and review the amounts due."
+                                />
+                                <div className="w-full sm:w-fit sm:min-w-37.5">
                                     <Controller
                                         name="payment_plans"
                                         control={form.control}
@@ -340,9 +377,9 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                                     <SelectTrigger
                                                         aria-invalid={fieldState.invalid}
                                                         className={cn(
-                                                            'w-full h-12.75 rounded-[3px] border border-[#ADABAB] bg-white text-sm',
+                                                            compactFieldClass,
                                                             fieldState.invalid &&
-                                                            'border-red-500 focus:ring-red-500'
+                                                            'border-[#BF162E] focus:ring-[#BF162E]'
                                                         )}>
                                                         <SelectValue placeholder="Select an option" />
                                                     </SelectTrigger>
@@ -355,7 +392,7 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                                     </SelectContent>
                                                 </Select>
                                                 {fieldState.error && (
-                                                    <FieldError className="mt-1 text-sm text-red-500">
+                                                    <FieldError className="mt-1 text-sm text-[#BF162E]">
                                                         {fieldState.error.message}
                                                     </FieldError>
                                                 )}
@@ -363,69 +400,78 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                         )}
                                     />
                                 </div>
+                                {visibleInstallmentCount > 0 ? (
+                                    <div
+                                        className={cn(
+                                            'mt-2.5 grid gap-2.5 sm:gap-4 [&_[data-slot=field-label]]:text-sm [&_[data-slot=field-label]]:mb-1',
+                                            visibleInstallmentCount === 1 && 'grid-cols-1 sm:grid-cols-2',
+                                            visibleInstallmentCount === 2 && 'grid-cols-1 sm:grid-cols-2',
+                                            visibleInstallmentCount >= 3 && 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
+                                        )}>
+                                        {visibleInstallmentCount >= 1 && (
+                                            <div className={cn(visibleInstallmentCount === 1 && 'sm:max-w-[37.5%]')}>
+                                            <ReuseableInput
+                                                className={compactFieldClass}
+                                                control={form.control}
+                                                name="first_installment"
+                                                label={
+                                                    selectedPaymentPlan === 'Full'
+                                                        ? 'Full installment'
+                                                        : '1st installment'
+                                                }
+                                                disabled
+                                                thousandsSeparator
+                                            />
+                                            </div>
+                                        )}
+                                        {visibleInstallmentCount >= 2 && (
+                                            <ReuseableInput
+                                                className={compactFieldClass}
+                                                control={form.control}
+                                                name="second_installment"
+                                                label="2nd installment"
+                                                disabled
+                                                thousandsSeparator
+                                            />
+                                        )}
+                                        {visibleInstallmentCount >= 3 && (
+                                            <ReuseableInput
+                                                className={compactFieldClass}
+                                                control={form.control}
+                                                name="third_installment"
+                                                label="3rd installment"
+                                                disabled
+                                                thousandsSeparator
+                                            />
+                                        )}
+                                    </div>
+                                ) : (
+                                    <p className="mt-2.5 text-sm text-black/70">
+                                        Select a payment plan above to see the installment schedule.
+                                    </p>
+                                )}
                             </div>
-                            {visibleInstallmentCount > 0 ? (
-                                <div
-                                    className={cn(
-                                        'grid gap-3 sm:gap-4',
-                                        visibleInstallmentCount === 1 && 'grid-cols-1 sm:max-w-md',
-                                        visibleInstallmentCount === 2 && 'grid-cols-1 sm:grid-cols-2',
-                                        visibleInstallmentCount >= 3 && 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
-                                    )}>
-                                    {visibleInstallmentCount >= 1 && (
-                                        <ReuseableInput
-                                            className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] bg-white text-black"
-                                            control={form.control}
-                                            name="first_installment"
-                                            label={
-                                                selectedPaymentPlan === 'Full'
-                                                    ? 'Full installment'
-                                                    : '1st installment'
-                                            }
-                                            disabled
-                                            thousandsSeparator
-                                        />
-                                    )}
-                                    {visibleInstallmentCount >= 2 && (
-                                        <ReuseableInput
-                                            className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] bg-white text-black"
-                                            control={form.control}
-                                            name="second_installment"
-                                            label="2nd installment"
-                                            disabled
-                                            thousandsSeparator
-                                        />
-                                    )}
-                                    {visibleInstallmentCount >= 3 && (
-                                        <ReuseableInput
-                                            className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] bg-white text-black"
-                                            control={form.control}
-                                            name="third_installment"
-                                            label="3rd installment"
-                                            disabled
-                                            thousandsSeparator
-                                        />
-                                    )}
-                                </div>
-                            ) : (
-                                <p className="text-sm text-muted-foreground">
-                                    Select a payment plan above to see the installment schedule.
-                                </p>
-                            )}
+
+                            <div className="rounded-xl border border-black/20 bg-white p-2.5 sm:p-4 [&_h2]:text-black [&_p]:text-black/70 [&_.mt-6]:mt-4.5">
+                                <BoxHeader
+                                    title="Preferred Payment Method"
+                                    description="Choose how the customer will complete this payment."
+                                />
+                                <ReuseableRadioChoiceGroup
+                                    variant="tabs"
+                                    layout="horizontal"
+                                    activeColor="#BF162E"
+                                    selectorPosition="left"
+                                    showSelector={true}
+                                    imagePriority
+                                    borderOnlyActive
+                                    neutralSelector
+                                    value={selectedPaymentMethod}
+                                    onValueChange={handlePaymentMethodChange}
+                                    items={EPAYMENTTABS}
+                                />
+                            </div>
                         </div>
-                        <div className="w-full py-3">
-                            <h6 className='text-base sm:text-lg font-bold'>Please Select Your Preferred Payment Option</h6>
-                        </div>
-                        <ReuseableRadioChoiceGroup
-                            variant="tabs"
-                            layout="horizontal"
-                            activeColor="#D3EDFF"
-                            selectorPosition="left"
-                            showSelector={true}
-                            value={selectedPaymentMethod}
-                            onValueChange={handlePaymentMethodChange}
-                            items={EPAYMENTTABS}
-                        />
                     </div>
 
                     <ConfirmationDialog
@@ -447,37 +493,37 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
 
                     {isPolling && (
                         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-                            <div className="bg-white rounded-2xl p-8 flex flex-col items-center gap-4 shadow-xl max-w-sm mx-4">
-                                <div className="w-12 h-12 border-4 border-[#0CC258] border-t-transparent rounded-full animate-spin" />
-                                <p className="text-center font-medium text-gray-700">{pollMessage}</p>
-                                <p className="text-center text-sm text-gray-500">
+                            <div className="bg-white rounded-2xl p-8 flex flex-col items-center gap-4 shadow-xl max-w-sm mx-4 border border-black/20">
+                                <div className="w-12 h-12 border-4 border-[#BF162E] border-t-transparent rounded-full animate-spin" />
+                                <p className="text-center font-medium text-black/80">{pollMessage}</p>
+                                <p className="text-center text-sm text-black/60">
                                     Please enter your PIN on the M-Pesa prompt on your phone.
                                 </p>
                                 <button
                                     type="button"
                                     onClick={stopPolling}
-                                    className="text-sm text-red-500 underline mt-2">
+                                    className="text-sm text-[#BF162E] underline mt-2">
                                     Cancel
                                 </button>
                             </div>
                         </div>
                     )}
 
-                    <CardFooter className="w-full flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mt-3 px-0">
+                    <CardFooter className="mt-4 w-full flex flex-col gap-3 px-0 sm:flex-row sm:items-center sm:justify-between">
                         <Button
                             type="button"
-                            className="w-full sm:w-auto rounded-full border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
+                            className="w-full rounded-full border border-[#BF162E] bg-transparent text-[#BF162E] hover:bg-[#BF162E]/10 sm:w-auto"
                             leftIcon={<ArrowLeftCircle />}
                             onClick={() => goToPrevStep?.()}>
                             Previous
                         </Button>
 
-                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                        <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
                             <ReusableDropdown
                                 trigger={
                                     <Button
                                         variant="outline"
-                                        className=" w-full lg:w-auto border-[#C20C0C] bg-[#FFF5F5] text-[#C20C0C] hover:bg-[#C20C0C] hover:text-white focus-visible:ring-[#C20C0C]/30">
+                                        className="w-full border-[#BF162E] bg-transparent text-[#BF162E] hover:bg-[#BF162E] hover:text-white focus-visible:ring-[#BF162E]/30 lg:w-auto">
                                         Generate Invoice
                                     </Button>
                                 }
@@ -492,7 +538,11 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                         icon: <Mail className="w-4 h-4" />,
                                         onClick: () => {
                                             handleDialogContextSwitch({
-                                                componentProps: { data: purchaseId },
+                                                componentProps: {
+                                                    data: purchaseId,
+                                                    requireRecipientEmail: true,
+                                                    defaultEmail: customerEmail,
+                                                },
                                                 Component: SendInvoiceViaEmail,
                                             })
                                         }
@@ -508,7 +558,7 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
                             <Button
                                 type="submit"
                                 disabled={isPolling}
-                                className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
+                                className="w-full rounded-full bg-[#BF162E]/90 hover:bg-[#BF162E] sm:w-auto"
                                 rightIcon={<ArrowRightCircle />}>
                                 {isPolling ? 'Processing...' : 'Proceed To Payment'}
                             </Button>
