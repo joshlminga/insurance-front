@@ -224,7 +224,7 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
 
     const handlePaymentMethodChange = (value: string) => {
         setSelectedPaymentMethod(value)
-        form.setValue('payment_method', value as 'mpesa' | 'card' | 'pesapal')
+        form.setValue('payment_method', value as 'mpesa' | 'card' | 'pesapal' | 'paypal' | 'credit' | 'cash')
         form.clearErrors()
     }
 

@@ -888,7 +888,7 @@ export const ReuseableRadioChoiceGroup: React.FC<RadioChoiceGroupProps> = ({
                                     <img
                                         src={item.image}
                                         alt={item.label}
-                                        className="h-8 w-10 object-contain"
+                                        className="h-8 w-20 object-contain"
                                     />
                                 )}
 

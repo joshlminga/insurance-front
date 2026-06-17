@@ -256,7 +256,7 @@ const BasePaymentSchema = z.object({
   first_installment: z.string().optional(),
   second_installment: z.string().optional(),
   third_installment: z.string().optional(),
-  payment_method: z.enum(["mpesa", "card", "pesapal"]),
+  payment_method: z.enum(["mpesa", "card", "pesapal", "paypal", "credit", "cash"]),
 })
 
 // Mpesa specific fields
@@ -311,11 +311,26 @@ const PesapalPaymentSchema = BasePaymentSchema.extend({
   payment_method: z.literal("pesapal"),
 })
 
+const PaypalPaymentSchema = BasePaymentSchema.extend({
+  payment_method: z.literal("paypal"),
+})
+
+const CreditPaymentSchema = BasePaymentSchema.extend({
+  payment_method: z.literal("credit"),
+})
+
+const CashPaymentSchema = BasePaymentSchema.extend({
+  payment_method: z.literal("cash"),
+})
+
 // Discriminated union for payment methods
 export const PaymentDetailsSchema = z.discriminatedUnion("payment_method", [
   MpesaPaymentSchema,
   CardPaymentSchema,
   PesapalPaymentSchema,
+  PaypalPaymentSchema,
+  CreditPaymentSchema,
+  CashPaymentSchema,
 ])
 
 export const OrganizationSchema = z.object({
