@@ -26,38 +26,35 @@ export const CardsTabPage: React.FC = () => {
                         <div className="mt-2.5 grid grid-cols-1 gap-2.5 sm:grid-cols-3">
                             <button
                                 type="button"
-                                className="flex flex-col items-center justify-center gap-2 rounded-lg border border-black/20 bg-white p-3 shadow-sm transition hover:border-[#BF162E] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#BF162E]/50"
+                                className="flex flex-col items-center justify-center gap-2 rounded-lg border border-black/20 bg-white shadow-sm transition hover:border-[#BF162E] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#BF162E]/50"
                             >
                                 <img
                                     src="/paystack.png"
                                     alt="PayStack"
-                                    className="h-8 w-auto max-w-full object-contain"
+                                    className="h-20 w-auto max-w-full object-contain"
                                 />
-                                <span className="text-xs text-black/70">Redirect payment</span>
                             </button>
 
                             <button
                                 type="button"
-                                className="flex flex-col items-center justify-center gap-2 rounded-lg border border-black/20 bg-white p-3 shadow-sm transition hover:border-[#BF162E] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#BF162E]/50"
+                                className="flex flex-col items-center justify-center gap-2 rounded-lg border border-black/20 bg-white shadow-sm transition hover:border-[#BF162E] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#BF162E]/50"
                             >
                                 <img
                                     src="/pesapal.png"
                                     alt="PesaPal"
-                                    className="h-8 w-auto max-w-full object-contain"
+                                    className="h-20 w-auto max-w-full object-contain"
                                 />
-                                <span className="text-xs text-black/70">Card & wallet</span>
                             </button>
 
                             <button
                                 type="button"
-                                className="flex flex-col items-center justify-center gap-2 rounded-lg border border-black/20 bg-white p-3 shadow-sm transition hover:border-[#BF162E] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#BF162E]/50"
+                                className="flex flex-col items-center justify-center gap-2 rounded-lg border border-black/20 bg-white shadow-sm transition hover:border-[#BF162E] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#BF162E]/50"
                             >
                                 <img
                                     src="/dpo.png"
                                     alt="DPO"
-                                    className="h-8 w-auto max-w-full object-contain"
+                                    className="h-20 w-auto max-w-full object-contain"
                                 />
-                                <span className="text-xs text-black/70">Secure checkout</span>
                             </button>
                         </div>
                     </div>
