@@ -53,7 +53,7 @@ export const CreditTabPage: React.FC = () => {
         <div className="w-full">
             <div className="mx-auto">
                 <FieldGroup>
-                    <PaymentAmountSummary label="Amount:" />
+                    <PaymentAmountSummary label="You will Pay:" />
 
                     {creditQuery.isLoading && CREDIT_SUMMARY_API_ENABLED ? (
                         <p className="mt-4 text-sm text-black/70">Loading credit info…</p>

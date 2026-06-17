@@ -469,7 +469,6 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
                                     value={selectedPaymentMethod}
                                     onValueChange={handlePaymentMethodChange}
                                     items={EPAYMENTTABS}
-                                    className="gap-4.5 flex-wrap"
                                 />
                             </div>
                         </div>

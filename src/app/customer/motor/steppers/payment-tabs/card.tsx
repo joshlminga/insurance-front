@@ -34,13 +34,13 @@ export const CardsTabPage: React.FC = () => {
                                     <RadioGroup
                                         value={field.value ?? 'paystack'}
                                         onValueChange={field.onChange}
-                                        className="grid grid-cols-1 gap-2.5 sm:grid-cols-3"
+                                        className="grid w-full grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6"
                                     >
                                         {CARD_PROVIDERS.map((provider) => {
                                             const inputId = `card-provider-${provider.value}`
                                             const isSelected = field.value === provider.value
                                             return (
-                                                <div key={provider.value} className="relative">
+                                                <div key={provider.value} className="relative w-full">
                                                     <RadioGroupItem
                                                         value={provider.value}
                                                         id={inputId}
@@ -49,14 +49,14 @@ export const CardsTabPage: React.FC = () => {
                                                     <Label
                                                         htmlFor={inputId}
                                                         className={cn(
-                                                            'flex cursor-pointer items-center justify-center overflow-hidden rounded-lg border border-black/20 bg-white p-0 shadow-sm transition hover:border-[#BF162E] hover:shadow-md min-h-24 aspect-[4/3]',
+                                                            'flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg border border-black/20 bg-white p-1 shadow-sm transition hover:border-[#BF162E] hover:shadow-md',
                                                             isSelected && 'border-[#BF162E] shadow-md'
                                                         )}
                                                     >
                                                         <img
                                                             src={provider.image}
                                                             alt={provider.label}
-                                                            className="h-full w-full object-contain p-2"
+                                                            className="h-auto w-20 object-contain"
                                                         />
                                                     </Label>
                                                 </div>

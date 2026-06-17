@@ -850,7 +850,9 @@ export const ReuseableRadioChoiceGroup: React.FC<RadioChoiceGroupProps> = ({
                 onValueChange={handleChange}
                 className={cn(
                     layout === "horizontal"
-                        ? "flex gap-6"
+                        ? imagePriority
+                            ? "grid w-full grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6"
+                            : "flex gap-6"
                         : "flex flex-col gap-3",
                     className
                 )}>
@@ -863,7 +865,7 @@ export const ReuseableRadioChoiceGroup: React.FC<RadioChoiceGroupProps> = ({
                             className={cn(
                                 "cursor-pointer rounded-lg border transition-all",
                                 imagePriority
-                                    ? "relative flex min-h-20 min-w-24 items-center justify-center overflow-hidden bg-white p-0 shadow-sm"
+                                    ? "relative flex w-full items-center justify-center overflow-hidden border-black/20 bg-white p-1 shadow-sm"
                                     : cn(
                                         "p-4",
                                         contentPosition === "inline"
@@ -888,7 +890,7 @@ export const ReuseableRadioChoiceGroup: React.FC<RadioChoiceGroupProps> = ({
                                     disabled={item.disabled}
                                     className={cn(
                                         imagePriority
-                                            ? "absolute top-1.5 left-1.5 z-10 mr-0"
+                                            ? "absolute top-1 left-1 z-10 mr-0 size-3.5"
                                             : "mr-3",
                                     )}
                                     style={
@@ -913,7 +915,7 @@ export const ReuseableRadioChoiceGroup: React.FC<RadioChoiceGroupProps> = ({
                                         alt={item.label ?? item.value}
                                         className={cn(
                                             imagePriority
-                                                ? "h-full w-full min-h-20 object-contain p-1.5"
+                                                ? "w-20 h-auto object-contain"
                                                 : "h-8 w-20 object-contain",
                                         )}
                                     />
