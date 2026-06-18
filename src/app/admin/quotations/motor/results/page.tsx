@@ -17,7 +17,6 @@ export const AdminMotorQuotationResultsPage = () => {
                     description="Compare motor insurance premiums for this quotation."
                 />
             </div>
-
             <AdminMotorQuotationsPage
                 goToPrevStep={() => navigate(EROUTES.MOTORQUOTATIONS)}
                 goToNextStep={() => navigate(EROUTES.MOTOR_QUOTATION_PURCHASE)}
