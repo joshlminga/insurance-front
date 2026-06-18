@@ -33,6 +33,7 @@ type AdminPhoneInputProps<T extends FieldValues> = {
     onBlur?: () => void
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function resolveDialCode(country: CountryGeoMeta | undefined): string {
     return (
         country?.country_dial_code ??
@@ -65,11 +66,9 @@ function buildPhonePlaceholder(country: CountryGeoMeta | undefined): string {
 function buildMaxLocalDigits(country: CountryGeoMeta | undefined): number {
     const code = resolveCountryCode(country)
     const dial = resolveDialCode(country)
-
     if (code === 'KE' || dial === '+254') {
         return 9
     }
-
     return 15
 }
 
@@ -125,7 +124,7 @@ export function AdminPhoneInput<T extends FieldValues>({
                         <span
                             className={cn(
                                 'flex shrink-0 items-center border-r border-[#ADABAB] px-3 text-xs font-medium text-muted-foreground',
-                                autofilled ? 'bg-[#C20C0C]/[0.06]' : 'bg-neutral-50'
+                                autofilled ? 'bg-[#C20C0C]/6' : 'bg-neutral-50'
                             )}
                             aria-hidden
                         >
