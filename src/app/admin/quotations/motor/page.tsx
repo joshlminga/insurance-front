@@ -128,7 +128,7 @@ const VehicleDetailsBox: React.FC = () => {
                 </p>
             </div>
 
-            <div className="rounded-2xl border border-[#ADABAB]/35 bg-white/95 p-3 sm:p-5">
+            <div className="rounded-2xl border border-[#ADABAB]/35 p-3 sm:p-5">
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     <ReuseableInput
                         className={cn(motorInputClassName, 'uppercase')}
@@ -231,7 +231,7 @@ function AnimatedSection({ show, children, className }: AnimatedSectionProps) {
             className={cn(
                 'transition-all duration-300 ease-out',
                 show
-                    ? 'opacity-100 translate-y-0 max-h-[2000px]'
+                    ? 'opacity-100 translate-y-0 max-h-500'
                     : 'pointer-events-none opacity-0 -translate-y-1 max-h-0 overflow-hidden',
                 className
             )}
@@ -312,13 +312,21 @@ export const MotorQuotationPage = () => {
 
     const formCountryId = useWatch({ control: form.control, name: 'country_id' })
 
-    const effectiveCountryId = useMemo(() => {
-        if (formCountryId) return formCountryId
+    // const effectiveCountryId = useMemo(() => {
+    //     if (formCountryId) return formCountryId
+    //     if (profileCountry?.id != null && profileCountry.id !== '') {
+    //         return String(profileCountry.id)
+    //     }
+    //     return ''
+    // }, [formCountryId, profileCountry?.id])
+
+    const effectiveCountryId = (() => {
+        if (formCountryId) return formCountryId;
         if (profileCountry?.id != null && profileCountry.id !== '') {
-            return String(profileCountry.id)
+            return String(profileCountry.id);
         }
-        return ''
-    }, [formCountryId, profileCountry?.id])
+        return '';
+    })();
 
     const { data: selectedCountryGeoData } = UseApiQuery<SubmitResponse>({
         url: 'taxonomies/geo/country',
@@ -331,11 +339,17 @@ export const MotorQuotationPage = () => {
         | undefined
     const dialCode = resolveDialCode(selectedCountryGeo)
 
-    const selectedCountryName = useMemo(() => {
-        if (selectedCountryGeo?.name) return selectedCountryGeo.name
-        if (!formCountryId && profileCountry?.name) return profileCountry.name
-        return 'selected country'
-    }, [selectedCountryGeo?.name, formCountryId, profileCountry?.name])
+    // const selectedCountryName = useMemo(() => {
+    //     if (selectedCountryGeo?.name) return selectedCountryGeo.name
+    //     if (!formCountryId && profileCountry?.name) return profileCountry.name
+    //     return 'selected country'
+    // }, [selectedCountryGeo?.name, formCountryId, profileCountry?.name])
+
+    const selectedCountryName = (() => {
+        if (selectedCountryGeo?.name) return selectedCountryGeo.name;
+        if (!formCountryId && profileCountry?.name) return profileCountry.name;
+        return 'selected country';
+    })();
 
     const canLoadOrganizations = Boolean(effectiveCountryId)
     const hasSelectedClass = Boolean(selectedTabValue)
@@ -439,11 +453,9 @@ export const MotorQuotationPage = () => {
             <FormProvider {...form}>
                 <form
                     onSubmit={form.handleSubmit(onSubmit)}
-                    className={cn('space-y-6', motorFormFieldStyles)}
-                >
+                    className={cn('space-y-6', motorFormFieldStyles)}>
                     <CustomerDetailsSection countryId={effectiveCountryId} />
-
-                    <div className="rounded-2xl border border-[#ADABAB]/50 bg-linear-to-b from-white to-neutral-50/90 p-4 shadow-sm sm:p-6">
+                    <div className="rounded-2xl border border-[#ADABAB]/50 p-4 shadow-sm sm:p-6">
                         <div className="w-full pb-4">
                             <h2 className="text-lg font-bold leading-tight tracking-tight sm:text-xl">
                                 Office{' '}
@@ -529,9 +541,8 @@ export const MotorQuotationPage = () => {
                                     className={cn(
                                         motorCheckboxLabelClassName,
                                         !canLoadOrganizations &&
-                                            'cursor-not-allowed opacity-70'
-                                    )}
-                                >
+                                        'cursor-not-allowed opacity-70'
+                                    )} >
                                     <span className={motorCheckboxLabelAccentClassName}>
                                         Admin Override
                                     </span>{' '}
@@ -542,7 +553,7 @@ export const MotorQuotationPage = () => {
                                 </label>
                             </div>
 
-                            <div className="rounded-2xl border border-[#ADABAB]/35 bg-white/95 p-3 sm:p-5">
+                            <div className="rounded-2xl border border-[#ADABAB]/35 p-3 sm:p-5">
                                 <p className="text-xs font-semibold text-[#C20C0C]">Office Use:</p>
                                 <p className="mt-1 text-xs text-muted-foreground">
                                     If the on-behalf organization is not in the list, enable admin
@@ -553,7 +564,7 @@ export const MotorQuotationPage = () => {
                         </div>
                     </div>
 
-                    <div className="rounded-2xl border border-[#ADABAB]/50 bg-linear-to-b from-white to-neutral-50/90 p-4 shadow-sm sm:p-6 [&_label]:text-sm [&_input]:text-sm [&_button]:text-sm">
+                    <div className="rounded-2xl border border-[#ADABAB]/50 p-4 shadow-sm sm:p-6 [&_label]:text-sm [&_input]:text-sm [&_button]:text-sm">
                         <div className="w-full pb-2">
                             <h2 className="text-lg font-bold leading-tight tracking-tight sm:text-xl">
                                 Vehicle{' '}
@@ -605,21 +616,19 @@ export const MotorQuotationPage = () => {
                                                         htmlFor={inputId}
                                                         className={cn(
                                                             'flex min-h-30 cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border-2 px-3 py-5 text-center transition-all',
-                                                            'shadow-sm outline-none hover:border-[#C20C0C]/45 hover:bg-white',
+                                                            'shadow-sm outline-none hover:border-[#C20C0C]/45',
                                                             'focus-within:ring-2 focus-within:ring-[#C20C0C]/25',
                                                             isSelected
                                                                 ? 'border-[#C20C0C] bg-[#C20C0C]/[0.07] ring-2 ring-[#C20C0C]/20'
-                                                                : 'border-[#E5E5E5] bg-white/90'
-                                                        )}
-                                                    >
+                                                                : 'border-[#E5E5E5]'
+                                                        )}>
                                                         <span
                                                             className={cn(
                                                                 'flex h-12 w-12 items-center justify-center rounded-xl border transition-colors',
                                                                 isSelected
                                                                     ? 'border-[#C20C0C]/40 bg-[#C20C0C]/10 text-[#C20C0C]'
                                                                     : 'border-neutral-200 bg-neutral-50 text-neutral-600'
-                                                            )}
-                                                        >
+                                                            )}>
                                                             <Icon
                                                                 className="h-6 w-6"
                                                                 strokeWidth={1.75}
@@ -634,7 +643,7 @@ export const MotorQuotationPage = () => {
                                         })}
                                     </RadioGroup>
 
-                                    <div className="mt-5 rounded-2xl border border-[#ADABAB]/35 bg-white/95 p-3 sm:p-5">
+                                    <div className="mt-5 rounded-2xl border border-[#ADABAB]/35 p-3 sm:p-5">
                                         <CoverDetailsBox />
                                     </div>
                                 </>
@@ -660,8 +669,7 @@ export const MotorQuotationPage = () => {
                                     motoTabs.length === 0 ||
                                     !selectedTabValue ||
                                     submitMutation.isPending
-                                }
-                            >
+                                }>
                                 Start Quotation
                             </Button>
                         </div>
@@ -673,8 +681,7 @@ export const MotorQuotationPage = () => {
                 open={showSelfCoverSubmitWarning}
                 onOpenChange={(open) => {
                     if (!open) handleCancelSelfCoverSubmit()
-                }}
-            >
+                }}>
                 <AlertDialogContent size="sm" className="sm:max-w-md">
                     <AlertDialogHeader>
                         <AlertDialogTitle>No customer contact details</AlertDialogTitle>
