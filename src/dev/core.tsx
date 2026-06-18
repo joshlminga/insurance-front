@@ -931,22 +931,22 @@ export const ReuseableRadioChoiceGroup: React.FC<RadioChoiceGroupProps> = ({
                                         }
                                     />)}
                                 {!imagePriority && (
-                                <div>
-                                    <div
-                                        className="font-semibold"
-                                        style={{
-                                            color: isActive
-                                                ? activeColor
-                                                : undefined,
-                                        }}>
-                                        {item.label}
-                                    </div>
-                                    {item.description && (
-                                        <div className="text-sm text-muted-foreground">
-                                            {item.description}
+                                    <div>
+                                        <div
+                                            className="font-semibold"
+                                            style={{
+                                                color: isActive
+                                                    ? activeColor
+                                                    : undefined,
+                                            }}>
+                                            {item.label}
                                         </div>
-                                    )}
-                                </div>
+                                        {item.description && (
+                                            <div className="text-sm text-muted-foreground">
+                                                {item.description}
+                                            </div>
+                                        )}
+                                    </div>
                                 )}
                             </div>
                             {showSelector &&
@@ -2165,27 +2165,25 @@ export const SendDocumentsViaEmail = ({
     componentProps?: any
 }) => {
     const requireRecipientEmail = componentProps?.requireRecipientEmail === true
-    const [quoteSessionId, setQuoteSessionId] = useState<number | null>(null)
     const [isSelf, setIsSelf] = useState(false)
-    const [email, setEmail] = useState("")
+    const quoteSessionId = (() => {
+        const storedSessionId = Number(sessionStorage.getItem(MOTOR_QUOTE_SESSION_STORAGE_KEY));
 
-    useEffect(() => {
-        const storedSessionId = Number(sessionStorage.getItem(MOTOR_QUOTE_SESSION_STORAGE_KEY))
         if (Number.isFinite(storedSessionId) && storedSessionId > 0) {
-            setQuoteSessionId(storedSessionId)
-        } else {
-            setQuoteSessionId(null)
+            return storedSessionId;
         }
-    }, [])
 
-    useEffect(() => {
-        if (!requireRecipientEmail) return
+        return null;
+    })();
+    const [email, setEmail] = useState<string>(() => {
+        if (!requireRecipientEmail) return "";
         const prefilled =
             componentProps?.defaultEmail?.trim() ||
             sessionStorage.getItem(ADMIN_MOTOR_CUSTOMER_EMAIL_KEY)?.trim() ||
-            ""
-        if (prefilled) setEmail(prefilled)
-    }, [requireRecipientEmail, componentProps?.defaultEmail])
+            "";
+
+        return prefilled;
+    });
 
     const submitMutation = UseApiMutation<SubmitResponse, FormData>({
         url: `document/motor/send-quote-via-email/${quoteSessionId}`,
@@ -2356,17 +2354,29 @@ export const SendInvoiceViaEmail = ({
 }) => {
     const requireRecipientEmail = componentProps?.requireRecipientEmail === true
     const [isSelf, setIsSelf] = useState(false)
-    const [email, setEmail] = useState("")
+    // const [email, setEmail] = useState("")
     const [isSingle, setIsSingle] = useState(false)
 
-    useEffect(() => {
-        if (!requireRecipientEmail) return
+    // useEffect(() => {
+    //     if (!requireRecipientEmail) return
+
+    //     const prefilled =
+    //         componentProps?.defaultEmail?.trim() ||
+    //         sessionStorage.getItem(ADMIN_MOTOR_CUSTOMER_EMAIL_KEY)?.trim() ||
+    //         ""
+    //     if (prefilled && prefilled !== email) {
+    //         setEmail(prefilled)
+    //     }
+    // }, [requireRecipientEmail, componentProps?.defaultEmail])
+
+    const [email, setEmail] = useState<string>(() => {
+        if (!requireRecipientEmail) return "";
         const prefilled =
             componentProps?.defaultEmail?.trim() ||
             sessionStorage.getItem(ADMIN_MOTOR_CUSTOMER_EMAIL_KEY)?.trim() ||
-            ""
-        if (prefilled) setEmail(prefilled)
-    }, [requireRecipientEmail, componentProps?.defaultEmail])
+            "";
+        return prefilled;
+    });
 
     const submitMutation = UseApiMutation<SubmitResponse, FormData>({
         url: `document/motor/send-invoice-via-email`,
