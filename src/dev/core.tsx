@@ -710,7 +710,7 @@ export const ReusableCard = ({
             {header && (
                 <CardHeader className={cn('flex items-center justify-center p-3 text-center', headerClassName)}>
                     {header.type === 'image' && (
-                        <div className="w-27.25 h-15 flex items-center justify-center">
+                        <div className="flex h-14 w-full max-w-27 items-center justify-center sm:h-15">
                             <img
                                 src={header.src}
                                 alt={header.alt ?? ''}

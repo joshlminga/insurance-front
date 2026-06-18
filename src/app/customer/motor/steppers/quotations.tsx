@@ -2,7 +2,6 @@
 
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { CardFooter } from '@/components/ui/card'
 import {
     Button,
     CustomDialogComponent,
@@ -17,13 +16,14 @@ import type {
     BenefitGroup,
     CustomerVerificationDetailsProps,
     MotorBenefitOption,
+    QuotationFiltersPanelProps,
     SelectedQuoteEntry,
     SubmitResponse,
     TFilterOptions,
     TPaginationFilters
 } from '@/types/types'
 import { EPREFIX, EROUTES } from '@/utils/enums'
-import { ArrowLeftCircle, ArrowRightCircle, X } from 'lucide-react'
+import { ArrowLeftCircle, ArrowRightCircle, ListFilter, X } from 'lucide-react'
 import React, { useCallback, useEffect, useMemo, useReducer, useState, useRef } from 'react'
 import type { FieldValues, Path } from 'react-hook-form'
 import { useForm } from 'react-hook-form'
@@ -46,19 +46,119 @@ import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
 import { formatCurrency } from '@/lib/format'
 import { serializeMotorPremiumParams } from '@/lib/motor-premium-params'
 import { ShowToast } from '@/utils/utils'
-import { 
-    benefitGroupFormKey, 
-    benefitIdsEqual, 
-    benefitOptionLabel, 
-    collectBenefitIdsFromValues, 
-    extractErrorMessage, 
-    resolveListedBenefitValue 
+import {
+    benefitGroupFormKey,
+    benefitIdsEqual,
+    benefitOptionLabel,
+    collectBenefitIdsFromValues,
+    extractErrorMessage,
+    resolveListedBenefitValue
 } from '@/utils/helpers'
 import { PostComparisonPage } from './comparisons/[id]/page'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Slider } from '@/components/ui/slider'
+import {
+    Sheet,
+    SheetContent,
+    SheetHeader,
+    SheetTitle,
+} from '@/components/ui/sheet'
+import type { Control } from 'react-hook-form'
 
+/** Sidebar + inline filters from xl up; Nest Hub / Hub Max use sheet + full-width cards below this. */
+const SIDEBAR_LAYOUT_QUERY = '(min-width: 1280px)'
+
+export function QuotationFiltersPanel({
+    idPrefix = 'quotation',
+    quoteSessionId,
+    isPending,
+    isFetching,
+    data,
+    benefitGroups,
+    benefitFormControl,
+    priceRange,
+    onPriceRangeChange,
+    className,
+}: QuotationFiltersPanelProps) {
+    const searchId = `${idPrefix}-insurer-search`
+    const sliderId = `${idPrefix}-price-slider`
+
+    return (
+        <div className={className}>
+            <div className="mb-5 grid gap-2">
+                <Label htmlFor={searchId}>Search by Insurer</Label>
+                <Input
+                    id={searchId}
+                    name="search"
+                    type="text"
+                    placeholder="Enter insurer name..."
+                    className="h-11 w-full rounded-[5px] border border-[#ADABAB] sm:h-12.75"
+                />
+            </div>
+
+            <h2 className="mb-1 text-base font-semibold text-gray-900 sm:text-lg">
+                Additional benefits
+            </h2>
+            <hr className="mb-5" />
+
+            <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
+                {!quoteSessionId ? null : isPending && !data && benefitGroups.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">Loading benefit options…</p>
+                ) : benefitGroups.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">
+                        No optional benefits are available for this quote yet.
+                    </p>
+                ) : (
+                    <div className="grid grid-cols-1 gap-4">
+                        {benefitGroups.map(({ group, items }) => {
+                            const fieldName = benefitGroupFormKey(group)
+                            const options = [
+                                { value: BENEFIT_SELECT_NONE, label: '-- none --' },
+                                ...items.map((item) => ({
+                                    value: String(item.id),
+                                    label: benefitOptionLabel(item),
+                                })),
+                            ]
+                            return (
+                                <ReusableSelect
+                                    key={group}
+                                    control={benefitFormControl}
+                                    name={fieldName as Path<FieldValues>}
+                                    label={group}
+                                    placeholder={`Choose in ${group}`}
+                                    options={options}
+                                    disabled={isFetching}
+                                    triggerClassName="border-[#ADABAB]"
+                                />
+                            )
+                        })}
+                    </div>
+                )}
+            </form>
+            <hr className="my-5" />
+            <h2 className="mb-1 text-base font-semibold text-gray-900 sm:text-lg">
+                Price Range
+            </h2>
+            <div className="grid w-full gap-3">
+                <div className="flex items-center justify-between gap-2">
+                    <Label htmlFor={sliderId}>Price</Label>
+                    <span className="text-sm text-muted-foreground">
+                        {priceRange.join(', ')}
+                    </span>
+                </div>
+                <Slider
+                    id={sliderId}
+                    value={priceRange}
+                    onValueChange={onPriceRangeChange}
+                    min={0}
+                    max={100}
+                    step={0.1}
+                />
+            </div>
+        </div>
+    )
+}
 
 
 export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
@@ -71,6 +171,24 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
     const [purchasingRateId, setPurchasingRateId] = useState<string | number | null>(null)
     const [appliedBenefitIds, setAppliedBenefitIds] = useState<number[]>([])
     const [value, setValue] = useState([0, 100])
+    const [filterSheetOpen, setFilterSheetOpen] = useState(false)
+    const [isSidebarLayout, setIsSidebarLayout] = useState(() =>
+        typeof window !== 'undefined'
+            ? window.matchMedia(SIDEBAR_LAYOUT_QUERY).matches
+            : true
+    )
+
+    useEffect(() => {
+        const mediaQuery = window.matchMedia(SIDEBAR_LAYOUT_QUERY)
+        const onChange = (event: MediaQueryListEvent) => setIsSidebarLayout(event.matches)
+        setIsSidebarLayout(mediaQuery.matches)
+        mediaQuery.addEventListener('change', onChange)
+        return () => mediaQuery.removeEventListener('change', onChange)
+    }, [])
+
+    useEffect(() => {
+        if (isSidebarLayout) setFilterSheetOpen(false)
+    }, [isSidebarLayout])
 
     const benefitForm = useForm<FieldValues>({ defaultValues: {} })
     const { isAuthenticated } = UseAuth()
@@ -407,8 +525,19 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
         }
     }
 
+    const filterPanelProps = {
+        quoteSessionId,
+        isPending,
+        isFetching,
+        data,
+        benefitGroups,
+        benefitFormControl: benefitForm.control,
+        priceRange: value,
+        onPriceRangeChange: setValue,
+    }
+
     return (
-        <div className="space-y-6">
+        <div className="w-full min-w-0 space-y-4 sm:space-y-6">
             {!quoteSessionId && (
                 <div className="rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
                     <strong>Quote session not found.</strong> Go back to {missingSessionBackLabel} and
@@ -416,76 +545,33 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                 </div>
             )}
 
-            <div className='2xl:flex gap-2'>
-                <section className="hidden w-72 shrink-0 px-4 py-5 sm:px-6 sm:py-6 2xl:flex 2xl:flex-col">
-                    <div className="grid gap-2 mb-5">
-                        <Label htmlFor="search">Search by Insurer</Label>
-                        <Input
-                            id="search"
-                            name="search"
-                            type="text"
-                            placeholder="Enter insurer name..."
-                            className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+            <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:gap-5 min-[1600px]:gap-6">
+                {isSidebarLayout ? (
+                    <aside className="w-full shrink-0 xl:flex xl:w-64 min-[1600px]:w-72">
+                        <QuotationFiltersPanel
+                            {...filterPanelProps}
+                            className="sticky top-24 w-full rounded-lg border border-gray-200 bg-white px-4 py-5 xl:px-5 xl:py-6"
                         />
-                    </div>
-                    <h2 className="mb-1 text-lg font-semibold text-gray-900">Additional benefits</h2>
-                    <hr className="mb-5" />
-                    <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
-                        {!quoteSessionId ? null : isPending && !data && benefitGroups.length === 0 ? (
-                            <p className="text-sm text-muted-foreground">Loading benefit options…</p>
-                        ) : benefitGroups.length === 0 ? (
-                            <p className="text-sm text-muted-foreground">
-                                No optional benefits are available for this quote yet.
-                            </p>
-                        ) : (
-                            <div className="grid grid-cols-1 gap-4 md:grid-cols-1 xl:grid-cols-1">
-                                {benefitGroups.map(({ group, items }) => {
-                                    const fieldName = benefitGroupFormKey(group)
-                                    const options = [
-                                        { value: BENEFIT_SELECT_NONE, label: '-- none --' },
-                                        ...items.map((item) => ({
-                                            value: String(item.id),
-                                            label: benefitOptionLabel(item),
-                                        })),
-                                    ]
-                                    return (
-                                        <ReusableSelect
-                                            key={group}
-                                            control={benefitForm.control}
-                                            name={fieldName as Path<FieldValues>}
-                                            label={group}
-                                            placeholder={`Choose in ${group}`}
-                                            options={options}
-                                            disabled={isFetching}
-                                            triggerClassName="border-[#ADABAB]"
-                                        />
-                                    )
-                                })}
-                            </div>
-                        )}
-                    </form>
-                    <hr className="mb-5" />
-                    <h2 className="mb-1 text-lg font-semibold text-gray-900">Price Range</h2>
-                    <div className="mx-auto grid w-full max-w-xs gap-3">
-                        <div className="flex items-center justify-between gap-2">
-                            <Label htmlFor="slider-demo-temperature">Price</Label>
-                            <span className="text-sm text-muted-foreground">
-                                {value.join(", ")}
-                            </span>
-                        </div>
-                        <Slider
-                            id="slider-demo-temperature"
-                            value={value}
-                            onValueChange={setValue}
-                            min={0}
-                            max={100}
-                            step={0.1}
-                        />
-                    </div>
-                </section>
+                    </aside>
+                ) : (
+                    <Sheet open={filterSheetOpen} onOpenChange={setFilterSheetOpen}>
+                        <SheetContent
+                            side="left"
+                            className="w-[min(100vw-2rem,20rem)] overflow-y-auto p-0"
+                        >
+                            <SheetHeader className="border-b px-4 py-4 text-left">
+                                <SheetTitle>Filters</SheetTitle>
+                            </SheetHeader>
+                            <QuotationFiltersPanel
+                                {...filterPanelProps}
+                                idPrefix="mobile-quotation"
+                                className="px-4 py-5"
+                            />
+                        </SheetContent>
+                    </Sheet>
+                )}
 
-                <section className="flex-1 min-w-0 space-y-4 px-4 py-5 sm:px-6 sm:py-6">
-
+                <section className="min-w-0 flex-1 space-y-4">
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                         <div className="flex min-w-0 flex-1 flex-col gap-2.5">
                             <div className="flex flex-wrap items-center gap-2 sm:gap-3">
@@ -506,19 +592,19 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                                     aria-label="Selected quotations for comparison">
                                     {selectedQuotesDisplay.map((quote) => (
                                         <div
-                                            key={String(quote.rate_id)}
+                                            key={String(quote?.rate_id)}
                                             role="listitem"
                                             className="inline-flex max-w-full items-center gap-2 rounded-lg border border-[#C20C0C]/25 bg-[#C20C0C]/5 py-1.5 pl-2 pr-1.5 text-sm shadow-sm">
                                             <div className="flex min-w-0 flex-col leading-tight">
                                                 <span className="truncate font-medium text-gray-900 max-w-40 sm:max-w-48">
-                                                    {quote.insurerName}
+                                                    {quote?.insurerName}
                                                 </span>
                                             </div>
                                             <button
                                                 type="button"
-                                                onClick={() => removeSelectedQuote(quote.rate_id)}
+                                                onClick={() => removeSelectedQuote(quote?.rate_id)}
                                                 className="shrink-0 rounded-full p-1 text-gray-500 transition-colors hover:bg-[#C20C0C]/15 hover:text-[#C20C0C]"
-                                                aria-label={`Remove ${quote.insurerName} from comparison`}
+                                                aria-label={`Remove ${quote?.insurerName} from comparison`}
                                             >
                                                 <X className="h-4 w-4" />
                                             </button>
@@ -528,28 +614,41 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                             )}
                         </div>
 
-                        <div className="flex shrink-0 items-center justify-between gap-3 sm:justify-end">
+                        <div className="flex w-full shrink-0 flex-wrap items-center justify-end gap-2 sm:w-auto sm:gap-3">
                             {isFetching && (
-                                <span className="animate-pulse text-xs text-gray-400">
+                                <span className="w-full animate-pulse text-xs text-gray-400 sm:w-auto">
                                     Fetching premium quotations…
                                 </span>
                             )}
+                            {!isSidebarLayout && (
+                                <Button
+                                    variant="outline"
+                                    type="button"
+                                    className="flex w-full items-center justify-center gap-2 sm:w-auto"
+                                    onClick={() => setFilterSheetOpen(true)}
+                                    leftIcon={<ListFilter className="h-4 w-4" />}
+                                >
+                                    Filter
+                                </Button>
+                            )}
+
                             <Button
                                 type="button"
-                                className="rounded bg-[#C20C0C]/80 px-5 py-2 text-sm font-medium text-white hover:bg-[#C20C0C] sm:w-auto"
+                                className="w-full rounded bg-[#C20C0C]/80 px-5 py-2 text-sm font-medium text-white hover:bg-[#C20C0C] sm:w-auto"
                                 onClick={() => onComparison(false)}
                                 loading={
                                     submitComparisonMutation.isPending ||
                                     submitComparisonDownloadMutation.isPending
                                 }
-                                disabled={selectedQuotes.length < 2}>
+                                disabled={selectedQuotes.length < 2}
+                            >
                                 Generate Comparison
                                 {selectedQuotes.length > 0 &&
                                     ` (${selectedQuotes.length}/${MAX_COMPARISONS})`}
                             </Button>
                         </div>
                     </div>
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 sm:gap-6">
+                    <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 md:grid-cols-3 sm:gap-5 lg:gap-6">
                         {isPending && !data
                             ? Array.from({ length: filter.pageSize }).map((_, i) => (
                                 <SkeletonCard key={`skeleton-${i}`} />
@@ -567,13 +666,16 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                                             )
                                         }
                                         key={item?.id ?? `quotation-${itemIndex}`}
+                                        headerClassName="p-2 sm:p-3"
                                         header={{
                                             type: 'image',
                                             src: item?.product?.organization?.logo,
                                             alt: item?.product?.organization?.name ?? 'Insurer logo',
+                                            className: 'max-h-12 w-auto object-contain',
                                         }}
-                                        rootClassName=""
-                                        footerClassName="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between"
+                                        rootClassName="@container/quote-card h-auto w-full"
+                                        contentClassName="px-3 py-2 sm:px-4"
+                                        footerClassName="flex flex-col gap-2 px-3 pb-3 sm:px-4 min-[1600px]:flex-row min-[1600px]:items-center min-[1600px]:justify-between"
                                         footer={
                                             <>
                                                 <Button
@@ -584,7 +686,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                                                             Component: QuotePreviewPage,
                                                         })
                                                     }
-                                                    className="w-full rounded-md border border-[#D9D9D9] bg-[#C20C0C] px-4 py-2 text-sm font-medium text-white hover:bg-[#C20C0C]/90 lg:w-auto">
+                                                    className="w-full rounded-md border border-[#D9D9D9] bg-[#C20C0C] px-3 py-2 text-sm font-medium text-white hover:bg-[#C20C0C]/90 min-[1600px]:w-auto min-[1600px]:px-4">
                                                     Get Quote
                                                 </Button>
                                                 {isAuthenticated ? (
@@ -594,7 +696,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                                                         onClick={() => onPurchase(item?.product?.id, item?.rate_id)}
                                                         loading={submitPurchaseMutation.isPending && purchasingRateId === item?.rate_id}
                                                         disabled={submitPurchaseMutation.isPending && purchasingRateId !== item?.rate_id}
-                                                        className=" w-full lg:w-auto border-[#C20C0C] bg-[#FFF5F5] text-[#C20C0C] hover:bg-[#C20C0C] hover:text-white focus-visible:ring-[#C20C0C]/30">
+                                                        className="w-full border-[#C20C0C] bg-[#FFF5F5] text-[#C20C0C] hover:bg-[#C20C0C] hover:text-white focus-visible:ring-[#C20C0C]/30 min-[1600px]:w-auto">
                                                         Purchase Cover
                                                     </Button>
                                                 ) : (
@@ -604,22 +706,22 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                                                             returnTo: location.pathname,
                                                             stepperStep: currentStep,
                                                         }}
-                                                        className="w-full lg:w-auto">
+                                                        className="w-full min-[1600px]:w-auto">
                                                         <Button
                                                             type="button"
-                                                            className=" w-full lg:w-auto border-[#C20C0C] bg-[#FFF5F5] text-[#C20C0C] hover:bg-[#C20C0C] hover:text-white focus-visible:ring-[#C20C0C]/30">
+                                                            className="w-full border-[#C20C0C] bg-[#FFF5F5] text-[#C20C0C] hover:bg-[#C20C0C] hover:text-white focus-visible:ring-[#C20C0C]/30 min-[1600px]:w-auto">
                                                             Purchase Cover
                                                         </Button>
                                                     </Link>
                                                 )}
                                             </>
                                         }>
-                                        <div className="space-y-1.5 px-1">
-                                            <div className="flex justify-between gap-2">
+                                        <div className="space-y-1.5">
+                                            <div className="flex flex-col gap-0.5 @[300px]/quote-card:flex-row @[300px]/quote-card:items-center @[300px]/quote-card:justify-between">
                                                 <span className="text-xs text-gray-500 sm:text-sm">
                                                     Basic Premium
                                                 </span>
-                                                <span className="text-xs font-medium text-gray-900 sm:text-sm">
+                                                <span className="text-xs font-medium text-gray-900 sm:text-sm shrink-0">
                                                     {formatCurrency(item?.calculated_premium?.vehicle_premium)}
                                                 </span>
                                             </div>
@@ -638,17 +740,20 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                                                                 ? 'bg-red-100 text-red-700'
                                                                 : 'bg-gray-100 text-gray-600'
                                                 return (
-                                                    <div key={benefit.id} className="flex justify-between gap-2">
+                                                    <div
+                                                        key={benefit.id}
+                                                        className="flex flex-col gap-0.5 @[300px]/quote-card:flex-row @[300px]/quote-card:items-start @[300px]/quote-card:justify-between @[300px]/quote-card:gap-2"
+                                                    >
                                                         <span
                                                             className={[
-                                                                'text-xs sm:text-sm',
+                                                                'min-w-0 text-xs leading-snug sm:text-sm',
                                                                 isSelectedInRequest ? 'font-medium text-green-700' : 'text-gray-500',
                                                             ].join(' ')}>
                                                             {label}
                                                         </span>
                                                         <span
                                                             className={[
-                                                                'inline-flex items-center rounded-sm px-2 py-0.5 text-xs font-medium',
+                                                                'inline-flex w-fit shrink-0 items-center rounded-sm px-2 py-0.5 text-xs font-medium',
                                                                 badgeClassName,
                                                             ].join(' ')}>
                                                             {resolved.text}
@@ -657,23 +762,22 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                                                 )
                                             })}
 
-                                            {/* Duty */}
-                                            <div className="flex justify-between gap-2">
+                                            <div className="flex flex-col gap-0.5 @[300px]/quote-card:flex-row @[300px]/quote-card:items-center @[300px]/quote-card:justify-between">
                                                 <span className="text-xs text-gray-500 sm:text-sm">
                                                     PHCF, TL & Stamp Duty
                                                 </span>
-                                                <span className="text-xs font-medium text-gray-900 sm:text-sm">
+                                                <span className="text-xs font-medium text-gray-900 sm:text-sm shrink-0">
                                                     {formatCurrency(item?.calculated_premium?.total_duty)}
                                                 </span>
                                             </div>
 
 
-                                            <div className="flex justify-between gap-2 border-t border-b border-gray-200 pt-2">
-                                                <span className="text-xs text-gray-500 font-bold sm:text-sm ">
+                                            <div className="flex flex-col gap-0.5 border-t border-b border-gray-200 py-2 @[300px]/quote-card:flex-row @[300px]/quote-card:items-center @[300px]/quote-card:justify-between">
+                                                <span className="text-xs font-bold text-gray-500 sm:text-sm">
                                                     Total Premium
                                                 </span>
 
-                                                <span className="text-xs font-semibold text-[#C20C0C] sm:text-sm">
+                                                <span className="text-xs font-semibold text-[#C20C0C] sm:text-sm shrink-0">
                                                     {formatCurrency(item?.calculated_premium?.total_premium)}
                                                 </span>
                                             </div>
@@ -684,7 +788,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                 </section>
             </div>
 
-            <CardFooter className="flex flex-col items-center justify-between gap-3 px-0 pt-2 sm:flex-row">
+            <div className="flex flex-col items-stretch justify-between gap-4 px-0 pt-2 sm:flex-row sm:items-center">
                 <Button
                     type="button"
                     className="w-full rounded-full border border-[#C20C0C] bg-transparent px-5 py-2 text-sm font-medium text-[#C20C0C] hover:bg-[#C20C0C]/10 sm:w-auto"
@@ -708,7 +812,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                     disabled>
                     Next
                 </Button>
-            </CardFooter>
+            </div>
             <CustomDialogComponent
                 {...{ handleDialogContextSwitch, dialogOpen }}
                 className="w-[95vw] p-4 sm:max-w-fit sm:w-auto sm:p-6">
