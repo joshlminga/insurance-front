@@ -22,7 +22,7 @@ import {
     ShoppingCart
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
-import React, { useEffect, useState } from "react";
+// import React, { useEffect, useState } from "react";
 import {
     BenefitType,
     premiumPreview,
@@ -39,15 +39,15 @@ import { ShowToast } from "@/utils/utils";
 import { UseApiMutation } from "@/hooks/hooks";
 import { extractErrorMessage } from "@/utils/helpers";
 import { useCustomDialogContextFactory } from "@/hooks";
+import React from "react";
 
 export const QuotePreviewPage: React.FC<premiumPreview> = ({
     componentProps,
     goToNextStep: goToNextStepProp,
     // handleDialogContextSwitch,
 }) => {
-
     const { currentStep } = usePurchaseStepper('motor');
-    const [quoteSessionId, setQuoteSessionId] = useState<number | null>(null)
+    // const [quoteSessionId, setQuoteSessionId] = useState<number | null>(null)
     const location = useLocation();
     const { isAuthenticated } = UseAuth();
     const item = componentProps?.data;
@@ -61,14 +61,22 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
         (benefits?.[key] ?? []).map((b: any) => ({ ...b, type }))
     );
 
-    useEffect(() => {
-        const storedSessionId = Number(sessionStorage.getItem(MOTOR_QUOTE_SESSION_STORAGE_KEY))
+    // useEffect(() => {
+    //     const storedSessionId = Number(sessionStorage.getItem(MOTOR_QUOTE_SESSION_STORAGE_KEY))
+    //     if (Number.isFinite(storedSessionId) && storedSessionId > 0) {
+    //         setQuoteSessionId(storedSessionId)
+    //     } else {
+    //         setQuoteSessionId(null)
+    //     }
+    // }, [])
+
+    const quoteSessionId = (() => {
+        const storedSessionId = Number(sessionStorage.getItem(MOTOR_QUOTE_SESSION_STORAGE_KEY));
         if (Number.isFinite(storedSessionId) && storedSessionId > 0) {
-            setQuoteSessionId(storedSessionId)
-        } else {
-            setQuoteSessionId(null)
+            return storedSessionId;
         }
-    }, [])
+        return null;
+    })();
 
     const data = {
         'product_id': componentProps?.data?.product_id,

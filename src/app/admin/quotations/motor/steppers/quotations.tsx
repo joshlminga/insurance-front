@@ -403,7 +403,7 @@ export const AdminMotorQuotationsPage: React.FC<AdminMotorStepProps> = ({
     return (
         <div className="space-y-6">
             {!quoteSessionId && (
-                <div className="rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                <div className="rounded-md border border-amber-300 px-4 py-3 text-sm text-amber-800">
                     <strong>Quote session not found.</strong> Go back to {missingSessionBackLabel} and
                     submit again.
                 </div>

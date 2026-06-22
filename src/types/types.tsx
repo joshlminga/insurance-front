@@ -864,3 +864,16 @@ export type TNotifs = {
   time: string;
   type: string;
 }
+
+export type QuotationFiltersPanelProps = {
+    idPrefix?: string
+    quoteSessionId: number | null
+    isPending: boolean
+    isFetching: boolean
+    data: SubmitResponse | undefined
+    benefitGroups: BenefitGroup[]
+    benefitFormControl: Control<FieldValues>
+    priceRange: number[]
+    onPriceRangeChange: (value: number[]) => void
+    className?: string
+}

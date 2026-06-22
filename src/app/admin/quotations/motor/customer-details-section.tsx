@@ -59,20 +59,15 @@ export function CustomerDetailsSection({ countryId }: CustomerDetailsSectionProp
     const [isSearchingEmail, setIsSearchingEmail] = useState(false)
     const [isSearchingPhone, setIsSearchingPhone] = useState(false)
     const [showSelfCoverWarning, setShowSelfCoverWarning] = useState(false)
-
     const lockedEmailRef = useRef('')
-
     const watchedEmail = useWatch({ control, name: 'email' })
-
     const { data: geoData } = UseApiQuery<SubmitResponse>({
         url: 'taxonomies/geo/country',
         params: { country_id: countryId },
         queryOptions: { enabled: Boolean(countryId) },
     })
-
     const countryGeo = (geoData?.data ?? [])[0] as CountryGeoMeta | undefined
     const dialCode = resolveDialCode(countryGeo)
-
     const applyFoundCustomer = useCallback(
         (user: CustomerSearchUser) => {
             const fullName = resolveFullName(user)
@@ -176,7 +171,7 @@ export function CustomerDetailsSection({ countryId }: CustomerDetailsSectionProp
     }
 
     return (
-        <div className="rounded-2xl border border-[#ADABAB]/50 bg-linear-to-b from-white to-neutral-50/90 p-4 shadow-sm sm:p-6">
+        <div className="rounded-2xl border border-[#ADABAB]/50 p-4 shadow-sm sm:p-6">
             <div className="flex w-full flex-wrap items-start justify-between gap-3 pb-4">
                 <div>
                     <h2 className="text-lg font-bold leading-tight tracking-tight sm:text-xl">
@@ -198,7 +193,6 @@ export function CustomerDetailsSection({ countryId }: CustomerDetailsSectionProp
                     </Button>
                 )}
             </div>
-
             {isCustomerLocked && (
                 <p className="mb-3 text-xs font-medium text-[#8B0A0A]">
                     These fields were auto-filled from an existing customer and are locked.
@@ -206,7 +200,6 @@ export function CustomerDetailsSection({ countryId }: CustomerDetailsSectionProp
                     edit manually.
                 </p>
             )}
-
             <FieldGroup className="[&_label]:text-sm [&_input]:text-sm">
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     <Controller
@@ -230,7 +223,7 @@ export function CustomerDetailsSection({ countryId }: CustomerDetailsSectionProp
                                     className={cn(
                                         motorInputClass(isCustomerLocked),
                                         fieldState.invalid &&
-                                            'border-red-500 focus-visible:ring-red-500'
+                                        'border-red-500 focus-visible:ring-red-500'
                                     )}
                                     value={field.value ?? ''}
                                     onChange={(e) => field.onChange(e.target.value)}
@@ -277,7 +270,7 @@ export function CustomerDetailsSection({ countryId }: CustomerDetailsSectionProp
                         control={control}
                         name="create_customer_account"
                         render={({ field }) => (
-                            <div className="mt-4 flex items-start gap-2.5 rounded-xl border border-[#C20C0C]/25 bg-[#FFFBFB] p-3 sm:p-4">
+                            <div className="mt-4 flex items-start gap-2.5 rounded-xl border border-[#C20C0C]/25 p-3 sm:p-4">
                                 <Checkbox
                                     id="create-customer-account"
                                     checked={Boolean(field.value)}
@@ -303,8 +296,7 @@ export function CustomerDetailsSection({ countryId }: CustomerDetailsSectionProp
 
             <AlertDialog
                 open={showSelfCoverWarning}
-                onOpenChange={setShowSelfCoverWarning}
-            >
+                onOpenChange={setShowSelfCoverWarning}>
                 <AlertDialogContent size="sm" className="sm:max-w-md">
                     <AlertDialogHeader>
                         <AlertDialogTitle>Issuing cover for yourself</AlertDialogTitle>
@@ -317,8 +309,7 @@ export function CustomerDetailsSection({ countryId }: CustomerDetailsSectionProp
                     <AlertDialogFooter>
                         <AlertDialogAction
                             className="rounded-full bg-[#C20C0C] hover:bg-[#C20C0C]/90"
-                            onClick={() => setShowSelfCoverWarning(false)}
-                        >
+                            onClick={() => setShowSelfCoverWarning(false)}>
                             Continue
                         </AlertDialogAction>
                     </AlertDialogFooter>

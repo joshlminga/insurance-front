@@ -16,7 +16,7 @@ import {
 } from "@/dev/core";
 import { useCustomDialogContextFactory } from "@/hooks";
 import { ArrowDown, Forward, Mail, Share2, ShoppingCart } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { ShowToast } from "@/utils/utils";
 import { UseApiMutation } from "@/hooks/hooks";
 import { premiumPreview, SubmitResponse } from "@/types/types";
@@ -61,21 +61,31 @@ export const PostComparisonPage: React.FC<premiumPreview> = ({
                     : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4";
 
     const comparisons: any[] = componentProps?.data?.data?.comparison ?? [];
-    const [quoteSessionId, setQuoteSessionId] = useState<number | null>(null);
+    // const [quoteSessionId, setQuoteSessionId] = useState<number | null>(null);
     const [purchasingRateId, setPurchasingRateId] = useState<string | number | null>(null);
     const { isAuthenticated } = UseAuth()
     const { currentStep } = usePurchaseStepper('motor')
 
     const goToNextStep = goToNextStepProp ?? componentProps?.goToNextStep;
 
-    useEffect(() => {
-        const storedSessionId = Number(sessionStorage.getItem(MOTOR_QUOTE_SESSION_STORAGE_KEY))
+    // useEffect(() => {
+    //     const storedSessionId = Number(sessionStorage.getItem(MOTOR_QUOTE_SESSION_STORAGE_KEY))
+    //     if (Number.isFinite(storedSessionId) && storedSessionId > 0) {
+    //         setQuoteSessionId(storedSessionId)
+    //     } else {
+    //         setQuoteSessionId(null)
+    //     }
+    // }, [])
+
+    const quoteSessionId = (() => {
+        const storedSessionId = Number(sessionStorage.getItem(MOTOR_QUOTE_SESSION_STORAGE_KEY));
+
         if (Number.isFinite(storedSessionId) && storedSessionId > 0) {
-            setQuoteSessionId(storedSessionId)
-        } else {
-            setQuoteSessionId(null)
+            return storedSessionId;
         }
-    }, [])
+
+        return null;
+    })();
 
     const { handleDialogContextSwitch, dialogContent, dialogOpen } =
         useCustomDialogContextFactory<{
