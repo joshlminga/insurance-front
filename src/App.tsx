@@ -26,6 +26,7 @@ const MotorLandingPage = lazy(() => import("./app/customer/motor/page").then(m =
 const StepPage = lazy(() => import("./app/customer/motor/steppers/steppage").then(m => ({ default: m.StepPage })))
 const MarineLandingPage = lazy(() => import("./app/customer/marine/page").then(m => ({ default: m.MarineLandingPage })))
 const MarineStepPage = lazy(() => import("./app/customer/marine/steppers/steppage").then(m => ({ default: m.MarineStepPage })))
+const PesapalReturnPage = lazy(() => import("./app/customer/payment/pesapal/return/page").then(m => ({ default: m.PesapalReturnPage })))
 const CustomerProfileLayout = lazy(() => import("./app/customer/profile-settings/layout").then(m => ({ default: m.CustomerProfileLayout })))
 const AccountSettingsPage = lazy(() => import("./app/customer/profile-settings/settings").then(m => ({ default: m.AccountSettingsPage })))
 const CustomerClaimsPage = lazy(() => import("./app/customer/profile-settings/claims").then(m => ({ default: m.CustomerClaimsPage })))
@@ -176,6 +177,15 @@ export const router = createBrowserRouter([
         element: <S><MarineStepPage /></S>,
       },
     ],
+  },
+
+  {
+    path: EROUTES.PESAPAL_RETURN,
+    element: (
+      <CustomerPublicRoute>
+        <S><PesapalReturnPage /></S>
+      </CustomerPublicRoute>
+    ),
   },
 
   // END-USERGENERAL = TRUE

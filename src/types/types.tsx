@@ -596,6 +596,18 @@ export type MpesaPayload = {
   transaction_desc?: string
 }
 
+export type PesapalPayload = {
+  invoice_id: number
+  phone?: string
+  email?: string
+}
+
+export type PesapalPollResponse = {
+  status?: string
+  payment_status?: string | null
+  confirmation_code?: string | null
+}
+
 export type MpesaPollResponse = {
   status?: string
   message?: string
