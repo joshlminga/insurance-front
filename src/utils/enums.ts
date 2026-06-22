@@ -26,6 +26,7 @@ export const EROUTES = {
   MOTOR: '/motor',
   TRAVEL: '/travel',
   MARINE: '/marine',
+  PESAPAL_RETURN: '/customer/payment/pesapal/return',
   LIFE: '/life',
   PROFILE: '/profile',
   ACCOUNTSETTINGS: '/profile/account-settings',

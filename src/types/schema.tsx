@@ -65,6 +65,7 @@ export type PaymentFormInput = {
   amount?: number
   mpesa_transaction_code?: string
   card_provider?: "paystack" | "pesapal" | "dpo"
+  pesapal_email?: string
   paypal_email?: string
   available_credit?: string
   unsettled_credit?: string

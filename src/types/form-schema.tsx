@@ -289,6 +289,31 @@ const CardPaymentSchema = BasePaymentSchema.extend({
 // Pesapal specific fields
 const PesapalPaymentSchema = BasePaymentSchema.extend({
   payment_method: z.literal("pesapal"),
+  invoice_id: z.string().min(1, "Invoice is required"),
+  phone_number: z
+    .string()
+    .optional()
+    .or(z.literal(""))
+    .refine(
+      (value) => !value || /^(?:\+254|254|0)?[17]\d{8}$/.test(value),
+      "Invalid Kenyan phone number"
+    ),
+  pesapal_email: z
+    .string()
+    .email("Enter a valid email address")
+    .optional()
+    .or(z.literal("")),
+}).superRefine((data, ctx) => {
+  const hasPhone = Boolean(data.phone_number?.trim())
+  const hasEmail = Boolean(data.pesapal_email?.trim())
+
+  if (!hasPhone && !hasEmail) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Enter a phone number or email address for Pesapal checkout",
+      path: ["phone_number"],
+    })
+  }
 })
 
 const PaypalPaymentSchema = BasePaymentSchema.extend({
