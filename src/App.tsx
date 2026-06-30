@@ -4,7 +4,7 @@ import { lazy, Suspense } from "react"
 import { createBrowserRouter, Navigate } from "react-router-dom"
 import { EPREFIX, EROUTES } from "./utils/enums"
 import { ProtectedRoute, PublicRoute, CustomerPublicRoute } from "./hooks/hooks"
-import { ModuleRoute } from "./auth/ModuleRoute"
+import { AdminModulePage } from "./auth/AdminModulePage"
 import { MODULES } from "./auth/module-keys"
 import Layout from "./Layout"
 
@@ -341,23 +341,18 @@ export const router = createBrowserRouter([
         element: <S><StaffPage /></S>,
       },
       {
-        path: "staff",
-        element: <S><StaffPage /></S>,
-      },
-      {
         path: "staff/:id",
         element: <S><StaffDetailPage /></S>,
       },
 
-      // quotations
-      // motor
+      // quotations — motor
       {
         path: "quotations/motor-quotations",
         element: (
           <S>
-            <ModuleRoute module={MODULES.QUOTATION_MOTOR}>
+            <AdminModulePage module={MODULES.QUOTATION_MOTOR}>
               <MotorQuotationPage />
-            </ModuleRoute>
+            </AdminModulePage>
           </S>
         ),
       },
@@ -365,9 +360,9 @@ export const router = createBrowserRouter([
         path: "quotations/motor-quotations/results",
         element: (
           <S>
-            <ModuleRoute module={MODULES.QUOTATION_MOTOR}>
+            <AdminModulePage module={MODULES.QUOTATION_MOTOR}>
               <AdminMotorQuotationResultsPage />
-            </ModuleRoute>
+            </AdminModulePage>
           </S>
         ),
       },
@@ -375,64 +370,135 @@ export const router = createBrowserRouter([
         path: "quotations/motor-quotations/purchase",
         element: (
           <S>
-            <ModuleRoute module={MODULES.QUOTATION_MOTOR}>
+            <AdminModulePage module={MODULES.QUOTATION_MOTOR}>
               <AdminMotorQuotationPurchasePage />
-            </ModuleRoute>
+            </AdminModulePage>
           </S>
         ),
       },
-      // products
-      // motor
+      // products — motor
       {
         path: "products/motor",
-        element: <S><MotorProductPage /></S>,
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.PRODUCT_MOTOR}>
+              <MotorProductPage />
+            </AdminModulePage>
+          </S>
+        ),
       },
       {
         path: "products/motor-rates/:slung",
-        element: <S><MotorProductRatesPage /></S>,
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.PRODUCT_MOTOR}>
+              <MotorProductRatesPage />
+            </AdminModulePage>
+          </S>
+        ),
       },
       {
         path: "products/motor/cover-types",
-        element: <S><MotorCoverTypePage /></S>,
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.PRODUCT_MOTOR}>
+              <MotorCoverTypePage />
+            </AdminModulePage>
+          </S>
+        ),
       },
       {
         path: "products/motor/covering",
-        element: <S><MotorCoveringPage /></S>,
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.PRODUCT_MOTOR}>
+              <MotorCoveringPage />
+            </AdminModulePage>
+          </S>
+        ),
       },
       {
         path: "products/motor/vehicle-classes",
-        element: <S><VehicleClassesPage /></S>,
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.PRODUCT_MOTOR}>
+              <VehicleClassesPage />
+            </AdminModulePage>
+          </S>
+        ),
       },
       {
         path: "products/motor/vehicle-use",
-        element: <S><VehicleUsePage /></S>,
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.PRODUCT_MOTOR}>
+              <VehicleUsePage />
+            </AdminModulePage>
+          </S>
+        ),
       },
       {
         path: "products/motor/add-on-benefits",
-        element: <S><MotorAddonBenefitsPage /></S>,
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.PRODUCT_MOTOR}>
+              <MotorAddonBenefitsPage />
+            </AdminModulePage>
+          </S>
+        ),
       },
       {
         path: "products/motor/detailed-benefits",
-        element: <S><MotorDetailedBenefitPage /></S>,
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.PRODUCT_MOTOR}>
+              <MotorDetailedBenefitPage />
+            </AdminModulePage>
+          </S>
+        ),
       },
       {
         path: "products/motor/tonage",
-        element: <S><MotorTonangePage /></S>,
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.PRODUCT_MOTOR}>
+              <MotorTonangePage />
+            </AdminModulePage>
+          </S>
+        ),
       },
 
       // Organizations
       {
         path: "organization",
-        element: <S><OrganizationsPage /></S>,
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.ORGANIZATION}>
+              <OrganizationsPage />
+            </AdminModulePage>
+          </S>
+        ),
       },
       {
         path: "organization-location",
-        element: <S><OrganizationLocationsPage /></S>,
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.ORGANIZATION_LOCATION}>
+              <OrganizationLocationsPage />
+            </AdminModulePage>
+          </S>
+        ),
       },
       // Users
       {
         path: "users",
-        element: <S><UsersPage /></S>,
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.USER}>
+              <UsersPage />
+            </AdminModulePage>
+          </S>
+        ),
       },
       // Settings
       {

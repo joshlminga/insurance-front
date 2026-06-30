@@ -32,7 +32,7 @@ export type NavItem = {
   items?: NavSubItem[]
 }
 
-/** Full admin sidebar config — add module keys incrementally per API catalog */
+/** Full admin sidebar config — module keys match API rbac-modules catalog */
 export const adminNavConfig: NavItem[] = [
   {
     title: 'Dashboard',
@@ -114,38 +114,47 @@ export const adminNavConfig: NavItem[] = [
     title: 'Motor',
     url: `${EROUTES.DASHBOARD}/${EPREFIX.PRODUCTS}`,
     icon: LayoutDashboard,
+    module: MODULES.PRODUCT_MOTOR,
     items: [
       {
         title: 'Motor Products',
         url: `${EROUTES.DASHBOARD}/${EPREFIX.PRODUCTS}/motor`,
+        module: MODULES.PRODUCT_MOTOR,
       },
       {
         title: 'Cover Types',
         url: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/cover-types`,
+        module: MODULES.PRODUCT_MOTOR,
       },
       {
         title: 'Motor Covering',
         url: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/covering`,
+        module: MODULES.PRODUCT_MOTOR,
       },
       {
         title: 'Vehicle Classes',
         url: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/vehicle-classes`,
+        module: MODULES.PRODUCT_MOTOR,
       },
       {
         title: 'Vehicle Use',
         url: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/vehicle-use`,
+        module: MODULES.PRODUCT_MOTOR,
       },
       {
         title: 'Addon Benefits',
         url: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/add-on-benefits`,
+        module: MODULES.PRODUCT_MOTOR,
       },
       {
         title: 'Detailed Benefits',
         url: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/detailed-benefits`,
+        module: MODULES.PRODUCT_MOTOR,
       },
       {
         title: 'Motor Tonage',
         url: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/tonage`,
+        module: MODULES.PRODUCT_MOTOR,
       },
     ],
   },
@@ -153,15 +162,25 @@ export const adminNavConfig: NavItem[] = [
     title: 'Organization',
     url: EROUTES.ORGANIZATION,
     icon: UserCog,
+    modules: [MODULES.ORGANIZATION, MODULES.ORGANIZATION_LOCATION],
     items: [
-      { title: 'Manage', url: EROUTES.ORGANIZATION },
-      { title: 'Location', url: EROUTES.ORGANIZATION_LOCATION },
+      {
+        title: 'Manage',
+        url: EROUTES.ORGANIZATION,
+        module: MODULES.ORGANIZATION,
+      },
+      {
+        title: 'Location',
+        url: EROUTES.ORGANIZATION_LOCATION,
+        module: MODULES.ORGANIZATION_LOCATION,
+      },
     ],
   },
   {
     title: 'Users',
     url: EROUTES.USERS,
     icon: Users,
+    module: MODULES.USER,
   },
   {
     title: 'Settings',
