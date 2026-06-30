@@ -21,6 +21,9 @@ export const MODULES = {
   RBAC: 'rbac',
   SETTINGS_RBAC: 'settings-rbac',
 
+  // Policies
+  POLICY: 'policy',
+
   // Account / finance (when wired to real API pages)
   ACCOUNT: 'account',
 } as const

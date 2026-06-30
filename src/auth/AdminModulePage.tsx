@@ -2,7 +2,8 @@ import type { ReactNode } from 'react'
 import { ModuleRoute } from './ModuleRoute'
 
 interface AdminModulePageProps {
-  module: string
+  module?: string
+  modules?: string[]
   permission?: string
   children: ReactNode
 }
@@ -11,9 +12,14 @@ interface AdminModulePageProps {
  * Wraps a lazy-loaded admin page with ModuleRoute — use inside App.tsx <S> blocks.
  * Like Laravel route middleware: `->middleware('module:product-motor')`
  */
-export function AdminModulePage({ module, permission, children }: AdminModulePageProps) {
+export function AdminModulePage({
+  module,
+  modules,
+  permission,
+  children,
+}: AdminModulePageProps) {
   return (
-    <ModuleRoute module={module} permission={permission}>
+    <ModuleRoute module={module} modules={modules} permission={permission}>
       {children}
     </ModuleRoute>
   )

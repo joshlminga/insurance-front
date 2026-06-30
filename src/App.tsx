@@ -282,67 +282,151 @@ export const router = createBrowserRouter([
         index: true,
         element: <S><DashboardPage /></S>,
       },
-      // Members
+      // Members / Policyholders
       {
         path: "members",
-        element: <S><MembersPage /></S>,
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.POLICY}>
+              <MembersPage />
+            </AdminModulePage>
+          </S>
+        ),
       },
       {
         path: "members/new",
-        element: <S><MemberNewPage /></S>,
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.POLICY}>
+              <MemberNewPage />
+            </AdminModulePage>
+          </S>
+        ),
       },
       {
         path: "members/:id",
-        element: <S><MemberDetailPage /></S>,
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.POLICY}>
+              <MemberDetailPage />
+            </AdminModulePage>
+          </S>
+        ),
       },
-      // Savings
+      // Savings / Premiums & Claims
       {
         path: "savings",
-        element: <S><SavingsPage /></S>,
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.ACCOUNT}>
+              <SavingsPage />
+            </AdminModulePage>
+          </S>
+        ),
       },
       {
         path: "savings/products",
-        element: <S><SavingsProductsPage /></S>,
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.ACCOUNT}>
+              <SavingsProductsPage />
+            </AdminModulePage>
+          </S>
+        ),
       },
       {
         path: "savings/:id",
-        element: <S><SavingAccensureuntDetailPage /></S>,
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.ACCOUNT}>
+              <SavingAccensureuntDetailPage />
+            </AdminModulePage>
+          </S>
+        ),
       },
-      // Loans
+      // Loans / Policies
       {
         path: "loans",
-        element: <S><LoansPage /></S>,
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.PURCHASE_MOTOR}>
+              <LoansPage />
+            </AdminModulePage>
+          </S>
+        ),
       },
       {
         path: "loans/apply",
-        element: <S><LoanApplicationPage /></S>,
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.PURCHASE_MOTOR}>
+              <LoanApplicationPage />
+            </AdminModulePage>
+          </S>
+        ),
       },
       {
         path: "loans/products",
-        element: <S><LoanProductsPage /></S>,
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.PURCHASE_MOTOR}>
+              <LoanProductsPage />
+            </AdminModulePage>
+          </S>
+        ),
       },
       {
         path: "loans/:id",
-        element: <S><LoanDetailPage /></S>,
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.PURCHASE_MOTOR}>
+              <LoanDetailPage />
+            </AdminModulePage>
+          </S>
+        ),
       },
-      // Transactions
+      // Transactions / Payments
       {
         path: "transactions",
-        element: <S><TransactionsPage /></S>,
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.ACCOUNT}>
+              <TransactionsPage />
+            </AdminModulePage>
+          </S>
+        ),
       },
-      // Reports
+      // Reports / Insights
       {
         path: "reports",
-        element: <S><ReportsPage /></S>,
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.RBAC}>
+              <ReportsPage />
+            </AdminModulePage>
+          </S>
+        ),
       },
-      // Staff
+      // Staff / Agents
       {
         path: "staff",
-        element: <S><StaffPage /></S>,
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.ROLE}>
+              <StaffPage />
+            </AdminModulePage>
+          </S>
+        ),
       },
       {
         path: "staff/:id",
-        element: <S><StaffDetailPage /></S>,
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.ROLE}>
+              <StaffDetailPage />
+            </AdminModulePage>
+          </S>
+        ),
       },
 
       // quotations — motor
@@ -503,7 +587,13 @@ export const router = createBrowserRouter([
       // Settings
       {
         path: "settings",
-        element: <S><SettingsPage /></S>,
+        element: (
+          <S>
+            <AdminModulePage modules={[MODULES.SETTINGS_RBAC, MODULES.RBAC]}>
+              <SettingsPage />
+            </AdminModulePage>
+          </S>
+        ),
       },
     ],
   },

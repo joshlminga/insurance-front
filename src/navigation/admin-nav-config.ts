@@ -44,39 +44,44 @@ export const adminNavConfig: NavItem[] = [
     title: 'Policyholders',
     url: EROUTES.MEMBERS,
     icon: Users,
+    module: MODULES.POLICY,
     items: [
-      { title: 'All Policyholders', url: EROUTES.MEMBERS },
-      { title: 'New Policyholder', url: EROUTES.MEMBERS_NEW },
+      { title: 'All Policyholders', url: EROUTES.MEMBERS, module: MODULES.POLICY },
+      { title: 'New Policyholder', url: EROUTES.MEMBERS_NEW, module: MODULES.POLICY },
     ],
   },
   {
     title: 'Premiums & Claims',
     url: EROUTES.SAVINGS,
     icon: Wallet,
+    module: MODULES.ACCOUNT,
     items: [
-      { title: 'Accounts', url: EROUTES.SAVINGS },
-      { title: 'Insurance Products', url: EROUTES.SAVINGS_PRODUCTS },
+      { title: 'Accounts', url: EROUTES.SAVINGS, module: MODULES.ACCOUNT },
+      { title: 'Insurance Products', url: EROUTES.SAVINGS_PRODUCTS, module: MODULES.ACCOUNT },
     ],
   },
   {
     title: 'Policies',
     url: EROUTES.LOANS,
     icon: ShieldCheck,
+    module: MODULES.PURCHASE_MOTOR,
     items: [
-      { title: 'All Policies', url: EROUTES.LOANS },
-      { title: 'New Application', url: EROUTES.LOANS_APPLY },
-      { title: 'Policy Products', url: EROUTES.LOANS_PRODUCTS },
+      { title: 'All Policies', url: EROUTES.LOANS, module: MODULES.PURCHASE_MOTOR },
+      { title: 'New Application', url: EROUTES.LOANS_APPLY, module: MODULES.PURCHASE_MOTOR },
+      { title: 'Policy Products', url: EROUTES.LOANS_PRODUCTS, module: MODULES.PURCHASE_MOTOR },
     ],
   },
   {
     title: 'Payments',
     url: EROUTES.TRANSACTIONS,
     icon: ArrowLeftRight,
+    module: MODULES.ACCOUNT,
   },
   {
     title: 'Insights',
     url: EROUTES.REPORTS,
     icon: BarChart3,
+    module: MODULES.RBAC,
   },
   {
     title: 'Quotations',
@@ -109,6 +114,7 @@ export const adminNavConfig: NavItem[] = [
     title: 'Agents',
     url: EROUTES.STAFF,
     icon: UserCog,
+    module: MODULES.ROLE,
   },
   {
     title: 'Motor',
@@ -186,5 +192,6 @@ export const adminNavConfig: NavItem[] = [
     title: 'Settings',
     url: EROUTES.SETTINGS,
     icon: Settings,
+    modules: [MODULES.SETTINGS_RBAC, MODULES.RBAC],
   },
 ]

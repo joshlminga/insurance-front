@@ -6,8 +6,10 @@ import { useCan } from './useCan'
 import { useModules } from './useModules'
 
 interface ModuleRouteProps {
-  /** RBAC module key required to view this route */
-  module: string
+  /** Single RBAC module key required to view this route */
+  module?: string
+  /** User needs any of these module keys (alternative to module) */
+  modules?: string[]
   /** Optional finer permission e.g. quotation-motor.read */
   permission?: string
   children: ReactNode
@@ -20,13 +22,20 @@ interface ModuleRouteProps {
  */
 export function ModuleRoute({
   module,
+  modules,
   permission,
   children,
   redirectTo = EROUTES.DASHBOARD,
 }: ModuleRouteProps) {
   const { isLoading } = UseAuth()
-  const { hasModule } = useModules()
+  const { hasModule, hasAnyModule } = useModules()
   const { can } = useCan()
+
+  const hasModuleAccess = module
+    ? hasModule(module)
+    : modules?.length
+      ? hasAnyModule(modules)
+      : false
 
   if (isLoading) {
     return (
@@ -36,7 +45,7 @@ export function ModuleRoute({
     )
   }
 
-  if (!hasModule(module)) {
+  if (!hasModuleAccess) {
     return <Navigate to={redirectTo} replace />
   }
 
