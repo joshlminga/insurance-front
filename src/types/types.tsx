@@ -8,6 +8,7 @@ import type { UseMutationOptions, UseQueryOptions } from "@tanstack/react-query"
 import type { SORT_ORDER } from "@/utils/enums";
 import { ColumnDef, OnChangeFn, Row, RowSelectionState } from "@tanstack/table-core";
 import { BENEFIT_TYPE_CONFIG } from "@/utils/constatnts";
+import type { Abilities, AuthSessionPayload } from '@/auth/types'
 
 export type T = {
   [key: string]: any;
@@ -27,14 +28,7 @@ export interface ReusableStepperProps {
   onValueChange?: (value: number) => void
   disabled?: boolean,
 }
-export interface LoginResponse {
-  message: string
-  user: any
-  access_token: string
-  is_general: boolean
-  status?: string;
-  data?: any
-}
+export type { LoginResponse } from '@/auth/types'
 
 export type TNodeChildrentType<T = ReactNode> = {
   children: T;
@@ -142,11 +136,18 @@ export interface AuthProviderState {
   token: string | null
   guest: Guest | null
   isGeneral: boolean | null
+  abilities: Abilities | null
+  expiresAt: number | null
+  organizationLocationId: number | null
   isAuthenticated: boolean
   isLoading: boolean
   country: string
   lang: string
   alpha: string
+  setSession: (payload: AuthSessionPayload) => void
+  setAbilities: (abilities: Abilities) => void
+  setOrganizationLocationId: (id: number | null) => Promise<void>
+  restoreSession: () => Promise<boolean>
   login: (user: Tuser, token: string, isGeneral: boolean) => void
   logout: () => void
   updateUser: (user: Partial<Tuser>) => void
@@ -670,10 +671,17 @@ export type AuthState = {
   token: string | null
   guest: Guest | null
   isGeneral: boolean | null
+  abilities: Abilities | null
+  expiresAt: number | null
+  organizationLocationId: number | null
   hasHydrated: boolean
   country: string
   lang: string
   alpha: string
+  setSession: (payload: AuthSessionPayload) => void
+  setAbilities: (abilities: Abilities) => void
+  setOrganizationLocationId: (id: number | null) => Promise<void>
+  restoreSession: () => Promise<boolean>
   login: (user: Tuser, token: string, isGeneral: boolean) => void
   logout: () => void
   updateUser: (updates: Partial<Tuser>) => void

@@ -7,6 +7,7 @@ import { UseAuth } from '@/stores/auth-store'
 import { OTPVerificationSchema } from '@/types/form-schema'
 import { OTPFormValues } from '@/types/schema'
 import { LoginResponse } from '@/types/types'
+import { normalizeLoginResponse } from '@/auth/session'
 import { EMETHODS } from '@/utils/constatnts'
 import { extractErrorMessage } from '@/utils/helpers'
 import { ShowToast } from '@/utils/utils'
@@ -17,7 +18,7 @@ export function OtpVerificationAuthForm({
   className,
   ...props
 }: React.ComponentProps<'div'>) {
-  const { login, guest } = UseAuth()
+  const { setSession, guest } = UseAuth()
 
   const form = useForm<OTPFormValues>({
     resolver: zodResolver(OTPVerificationSchema),
@@ -33,7 +34,7 @@ export function OtpVerificationAuthForm({
     method: EMETHODS.POST,
     mutationOptions: {
       onSuccess: (data) => {
-        login(data.user, data.access_token, data.is_general)
+        setSession(normalizeLoginResponse(data))
         ShowToast.success(data.message || 'Verified successfully!')
       },
       onError: (error: any) => {
