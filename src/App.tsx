@@ -4,6 +4,8 @@ import { lazy, Suspense } from "react"
 import { createBrowserRouter, Navigate } from "react-router-dom"
 import { EPREFIX, EROUTES } from "./utils/enums"
 import { ProtectedRoute, PublicRoute, CustomerPublicRoute } from "./hooks/hooks"
+import { ModuleRoute } from "./auth/ModuleRoute"
+import { MODULES } from "./auth/module-keys"
 import Layout from "./Layout"
 
 const Loader = () => (
@@ -351,15 +353,33 @@ export const router = createBrowserRouter([
       // motor
       {
         path: "quotations/motor-quotations",
-        element: <S><MotorQuotationPage /></S>,
+        element: (
+          <S>
+            <ModuleRoute module={MODULES.QUOTATION_MOTOR}>
+              <MotorQuotationPage />
+            </ModuleRoute>
+          </S>
+        ),
       },
       {
         path: "quotations/motor-quotations/results",
-        element: <S><AdminMotorQuotationResultsPage /></S>,
+        element: (
+          <S>
+            <ModuleRoute module={MODULES.QUOTATION_MOTOR}>
+              <AdminMotorQuotationResultsPage />
+            </ModuleRoute>
+          </S>
+        ),
       },
       {
         path: "quotations/motor-quotations/purchase",
-        element: <S><AdminMotorQuotationPurchasePage /></S>,
+        element: (
+          <S>
+            <ModuleRoute module={MODULES.QUOTATION_MOTOR}>
+              <AdminMotorQuotationPurchasePage />
+            </ModuleRoute>
+          </S>
+        ),
       },
       // products
       // motor

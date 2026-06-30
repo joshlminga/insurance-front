@@ -1,7 +1,8 @@
 "use client"
 
-import { ChevronRight, type LucideIcon } from "lucide-react"
+import { ChevronRight } from "lucide-react"
 import { Link, useLocation } from "react-router-dom"
+import type { NavItem } from "@/navigation/admin-nav-config"
 
 import {
   Collapsible,
@@ -21,16 +22,7 @@ import {
 export function NavMain({
   items,
 }: {
-  items: {
-    title: string
-    url: string
-    icon?: LucideIcon
-    isActive?: boolean
-    items?: {
-      title: string
-      url: string
-    }[]
-  }[]
+  items: NavItem[]
 }) {
   const location = useLocation()
 

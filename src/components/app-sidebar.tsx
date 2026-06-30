@@ -1,192 +1,27 @@
-import * as React from "react"
-import {
-  Settings,
-  LayoutDashboard,
-  Users,
-  Wallet,
-  ArrowLeftRight,
-  BarChart3,
-  UserCog,
-  ShieldCheck,
-  TextQuote,
-} from "lucide-react"
-
-import { NavMain } from "@/components/nav-main"
-import { NavUser } from "@/components/nav-user"
-
+import { useMemo } from 'react'
+import { NavMain } from '@/components/nav-main'
+import { NavUser } from '@/components/nav-user'
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
   SidebarRail,
-} from "@/components/ui/sidebar"
-import { EPREFIX, EROUTES } from "@/utils/enums"
-import AppLogo from "./ui/app-logo"
-import { UseAuth } from "@/stores/auth-store"
-
-
-const navData = {
-  navMain: [
-    {
-      title: "Dashboard",
-      url: EROUTES.DASHBOARD,
-      icon: LayoutDashboard,
-      isActive: true,
-    },
-    {
-      title: "Policyholders",
-      url: EROUTES.MEMBERS,
-      icon: Users,
-      items: [
-        {
-          title: "All Policyholders",
-          url: EROUTES.MEMBERS,
-        },
-        {
-          title: "New Policyholder",
-          url: EROUTES.MEMBERS_NEW,
-        },
-      ],
-    },
-    {
-      title: "Premiums & Claims",
-      url: EROUTES.SAVINGS,
-      icon: Wallet,
-      items: [
-        {
-          title: "Accounts",
-          url: EROUTES.SAVINGS,
-        },
-        {
-          title: "Insurance Products",
-          url: EROUTES.SAVINGS_PRODUCTS,
-        },
-      ],
-    },
-    {
-      title: "Policies",
-      url: EROUTES.LOANS,
-      icon: ShieldCheck,
-      items: [
-        {
-          title: "All Policies",
-          url: EROUTES.LOANS,
-        },
-        {
-          title: "New Application",
-          url: EROUTES.LOANS_APPLY,
-        },
-        {
-          title: "Policy Products",
-          url: EROUTES.LOANS_PRODUCTS,
-        },
-      ],
-    },
-    {
-      title: "Payments",
-      url: EROUTES.TRANSACTIONS,
-      icon: ArrowLeftRight,
-    },
-    {
-      title: "Insights",
-      url: EROUTES.REPORTS,
-      icon: BarChart3,
-    },
-    {
-      title: "Quotations",
-      url: `${EROUTES.QUOTATIONS}`,
-      icon: TextQuote,
-      items: [
-        {
-          title: "Motor Quotation",
-          url: `${EROUTES.MOTORQUOTATIONS}`,
-        },
-        {
-          title: "Marine Quotation",
-          url: '',
-        },
-        {
-          title: "Travel Quotation",
-          url: '',
-        },
-      ],
-    },
-    {
-      title: "Agents",
-      url: EROUTES.STAFF,
-      icon: UserCog,
-    },
-    {
-      title: "Motor",
-      url: `${EROUTES.DASHBOARD}/${EPREFIX.PRODUCTS}`,
-      icon: LayoutDashboard,
-      items: [
-        {
-          title: "Motor Products",
-          url: `${EROUTES.DASHBOARD}/${EPREFIX.PRODUCTS}/motor`,
-        },
-        {
-          title: "Cover Types",
-          url: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/cover-types`
-        },
-        {
-          title: "Motor Covering",
-          url: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/covering`
-        },
-        {
-          title: "Vehicle Classes",
-          url: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/vehicle-classes`
-        },
-        {
-          title: "Vehicle Use",
-          url: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/vehicle-use`
-        },
-        {
-          title: "Addon Benefits",
-          url: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/add-on-benefits`
-        },
-        {
-          title: "Detailed Benefits",
-          url: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/detailed-benefits`
-        },
-        {
-          title: "Motor Tonage",
-          url: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/tonage`
-        }
-      ],
-    },
-    {
-      title: "Organization",
-      url: EROUTES.ORGANIZATION,
-      icon: UserCog,
-      items: [
-        {
-          title: "Manage",
-          url: EROUTES.ORGANIZATION,
-        },
-        {
-          title: "Location",
-          url: EROUTES.ORGANIZATION_LOCATION,
-        },
-      ],
-    },
-    {
-      title: "Users",
-      url: EROUTES.USERS,
-      icon: Users,
-    },
-    {
-      title: "Settings",
-      url: EROUTES.SETTINGS,
-      icon: Settings,
-    },
-  ],
-}
-
+} from '@/components/ui/sidebar'
+import { useModules } from '@/auth/useModules'
+import { adminNavConfig } from '@/navigation/admin-nav-config'
+import { filterNavItems } from '@/navigation/filter-nav-items'
+import AppLogo from './ui/app-logo'
+import { UseAuth } from '@/stores/auth-store'
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user } = UseAuth()
+  const { hasModule, hasAnyModule } = useModules()
+
+  const visibleNav = useMemo(
+    () => filterNavItems(adminNavConfig, hasModule, hasAnyModule),
+    [hasModule, hasAnyModule],
+  )
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -194,7 +29,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <AppLogo />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={navData.navMain} />
+        <NavMain items={visibleNav} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={user} />
