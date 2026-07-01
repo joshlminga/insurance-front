@@ -33,7 +33,8 @@ export const AssignPermissionsModal = ({
   const roleId = getRoleId(role)
   const organizationLocationId = componentProps?.organizationLocationId
 
-  const { data: roleListData, isLoading: isLoadingRole } = UseApiQuery<SubmitResponse>({
+  const { data: roleListData, isLoading: isLoadingRole, refetch: refetchRole } =
+    UseApiQuery<SubmitResponse>({
     url: "roles",
     params: {
       role_id: roleId,
@@ -56,7 +57,8 @@ export const AssignPermissionsModal = ({
 
   const [selectedPermissionIds, setSelectedPermissionIds] = useState<number[]>([])
 
-  const { data: permissionsData, isLoading: isLoadingPermissions } = UseApiQuery<SubmitResponse>({
+  const { data: permissionsData, isLoading: isLoadingPermissions, refetch: refetchPermissions } =
+    UseApiQuery<SubmitResponse>({
     url: `permissions/${roleId}`,
     params: {
       organization_location_id: organizationLocationId,
@@ -89,11 +91,15 @@ export const AssignPermissionsModal = ({
   const saveMutation = UseApiMutation<SubmitResponse, { permission_ids: number[] }>({
     url: `roles/${roleId}/permissions`,
     method: EMETHODS.POST,
+    invalidateQueries: roleId ? [`permissions/${roleId}`, "roles"] : ["roles"],
     mutationOptions: {
-      onSuccess: (response) => {
+      onSuccess: async (response) => {
         ShowToast.success(response?.message || "Permissions assigned successfully")
-        componentProps?.refetch?.()
-        handleDialogContextSwitch({})
+        await Promise.all([
+          refetchPermissions(),
+          refetchRole(),
+          componentProps?.refetch?.(),
+        ])
       },
       onError: (error) => {
         ShowToast.error(extractErrorMessage(error))
