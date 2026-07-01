@@ -340,6 +340,8 @@ export type TCustomDialogProps<T = TKeyValueStringType> = {
   children: ReactNode;
   toggleDialog: () => any;
   dialogOpen: boolean;
+  /** Accessible dialog title for screen readers when children use a plain heading */
+  title?: string;
 } & Partial<TClassType>;
 
 export type TDebounceprops<TDebounceCallBackArgs> = {
@@ -424,6 +426,12 @@ export type TTableReusableComponent<T = any> = {
   isError?: boolean;
   page?: number;
   data: T[];
+  /** When set, renders a full-width sub-row below the matching row (modules-tab style) */
+  expandedRowId?: string | number | null;
+  getRowId?: (row: T) => string | number | null | undefined;
+  canExpandRow?: (row: T) => boolean;
+  onToggleExpand?: (rowId: string | number) => void;
+  renderExpandedRow?: (row: Row<T>) => ReactNode;
 };
 
 export type TCommandOption<T = string> = { label: string; value?: T };

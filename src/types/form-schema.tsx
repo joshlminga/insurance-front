@@ -902,3 +902,16 @@ export const ContactUsSchema = z.object({
   subject: z.string().min(2, "Subject must be at least 2 characters").max(200, "Subject is too long"),
   message: z.string().min(5, "Message must be at least 5 characters").max(2000, "Message is too long"),
 });
+
+/** Organization role create/edit — authority is sent as hidden default "comp" */
+export const RoleCreateSchema = z.object({
+  name: z.string().min(2, "Role name is required").max(100),
+  description: z.string().max(500).optional().or(z.literal("")),
+  modules: z.array(z.string()).min(1, "Select at least one module"),
+  org_id: z.union([z.string(), z.number()]).refine(
+    (value) => String(value).trim().length > 0,
+    "Organization is required"
+  ),
+})
+
+export const RoleEditSchema = RoleCreateSchema

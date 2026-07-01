@@ -83,7 +83,7 @@ import {
     PaginationPrevious
 } from "@/components/ui/pagination";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -753,9 +753,10 @@ export const CustomDialogComponent = <T = TKeyValueStringType,>({
     dialogOpen,
     className,
     children,
+    title,
 }: Pick<
     TCustomDialogProps<T>,
-    "children" | "dialogOpen" | "handleDialogContextSwitch" | "className"
+    "children" | "dialogOpen" | "handleDialogContextSwitch" | "className" | "title"
 >) => {
     return (
         <Dialog
@@ -770,6 +771,9 @@ export const CustomDialogComponent = <T = TKeyValueStringType,>({
                     "select-none max-h-[80dvh] flex flex-col overflow-hidden p-0! m-0!",
                     className ?? ""
                 )}>
+                {title ? (
+                    <DialogTitle className="sr-only">{title}</DialogTitle>
+                ) : null}
                 <div
                     {...{
                         className: `relative w-full flex-1 h-full overflow-y-auto py-5! px-5`,

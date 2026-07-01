@@ -36,7 +36,9 @@ import {
     ResetPasswordSchema,
     SendViaEmailSchema,
     SendMessageSchema,
-    ContactUsSchema
+    ContactUsSchema,
+    RoleCreateSchema,
+    RoleEditSchema
 } from "./form-schema";
 
 export type CustomerFormValues = z.infer<typeof CustomerDetailsSchema>
@@ -102,3 +104,5 @@ export type SendMessageValues = z.infer<typeof SendMessageSchema>
 
 
 export type SendContactUsMessageValues = z.infer<typeof ContactUsSchema>
+export type RoleCreateFormValues = z.infer<typeof RoleCreateSchema>
+export type RoleEditFormValues = z.infer<typeof RoleEditSchema>

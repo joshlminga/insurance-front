@@ -189,6 +189,12 @@ export const adminNavConfig: NavItem[] = [
     module: MODULES.USER,
   },
   {
+    title: 'Organization Roles',
+    url: EROUTES.ORGANIZATION_ROLES,
+    icon: ShieldCheck,
+    module: MODULES.ROLE,
+  },
+  {
     title: 'Settings',
     url: EROUTES.SETTINGS,
     icon: Settings,

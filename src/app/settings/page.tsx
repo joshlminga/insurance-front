@@ -19,12 +19,15 @@ import {
   Bell,
   Shield,
   Database,
+  Boxes,
   Save,
   Upload,
 } from "lucide-react"
+import { ModulesTab } from "./modules-tab"
 
 export default function SettingsPage() {
   const [isSaving, setIsSaving] = useState(false)
+  const [activeTab, setActiveTab] = useState("general")
 
   const handleSave = async () => {
     setIsSaving(true)
@@ -39,7 +42,7 @@ export default function SettingsPage() {
         description="Configure Accensure system settings and preferences"
       />
 
-      <Tabs defaultValue="general">
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
           <TabsTrigger value="general">
             <Building className="h-4 w-4 mr-2" />
@@ -60,6 +63,10 @@ export default function SettingsPage() {
           <TabsTrigger value="integrations">
             <Database className="h-4 w-4 mr-2" />
             Integrations
+          </TabsTrigger>
+          <TabsTrigger value="modules">
+            <Boxes className="h-4 w-4 mr-2" />
+            Modules
           </TabsTrigger>
         </TabsList>
 
@@ -512,6 +519,10 @@ export default function SettingsPage() {
               </FormGrid>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="modules" className="mt-4 space-y-4">
+          <ModulesTab enabled={activeTab === "modules"} />
         </TabsContent>
       </Tabs>
 
