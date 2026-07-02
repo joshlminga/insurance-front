@@ -26,13 +26,16 @@ export const EditRoleModal = ({
     data?: Record<string, any>
     orgId?: number | string
     organizationLocationId?: number | string
+    rolesBasePath?: string
     refetch?: () => Promise<any>
   }
 }) => {
   const roleId = getRoleId(componentProps?.data ?? {})
+  const rolesBasePath = componentProps?.rolesBasePath ?? "roles"
+  const isScopedRole = rolesBasePath === "roles"
 
   const { data: showData, isLoading } = UseApiQuery<SubmitResponse>({
-    url: `roles/${roleId}`,
+    url: `${rolesBasePath}/${roleId}`,
     queryOptions: {
       enabled: Boolean(roleId),
     },
@@ -65,8 +68,8 @@ export const EditRoleModal = ({
   }, [role?.name, role?.description, role?.modules, role?.org_id, componentProps?.orgId])
 
   const updateMutation = UseApiMutation<SubmitResponse, Record<string, unknown>>({
-    url: `roles/${roleId}`,
-    method: EMETHODS.PUT,
+    url: `${rolesBasePath}/${roleId}`,
+    method: EMETHODS.PATCH,
     mutationOptions: {
       onSuccess: (response) => {
         ShowToast.success(response?.message || "Role updated successfully")
@@ -85,16 +88,21 @@ export const EditRoleModal = ({
       return
     }
 
-    updateMutation.mutate({
+    const payload: Record<string, unknown> = {
       name: data.name,
       description: data.description || undefined,
       modules: normalizeModuleKeys(data.modules ?? []),
       authority: ROLE_AUTHORITY_DEFAULT,
-      org_id: Number(data.org_id),
-      organization_location_id: componentProps?.organizationLocationId
-        ? Number(componentProps.organizationLocationId)
-        : undefined,
-    })
+    }
+
+    if (isScopedRole) {
+      payload.org_id = Number(data.org_id)
+      if (componentProps?.organizationLocationId) {
+        payload.organization_location_id = Number(componentProps.organizationLocationId)
+      }
+    }
+
+    updateMutation.mutate(payload)
   }
 
   return (

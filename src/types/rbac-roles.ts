@@ -11,6 +11,8 @@ export interface RbacRole {
   parent_role_id?: number | null
   parent_role_name?: string | null
   is_active?: boolean | null
+  is_general?: boolean | null
+  is_editable?: boolean | null
   guard_name?: string | null
 }
 

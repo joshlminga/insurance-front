@@ -68,6 +68,8 @@ const OrganizationsPage = lazy(() => import("./app/admin/organizations/page"))
 const OrganizationLocationsPage = lazy(() => import("./app/admin/organization-location/page"))
 const OrganizationRolesPage = lazy(() => import("./app/admin/organization-roles/page"))
 const OrganizationRolesDetailPage = lazy(() => import("./app/admin/organization-roles/[orgLocationId]/page"))
+const GlobalRolesPage = lazy(() => import("./app/admin/system-roles/global/page"))
+const SystemRolesPage = lazy(() => import("./app/admin/system-roles/system/page"))
 const UsersPage = lazy(() => import("./app/admin/users/page").then(m => ({ default: m.UsersPage })))
 const MotorProductPage = lazy(() => import("./app/admin/product/motor/motor-product/page").then(m => ({ default: m.MotorProductPage })))
 const MotorCoverTypePage = lazy(() => import("./app/admin/product/motor/cover_types/page").then(m => ({ default: m.MotorCoverTypePage })))
@@ -592,6 +594,27 @@ export const router = createBrowserRouter([
           <S>
             <AdminModulePage module={MODULES.ROLE}>
               <OrganizationRolesDetailPage />
+            </AdminModulePage>
+          </S>
+        ),
+      },
+      // Global / System roles (RBAC admin)
+      {
+        path: "global-roles",
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.RBAC}>
+              <GlobalRolesPage />
+            </AdminModulePage>
+          </S>
+        ),
+      },
+      {
+        path: "system-roles",
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.RBAC}>
+              <SystemRolesPage />
             </AdminModulePage>
           </S>
         ),

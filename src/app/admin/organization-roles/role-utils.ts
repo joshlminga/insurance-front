@@ -8,11 +8,13 @@ export const buildRolePermissionsParams = ({
   modules,
   page,
 }: {
-  organizationLocationId: number | string
+  organizationLocationId?: number | string | null
   modules: string
   page: number
 }) => ({
-  organization_location_id: organizationLocationId,
+  ...(organizationLocationId != null && organizationLocationId !== ""
+    ? { organization_location_id: organizationLocationId }
+    : {}),
   modules,
   guard_name: ROLE_GUARD_NAME,
   per_page: ROLE_PERMISSIONS_PAGE_SIZE,
@@ -49,6 +51,16 @@ export const getRoleIsActive = (rowData: Record<string, any>) => {
   if (typeof rowData?.is_active === "boolean") return rowData.is_active
   if (typeof rowData?.active === "boolean") return rowData.active
   return Boolean(rowData?.is_active)
+}
+
+/** Whether a role is a general (system) role */
+export const getRoleIsGeneral = (rowData: Record<string, any>) =>
+  Boolean(rowData?.is_general)
+
+/** Whether a role can be edited; defaults to true when field is absent */
+export const getRoleIsEditable = (rowData: Record<string, any>) => {
+  if (typeof rowData?.is_editable === "boolean") return rowData.is_editable
+  return true
 }
 
 /** Extract roles array from list API response (handles multiple shapes) */

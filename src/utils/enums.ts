@@ -93,6 +93,8 @@ export const EROUTES = {
   ORGANIZATION_LOCATION: `/${EPREFIX.DASHBOARD}/organization-location`,
   ORGANIZATION_ROLES: `/${EPREFIX.DASHBOARD}/organization-roles`,
   ORGANIZATION_ROLES_DETAIL: `/${EPREFIX.DASHBOARD}/organization-roles/:orgLocationId`,
+  GLOBAL_ROLES: `/${EPREFIX.DASHBOARD}/global-roles`,
+  SYSTEM_ROLES: `/${EPREFIX.DASHBOARD}/system-roles`,
   USERS: `/${EPREFIX.DASHBOARD}/users`,
 
   ERROR404: `/${EPREFIX.ERRORS}/errors404`

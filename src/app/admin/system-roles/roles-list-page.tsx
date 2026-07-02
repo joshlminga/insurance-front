@@ -11,7 +11,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { Button } from "@/components/ui/button"
 import { buttonVariants } from "@/components/ui/button"
 import { ActionColumn } from "@/dev/columns"
 import {
@@ -25,27 +24,36 @@ import { UseApiMutation, UseApiQuery } from "@/hooks/hooks"
 import { SingleActionsHandler, SubmitResponse, TFilterOptions, TPaginationFilters } from "@/types/types"
 import { FILTEROPTIONS, ReusableReducer } from "@/utils/constatnts"
 import { EMETHODS } from "@/utils/constatnts"
-import { EROUTES } from "@/utils/enums"
 import { extractErrorMessage } from "@/utils/helpers"
 import { ShowToast } from "@/utils/utils"
-import { ArrowLeft, Plus } from "lucide-react"
-import { useMemo, useReducer, useState } from "react"
-import { Link, useParams } from "react-router-dom"
+import { Plus } from "lucide-react"
+import { useReducer, useState } from "react"
 
+import AssignPermissionsModal from "../organization-roles/modals/assign-permissions"
+import CreateRoleModal from "../organization-roles/modals/create"
+import EditRoleModal from "../organization-roles/modals/edit"
+import ViewRoleModal from "../organization-roles/modals/view"
 import {
   extractRolesFromResponse,
   getRoleId,
   getRoleIsActive,
   getRoleIsEditable,
-} from "../role-utils"
-import AssignPermissionsModal from "../modals/assign-permissions"
-import CreateRoleModal from "../modals/create"
-import EditRoleModal from "../modals/edit"
-import ViewRoleModal from "../modals/view"
+} from "../organization-roles/role-utils"
 
-const OrganizationRolesDetailPage = () => {
-  const { orgLocationId } = useParams<{ orgLocationId: string }>()
+type RolesListPageProps = {
+  rolesBasePath: "global-roles" | "system-roles"
+  title: string
+  description: string
+  tableTitle: string
+}
 
+/** Shared list page for global (template) and system (admin) roles */
+export const RolesListPage = ({
+  rolesBasePath,
+  title,
+  description,
+  tableTitle,
+}: RolesListPageProps) => {
   const [expandedRoleId, setExpandedRoleId] = useState<string | number | null>(null)
 
   const [deleteTarget, setDeleteTarget] = useState<{
@@ -66,50 +74,23 @@ const OrganizationRolesDetailPage = () => {
     useCustomDialogContextFactory<{
       refetch?: () => Promise<any>
       data?: any
-      orgId?: number | string
-      organizationLocationId?: number | string
+      rolesBasePath?: string
     }>()
 
-  const { data: orgLocationData } = UseApiQuery<SubmitResponse>({
-    url: `organization-location/${orgLocationId}`,
-    queryOptions: {
-      enabled: Boolean(orgLocationId),
-    },
-  })
-
-  const organizationLocation = useMemo(() => {
-    const payload = (orgLocationData as any)?.data
-    return payload?.location ?? payload ?? {}
-  }, [orgLocationData])
-
-  const orgId =
-    organizationLocation?.organization_id ??
-    organizationLocation?.organization?.id ??
-    organizationLocation?.org_id
-
-  const organizationName =
-    organizationLocation?.organization_name ??
-    organizationLocation?.organization?.name ??
-    "Organization"
-
-  const countryName = organizationLocation?.country?.name ?? ""
-  const orgLocationDisplayName = [organizationName, countryName].filter(Boolean).join(" ")
-
   const { data, isLoading, refetch, isError } = UseApiQuery<SubmitResponse>({
-    url: "roles",
+    url: rolesBasePath,
     params: {
-      organization_location_id: orgLocationId,
       page: filter.page,
       pageSize: filter.pageSize,
       term: filter.term,
     },
     queryOptions: {
-      enabled: Boolean(orgLocationId),
+      enabled: true,
     },
   })
 
   const deleteRoleMutation = UseApiMutation<SubmitResponse, { id: number | string }>({
-    url: ({ id }) => `roles/${id}`,
+    url: ({ id }) => `${rolesBasePath}/${id}`,
     method: EMETHODS.DELETE,
     mutationOptions: {
       onSuccess: (response) => {
@@ -126,7 +107,7 @@ const OrganizationRolesDetailPage = () => {
     SubmitResponse,
     { id: number | string; is_active: boolean }
   >({
-    url: ({ id }) => `roles/${id}/status`,
+    url: ({ id }) => `${rolesBasePath}/${id}/status`,
     method: EMETHODS.PATCH,
     mutationOptions: {
       onSuccess: (response) => {
@@ -144,7 +125,7 @@ const OrganizationRolesDetailPage = () => {
       label: "View",
       onSelect: (rowData) => {
         handleDialogContextSwitch({
-          componentProps: { data: rowData },
+          componentProps: { data: rowData, rolesBasePath },
           Component: ViewRoleModal,
         })
       },
@@ -156,8 +137,7 @@ const OrganizationRolesDetailPage = () => {
         handleDialogContextSwitch({
           componentProps: {
             data: rowData,
-            orgId,
-            organizationLocationId: orgLocationId,
+            rolesBasePath,
             refetch,
           },
           Component: EditRoleModal,
@@ -172,9 +152,8 @@ const OrganizationRolesDetailPage = () => {
         handleDialogContextSwitch({
           componentProps: {
             data: rowData,
-            organizationLocationId: orgLocationId,
+            rolesBasePath,
             refetch,
-            readOnly: false,
           },
           Component: AssignPermissionsModal,
         })
@@ -188,7 +167,7 @@ const OrganizationRolesDetailPage = () => {
         handleDialogContextSwitch({
           componentProps: {
             data: rowData,
-            organizationLocationId: orgLocationId,
+            rolesBasePath,
             refetch,
             readOnly: true,
           },
@@ -220,8 +199,8 @@ const OrganizationRolesDetailPage = () => {
       },
       conditional: (rowData) =>
         Boolean(getRoleId(rowData)) &&
-        getRoleIsEditable(rowData) &&
-        Boolean(getRoleIsActive(rowData)),
+        Boolean(getRoleIsActive(rowData)) &&
+        getRoleIsEditable(rowData),
     },
     {
       label: "Activate",
@@ -232,8 +211,8 @@ const OrganizationRolesDetailPage = () => {
       },
       conditional: (rowData) =>
         Boolean(getRoleId(rowData)) &&
-        getRoleIsEditable(rowData) &&
-        !Boolean(getRoleIsActive(rowData)),
+        !Boolean(getRoleIsActive(rowData)) &&
+        getRoleIsEditable(rowData),
     },
   ]
 
@@ -245,18 +224,9 @@ const OrganizationRolesDetailPage = () => {
 
   return (
     <div>
-      <div className="mb-4">
-        <Button variant="ghost" size="sm" asChild className="mb-2 -ml-2">
-          <Link to={EROUTES.ORGANIZATION_ROLES}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Organizations
-          </Link>
-        </Button>
-      </div>
-
       <PageHeader
-        title={`Roles — ${orgLocationDisplayName}`}
-        description="Manage roles and permissions for this organization"
+        title={title}
+        description={description}
         actions={[
           {
             icon: Plus,
@@ -265,8 +235,7 @@ const OrganizationRolesDetailPage = () => {
             onClick: () => {
               handleDialogContextSwitch({
                 componentProps: {
-                  orgId,
-                  organizationLocationId: orgLocationId,
+                  rolesBasePath,
                   refetch,
                 },
                 Component: CreateRoleModal,
@@ -303,7 +272,7 @@ const OrganizationRolesDetailPage = () => {
               (data as any)?.data?.pagination?.last_page ??
               (data as any)?.pagination?.last_page ??
               1,
-            title: "Organization Roles",
+            title: tableTitle,
             showPagination: true,
             setPageSize: (pageSize) =>
               optionsDispatcher({
@@ -386,4 +355,4 @@ const OrganizationRolesDetailPage = () => {
   )
 }
 
-export default OrganizationRolesDetailPage
+export default RolesListPage

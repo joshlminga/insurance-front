@@ -466,8 +466,10 @@ export const ReusableCheckboxGrid = ({
                     <Checkbox
                         id={`checkbox-${option.id}`}
                         checked={option.checked}
+                        disabled={option.disabled}
                         name={name}
                         onCheckedChange={(checked) => {
+                            if (option.disabled) return
                             option.onChange?.(Boolean(checked));
                         }}
                         className="w-3.75 h-3.75 rounded-[3px] border border-[#D9D9D9]

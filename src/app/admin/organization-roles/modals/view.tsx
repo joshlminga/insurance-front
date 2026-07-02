@@ -13,12 +13,14 @@ export const ViewRoleModal = ({
   handleDialogContextSwitch: (context?: any) => void
   componentProps?: {
     data?: Record<string, any>
+    rolesBasePath?: string
   }
 }) => {
   const roleId = getRoleId(componentProps?.data ?? {})
+  const rolesBasePath = componentProps?.rolesBasePath ?? "roles"
 
   const { data, isLoading } = UseApiQuery<SubmitResponse>({
-    url: `roles/${roleId}`,
+    url: `${rolesBasePath}/${roleId}`,
     queryOptions: {
       enabled: Boolean(roleId),
     },

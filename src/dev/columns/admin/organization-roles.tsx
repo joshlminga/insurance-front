@@ -2,6 +2,7 @@
 import {
   getModuleLabel,
   getRoleId,
+  getRoleIsGeneral,
   normalizeModuleKey,
 } from "@/app/admin/organization-roles/role-utils"
 import { Badge } from "@/components/ui/badge"
@@ -71,6 +72,26 @@ export const OrganizationRolesColumns: ColumnDef<any>[] = [
     id: "name",
     header: () => <div>Name</div>,
     cell: ({ row }) => <div className="font-medium">{row.original?.name ?? "N/A"}</div>,
+  },
+  {
+    id: "is_general",
+    header: () => <div className="font-bold">General</div>,
+    cell: ({ row }) => {
+      const isGeneral = getRoleIsGeneral(row.original)
+
+      return (
+        <Badge
+          variant="outline"
+          className={`rounded-full px-3 py-1 border-none font-medium shadow-sm transition-colors ${
+            isGeneral
+              ? "bg-emerald-100 text-emerald-800"
+              : "bg-indigo-100 text-indigo-800"
+          }`}
+        >
+          {isGeneral ? "General" : "Custom"}
+        </Badge>
+      )
+    },
   },
   {
     id: "parent_role",

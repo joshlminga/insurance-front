@@ -17,6 +17,7 @@ import {
   extractPermissionsFromResponse,
   extractRolesFromResponse,
   getRoleId,
+  getRoleIsEditable,
   groupPermissionsByModule,
   mergePermissionsById,
   normalizeModuleKeys,
@@ -37,29 +38,40 @@ export const AssignPermissionsModal = ({
   componentProps?: {
     data?: Record<string, any>
     organizationLocationId?: number | string
+    rolesBasePath?: string
     refetch?: () => Promise<any>
+    readOnly?: boolean
   }
 }) => {
   const role = componentProps?.data ?? {}
   const roleId = getRoleId(role)
+  const rolesBasePath = componentProps?.rolesBasePath ?? "roles"
   const organizationLocationId = componentProps?.organizationLocationId
+  const isReadOnly = componentProps?.readOnly ?? !getRoleIsEditable(role)
+  const isScopedRole = rolesBasePath === "roles"
 
   const { data: roleListData, isLoading: isLoadingRole, refetch: refetchRole } =
     UseApiQuery<SubmitResponse>({
-      url: "roles",
-      params: {
-        role_id: roleId,
-        organization_location_id: organizationLocationId,
-      },
+      url: isScopedRole ? "roles" : `${rolesBasePath}/${roleId}`,
+      params: isScopedRole
+        ? {
+            role_id: roleId,
+            organization_location_id: organizationLocationId,
+          }
+        : undefined,
       queryOptions: {
-        enabled: Boolean(roleId) && Boolean(organizationLocationId),
+        enabled: Boolean(roleId) && (isScopedRole ? Boolean(organizationLocationId) : true),
       },
     })
 
   const resolvedRole = useMemo(() => {
-    const fromApi = extractRolesFromResponse(roleListData)[0]
-    return fromApi ?? role
-  }, [roleListData, role])
+    if (isScopedRole) {
+      const fromApi = extractRolesFromResponse(roleListData)[0]
+      return fromApi ?? role
+    }
+    const payload = (roleListData as any)?.data?.role ?? (roleListData as any)?.data
+    return payload ?? role
+  }, [roleListData, role, isScopedRole])
 
   const roleModules = normalizeModuleKeys(
     Array.isArray(resolvedRole?.modules) ? resolvedRole.modules : []
@@ -73,7 +85,7 @@ export const AssignPermissionsModal = ({
 
   const permissionsEnabled =
     Boolean(roleId) &&
-    Boolean(organizationLocationId) &&
+    (isScopedRole ? Boolean(organizationLocationId) : true) &&
     Boolean(modulesCsv) &&
     !isLoadingRole
 
@@ -81,7 +93,7 @@ export const AssignPermissionsModal = ({
     UseApiQuery<SubmitResponse>({
       url: `permissions/${roleId}`,
       params: buildRolePermissionsParams({
-        organizationLocationId: organizationLocationId!,
+        organizationLocationId,
         modules: modulesCsv,
         page,
       }),
@@ -120,9 +132,9 @@ export const AssignPermissionsModal = ({
   )
 
   const saveMutation = UseApiMutation<SubmitResponse, { permission_ids: number[] }>({
-    url: `roles/${roleId}/permissions`,
+    url: `${rolesBasePath}/${roleId}/permissions`,
     method: EMETHODS.POST,
-    invalidateQueries: roleId ? [`permissions/${roleId}`, "roles"] : ["roles"],
+    invalidateQueries: roleId ? [`permissions/${roleId}`, rolesBasePath] : [rolesBasePath],
     mutationOptions: {
       onSuccess: async (response) => {
         ShowToast.success(response?.message || "Permissions assigned successfully")
@@ -173,15 +185,19 @@ export const AssignPermissionsModal = ({
   return (
     <div className="w-full min-w-[600px] max-w-[900px] p-6 space-y-6">
       <div className="border-b pb-3">
-        <DialogTitle className="text-xl font-semibold">Assign Permissions</DialogTitle>
+        <DialogTitle className="text-xl font-semibold">
+          {isReadOnly ? "View Permissions" : "Assign Permissions"}
+        </DialogTitle>
         <DialogDescription className="mt-1">
-          Select permissions for role &quot;{resolvedRole?.name ?? role?.name ?? "N/A"}&quot;.
+          {isReadOnly
+            ? `Viewing permissions for role "${resolvedRole?.name ?? role?.name ?? "N/A"}" (read-only).`
+            : `Select permissions for role "${resolvedRole?.name ?? role?.name ?? "N/A"}".`}
         </DialogDescription>
       </div>
 
       {!roleId ? (
         <div className="text-sm text-destructive">Unable to assign permissions: missing role id.</div>
-      ) : !organizationLocationId ? (
+      ) : isScopedRole && !organizationLocationId ? (
         <div className="text-sm text-destructive">
           Unable to assign permissions: missing organization location.
         </div>
@@ -210,7 +226,10 @@ export const AssignPermissionsModal = ({
                     id: String(permission.id),
                     name: permission.description || permission.name,
                     checked: selectedPermissionIds.includes(permission.id),
-                    onChange: (checked) => togglePermission(permission.id, checked),
+                    disabled: isReadOnly,
+                    onChange: isReadOnly
+                      ? undefined
+                      : (checked) => togglePermission(permission.id, checked),
                   }))}
                 />
               </div>
@@ -240,18 +259,20 @@ export const AssignPermissionsModal = ({
           className="w-full sm:w-auto rounded-full border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
           onClick={() => handleDialogContextSwitch({})}
         >
-          Cancel
+          {isReadOnly ? "Close" : "Cancel"}
         </Button>
 
-        <Button
-          type="button"
-          className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
-          disabled={!roleId || !modulesCsv || saveMutation.isPending}
-          loading={saveMutation.isPending}
-          onClick={handleSave}
-        >
-          Save Permissions
-        </Button>
+        {!isReadOnly && (
+          <Button
+            type="button"
+            className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
+            disabled={!roleId || !modulesCsv || saveMutation.isPending}
+            loading={saveMutation.isPending}
+            onClick={handleSave}
+          >
+            Save Permissions
+          </Button>
+        )}
       </CardFooter>
     </div>
   )

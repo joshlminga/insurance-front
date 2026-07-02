@@ -24,9 +24,12 @@ export const CreateRoleModal = ({
   componentProps?: {
     orgId?: number | string
     organizationLocationId?: number | string
+    rolesBasePath?: string
     refetch?: () => Promise<any>
   }
 }) => {
+  const rolesBasePath = componentProps?.rolesBasePath ?? "roles"
+  const isScopedRole = rolesBasePath === "roles"
   const form = useForm<RoleCreateFormValues>({
     resolver: zodResolver(RoleCreateSchema),
     defaultValues: {
@@ -38,7 +41,7 @@ export const CreateRoleModal = ({
   })
 
   const submitMutation = UseApiMutation<SubmitResponse, Record<string, unknown>>({
-    url: "roles",
+    url: rolesBasePath,
     method: EMETHODS.POST,
     mutationOptions: {
       onSuccess: (response) => {
@@ -60,16 +63,21 @@ export const CreateRoleModal = ({
 
   const onSubmit = (data: RoleCreateFormValues) => {
     const moduleKeys = normalizeModuleKeys(data.modules ?? [])
-    submitMutation.mutate({
+    const payload: Record<string, unknown> = {
       name: data.name,
       description: data.description || undefined,
       modules: moduleKeys,
       authority: ROLE_AUTHORITY_DEFAULT,
-      org_id: Number(data.org_id),
-      organization_location_id: componentProps?.organizationLocationId
-        ? Number(componentProps.organizationLocationId)
-        : undefined,
-    })
+    }
+
+    if (isScopedRole) {
+      payload.org_id = Number(data.org_id)
+      if (componentProps?.organizationLocationId) {
+        payload.organization_location_id = Number(componentProps.organizationLocationId)
+      }
+    }
+
+    submitMutation.mutate(payload)
   }
 
   return (
@@ -77,7 +85,9 @@ export const CreateRoleModal = ({
       <div className="border-b pb-3">
         <DialogTitle className="text-xl font-semibold">Create Role</DialogTitle>
         <DialogDescription className="mt-1">
-          Define a new role and assign modules for this organization.
+          {isScopedRole
+            ? "Define a new role and assign modules for this organization."
+            : "Define a new role and assign modules."}
         </DialogDescription>
       </div>
 

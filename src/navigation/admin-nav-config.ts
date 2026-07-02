@@ -195,6 +195,16 @@ export const adminNavConfig: NavItem[] = [
     module: MODULES.ROLE,
   },
   {
+    title: 'System Roles',
+    url: EROUTES.GLOBAL_ROLES,
+    icon: ShieldCheck,
+    modules: [MODULES.RBAC],
+    items: [
+      { title: 'General', url: EROUTES.GLOBAL_ROLES, module: MODULES.RBAC },
+      { title: 'System', url: EROUTES.SYSTEM_ROLES, module: MODULES.RBAC },
+    ],
+  },
+  {
     title: 'Settings',
     url: EROUTES.SETTINGS,
     icon: Settings,
