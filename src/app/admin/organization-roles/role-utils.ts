@@ -1,5 +1,40 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { RbacPermission, RbacRole } from "@/types/rbac-roles"
+import { ROLE_GUARD_NAME, type RbacPermission, type RbacRole } from "@/types/rbac-roles"
+
+export const ROLE_PERMISSIONS_PAGE_SIZE = 100
+
+export const buildRolePermissionsParams = ({
+  organizationLocationId,
+  modules,
+  page,
+}: {
+  organizationLocationId: number | string
+  modules: string
+  page: number
+}) => ({
+  organization_location_id: organizationLocationId,
+  modules,
+  guard_name: ROLE_GUARD_NAME,
+  per_page: ROLE_PERMISSIONS_PAGE_SIZE,
+  page,
+  sort_by: "name",
+  direction: "asc",
+})
+
+/** Read pagination metadata from list API responses */
+export const extractPaginationFromResponse = (data: any) => {
+  return data?.pagination ?? data?.data?.pagination ?? null
+}
+
+/** Merge permission rows by id (used when loading additional pages) */
+export const mergePermissionsById = (
+  existing: RbacPermission[],
+  incoming: RbacPermission[]
+): RbacPermission[] => {
+  const map = new Map(existing.map((permission) => [permission.id, permission]))
+  incoming.forEach((permission) => map.set(permission.id, permission))
+  return Array.from(map.values())
+}
 
 /** Resolve organization location id from API row or route param */
 export const getOrgLocationId = (rowData: Record<string, any>) =>

@@ -3,6 +3,7 @@ import { CardFooter } from "@/components/ui/card"
 import { DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Button, ReusableCheckboxGrid } from "@/dev/core"
 import { UseApiMutation, UseApiQuery } from "@/hooks/hooks"
+import type { RbacPermission } from "@/types/rbac-roles"
 import { SubmitResponse } from "@/types/types"
 import { EMETHODS } from "@/utils/constatnts"
 import { extractErrorMessage } from "@/utils/helpers"
@@ -10,13 +11,23 @@ import { ShowToast } from "@/utils/utils"
 import { useEffect, useMemo, useState } from "react"
 
 import {
+  buildRolePermissionsParams,
   extractInitialSelectedPermissionIds,
+  extractPaginationFromResponse,
   extractPermissionsFromResponse,
   extractRolesFromResponse,
   getRoleId,
   groupPermissionsByModule,
+  mergePermissionsById,
   normalizeModuleKeys,
 } from "../role-utils"
+
+type PermissionsPagination = {
+  current_page?: number
+  last_page?: number
+  per_page?: number
+  total?: number
+}
 
 export const AssignPermissionsModal = ({
   handleDialogContextSwitch,
@@ -35,15 +46,15 @@ export const AssignPermissionsModal = ({
 
   const { data: roleListData, isLoading: isLoadingRole, refetch: refetchRole } =
     UseApiQuery<SubmitResponse>({
-    url: "roles",
-    params: {
-      role_id: roleId,
-      organization_location_id: organizationLocationId,
-    },
-    queryOptions: {
-      enabled: Boolean(roleId) && Boolean(organizationLocationId),
-    },
-  })
+      url: "roles",
+      params: {
+        role_id: roleId,
+        organization_location_id: organizationLocationId,
+      },
+      queryOptions: {
+        enabled: Boolean(roleId) && Boolean(organizationLocationId),
+      },
+    })
 
   const resolvedRole = useMemo(() => {
     const fromApi = extractRolesFromResponse(roleListData)[0]
@@ -55,38 +66,58 @@ export const AssignPermissionsModal = ({
   )
   const modulesCsv = roleModules.join(",")
 
+  const [page, setPage] = useState(1)
+  const [accumulatedPermissions, setAccumulatedPermissions] = useState<RbacPermission[]>([])
+  const [pagination, setPagination] = useState<PermissionsPagination | null>(null)
   const [selectedPermissionIds, setSelectedPermissionIds] = useState<number[]>([])
+
+  const permissionsEnabled =
+    Boolean(roleId) &&
+    Boolean(organizationLocationId) &&
+    Boolean(modulesCsv) &&
+    !isLoadingRole
 
   const { data: permissionsData, isLoading: isLoadingPermissions, refetch: refetchPermissions } =
     UseApiQuery<SubmitResponse>({
-    url: `permissions/${roleId}`,
-    params: {
-      organization_location_id: organizationLocationId,
-      modules: modulesCsv,
-    },
-    queryOptions: {
-      enabled:
-        Boolean(roleId) &&
-        Boolean(organizationLocationId) &&
-        Boolean(modulesCsv) &&
-        !isLoadingRole,
-    },
-  })
+      url: `permissions/${roleId}`,
+      params: buildRolePermissionsParams({
+        organizationLocationId: organizationLocationId!,
+        modules: modulesCsv,
+        page,
+      }),
+      queryOptions: {
+        enabled: permissionsEnabled,
+      },
+    })
 
-  const permissions = useMemo(
-    () => extractPermissionsFromResponse(permissionsData),
-    [permissionsData]
-  )
+  // Reset paging when role or modules change
+  useEffect(() => {
+    setPage(1)
+    setAccumulatedPermissions([])
+    setPagination(null)
+    setSelectedPermissionIds([])
+  }, [roleId, organizationLocationId, modulesCsv])
+
+  // Merge each fetched page into accumulated list and sync selections
+  useEffect(() => {
+    if (!permissionsData) return
+
+    const batch = extractPermissionsFromResponse(permissionsData)
+    const nextPagination = extractPaginationFromResponse(permissionsData)
+    const syncedIds = extractInitialSelectedPermissionIds(batch)
+
+    setPagination(nextPagination)
+    setAccumulatedPermissions((current) => (page === 1 ? batch : mergePermissionsById(current, batch)))
+    setSelectedPermissionIds((current) => {
+      if (page === 1) return syncedIds
+      return Array.from(new Set([...current, ...syncedIds]))
+    })
+  }, [permissionsData, page])
 
   const permissionGroups = useMemo(
-    () => groupPermissionsByModule(permissions),
-    [permissions]
+    () => groupPermissionsByModule(accumulatedPermissions),
+    [accumulatedPermissions]
   )
-
-  useEffect(() => {
-    const list = extractPermissionsFromResponse(permissionsData)
-    setSelectedPermissionIds(extractInitialSelectedPermissionIds(list))
-  }, [permissionsData])
 
   const saveMutation = UseApiMutation<SubmitResponse, { permission_ids: number[] }>({
     url: `roles/${roleId}/permissions`,
@@ -95,6 +126,9 @@ export const AssignPermissionsModal = ({
     mutationOptions: {
       onSuccess: async (response) => {
         ShowToast.success(response?.message || "Permissions assigned successfully")
+        setPage(1)
+        setAccumulatedPermissions([])
+        setPagination(null)
         await Promise.all([
           refetchPermissions(),
           refetchRole(),
@@ -125,7 +159,16 @@ export const AssignPermissionsModal = ({
     saveMutation.mutate({ permission_ids: selectedPermissionIds })
   }
 
-  const isLoading = isLoadingRole || isLoadingPermissions
+  const handleLoadMore = () => {
+    setPage((currentPage) => currentPage + 1)
+  }
+
+  const isInitialLoading = isLoadingRole || (isLoadingPermissions && page === 1)
+  const isLoadingMore = isLoadingPermissions && page > 1
+  const hasMore =
+    pagination != null &&
+    (pagination.current_page ?? page) < (pagination.last_page ?? 1)
+  const totalCount = pagination?.total ?? accumulatedPermissions.length
 
   return (
     <div className="w-full min-w-[600px] max-w-[900px] p-6 space-y-6">
@@ -146,27 +189,48 @@ export const AssignPermissionsModal = ({
         <div className="text-sm text-destructive">
           This role has no modules. Edit the role and add modules first.
         </div>
-      ) : isLoading ? (
+      ) : isInitialLoading ? (
         <div className="text-sm text-muted-foreground">Loading permissions...</div>
-      ) : permissions.length === 0 ? (
+      ) : accumulatedPermissions.length === 0 ? (
         <div className="text-sm text-muted-foreground">No permissions found for this role&apos;s modules.</div>
       ) : (
-        <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-2">
-          {permissionGroups.map(([moduleKey, modulePermissions]) => (
-            <div key={moduleKey} className="space-y-3">
-              <h3 className="text-sm font-semibold capitalize">{moduleKey}</h3>
-              <ReusableCheckboxGrid
-                name={`permissions-${moduleKey}`}
-                columns={2}
-                options={modulePermissions.map((permission) => ({
-                  id: String(permission.id),
-                  name: permission.description || permission.name,
-                  checked: selectedPermissionIds.includes(permission.id),
-                  onChange: (checked) => togglePermission(permission.id, checked),
-                }))}
-              />
-            </div>
-          ))}
+        <div className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Showing {accumulatedPermissions.length} of {totalCount} permissions
+          </p>
+
+          <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-2">
+            {permissionGroups.map(([moduleKey, modulePermissions]) => (
+              <div key={moduleKey} className="space-y-3">
+                <h3 className="text-sm font-semibold capitalize">{moduleKey}</h3>
+                <ReusableCheckboxGrid
+                  name={`permissions-${moduleKey}`}
+                  columns={2}
+                  options={modulePermissions.map((permission) => ({
+                    id: String(permission.id),
+                    name: permission.description || permission.name,
+                    checked: selectedPermissionIds.includes(permission.id),
+                    onChange: (checked) => togglePermission(permission.id, checked),
+                  }))}
+                />
+              </div>
+            ))}
+          </div>
+
+          {hasMore && (
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full rounded-full"
+              disabled={isLoadingMore}
+              loading={isLoadingMore}
+              onClick={handleLoadMore}
+            >
+              {isLoadingMore
+                ? "Loading more..."
+                : `Load more (${accumulatedPermissions.length} of ${totalCount})`}
+            </Button>
+          )}
         </div>
       )}
 
