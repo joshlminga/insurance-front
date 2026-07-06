@@ -235,6 +235,7 @@ export const CustomBaseTable = <T,>({
     canExpandRow,
     onToggleExpand,
     renderExpandedRow,
+    rolesBasePath,
 }: TTableReusableComponent<T>) => {
     // eslint-disable-next-line react-hooks/incompatible-library
     const table = useReactTable({
@@ -251,6 +252,7 @@ export const CustomBaseTable = <T,>({
         meta: {
             expandedRoleId: expandedRowId,
             onToggleExpand,
+            rolesBasePath,
         },
         state: {
             ...(rowSelection ? { rowSelection } : {}),

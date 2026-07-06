@@ -433,6 +433,8 @@ export type TTableReusableComponent<T = any> = {
   canExpandRow?: (row: T) => boolean;
   onToggleExpand?: (rowId: string | number) => void;
   renderExpandedRow?: (row: Row<T>) => ReactNode;
+  /** Passed to table meta for role name column (org roles vs global/system) */
+  rolesBasePath?: string;
 };
 
 export type TCommandOption<T = string> = { label: string; value?: T };

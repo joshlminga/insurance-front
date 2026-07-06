@@ -37,6 +37,7 @@ import {
   getRoleId,
   getRoleIsActive,
   getRoleIsEditable,
+  getRoleLabel,
 } from "../role-utils"
 import AssignPermissionsModal from "../modals/assign-permissions"
 import CreateRoleModal from "../modals/create"
@@ -205,7 +206,7 @@ const OrganizationRolesDetailPage = () => {
         if (!id) return
         setDeleteTarget({
           id,
-          label: rowData?.name ?? "this role",
+          label: getRoleLabel(rowData, "roles"),
         })
       },
       conditional: (rowData) =>
@@ -320,6 +321,7 @@ const OrganizationRolesDetailPage = () => {
               1,
             isLoading,
             isError,
+            rolesBasePath: "roles",
             expandedRowId: expandedRoleId,
             getRowId: (row: any) => getRoleId(row) ?? null,
             canExpandRow: (row: any) =>

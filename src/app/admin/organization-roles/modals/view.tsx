@@ -5,7 +5,7 @@ import { DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { UseApiQuery } from "@/hooks/hooks"
 import { SubmitResponse } from "@/types/types"
 
-import { getRoleId, getRoleIsActive, getModuleLabel, normalizeModuleKey } from "../role-utils"
+import { getRoleId, getRoleIsActive, getModuleLabel, getRoleLabel, normalizeModuleKey } from "../role-utils"
 
 export const ViewRoleModal = ({
   componentProps,
@@ -46,7 +46,7 @@ export const ViewRoleModal = ({
       ) : (
         <>
           <DetailGrid columns={2}>
-            <DetailItem label="Name" value={role?.name ?? "N/A"} />
+            <DetailItem label="Name" value={getRoleLabel(role, rolesBasePath)} />
             <DetailItem label="Authority" value={role?.authority ?? "N/A"} />
             <DetailItem label="Description" value={role?.description ?? "-"} />
             <DetailItem

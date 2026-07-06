@@ -289,6 +289,7 @@ export const RolesListPage = ({
               1,
             isLoading,
             isError,
+            rolesBasePath,
             expandedRowId: expandedRoleId,
             getRowId: (row: any) => getRoleId(row) ?? null,
             canExpandRow: (row: any) =>

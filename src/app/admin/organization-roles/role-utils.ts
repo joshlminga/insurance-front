@@ -46,6 +46,15 @@ export const getOrgLocationId = (rowData: Record<string, any>) =>
 export const getRoleId = (rowData: Record<string, any>) =>
   rowData?.id ?? rowData?.role_id ?? rowData?.roleId
 
+/** Human-readable role label — org roles use display_name; global/system use name */
+export const getRoleLabel = (
+  rowData: Record<string, any>,
+  rolesBasePath = "roles"
+) =>
+  rolesBasePath === "roles"
+    ? (rowData?.display_name ?? "N/A")
+    : (rowData?.name ?? "N/A")
+
 /** Whether a role row is active */
 export const getRoleIsActive = (rowData: Record<string, any>) => {
   if (typeof rowData?.is_active === "boolean") return rowData.is_active

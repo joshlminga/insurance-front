@@ -3,6 +3,7 @@
 export interface RbacRole {
   id: number
   name: string
+  display_name?: string | null
   description?: string | null
   authority?: string | null
   modules?: string[] | null

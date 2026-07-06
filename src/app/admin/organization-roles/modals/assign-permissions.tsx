@@ -18,6 +18,7 @@ import {
   extractRolesFromResponse,
   getRoleId,
   getRoleIsEditable,
+  getRoleLabel,
   groupPermissionsByModule,
   mergePermissionsById,
   normalizeModuleKeys,
@@ -190,8 +191,8 @@ export const AssignPermissionsModal = ({
         </DialogTitle>
         <DialogDescription className="mt-1">
           {isReadOnly
-            ? `Viewing permissions for role "${resolvedRole?.name ?? role?.name ?? "N/A"}" (read-only).`
-            : `Select permissions for role "${resolvedRole?.name ?? role?.name ?? "N/A"}".`}
+            ? `Viewing permissions for role "${getRoleLabel(resolvedRole ?? role, rolesBasePath)}" (read-only).`
+            : `Select permissions for role "${getRoleLabel(resolvedRole ?? role, rolesBasePath)}".`}
         </DialogDescription>
       </div>
 

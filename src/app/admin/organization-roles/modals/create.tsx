@@ -63,8 +63,12 @@ export const CreateRoleModal = ({
 
   const onSubmit = (data: RoleCreateFormValues) => {
     const moduleKeys = normalizeModuleKeys(data.modules ?? [])
+    const roleNamePayload = isScopedRole
+      ? { display_name: data.name }
+      : { name: data.name }
+
     const payload: Record<string, unknown> = {
-      name: data.name,
+      ...roleNamePayload,
       description: data.description || undefined,
       modules: moduleKeys,
       authority: ROLE_AUTHORITY_DEFAULT,

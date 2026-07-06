@@ -3,6 +3,7 @@ import {
   getModuleLabel,
   getRoleId,
   getRoleIsGeneral,
+  getRoleLabel,
   normalizeModuleKey,
 } from "@/app/admin/organization-roles/role-utils"
 import { Badge } from "@/components/ui/badge"
@@ -21,6 +22,7 @@ import { ChevronDown } from "lucide-react"
 type OrganizationRolesTableMeta = {
   expandedRoleId?: string | number | null
   onToggleExpand?: (roleId: string | number) => void
+  rolesBasePath?: string
 }
 
 const getIsActiveFromRow = (rowData: any) => {
@@ -71,7 +73,14 @@ export const OrganizationRolesColumns: ColumnDef<any>[] = [
   {
     id: "name",
     header: () => <div>Name</div>,
-    cell: ({ row }) => <div className="font-medium">{row.original?.name ?? "N/A"}</div>,
+    cell: ({ row, table }) => {
+      const meta = table.options.meta as OrganizationRolesTableMeta | undefined
+      return (
+        <div className="font-medium">
+          {getRoleLabel(row.original, meta?.rolesBasePath)}
+        </div>
+      )
+    },
   },
   {
     id: "is_general",

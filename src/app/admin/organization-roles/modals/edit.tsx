@@ -59,13 +59,23 @@ export const EditRoleModal = ({
   useEffect(() => {
     const rawModules = Array.isArray(role?.modules) ? role.modules : []
     form.reset({
-      name: String(role?.name ?? ""),
+      name: String(
+        isScopedRole ? (role?.display_name ?? "") : (role?.name ?? "")
+      ),
       description: String(role?.description ?? ""),
       modules: normalizeModuleKeys(rawModules),
       org_id: String(role?.org_id ?? componentProps?.orgId ?? ""),
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [role?.name, role?.description, role?.modules, role?.org_id, componentProps?.orgId])
+  }, [
+    role?.name,
+    role?.display_name,
+    role?.description,
+    role?.modules,
+    role?.org_id,
+    componentProps?.orgId,
+    isScopedRole,
+  ])
 
   const updateMutation = UseApiMutation<SubmitResponse, Record<string, unknown>>({
     url: `${rolesBasePath}/${roleId}`,
@@ -88,8 +98,12 @@ export const EditRoleModal = ({
       return
     }
 
+    const roleNamePayload = isScopedRole
+      ? { display_name: data.name }
+      : { name: data.name }
+
     const payload: Record<string, unknown> = {
-      name: data.name,
+      ...roleNamePayload,
       description: data.description || undefined,
       modules: normalizeModuleKeys(data.modules ?? []),
       authority: ROLE_AUTHORITY_DEFAULT,
