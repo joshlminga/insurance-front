@@ -175,29 +175,12 @@ const OrganizationRolesDetailPage = () => {
             data: rowData,
             organizationLocationId: orgLocationId,
             refetch,
-            readOnly: false,
+            readOnly: !getRoleIsEditable(rowData),
           },
           Component: AssignPermissionsModal,
         })
       },
-      conditional: (rowData) =>
-        Boolean(getRoleId(rowData)) && getRoleIsEditable(rowData),
-    },
-    {
-      label: "View Permissions",
-      onSelect: (rowData) => {
-        handleDialogContextSwitch({
-          componentProps: {
-            data: rowData,
-            organizationLocationId: orgLocationId,
-            refetch,
-            readOnly: true,
-          },
-          Component: AssignPermissionsModal,
-        })
-      },
-      conditional: (rowData) =>
-        Boolean(getRoleId(rowData)) && !getRoleIsEditable(rowData),
+      conditional: (rowData) => Boolean(getRoleId(rowData)),
     },
     {
       label: "Delete",

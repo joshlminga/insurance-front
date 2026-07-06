@@ -48,7 +48,6 @@ export const AssignPermissionsModal = ({
   const roleId = getRoleId(role)
   const rolesBasePath = componentProps?.rolesBasePath ?? "roles"
   const organizationLocationId = componentProps?.organizationLocationId
-  const isReadOnly = componentProps?.readOnly ?? !getRoleIsEditable(role)
   const isScopedRole = rolesBasePath === "roles"
 
   const { data: roleListData, isLoading: isLoadingRole, refetch: refetchRole } =
@@ -73,6 +72,9 @@ export const AssignPermissionsModal = ({
     const payload = (roleListData as any)?.data?.role ?? (roleListData as any)?.data
     return payload ?? role
   }, [roleListData, role, isScopedRole])
+
+  const isReadOnly =
+    componentProps?.readOnly ?? !getRoleIsEditable(resolvedRole ?? role)
 
   const roleModules = normalizeModuleKeys(
     Array.isArray(resolvedRole?.modules) ? resolvedRole.modules : []
@@ -155,6 +157,7 @@ export const AssignPermissionsModal = ({
   })
 
   const togglePermission = (permissionId: number, checked: boolean) => {
+    if (isReadOnly) return
     setSelectedPermissionIds((current) => {
       if (checked) {
         return current.includes(permissionId) ? current : [...current, permissionId]
@@ -164,6 +167,7 @@ export const AssignPermissionsModal = ({
   }
 
   const handleSave = () => {
+    if (isReadOnly) return
     if (!roleId) {
       ShowToast.error("Unable to assign permissions: missing role id")
       return

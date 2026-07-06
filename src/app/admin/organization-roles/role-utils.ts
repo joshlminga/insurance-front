@@ -68,7 +68,10 @@ export const getRoleIsGeneral = (rowData: Record<string, any>) =>
 
 /** Whether a role can be edited; defaults to true when field is absent */
 export const getRoleIsEditable = (rowData: Record<string, any>) => {
-  if (typeof rowData?.is_editable === "boolean") return rowData.is_editable
+  const value = rowData?.is_editable ?? rowData?.isEditable
+  if (typeof value === "boolean") return value
+  if (value === 0 || value === "0" || value === "false") return false
+  if (value === 1 || value === "1" || value === "true") return true
   return true
 }
 
