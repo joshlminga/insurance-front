@@ -38,7 +38,9 @@ import {
     SendMessageSchema,
     ContactUsSchema,
     RoleCreateSchema,
-    RoleEditSchema
+    RoleEditSchema,
+    OrganizationMemberCreateSchema,
+    OrganizationMemberEditSchema
 } from "./form-schema";
 
 export type CustomerFormValues = z.infer<typeof CustomerDetailsSchema>
@@ -106,3 +108,5 @@ export type SendMessageValues = z.infer<typeof SendMessageSchema>
 export type SendContactUsMessageValues = z.infer<typeof ContactUsSchema>
 export type RoleCreateFormValues = z.infer<typeof RoleCreateSchema>
 export type RoleEditFormValues = z.infer<typeof RoleEditSchema>
+export type OrganizationMemberCreateFormValues = z.infer<typeof OrganizationMemberCreateSchema>
+export type OrganizationMemberEditFormValues = z.infer<typeof OrganizationMemberEditSchema>

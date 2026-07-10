@@ -903,6 +903,39 @@ export const ContactUsSchema = z.object({
   message: z.string().min(5, "Message must be at least 5 characters").max(2000, "Message is too long"),
 });
 
+/**
+ * Organization member (location staff user) create/edit.
+ * Roles are kept as strings because the multi-select works with string values;
+ * they are converted to numbers right before the API call.
+ */
+export const OrganizationMemberCreateSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters").max(100, "Name is too long"),
+  email: z
+    .string()
+    .email("Invalid email address")
+    .min(2, "Email must be at least 2 characters")
+    .max(100, "Email is too long"),
+  phone: z
+    .string()
+    .min(10, "Phone number must be at least 10 digits")
+    .optional()
+    .or(z.literal("")),
+  roles: z.array(z.string()).min(1, "Select at least one role"),
+  profile_picture: z
+    .any()
+    .optional()
+    .refine(
+      (file) => !file || file instanceof File,
+      "Profile picture must be a valid file"
+    )
+    .refine(
+      (file) => !file || ACCEPTED_IMAGE_TYPES.includes(file.type),
+      "Profile picture must be jpeg, png, jpg, or webp"
+    ),
+})
+
+export const OrganizationMemberEditSchema = OrganizationMemberCreateSchema
+
 /** Organization role create/edit — authority is sent as hidden default "comp" */
 export const RoleCreateSchema = z.object({
   name: z.string().min(2, "Role name is required").max(100),

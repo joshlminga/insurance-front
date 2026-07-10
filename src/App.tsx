@@ -68,6 +68,8 @@ const OrganizationsPage = lazy(() => import("./app/admin/organizations/page"))
 const OrganizationLocationsPage = lazy(() => import("./app/admin/organization-location/page"))
 const OrganizationRolesPage = lazy(() => import("./app/admin/organization-roles/page"))
 const OrganizationRolesDetailPage = lazy(() => import("./app/admin/organization-roles/[orgLocationId]/page"))
+const OrganizationMembersPage = lazy(() => import("./app/admin/organization-members/page"))
+const OrganizationMembersDetailPage = lazy(() => import("./app/admin/organization-members/[orgLocationId]/page"))
 const GlobalRolesPage = lazy(() => import("./app/admin/system-roles/global/page"))
 const SystemRolesPage = lazy(() => import("./app/admin/system-roles/system/page"))
 const UsersPage = lazy(() => import("./app/admin/users/page").then(m => ({ default: m.UsersPage })))
@@ -594,6 +596,27 @@ export const router = createBrowserRouter([
           <S>
             <AdminModulePage module={MODULES.ROLE}>
               <OrganizationRolesDetailPage />
+            </AdminModulePage>
+          </S>
+        ),
+      },
+      // Organization Members (location staff users)
+      {
+        path: "organization-members",
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.ORGANIZATION_LOCATION_USER}>
+              <OrganizationMembersPage />
+            </AdminModulePage>
+          </S>
+        ),
+      },
+      {
+        path: "organization-members/:orgLocationId",
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.ORGANIZATION_LOCATION_USER}>
+              <OrganizationMembersDetailPage />
             </AdminModulePage>
           </S>
         ),

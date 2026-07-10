@@ -11,6 +11,7 @@ export const MODULES = {
   // Organization
   ORGANIZATION: 'organization',
   ORGANIZATION_LOCATION: 'organization-location',
+  ORGANIZATION_LOCATION_USER: 'organization-location-user',
 
   // Products
   PRODUCT_MOTOR: 'product-motor',
