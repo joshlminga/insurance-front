@@ -2,6 +2,7 @@ import axios from 'axios'
 import { isBypassUser } from '@/auth/can'
 import { AUTH_STORAGE_KEY, ORG_LOCATION_HEADER } from '@/auth/constants'
 import type { Abilities } from '@/auth/types'
+import { buildRequestContextHeaders } from '@/lib/request-context-headers'
 import { emitSessionExpired } from '@/stores/session-timeout-store'
 import { EPREFIX, EROUTES } from '@/utils/enums'
 
@@ -44,6 +45,10 @@ apiClient.interceptors.request.use(
                 console.error('Error parsing auth-storage:', error)
             }
         }
+
+        // Attach dynamic headers from localStorage (e.g. X-Location-Code: KE)
+        Object.assign(config.headers, buildRequestContextHeaders())
+
         return config
     },
     (error) => {

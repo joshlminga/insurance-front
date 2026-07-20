@@ -3,7 +3,14 @@ import { useShallow } from 'zustand/react/shallow'
 import { checkAuth, fetchAbilities, logoutOnServer, refreshSession } from '@/auth/auth-service'
 import { AUTH_STORAGE_KEY, TOKEN_REFRESH_BUFFER_SECONDS } from '@/auth/constants'
 import type { Abilities, AuthSessionPayload } from '@/auth/types'
+import {
+  getRequestContext,
+  setRequestContextValue,
+} from '@/lib/request-context-headers'
 import type { AuthProviderState, AuthState, Guest, Tuser } from '@/types/types'
+
+/** Default country alpha2 when nothing is stored yet */
+const DEFAULT_LOCATION_CODE = 'KE'
 
 let tokenRefreshTimer: ReturnType<typeof setTimeout> | null = null
 
@@ -230,7 +237,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   setGuest: (guest) => set({ guest }),
 
-  setLocale: (country, lang, alpha) => set({ country, lang, alpha }),
+  // Also persist alpha2 so api-client can send X-Location-Code on every request
+  setLocale: (country, lang, alpha) => {
+    set({ country, lang, alpha })
+    if (alpha) {
+      setRequestContextValue('locationCode', alpha)
+    }
+  },
 }))
 
 let authListenerAttached = false
@@ -246,6 +259,15 @@ export async function initAuthStore() {
       }
     } catch {
       writePersistedAuth(null)
+    }
+
+    // Restore country alpha2 from request-context storage (or seed default KE)
+    const storedLocationCode = getRequestContext().locationCode
+    if (storedLocationCode) {
+      useAuthStore.setState({ alpha: storedLocationCode })
+    } else {
+      setRequestContextValue('locationCode', DEFAULT_LOCATION_CODE)
+      useAuthStore.setState({ alpha: DEFAULT_LOCATION_CODE })
     }
 
     const { token } = useAuthStore.getState()

@@ -222,7 +222,7 @@ export const router = createBrowserRouter([
           <PublicRoute>
             <S>
               <AuthLayoutPage
-                title="Please or register"
+                title="Please sign up"
                 description="to purchase your cover">
                 <SignupForm />
               </AuthLayoutPage>
