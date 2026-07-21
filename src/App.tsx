@@ -5,7 +5,7 @@ import { createBrowserRouter, Navigate } from "react-router-dom"
 import { EPREFIX, EROUTES } from "./utils/enums"
 import { ProtectedRoute, PublicRoute, CustomerPublicRoute } from "./hooks/hooks"
 import { AdminModulePage } from "./auth/AdminModulePage"
-import { MODULES } from "./auth/module-keys"
+import { MODULES, PURCHASE_MOTOR_MODULES, QUOTATION_MOTOR_MODULES } from "./auth/module-keys"
 import Layout from "./Layout"
 
 const Loader = () => (
@@ -355,7 +355,7 @@ export const router = createBrowserRouter([
         path: "loans",
         element: (
           <S>
-            <AdminModulePage module={MODULES.PURCHASE_MOTOR}>
+            <AdminModulePage modules={[...PURCHASE_MOTOR_MODULES]}>
               <LoansPage />
             </AdminModulePage>
           </S>
@@ -365,7 +365,7 @@ export const router = createBrowserRouter([
         path: "loans/apply",
         element: (
           <S>
-            <AdminModulePage module={MODULES.PURCHASE_MOTOR}>
+            <AdminModulePage modules={[...PURCHASE_MOTOR_MODULES]}>
               <LoanApplicationPage />
             </AdminModulePage>
           </S>
@@ -375,7 +375,7 @@ export const router = createBrowserRouter([
         path: "loans/products",
         element: (
           <S>
-            <AdminModulePage module={MODULES.PURCHASE_MOTOR}>
+            <AdminModulePage modules={[...PURCHASE_MOTOR_MODULES]}>
               <LoanProductsPage />
             </AdminModulePage>
           </S>
@@ -385,7 +385,7 @@ export const router = createBrowserRouter([
         path: "loans/:id",
         element: (
           <S>
-            <AdminModulePage module={MODULES.PURCHASE_MOTOR}>
+            <AdminModulePage modules={[...PURCHASE_MOTOR_MODULES]}>
               <LoanDetailPage />
             </AdminModulePage>
           </S>
@@ -440,7 +440,7 @@ export const router = createBrowserRouter([
         path: "quotations/motor-quotations",
         element: (
           <S>
-            <AdminModulePage module={MODULES.QUOTATION_MOTOR}>
+            <AdminModulePage modules={[...QUOTATION_MOTOR_MODULES]}>
               <MotorQuotationPage />
             </AdminModulePage>
           </S>
@@ -450,7 +450,7 @@ export const router = createBrowserRouter([
         path: "quotations/motor-quotations/results",
         element: (
           <S>
-            <AdminModulePage module={MODULES.QUOTATION_MOTOR}>
+            <AdminModulePage modules={[...QUOTATION_MOTOR_MODULES]}>
               <AdminMotorQuotationResultsPage />
             </AdminModulePage>
           </S>
@@ -460,7 +460,7 @@ export const router = createBrowserRouter([
         path: "quotations/motor-quotations/purchase",
         element: (
           <S>
-            <AdminModulePage module={MODULES.QUOTATION_MOTOR}>
+            <AdminModulePage modules={[...QUOTATION_MOTOR_MODULES]}>
               <AdminMotorQuotationPurchasePage />
             </AdminModulePage>
           </S>

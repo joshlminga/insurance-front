@@ -10,7 +10,7 @@ import {
   ShieldCheck,
   TextQuote,
 } from 'lucide-react'
-import { MODULES } from '@/auth/module-keys'
+import { MODULES, PURCHASE_MOTOR_MODULES, QUOTATION_MOTOR_MODULES } from '@/auth/module-keys'
 import { EPREFIX, EROUTES } from '@/utils/enums'
 
 export type NavSubItem = {
@@ -18,6 +18,8 @@ export type NavSubItem = {
   url: string
   /** Case 2: sub-item visible only when user has this module */
   module?: string
+  /** Case 2 (any): sub-item visible when user has any of these modules */
+  modules?: string[]
 }
 
 export type NavItem = {
@@ -64,11 +66,11 @@ export const adminNavConfig: NavItem[] = [
     title: 'Policies',
     url: EROUTES.LOANS,
     icon: ShieldCheck,
-    module: MODULES.PURCHASE_MOTOR,
+    modules: [...PURCHASE_MOTOR_MODULES],
     items: [
-      { title: 'All Policies', url: EROUTES.LOANS, module: MODULES.PURCHASE_MOTOR },
-      { title: 'New Application', url: EROUTES.LOANS_APPLY, module: MODULES.PURCHASE_MOTOR },
-      { title: 'Policy Products', url: EROUTES.LOANS_PRODUCTS, module: MODULES.PURCHASE_MOTOR },
+      { title: 'All Policies', url: EROUTES.LOANS, modules: [...PURCHASE_MOTOR_MODULES] },
+      { title: 'New Application', url: EROUTES.LOANS_APPLY, modules: [...PURCHASE_MOTOR_MODULES] },
+      { title: 'Policy Products', url: EROUTES.LOANS_PRODUCTS, modules: [...PURCHASE_MOTOR_MODULES] },
     ],
   },
   {
@@ -88,7 +90,7 @@ export const adminNavConfig: NavItem[] = [
     url: EROUTES.QUOTATIONS,
     icon: TextQuote,
     modules: [
-      MODULES.QUOTATION_MOTOR,
+      ...QUOTATION_MOTOR_MODULES,
       MODULES.QUOTATION_MARINE,
       MODULES.QUOTATION_TRAVEL,
     ],
@@ -96,7 +98,7 @@ export const adminNavConfig: NavItem[] = [
       {
         title: 'Motor Quotation',
         url: EROUTES.MOTORQUOTATIONS,
-        module: MODULES.QUOTATION_MOTOR,
+        modules: [...QUOTATION_MOTOR_MODULES],
       },
       {
         title: 'Marine Quotation',
