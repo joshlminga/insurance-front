@@ -1,6 +1,12 @@
 import { create } from 'zustand'
 import { useShallow } from 'zustand/react/shallow'
-import { checkAuth, fetchAbilities, logoutOnServer, refreshSession } from '@/auth/auth-service'
+import {
+  checkAuth,
+  fetchAbilities,
+  logoutOnServer,
+  refreshSession,
+  resolveOrganization,
+} from '@/auth/auth-service'
 import { AUTH_STORAGE_KEY, TOKEN_REFRESH_BUFFER_SECONDS } from '@/auth/constants'
 import type { Abilities, AuthSessionPayload } from '@/auth/types'
 import {
@@ -219,6 +225,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         /* best-effort server logout */
       })
     }
+    // Keep organizationLocationId — tenant comes from URL Origin, not the user session
     set({
       user: null,
       token: null,
@@ -226,7 +233,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       isGeneral: null,
       abilities: null,
       expiresAt: null,
-      organizationLocationId: null,
     })
   },
 
@@ -251,6 +257,46 @@ let authListenerAttached = false
 export async function initAuthStore() {
   if (typeof window === 'undefined') return
 
+  // Attach persistence before hydrate/resolve so org id is written to localStorage
+  if (!authListenerAttached) {
+    authListenerAttached = true
+
+    window.addEventListener('storage', (e) => {
+      if (e.key !== AUTH_STORAGE_KEY || e.storageArea !== localStorage) return
+      applyPersistedPayload(e.newValue)
+    })
+
+    useAuthStore.subscribe((state) => {
+      // Persist session OR tenant-only context (org id before login)
+      if (state.user || state.token || state.guest || state.organizationLocationId != null) {
+        const next = JSON.stringify({
+          user: state.user,
+          token: state.token,
+          guest: state.guest,
+          isGeneral: state.isGeneral,
+          abilities: state.abilities,
+          expiresAt: state.expiresAt,
+          organizationLocationId: state.organizationLocationId,
+        })
+        try {
+          if (localStorage.getItem(AUTH_STORAGE_KEY) !== next) {
+            writePersistedAuth(next)
+          }
+        } catch {
+          writePersistedAuth(next)
+        }
+      } else {
+        try {
+          if (localStorage.getItem(AUTH_STORAGE_KEY) != null) {
+            writePersistedAuth(null)
+          }
+        } catch {
+          writePersistedAuth(null)
+        }
+      }
+    })
+  }
+
   if (!useAuthStore.getState().hasHydrated) {
     try {
       const raw = readPersistedAuth()
@@ -261,7 +307,26 @@ export async function initAuthStore() {
       writePersistedAuth(null)
     }
 
-    // Restore country alpha2 from request-context storage (or seed default KE)
+    // Resolve tenant from browser Origin when org location is not stored yet
+    if (useAuthStore.getState().organizationLocationId == null) {
+      try {
+        const org = await resolveOrganization()
+        // Only persist when API actually resolved a location (Origin may be unknown)
+        if (org.organization_location_id != null) {
+          useAuthStore.setState({
+            organizationLocationId: org.organization_location_id,
+          })
+        }
+        if (org.location_code) {
+          setRequestContextValue('locationCode', org.location_code)
+          useAuthStore.setState({ alpha: org.location_code })
+        }
+      } catch (error) {
+        console.error('Failed to resolve organization from Origin:', error)
+      }
+    }
+
+    // Restore country alpha2 from request-context (or seed default KE only as fallback)
     const storedLocationCode = getRequestContext().locationCode
     if (storedLocationCode) {
       useAuthStore.setState({ alpha: storedLocationCode })
@@ -277,43 +342,6 @@ export async function initAuthStore() {
 
     useAuthStore.setState({ hasHydrated: true })
   }
-
-  if (authListenerAttached) return
-  authListenerAttached = true
-
-  window.addEventListener('storage', (e) => {
-    if (e.key !== AUTH_STORAGE_KEY || e.storageArea !== localStorage) return
-    applyPersistedPayload(e.newValue)
-  })
-
-  useAuthStore.subscribe((state) => {
-    if (state.user || state.token || state.guest) {
-      const next = JSON.stringify({
-        user: state.user,
-        token: state.token,
-        guest: state.guest,
-        isGeneral: state.isGeneral,
-        abilities: state.abilities,
-        expiresAt: state.expiresAt,
-        organizationLocationId: state.organizationLocationId,
-      })
-      try {
-        if (localStorage.getItem(AUTH_STORAGE_KEY) !== next) {
-          writePersistedAuth(next)
-        }
-      } catch {
-        writePersistedAuth(next)
-      }
-    } else {
-      try {
-        if (localStorage.getItem(AUTH_STORAGE_KEY) != null) {
-          writePersistedAuth(null)
-        }
-      } catch {
-        writePersistedAuth(null)
-      }
-    }
-  })
 }
 
 export function UseAuth(): AuthProviderState {

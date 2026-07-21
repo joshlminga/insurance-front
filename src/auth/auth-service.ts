@@ -6,6 +6,7 @@ import type {
   ApiSuccess,
   AuthSessionPayload,
   CheckAuthData,
+  OrgResolveData,
 } from './types'
 
 function authHeaders(token: string, organizationLocationId?: number | null) {
@@ -16,6 +17,15 @@ function authHeaders(token: string, organizationLocationId?: number | null) {
     headers[ORG_LOCATION_HEADER] = String(organizationLocationId)
   }
   return headers
+}
+
+/**
+ * Resolve tenant org location from the browser Origin header (API reads Origin).
+ * Call only when organizationLocationId is not yet stored.
+ */
+export async function resolveOrganization(): Promise<OrgResolveData> {
+  const { data } = await apiClient.get<ApiSuccess<OrgResolveData>>('auth/org')
+  return data.data
 }
 
 /** Validate stored token and fetch fresh user + abilities on app boot */

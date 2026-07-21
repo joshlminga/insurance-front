@@ -78,6 +78,14 @@ export interface AbilitiesData {
   abilities: Abilities
 }
 
+/** Response from GET /auth/org — tenant resolved from browser Origin */
+export interface OrgResolveData {
+  origin: string
+  location_code: string | null
+  country_id: number | null
+  organization_location_id: number | null
+}
+
 export interface LocationOption {
   organizationId: number
   locationId: number
