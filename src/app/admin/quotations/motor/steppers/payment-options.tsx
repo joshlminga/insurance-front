@@ -10,12 +10,12 @@ import {
 } from '@/components/ui/select'
 import { Button, ConfirmationDialog, CustomDialogComponent, ReusableDropdown, ReuseableInput, ReuseableRadioChoiceGroup, SendInvoiceViaEmail } from '@/dev/core'
 import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
-import type { MpesaPayload, MpesaPollResponse, SubmitResponse } from '@/types/types'
+import type { MpesaPayload, SubmitResponse } from '@/types/types'
 import {
     EMETHODS,
     INSTALLMENT_FIELDS_VISIBLE,
     INVOICE_SESSION_STORAGE_KEY,
-    PAYMENTPLANS, POLL_INTERVAL_MS, POLL_TIMEOUT_MS,
+    PAYMENTPLANS,
     PURCHASE_SESSION_STORAGE_KEY
 } from '@/utils/constatnts'
 import { EPAYMENTTABS } from '@/utils/steps-config'
@@ -29,6 +29,7 @@ import type { PaymentFormInput } from '@/types/schema'
 import { extractErrorMessage } from '@/utils/helpers'
 import { cn } from '@/lib/utils'
 import { useCustomDialogContextFactory } from '@/hooks'
+import { usePesapalPaymentFlow } from '@/hooks/use-pesapal-payment-flow'
 import type { AdminMotorStepProps } from '../admin-step-props'
 import { readAdminMotorCustomerContact } from '../admin-motor-session'
 
@@ -58,9 +59,6 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
 }) => {
     const customerEmail = defaultCustomerContact?.email ?? readAdminMotorCustomerContact().email
     const [selectedPaymentMethod, setSelectedPaymentMethod] = React.useState<string>('mpesa');
-    const [isPolling, setIsPolling] = React.useState(false);
-    const [pollMessage, setPollMessage] = React.useState('');
-    const [checkoutRequestId, setCheckoutRequestId] = React.useState<string | null>(null);
     const [purchaseSessionId, setPurchaseSessionId] = React.useState<string | null>(null);
     const [isPlanConfirmOpen, setIsPlanConfirmOpen] = React.useState(false);
     const lastAppliedPlanRef = React.useRef<string>('');
@@ -68,28 +66,16 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
     const isConfirmingPlanRef = React.useRef(false);
     const [purchaseId, setPurchaseId] = React.useState<string | null>(null)
 
-    const stopPolling = React.useCallback(() => {
-        setIsPolling(false)
-        setPollMessage('')
-        setCheckoutRequestId(null)
-    }, [])
-
-    const startPolling = React.useCallback((id: string) => {
-        setCheckoutRequestId(id)
-        setIsPolling(true)
-        setPollMessage('Waiting for payment confirmation...')
-    }, [])
-
-    const pollQuery = UseApiQuery<MpesaPollResponse>({
-        url: 'mpesa/status',
-        params: checkoutRequestId ? { checkout_request_id: checkoutRequestId } : undefined,
-        queryOptions: {
-            enabled: isPolling && !!checkoutRequestId,
-            refetchInterval: isPolling ? POLL_INTERVAL_MS : false,
-            refetchIntervalInBackground: true,
-            retry: 1,
-        },
-    })
+    const {
+        pollMode,
+        isPolling,
+        pollMessage,
+        stopPolling,
+        startMpesaPolling,
+        submitPesapal,
+        usesPesapal,
+        isPesapalSubmitting,
+    } = usePesapalPaymentFlow({ flow: 'admin', goToNextStep })
 
     React.useEffect(() => {
         const storedPurchaseKey = String(sessionStorage.getItem(PURCHASE_SESSION_STORAGE_KEY))
@@ -108,50 +94,6 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
             setPurchaseSessionId(null)
         }
     }, [])
-
-    // console.log('Purchase ID:', purchaseId);
-
-    React.useEffect(() => {
-        if (!isPolling) return
-        const timeoutId = setTimeout(() => {
-            stopPolling()
-            ShowToast.error('Payment timed out. Please try again.')
-        }, POLL_TIMEOUT_MS)
-
-        return () => clearTimeout(timeoutId)
-    }, [isPolling, stopPolling])
-
-    React.useEffect(() => {
-        if (!isPolling || !pollQuery.data) return
-        const payload = pollQuery.data.data ?? pollQuery.data
-        const statusRaw = payload.status?.toLowerCase()
-        const resultCode = payload.ResultCode
-
-        const isSuccess = statusRaw === 'completed' || statusRaw === 'success' || statusRaw === 'successful' || resultCode === 0
-        const isFailed = statusRaw === 'failed' || statusRaw === 'cancelled' || statusRaw === 'canceled' || statusRaw === 'error' || (typeof resultCode === 'number' && resultCode !== 0)
-
-        if (isSuccess) {
-            stopPolling()
-            setTimeout(() => {
-                ShowToast.success(payload.message || payload.ResultDesc || 'Payment confirmed!')
-            }, 4000)
-            goToNextStep?.()
-            return
-        }
-        if (isFailed) {
-            stopPolling()
-            setTimeout(() => {
-                ShowToast.error(payload.message || payload.ResultDesc || 'Payment failed. Please try again.')
-            }, 4000)
-            return
-        }
-        setPollMessage(payload.message || 'Waiting for payment confirmation...')
-    }, [isPolling, pollQuery.data, goToNextStep, stopPolling])
-
-    React.useEffect(() => {
-        if (!isPolling || !pollQuery.isError) return
-        setPollMessage('Still checking payment status...')
-    }, [isPolling, pollQuery.isError])
 
     const { data: SummaryData, refetch: refetchSummary } = UseApiQuery<SubmitResponse>({
         url: `purchase/motor/${purchaseSessionId}/summary`,
@@ -174,6 +116,7 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
             third_installment: '',
             card_provider: 'paystack',
             paypal_email: '',
+            pesapal_email: customerEmail ?? '',
             available_credit: '',
             unsettled_credit: '',
             unsettled_credit_limit: '',
@@ -272,7 +215,7 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
                     return
                 }
                 ShowToast.success('Check your phone and enter your M-Pesa PIN.')
-                startPolling(String(checkoutId))
+                startMpesaPolling(String(checkoutId))
             },
             onError: (error: any) => {
                 const message = extractErrorMessage(error);
@@ -282,6 +225,11 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
     })
 
     const onSubmit = (data: PaymentFormInput) => {
+        if (usesPesapal(data)) {
+            submitPesapal(data)
+            return
+        }
+
         if (data.payment_method !== 'mpesa') {
             goToNextStep?.()
             return
@@ -497,7 +445,9 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
                                 <div className="w-12 h-12 border-4 border-[#BF162E] border-t-transparent rounded-full animate-spin" />
                                 <p className="text-center font-medium text-black/80">{pollMessage}</p>
                                 <p className="text-center text-sm text-black/60">
-                                    Please enter your PIN on the M-Pesa prompt on your phone.
+                                    {pollMode === 'pesapal'
+                                        ? 'Complete payment on the Pesapal page if it is still open.'
+                                        : 'Please enter your PIN on the M-Pesa prompt on your phone.'}
                                 </p>
                                 <button
                                     type="button"
@@ -557,10 +507,10 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
                                 ]} />
                             <Button
                                 type="submit"
-                                disabled={isPolling}
+                                disabled={isPolling || isPesapalSubmitting}
                                 className="w-full rounded-full bg-[#BF162E]/90 hover:bg-[#BF162E] sm:w-auto"
                                 rightIcon={<ArrowRightCircle />}>
-                                {isPolling ? 'Processing...' : 'Proceed To Payment'}
+                                {isPolling || isPesapalSubmitting ? 'Processing...' : 'Proceed To Payment'}
                             </Button>
                         </div>
                     </CardFooter>

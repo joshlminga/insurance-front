@@ -23,6 +23,7 @@ import {
 import { LoginSchema } from '@/types/form-schema'
 import type { LoginFormValues } from '@/types/schema'
 import type { LoginResponse } from '@/types/types'
+import { normalizeLoginResponse } from '@/auth/session'
 import { EMETHODS } from '@/utils/constatnts'
 import { EPREFIX, EROUTES } from '@/utils/enums'
 import { extractErrorMessage } from '@/utils/helpers'
@@ -37,7 +38,7 @@ const signupPath = `/${EPREFIX.AUTH}${EROUTES.SIGNUP}`
  */
 export function SessionTimeoutDialog() {
   const { isOpen, open, close } = useSessionTimeoutStore()
-  const { login, logout, setGuest } = UseAuth()
+  const { setSession, logout, setGuest } = UseAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [rememberMe, setRememberMe] = useState(false)
 
@@ -81,7 +82,7 @@ export function SessionTimeoutDialog() {
         }
 
         ShowToast.success(data.message || 'Login successful!')
-        login(data.user, data.access_token, data.is_general)
+        setSession(normalizeLoginResponse(data))
 
         if (rememberMe) {
           localStorage.setItem(REMEMBER_EMAIL_KEY, form.getValues('email'))

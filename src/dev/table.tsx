@@ -25,7 +25,7 @@ import {
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
-import { useRef } from 'react';
+import { useRef, Fragment } from 'react';
 import {
     CustomLoader,
     TableComponentHeadings,
@@ -49,6 +49,10 @@ export const DataTable = ({
     isError,
     table,
     page,
+    expandedRowId,
+    getRowId,
+    canExpandRow,
+    renderExpandedRow,
 }: { table: TableType<any> } & Pick<
     TTableReusableComponent,
     | 'showPagination'
@@ -58,6 +62,10 @@ export const DataTable = ({
     | 'isLoading'
     | 'onClick'
     | 'isError'
+    | 'expandedRowId'
+    | 'getRowId'
+    | 'canExpandRow'
+    | 'renderExpandedRow'
 > &
     Required<Pick<TTableReusableComponent, 'page'>>) => {
     return (
@@ -102,28 +110,49 @@ export const DataTable = ({
                     ) : (
                         <>
                             {table.getRowModel().rows?.length ? (
-                                table.getRowModel().rows.map((row, index) => (
-                                    <TableRow
-                                        key={`tableBody-${index}`}
-                                        {...{
-                                            ...(onClick
-                                                ? {
-                                                    onClick: () => onClick(row),
-                                                }
-                                                : {}),
-                                        }}
-                                        className='h-14 overflow-auto pb-px border-b border-table-border-color px-6 py-4'
-                                        data-state={row.getIsSelected() && 'selected'}>
-                                        {row.getVisibleCells().map((cell, index) => (
-                                            <TableCell key={`cell-index-${index}`} align={'left'}>
-                                                {flexRender(
-                                                    cell.column.columnDef.cell,
-                                                    cell.getContext()
-                                                )}
-                                            </TableCell>
-                                        ))}
-                                    </TableRow>
-                                ))
+                                table.getRowModel().rows.map((row, index) => {
+                                    const rowId = getRowId?.(row.original)
+                                    const isExpanded =
+                                        rowId != null &&
+                                        expandedRowId != null &&
+                                        expandedRowId === rowId
+                                    const canExpand =
+                                        Boolean(renderExpandedRow) &&
+                                        (canExpandRow?.(row.original) ?? true)
+
+                                    return (
+                                        <Fragment key={`tableBody-${index}`}>
+                                            <TableRow
+                                                {...{
+                                                    ...(onClick
+                                                        ? {
+                                                            onClick: () => onClick(row),
+                                                        }
+                                                        : {}),
+                                                }}
+                                                className='h-14 overflow-auto pb-px border-b border-table-border-color px-6 py-4'
+                                                data-state={row.getIsSelected() && 'selected'}>
+                                                {row.getVisibleCells().map((cell, cellIndex) => (
+                                                    <TableCell key={`cell-index-${cellIndex}`} align={'left'}>
+                                                        {flexRender(
+                                                            cell.column.columnDef.cell,
+                                                            cell.getContext()
+                                                        )}
+                                                    </TableCell>
+                                                ))}
+                                            </TableRow>
+                                            {isExpanded && canExpand && renderExpandedRow && (
+                                                <TableRow className='bg-muted/30 hover:bg-muted/30'>
+                                                    <TableCell
+                                                        colSpan={table.getAllColumns().length}
+                                                        className='p-4'>
+                                                        {renderExpandedRow(row)}
+                                                    </TableCell>
+                                                </TableRow>
+                                            )}
+                                        </Fragment>
+                                    )
+                                })
                             ) : (
                                 <TableRow>
                                     <TableCell
@@ -201,6 +230,12 @@ export const CustomBaseTable = <T,>({
     page = 1,
     data,
     title,
+    expandedRowId,
+    getRowId,
+    canExpandRow,
+    onToggleExpand,
+    renderExpandedRow,
+    rolesBasePath,
 }: TTableReusableComponent<T>) => {
     // eslint-disable-next-line react-hooks/incompatible-library
     const table = useReactTable({
@@ -214,6 +249,11 @@ export const CustomBaseTable = <T,>({
             : {}),
         columns,
         data,
+        meta: {
+            expandedRoleId: expandedRowId,
+            onToggleExpand,
+            rolesBasePath,
+        },
         state: {
             ...(rowSelection ? { rowSelection } : {}),
         },
@@ -256,6 +296,10 @@ export const CustomBaseTable = <T,>({
                     onClick,
                     table,
                     page,
+                    expandedRowId,
+                    getRowId,
+                    canExpandRow,
+                    renderExpandedRow,
                 }}
             />
         </div>

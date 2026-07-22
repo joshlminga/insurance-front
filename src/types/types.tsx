@@ -8,6 +8,7 @@ import type { UseMutationOptions, UseQueryOptions } from "@tanstack/react-query"
 import type { SORT_ORDER } from "@/utils/enums";
 import { ColumnDef, OnChangeFn, Row, RowSelectionState } from "@tanstack/table-core";
 import { BENEFIT_TYPE_CONFIG } from "@/utils/constatnts";
+import type { Abilities, AuthSessionPayload } from '@/auth/types'
 
 export type T = {
   [key: string]: any;
@@ -27,14 +28,7 @@ export interface ReusableStepperProps {
   onValueChange?: (value: number) => void
   disabled?: boolean,
 }
-export interface LoginResponse {
-  message: string
-  user: any
-  access_token: string
-  is_general: boolean
-  status?: string;
-  data?: any
-}
+export type { LoginResponse } from '@/auth/types'
 
 export type TNodeChildrentType<T = ReactNode> = {
   children: T;
@@ -142,11 +136,18 @@ export interface AuthProviderState {
   token: string | null
   guest: Guest | null
   isGeneral: boolean | null
+  abilities: Abilities | null
+  expiresAt: number | null
+  organizationLocationId: number | null
   isAuthenticated: boolean
   isLoading: boolean
   country: string
   lang: string
   alpha: string
+  setSession: (payload: AuthSessionPayload) => void
+  setAbilities: (abilities: Abilities) => void
+  setOrganizationLocationId: (id: number | null) => Promise<void>
+  restoreSession: () => Promise<boolean>
   login: (user: Tuser, token: string, isGeneral: boolean) => void
   logout: () => void
   updateUser: (user: Partial<Tuser>) => void
@@ -255,6 +256,7 @@ export type CheckboxOption = {
   label?: string
   name?: string
   checked?: boolean
+  disabled?: boolean
   onChange?: (checked: boolean) => void
 }
 
@@ -339,6 +341,8 @@ export type TCustomDialogProps<T = TKeyValueStringType> = {
   children: ReactNode;
   toggleDialog: () => any;
   dialogOpen: boolean;
+  /** Accessible dialog title for screen readers when children use a plain heading */
+  title?: string;
 } & Partial<TClassType>;
 
 export type TDebounceprops<TDebounceCallBackArgs> = {
@@ -423,6 +427,14 @@ export type TTableReusableComponent<T = any> = {
   isError?: boolean;
   page?: number;
   data: T[];
+  /** When set, renders a full-width sub-row below the matching row (modules-tab style) */
+  expandedRowId?: string | number | null;
+  getRowId?: (row: T) => string | number | null | undefined;
+  canExpandRow?: (row: T) => boolean;
+  onToggleExpand?: (rowId: string | number) => void;
+  renderExpandedRow?: (row: Row<T>) => ReactNode;
+  /** Passed to table meta for role name column (org roles vs global/system) */
+  rolesBasePath?: string;
 };
 
 export type TCommandOption<T = string> = { label: string; value?: T };
@@ -596,6 +608,18 @@ export type MpesaPayload = {
   transaction_desc?: string
 }
 
+export type PesapalPayload = {
+  invoice_id: number
+  phone?: string
+  email?: string
+}
+
+export type PesapalPollResponse = {
+  status?: string
+  payment_status?: string | null
+  confirmation_code?: string | null
+}
+
 export type MpesaPollResponse = {
   status?: string
   message?: string
@@ -658,10 +682,17 @@ export type AuthState = {
   token: string | null
   guest: Guest | null
   isGeneral: boolean | null
+  abilities: Abilities | null
+  expiresAt: number | null
+  organizationLocationId: number | null
   hasHydrated: boolean
   country: string
   lang: string
   alpha: string
+  setSession: (payload: AuthSessionPayload) => void
+  setAbilities: (abilities: Abilities) => void
+  setOrganizationLocationId: (id: number | null) => Promise<void>
+  restoreSession: () => Promise<boolean>
   login: (user: Tuser, token: string, isGeneral: boolean) => void
   logout: () => void
   updateUser: (updates: Partial<Tuser>) => void

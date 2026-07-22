@@ -31,8 +31,9 @@ migrateLegacyLocalStorageKeys([
   INVOICE_SESSION_STORAGE_KEY,
 ])
 
-initAuthStore()
 initThemeStore()
+
+void initAuthStore()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

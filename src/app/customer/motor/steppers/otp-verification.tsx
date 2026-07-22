@@ -14,9 +14,10 @@ import { OTPVerificationSchema } from "@/types/form-schema";
 import type { OTPFormValues, ResendOTPFormValues } from "@/types/schema";
 import { extractErrorMessage } from "@/utils/helpers";
 import { UseAuth } from "@/stores/auth-store";
+import { normalizeLoginResponse } from "@/auth/session";
 
 export default function OTPVerificationPage({ goToNextStep, goToPrevStep }: CustomerVerificationDetailsProps) {
-  const { login, guest } = UseAuth();
+  const { setSession, guest } = UseAuth();
 
   const methods = useForm<OTPFormValues>({
     resolver: zodResolver(OTPVerificationSchema),
@@ -32,7 +33,7 @@ export default function OTPVerificationPage({ goToNextStep, goToPrevStep }: Cust
     method: EMETHODS.POST,
     mutationOptions: {
       onSuccess: (data) => {
-        login(data.user, data.access_token, data.is_general)
+        setSession(normalizeLoginResponse(data))
         goToNextStep?.()
         ShowToast.success(data.message || "Verified successfully!")
       },
