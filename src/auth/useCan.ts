@@ -5,6 +5,7 @@ import {
   can,
   canAny,
   canModuleAction,
+  canModuleMenu,
   hasAnyRole,
   hasRole,
   isBypassUser,
@@ -39,6 +40,7 @@ export function useCan() {
     canAny: (permissions: string[]) => canAny(abilities, permissions, activeSet),
     canModuleAction: (module: string, action: string) =>
       canModuleAction(abilities, module, action, activeSet),
+    canModuleMenu: (module: string) => canModuleMenu(abilities, module, activeSet),
     hasRole: (role: string) => hasRole(abilities, role),
     hasAnyRole: (roles: string[]) => hasAnyRole(abilities, roles),
     isSuperAdmin: abilities?.roles.includes(SUPER_ADMIN_ROLE) ?? false,

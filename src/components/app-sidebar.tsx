@@ -8,6 +8,7 @@ import {
   SidebarHeader,
   SidebarRail,
 } from '@/components/ui/sidebar'
+import { useCan } from '@/auth/useCan'
 import { useModules } from '@/auth/useModules'
 import { adminNavConfig } from '@/navigation/admin-nav-config'
 import { filterNavItems } from '@/navigation/filter-nav-items'
@@ -17,12 +18,13 @@ import { UseAuth, useAuthStore } from '@/stores/auth-store'
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user } = UseAuth()
   const abilities = useAuthStore((s) => s.abilities)
-  const { hasModule, hasAnyModule } = useModules()
+  const { hasModule } = useModules()
+  const { canModuleMenu } = useCan()
 
   // Re-filter when abilities change (not just function identity)
   const visibleNav = useMemo(
-    () => filterNavItems(adminNavConfig, hasModule, hasAnyModule),
-    [abilities, hasModule, hasAnyModule],
+    () => filterNavItems(adminNavConfig, hasModule, canModuleMenu),
+    [abilities, hasModule, canModuleMenu],
   )
 
   return (
