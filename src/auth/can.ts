@@ -52,6 +52,15 @@ export function canModuleAction(
   return can(abilities, `${module}.${action}`, activeSet)
 }
 
+/** Check whether the user can see a module's sidebar nav item */
+export function canModuleMenu(
+  abilities: Abilities | null | undefined,
+  moduleKey: string,
+  activeSet?: Set<string> | null,
+): boolean {
+  return can(abilities, `${moduleKey}.menu`, activeSet)
+}
+
 export function hasRole(
   abilities: Abilities | null | undefined,
   role: string,
