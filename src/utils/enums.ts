@@ -1,7 +1,7 @@
 import { ClaimItem } from "@/types/types";
 
 export const ELOGO = {
-  NAVBARLOGO: '/logo/logo1.png'
+  NAVBARLOGO: '/logo/logo.png'
 }
 
 export const EPREFIX = {
