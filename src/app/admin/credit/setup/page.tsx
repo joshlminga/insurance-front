@@ -82,10 +82,10 @@ export function CreditSetupPage() {
         ? Number(pool.auto_approve_threshold)
         : null,
       finance_can_override_without_payment: pool?.finance_can_override_without_payment ?? false,
-      finance_role_id: pool?.finance_role_id ? String(pool.finance_role_id) : "",
+      finance_role_id: pool?.finance_role_id ? String(pool.finance_role_id) : undefined,
       overall_manager_role_id: pool?.overall_manager_role_id
         ? String(pool.overall_manager_role_id)
-        : "",
+        : undefined,
     },
   })
 

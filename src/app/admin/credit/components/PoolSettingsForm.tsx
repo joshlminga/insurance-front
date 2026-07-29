@@ -45,14 +45,16 @@ export function PoolSettingsForm({
           control={control}
           name="finance_role_id"
           label="Finance role"
-          options={[{ label: "Select role", value: "" }, ...roleOptions]}
+          placeholder="Select role"
+          options={roleOptions}
         />
 
         <ReusableSelect
           control={control}
           name="overall_manager_role_id"
           label="Overall manager role"
-          options={[{ label: "Select role", value: "" }, ...roleOptions]}
+          placeholder="Select role"
+          options={roleOptions}
         />
       </div>
 

@@ -35,19 +35,22 @@ export function CreditAdjustmentsPage() {
     usersQuery.data?.data?.data ??
     (Array.isArray(usersQuery.data?.data) ? usersQuery.data.data : [])
 
-  const userOptions = [
-    { label: "Select user", value: "" },
-    ...users.map((entry: any) => ({
-      label: entry.user?.name ?? entry.user?.email ?? `User ${entry.user_id ?? entry.user?.id}`,
-      value: String(entry.user_id ?? entry.user?.id),
-    })),
-  ]
+  const userOptions = users
+    .map((entry: any) => {
+      const userId = entry.user_id ?? entry.user?.id
+      if (userId == null || userId === "") return null
+      return {
+        label: entry.user?.name ?? entry.user?.email ?? `User ${userId}`,
+        value: String(userId),
+      }
+    })
+    .filter(Boolean) as Array<{ label: string; value: string }>
 
   const form = useForm<AdjustmentFormValues>({
     resolver: zodResolver(AdjustmentSchema),
     defaultValues: {
-      user_id: "",
-      amount: 0,
+      user_id: undefined,
+      amount: undefined,
       type: "correction",
       reason: "",
     },
@@ -63,8 +66,8 @@ export function CreditAdjustmentsPage() {
       onSuccess: async (response) => {
         ShowToast.success(response?.message || "Adjustment applied")
         form.reset({
-          user_id: "",
-          amount: 0,
+          user_id: undefined,
+          amount: undefined,
           type: "correction",
           reason: "",
         })
@@ -96,6 +99,7 @@ export function CreditAdjustmentsPage() {
             control={form.control}
             name="user_id"
             label="User"
+            placeholder="Select user"
             options={userOptions}
             required
           />
