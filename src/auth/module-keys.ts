@@ -31,6 +31,9 @@ export const MODULES = {
 
   // Account / finance (when wired to real API pages)
   ACCOUNT: 'account',
+
+  // Prepaid credit & finance control
+  FINANCE_CONTROL: 'finance-control',
 } as const
 
 export type ModuleKey = (typeof MODULES)[keyof typeof MODULES]

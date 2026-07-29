@@ -73,6 +73,12 @@ const OrganizationMembersDetailPage = lazy(() => import("./app/admin/organizatio
 const GlobalRolesPage = lazy(() => import("./app/admin/system-roles/global/page"))
 const SystemRolesPage = lazy(() => import("./app/admin/system-roles/system/page"))
 const UsersPage = lazy(() => import("./app/admin/users/page").then(m => ({ default: m.UsersPage })))
+const CreditWalletPage = lazy(() => import("./app/admin/credit/wallet/page").then(m => ({ default: m.CreditWalletPage })))
+const CreditTransactionsPage = lazy(() => import("./app/admin/credit/transactions/page").then(m => ({ default: m.CreditTransactionsPage })))
+const CreditApprovalsPage = lazy(() => import("./app/admin/credit/approvals/page").then(m => ({ default: m.CreditApprovalsPage })))
+const CreditSetupPage = lazy(() => import("./app/admin/credit/setup/page").then(m => ({ default: m.CreditSetupPage })))
+const CreditSettlementDetailPage = lazy(() => import("./app/admin/credit/settlements/[id]/page").then(m => ({ default: m.CreditSettlementDetailPage })))
+const CreditAdjustmentsPage = lazy(() => import("./app/admin/credit/adjustments/page").then(m => ({ default: m.CreditAdjustmentsPage })))
 const MotorProductPage = lazy(() => import("./app/admin/product/motor/motor-product/page").then(m => ({ default: m.MotorProductPage })))
 const MotorCoverTypePage = lazy(() => import("./app/admin/product/motor/cover_types/page").then(m => ({ default: m.MotorCoverTypePage })))
 const MotorCoveringPage = lazy(() => import("./app/admin/product/motor/motor-coving/page").then(m => ({ default: m.MotorCoveringPage })))
@@ -660,6 +666,67 @@ export const router = createBrowserRouter([
           <S>
             <AdminModulePage modules={[MODULES.SETTINGS_RBAC, MODULES.RBAC]}>
               <SettingsPage />
+            </AdminModulePage>
+          </S>
+        ),
+      },
+      // Credit & Finance
+      {
+        path: "credit/wallet",
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.FINANCE_CONTROL}>
+              <CreditWalletPage />
+            </AdminModulePage>
+          </S>
+        ),
+      },
+      {
+        path: "credit/transactions",
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.FINANCE_CONTROL}>
+              <CreditTransactionsPage />
+            </AdminModulePage>
+          </S>
+        ),
+      },
+      {
+        path: "credit/approvals",
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.FINANCE_CONTROL} permission="finance-control.approve">
+              <CreditApprovalsPage />
+            </AdminModulePage>
+          </S>
+        ),
+      },
+      {
+        path: "credit/setup",
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.FINANCE_CONTROL} permission="finance-control.update">
+              <CreditSetupPage />
+            </AdminModulePage>
+          </S>
+        ),
+      },
+      {
+        path: "credit/settlements/:id",
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.FINANCE_CONTROL}>
+              <CreditSettlementDetailPage />
+            </AdminModulePage>
+          </S>
+        ),
+      },
+      {
+        path: "credit/adjustments",
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.FINANCE_CONTROL} permission="finance-control.adjust">
+              <CreditAdjustmentsPage />
             </AdminModulePage>
           </S>
         ),

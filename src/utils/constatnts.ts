@@ -178,8 +178,8 @@ export const PURCHASE_SESSION_STORAGE_KEY = "purchase_session_id"
 export const INVOICE_SESSION_STORAGE_KEY = "invoice_purchase_session_id"
 
 /** Flip to true when backend credit-summary endpoint is ready */
-export const CREDIT_SUMMARY_API_ENABLED = false
-export const CREDIT_SUMMARY_URL = "purchase/motor/credit-summary"
+export const CREDIT_SUMMARY_API_ENABLED = true
+export const CREDIT_SUMMARY_URL = "credit/wallet"
 
 /** Flip to true when backend bank-payment-details endpoint is ready */
 export const BANK_PAYMENT_DETAILS_API_ENABLED = false

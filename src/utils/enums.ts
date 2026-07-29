@@ -63,6 +63,14 @@ export const EROUTES = {
   // Transactions
   TRANSACTIONS: `/${EPREFIX.DASHBOARD}/transactions`,
 
+  // Credit & Finance
+  CREDIT_WALLET: `/${EPREFIX.DASHBOARD}/credit/wallet`,
+  CREDIT_TRANSACTIONS: `/${EPREFIX.DASHBOARD}/credit/transactions`,
+  CREDIT_APPROVALS: `/${EPREFIX.DASHBOARD}/credit/approvals`,
+  CREDIT_SETUP: `/${EPREFIX.DASHBOARD}/credit/setup`,
+  CREDIT_SETTLEMENT: `/${EPREFIX.DASHBOARD}/credit/settlements/:id`,
+  CREDIT_ADJUSTMENTS: `/${EPREFIX.DASHBOARD}/credit/adjustments`,
+
   // Reports
   REPORTS: `/${EPREFIX.DASHBOARD}/reports`,
 

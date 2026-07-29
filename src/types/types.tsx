@@ -642,6 +642,93 @@ export type CreditSummaryResponse = {
   data?: CreditSummaryResponse
 }
 
+export type CreditTransactionStatus = 'pending_approval' | 'approved' | 'rejected'
+export type CreditSettlementStatus = 'pending' | 'processing' | 'completed' | 'failed'
+export type CreditAdjustmentType = 'refund' | 'write_off' | 'manual_charge' | 'correction'
+export type CreditPaymentGateway = 'pesapal' | 'mpesa'
+
+export type CreditWallet = {
+  id?: number
+  user_id?: number
+  organization_location_id?: number
+  allocated_balance: string | null
+  available_balance: string | null
+  pending_balance: string | null
+  minimum_spend_threshold: string | null
+}
+
+export type CreditTransaction = {
+  id: number
+  user_id?: number
+  amount_used: string
+  status: CreditTransactionStatus
+  transactionable_type?: string | null
+  transactionable_id?: number | null
+  approval_required_at_order_time?: boolean
+  approved_at?: string | null
+  created_at?: string
+  user?: { id?: number; name?: string; email?: string }
+}
+
+export type CreditSettlement = {
+  id: number
+  total_amount: string
+  status: CreditSettlementStatus
+  payment_method?: string | null
+  payment_gateway?: CreditPaymentGateway | null
+  paystack_reference?: string | null
+  finance_notes?: string | null
+  completed_at?: string | null
+  created_at?: string
+  items?: Array<{
+    id?: number
+    credit_transaction_id?: number
+    amount_paid_for_this_txn?: string
+    credit_transaction?: CreditTransaction
+  }>
+  redirect_url?: string | null
+  order_tracking_id?: string | null
+  checkout_request_id?: string | null
+}
+
+export type CreditApprovalQueueItem = {
+  id: number
+  credit_transaction_id?: number
+  assigned_to_role_id?: number | null
+  status: 'pending' | 'approved' | 'rejected'
+  rejection_reason?: string | null
+  created_at?: string
+  credit_transaction?: CreditTransaction
+}
+
+export type CreditPool = {
+  id?: number
+  organization_location_id?: number
+  total_available: string | null
+  total_allocated?: string | null
+  requires_approval?: boolean
+  auto_approve_threshold?: string | null
+  finance_can_override_without_payment?: boolean
+  finance_role_id?: number | null
+  overall_manager_role_id?: number | null
+}
+
+export type CreditUserAllocation = {
+  id?: number
+  user_id: number
+  user?: { id?: number; name?: string; email?: string }
+  allocated_balance?: string | null
+  available_balance?: string | null
+  pending_balance?: string | null
+  minimum_spend_threshold?: string | null
+}
+
+export type CreditPaymentPendingResponse = {
+  success?: boolean
+  message?: string
+  credit_transaction_id?: number
+}
+
 export type CashPaymentOption = {
   title: string
   steps: string[]

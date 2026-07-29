@@ -2,13 +2,9 @@ import { Field, FieldError, FieldGroup } from '@/components/ui/field'
 import { Checkbox } from '@/components/ui/checkbox'
 import { ReuseableInput } from '@/dev/core'
 import { UseApiQuery } from '@/hooks/hooks'
-import type { CreditSummaryResponse } from '@/types/types'
+import type { CreditWallet, SubmitResponse } from '@/types/types'
 import type { PaymentFormInput } from '@/types/schema'
-import {
-    CREDIT_SUMMARY_API_ENABLED,
-    CREDIT_SUMMARY_URL,
-    INVOICE_SESSION_STORAGE_KEY,
-} from '@/utils/constatnts'
+import { CREDIT_SUMMARY_API_ENABLED, CREDIT_SUMMARY_URL } from '@/utils/constatnts'
 import React from 'react'
 import { Controller, useFormContext } from 'react-hook-form'
 import { PaymentAmountSummary } from './payment-amount-summary'
@@ -25,28 +21,26 @@ const formatCreditValue = (value: string | number | undefined) => {
 export const CreditTabPage: React.FC = () => {
     const { control, setValue } = useFormContext<PaymentFormInput>()
 
-    const [purchaseSessionId, setPurchaseSessionId] = React.useState<string | null>(null)
-
-    React.useEffect(() => {
-        const stored = sessionStorage.getItem(INVOICE_SESSION_STORAGE_KEY)
-        setPurchaseSessionId(stored ? String(stored) : null)
-    }, [])
-
-    const creditQuery = UseApiQuery<CreditSummaryResponse>({
+    const creditQuery = UseApiQuery<SubmitResponse>({
         url: CREDIT_SUMMARY_URL,
-        params: purchaseSessionId ? { purchase_session_id: purchaseSessionId } : undefined,
         queryOptions: {
-            enabled: CREDIT_SUMMARY_API_ENABLED && !!purchaseSessionId,
+            enabled: CREDIT_SUMMARY_API_ENABLED,
             retry: 1,
         },
     })
 
     React.useEffect(() => {
         if (!creditQuery.data) return
-        const payload = creditQuery.data.data ?? creditQuery.data
-        setValue('available_credit', formatCreditValue(payload.available_credit))
-        setValue('unsettled_credit', formatCreditValue(payload.unsettled_credit))
-        setValue('unsettled_credit_limit', formatCreditValue(payload.unsettled_credit_limit))
+        const payload = (creditQuery.data?.data?.wallet ??
+            creditQuery.data?.data) as CreditWallet | null | undefined
+        if (!payload) return
+
+        setValue('available_credit', formatCreditValue(payload.available_balance ?? undefined))
+        setValue('unsettled_credit', formatCreditValue(payload.pending_balance ?? undefined))
+        setValue(
+            'unsettled_credit_limit',
+            formatCreditValue(payload.minimum_spend_threshold ?? undefined)
+        )
     }, [creditQuery.data, setValue])
 
     return (
@@ -57,6 +51,12 @@ export const CreditTabPage: React.FC = () => {
 
                     {creditQuery.isLoading && CREDIT_SUMMARY_API_ENABLED ? (
                         <p className="mt-4 text-sm text-black/70">Loading credit info…</p>
+                    ) : null}
+
+                    {!creditQuery.isLoading && CREDIT_SUMMARY_API_ENABLED && !creditQuery.data?.data && !creditQuery.data?.data?.wallet ? (
+                        <p className="mt-4 text-sm text-black/70">
+                            No credit allocated for this location.
+                        </p>
                     ) : null}
 
                     <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -71,14 +71,14 @@ export const CreditTabPage: React.FC = () => {
                             className="w-full h-10 rounded-sm border border-black/30 bg-white text-black"
                             control={control}
                             name="unsettled_credit"
-                            label="Unsettled Credit"
+                            label="Pending Credit"
                             disabled
                         />
                         <ReuseableInput
                             className="w-full h-10 rounded-sm border border-black/30 bg-white text-black"
                             control={control}
                             name="unsettled_credit_limit"
-                            label="Unsettled Credit Limit"
+                            label="Minimum Spend Threshold"
                             disabled
                         />
                     </div>
