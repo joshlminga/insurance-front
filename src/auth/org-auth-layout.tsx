@@ -20,7 +20,7 @@ export default function OrgAuthLayout({ organization, children }: OrgAuthLayoutP
     <main className="flex min-h-dvh flex-col md:flex-row">
       {/* Left branding panel — hidden on small screens */}
       <section
-        className="relative hidden w-full overflow-hidden md:flex md:w-1/2 md:min-h-dvh"
+        className="relative hidden w-full overflow-hidden md:flex md:w-1/2 md:min-h-dvh md:flex-col"
         aria-hidden="true">
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
@@ -29,17 +29,15 @@ export default function OrgAuthLayout({ organization, children }: OrgAuthLayoutP
         {/* Dark overlay so white/red taglines stay readable */}
         <div className="absolute inset-0 bg-black/70" />
 
-        <div className="relative z-10 flex flex-col justify-end p-10 lg:p-14">
+        <div className="relative z-10 mt-auto flex w-full flex-col items-center px-10 pb-10 text-center lg:px-14 lg:pb-14">
           <h2 className="text-2xl font-bold uppercase tracking-wide text-white lg:text-3xl">
-            Precision in every process.
+            Transforming Insurance.
           </h2>
           <h2 className="mt-1 text-2xl font-bold uppercase tracking-wide text-[#C20C0C] lg:text-3xl">
-            Excellence in every delivery.
+            One Platform. Endless Possibilities.
           </h2>
-          <p className="mt-4 max-w-md text-sm leading-relaxed text-white/90">
-            Empowering {orgName}
-            {locationName ? ` (${locationName})` : ''} teams to streamline workflows, track
-            milestones, and achieve collective success.
+          <p className="mt-4 text-sm leading-relaxed text-white/90">
+            A unified insurance platform that enables insurers, brokers, and partners to generate accurate quotations, manage policies, process claims, and oversee every stage of the insurance lifecycle with confidence.
           </p>
         </div>
       </section>
