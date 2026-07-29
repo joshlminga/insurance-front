@@ -232,8 +232,15 @@ export function CreditTransactionsPage() {
       <CustomDialogComponent
         handleDialogContextSwitch={handleDialogContextSwitch}
         dialogOpen={dialogOpen}
-        dialogContent={dialogContent}
-      />
+        className="sm:max-w-fit w-[95vw] sm:w-auto"
+      >
+        {dialogContent?.Component && (
+          <dialogContent.Component
+            componentProps={dialogContent.componentProps}
+            handleDialogContextSwitch={handleDialogContextSwitch}
+          />
+        )}
+      </CustomDialogComponent>
     </div>
   )
 }

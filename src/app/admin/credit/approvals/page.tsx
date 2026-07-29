@@ -132,8 +132,15 @@ export function CreditApprovalsPage() {
       <CustomDialogComponent
         handleDialogContextSwitch={handleDialogContextSwitch}
         dialogOpen={dialogOpen}
-        dialogContent={dialogContent}
-      />
+        className="sm:max-w-fit w-[95vw] sm:w-auto"
+      >
+        {dialogContent?.Component && (
+          <dialogContent.Component
+            componentProps={dialogContent.componentProps}
+            handleDialogContextSwitch={handleDialogContextSwitch}
+          />
+        )}
+      </CustomDialogComponent>
 
       <AlertDialog open={Boolean(approveTarget)} onOpenChange={() => setApproveTarget(null)}>
         <AlertDialogContent>

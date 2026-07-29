@@ -26,11 +26,11 @@ export default function AllocateCreditModal({
 }: AllocateCreditModalProps) {
   const queryClient = useQueryClient()
   const user = componentProps?.user
-  const userId = user?.user_id ?? user?.user?.id
+  const userId = user?.user_id ?? user?.user?.id ?? user?.id
 
   const form = useForm<AllocateCreditFormValues>({
     resolver: zodResolver(AllocateCreditSchema),
-    defaultValues: {
+    values: {
       amount: user?.allocated_balance ? Number(user.allocated_balance) : 0,
       minimum_spend_threshold: user?.minimum_spend_threshold
         ? Number(user.minimum_spend_threshold)

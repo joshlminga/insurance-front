@@ -8,7 +8,7 @@ import type { UseMutationOptions, UseQueryOptions } from "@tanstack/react-query"
 import type { SORT_ORDER } from "@/utils/enums";
 import { ColumnDef, OnChangeFn, Row, RowSelectionState } from "@tanstack/table-core";
 import { BENEFIT_TYPE_CONFIG } from "@/utils/constatnts";
-import type { Abilities, AuthSessionPayload } from '@/auth/types'
+import type { Abilities, AuthSessionPayload, OrgResolveData, OrgResolveStatus } from '@/auth/types'
 
 export type T = {
   [key: string]: any;
@@ -139,6 +139,9 @@ export interface AuthProviderState {
   abilities: Abilities | null
   expiresAt: number | null
   organizationLocationId: number | null
+  resolvedOrganization: OrgResolveData | null
+  orgResolveStatus: OrgResolveStatus
+  isOrgTenant: boolean
   isAuthenticated: boolean
   isLoading: boolean
   country: string
@@ -772,6 +775,8 @@ export type AuthState = {
   abilities: Abilities | null
   expiresAt: number | null
   organizationLocationId: number | null
+  resolvedOrganization: OrgResolveData | null
+  orgResolveStatus: OrgResolveStatus
   hasHydrated: boolean
   country: string
   lang: string

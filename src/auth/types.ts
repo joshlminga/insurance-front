@@ -84,7 +84,14 @@ export interface OrgResolveData {
   location_code: string | null
   country_id: number | null
   organization_location_id: number | null
+  organization_name?: string | null
+  location_name?: string | null
+  logo?: string | null
+  logo_url?: string | null
 }
+
+/** Outcome of GET /auth/org during app boot */
+export type OrgResolveStatus = 'idle' | 'resolved' | 'not_found' | 'failed'
 
 export interface LocationOption {
   organizationId: number

@@ -8,12 +8,14 @@ import {
   resolveOrganization,
 } from '@/auth/auth-service'
 import { AUTH_STORAGE_KEY, TOKEN_REFRESH_BUFFER_SECONDS } from '@/auth/constants'
-import type { Abilities, AuthSessionPayload } from '@/auth/types'
+import type { Abilities, AuthSessionPayload, OrgResolveData, OrgResolveStatus } from '@/auth/types'
 import {
   getRequestContext,
   setRequestContextValue,
 } from '@/lib/request-context-headers'
+import { isTenantSubdomain } from '@/lib/tenant-from-host'
 import type { AuthProviderState, AuthState, Guest, Tuser } from '@/types/types'
+import axios from 'axios'
 
 /** Default country alpha2 when nothing is stored yet */
 const DEFAULT_LOCATION_CODE = 'KE'
@@ -102,6 +104,8 @@ function applyPersistedPayload(raw: string | null) {
       abilities: null,
       expiresAt: null,
       organizationLocationId: null,
+      resolvedOrganization: null,
+      orgResolveStatus: 'idle',
     })
     return
   }
@@ -115,6 +119,8 @@ function applyPersistedPayload(raw: string | null) {
       abilities: parsed.abilities ?? null,
       expiresAt: parsed.expiresAt ?? null,
       organizationLocationId: parsed.organizationLocationId ?? null,
+      resolvedOrganization: null,
+      orgResolveStatus: 'idle',
     })
   } catch {
     writePersistedAuth(null)
@@ -129,6 +135,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   abilities: null,
   expiresAt: null,
   organizationLocationId: null,
+  resolvedOrganization: null,
+  orgResolveStatus: 'idle',
   hasHydrated: false,
   country: 'Kenya',
   lang: 'eng',
@@ -307,22 +315,38 @@ export async function initAuthStore() {
       writePersistedAuth(null)
     }
 
-    // Resolve tenant from browser Origin when org location is not stored yet
-    if (useAuthStore.getState().organizationLocationId == null) {
-      try {
-        const org = await resolveOrganization()
-        // Only persist when API actually resolved a location (Origin may be unknown)
-        if (org.organization_location_id != null) {
-          useAuthStore.setState({
-            organizationLocationId: org.organization_location_id,
-          })
-        }
-        if (org.location_code) {
-          setRequestContextValue('locationCode', org.location_code)
-          useAuthStore.setState({ alpha: org.location_code })
-        }
-      } catch (error) {
-        console.error('Failed to resolve organization from Origin:', error)
+    // Resolve tenant + branding from browser Origin (logo URLs expire, so always refresh)
+    try {
+      const org = await resolveOrganization()
+      useAuthStore.setState({ resolvedOrganization: org })
+      if (org.organization_location_id != null) {
+        useAuthStore.setState({
+          organizationLocationId: org.organization_location_id,
+          orgResolveStatus: 'resolved',
+        })
+      } else if (isTenantSubdomain()) {
+        useAuthStore.setState({ orgResolveStatus: 'not_found' })
+      } else {
+        useAuthStore.setState({ orgResolveStatus: 'idle' })
+      }
+      if (org.location_code) {
+        setRequestContextValue('locationCode', org.location_code)
+        useAuthStore.setState({ alpha: org.location_code })
+      }
+    } catch (error) {
+      console.error('Failed to resolve organization from Origin:', error)
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
+        useAuthStore.setState({
+          orgResolveStatus: 'not_found',
+          resolvedOrganization: null,
+        })
+      } else if (isTenantSubdomain()) {
+        useAuthStore.setState({
+          orgResolveStatus: 'failed',
+          resolvedOrganization: null,
+        })
+      } else {
+        useAuthStore.setState({ orgResolveStatus: 'idle' })
       }
     }
 
@@ -354,6 +378,9 @@ export function UseAuth(): AuthProviderState {
       abilities: s.abilities,
       expiresAt: s.expiresAt,
       organizationLocationId: s.organizationLocationId,
+      resolvedOrganization: s.resolvedOrganization,
+      orgResolveStatus: s.orgResolveStatus,
+      isOrgTenant: s.resolvedOrganization?.organization_location_id != null,
       isAuthenticated: !!s.user && !!s.token,
       isLoading: !s.hasHydrated,
       country: s.country,
