@@ -53,9 +53,9 @@ export function CreditBalanceCard({ wallet, isLoading }: CreditBalanceCardProps)
         icon={Lock}
       />
       <StatsCard
-        title="Min. threshold"
+        title="Credit floor"
         value={format(wallet.minimum_spend_threshold)}
-        description="Floor balance after spending"
+        description="You must keep at least this amount available after using credit."
         icon={TrendingDown}
       />
     </StatsGrid>

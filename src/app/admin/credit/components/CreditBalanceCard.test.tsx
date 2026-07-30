@@ -17,7 +17,12 @@ describe("CreditBalanceCard", () => {
     expect(screen.getByText("Allocated")).toBeInTheDocument()
     expect(screen.getByText("Available")).toBeInTheDocument()
     expect(screen.getByText("Pending")).toBeInTheDocument()
-    expect(screen.getByText("Min. threshold")).toBeInTheDocument()
+    expect(screen.getByText("Credit floor")).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        "You must keep at least this amount available after using credit."
+      )
+    ).toBeInTheDocument()
   })
 
   it("shows empty state when wallet is null", () => {

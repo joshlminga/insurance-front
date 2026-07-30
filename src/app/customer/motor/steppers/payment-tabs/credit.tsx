@@ -74,13 +74,18 @@ export const CreditTabPage: React.FC = () => {
                             label="Pending Credit"
                             disabled
                         />
-                        <ReuseableInput
-                            className="w-full h-10 rounded-sm border border-black/30 bg-white text-black"
-                            control={control}
-                            name="unsettled_credit_limit"
-                            label="Minimum Spend Threshold"
-                            disabled
-                        />
+                        <div className="space-y-1">
+                            <ReuseableInput
+                                className="w-full h-10 rounded-sm border border-black/30 bg-white text-black"
+                                control={control}
+                                name="unsettled_credit_limit"
+                                label="Credit floor"
+                                disabled
+                            />
+                            <small className="block text-xs text-black/60 leading-snug">
+                                You must keep at least this amount available after using credit.
+                            </small>
+                        </div>
                     </div>
 
                     <div className="mt-4 w-full rounded-lg border border-black/20 bg-white shadow-sm p-3 space-y-3">
