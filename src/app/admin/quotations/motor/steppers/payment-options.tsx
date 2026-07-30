@@ -30,6 +30,8 @@ import { extractErrorMessage } from '@/utils/helpers'
 import { cn } from '@/lib/utils'
 import { useCustomDialogContextFactory } from '@/hooks'
 import { usePesapalPaymentFlow } from '@/hooks/use-pesapal-payment-flow'
+import { submitMotorCreditPayment } from '@/app/admin/credit/credit-payment'
+import { CreditPendingBanner } from '@/app/admin/credit/components/CreditPendingBanner'
 import type { AdminMotorStepProps } from '../admin-step-props'
 import { readAdminMotorCustomerContact } from '../admin-motor-session'
 
@@ -65,6 +67,11 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
     const pendingPlanRef = React.useRef<string | null>(null);
     const isConfirmingPlanRef = React.useRef(false);
     const [purchaseId, setPurchaseId] = React.useState<string | null>(null)
+    const [creditPending, setCreditPending] = React.useState<{
+        message: string
+        creditTransactionId?: number
+    } | null>(null)
+    const [isCreditSubmitting, setIsCreditSubmitting] = React.useState(false)
 
     const {
         pollMode,
@@ -224,9 +231,43 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
         },
     })
 
-    const onSubmit = (data: PaymentFormInput) => {
+    const onSubmit = async (data: PaymentFormInput) => {
         if (usesPesapal(data)) {
             submitPesapal(data)
+            return
+        }
+
+        if (data.payment_method === 'credit') {
+            if (!purchaseSessionId) {
+                ShowToast.error('Purchase session is missing. Please refresh and try again.')
+                return
+            }
+            setCreditPending(null)
+            setIsCreditSubmitting(true)
+            try {
+                const result = await submitMotorCreditPayment(purchaseSessionId, {
+                    credit_acknowledged: data.credit_acknowledged,
+                    invoice_id: data.invoice_id,
+                })
+                if (result.kind === 'pending_approval') {
+                    setCreditPending({
+                        message: result.message,
+                        creditTransactionId: result.creditTransactionId,
+                    })
+                    ShowToast.success(result.message)
+                    return
+                }
+                if (result.kind === 'validation_error') {
+                    ShowToast.error(result.message)
+                    return
+                }
+                ShowToast.success(result.message || 'Credit payment submitted successfully')
+                goToNextStep?.()
+            } catch (error) {
+                ShowToast.error(extractErrorMessage(error))
+            } finally {
+                setIsCreditSubmitting(false)
+            }
             return
         }
 
@@ -459,6 +500,15 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
                         </div>
                     )}
 
+                    {creditPending ? (
+                        <div className="mt-4 px-1">
+                            <CreditPendingBanner
+                                message={creditPending.message}
+                                creditTransactionId={creditPending.creditTransactionId}
+                            />
+                        </div>
+                    ) : null}
+
                     <CardFooter className="mt-4 w-full flex flex-col gap-3 px-0 sm:flex-row sm:items-center sm:justify-between">
                         <Button
                             type="button"
@@ -507,10 +557,12 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
                                 ]} />
                             <Button
                                 type="submit"
-                                disabled={isPolling || isPesapalSubmitting}
+                                disabled={isPolling || isPesapalSubmitting || isCreditSubmitting}
                                 className="w-full rounded-full bg-[#BF162E]/90 hover:bg-[#BF162E] sm:w-auto"
                                 rightIcon={<ArrowRightCircle />}>
-                                {isPolling || isPesapalSubmitting ? 'Processing...' : 'Proceed To Payment'}
+                                {isPolling || isPesapalSubmitting || isCreditSubmitting
+                                    ? 'Processing...'
+                                    : 'Proceed To Payment'}
                             </Button>
                         </div>
                     </CardFooter>

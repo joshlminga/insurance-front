@@ -948,3 +948,66 @@ export const RoleCreateSchema = z.object({
 })
 
 export const RoleEditSchema = RoleCreateSchema
+
+export const PoolSettingsSchema = z.object({
+  total_available: z.coerce.number().min(0, "Pool ceiling must be 0 or more"),
+  requires_approval: z.boolean(),
+  auto_approve_threshold: z.coerce.number().min(0).optional().nullable(),
+  finance_can_override_without_payment: z.boolean(),
+  finance_role_id: z.union([z.string(), z.number()]).optional().nullable(),
+  overall_manager_role_id: z.union([z.string(), z.number()]).optional().nullable(),
+}).superRefine((data, ctx) => {
+  if (data.requires_approval && (data.auto_approve_threshold === undefined || data.auto_approve_threshold === null)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Auto-approve threshold is required when approval is enabled",
+      path: ["auto_approve_threshold"],
+    })
+  }
+})
+
+export const AllocateCreditSchema = z.object({
+  amount: z.coerce.number().positive("Amount must be greater than zero"),
+  minimum_spend_threshold: z.coerce.number().min(0, "Minimum threshold must be 0 or more"),
+})
+
+export const AdjustmentSchema = z.object({
+  user_id: z.union([z.string(), z.number()]).refine(
+    (value) => String(value).trim().length > 0,
+    "Select a user"
+  ),
+  amount: z.coerce.number().refine((val) => val !== 0, "Amount cannot be zero"),
+  type: z.enum(["refund", "write_off", "manual_charge", "correction"]),
+  reason: z.string().min(3, "Reason is required").max(500),
+})
+
+export const RejectApprovalSchema = z.object({
+  reason: z.string().min(3, "Rejection reason is required").max(500),
+})
+
+export const CreateSettlementSchema = z
+  .object({
+    payment_gateway: z.enum(["pesapal", "mpesa"]),
+    phone: z.string().optional(),
+    email: z.string().email("Enter a valid email").optional().or(z.literal("")),
+  })
+  .superRefine((data, ctx) => {
+    const phone = data.phone?.trim()
+    const email = data.email?.trim()
+
+    if (data.payment_gateway === "mpesa" && !phone) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Phone number is required for M-Pesa",
+        path: ["phone"],
+      })
+    }
+
+    if (data.payment_gateway === "pesapal" && !phone && !email) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Phone or email is required for Pesapal",
+        path: ["phone"],
+      })
+    }
+  })

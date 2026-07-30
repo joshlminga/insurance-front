@@ -29,7 +29,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   return (
     <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader className="bg-white">
+      <SidebarHeader className="">
         <AppLogo />
       </SidebarHeader>
       <SidebarContent>

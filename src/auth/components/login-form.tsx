@@ -25,8 +25,9 @@ import { Eye, EyeOff } from "lucide-react"
 
 export function LoginForm({
   className,
+  variant = 'default',
   ...props
-}: React.ComponentProps<"div">) {
+}: React.ComponentProps<"div"> & { variant?: 'default' | 'org' }) {
 
   const [show, setShow] = useState(false);
   const { setSession, setGuest } = UseAuth()
@@ -121,11 +122,14 @@ export function LoginForm({
               className="w-full h-12 bg-[#C20C0C] hover:bg-[#C20C0C]/80"
               type="submit"
               loading={loginMutation.isPending}>
-              <span className="font-semibold text-sm">Login</span>
+              <span className="font-semibold text-sm">
+                {variant === 'org' ? 'Secure Login' : 'Login'}
+              </span>
             </Button>
           </Field>
         </FieldGroup>
       </form>
+      {variant !== 'org' && (
       <FieldDescription className="text-center text-sm">
         Don&apos;t have an account?{" "}
         <Link
@@ -140,6 +144,7 @@ export function LoginForm({
           Sign Up
         </Link>
       </FieldDescription>
+      )}
     </div>
   );
 

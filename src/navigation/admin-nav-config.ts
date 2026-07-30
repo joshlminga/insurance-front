@@ -9,6 +9,7 @@ import {
   UserCog,
   ShieldCheck,
   TextQuote,
+  Coins,
 } from 'lucide-react'
 import { MODULES, PURCHASE_MOTOR_MODULES, QUOTATION_MOTOR_MODULES } from '@/auth/module-keys'
 import { EPREFIX, EROUTES } from '@/utils/enums'
@@ -164,6 +165,20 @@ export const adminNavConfig: NavItem[] = [
         url: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/tonage`,
         module: MODULES.PRODUCT_MOTOR,
       },
+    ],
+  },
+    {
+    title: 'Credit & Finance',
+    url: EROUTES.CREDIT_WALLET,
+    icon: Coins,
+    module: MODULES.FINANCE_CONTROL,
+    items: [
+      { title: 'My Wallet', url: EROUTES.CREDIT_WALLET, module: MODULES.FINANCE_CONTROL },
+      { title: 'Transactions', url: EROUTES.CREDIT_TRANSACTIONS, module: MODULES.FINANCE_CONTROL },
+      { title: 'Pending Approvals', url: EROUTES.CREDIT_APPROVALS, module: MODULES.FINANCE_CONTROL },
+      { title: 'Pool Settings', url: EROUTES.CREDIT_SETUP_POOL, module: MODULES.FINANCE_CONTROL },
+      { title: 'User Allocations', url: EROUTES.CREDIT_SETUP_USERS, module: MODULES.FINANCE_CONTROL },
+      { title: 'Adjustments', url: EROUTES.CREDIT_ADJUSTMENTS, module: MODULES.FINANCE_CONTROL },
     ],
   },
   {

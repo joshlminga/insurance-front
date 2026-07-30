@@ -7,6 +7,7 @@ import { ProtectedRoute, PublicRoute, CustomerPublicRoute } from "./hooks/hooks"
 import { AdminModulePage } from "./auth/AdminModulePage"
 import { MODULES, PURCHASE_MOTOR_MODULES, QUOTATION_MOTOR_MODULES } from "./auth/module-keys"
 import Layout from "./Layout"
+import SubdomainGuestGate from "./auth/subdomain-guest-gate"
 
 const Loader = () => (
   <div className="flex h-screen w-full items-center justify-center">
@@ -39,7 +40,7 @@ const CustomerSingleCustomerCoversPage = lazy(() => import("./app/customer/profi
 
 // Auth pages
 const AuthLayoutPage = lazy(() => import("./auth/layout"))
-const LoginForm = lazy(() => import("./auth/components/login-form").then(m => ({ default: m.LoginForm })))
+const SignInPage = lazy(() => import("./auth/components/signin-page"))
 const SignupForm = lazy(() => import("./auth/components/signup-form").then(m => ({ default: m.SignupForm })))
 const ForgotPasswordForm = lazy(() => import("./auth/components/forgot-password-form"))
 const ResetPasswordForm = lazy(() => import("./auth/components/rest-password-form").then(m => ({ default: m.ResetPasswordForm })))
@@ -73,6 +74,13 @@ const OrganizationMembersDetailPage = lazy(() => import("./app/admin/organizatio
 const GlobalRolesPage = lazy(() => import("./app/admin/system-roles/global/page"))
 const SystemRolesPage = lazy(() => import("./app/admin/system-roles/system/page"))
 const UsersPage = lazy(() => import("./app/admin/users/page").then(m => ({ default: m.UsersPage })))
+const CreditWalletPage = lazy(() => import("./app/admin/credit/wallet/page").then(m => ({ default: m.CreditWalletPage })))
+const CreditTransactionsPage = lazy(() => import("./app/admin/credit/transactions/page").then(m => ({ default: m.CreditTransactionsPage })))
+const CreditApprovalsPage = lazy(() => import("./app/admin/credit/approvals/page").then(m => ({ default: m.CreditApprovalsPage })))
+const CreditSetupPoolPage = lazy(() => import("./app/admin/credit/setup/pool/page").then(m => ({ default: m.CreditSetupPoolPage })))
+const CreditSetupUsersPage = lazy(() => import("./app/admin/credit/setup/users/page").then(m => ({ default: m.CreditSetupUsersPage })))
+const CreditSettlementDetailPage = lazy(() => import("./app/admin/credit/settlements/[id]/page").then(m => ({ default: m.CreditSettlementDetailPage })))
+const CreditAdjustmentsPage = lazy(() => import("./app/admin/credit/adjustments/page").then(m => ({ default: m.CreditAdjustmentsPage })))
 const MotorProductPage = lazy(() => import("./app/admin/product/motor/motor-product/page").then(m => ({ default: m.MotorProductPage })))
 const MotorCoverTypePage = lazy(() => import("./app/admin/product/motor/cover_types/page").then(m => ({ default: m.MotorCoverTypePage })))
 const MotorCoveringPage = lazy(() => import("./app/admin/product/motor/motor-coving/page").then(m => ({ default: m.MotorCoveringPage })))
@@ -95,6 +103,9 @@ const AdminMotorQuotationPurchasePage = lazy(() =>
 )
 
 export const router = createBrowserRouter([
+  {
+    element: <SubdomainGuestGate />,
+    children: [
 
   // Public
   {
@@ -207,11 +218,7 @@ export const router = createBrowserRouter([
         element: (
           <PublicRoute>
             <S>
-              <AuthLayoutPage
-                title="Please sign in"
-                description="to purchase your cover">
-                <LoginForm />
-              </AuthLayoutPage>
+              <SignInPage />
             </S>
           </PublicRoute>
         ),
@@ -664,6 +671,81 @@ export const router = createBrowserRouter([
           </S>
         ),
       },
+      // Credit & Finance
+      {
+        path: "credit/wallet",
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.FINANCE_CONTROL} permission="finance-control.mine">
+              <CreditWalletPage />
+            </AdminModulePage>
+          </S>
+        ),
+      },
+      {
+        path: "credit/transactions",
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.FINANCE_CONTROL}>
+              <CreditTransactionsPage />
+            </AdminModulePage>
+          </S>
+        ),
+      },
+      {
+        path: "credit/approvals",
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.FINANCE_CONTROL} permission="finance-control.approve">
+              <CreditApprovalsPage />
+            </AdminModulePage>
+          </S>
+        ),
+      },
+      {
+        path: "credit/setup",
+        element: <Navigate to={EROUTES.CREDIT_SETUP_POOL} replace />,
+      },
+      {
+        path: "credit/setup/pool",
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.FINANCE_CONTROL} permission="finance-control.update">
+              <CreditSetupPoolPage />
+            </AdminModulePage>
+          </S>
+        ),
+      },
+      {
+        path: "credit/setup/users",
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.FINANCE_CONTROL} permission="finance-control.update">
+              <CreditSetupUsersPage />
+            </AdminModulePage>
+          </S>
+        ),
+      },
+      {
+        path: "credit/settlements/:id",
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.FINANCE_CONTROL} permission="finance-control.read">
+              <CreditSettlementDetailPage />
+            </AdminModulePage>
+          </S>
+        ),
+      },
+      {
+        path: "credit/adjustments",
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.FINANCE_CONTROL} permission="finance-control.adjust">
+              <CreditAdjustmentsPage />
+            </AdminModulePage>
+          </S>
+        ),
+      },
     ],
   },
   // END-USERGENERAL = FALSE
@@ -672,5 +754,7 @@ export const router = createBrowserRouter([
   {
     path: "*",
     element: <Navigate to={EROUTES.LANDING} replace />,
+  },
+    ],
   },
 ])

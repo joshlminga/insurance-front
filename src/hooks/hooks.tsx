@@ -4,7 +4,7 @@ import axios from 'axios'
 import apiClient from '@/lib/api-client'
 import { EMETHODS } from '@/utils/constatnts'
 import { UseAuth } from '@/stores/auth-store'
-import { EROUTES } from '@/utils/enums'
+import { EROUTES, EPREFIX } from '@/utils/enums'
 import { Navigate, useLocation } from 'react-router-dom'
 import type { 
   ProtectedRouteProps, 
@@ -92,7 +92,7 @@ export function ProtectedRoute({ children, requireGeneral }: ProtectedRouteProps
   }
 
   if (!isAuthenticated) {
-    return <Navigate to={EROUTES.SIGNIN} replace />
+    return <Navigate to={`/${EPREFIX.AUTH}${EROUTES.SIGNIN}`} replace />
   }
 
   return <>{children}</>
