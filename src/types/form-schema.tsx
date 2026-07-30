@@ -289,6 +289,31 @@ const CardPaymentSchema = BasePaymentSchema.extend({
 // Pesapal specific fields
 const PesapalPaymentSchema = BasePaymentSchema.extend({
   payment_method: z.literal("pesapal"),
+  invoice_id: z.string().min(1, "Invoice is required"),
+  phone_number: z
+    .string()
+    .optional()
+    .or(z.literal(""))
+    .refine(
+      (value) => !value || /^(?:\+254|254|0)?[17]\d{8}$/.test(value),
+      "Invalid Kenyan phone number"
+    ),
+  pesapal_email: z
+    .string()
+    .email("Enter a valid email address")
+    .optional()
+    .or(z.literal("")),
+}).superRefine((data, ctx) => {
+  const hasPhone = Boolean(data.phone_number?.trim())
+  const hasEmail = Boolean(data.pesapal_email?.trim())
+
+  if (!hasPhone && !hasEmail) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Enter a phone number or email address for Pesapal checkout",
+      path: ["phone_number"],
+    })
+  }
 })
 
 const PaypalPaymentSchema = BasePaymentSchema.extend({
@@ -877,3 +902,112 @@ export const ContactUsSchema = z.object({
   subject: z.string().min(2, "Subject must be at least 2 characters").max(200, "Subject is too long"),
   message: z.string().min(5, "Message must be at least 5 characters").max(2000, "Message is too long"),
 });
+
+/**
+ * Organization member (location staff user) create/edit.
+ * Roles are kept as strings because the multi-select works with string values;
+ * they are converted to numbers right before the API call.
+ */
+export const OrganizationMemberCreateSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters").max(100, "Name is too long"),
+  email: z
+    .string()
+    .email("Invalid email address")
+    .min(2, "Email must be at least 2 characters")
+    .max(100, "Email is too long"),
+  phone: z
+    .string()
+    .min(10, "Phone number must be at least 10 digits")
+    .optional()
+    .or(z.literal("")),
+  roles: z.array(z.string()).min(1, "Select at least one role"),
+  profile_picture: z
+    .any()
+    .optional()
+    .refine(
+      (file) => !file || file instanceof File,
+      "Profile picture must be a valid file"
+    )
+    .refine(
+      (file) => !file || ACCEPTED_IMAGE_TYPES.includes(file.type),
+      "Profile picture must be jpeg, png, jpg, or webp"
+    ),
+})
+
+export const OrganizationMemberEditSchema = OrganizationMemberCreateSchema
+
+/** Organization role create/edit — authority is sent as hidden default "comp" */
+export const RoleCreateSchema = z.object({
+  name: z.string().min(2, "Role name is required").max(100),
+  description: z.string().max(500).optional().or(z.literal("")),
+  modules: z.array(z.string()).min(1, "Select at least one module"),
+  org_id: z.union([z.string(), z.number()]).refine(
+    (value) => String(value).trim().length > 0,
+    "Organization is required"
+  ),
+})
+
+export const RoleEditSchema = RoleCreateSchema
+
+export const PoolSettingsSchema = z.object({
+  total_available: z.coerce.number().min(0, "Pool ceiling must be 0 or more"),
+  requires_approval: z.boolean(),
+  auto_approve_threshold: z.coerce.number().min(0).optional().nullable(),
+  finance_can_override_without_payment: z.boolean(),
+  finance_role_id: z.union([z.string(), z.number()]).optional().nullable(),
+  overall_manager_role_id: z.union([z.string(), z.number()]).optional().nullable(),
+}).superRefine((data, ctx) => {
+  if (data.requires_approval && (data.auto_approve_threshold === undefined || data.auto_approve_threshold === null)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Auto-approve threshold is required when approval is enabled",
+      path: ["auto_approve_threshold"],
+    })
+  }
+})
+
+export const AllocateCreditSchema = z.object({
+  amount: z.coerce.number().positive("Amount must be greater than zero"),
+  minimum_spend_threshold: z.coerce.number().min(0, "Minimum threshold must be 0 or more"),
+})
+
+export const AdjustmentSchema = z.object({
+  user_id: z.union([z.string(), z.number()]).refine(
+    (value) => String(value).trim().length > 0,
+    "Select a user"
+  ),
+  amount: z.coerce.number().refine((val) => val !== 0, "Amount cannot be zero"),
+  type: z.enum(["refund", "write_off", "manual_charge", "correction"]),
+  reason: z.string().min(3, "Reason is required").max(500),
+})
+
+export const RejectApprovalSchema = z.object({
+  reason: z.string().min(3, "Rejection reason is required").max(500),
+})
+
+export const CreateSettlementSchema = z
+  .object({
+    payment_gateway: z.enum(["pesapal", "mpesa"]),
+    phone: z.string().optional(),
+    email: z.string().email("Enter a valid email").optional().or(z.literal("")),
+  })
+  .superRefine((data, ctx) => {
+    const phone = data.phone?.trim()
+    const email = data.email?.trim()
+
+    if (data.payment_gateway === "mpesa" && !phone) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Phone number is required for M-Pesa",
+        path: ["phone"],
+      })
+    }
+
+    if (data.payment_gateway === "pesapal" && !phone && !email) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Phone or email is required for Pesapal",
+        path: ["phone"],
+      })
+    }
+  })

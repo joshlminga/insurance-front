@@ -18,17 +18,19 @@ import { type LoginFormValues } from "@/types/schema"
 import { UseApiMutation } from "@/hooks/hooks"
 import { ShowToast } from "@/utils/utils"
 import type { LoginResponse } from "@/types/types"
+import { normalizeLoginResponse } from '@/auth/session'
 import { extractErrorMessage } from "@/utils/helpers"
 import { useState } from "react"
 import { Eye, EyeOff } from "lucide-react"
 
 export function LoginForm({
   className,
+  variant = 'default',
   ...props
-}: React.ComponentProps<"div">) {
+}: React.ComponentProps<"div"> & { variant?: 'default' | 'org' }) {
 
   const [show, setShow] = useState(false);
-  const { login, setGuest } = UseAuth()
+  const { setSession, setGuest } = UseAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const returnTo = (location.state as any)?.returnTo
@@ -51,7 +53,7 @@ export function LoginForm({
           return;
         }
         ShowToast.success(data.message || "Login successful!")
-        login(data.user, data.access_token, data.is_general)
+        setSession(normalizeLoginResponse(data))
         if (returnTo) {
           navigate(returnTo)
         } else if (data.is_general) {
@@ -120,11 +122,14 @@ export function LoginForm({
               className="w-full h-12 bg-[#C20C0C] hover:bg-[#C20C0C]/80"
               type="submit"
               loading={loginMutation.isPending}>
-              <span className="font-semibold text-sm">Login</span>
+              <span className="font-semibold text-sm">
+                {variant === 'org' ? 'Secure Login' : 'Login'}
+              </span>
             </Button>
           </Field>
         </FieldGroup>
       </form>
+      {variant !== 'org' && (
       <FieldDescription className="text-center text-sm">
         Don&apos;t have an account?{" "}
         <Link
@@ -139,6 +144,7 @@ export function LoginForm({
           Sign Up
         </Link>
       </FieldDescription>
+      )}
     </div>
   );
 

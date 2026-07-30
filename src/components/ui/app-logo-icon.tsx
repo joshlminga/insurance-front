@@ -10,7 +10,7 @@ export default function AppLogoIcon({ className = '' }: HTMLAttributes<HTMLImage
     } catch (e) {
         console.log(e);
     }
-    const src = state === 'collapsed' ? '/logo/logo3.png' : '/logo/logo1.png';
+    const src = state === 'collapsed' ? '/logo/logo3.png' : '/logo/logo.png';
 
     return (
         <img

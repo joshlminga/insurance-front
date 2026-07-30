@@ -1,4 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
+import { QUOTATION_MOTOR_MODULES } from '@/auth/module-keys'
+import { useCan } from '@/auth/useCan'
 import { PageHeader } from '@/components/shared'
 import {
     AlertDialog,
@@ -244,6 +246,10 @@ function AnimatedSection({ show, children, className }: AnimatedSectionProps) {
 export const MotorQuotationPage = () => {
     const navigate = useNavigate()
     const { user } = UseAuth()
+    const { canModuleAction } = useCan()
+    const canMotorOverride = QUOTATION_MOTOR_MODULES.some((module) =>
+        canModuleAction(module, 'override')
+    )
     const [selectedTabValue, setSelectedTabValue] = useState<string>('')
     const [adminOrganizationOverride, setAdminOrganizationOverride] = useState(false)
     const [showSelfCoverSubmitWarning, setShowSelfCoverSubmitWarning] = useState(false)
@@ -354,6 +360,8 @@ export const MotorQuotationPage = () => {
     const canLoadOrganizations = Boolean(effectiveCountryId)
     const hasSelectedClass = Boolean(selectedTabValue)
     const isClassTabsLoading = isVehicleClassesLoading
+    const effectiveAdminOrganizationOverride =
+        canMotorOverride && adminOrganizationOverride
 
     const handleClassChange = (value: string) => {
         setSelectedTabValue(value)
@@ -506,7 +514,7 @@ export const MotorQuotationPage = () => {
                                         <OrganizationLocationInput
                                             variant="onBehalf"
                                             countryId={effectiveCountryId}
-                                            override={adminOrganizationOverride}
+                                            override={effectiveAdminOrganizationOverride}
                                             value={field.value}
                                             onChange={field.onChange}
                                             label="On behalf of"
@@ -526,41 +534,45 @@ export const MotorQuotationPage = () => {
                                 />
                             </div>
 
-                            <div className="flex items-start gap-2">
-                                <Checkbox
-                                    id="admin-organization-override"
-                                    checked={adminOrganizationOverride}
-                                    onCheckedChange={(checked) =>
-                                        setAdminOrganizationOverride(Boolean(checked))
-                                    }
-                                    disabled={!canLoadOrganizations}
-                                    className="w-3.75 h-3.75 rounded-[3px] border border-[#D9D9D9] data-[state=checked]:bg-[#C20C0C] data-[state=checked]:border-[#C20C0C]"
-                                />
-                                <label
-                                    htmlFor="admin-organization-override"
-                                    className={cn(
-                                        motorCheckboxLabelClassName,
-                                        !canLoadOrganizations &&
-                                        'cursor-not-allowed opacity-70'
-                                    )} >
-                                    <span className={motorCheckboxLabelAccentClassName}>
-                                        Admin Override
-                                    </span>{' '}
-                                    (On behalf of): Pull all organizations in{' '}
-                                    <span className={motorCheckboxLabelAccentClassName}>
-                                        {selectedCountryName}
-                                    </span>
-                                </label>
-                            </div>
+                            {canMotorOverride && (
+                                <div className="flex items-start gap-2">
+                                    <Checkbox
+                                        id="admin-organization-override"
+                                        checked={adminOrganizationOverride}
+                                        onCheckedChange={(checked) =>
+                                            setAdminOrganizationOverride(Boolean(checked))
+                                        }
+                                        disabled={!canLoadOrganizations}
+                                        className="w-3.75 h-3.75 rounded-[3px] border border-[#D9D9D9] data-[state=checked]:bg-[#C20C0C] data-[state=checked]:border-[#C20C0C]"
+                                    />
+                                    <label
+                                        htmlFor="admin-organization-override"
+                                        className={cn(
+                                            motorCheckboxLabelClassName,
+                                            !canLoadOrganizations &&
+                                            'cursor-not-allowed opacity-70'
+                                        )} >
+                                        <span className={motorCheckboxLabelAccentClassName}>
+                                            Admin Override
+                                        </span>{' '}
+                                        (On behalf of): Pull all organizations in{' '}
+                                        <span className={motorCheckboxLabelAccentClassName}>
+                                            {selectedCountryName}
+                                        </span>
+                                    </label>
+                                </div>
+                            )}
 
-                            <div className="rounded-2xl border border-[#ADABAB]/35 p-3 sm:p-5">
-                                <p className="text-xs font-semibold text-[#C20C0C]">Office Use:</p>
-                                <p className="mt-1 text-xs text-muted-foreground">
-                                    If the on-behalf organization is not in the list, enable admin
-                                    override. Your Agency is always limited to your Agent and
-                                    Organization locations.
-                                </p>
-                            </div>
+                            {canMotorOverride && (
+                                <div className="rounded-2xl border border-[#ADABAB]/35 p-3 sm:p-5">
+                                    <p className="text-xs font-semibold text-[#C20C0C]">Office Use:</p>
+                                    <p className="mt-1 text-xs text-muted-foreground">
+                                        If the on-behalf organization is not in the list, enable admin
+                                        override. Your Agency is always limited to your Agent and
+                                        Organization locations.
+                                    </p>
+                                </div>
+                            )}
                         </div>
                     </div>
 

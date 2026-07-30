@@ -4,7 +4,10 @@ import { lazy, Suspense } from "react"
 import { createBrowserRouter, Navigate } from "react-router-dom"
 import { EPREFIX, EROUTES } from "./utils/enums"
 import { ProtectedRoute, PublicRoute, CustomerPublicRoute } from "./hooks/hooks"
+import { AdminModulePage } from "./auth/AdminModulePage"
+import { MODULES, PURCHASE_MOTOR_MODULES, QUOTATION_MOTOR_MODULES } from "./auth/module-keys"
 import Layout from "./Layout"
+import SubdomainGuestGate from "./auth/subdomain-guest-gate"
 
 const Loader = () => (
   <div className="flex h-screen w-full items-center justify-center">
@@ -26,6 +29,7 @@ const MotorLandingPage = lazy(() => import("./app/customer/motor/page").then(m =
 const StepPage = lazy(() => import("./app/customer/motor/steppers/steppage").then(m => ({ default: m.StepPage })))
 const MarineLandingPage = lazy(() => import("./app/customer/marine/page").then(m => ({ default: m.MarineLandingPage })))
 const MarineStepPage = lazy(() => import("./app/customer/marine/steppers/steppage").then(m => ({ default: m.MarineStepPage })))
+const PesapalReturnPage = lazy(() => import("./app/customer/payment/pesapal/return/page").then(m => ({ default: m.PesapalReturnPage })))
 const CustomerProfileLayout = lazy(() => import("./app/customer/profile-settings/layout").then(m => ({ default: m.CustomerProfileLayout })))
 const AccountSettingsPage = lazy(() => import("./app/customer/profile-settings/settings").then(m => ({ default: m.AccountSettingsPage })))
 const CustomerClaimsPage = lazy(() => import("./app/customer/profile-settings/claims").then(m => ({ default: m.CustomerClaimsPage })))
@@ -36,7 +40,7 @@ const CustomerSingleCustomerCoversPage = lazy(() => import("./app/customer/profi
 
 // Auth pages
 const AuthLayoutPage = lazy(() => import("./auth/layout"))
-const LoginForm = lazy(() => import("./auth/components/login-form").then(m => ({ default: m.LoginForm })))
+const SignInPage = lazy(() => import("./auth/components/signin-page"))
 const SignupForm = lazy(() => import("./auth/components/signup-form").then(m => ({ default: m.SignupForm })))
 const ForgotPasswordForm = lazy(() => import("./auth/components/forgot-password-form"))
 const ResetPasswordForm = lazy(() => import("./auth/components/rest-password-form").then(m => ({ default: m.ResetPasswordForm })))
@@ -63,7 +67,20 @@ const StaffDetailPage = lazy(() => import("./app/staff/[id]/page"))
 const SettingsPage = lazy(() => import("./app/settings/page"))
 const OrganizationsPage = lazy(() => import("./app/admin/organizations/page"))
 const OrganizationLocationsPage = lazy(() => import("./app/admin/organization-location/page"))
+const OrganizationRolesPage = lazy(() => import("./app/admin/organization-roles/page"))
+const OrganizationRolesDetailPage = lazy(() => import("./app/admin/organization-roles/[orgLocationId]/page"))
+const OrganizationMembersPage = lazy(() => import("./app/admin/organization-members/page"))
+const OrganizationMembersDetailPage = lazy(() => import("./app/admin/organization-members/[orgLocationId]/page"))
+const GlobalRolesPage = lazy(() => import("./app/admin/system-roles/global/page"))
+const SystemRolesPage = lazy(() => import("./app/admin/system-roles/system/page"))
 const UsersPage = lazy(() => import("./app/admin/users/page").then(m => ({ default: m.UsersPage })))
+const CreditWalletPage = lazy(() => import("./app/admin/credit/wallet/page").then(m => ({ default: m.CreditWalletPage })))
+const CreditTransactionsPage = lazy(() => import("./app/admin/credit/transactions/page").then(m => ({ default: m.CreditTransactionsPage })))
+const CreditApprovalsPage = lazy(() => import("./app/admin/credit/approvals/page").then(m => ({ default: m.CreditApprovalsPage })))
+const CreditSetupPoolPage = lazy(() => import("./app/admin/credit/setup/pool/page").then(m => ({ default: m.CreditSetupPoolPage })))
+const CreditSetupUsersPage = lazy(() => import("./app/admin/credit/setup/users/page").then(m => ({ default: m.CreditSetupUsersPage })))
+const CreditSettlementDetailPage = lazy(() => import("./app/admin/credit/settlements/[id]/page").then(m => ({ default: m.CreditSettlementDetailPage })))
+const CreditAdjustmentsPage = lazy(() => import("./app/admin/credit/adjustments/page").then(m => ({ default: m.CreditAdjustmentsPage })))
 const MotorProductPage = lazy(() => import("./app/admin/product/motor/motor-product/page").then(m => ({ default: m.MotorProductPage })))
 const MotorCoverTypePage = lazy(() => import("./app/admin/product/motor/cover_types/page").then(m => ({ default: m.MotorCoverTypePage })))
 const MotorCoveringPage = lazy(() => import("./app/admin/product/motor/motor-coving/page").then(m => ({ default: m.MotorCoveringPage })))
@@ -86,6 +103,9 @@ const AdminMotorQuotationPurchasePage = lazy(() =>
 )
 
 export const router = createBrowserRouter([
+  {
+    element: <SubdomainGuestGate />,
+    children: [
 
   // Public
   {
@@ -178,6 +198,15 @@ export const router = createBrowserRouter([
     ],
   },
 
+  {
+    path: EROUTES.PESAPAL_RETURN,
+    element: (
+      <CustomerPublicRoute>
+        <S><PesapalReturnPage /></S>
+      </CustomerPublicRoute>
+    ),
+  },
+
   // END-USERGENERAL = TRUE
 
   // Auth
@@ -189,11 +218,7 @@ export const router = createBrowserRouter([
         element: (
           <PublicRoute>
             <S>
-              <AuthLayoutPage
-                title="Please sign in"
-                description="to purchase your cover">
-                <LoginForm />
-              </AuthLayoutPage>
+              <SignInPage />
             </S>
           </PublicRoute>
         ),
@@ -204,7 +229,7 @@ export const router = createBrowserRouter([
           <PublicRoute>
             <S>
               <AuthLayoutPage
-                title="Please or register"
+                title="Please sign up"
                 description="to purchase your cover">
                 <SignupForm />
               </AuthLayoutPage>
@@ -270,144 +295,456 @@ export const router = createBrowserRouter([
         index: true,
         element: <S><DashboardPage /></S>,
       },
-      // Members
+      // Members / Policyholders
       {
         path: "members",
-        element: <S><MembersPage /></S>,
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.POLICY}>
+              <MembersPage />
+            </AdminModulePage>
+          </S>
+        ),
       },
       {
         path: "members/new",
-        element: <S><MemberNewPage /></S>,
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.POLICY}>
+              <MemberNewPage />
+            </AdminModulePage>
+          </S>
+        ),
       },
       {
         path: "members/:id",
-        element: <S><MemberDetailPage /></S>,
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.POLICY}>
+              <MemberDetailPage />
+            </AdminModulePage>
+          </S>
+        ),
       },
-      // Savings
+      // Savings / Premiums & Claims
       {
         path: "savings",
-        element: <S><SavingsPage /></S>,
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.ACCOUNT}>
+              <SavingsPage />
+            </AdminModulePage>
+          </S>
+        ),
       },
       {
         path: "savings/products",
-        element: <S><SavingsProductsPage /></S>,
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.ACCOUNT}>
+              <SavingsProductsPage />
+            </AdminModulePage>
+          </S>
+        ),
       },
       {
         path: "savings/:id",
-        element: <S><SavingAccensureuntDetailPage /></S>,
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.ACCOUNT}>
+              <SavingAccensureuntDetailPage />
+            </AdminModulePage>
+          </S>
+        ),
       },
-      // Loans
+      // Loans / Policies
       {
         path: "loans",
-        element: <S><LoansPage /></S>,
+        element: (
+          <S>
+            <AdminModulePage modules={[...PURCHASE_MOTOR_MODULES]}>
+              <LoansPage />
+            </AdminModulePage>
+          </S>
+        ),
       },
       {
         path: "loans/apply",
-        element: <S><LoanApplicationPage /></S>,
+        element: (
+          <S>
+            <AdminModulePage modules={[...PURCHASE_MOTOR_MODULES]}>
+              <LoanApplicationPage />
+            </AdminModulePage>
+          </S>
+        ),
       },
       {
         path: "loans/products",
-        element: <S><LoanProductsPage /></S>,
+        element: (
+          <S>
+            <AdminModulePage modules={[...PURCHASE_MOTOR_MODULES]}>
+              <LoanProductsPage />
+            </AdminModulePage>
+          </S>
+        ),
       },
       {
         path: "loans/:id",
-        element: <S><LoanDetailPage /></S>,
+        element: (
+          <S>
+            <AdminModulePage modules={[...PURCHASE_MOTOR_MODULES]}>
+              <LoanDetailPage />
+            </AdminModulePage>
+          </S>
+        ),
       },
-      // Transactions
+      // Transactions / Payments
       {
         path: "transactions",
-        element: <S><TransactionsPage /></S>,
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.ACCOUNT}>
+              <TransactionsPage />
+            </AdminModulePage>
+          </S>
+        ),
       },
-      // Reports
+      // Reports / Insights
       {
         path: "reports",
-        element: <S><ReportsPage /></S>,
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.RBAC}>
+              <ReportsPage />
+            </AdminModulePage>
+          </S>
+        ),
       },
-      // Staff
+      // Staff / Agents
       {
         path: "staff",
-        element: <S><StaffPage /></S>,
-      },
-      {
-        path: "staff",
-        element: <S><StaffPage /></S>,
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.ROLE}>
+              <StaffPage />
+            </AdminModulePage>
+          </S>
+        ),
       },
       {
         path: "staff/:id",
-        element: <S><StaffDetailPage /></S>,
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.ROLE}>
+              <StaffDetailPage />
+            </AdminModulePage>
+          </S>
+        ),
       },
 
-      // quotations
-      // motor
+      // quotations — motor
       {
         path: "quotations/motor-quotations",
-        element: <S><MotorQuotationPage /></S>,
+        element: (
+          <S>
+            <AdminModulePage modules={[...QUOTATION_MOTOR_MODULES]}>
+              <MotorQuotationPage />
+            </AdminModulePage>
+          </S>
+        ),
       },
       {
         path: "quotations/motor-quotations/results",
-        element: <S><AdminMotorQuotationResultsPage /></S>,
+        element: (
+          <S>
+            <AdminModulePage modules={[...QUOTATION_MOTOR_MODULES]}>
+              <AdminMotorQuotationResultsPage />
+            </AdminModulePage>
+          </S>
+        ),
       },
       {
         path: "quotations/motor-quotations/purchase",
-        element: <S><AdminMotorQuotationPurchasePage /></S>,
+        element: (
+          <S>
+            <AdminModulePage modules={[...QUOTATION_MOTOR_MODULES]}>
+              <AdminMotorQuotationPurchasePage />
+            </AdminModulePage>
+          </S>
+        ),
       },
-      // products
-      // motor
+      // products — motor
       {
         path: "products/motor",
-        element: <S><MotorProductPage /></S>,
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.PRODUCT_MOTOR}>
+              <MotorProductPage />
+            </AdminModulePage>
+          </S>
+        ),
       },
       {
         path: "products/motor-rates/:slung",
-        element: <S><MotorProductRatesPage /></S>,
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.PRODUCT_MOTOR}>
+              <MotorProductRatesPage />
+            </AdminModulePage>
+          </S>
+        ),
       },
       {
         path: "products/motor/cover-types",
-        element: <S><MotorCoverTypePage /></S>,
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.PRODUCT_MOTOR}>
+              <MotorCoverTypePage />
+            </AdminModulePage>
+          </S>
+        ),
       },
       {
         path: "products/motor/covering",
-        element: <S><MotorCoveringPage /></S>,
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.PRODUCT_MOTOR}>
+              <MotorCoveringPage />
+            </AdminModulePage>
+          </S>
+        ),
       },
       {
         path: "products/motor/vehicle-classes",
-        element: <S><VehicleClassesPage /></S>,
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.PRODUCT_MOTOR}>
+              <VehicleClassesPage />
+            </AdminModulePage>
+          </S>
+        ),
       },
       {
         path: "products/motor/vehicle-use",
-        element: <S><VehicleUsePage /></S>,
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.PRODUCT_MOTOR}>
+              <VehicleUsePage />
+            </AdminModulePage>
+          </S>
+        ),
       },
       {
         path: "products/motor/add-on-benefits",
-        element: <S><MotorAddonBenefitsPage /></S>,
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.PRODUCT_MOTOR}>
+              <MotorAddonBenefitsPage />
+            </AdminModulePage>
+          </S>
+        ),
       },
       {
         path: "products/motor/detailed-benefits",
-        element: <S><MotorDetailedBenefitPage /></S>,
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.PRODUCT_MOTOR}>
+              <MotorDetailedBenefitPage />
+            </AdminModulePage>
+          </S>
+        ),
       },
       {
         path: "products/motor/tonage",
-        element: <S><MotorTonangePage /></S>,
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.PRODUCT_MOTOR}>
+              <MotorTonangePage />
+            </AdminModulePage>
+          </S>
+        ),
       },
 
       // Organizations
       {
         path: "organization",
-        element: <S><OrganizationsPage /></S>,
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.ORGANIZATION}>
+              <OrganizationsPage />
+            </AdminModulePage>
+          </S>
+        ),
       },
       {
         path: "organization-location",
-        element: <S><OrganizationLocationsPage /></S>,
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.ORGANIZATION_LOCATION}>
+              <OrganizationLocationsPage />
+            </AdminModulePage>
+          </S>
+        ),
+      },
+      // Organization Roles
+      {
+        path: "organization-roles",
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.ROLE}>
+              <OrganizationRolesPage />
+            </AdminModulePage>
+          </S>
+        ),
+      },
+      {
+        path: "organization-roles/:orgLocationId",
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.ROLE}>
+              <OrganizationRolesDetailPage />
+            </AdminModulePage>
+          </S>
+        ),
+      },
+      // Organization Members (location staff users)
+      {
+        path: "organization-members",
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.ORGANIZATION_LOCATION_USER}>
+              <OrganizationMembersPage />
+            </AdminModulePage>
+          </S>
+        ),
+      },
+      {
+        path: "organization-members/:orgLocationId",
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.ORGANIZATION_LOCATION_USER}>
+              <OrganizationMembersDetailPage />
+            </AdminModulePage>
+          </S>
+        ),
+      },
+      // Global / System roles (RBAC admin)
+      {
+        path: "global-roles",
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.RBAC}>
+              <GlobalRolesPage />
+            </AdminModulePage>
+          </S>
+        ),
+      },
+      {
+        path: "system-roles",
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.RBAC}>
+              <SystemRolesPage />
+            </AdminModulePage>
+          </S>
+        ),
       },
       // Users
       {
         path: "users",
-        element: <S><UsersPage /></S>,
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.USER}>
+              <UsersPage />
+            </AdminModulePage>
+          </S>
+        ),
       },
       // Settings
       {
         path: "settings",
-        element: <S><SettingsPage /></S>,
+        element: (
+          <S>
+            <AdminModulePage modules={[MODULES.SETTINGS_RBAC, MODULES.RBAC]}>
+              <SettingsPage />
+            </AdminModulePage>
+          </S>
+        ),
+      },
+      // Credit & Finance
+      {
+        path: "credit/wallet",
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.FINANCE_CONTROL} permission="finance-control.mine">
+              <CreditWalletPage />
+            </AdminModulePage>
+          </S>
+        ),
+      },
+      {
+        path: "credit/transactions",
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.FINANCE_CONTROL}>
+              <CreditTransactionsPage />
+            </AdminModulePage>
+          </S>
+        ),
+      },
+      {
+        path: "credit/approvals",
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.FINANCE_CONTROL} permission="finance-control.approve">
+              <CreditApprovalsPage />
+            </AdminModulePage>
+          </S>
+        ),
+      },
+      {
+        path: "credit/setup",
+        element: <Navigate to={EROUTES.CREDIT_SETUP_POOL} replace />,
+      },
+      {
+        path: "credit/setup/pool",
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.FINANCE_CONTROL} permission="finance-control.update">
+              <CreditSetupPoolPage />
+            </AdminModulePage>
+          </S>
+        ),
+      },
+      {
+        path: "credit/setup/users",
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.FINANCE_CONTROL} permission="finance-control.update">
+              <CreditSetupUsersPage />
+            </AdminModulePage>
+          </S>
+        ),
+      },
+      {
+        path: "credit/settlements/:id",
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.FINANCE_CONTROL} permission="finance-control.read">
+              <CreditSettlementDetailPage />
+            </AdminModulePage>
+          </S>
+        ),
+      },
+      {
+        path: "credit/adjustments",
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.FINANCE_CONTROL} permission="finance-control.adjust">
+              <CreditAdjustmentsPage />
+            </AdminModulePage>
+          </S>
+        ),
       },
     ],
   },
@@ -417,5 +754,7 @@ export const router = createBrowserRouter([
   {
     path: "*",
     element: <Navigate to={EROUTES.LANDING} replace />,
+  },
+    ],
   },
 ])

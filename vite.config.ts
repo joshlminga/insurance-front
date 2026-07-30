@@ -10,4 +10,19 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  test: {
+    environment: "jsdom",
+    setupFiles: "./src/test/setup.ts",
+    globals: true,
+  },
+  server: {
+    host: '0.0.0.0',
+    port: 5174,
+    strictPort: false,
+    allowedHosts: [
+      'acensure.test',
+      'acentria.acensure.test',
+      'lolc-kenya.acensure.test',
+    ]
+  }
 })

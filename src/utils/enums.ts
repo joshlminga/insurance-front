@@ -26,6 +26,7 @@ export const EROUTES = {
   MOTOR: '/motor',
   TRAVEL: '/travel',
   MARINE: '/marine',
+  PESAPAL_RETURN: '/customer/payment/pesapal/return',
   LIFE: '/life',
   PROFILE: '/profile',
   ACCOUNTSETTINGS: '/profile/account-settings',
@@ -62,6 +63,16 @@ export const EROUTES = {
   // Transactions
   TRANSACTIONS: `/${EPREFIX.DASHBOARD}/transactions`,
 
+  // Credit & Finance
+  CREDIT_WALLET: `/${EPREFIX.DASHBOARD}/credit/wallet`,
+  CREDIT_TRANSACTIONS: `/${EPREFIX.DASHBOARD}/credit/transactions`,
+  CREDIT_APPROVALS: `/${EPREFIX.DASHBOARD}/credit/approvals`,
+  CREDIT_SETUP: `/${EPREFIX.DASHBOARD}/credit/setup`,
+  CREDIT_SETUP_POOL: `/${EPREFIX.DASHBOARD}/credit/setup/pool`,
+  CREDIT_SETUP_USERS: `/${EPREFIX.DASHBOARD}/credit/setup/users`,
+  CREDIT_SETTLEMENT: `/${EPREFIX.DASHBOARD}/credit/settlements/:id`,
+  CREDIT_ADJUSTMENTS: `/${EPREFIX.DASHBOARD}/credit/adjustments`,
+
   // Reports
   REPORTS: `/${EPREFIX.DASHBOARD}/reports`,
 
@@ -90,6 +101,12 @@ export const EROUTES = {
 
   ORGANIZATION: `/${EPREFIX.DASHBOARD}/organization`,
   ORGANIZATION_LOCATION: `/${EPREFIX.DASHBOARD}/organization-location`,
+  ORGANIZATION_ROLES: `/${EPREFIX.DASHBOARD}/organization-roles`,
+  ORGANIZATION_ROLES_DETAIL: `/${EPREFIX.DASHBOARD}/organization-roles/:orgLocationId`,
+  ORGANIZATION_MEMBERS: `/${EPREFIX.DASHBOARD}/organization-members`,
+  ORGANIZATION_MEMBERS_DETAIL: `/${EPREFIX.DASHBOARD}/organization-members/:orgLocationId`,
+  GLOBAL_ROLES: `/${EPREFIX.DASHBOARD}/global-roles`,
+  SYSTEM_ROLES: `/${EPREFIX.DASHBOARD}/system-roles`,
   USERS: `/${EPREFIX.DASHBOARD}/users`,
 
   ERROR404: `/${EPREFIX.ERRORS}/errors404`

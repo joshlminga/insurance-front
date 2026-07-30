@@ -1,4 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import {
+    getMemberRoleLabel,
+    getMemberRoles,
+} from "@/app/admin/organization-members/member-utils";
 import { Badge } from "@/components/ui/badge";
 import { ColumnDef } from "@tanstack/table-core";
 
@@ -145,4 +149,35 @@ export const LocationUsersColumns: ColumnDef<any>[] = [
             );
         },
     },
+];
+
+/** Organization Members table — LocationUsersColumns plus a Roles column from the list API */
+export const OrganizationMembersColumns: ColumnDef<any>[] = [
+    ...LocationUsersColumns.slice(0, 3),
+    {
+        id: "roles",
+        header: () => <div>Roles</div>,
+        cell: ({ row }) => {
+            const roles = getMemberRoles(row.original);
+
+            if (roles.length === 0) {
+                return <span className="text-sm text-muted-foreground">—</span>;
+            }
+
+            return (
+                <div className="flex flex-wrap gap-1">
+                    {roles.map((role: any, index: number) => (
+                        <Badge
+                            key={`${role?.role_id ?? role?.name ?? index}-${index}`}
+                            variant="outline"
+                            className="rounded-full border-transparent bg-slate-100 text-xs font-medium text-slate-800"
+                        >
+                            {getMemberRoleLabel(role)}
+                        </Badge>
+                    ))}
+                </div>
+            );
+        },
+    },
+    ...LocationUsersColumns.slice(3),
 ];

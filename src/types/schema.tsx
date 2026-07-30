@@ -36,7 +36,16 @@ import {
     ResetPasswordSchema,
     SendViaEmailSchema,
     SendMessageSchema,
-    ContactUsSchema
+    ContactUsSchema,
+    RoleCreateSchema,
+    RoleEditSchema,
+    OrganizationMemberCreateSchema,
+    OrganizationMemberEditSchema,
+    PoolSettingsSchema,
+    AllocateCreditSchema,
+    AdjustmentSchema,
+    RejectApprovalSchema,
+    CreateSettlementSchema,
 } from "./form-schema";
 
 export type CustomerFormValues = z.infer<typeof CustomerDetailsSchema>
@@ -65,6 +74,7 @@ export type PaymentFormInput = {
   amount?: number
   mpesa_transaction_code?: string
   card_provider?: "paystack" | "pesapal" | "dpo"
+  pesapal_email?: string
   paypal_email?: string
   available_credit?: string
   unsettled_credit?: string
@@ -101,3 +111,12 @@ export type SendMessageValues = z.infer<typeof SendMessageSchema>
 
 
 export type SendContactUsMessageValues = z.infer<typeof ContactUsSchema>
+export type RoleCreateFormValues = z.infer<typeof RoleCreateSchema>
+export type RoleEditFormValues = z.infer<typeof RoleEditSchema>
+export type OrganizationMemberCreateFormValues = z.infer<typeof OrganizationMemberCreateSchema>
+export type OrganizationMemberEditFormValues = z.infer<typeof OrganizationMemberEditSchema>
+export type PoolSettingsFormValues = z.infer<typeof PoolSettingsSchema>
+export type AllocateCreditFormValues = z.infer<typeof AllocateCreditSchema>
+export type AdjustmentFormValues = z.infer<typeof AdjustmentSchema>
+export type RejectApprovalFormValues = z.infer<typeof RejectApprovalSchema>
+export type CreateSettlementFormValues = z.infer<typeof CreateSettlementSchema>
