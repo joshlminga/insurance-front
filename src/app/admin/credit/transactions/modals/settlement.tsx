@@ -1,21 +1,28 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button, ReuseableInput } from "@/dev/core"
 import { CREDIT_URLS } from "@/app/admin/credit/credit-query"
-import { CreditAmount } from "@/app/admin/credit/components/CreditAmount"
+import { getCreditOutstanding } from "@/dev/columns/admin/credit/transactions"
 import { UseApiMutation } from "@/hooks/hooks"
 import { CreateSettlementSchema } from "@/types/form-schema"
 import type { CreateSettlementFormValues } from "@/types/schema"
-import type { CreditTransaction, SubmitResponse } from "@/types/types"
+import type {
+  CreditSettlement,
+  CreditSettlementPayment,
+  CreditTransaction,
+  SubmitResponse,
+} from "@/types/types"
 import { EMETHODS } from "@/utils/constatnts"
 import { extractErrorMessage } from "@/utils/helpers"
 import { ShowToast } from "@/utils/utils"
+import { storePesapalCheckoutSession } from "@/utils/pesapal-payment"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm, Controller } from "react-hook-form"
 import { useNavigate } from "react-router-dom"
-import { parseMoneyString } from "@/lib/format"
 import { formatCurrency } from "@/lib/format"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Input } from "@/components/ui/input"
+import { useMemo, useState } from "react"
 
 type SettlementModalProps = {
   handleDialogContextSwitch: (context?: any) => void
@@ -25,6 +32,13 @@ type SettlementModalProps = {
   }
 }
 
+type CreateSettlementPayload = {
+  items: Array<{ credit_transaction_id: number; amount: number }>
+  payment_gateway: string
+  phone?: string
+  email?: string
+}
+
 export default function SettlementModal({
   handleDialogContextSwitch,
   componentProps,
@@ -32,8 +46,19 @@ export default function SettlementModal({
   const navigate = useNavigate()
   const selectedTransactions = componentProps?.selectedTransactions ?? []
 
+  // Editable per-item amounts — default to outstanding (partial settle supported)
+  const defaultAmounts = useMemo(() => {
+    const map: Record<number, number> = {}
+    selectedTransactions.forEach((txn) => {
+      map[txn.id] = getCreditOutstanding(txn)
+    })
+    return map
+  }, [selectedTransactions])
+
+  const [itemAmounts, setItemAmounts] = useState<Record<number, number>>(defaultAmounts)
+
   const total = selectedTransactions.reduce(
-    (sum, txn) => sum + parseMoneyString(txn.amount_used),
+    (sum, txn) => sum + (itemAmounts[txn.id] ?? getCreditOutstanding(txn)),
     0
   )
 
@@ -41,26 +66,45 @@ export default function SettlementModal({
     resolver: zodResolver(CreateSettlementSchema),
     defaultValues: {
       payment_gateway: "mpesa",
-      phone_number: "",
+      phone: "",
+      email: "",
     },
   })
 
   const paymentGateway = form.watch("payment_gateway")
 
-  const submitMutation = UseApiMutation<
-    SubmitResponse,
-    { credit_transaction_ids: number[]; payment_gateway: string; phone_number?: string }
-  >({
+  const submitMutation = UseApiMutation<SubmitResponse, CreateSettlementPayload>({
     url: CREDIT_URLS.settlements,
     method: EMETHODS.POST,
     mutationOptions: {
       onSuccess: (response) => {
+        const settlement = (response?.data?.settlement ?? response?.data) as
+          | CreditSettlement
+          | undefined
+        const payment = (response?.data?.payment ?? {}) as CreditSettlementPayment
+        const settlementId = settlement?.id
+
         ShowToast.success(response?.message || "Settlement created")
         componentProps?.refetch?.()
         handleDialogContextSwitch({ refetch: true })
 
-        const settlement = response?.data?.settlement ?? response?.data
-        const settlementId = settlement?.id
+        const redirectUrl = payment.redirect_url
+        const orderTrackingId = payment.order_tracking_id
+        const checkoutRequestId = payment.checkout_request_id
+
+        // Pesapal: redirect to gateway, return to settlement detail to poll
+        if (redirectUrl && orderTrackingId && settlementId) {
+          const returnUrl = `/dashboard/credit/settlements/${settlementId}`
+          storePesapalCheckoutSession(orderTrackingId, returnUrl)
+          window.location.href = redirectUrl
+          return
+        }
+
+        // M-Pesa: STK already started — poll on detail page
+        if (checkoutRequestId) {
+          ShowToast.success("Check your phone and enter your M-Pesa PIN.")
+        }
+
         if (settlementId) {
           navigate(`/dashboard/credit/settlements/${settlementId}`)
         }
@@ -77,10 +121,21 @@ export default function SettlementModal({
       return
     }
 
+    const items = selectedTransactions.map((txn) => ({
+      credit_transaction_id: txn.id,
+      amount: itemAmounts[txn.id] ?? getCreditOutstanding(txn),
+    }))
+
+    if (items.some((item) => !(item.amount > 0))) {
+      ShowToast.error("Each item amount must be greater than zero")
+      return
+    }
+
     submitMutation.mutate({
-      credit_transaction_ids: selectedTransactions.map((txn) => txn.id),
+      items,
       payment_gateway: values.payment_gateway,
-      phone_number: values.phone_number?.trim() || undefined,
+      phone: values.phone?.trim() || undefined,
+      email: values.email?.trim() || undefined,
     })
   }
 
@@ -89,22 +144,40 @@ export default function SettlementModal({
       <div className="border-b pb-3">
         <h2 className="text-xl font-semibold">Recharge credit</h2>
         <p className="text-sm text-muted-foreground mt-1">
-          Pay back spent credit for the selected transactions.
+          Pay back spent credit. You can settle a partial amount per transaction.
         </p>
       </div>
 
-      <div className="rounded-lg border bg-muted/20 p-4 space-y-2">
+      <div className="rounded-lg border bg-muted/20 p-4 space-y-3">
         <p className="text-sm font-medium">
           {selectedTransactions.length} transaction(s) selected
         </p>
         <p className="text-2xl font-bold">{formatCurrency(total)}</p>
-        <ul className="text-sm text-muted-foreground space-y-1 max-h-32 overflow-y-auto">
-          {selectedTransactions.map((txn) => (
-            <li key={txn.id} className="flex justify-between gap-4">
-              <span>#{txn.id}</span>
-              <CreditAmount value={txn.amount_used} />
-            </li>
-          ))}
+        <ul className="text-sm space-y-2 max-h-40 overflow-y-auto">
+          {selectedTransactions.map((txn) => {
+            const maxOutstanding = getCreditOutstanding(txn)
+            return (
+              <li key={txn.id} className="flex items-center justify-between gap-3">
+                <span className="text-muted-foreground shrink-0">#{txn.id}</span>
+                <Input
+                  type="number"
+                  min={0.01}
+                  step="0.01"
+                  max={maxOutstanding || undefined}
+                  className="h-8 w-36 text-right"
+                  value={itemAmounts[txn.id] ?? maxOutstanding}
+                  onChange={(event) => {
+                    const next = Number(event.target.value)
+                    setItemAmounts((prev) => ({
+                      ...prev,
+                      [txn.id]: Number.isFinite(next) ? next : 0,
+                    }))
+                  }}
+                  aria-label={`Amount for transaction ${txn.id}`}
+                />
+              </li>
+            )
+          })}
         </ul>
       </div>
 
@@ -133,12 +206,21 @@ export default function SettlementModal({
           />
         </div>
 
-        {paymentGateway === "mpesa" ? (
+        <ReuseableInput
+          control={form.control}
+          name="phone"
+          label={paymentGateway === "mpesa" ? "M-Pesa phone number" : "Phone number"}
+          placeholder="07XXXXXXXX"
+          required={paymentGateway === "mpesa"}
+        />
+
+        {paymentGateway === "pesapal" ? (
           <ReuseableInput
             control={form.control}
-            name="phone_number"
-            label="M-Pesa phone number"
-            placeholder="07XXXXXXXX"
+            name="email"
+            label="Email"
+            type="email"
+            placeholder="agent@example.com"
           />
         ) : null}
 

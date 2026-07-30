@@ -2,7 +2,7 @@
 import { PageHeader } from "@/components/shared"
 import { Button, CustomDialogComponent } from "@/dev/core"
 import { CustomBaseTable, SearchTools } from "@/dev/table"
-import { buildCreditTransactionColumns } from "@/dev/columns/admin/credit/transactions"
+import { buildCreditTransactionColumns, getCreditOutstanding } from "@/dev/columns/admin/credit/transactions"
 import { useCan } from "@/auth/useCan"
 import { MODULES } from "@/auth/module-keys"
 import { CREDIT_URLS } from "@/app/admin/credit/credit-query"
@@ -10,7 +10,6 @@ import { useCustomDialogContextFactory, useDebounce } from "@/hooks"
 import { UseApiQuery } from "@/hooks/hooks"
 import type { CreditTransaction, SubmitResponse, TPaginationFilters, TFilterOptions } from "@/types/types"
 import { FILTEROPTIONS, ReusableReducer } from "@/utils/constatnts"
-import { parseMoneyString } from "@/lib/format"
 import { formatCurrency } from "@/lib/format"
 import { useReducer, useState } from "react"
 import { useSearchParams } from "react-router-dom"
@@ -45,7 +44,7 @@ export function CreditTransactionsPage() {
     url: CREDIT_URLS.transactionsMine,
     params: {
       page: filter.page,
-      pageSize: filter.pageSize,
+      per_page: filter.pageSize,
       term: filter.term,
     },
     queryOptions: {
@@ -57,7 +56,7 @@ export function CreditTransactionsPage() {
     url: CREDIT_URLS.transactions,
     params: {
       page: filter.page,
-      pageSize: filter.pageSize,
+      per_page: filter.pageSize,
       term: filter.term,
       status: filter.status || undefined,
       user_id: filter.user_id || undefined,
@@ -78,7 +77,7 @@ export function CreditTransactionsPage() {
 
   const selectedTransactions = transactions.filter((txn) => selectedIds.has(txn.id))
   const selectedTotal = selectedTransactions.reduce(
-    (sum, txn) => sum + parseMoneyString(txn.amount_used),
+    (sum, txn) => sum + getCreditOutstanding(txn),
     0
   )
 

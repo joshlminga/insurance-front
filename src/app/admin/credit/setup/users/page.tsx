@@ -42,7 +42,7 @@ export function CreditSetupUsersPage() {
     url: CREDIT_URLS.setupUsers,
     params: {
       page: filter.page,
-      pageSize: filter.pageSize,
+      per_page: filter.pageSize,
       term: filter.term,
     },
     queryOptions: { enabled: true },

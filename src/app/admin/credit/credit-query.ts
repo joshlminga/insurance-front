@@ -1,12 +1,11 @@
 import type { QueryClient } from "@tanstack/react-query"
 
 export const CREDIT_URLS = {
-  wallet: "credit/wallet",
+  wallet: "credit/wallet/mine",
   transactionsMine: "credit/transactions/mine",
   transactions: "credit/transactions",
   settlements: "credit/settlements",
   settlement: (id: number | string) => `credit/settlements/${id}`,
-  settlementPay: (id: number | string) => `credit/settlements/${id}/pay`,
   settlementManualSettle: (id: number | string) => `credit/settlements/${id}/manual-settle`,
   approvals: "credit/approvals",
   approvalApprove: (transactionId: number | string) => `credit/approvals/${transactionId}/approve`,

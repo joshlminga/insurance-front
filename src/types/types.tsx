@@ -664,6 +664,8 @@ export type CreditTransaction = {
   id: number
   user_id?: number
   amount_used: string
+  amount_settled?: string | null
+  outstanding_amount?: string | null
   status: CreditTransactionStatus
   transactionable_type?: string | null
   transactionable_id?: number | null
@@ -673,13 +675,22 @@ export type CreditTransaction = {
   user?: { id?: number; name?: string; email?: string }
 }
 
+/** Payment initiation payload returned with POST /credit/settlements */
+export type CreditSettlementPayment = {
+  gateway?: string
+  merchant_reference?: string
+  order_tracking_id?: string
+  redirect_url?: string
+  checkout_request_id?: string
+}
+
 export type CreditSettlement = {
   id: number
   total_amount: string
   status: CreditSettlementStatus
   payment_method?: string | null
   payment_gateway?: CreditPaymentGateway | null
-  paystack_reference?: string | null
+  payment_reference?: string | null
   finance_notes?: string | null
   completed_at?: string | null
   created_at?: string
@@ -687,6 +698,7 @@ export type CreditSettlement = {
     id?: number
     credit_transaction_id?: number
     amount_paid_for_this_txn?: string
+    amount?: string
     credit_transaction?: CreditTransaction
   }>
   redirect_url?: string | null

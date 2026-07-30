@@ -25,7 +25,7 @@ export function CreditAdjustmentsPage() {
 
   const usersQuery = UseApiQuery<SubmitResponse>({
     url: CREDIT_URLS.setupUsers,
-    params: { page: 1, pageSize: 100 },
+    params: { page: 1, per_page: 100 },
     queryOptions: { enabled: true },
   })
 

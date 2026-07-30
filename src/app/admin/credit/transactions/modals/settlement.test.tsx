@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest"
 import { render, screen } from "@testing-library/react"
 import SettlementModal from "@/app/admin/credit/transactions/modals/settlement"
 import type { CreditTransaction } from "@/types/types"
-import { RejectApprovalSchema } from "@/types/form-schema"
+import { CreateSettlementSchema, RejectApprovalSchema } from "@/types/form-schema"
 
 vi.mock("@/hooks/hooks", () => ({
   UseApiMutation: () => ({
@@ -20,12 +20,12 @@ vi.mock("react-router-dom", async () => {
 })
 
 const selectedTransactions: CreditTransaction[] = [
-  { id: 1, amount_used: "40000.00", status: "approved" },
-  { id: 2, amount_used: "30000.00", status: "approved" },
+  { id: 1, amount_used: "40000.00", outstanding_amount: "40000.00", status: "approved" },
+  { id: 2, amount_used: "30000.00", outstanding_amount: "30000.00", status: "approved" },
 ]
 
 describe("SettlementModal", () => {
-  it("shows sum of selected transaction amounts", () => {
+  it("shows sum of outstanding amounts for selected transactions", () => {
     render(
       <SettlementModal
         handleDialogContextSwitch={vi.fn()}
@@ -46,6 +46,44 @@ describe("SettlementModal", () => {
     )
 
     expect(screen.getByRole("button", { name: /Create settlement & pay/i })).toBeDisabled()
+  })
+
+  it("shows phone field and M-Pesa label by default", () => {
+    render(
+      <SettlementModal
+        handleDialogContextSwitch={vi.fn()}
+        componentProps={{ selectedTransactions }}
+      />
+    )
+
+    expect(screen.getByText(/M-Pesa phone number/i)).toBeInTheDocument()
+  })
+})
+
+describe("CreateSettlementSchema", () => {
+  it("requires phone for M-Pesa", () => {
+    const result = CreateSettlementSchema.safeParse({
+      payment_gateway: "mpesa",
+      phone: "",
+    })
+    expect(result.success).toBe(false)
+  })
+
+  it("requires phone or email for Pesapal", () => {
+    const result = CreateSettlementSchema.safeParse({
+      payment_gateway: "pesapal",
+      phone: "",
+      email: "",
+    })
+    expect(result.success).toBe(false)
+  })
+
+  it("accepts Pesapal with email only", () => {
+    const result = CreateSettlementSchema.safeParse({
+      payment_gateway: "pesapal",
+      email: "agent@example.com",
+    })
+    expect(result.success).toBe(true)
   })
 })
 

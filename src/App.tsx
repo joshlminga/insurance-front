@@ -676,7 +676,7 @@ export const router = createBrowserRouter([
         path: "credit/wallet",
         element: (
           <S>
-            <AdminModulePage module={MODULES.FINANCE_CONTROL}>
+            <AdminModulePage module={MODULES.FINANCE_CONTROL} permission="finance-control.mine">
               <CreditWalletPage />
             </AdminModulePage>
           </S>
@@ -730,7 +730,7 @@ export const router = createBrowserRouter([
         path: "credit/settlements/:id",
         element: (
           <S>
-            <AdminModulePage module={MODULES.FINANCE_CONTROL}>
+            <AdminModulePage module={MODULES.FINANCE_CONTROL} permission="finance-control.read">
               <CreditSettlementDetailPage />
             </AdminModulePage>
           </S>

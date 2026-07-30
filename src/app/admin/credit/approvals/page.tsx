@@ -52,7 +52,7 @@ export function CreditApprovalsPage() {
     url: CREDIT_URLS.approvals,
     params: {
       page: filter.page,
-      pageSize: filter.pageSize,
+      per_page: filter.pageSize,
       term: filter.term,
     },
     queryOptions: {

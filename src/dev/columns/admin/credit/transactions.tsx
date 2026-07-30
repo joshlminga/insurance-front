@@ -3,8 +3,17 @@ import { CreditAmount } from "@/app/admin/credit/components/CreditAmount"
 import { CreditStatusBadge } from "@/app/admin/credit/components/CreditStatusBadge"
 import { Checkbox } from "@/components/ui/checkbox"
 import type { CreditTransaction } from "@/types/types"
-import { formatDate } from "@/lib/format"
+import { formatDate, parseMoneyString } from "@/lib/format"
 import type { ColumnDef } from "@tanstack/table-core"
+
+/** Outstanding amount to settle — falls back to amount_used when API omits the field */
+export function getCreditOutstanding(txn: CreditTransaction): number {
+  return parseMoneyString(txn.outstanding_amount ?? txn.amount_used)
+}
+
+export function isCreditTransactionSelectable(txn: CreditTransaction): boolean {
+  return txn.status === "approved" && getCreditOutstanding(txn) > 0
+}
 
 type BuildCreditTransactionColumnsOptions = {
   showSelection?: boolean
@@ -23,25 +32,25 @@ export function buildCreditTransactionColumns(
     columns.push({
       id: "select",
       header: ({ table }) => {
-        const approvedRows = table
+        const selectableRows = table
           .getRowModel()
           .rows.map((row) => row.original)
-          .filter((row) => row.status === "approved")
+          .filter(isCreditTransactionSelectable)
         const allSelected =
-          approvedRows.length > 0 &&
-          approvedRows.every((row) => selectedIds?.has(row.id))
+          selectableRows.length > 0 &&
+          selectableRows.every((row) => selectedIds?.has(row.id))
 
         return (
           <Checkbox
             checked={allSelected}
-            onCheckedChange={(checked) => onToggleAll?.(approvedRows, checked === true)}
-            aria-label="Select all approved transactions"
+            onCheckedChange={(checked) => onToggleAll?.(selectableRows, checked === true)}
+            aria-label="Select all settleable transactions"
           />
         )
       },
       cell: ({ row }) => {
         const txn = row.original
-        if (txn.status !== "approved") return null
+        if (!isCreditTransactionSelectable(txn)) return null
         return (
           <Checkbox
             checked={selectedIds?.has(txn.id) ?? false}
@@ -64,6 +73,16 @@ export function buildCreditTransactionColumns(
       accessorKey: "amount_used",
       header: () => <div>Amount</div>,
       cell: ({ row }) => <CreditAmount value={row.original.amount_used} className="font-medium" />,
+    },
+    {
+      accessorKey: "outstanding_amount",
+      header: () => <div>Outstanding</div>,
+      cell: ({ row }) => (
+        <CreditAmount
+          value={row.original.outstanding_amount ?? row.original.amount_used}
+          className="font-medium"
+        />
+      ),
     },
     {
       accessorKey: "status",

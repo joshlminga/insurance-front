@@ -22,8 +22,7 @@ import { EROUTES } from "@/utils/enums"
 import { useQueryClient } from "@tanstack/react-query"
 import { Link, useNavigate, useParams } from "react-router-dom"
 import { ArrowLeft, RefreshCw } from "lucide-react"
-import { useState } from "react"
-import { storePesapalCheckoutSession } from "@/utils/pesapal-payment"
+import { useEffect, useRef, useState } from "react"
 
 const TERMINAL_STATUSES = new Set(["completed", "failed"])
 
@@ -33,8 +32,8 @@ export function CreditSettlementDetailPage() {
   const queryClient = useQueryClient()
   const { canModuleAction } = useCan()
   const canSettle = canModuleAction(MODULES.FINANCE_CONTROL, "settle")
-  const [phoneNumber, setPhoneNumber] = useState("")
   const [financeNotes, setFinanceNotes] = useState("")
+  const completedInvalidated = useRef(false)
 
   const settlementQuery = UseApiQuery<SubmitResponse>({
     url: CREDIT_URLS.settlement(id ?? ""),
@@ -67,40 +66,17 @@ export function CreditSettlementDetailPage() {
     settlement &&
     (settlement.status === "pending" || settlement.status === "failed")
 
-  const payMutation = UseApiMutation<
-    SubmitResponse,
-    { payment_gateway?: string; phone_number?: string }
-  >({
-    url: CREDIT_URLS.settlementPay(id ?? ""),
-    method: EMETHODS.POST,
-    mutationOptions: {
-      onSuccess: (response) => {
-        const payload = response?.data?.settlement ?? response?.data ?? response
-        const redirectUrl = payload?.redirect_url
-        const orderTrackingId = payload?.order_tracking_id
-        const checkoutRequestId = payload?.checkout_request_id
-
-        if (redirectUrl && orderTrackingId) {
-          const returnUrl = `/dashboard/credit/settlements/${id}`
-          storePesapalCheckoutSession(orderTrackingId, returnUrl)
-          window.location.href = redirectUrl
-          return
-        }
-
-        if (checkoutRequestId) {
-          ShowToast.success("Check your phone and enter your M-Pesa PIN.")
-          settlementQuery.refetch()
-          return
-        }
-
-        ShowToast.success(response?.message || "Payment initiated")
-        settlementQuery.refetch()
-      },
-      onError: (error) => {
-        ShowToast.error(extractErrorMessage(error))
-      },
-    },
-  })
+  // When poll reaches completed, refresh wallet + transactions once
+  useEffect(() => {
+    const status = settlement?.status?.toLowerCase()
+    if (status === "completed" && !completedInvalidated.current) {
+      completedInvalidated.current = true
+      void Promise.all([
+        invalidateCreditWallet(queryClient),
+        invalidateCreditTransactions(queryClient),
+      ])
+    }
+  }, [settlement?.status, queryClient])
 
   const manualSettleMutation = UseApiMutation<SubmitResponse, { finance_notes?: string }>({
     url: CREDIT_URLS.settlementManualSettle(id ?? ""),
@@ -124,10 +100,13 @@ export function CreditSettlementDetailPage() {
   const isPending = status === "pending" || status === "processing"
 
   const statusMessage: Record<string, string> = {
-    pending: "Complete payment in the gateway to restore your credit.",
+    pending:
+      settlement?.payment_gateway === "mpesa"
+        ? "Approve the M-Pesa STK push on your phone to restore credit."
+        : "Complete payment in the gateway to restore your credit.",
     processing: "Confirming payment…",
     completed: "Credit restored successfully.",
-    failed: "Payment failed. You can retry or contact finance.",
+    failed: "Payment failed. Start a new settlement to retry.",
   }
 
   return (
@@ -210,43 +189,6 @@ export function CreditSettlementDetailPage() {
             ) : null}
           </div>
 
-          {settlement.status === "pending" ? (
-            <div className="rounded-xl border p-6 space-y-4">
-              <h3 className="font-semibold">Complete payment</h3>
-              <div className="space-y-2">
-                <Label htmlFor="settlement-phone">M-Pesa phone (if paying via M-Pesa)</Label>
-                <Input
-                  id="settlement-phone"
-                  placeholder="07XXXXXXXX"
-                  value={phoneNumber}
-                  onChange={(event) => setPhoneNumber(event.target.value)}
-                />
-              </div>
-              <div className="flex flex-wrap gap-3">
-                <Button
-                  type="button"
-                  disabled={payMutation.isPending}
-                  onClick={() =>
-                    payMutation.mutate({
-                      payment_gateway: "mpesa",
-                      phone_number: phoneNumber.trim() || undefined,
-                    })
-                  }
-                >
-                  Pay with M-Pesa
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={payMutation.isPending}
-                  onClick={() => payMutation.mutate({ payment_gateway: "pesapal" })}
-                >
-                  Pay with Pesapal
-                </Button>
-              </div>
-            </div>
-          ) : null}
-
           {canManualSettle ? (
             <div className="rounded-xl border border-amber-200 bg-amber-50/50 p-6 space-y-4">
               <h3 className="font-semibold">Finance manual settle</h3>
@@ -285,7 +227,13 @@ export function CreditSettlementDetailPage() {
                     <span>
                       Transaction #{item.credit_transaction_id ?? item.credit_transaction?.id}
                     </span>
-                    <CreditAmount value={item.amount_paid_for_this_txn ?? item.credit_transaction?.amount_used} />
+                    <CreditAmount
+                      value={
+                        item.amount_paid_for_this_txn ??
+                        item.amount ??
+                        item.credit_transaction?.amount_used
+                      }
+                    />
                   </li>
                 ))}
               </ul>

@@ -985,7 +985,29 @@ export const RejectApprovalSchema = z.object({
   reason: z.string().min(3, "Rejection reason is required").max(500),
 })
 
-export const CreateSettlementSchema = z.object({
-  payment_gateway: z.enum(["pesapal", "mpesa"]),
-  phone_number: z.string().optional(),
-})
+export const CreateSettlementSchema = z
+  .object({
+    payment_gateway: z.enum(["pesapal", "mpesa"]),
+    phone: z.string().optional(),
+    email: z.string().email("Enter a valid email").optional().or(z.literal("")),
+  })
+  .superRefine((data, ctx) => {
+    const phone = data.phone?.trim()
+    const email = data.email?.trim()
+
+    if (data.payment_gateway === "mpesa" && !phone) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Phone number is required for M-Pesa",
+        path: ["phone"],
+      })
+    }
+
+    if (data.payment_gateway === "pesapal" && !phone && !email) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Phone or email is required for Pesapal",
+        path: ["phone"],
+      })
+    }
+  })
