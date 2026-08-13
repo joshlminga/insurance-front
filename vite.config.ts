@@ -21,7 +21,7 @@ export default defineConfig({
     strictPort: false,
     allowedHosts: [
       'acensure.test',
-      'acentria.acensure.test',
+      'acentria.localhost',
       'lolc-kenya.acensure.test',
     ]
   }
