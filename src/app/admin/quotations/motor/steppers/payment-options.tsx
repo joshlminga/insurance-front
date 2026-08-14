@@ -30,10 +30,11 @@ import { extractErrorMessage } from '@/utils/helpers'
 import { cn } from '@/lib/utils'
 import { useCustomDialogContextFactory } from '@/hooks'
 import { usePesapalPaymentFlow } from '@/hooks/use-pesapal-payment-flow'
-import { submitMotorCreditPayment } from '@/app/admin/credit/credit-payment'
+import { submitMotorCreditPayment, creditPendingDetailPath } from '@/app/admin/credit/credit-payment'
 import { CreditPendingBanner } from '@/app/admin/credit/components/CreditPendingBanner'
 import type { AdminMotorStepProps } from '../admin-step-props'
 import { readAdminMotorCustomerContact } from '../admin-motor-session'
+import { useNavigate } from 'react-router-dom'
 
 type BoxHeaderProps = {
     title: string
@@ -60,6 +61,7 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
     defaultCustomerContact,
 }) => {
     const customerEmail = defaultCustomerContact?.email ?? readAdminMotorCustomerContact().email
+    const navigate = useNavigate()
     const [selectedPaymentMethod, setSelectedPaymentMethod] = React.useState<string>('mpesa');
     const [purchaseSessionId, setPurchaseSessionId] = React.useState<string | null>(null);
     const [isPlanConfirmOpen, setIsPlanConfirmOpen] = React.useState(false);
@@ -70,6 +72,7 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
     const [creditPending, setCreditPending] = React.useState<{
         message: string
         creditTransactionId?: number
+        invoiceId?: string
     } | null>(null)
     const [isCreditSubmitting, setIsCreditSubmitting] = React.useState(false)
 
@@ -249,11 +252,14 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
                     credit_acknowledged: data.credit_acknowledged,
                 })
                 if (result.kind === 'pending_approval') {
+                    const invoiceId = String(result.invoiceId ?? data.invoice_id)
                     setCreditPending({
                         message: result.message,
                         creditTransactionId: result.creditTransactionId,
+                        invoiceId,
                     })
                     ShowToast.success(result.message)
+                    navigate(creditPendingDetailPath(invoiceId))
                     return
                 }
                 if (result.kind === 'validation_error') {
@@ -504,6 +510,7 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
                             <CreditPendingBanner
                                 message={creditPending.message}
                                 creditTransactionId={creditPending.creditTransactionId}
+                                invoiceId={creditPending.invoiceId}
                             />
                         </div>
                     ) : null}

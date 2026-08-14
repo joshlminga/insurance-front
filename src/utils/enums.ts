@@ -67,6 +67,8 @@ export const EROUTES = {
   CREDIT_WALLET: `/${EPREFIX.DASHBOARD}/credit/wallet`,
   CREDIT_TRANSACTIONS: `/${EPREFIX.DASHBOARD}/credit/transactions`,
   CREDIT_APPROVALS: `/${EPREFIX.DASHBOARD}/credit/approvals`,
+  CREDIT_PENDING: `/${EPREFIX.DASHBOARD}/credit/pending`,
+  CREDIT_PENDING_DETAIL: `/${EPREFIX.DASHBOARD}/credit/pending/:invoiceId`,
   CREDIT_SETUP: `/${EPREFIX.DASHBOARD}/credit/setup`,
   CREDIT_SETUP_POOL: `/${EPREFIX.DASHBOARD}/credit/setup/pool`,
   CREDIT_SETUP_USERS: `/${EPREFIX.DASHBOARD}/credit/setup/users`,

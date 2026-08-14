@@ -16,6 +16,9 @@ export const CREDIT_URLS = {
   setupUserAllocate: (userId: number | string) => `credit/setup/users/${userId}/allocate`,
   adjustments: "credit/adjustments",
   invoicePay: (invoiceId: number | string) => `credit/invoices/${invoiceId}/pay`,
+  invoiceSchedule: (invoiceId: number | string) => `credit/invoices/${invoiceId}/schedule`,
+  scheduleCoverStart: (scheduleId: number | string) => `credit/schedules/${scheduleId}/cover-start-date`,
+  scheduleProceed: (scheduleId: number | string) => `credit/schedules/${scheduleId}/proceed`,
 } as const
 
 export function creditWalletKey() {
@@ -36,6 +39,10 @@ export function creditSettlementKey(id: number | string) {
 
 export function creditApprovalsKey(params?: Record<string, unknown>) {
   return [CREDIT_URLS.approvals, params] as const
+}
+
+export function creditInvoiceScheduleKey(invoiceId: number | string) {
+  return [CREDIT_URLS.invoiceSchedule(invoiceId), undefined] as const
 }
 
 export function creditSetupPoolKey() {

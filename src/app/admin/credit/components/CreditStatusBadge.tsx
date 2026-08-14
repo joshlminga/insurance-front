@@ -8,6 +8,14 @@ const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
     label: "Pending approval",
     className: "bg-amber-100 text-amber-800",
   },
+  awaiting_cover_update: {
+    label: "Awaiting cover date",
+    className: "bg-orange-100 text-orange-800",
+  },
+  cancelled: {
+    label: "Cancelled",
+    className: "bg-red-100 text-red-800",
+  },
   approved: {
     label: "Approved",
     className: "bg-green-100 text-green-800",

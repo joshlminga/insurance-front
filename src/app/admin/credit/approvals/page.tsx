@@ -19,6 +19,7 @@ import { useCustomDialogContextFactory, useDebounce } from "@/hooks"
 import { UseApiMutation, UseApiQuery } from "@/hooks/hooks"
 import type {
   CreditApprovalQueueItem,
+  CreditSchedule,
   SingleActionsHandler,
   SubmitResponse,
   TPaginationFilters,
@@ -65,7 +66,16 @@ export function CreditApprovalsPage() {
     method: EMETHODS.POST,
     mutationOptions: {
       onSuccess: (response) => {
-        ShowToast.success(response?.message || "Transaction approved")
+        const schedule = response?.data?.schedule as CreditSchedule | undefined
+        if (schedule?.status === "awaiting_cover_update") {
+          ShowToast.success(
+            "Approved. The payer must update the cover start date before payment can finish."
+          )
+        } else if (schedule?.status === "completed") {
+          ShowToast.success(response?.message || "Credit approved and payment completed.")
+        } else {
+          ShowToast.success(response?.message || "Transaction approved")
+        }
         setApproveTarget(null)
         refetch()
       },

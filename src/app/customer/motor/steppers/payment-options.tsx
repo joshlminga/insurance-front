@@ -32,6 +32,7 @@ import { useCustomDialogContextFactory } from '@/hooks'
 import { usePesapalPaymentFlow } from '@/hooks/use-pesapal-payment-flow'
 import { submitMotorCreditPayment } from '@/app/admin/credit/credit-payment'
 import { CreditPendingBanner } from '@/app/admin/credit/components/CreditPendingBanner'
+import { CreditScheduleStatusPanel } from '@/app/admin/credit/components/CreditScheduleStatusPanel'
 
 
 export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goToNextStep, goToPrevStep }) => {
@@ -45,6 +46,7 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
     const [creditPending, setCreditPending] = React.useState<{
         message: string
         creditTransactionId?: number
+        invoiceId?: string
     } | null>(null)
     const [isCreditSubmitting, setIsCreditSubmitting] = React.useState(false)
 
@@ -227,6 +229,7 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
                     setCreditPending({
                         message: result.message,
                         creditTransactionId: result.creditTransactionId,
+                        invoiceId: String(result.invoiceId ?? data.invoice_id),
                     })
                     ShowToast.success(result.message)
                     return
@@ -454,11 +457,20 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
                     )}
 
                     {creditPending ? (
-                        <div className="px-2 sm:px-4">
+                        <div className="px-2 sm:px-4 space-y-4">
                             <CreditPendingBanner
                                 message={creditPending.message}
                                 creditTransactionId={creditPending.creditTransactionId}
+                                invoiceId={creditPending.invoiceId}
+                                showDashboardLink={false}
                             />
+                            {creditPending.invoiceId ? (
+                                <CreditScheduleStatusPanel
+                                    invoiceId={creditPending.invoiceId}
+                                    onProceeded={() => goToNextStep?.()}
+                                    showReceiptButton={false}
+                                />
+                            ) : null}
                         </div>
                     ) : null}
 

@@ -175,6 +175,7 @@ export const adminNavConfig: NavItem[] = [
     items: [
       { title: 'My Wallet', url: EROUTES.CREDIT_WALLET, module: MODULES.FINANCE_CONTROL },
       { title: 'Transactions', url: EROUTES.CREDIT_TRANSACTIONS, module: MODULES.FINANCE_CONTROL },
+      { title: 'Credit Approval Pending', url: EROUTES.CREDIT_PENDING, module: MODULES.FINANCE_CONTROL },
       { title: 'Pending Approvals', url: EROUTES.CREDIT_APPROVALS, module: MODULES.FINANCE_CONTROL },
       { title: 'Pool Settings', url: EROUTES.CREDIT_SETUP_POOL, module: MODULES.FINANCE_CONTROL },
       { title: 'User Allocations', url: EROUTES.CREDIT_SETUP_USERS, module: MODULES.FINANCE_CONTROL },

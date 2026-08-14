@@ -77,6 +77,8 @@ const UsersPage = lazy(() => import("./app/admin/users/page").then(m => ({ defau
 const CreditWalletPage = lazy(() => import("./app/admin/credit/wallet/page").then(m => ({ default: m.CreditWalletPage })))
 const CreditTransactionsPage = lazy(() => import("./app/admin/credit/transactions/page").then(m => ({ default: m.CreditTransactionsPage })))
 const CreditApprovalsPage = lazy(() => import("./app/admin/credit/approvals/page").then(m => ({ default: m.CreditApprovalsPage })))
+const CreditPendingPage = lazy(() => import("./app/admin/credit/pending/page").then(m => ({ default: m.CreditPendingPage })))
+const CreditPendingDetailPage = lazy(() => import("./app/admin/credit/pending/[invoiceId]/page").then(m => ({ default: m.CreditPendingDetailPage })))
 const CreditSetupPoolPage = lazy(() => import("./app/admin/credit/setup/pool/page").then(m => ({ default: m.CreditSetupPoolPage })))
 const CreditSetupUsersPage = lazy(() => import("./app/admin/credit/setup/users/page").then(m => ({ default: m.CreditSetupUsersPage })))
 const CreditSettlementDetailPage = lazy(() => import("./app/admin/credit/settlements/[id]/page").then(m => ({ default: m.CreditSettlementDetailPage })))
@@ -698,6 +700,26 @@ export const router = createBrowserRouter([
           <S>
             <AdminModulePage module={MODULES.FINANCE_CONTROL} permission="finance-control.approve">
               <CreditApprovalsPage />
+            </AdminModulePage>
+          </S>
+        ),
+      },
+      {
+        path: "credit/pending",
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.FINANCE_CONTROL} permission="finance-control.mine">
+              <CreditPendingPage />
+            </AdminModulePage>
+          </S>
+        ),
+      },
+      {
+        path: "credit/pending/:invoiceId",
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.FINANCE_CONTROL} permission="finance-control.mine">
+              <CreditPendingDetailPage />
             </AdminModulePage>
           </S>
         ),

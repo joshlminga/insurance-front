@@ -660,6 +660,11 @@ export type CreditSummaryResponse = {
 }
 
 export type CreditTransactionStatus = 'pending_approval' | 'approved' | 'rejected'
+export type CreditScheduleStatus =
+  | 'pending_approval'
+  | 'awaiting_cover_update'
+  | 'completed'
+  | 'cancelled'
 export type CreditSettlementStatus = 'pending' | 'processing' | 'completed' | 'failed'
 export type CreditAdjustmentType = 'refund' | 'write_off' | 'manual_charge' | 'correction'
 export type CreditPaymentGateway = 'pesapal' | 'mpesa'
@@ -672,6 +677,29 @@ export type CreditWallet = {
   available_balance: string | null
   pending_balance: string | null
   minimum_spend_threshold: string | null
+}
+
+export type CreditApprovalQueue = {
+  id?: number
+  status?: string
+  rejection_reason?: string | null
+  action_at?: string | null
+}
+
+export type CreditSchedule = {
+  id: number
+  credit_transaction_id?: number
+  invoice_id?: number
+  purchase_id?: number
+  cover_start_date?: string | null
+  status: CreditScheduleStatus
+  requires_cover_start_update?: boolean
+  can_proceed?: boolean
+  invoice_unpaid?: boolean
+  rejection_reason?: string | null
+  completed_at?: string | null
+  created_at?: string
+  updated_at?: string
 }
 
 export type CreditTransaction = {
@@ -687,6 +715,8 @@ export type CreditTransaction = {
   approved_at?: string | null
   created_at?: string
   user?: { id?: number; name?: string; email?: string }
+  approval_queue?: CreditApprovalQueue | null
+  schedule?: CreditSchedule | null
 }
 
 /** Payment initiation payload returned with POST /credit/settlements */
@@ -752,10 +782,21 @@ export type CreditUserAllocation = {
   minimum_spend_threshold?: string | null
 }
 
+export type CreditPaymentPendingData = {
+  invoice_id?: number
+  credit_transaction_id?: number
+  credit_schedule_id?: number
+  schedule_status?: CreditScheduleStatus
+  cover_start_date?: string
+  requires_cover_start_update?: boolean
+  can_proceed?: boolean
+}
+
 export type CreditPaymentPendingResponse = {
   success?: boolean
   message?: string
   credit_transaction_id?: number
+  data?: CreditPaymentPendingData
 }
 
 export type CashPaymentOption = {
