@@ -178,6 +178,20 @@ export interface ToastOptions {
   duration?: number
 }
 
+export type MotorQuoteSessionCustomerType = 'guest' | 'member' | 'agency'
+
+/** POST auto/quotation/motor — quote session summary in `data`. */
+export type MotorQuoteSessionStartData = {
+  id: number
+  quote_code?: string
+  customer_type?: MotorQuoteSessionCustomerType
+  customer_id?: number | null
+  /** Derived on API; equals customer_id when customer_type is guest. */
+  guest_id?: number | null
+  user_id?: number | null
+  is_guest?: boolean
+}
+
 export interface SubmitResponse {
   message: string,
   success: string,

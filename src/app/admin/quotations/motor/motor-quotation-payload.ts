@@ -51,8 +51,25 @@ type BuildMotorQuotationPayloadInput = {
     dialCode: string
 }
 
+function resolveAgencyId(
+    data: AdminMotorQuotationFormValues,
+    isGuest: boolean
+): string | null {
+    const onBehalfAgencyId = data.agency_id?.trim() || null
+    if (onBehalfAgencyId) {
+        return onBehalfAgencyId
+    }
+
+    if (!isGuest) {
+        return data.processed_by_organization_id?.trim() || null
+    }
+
+    return null
+}
+
 function buildSharedVehicleAndOfficeFields(
-    data: AdminMotorQuotationFormValues
+    data: AdminMotorQuotationFormValues,
+    isGuest: boolean
 ): Pick<
     MotorQuotationApiPayload,
     | 'vehicle_class_id'
@@ -77,7 +94,7 @@ function buildSharedVehicleAndOfficeFields(
         used_for_id: data.used_for_id,
         valued_by_professional: resolveValuedByProfessional(data),
         processed_by_organization_id: data.processed_by_organization_id,
-        agency_id: data.agency_id?.trim() || null,
+        agency_id: resolveAgencyId(data, isGuest),
         referral_id: data.referral_id?.trim() || null,
     }
 }
@@ -93,8 +110,9 @@ export function buildMotorQuotationPayload({
             ? String(profileCountryId)
             : null)
 
-    const vehicleAndOffice = buildSharedVehicleAndOfficeFields(data)
     const hasExistingCustomer = Boolean(String(data.user_id ?? '').trim())
+    const isGuest = !data.create_customer_account
+    const vehicleAndOffice = buildSharedVehicleAndOfficeFields(data, isGuest)
 
     if (hasExistingCustomer) {
         return {
@@ -127,7 +145,7 @@ export function buildMotorQuotationPayload({
         ...(last_name ? { last_name } : {}),
         email: String(data.email ?? '').trim(),
         phone,
-        is_guest: !data.create_customer_account,
+        is_guest: isGuest,
         vehicle_class_id: vehicleAndOffice.vehicle_class_id,
         covertype_id: vehicleAndOffice.covertype_id,
         covering_id: vehicleAndOffice.covering_id,

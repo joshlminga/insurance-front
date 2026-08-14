@@ -28,9 +28,9 @@ import { cn } from '@/lib/utils'
 import { UseAuth } from '@/stores/auth-store'
 import { AdminMotorQuotationSchema } from '@/types/form-schema'
 import type { AdminMotorQuotationFormValues } from '@/types/schema'
-import type { SubmitResponse, VehicleClassItem } from '@/types/types'
+import type { SubmitResponse, VehicleClassItem, MotorQuoteSessionStartData } from '@/types/types'
 import { EROUTES, PROFFESIONALVALUATIONCHECKBOX } from '@/utils/enums'
-import { EMETHODS, MOTOR_QUOTE_SESSION_STORAGE_KEY, OWNERSHIPOPTIONS } from '@/utils/constatnts'
+import { EMETHODS, OWNERSHIPOPTIONS } from '@/utils/constatnts'
 import { extractErrorMessage } from '@/utils/helpers'
 import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -66,7 +66,7 @@ import {
 import { buildMotorQuotationPayload } from './motor-quotation-payload'
 import { OrganizationLocationInput } from './organization-location-input'
 import { OfficeCountrySelect } from './office-country-select'
-import { persistAdminMotorCustomerContact } from './admin-motor-session'
+import { persistAdminMotorCustomerContact, persistAdminMotorQuoteSession } from './admin-motor-session'
 
 type ProfileCountry = {
     id?: number | string
@@ -226,6 +226,16 @@ function isCustomerContactMissing(data: AdminMotorQuotationFormValues): boolean 
     return !email && !phoneDigits
 }
 
+function isCreateAccountAgencyMissing(data: AdminMotorQuotationFormValues): boolean {
+    if (isCustomerContactMissing(data)) return false
+    if (!data.create_customer_account) return false
+
+    const onBehalfAgencyId = String(data.agency_id ?? '').trim()
+    const yourAgencyId = String(data.processed_by_organization_id ?? '').trim()
+
+    return !onBehalfAgencyId && !yourAgencyId
+}
+
 function AnimatedSection({ show, children, className }: AnimatedSectionProps) {
     return (
         <div
@@ -379,24 +389,25 @@ export const MotorQuotationPage = () => {
     }
 
     const submitMutation = UseApiMutation<
-        SubmitResponse,
+        SubmitResponse & { data: MotorQuoteSessionStartData },
         ReturnType<typeof buildMotorQuotationPayload>
     >({
         url: 'auto/quotation/motor',
         method: EMETHODS.POST,
         mutationOptions: {
             onSuccess: (response) => {
-                const quoteSessionId = Number(response?.data?.id)
+                const session = response?.data as MotorQuoteSessionStartData | undefined
+                const quoteSessionId = Number(session?.id)
                 if (!Number.isFinite(quoteSessionId) || quoteSessionId <= 0) {
                     ShowToast.error(
                         'Quote session could not be initialized. Please try again.'
                     )
                     return
                 }
-                sessionStorage.setItem(
-                    MOTOR_QUOTE_SESSION_STORAGE_KEY,
-                    String(quoteSessionId)
-                )
+                persistAdminMotorQuoteSession({
+                    ...session,
+                    id: quoteSessionId,
+                })
                 ShowToast.success(
                     response?.message || 'Quotation started successfully.'
                 )
@@ -412,6 +423,13 @@ export const MotorQuotationPage = () => {
         user?.name?.trim() || user?.email?.trim() || 'your account'
 
     const submitQuotation = (data: AdminMotorQuotationFormValues) => {
+        if (isCreateAccountAgencyMissing(data)) {
+            ShowToast.error(
+                'Select Your Agency before creating a customer account for this quotation.'
+            )
+            return
+        }
+
         persistAdminMotorCustomerContact({
             email: data.email?.trim() || undefined,
             name: data.full_name?.trim() || undefined,
@@ -699,12 +717,12 @@ export const MotorQuotationPage = () => {
                     <AlertDialogHeader>
                         <AlertDialogTitle>No customer contact details</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Email and phone were not provided. The system will process this
-                            cover as belonging to{' '}
+                            Email and phone were not provided. No guest record will be
+                            created — this quotation will be tied to your agent account (
                             <span className="font-semibold text-foreground">
                                 {loggedInUserName}
                             </span>
-                            . Do you want to continue?
+                            ). Do you want to continue?
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>

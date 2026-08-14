@@ -189,6 +189,9 @@ export const VEHICLE_OWNERSHIP_SESSION_STORAGE_KEY = "vehicle_ownership_session"
 export const ADMIN_MOTOR_CUSTOMER_EMAIL_KEY = "admin_motor_customer_email"
 export const ADMIN_MOTOR_CUSTOMER_NAME_KEY = "admin_motor_customer_name"
 export const ADMIN_MOTOR_CUSTOMER_PHONE_KEY = "admin_motor_customer_phone"
+export const ADMIN_MOTOR_QUOTE_CUSTOMER_TYPE_KEY = "admin_motor_quote_customer_type"
+export const ADMIN_MOTOR_QUOTE_IS_GUEST_KEY = "admin_motor_quote_is_guest"
+export const ADMIN_MOTOR_QUOTE_CUSTOMER_ID_KEY = "admin_motor_quote_customer_id"
 export const INVOICE_ID_KEY = "invoice_id"
 
 export const BENEFIT_TYPE_CONFIG = {
