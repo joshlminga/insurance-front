@@ -323,6 +323,7 @@ const PaypalPaymentSchema = BasePaymentSchema.extend({
 
 const CreditPaymentSchema = BasePaymentSchema.extend({
   payment_method: z.literal("credit"),
+  invoice_id: z.string().min(1, "Invoice is required"),
   available_credit: z.string().optional().or(z.literal("")),
   unsettled_credit: z.string().optional().or(z.literal("")),
   unsettled_credit_limit: z.string().optional().or(z.literal("")),

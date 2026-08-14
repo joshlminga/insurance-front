@@ -15,6 +15,7 @@ export const CREDIT_URLS = {
   setupUser: (userId: number | string) => `credit/setup/users/${userId}`,
   setupUserAllocate: (userId: number | string) => `credit/setup/users/${userId}/allocate`,
   adjustments: "credit/adjustments",
+  invoicePay: (invoiceId: number | string) => `credit/invoices/${invoiceId}/pay`,
 } as const
 
 export function creditWalletKey() {

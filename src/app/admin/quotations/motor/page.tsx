@@ -462,7 +462,6 @@ export const MotorQuotationPage = () => {
                 <form
                     onSubmit={form.handleSubmit(onSubmit)}
                     className={cn('space-y-6', motorFormFieldStyles)}>
-                    <CustomerDetailsSection countryId={effectiveCountryId} />
                     <div className="rounded-2xl border border-[#ADABAB]/50 p-4 shadow-sm sm:p-6">
                         <div className="w-full pb-4">
                             <h2 className="text-lg font-bold leading-tight tracking-tight sm:text-xl">
@@ -575,6 +574,8 @@ export const MotorQuotationPage = () => {
                             )}
                         </div>
                     </div>
+
+                    <CustomerDetailsSection countryId={effectiveCountryId} />
 
                     <div className="rounded-2xl border border-[#ADABAB]/50 p-4 shadow-sm sm:p-6 [&_label]:text-sm [&_input]:text-sm [&_button]:text-sm">
                         <div className="w-full pb-2">

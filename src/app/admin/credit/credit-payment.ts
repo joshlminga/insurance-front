@@ -1,3 +1,4 @@
+import { CREDIT_URLS } from "@/app/admin/credit/credit-query"
 import apiClient from "@/lib/api-client"
 import type { AxiosResponse } from "axios"
 import type { CreditPaymentPendingResponse, SubmitResponse } from "@/types/types"
@@ -7,18 +8,15 @@ export type MotorCreditPaymentResult =
   | { kind: "pending_approval"; message: string; creditTransactionId?: number }
   | { kind: "validation_error"; message: string }
 
-/** Submit motor invoice payment using prepaid credit — handles 200, 202, 422 */
+/** Pay an invoice with prepaid credit — handles 200, 202, 422 */
 export async function submitMotorCreditPayment(
-  purchaseSessionId: string,
+  invoiceId: string,
   payload: Record<string, unknown> = {}
 ): Promise<MotorCreditPaymentResult> {
   try {
     const response: AxiosResponse<SubmitResponse> = await apiClient.post(
-      `purchase/motor/${purchaseSessionId}/pay`,
-      {
-        payment_method: "credit",
-        ...payload,
-      }
+      CREDIT_URLS.invoicePay(invoiceId),
+      payload
     )
 
     if (response.status === 202) {

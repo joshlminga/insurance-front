@@ -238,16 +238,15 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
         }
 
         if (data.payment_method === 'credit') {
-            if (!purchaseSessionId) {
-                ShowToast.error('Purchase session is missing. Please refresh and try again.')
+            if (!data.invoice_id) {
+                ShowToast.error('Invoice is missing. Please refresh and try again.')
                 return
             }
             setCreditPending(null)
             setIsCreditSubmitting(true)
             try {
-                const result = await submitMotorCreditPayment(purchaseSessionId, {
+                const result = await submitMotorCreditPayment(data.invoice_id, {
                     credit_acknowledged: data.credit_acknowledged,
-                    invoice_id: data.invoice_id,
                 })
                 if (result.kind === 'pending_approval') {
                     setCreditPending({
