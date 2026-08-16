@@ -9,10 +9,9 @@ import React from 'react'
 import { Controller, useFormContext } from 'react-hook-form'
 import { PaymentAmountSummary } from './payment-amount-summary'
 
-const CARD_PROVIDERS = [
+export const CARD_PROVIDERS = [
     { value: 'paystack', label: 'PayStack', image: '/paystack.png' },
     { value: 'pesapal', label: 'PesaPal', image: '/pesapal.png' },
-    { value: 'dpo', label: 'DPO', image: '/dpo.png' },
 ] as const
 
 export const CardsTabPage: React.FC = () => {
@@ -93,6 +92,39 @@ export const CardsTabPage: React.FC = () => {
                                 <span className="text-xs sm:text-sm text-black/80 leading-relaxed">
                                     Paystack will open a card checkout. If the popup is blocked, we
                                     send you to Paystack&apos;s payment page instead.
+                                </span>
+                            </div>
+                        </div>
+                    ) : null}
+
+                    {cardProvider === 'pesapal' ? (
+                        <div className="mt-4 rounded-lg border border-black/20 bg-white p-3 shadow-sm">
+                            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                                <ReuseableInput
+                                    className="w-full h-10 rounded-sm border border-black/30 bg-white text-black"
+                                    control={control}
+                                    name="phone_number"
+                                    label="Mobile Number"
+                                    type="tel"
+                                    placeholder="0712345678"
+                                />
+                                <ReuseableInput
+                                    className="w-full h-10 rounded-sm border border-black/30 bg-white text-black"
+                                    control={control}
+                                    name="pesapal_email"
+                                    label="Email Address"
+                                    type="email"
+                                    placeholder="name@example.com"
+                                />
+                            </div>
+                            <div className="mt-4 flex items-start gap-3 rounded-md border border-black/20 bg-white p-3">
+                                <div className="mt-1 text-[#BF162E]">
+                                    <CircleAlert className="h-4 w-4" />
+                                </div>
+                                <span className="text-xs sm:text-sm text-black/80 leading-relaxed">
+                                    Provide at least a phone number or email address. You will be
+                                    redirected to Pesapal to pay with M-Pesa, card, or other supported
+                                    methods.
                                 </span>
                             </div>
                         </div>

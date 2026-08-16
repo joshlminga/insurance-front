@@ -15,7 +15,6 @@ import { CashTabPage } from "@/app/customer/motor/steppers/payment-tabs/cash";
 import { CreditTabPage } from "@/app/customer/motor/steppers/payment-tabs/credit";
 import { MpesaPageTab } from "@/app/customer/motor/steppers/payment-tabs/mpesa";
 import { PaypalTabPage } from "@/app/customer/motor/steppers/payment-tabs/paypal";
-import { PesapalTabPage } from "@/app/customer/motor/steppers/payment-tabs/pesapal";
 import { QuotationsPage } from "@/app/customer/motor/steppers/quotations";
 import { SuccessPurchase } from "@/app/customer/motor/steppers/success-purchase";
 import { VehicleDetailsPage } from "@/app/customer/motor/steppers/vehicle-details";
@@ -146,10 +145,5 @@ export const EPAYMENTTABS = [
         value: "cash",
         image: '/paycash.png',
         component: CashTabPage,
-    },
-    {
-        value: "pesapal",
-        image: '/pesapal.png',
-        component: PesapalTabPage,
     },
 ]

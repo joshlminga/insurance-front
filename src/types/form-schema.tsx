@@ -290,26 +290,58 @@ const CardPaymentSchema = BasePaymentSchema.extend({
     .email("Enter a valid email address")
     .optional()
     .or(z.literal("")),
-  phone_number: z.string().optional().or(z.literal("")),
+  pesapal_email: z
+    .string()
+    .email("Enter a valid email address")
+    .optional()
+    .or(z.literal("")),
+  phone_number: z
+    .string()
+    .optional()
+    .or(z.literal(""))
+    .refine(
+      (value) => !value || /^(?:\+254|254|0)?[17]\d{8}$/.test(value),
+      "Invalid Kenyan phone number"
+    ),
 }).superRefine((data, ctx) => {
-  if (data.card_provider !== "paystack") {
+  if (data.card_provider === "paystack") {
+    if (!data.invoice_id?.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Invoice is required",
+        path: ["invoice_id"],
+      })
+    }
+
+    if (!data.paystack_email?.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Enter an email address for Paystack checkout",
+        path: ["paystack_email"],
+      })
+    }
     return
   }
 
-  if (!data.invoice_id?.trim()) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: "Invoice is required",
-      path: ["invoice_id"],
-    })
-  }
+  if (data.card_provider === "pesapal") {
+    if (!data.invoice_id?.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Invoice is required",
+        path: ["invoice_id"],
+      })
+    }
 
-  if (!data.paystack_email?.trim()) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: "Enter an email address for Paystack checkout",
-      path: ["paystack_email"],
-    })
+    const hasPhone = Boolean(data.phone_number?.trim())
+    const hasEmail = Boolean(data.pesapal_email?.trim())
+
+    if (!hasPhone && !hasEmail) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Enter a phone number or email address for Pesapal checkout",
+        path: ["phone_number"],
+      })
+    }
   }
 })
 

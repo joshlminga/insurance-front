@@ -222,8 +222,7 @@ export function usePesapalPaymentFlow({ flow, goToNextStep }: UsePesapalPaymentF
     )
 
     const usesPesapal = (data: PaymentFormInput) =>
-        data.payment_method === 'pesapal' ||
-        (data.payment_method === 'card' && data.card_provider === 'pesapal')
+        data.payment_method === 'card' && data.card_provider === 'pesapal'
 
     return {
         pollMode,
