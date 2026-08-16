@@ -11,7 +11,8 @@ import {
 import { EROUTES } from '@/utils/enums'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { readAdminMotorCustomerContact } from '../admin-motor-session'
+import { UseAuth } from '@/stores/auth-store'
+import { resolveAdminMotorPayeeContact } from '../admin-motor-session'
 import { AdminMotorInvoicePayment } from '../steppers/invoice-payment'
 import { AdminMotorPaymentOptions } from '../steppers/payment-options'
 
@@ -41,8 +42,9 @@ const readStoredPurchaseStep = () => {
 
 export const AdminMotorQuotationPurchasePage = () => {
     const navigate = useNavigate()
+    const { user } = UseAuth()
     const [step, setStep] = useState(readStoredPurchaseStep)
-    const defaultCustomerContact = readAdminMotorCustomerContact()
+    const defaultCustomerContact = resolveAdminMotorPayeeContact(user)
 
     useEffect(() => {
         sessionStorage.setItem(ADMIN_MOTOR_PURCHASE_STEP_KEY, String(step))

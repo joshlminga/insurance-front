@@ -3,11 +3,16 @@ import { AdminMotorQuotationsPage } from '../steppers/quotations'
 import { EROUTES } from '@/utils/enums'
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { readAdminMotorCustomerContact } from '../admin-motor-session'
+import { UseAuth } from '@/stores/auth-store'
+import { resolveAdminMotorPayeeContact } from '../admin-motor-session'
 
 export const AdminMotorQuotationResultsPage = () => {
     const navigate = useNavigate()
-    const defaultCustomerContact = useMemo(() => readAdminMotorCustomerContact(), [])
+    const { user } = UseAuth()
+    const defaultCustomerContact = useMemo(
+        () => resolveAdminMotorPayeeContact(user),
+        [user]
+    )
 
     return (
         <div className="space-y-6 text-sm pb-[max(5vh,4.5rem)] mb-[5vh]">

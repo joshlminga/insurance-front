@@ -23,10 +23,8 @@ import { premiumPreview, SubmitResponse } from "@/types/types";
 import {
     EMETHODS,
     MOTOR_QUOTE_SESSION_STORAGE_KEY,
-    PURCHASE_SESSION_STORAGE_KEY,
-    VEHICLE_DETAILS_SESSION_STORAGE_KEY,
-    VEHICLE_OWNERSHIP_SESSION_STORAGE_KEY,
 } from "@/utils/constatnts";
+import { persistAdminMotorPurchaseStart } from "../../../admin-motor-session";
 import { extractErrorMessage } from "@/utils/helpers";
 import { cn } from "@/lib/utils";
 
@@ -92,15 +90,11 @@ export const AdminMotorPostComparisonPage: React.FC<premiumPreview> = ({
                     ShowToast.error("Purchase session could not be initialized. Please try again.")
                     return
                 }
-                sessionStorage.setItem(PURCHASE_SESSION_STORAGE_KEY, String(purchaseId))
-                sessionStorage.setItem(
-                    VEHICLE_DETAILS_SESSION_STORAGE_KEY,
-                    data?.data?.vehicle_info ? JSON.stringify(data.data.vehicle_info) : ""
-                )
-                sessionStorage.setItem(
-                    VEHICLE_OWNERSHIP_SESSION_STORAGE_KEY,
-                    String(data?.data?.ownership ?? "")
-                )
+                persistAdminMotorPurchaseStart({
+                    purchaseId,
+                    vehicleInfo: data?.data?.vehicle_info,
+                    ownership: data?.data?.ownership,
+                })
                 goToNextStep?.();
                 ShowToast.success(data?.message ?? "Purchase started");
             },

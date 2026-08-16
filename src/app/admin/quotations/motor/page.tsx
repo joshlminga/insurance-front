@@ -66,7 +66,11 @@ import {
 import { buildMotorQuotationPayload } from './motor-quotation-payload'
 import { OrganizationLocationInput } from './organization-location-input'
 import { OfficeCountrySelect } from './office-country-select'
-import { persistAdminMotorCustomerContact, persistAdminMotorQuoteSession } from './admin-motor-session'
+import {
+    contactFromUser,
+    persistAdminMotorCustomerContact,
+    persistAdminMotorQuoteSession,
+} from './admin-motor-session'
 
 type ProfileCountry = {
     id?: number | string
@@ -430,11 +434,15 @@ export const MotorQuotationPage = () => {
             return
         }
 
-        persistAdminMotorCustomerContact({
-            email: data.email?.trim() || undefined,
-            name: data.full_name?.trim() || undefined,
-            phone: data.phone?.trim() || undefined,
-        })
+        persistAdminMotorCustomerContact(
+            isCustomerContactMissing(data)
+                ? contactFromUser(user)
+                : {
+                    email: data.email?.trim() || undefined,
+                    name: data.full_name?.trim() || undefined,
+                    phone: data.phone?.trim() || undefined,
+                }
+        )
         const payload = buildMotorQuotationPayload({
             data,
             profileCountryId: profileCountry?.id,

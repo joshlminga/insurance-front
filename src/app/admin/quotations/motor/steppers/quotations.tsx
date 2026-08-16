@@ -33,11 +33,9 @@ import {
     FILTEROPTIONS,
     MAX_COMPARISONS,
     MOTOR_QUOTE_SESSION_STORAGE_KEY,
-    PURCHASE_SESSION_STORAGE_KEY,
-    VEHICLE_DETAILS_SESSION_STORAGE_KEY,
-    VEHICLE_OWNERSHIP_SESSION_STORAGE_KEY,
     ReusableReducer
 } from '@/utils/constatnts'
+import { persistAdminMotorPurchaseStart } from '../admin-motor-session'
 import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
 import { formatCurrency } from '@/lib/format'
 import { serializeMotorPremiumParams } from '@/lib/motor-premium-params'
@@ -284,10 +282,11 @@ export const AdminMotorQuotationsPage: React.FC<AdminMotorStepProps> = ({
                     ShowToast.error("Purchase session could not be initialized. Please try again.")
                     return
                 }
-                const vehicleInfo = data?.data?.vehicle_info
-                sessionStorage.setItem(PURCHASE_SESSION_STORAGE_KEY, String(purchaseId))
-                sessionStorage.setItem(VEHICLE_DETAILS_SESSION_STORAGE_KEY, vehicleInfo ? JSON.stringify(vehicleInfo) : "")
-                sessionStorage.setItem(VEHICLE_OWNERSHIP_SESSION_STORAGE_KEY, String(data?.data?.ownership))
+                persistAdminMotorPurchaseStart({
+                    purchaseId,
+                    vehicleInfo: data?.data?.vehicle_info,
+                    ownership: data?.data?.ownership,
+                })
                 goToNextStep?.();
                 ShowToast.success(data?.message ?? "Purchase started");
             },
