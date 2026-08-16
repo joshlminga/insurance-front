@@ -9,6 +9,11 @@ vi.mock("@/hooks/hooks", () => ({
     mutate: vi.fn(),
     isPending: false,
   }),
+  UseApiQuery: () => ({
+    data: undefined,
+    isError: false,
+    isLoading: false,
+  }),
 }))
 
 vi.mock("react-router-dom", async () => {
@@ -57,6 +62,7 @@ describe("SettlementModal", () => {
     )
 
     expect(screen.getByText(/M-Pesa phone number/i)).toBeInTheDocument()
+    expect(screen.getByText("Paystack")).toBeInTheDocument()
   })
 })
 
@@ -81,6 +87,22 @@ describe("CreateSettlementSchema", () => {
   it("accepts Pesapal with email only", () => {
     const result = CreateSettlementSchema.safeParse({
       payment_gateway: "pesapal",
+      email: "agent@example.com",
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it("requires email for Paystack", () => {
+    const result = CreateSettlementSchema.safeParse({
+      payment_gateway: "paystack",
+      email: "",
+    })
+    expect(result.success).toBe(false)
+  })
+
+  it("accepts Paystack with a valid email", () => {
+    const result = CreateSettlementSchema.safeParse({
+      payment_gateway: "paystack",
       email: "agent@example.com",
     })
     expect(result.success).toBe(true)

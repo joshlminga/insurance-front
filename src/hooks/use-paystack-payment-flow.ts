@@ -125,7 +125,7 @@ export function usePaystackPaymentFlow({ flow }: UsePaystackPaymentFlowOptions) 
           accessCode: checkout.access_code,
           publicKey: checkout.public_key,
           email: variables.email ?? '',
-          amount: 0,
+          amount: variables.amount ?? 0,
           reference,
           onSuccess: () => startPaystackPolling(reference),
           onCancel: () => {
@@ -164,6 +164,7 @@ export function usePaystackPaymentFlow({ flow }: UsePaystackPaymentFlowOptions) 
       const payload: PaystackPayload = {
         invoice_id: invoiceId,
         email,
+        amount: data.amount,
       }
 
       const phone = data.phone_number?.trim()

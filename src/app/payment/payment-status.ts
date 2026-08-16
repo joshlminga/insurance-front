@@ -69,6 +69,17 @@ export function interpretPaystackStatus(response: PaystackPollResponse | undefin
     return 'unknown'
 }
 
+/** Settlement Paystack status payloads include this id; invoice checkouts do not. */
+export function readPaystackSettlementId(response: PaystackPollResponse | undefined): number | undefined {
+    if (!response) return undefined
+    const payload = nestedPayload<{ credit_settlement_id?: number | null }>(response)
+    const raw = payload.credit_settlement_id ?? response.credit_settlement_id
+    if (typeof raw === 'number' && Number.isFinite(raw) && raw > 0) {
+        return raw
+    }
+    return undefined
+}
+
 export function readCreditSchedule(payload: SubmitResponse | undefined): CreditSchedule | undefined {
     const data = payload?.data
     if (!data || Array.isArray(data) || typeof data !== 'object') return undefined

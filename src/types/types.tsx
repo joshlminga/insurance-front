@@ -635,6 +635,7 @@ export type PaystackPayload = {
   invoice_id: number
   email?: string
   phone?: string
+  amount?: number
 }
 
 export type PesapalPollResponse = {
@@ -662,13 +663,15 @@ export type PaystackPollResponse = {
   status?: string
   gateway_status?: string
   reference?: string
-  invoice_id?: number
+  invoice_id?: number | null
+  credit_settlement_id?: number | null
   message?: string
   data?: {
     status?: string
     gateway_status?: string
     reference?: string
-    invoice_id?: number
+    invoice_id?: number | null
+    credit_settlement_id?: number | null
   }
 }
 
@@ -687,7 +690,7 @@ export type CreditScheduleStatus =
   | 'cancelled'
 export type CreditSettlementStatus = 'pending' | 'processing' | 'completed' | 'failed'
 export type CreditAdjustmentType = 'refund' | 'write_off' | 'manual_charge' | 'correction'
-export type CreditPaymentGateway = 'pesapal' | 'mpesa'
+export type CreditPaymentGateway = 'pesapal' | 'mpesa' | 'paystack'
 
 export type CreditWallet = {
   id?: number
@@ -746,6 +749,10 @@ export type CreditSettlementPayment = {
   order_tracking_id?: string
   redirect_url?: string
   checkout_request_id?: string
+  reference?: string
+  access_code?: string
+  authorization_url?: string
+  public_key?: string
 }
 
 export type CreditSettlement = {

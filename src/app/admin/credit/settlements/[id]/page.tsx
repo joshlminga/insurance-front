@@ -103,7 +103,9 @@ export function CreditSettlementDetailPage() {
     pending:
       settlement?.payment_gateway === "mpesa"
         ? "Approve the M-Pesa STK push on your phone to restore credit."
-        : "Complete payment in the gateway to restore your credit.",
+        : settlement?.payment_gateway === "paystack"
+          ? "Complete checkout in Paystack to restore your credit."
+          : "Complete payment in the gateway to restore your credit.",
     processing: "Confirming payment…",
     completed: "Credit restored successfully.",
     failed: "Payment failed. Start a new settlement to retry.",

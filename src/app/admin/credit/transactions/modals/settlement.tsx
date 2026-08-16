@@ -2,19 +2,23 @@
 import { Button, ReuseableInput } from "@/dev/core"
 import { CREDIT_URLS } from "@/app/admin/credit/credit-query"
 import { getCreditOutstanding } from "@/dev/columns/admin/credit/transactions"
-import { UseApiMutation } from "@/hooks/hooks"
+import { interpretPaystackStatus } from "@/app/payment/payment-status"
+import { UseApiMutation, UseApiQuery } from "@/hooks/hooks"
 import { CreateSettlementSchema } from "@/types/form-schema"
 import type { CreateSettlementFormValues } from "@/types/schema"
 import type {
   CreditSettlement,
   CreditSettlementPayment,
   CreditTransaction,
+  PaystackPollResponse,
   SubmitResponse,
 } from "@/types/types"
-import { EMETHODS } from "@/utils/constatnts"
+import { EMETHODS, POLL_INTERVAL_MS, POLL_TIMEOUT_MS } from "@/utils/constatnts"
 import { extractErrorMessage } from "@/utils/helpers"
 import { ShowToast } from "@/utils/utils"
 import { storePesapalCheckoutSession } from "@/utils/pesapal-payment"
+import { openPaystackPopup } from "@/utils/paystack-payment"
+import { EROUTES } from "@/utils/enums"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm, Controller } from "react-hook-form"
 import { useNavigate } from "react-router-dom"
@@ -22,7 +26,7 @@ import { formatCurrency } from "@/lib/format"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Input } from "@/components/ui/input"
-import { useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 
 type SettlementModalProps = {
   handleDialogContextSwitch: (context?: any) => void
@@ -37,6 +41,10 @@ type CreateSettlementPayload = {
   payment_gateway: string
   phone?: string
   email?: string
+}
+
+function creditSettlementPath(id: number): string {
+  return EROUTES.CREDIT_SETTLEMENT.replace(":id", String(id))
 }
 
 export default function SettlementModal({
@@ -56,6 +64,9 @@ export default function SettlementModal({
   }, [selectedTransactions])
 
   const [itemAmounts, setItemAmounts] = useState<Record<number, number>>(defaultAmounts)
+  // After Paystack popup success we poll /paystack/status (same as cover payment).
+  const [pollReference, setPollReference] = useState<string | null>(null)
+  const [pendingSettlementId, setPendingSettlementId] = useState<number | null>(null)
 
   const total = selectedTransactions.reduce(
     (sum, txn) => sum + (itemAmounts[txn.id] ?? getCreditOutstanding(txn)),
@@ -72,6 +83,90 @@ export default function SettlementModal({
   })
 
   const paymentGateway = form.watch("payment_gateway")
+  const isConfirmingPaystack = Boolean(pollReference)
+
+  const goToSettlement = useCallback(
+    (settlementId: number) => {
+      handleDialogContextSwitch({ refetch: true })
+      navigate(creditSettlementPath(settlementId))
+    },
+    [handleDialogContextSwitch, navigate],
+  )
+
+  const paystackPollQuery = UseApiQuery<PaystackPollResponse>({
+    url: "paystack/status",
+    params: isConfirmingPaystack && pollReference ? { reference: pollReference } : undefined,
+    queryOptions: {
+      enabled: isConfirmingPaystack && Boolean(pollReference),
+      refetchInterval: isConfirmingPaystack ? POLL_INTERVAL_MS : false,
+      refetchIntervalInBackground: true,
+      retry: 1,
+    },
+  })
+
+  useEffect(() => {
+    if (!isConfirmingPaystack || pendingSettlementId === null) return
+    const timeoutId = window.setTimeout(() => {
+      ShowToast.error("Payment timed out. Check the settlement page for the latest status.")
+      goToSettlement(pendingSettlementId)
+    }, POLL_TIMEOUT_MS)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [goToSettlement, isConfirmingPaystack, pendingSettlementId])
+
+  useEffect(() => {
+    if (!isConfirmingPaystack || pendingSettlementId === null || !paystackPollQuery.data) return
+
+    const outcome = interpretPaystackStatus(paystackPollQuery.data)
+    if (outcome === "success") {
+      ShowToast.success("Paystack payment confirmed.")
+      goToSettlement(pendingSettlementId)
+      return
+    }
+    if (outcome === "failed") {
+      ShowToast.error("Paystack payment failed. You can retry from a new settlement.")
+      goToSettlement(pendingSettlementId)
+    }
+  }, [goToSettlement, isConfirmingPaystack, paystackPollQuery.data, pendingSettlementId])
+
+  const startPaystackCheckout = useCallback(
+    async (payment: CreditSettlementPayment, settlementId: number) => {
+      const reference = payment.reference
+      const authorizationUrl = payment.authorization_url
+      if (!reference) {
+        ShowToast.error("Failed to initiate Paystack checkout.")
+        goToSettlement(settlementId)
+        return
+      }
+
+      const opened = await openPaystackPopup({
+        accessCode: payment.access_code,
+        publicKey: payment.public_key,
+        email: form.getValues("email")?.trim() || "",
+        amount: total,
+        reference,
+        onSuccess: () => {
+          setPendingSettlementId(settlementId)
+          setPollReference(reference)
+        },
+        onCancel: () => {
+          ShowToast.error("Paystack checkout was closed. Please try again.")
+          goToSettlement(settlementId)
+        },
+      })
+
+      if (!opened) {
+        if (!authorizationUrl) {
+          ShowToast.error("Failed to open Paystack checkout.")
+          goToSettlement(settlementId)
+          return
+        }
+        ShowToast.success("Redirecting to Paystack to complete payment.")
+        window.location.href = authorizationUrl
+      }
+    },
+    [form, goToSettlement, total],
+  )
 
   const submitMutation = UseApiMutation<SubmitResponse, CreateSettlementPayload>({
     url: CREDIT_URLS.settlements,
@@ -86,15 +181,22 @@ export default function SettlementModal({
 
         ShowToast.success(response?.message || "Settlement created")
         componentProps?.refetch?.()
-        handleDialogContextSwitch({ refetch: true })
 
         const redirectUrl = payment.redirect_url
         const orderTrackingId = payment.order_tracking_id
         const checkoutRequestId = payment.checkout_request_id
 
+        // Paystack: popup first, hosted checkout as fallback — stay on this modal while we poll.
+        if (settlementId && payment.gateway === "paystack") {
+          void startPaystackCheckout(payment, settlementId)
+          return
+        }
+
+        handleDialogContextSwitch({ refetch: true })
+
         // Pesapal: redirect to gateway, return to settlement detail to poll
         if (redirectUrl && orderTrackingId && settlementId) {
-          const returnUrl = `/dashboard/credit/settlements/${settlementId}`
+          const returnUrl = creditSettlementPath(settlementId)
           storePesapalCheckoutSession(orderTrackingId, returnUrl)
           window.location.href = redirectUrl
           return
@@ -106,7 +208,7 @@ export default function SettlementModal({
         }
 
         if (settlementId) {
-          navigate(`/dashboard/credit/settlements/${settlementId}`)
+          navigate(creditSettlementPath(settlementId))
         }
       },
       onError: (error) => {
@@ -138,6 +240,8 @@ export default function SettlementModal({
       email: values.email?.trim() || undefined,
     })
   }
+
+  const showEmailField = paymentGateway === "pesapal" || paymentGateway === "paystack"
 
   return (
     <div className="w-full min-w-120 max-w-lg p-6 space-y-6">
@@ -191,7 +295,7 @@ export default function SettlementModal({
               <RadioGroup
                 value={field.value}
                 onValueChange={field.onChange}
-                className="flex gap-4"
+                className="flex flex-wrap gap-4"
               >
                 <div className="flex items-center gap-2">
                   <RadioGroupItem value="mpesa" id="gateway-mpesa" />
@@ -200,6 +304,10 @@ export default function SettlementModal({
                 <div className="flex items-center gap-2">
                   <RadioGroupItem value="pesapal" id="gateway-pesapal" />
                   <Label htmlFor="gateway-pesapal">Pesapal</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <RadioGroupItem value="paystack" id="gateway-paystack" />
+                  <Label htmlFor="gateway-paystack">Paystack</Label>
                 </div>
               </RadioGroup>
             )}
@@ -214,14 +322,21 @@ export default function SettlementModal({
           required={paymentGateway === "mpesa"}
         />
 
-        {paymentGateway === "pesapal" ? (
+        {showEmailField ? (
           <ReuseableInput
             control={form.control}
             name="email"
             label="Email"
             type="email"
             placeholder="agent@example.com"
+            required={paymentGateway === "paystack"}
           />
+        ) : null}
+
+        {isConfirmingPaystack ? (
+          <p className="text-sm text-muted-foreground">
+            Confirming your Paystack payment...
+          </p>
         ) : null}
 
         <div className="flex justify-end gap-3 pt-2">
@@ -229,13 +344,14 @@ export default function SettlementModal({
             type="button"
             variant="outline"
             onClick={() => handleDialogContextSwitch({ refetch: false })}
+            disabled={submitMutation.isPending || isConfirmingPaystack}
           >
             Cancel
           </Button>
           <Button
             type="submit"
-            loading={submitMutation.isPending}
-            disabled={selectedTransactions.length === 0}
+            loading={submitMutation.isPending || isConfirmingPaystack}
+            disabled={selectedTransactions.length === 0 || isConfirmingPaystack}
           >
             Create settlement & pay
           </Button>

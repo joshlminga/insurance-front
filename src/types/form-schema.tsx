@@ -1015,7 +1015,7 @@ export const RejectApprovalSchema = z.object({
 
 export const CreateSettlementSchema = z
   .object({
-    payment_gateway: z.enum(["pesapal", "mpesa"]),
+    payment_gateway: z.enum(["pesapal", "mpesa", "paystack"]),
     phone: z.string().optional(),
     email: z.string().email("Enter a valid email").optional().or(z.literal("")),
   })
@@ -1036,6 +1036,14 @@ export const CreateSettlementSchema = z
         code: z.ZodIssueCode.custom,
         message: "Phone or email is required for Pesapal",
         path: ["phone"],
+      })
+    }
+
+    if (data.payment_gateway === "paystack" && !email) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Email is required for Paystack",
+        path: ["email"],
       })
     }
   })
