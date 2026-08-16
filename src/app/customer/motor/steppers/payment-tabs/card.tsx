@@ -3,6 +3,8 @@ import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { cn } from '@/lib/utils'
 import type { PaymentFormInput } from '@/types/schema'
+import { ReuseableInput } from '@/dev/core'
+import { CircleAlert } from 'lucide-react'
 import React from 'react'
 import { Controller, useFormContext } from 'react-hook-form'
 import { PaymentAmountSummary } from './payment-amount-summary'
@@ -14,7 +16,8 @@ const CARD_PROVIDERS = [
 ] as const
 
 export const CardsTabPage: React.FC = () => {
-    const { control } = useFormContext<PaymentFormInput>()
+    const { control, watch } = useFormContext<PaymentFormInput>()
+    const cardProvider = watch('card_provider') ?? 'paystack'
 
     return (
         <div className="w-full">
@@ -72,6 +75,28 @@ export const CardsTabPage: React.FC = () => {
                             )}
                         />
                     </div>
+
+                    {cardProvider === 'paystack' ? (
+                        <div className="mt-4 rounded-lg border border-black/20 bg-white p-3 shadow-sm">
+                            <ReuseableInput
+                                className="w-full h-10 rounded-sm border border-black/30 bg-white text-black"
+                                control={control}
+                                name="paystack_email"
+                                label="Email Address"
+                                type="email"
+                                placeholder="name@example.com"
+                            />
+                            <div className="mt-3 flex items-start gap-3 rounded-md border border-black/20 bg-white p-3">
+                                <div className="mt-1 text-[#BF162E]">
+                                    <CircleAlert className="h-4 w-4" />
+                                </div>
+                                <span className="text-xs sm:text-sm text-black/80 leading-relaxed">
+                                    Paystack will open a card checkout. If the popup is blocked, we
+                                    send you to Paystack&apos;s payment page instead.
+                                </span>
+                            </div>
+                        </div>
+                    ) : null}
                 </FieldGroup>
             </div>
         </div>

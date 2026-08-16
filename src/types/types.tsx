@@ -631,6 +631,12 @@ export type PesapalPayload = {
   email?: string
 }
 
+export type PaystackPayload = {
+  invoice_id: number
+  email?: string
+  phone?: string
+}
+
 export type PesapalPollResponse = {
   status?: string
   payment_status?: string | null
@@ -649,6 +655,20 @@ export type MpesaPollResponse = {
     ResultDesc?: string
     CheckoutRequestID?: string
     checkout_request_id?: string
+  }
+}
+
+export type PaystackPollResponse = {
+  status?: string
+  gateway_status?: string
+  reference?: string
+  invoice_id?: number
+  message?: string
+  data?: {
+    status?: string
+    gateway_status?: string
+    reference?: string
+    invoice_id?: number
   }
 }
 

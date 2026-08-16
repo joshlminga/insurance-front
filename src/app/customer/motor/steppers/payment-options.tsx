@@ -30,12 +30,17 @@ import { extractErrorMessage } from '@/utils/helpers'
 import { cn } from '@/lib/utils'
 import { useCustomDialogContextFactory } from '@/hooks'
 import { usePesapalPaymentFlow } from '@/hooks/use-pesapal-payment-flow'
+import { usePaystackPaymentFlow } from '@/hooks/use-paystack-payment-flow'
 import { submitMotorCreditPayment } from '@/app/admin/credit/credit-payment'
 import { CreditPendingBanner } from '@/app/admin/credit/components/CreditPendingBanner'
 import { CreditScheduleStatusPanel } from '@/app/admin/credit/components/CreditScheduleStatusPanel'
+import { storePaymentStatusSession } from '@/app/payment/payment-session'
+import { EROUTES } from '@/utils/enums'
+import { useNavigate } from 'react-router-dom'
 
 
 export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goToNextStep, goToPrevStep }) => {
+    const navigate = useNavigate()
     const [selectedPaymentMethod, setSelectedPaymentMethod] = React.useState<string>('mpesa');
     const [purchaseSessionId, setPurchaseSessionId] = React.useState<string | null>(null);
     const [isPlanConfirmOpen, setIsPlanConfirmOpen] = React.useState(false);
@@ -52,14 +57,27 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
 
     const {
         pollMode,
-        isPolling,
-        pollMessage,
-        stopPolling,
+        isPolling: isGatewayPolling,
+        pollMessage: gatewayPollMessage,
+        stopPolling: stopGatewayPolling,
         startMpesaPolling,
         submitPesapal,
         usesPesapal,
         isPesapalSubmitting,
     } = usePesapalPaymentFlow({ flow: 'motor', goToNextStep })
+
+    const {
+        isPolling: isPaystackPolling,
+        pollMessage: paystackPollMessage,
+        stopPolling: stopPaystackPolling,
+        submitPaystack,
+        usesPaystack,
+        isPaystackSubmitting,
+    } = usePaystackPaymentFlow({ flow: 'motor' })
+
+    const isPolling = isGatewayPolling || isPaystackPolling
+    const pollMessage = isPaystackPolling ? paystackPollMessage : gatewayPollMessage
+    const stopPolling = isPaystackPolling ? stopPaystackPolling : stopGatewayPolling
 
     React.useEffect(() => {
         const storedPurchaseKey = String(sessionStorage.getItem(PURCHASE_SESSION_STORAGE_KEY))
@@ -101,6 +119,7 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
             card_provider: 'paystack',
             paypal_email: '',
             pesapal_email: '',
+            paystack_email: '',
             available_credit: '',
             unsettled_credit: '',
             unsettled_credit_limit: '',
@@ -221,17 +240,20 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
             }
             setCreditPending(null)
             setIsCreditSubmitting(true)
+            storePaymentStatusSession({ flow: 'motor', invoiceId: data.invoice_id })
             try {
                 const result = await submitMotorCreditPayment(data.invoice_id, {
                     credit_acknowledged: data.credit_acknowledged,
                 })
                 if (result.kind === 'pending_approval') {
+                    const invoiceId = String(result.invoiceId ?? data.invoice_id)
                     setCreditPending({
                         message: result.message,
                         creditTransactionId: result.creditTransactionId,
-                        invoiceId: String(result.invoiceId ?? data.invoice_id),
+                        invoiceId,
                     })
                     ShowToast.success(result.message)
+                    navigate(`${EROUTES.PAYMENT_CREDIT_PENDING}?invoice_id=${encodeURIComponent(invoiceId)}`)
                     return
                 }
                 if (result.kind === 'validation_error') {
@@ -239,12 +261,19 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
                     return
                 }
                 ShowToast.success(result.message || 'Credit payment submitted successfully')
-                goToNextStep?.()
+                navigate(EROUTES.PAYMENT_CREDIT_SUCCESS)
             } catch (error) {
                 ShowToast.error(extractErrorMessage(error))
+                navigate(EROUTES.PAYMENT_CREDIT_FAILED)
             } finally {
                 setIsCreditSubmitting(false)
             }
+            return
+        }
+
+        if (usesPaystack(data)) {
+            storePaymentStatusSession({ flow: 'motor', invoiceId: data.invoice_id })
+            submitPaystack(data)
             return
         }
 
@@ -252,6 +281,7 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
             goToNextStep?.()
             return
         }
+        storePaymentStatusSession({ flow: 'motor', invoiceId: data.invoice_id })
         const payload: MpesaPayload = {
             phone: data.phone_number ?? '',
             amount: data.amount ?? 0,
@@ -442,7 +472,9 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                 <div className="w-12 h-12 border-4 border-[#0CC258] border-t-transparent rounded-full animate-spin" />
                                 <p className="text-center font-medium text-gray-700">{pollMessage}</p>
                                 <p className="text-center text-sm text-gray-500">
-                                    {pollMode === 'pesapal'
+                                    {isPaystackPolling
+                                        ? 'Complete payment in the Paystack window if it is still open.'
+                                        : pollMode === 'pesapal'
                                         ? 'Complete payment on the Pesapal page if it is still open.'
                                         : 'Please enter your PIN on the M-Pesa prompt on your phone.'}
                                 </p>
@@ -518,10 +550,10 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                 ]} />
                             <Button
                                 type="submit"
-                                disabled={isPolling || isPesapalSubmitting || isCreditSubmitting}
+                                disabled={isPolling || isPesapalSubmitting || isPaystackSubmitting || isCreditSubmitting}
                                 className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
                                 rightIcon={<ArrowRightCircle />}>
-                                {isPolling || isPesapalSubmitting || isCreditSubmitting
+                                {isPolling || isPesapalSubmitting || isPaystackSubmitting || isCreditSubmitting
                                     ? 'Processing...'
                                     : 'Proceed To Payment'}
                             </Button>

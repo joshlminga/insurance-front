@@ -21,6 +21,8 @@ type CreditScheduleStatusPanelProps = {
   invoiceId: string | number
   /** Customer purchase stepper: advance to the receipt/success step after Proceed. */
   onProceeded?: () => void
+  /** Fires when the schedule status becomes completed (including after polling). */
+  onCompleted?: () => void
   /** Dashboard default: offer the receipt PDF after payment completes. */
   showReceiptButton?: boolean
 }
@@ -44,6 +46,7 @@ const getTodayDateString = () => new Date().toISOString().split("T")[0]
 export function CreditScheduleStatusPanel({
   invoiceId,
   onProceeded,
+  onCompleted,
   showReceiptButton = true,
 }: CreditScheduleStatusPanelProps) {
   const [coverStartDraft, setCoverStartDraft] = useState("")
@@ -73,6 +76,12 @@ export function CreditScheduleStatusPanel({
       setCoverStartDraft(schedule.cover_start_date)
     }
   }, [schedule?.cover_start_date])
+
+  useEffect(() => {
+    if (schedule?.status === 'completed') {
+      onCompleted?.()
+    }
+  }, [schedule?.status, onCompleted])
 
   const coverStartMutation = UseApiMutation<SubmitResponse, CoverStartPayload>({
     url: (variables) => CREDIT_URLS.scheduleCoverStart(variables.scheduleId),

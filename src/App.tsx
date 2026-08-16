@@ -30,6 +30,17 @@ const StepPage = lazy(() => import("./app/customer/motor/steppers/steppage").the
 const MarineLandingPage = lazy(() => import("./app/customer/marine/page").then(m => ({ default: m.MarineLandingPage })))
 const MarineStepPage = lazy(() => import("./app/customer/marine/steppers/steppage").then(m => ({ default: m.MarineStepPage })))
 const PesapalReturnPage = lazy(() => import("./app/customer/payment/pesapal/return/page").then(m => ({ default: m.PesapalReturnPage })))
+const PaymentLayout = lazy(() => import("./app/payment/layout").then(m => ({ default: m.PaymentLayout })))
+const MpesaReturnPage = lazy(() => import("./app/payment/mpesa/return/page").then(m => ({ default: m.MpesaReturnPage })))
+const MpesaSuccessPage = lazy(() => import("./app/payment/mpesa/success/page").then(m => ({ default: m.MpesaSuccessPage })))
+const MpesaFailedPage = lazy(() => import("./app/payment/mpesa/failed/page").then(m => ({ default: m.MpesaFailedPage })))
+const CreditReturnPage = lazy(() => import("./app/payment/credit/return/page").then(m => ({ default: m.CreditReturnPage })))
+const CreditSuccessPage = lazy(() => import("./app/payment/credit/success/page").then(m => ({ default: m.CreditSuccessPage })))
+const PaymentCreditPendingPage = lazy(() => import("./app/payment/credit/pending/page").then(m => ({ default: m.CreditPendingPage })))
+const CreditFailedPage = lazy(() => import("./app/payment/credit/failed/page").then(m => ({ default: m.CreditFailedPage })))
+const PaystackReturnPage = lazy(() => import("./app/payment/paystack/return/page").then(m => ({ default: m.PaystackReturnPage })))
+const PaystackSuccessPage = lazy(() => import("./app/payment/paystack/success/page").then(m => ({ default: m.PaystackSuccessPage })))
+const PaystackFailedPage = lazy(() => import("./app/payment/paystack/failed/page").then(m => ({ default: m.PaystackFailedPage })))
 const CustomerProfileLayout = lazy(() => import("./app/customer/profile-settings/layout").then(m => ({ default: m.CustomerProfileLayout })))
 const AccountSettingsPage = lazy(() => import("./app/customer/profile-settings/settings").then(m => ({ default: m.AccountSettingsPage })))
 const CustomerClaimsPage = lazy(() => import("./app/customer/profile-settings/claims").then(m => ({ default: m.CustomerClaimsPage })))
@@ -207,6 +218,36 @@ export const router = createBrowserRouter([
         <S><PesapalReturnPage /></S>
       </CustomerPublicRoute>
     ),
+  },
+
+  {
+    path: EROUTES.PAYSTACK_RETURN,
+    element: (
+      <CustomerPublicRoute>
+        <S><PaystackReturnPage /></S>
+      </CustomerPublicRoute>
+    ),
+  },
+
+  {
+    path: "payment",
+    element: (
+      <CustomerPublicRoute>
+        <S><PaymentLayout /></S>
+      </CustomerPublicRoute>
+    ),
+    children: [
+      { path: "mpesa/return", element: <S><MpesaReturnPage /></S> },
+      { path: "mpesa/success", element: <S><MpesaSuccessPage /></S> },
+      { path: "mpesa/failed", element: <S><MpesaFailedPage /></S> },
+      { path: "credit/return", element: <S><CreditReturnPage /></S> },
+      { path: "credit/success", element: <S><CreditSuccessPage /></S> },
+      { path: "credit/pending", element: <S><PaymentCreditPendingPage /></S> },
+      { path: "credit/failed", element: <S><CreditFailedPage /></S> },
+      { path: "paystack/return", element: <S><PaystackReturnPage /></S> },
+      { path: "paystack/success", element: <S><PaystackSuccessPage /></S> },
+      { path: "paystack/failed", element: <S><PaystackFailedPage /></S> },
+    ],
   },
 
   // END-USERGENERAL = TRUE

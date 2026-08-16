@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { getPaymentStatusPath, patchPaymentStatusSession } from '@/app/payment/payment-session'
 import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
 import type { PaymentFormInput } from '@/types/schema'
 import type { PesapalPayload, PesapalPollResponse, SubmitResponse } from '@/types/types'
@@ -15,6 +16,7 @@ import {
 import { extractErrorMessage } from '@/utils/helpers'
 import { ShowToast } from '@/utils/utils'
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 
 export type PaymentPollMode = 'mpesa' | 'pesapal' | null
 
@@ -24,6 +26,7 @@ type UsePesapalPaymentFlowOptions = {
 }
 
 export function usePesapalPaymentFlow({ flow, goToNextStep }: UsePesapalPaymentFlowOptions) {
+    const navigate = useNavigate()
     const [pollMode, setPollMode] = React.useState<PaymentPollMode>(null)
     const [pollId, setPollId] = React.useState<string | null>(null)
     const [isPolling, setIsPolling] = React.useState(false)
@@ -37,11 +40,12 @@ export function usePesapalPaymentFlow({ flow, goToNextStep }: UsePesapalPaymentF
     }, [])
 
     const startMpesaPolling = React.useCallback((checkoutRequestId: string) => {
+        patchPaymentStatusSession({ flow, checkoutRequestId })
         setPollMode('mpesa')
         setPollId(checkoutRequestId)
         setIsPolling(true)
         setPollMessage('Waiting for payment confirmation...')
-    }, [])
+    }, [flow])
 
     const startPesapalPolling = React.useCallback((orderTrackingId: string) => {
         setPollMode('pesapal')
@@ -74,12 +78,16 @@ export function usePesapalPaymentFlow({ flow, goToNextStep }: UsePesapalPaymentF
     React.useEffect(() => {
         if (!isPolling) return
         const timeoutId = setTimeout(() => {
+            const timedOutMode = pollMode
             stopPolling()
             ShowToast.error('Payment timed out. Please try again.')
+            if (timedOutMode === 'mpesa') {
+                navigate(getPaymentStatusPath('mpesa', 'failed'))
+            }
         }, POLL_TIMEOUT_MS)
 
         return () => clearTimeout(timeoutId)
-    }, [isPolling, stopPolling])
+    }, [isPolling, navigate, pollMode, stopPolling])
 
     const mpesaPollQuery = UseApiQuery<any>({
         url: 'mpesa/status',
@@ -123,21 +131,18 @@ export function usePesapalPaymentFlow({ flow, goToNextStep }: UsePesapalPaymentF
 
         if (isSuccess) {
             stopPolling()
-            setTimeout(() => {
-                ShowToast.success(payload.message || payload.ResultDesc || 'Payment confirmed!')
-            }, 4000)
-            goToNextStep?.()
+            ShowToast.success(payload.message || payload.ResultDesc || 'Payment confirmed!')
+            navigate(getPaymentStatusPath('mpesa', 'success'))
             return
         }
         if (isFailed) {
             stopPolling()
-            setTimeout(() => {
-                ShowToast.error(payload.message || payload.ResultDesc || 'Payment failed. Please try again.')
-            }, 4000)
+            ShowToast.error(payload.message || payload.ResultDesc || 'Payment failed. Please try again.')
+            navigate(getPaymentStatusPath('mpesa', 'failed'))
             return
         }
         setPollMessage(payload.message || 'Waiting for payment confirmation...')
-    }, [isPolling, pollMode, mpesaPollQuery.data, goToNextStep, stopPolling])
+    }, [isPolling, pollMode, mpesaPollQuery.data, navigate, stopPolling])
 
     React.useEffect(() => {
         if (!isPolling || pollMode !== 'pesapal' || !pesapalPollQuery.data) return

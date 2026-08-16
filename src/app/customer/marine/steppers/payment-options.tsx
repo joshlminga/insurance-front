@@ -18,8 +18,12 @@ import { FormProvider, useForm, type Resolver } from 'react-hook-form'
 import { PaymentDetailsSchema } from '@/types/form-schema'
 import type { PaymentFormInput } from '@/types/schema'
 import { extractErrorMessage } from '@/utils/helpers'
+import { storePaymentStatusSession } from '@/app/payment/payment-session'
+import { EROUTES } from '@/utils/enums'
+import { useNavigate } from 'react-router-dom'
 
 export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goToNextStep, goToPrevStep }) => {
+    const navigate = useNavigate()
     const [selectedPaymentMethod, setSelectedPaymentMethod] = React.useState<string>('mpesa')
     const [purchaseSessionId, setPurchaseSessionId] = React.useState<string | null>(null)
 
@@ -114,10 +118,17 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
             return
         }
 
+        if (data.payment_method === 'card' && data.card_provider === 'paystack') {
+            storePaymentStatusSession({ flow: 'marine', invoiceId: data.invoice_id })
+            navigate(EROUTES.PAYMENT_PAYSTACK_SUCCESS)
+            return
+        }
+
         if (data.payment_method !== 'mpesa') {
             goToNextStep?.()
             return
         }
+        storePaymentStatusSession({ flow: 'marine', invoiceId: data.invoice_id })
         const payload: MpesaPayload = {
             phone: data.phone_number ?? '',
             amount: data.amount ?? 0,

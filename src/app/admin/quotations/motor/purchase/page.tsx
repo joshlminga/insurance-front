@@ -2,6 +2,9 @@ import { PageHeader } from '@/components/shared'
 import { KycInfo } from '@/app/customer/motor/steppers/kyc-info'
 import { SuccessPurchase } from '@/app/customer/motor/steppers/success-purchase'
 import {
+    ADMIN_MOTOR_PURCHASE_STEP_KEY,
+} from '@/app/payment/payment-session'
+import {
     INVOICE_SESSION_STORAGE_KEY,
     PURCHASE_SESSION_STORAGE_KEY,
 } from '@/utils/constatnts'
@@ -27,10 +30,23 @@ const readSessionValue = (key: string) => {
 
 const hasSessionValue = (key: string) => Boolean(readSessionValue(key))
 
+const readStoredPurchaseStep = () => {
+    const stored = readSessionValue(ADMIN_MOTOR_PURCHASE_STEP_KEY)
+    const parsed = stored ? Number(stored) : 1
+    if (Number.isInteger(parsed) && parsed >= 1 && parsed <= PURCHASE_STEPS.length) {
+        return parsed
+    }
+    return 1
+}
+
 export const AdminMotorQuotationPurchasePage = () => {
     const navigate = useNavigate()
-    const [step, setStep] = useState(1)
+    const [step, setStep] = useState(readStoredPurchaseStep)
     const defaultCustomerContact = readAdminMotorCustomerContact()
+
+    useEffect(() => {
+        sessionStorage.setItem(ADMIN_MOTOR_PURCHASE_STEP_KEY, String(step))
+    }, [step])
 
     useEffect(() => {
         if (step === 1 && !hasSessionValue(PURCHASE_SESSION_STORAGE_KEY)) {

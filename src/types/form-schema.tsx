@@ -284,6 +284,33 @@ const CardPaymentSchema = BasePaymentSchema.extend({
   card_provider: z.enum(["paystack", "pesapal", "dpo"], {
     error: "Select a payment provider",
   }),
+  invoice_id: z.string().optional(),
+  paystack_email: z
+    .string()
+    .email("Enter a valid email address")
+    .optional()
+    .or(z.literal("")),
+  phone_number: z.string().optional().or(z.literal("")),
+}).superRefine((data, ctx) => {
+  if (data.card_provider !== "paystack") {
+    return
+  }
+
+  if (!data.invoice_id?.trim()) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Invoice is required",
+      path: ["invoice_id"],
+    })
+  }
+
+  if (!data.paystack_email?.trim()) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Enter an email address for Paystack checkout",
+      path: ["paystack_email"],
+    })
+  }
 })
 
 // Pesapal specific fields
