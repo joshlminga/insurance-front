@@ -34,3 +34,4 @@ dist-ssr
 .cursor*
 package-lock.json
 yarn.lock
+public/test-assets
