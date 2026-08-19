@@ -15,6 +15,7 @@ import {
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { AddVehicleDetailsDialog } from '@/app/customer/motor/steppers/components/add-vehicle-details-dialog'
 import { VehicleUseInput } from '@/app/customer/motor/steppers/components/vehicle-use-input'
 import {
     Button,
@@ -28,10 +29,10 @@ import { cn } from '@/lib/utils'
 import { UseAuth } from '@/stores/auth-store'
 import { AdminMotorQuotationSchema } from '@/types/form-schema'
 import type { AdminMotorQuotationFormValues } from '@/types/schema'
-import type { SubmitResponse, VehicleClassItem, MotorQuoteSessionStartData } from '@/types/types'
+import type { SubmitResponse, VehicleClassItem, MotorQuoteSessionStartData, VehiclePreview } from '@/types/types'
 import { EROUTES, PROFFESIONALVALUATIONCHECKBOX } from '@/utils/enums'
 import { EMETHODS, OWNERSHIPOPTIONS } from '@/utils/constatnts'
-import { extractErrorMessage } from '@/utils/helpers'
+import { extractErrorMessage, getInvalidVehicleRegistrationError } from '@/utils/helpers'
 import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
@@ -269,6 +270,11 @@ export const MotorQuotationPage = () => {
     const [showSelfCoverSubmitWarning, setShowSelfCoverSubmitWarning] = useState(false)
     const [pendingSubmitData, setPendingSubmitData] =
         useState<AdminMotorQuotationFormValues | null>(null)
+    const [addVehicleOpen, setAddVehicleOpen] = useState(false)
+    const [vehiclePreview, setVehiclePreview] = useState<VehiclePreview | null>(null)
+    const [lastQuotePayload, setLastQuotePayload] = useState<ReturnType<
+        typeof buildMotorQuotationPayload
+    > | null>(null)
 
     const { data: adminProfileData, isLoading: isAdminProfileLoading } =
         UseApiQuery<SubmitResponse>({
@@ -331,6 +337,10 @@ export const MotorQuotationPage = () => {
     })
 
     const formCountryId = useWatch({ control: form.control, name: 'country_id' })
+    const vehicleRegistrationNumber = useWatch({
+        control: form.control,
+        name: 'vehicle_registration_number',
+    })
 
     // const effectiveCountryId = useMemo(() => {
     //     if (formCountryId) return formCountryId
@@ -418,6 +428,12 @@ export const MotorQuotationPage = () => {
                 navigate(EROUTES.MOTOR_QUOTATION_RESULTS)
             },
             onError: (error) => {
+                const invalidRegistration = getInvalidVehicleRegistrationError(error)
+                if (invalidRegistration) {
+                    setVehiclePreview(invalidRegistration.preview)
+                    setAddVehicleOpen(true)
+                    return
+                }
                 ShowToast.error(extractErrorMessage(error))
             },
         },
@@ -448,6 +464,7 @@ export const MotorQuotationPage = () => {
             profileCountryId: profileCountry?.id,
             dialCode,
         })
+        setLastQuotePayload(payload)
         submitMutation.mutate(payload)
     }
 
@@ -473,6 +490,11 @@ export const MotorQuotationPage = () => {
     const handleCancelSelfCoverSubmit = () => {
         setPendingSubmitData(null)
         setShowSelfCoverSubmitWarning(false)
+    }
+
+    const handleVehicleAdded = () => {
+        if (!lastQuotePayload) return
+        submitMutation.mutate(lastQuotePayload)
     }
 
     return (
@@ -715,6 +737,15 @@ export const MotorQuotationPage = () => {
                     </div>
                 </form>
             </FormProvider>
+
+            <AddVehicleDetailsDialog
+                open={addVehicleOpen}
+                onOpenChange={setAddVehicleOpen}
+                registrationNumber={vehicleRegistrationNumber ?? ''}
+                preview={vehiclePreview}
+                autofillSensitiveFields
+                onAdded={handleVehicleAdded}
+            />
 
             <AlertDialog
                 open={showSelfCoverSubmitWarning}

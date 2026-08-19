@@ -206,6 +206,40 @@ export interface SubmitResponse {
   }
   CheckoutRequestID?: any
 }
+
+/** NTSA-style preview returned when quote start rejects the registration number. */
+export type VehiclePreview = {
+  make?: string | null
+  model?: string | null
+  year?: number | string | null
+  body_type?: string | null
+  color?: string | null
+  number_of_passengers?: number | string | null
+  tonnage?: number | string | null
+  engine_number?: string | null
+  cubic_capacity?: number | string | null
+  chassis_number?: string | null
+}
+
+export type InvalidVehicleRegistrationError = {
+  message: string
+  preview: VehiclePreview | null
+}
+
+/** POST /vehicle/add-vehicle body — numbers are coerced from the dialog form strings. */
+export type AddVehicleApiPayload = {
+  registration_number: string
+  make: string
+  model: string
+  manufacture_year: number
+  body_type: string
+  color: string
+  number_of_passengers: number
+  tonnage: number
+  engine_number: string
+  cubic_capacity: number
+  chassis_number: string
+}
 export interface CustomerVerificationDetailsProps {
   goToNextStep?: () => void
   goToPrevStep?: () => void

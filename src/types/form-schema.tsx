@@ -102,6 +102,20 @@ export const VehicleDetailsSchema = z.object({
     }
   })
 
+export const AddVehicleSchema = z.object({
+  registration_number: z.string().min(1, "Registration number is required"),
+  make: z.string().min(1, "Make is required"),
+  model: z.string().min(1, "Model is required"),
+  manufacture_year: z.string().min(1, "Year of manufacture is required"),
+  body_type: z.string().min(1, "Body type is required"),
+  color: z.string().min(1, "Color is required"),
+  number_of_passengers: z.string().min(1, "Number of passengers is required"),
+  tonnage: z.string().min(1, "Tonnage is required"),
+  engine_number: z.string().min(1, "Engine number is required"),
+  cubic_capacity: z.string().min(1, "Cubic capacity is required"),
+  chassis_number: z.string().min(1, "Chassis number is required"),
+})
+
 export const AdminMotorQuotationSchema = CustomerDetailsSchema
   .omit({ country: true, first_name: true, last_name: true })
   .merge(VehicleDetailsSchema)
@@ -227,6 +241,7 @@ export const MotorKycSchema = z.object({
   industry_category: z.string().optional(),
   coi_number: z.string().optional(),
   tax_pin: z.string().optional(),
+  policy_holder: z.string().optional(),
   logbook: OptionalKycFileSchema,
   tax_certificate: OptionalKycFileSchema,
   id_document: OptionalKycFileSchema,

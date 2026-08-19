@@ -1,9 +1,11 @@
 import { formatNumber } from "@/lib/format";
 import { 
   BenefitGroup, 
+  InvalidVehicleRegistrationError,
   ListedBenefitResolved, 
   MotorBenefitOption, 
-  MotorUserCoverInvoice
+  MotorUserCoverInvoice,
+  VehiclePreview,
 } from "@/types/types";
 import { FieldValues } from "react-hook-form";
 import { BENEFIT_SELECT_NONE } from "./constatnts";
@@ -36,6 +38,34 @@ export const extractErrorMessage = (error: any): string => {
   }
   return error?.message || "Submission failed!";
 };
+
+/**
+ * Quote start can reject a plate that NTSA still "knows".
+ * Laravel then sends errors.vehicle_registration_number plus vehicle_preview.
+ * If that field error is present we open the add-vehicle dialog instead of a toast.
+ */
+export function getInvalidVehicleRegistrationError(
+  error: unknown
+): InvalidVehicleRegistrationError | null {
+  const response = (error as any)?.response?.data
+  const fieldErrors = response?.errors?.vehicle_registration_number
+  if (fieldErrors == null) return null
+
+  const message = Array.isArray(fieldErrors)
+    ? fieldErrors.filter(Boolean).join("\n")
+    : String(fieldErrors)
+
+  const rawPreview = response?.vehicle_preview
+  const preview =
+    rawPreview && typeof rawPreview === "object"
+      ? (rawPreview as VehiclePreview)
+      : null
+
+  return {
+    message: message || "Invalid vehicle registration number",
+    preview,
+  }
+}
 
 export const formatDate = (value?: string) => {
     if (!value) return '-'

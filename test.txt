@@ -1,0 +1,25 @@
+    public function loadData()
+    {
+        $data['breadcrumb'] = [];
+        $data['brand_name'] = "ICEVI Africa";
+        $data['h4_pagetitle'] = '';
+        $data['main_website'] = 'https://conference2026.iceviafrica.org/';
+        $data['base_url'] = 'https://conference2026.iceviafrica.org/';
+        $data['api_url'] = 'https://conferenceforms.iceviafrica.org/mail';
+        $data['this_page'] = '';
+
+        // #region agent log
+        self::agentDebugLog('A', 'Auto::loadData base URLs', [
+            'base_url' => $data['base_url'],
+            'api_url' => $data['api_url'],
+            'app_url' => config('app.url'),
+            'php_sapi' => PHP_SAPI,
+            'server_addr' => $_SERVER['SERVER_ADDR'] ?? null,
+            'http_host' => $_SERVER['HTTP_HOST'] ?? null,
+        ]);
+        // #endregion
+
+
+        // Return
+        return $data;
+    }

@@ -11,7 +11,8 @@ import React, { useEffect, useMemo, useState } from 'react'
 import type {
     CustomerVerificationDetailsProps,
     SubmitResponse,
-    VehicleClassItem
+    VehicleClassItem,
+    VehiclePreview,
 } from '@/types/types'
 import { CardFooter } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
@@ -26,7 +27,7 @@ import {
     Truck,
     type LucideIcon,
 } from 'lucide-react'
-import { Controller, useForm, FormProvider, useFormContext } from 'react-hook-form'
+import { Controller, useForm, FormProvider, useFormContext, useWatch } from 'react-hook-form'
 import type { VehicleFormValues } from '@/types/schema'
 import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -34,10 +35,11 @@ import { VehicleDetailsSchema } from '@/types/form-schema'
 import { EMETHODS, MOTOR_QUOTE_SESSION_STORAGE_KEY } from '@/utils/constatnts'
 import { ShowToast } from '@/utils/utils'
 import { UseAuth } from '@/stores/auth-store'
-import { extractErrorMessage } from '@/utils/helpers'
+import { extractErrorMessage, getInvalidVehicleRegistrationError } from '@/utils/helpers'
 import { cn } from '@/lib/utils'
 import { OWNERSHIPOPTIONS } from '@/utils/constatnts'
 import { PROFFESIONALVALUATIONCHECKBOX } from '@/utils/enums'
+import { AddVehicleDetailsDialog } from './components/add-vehicle-details-dialog'
 import { VehicleUseInput } from './components/vehicle-use-input'
 
 type MotorClassTab = {
@@ -201,6 +203,9 @@ function AnimatedSection({ show, children, className }: AnimatedSectionProps) {
 
 export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({ goToNextStep, goToPrevStep }) => {
     const [selectedTabValue, setSelectedTabValue] = useState<string>("");
+    const [addVehicleOpen, setAddVehicleOpen] = useState(false)
+    const [vehiclePreview, setVehiclePreview] = useState<VehiclePreview | null>(null)
+    const [lastQuotePayload, setLastQuotePayload] = useState<Record<string, any> | null>(null)
 
     const { user, alpha } = UseAuth();
     const { data, isLoading } = UseApiQuery<SubmitResponse>({
@@ -254,6 +259,10 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
     }, [alpha, form])
 
     const hasSelectedClass = Boolean(selectedTabValue)
+    const vehicleRegistrationNumber = useWatch({
+        control: form.control,
+        name: 'vehicle_registration_number',
+    })
 
     const submitMutation = UseApiMutation<SubmitResponse, Record<string, any>>({
         url: "alternative/quotation/motor",
@@ -270,6 +279,12 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
                 ShowToast.success(data.message || "Submitted successfully!")
             },
             onError: (error: any) => {
+                const invalidRegistration = getInvalidVehicleRegistrationError(error)
+                if (invalidRegistration) {
+                    setVehiclePreview(invalidRegistration.preview)
+                    setAddVehicleOpen(true)
+                    return
+                }
                 const message = extractErrorMessage(error);
                 ShowToast.error(message || "Submission failed!")
             },
@@ -280,7 +295,7 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
             data.valued_by_professional === true ||
             String(data.valued_by_professional).toLowerCase() === "true"
 
-        submitMutation.mutate({
+        const payload = {
             // Active UI fields
             user_id: (data.user_id || user?.id) ?? "",
             valued_by_professional: valuedByProfessional,
@@ -305,7 +320,14 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
             number_of_passengers: null,
             tonnage: null,
             coverfor_id: null,
-        })
+        }
+        setLastQuotePayload(payload)
+        submitMutation.mutate(payload)
+    }
+
+    const handleVehicleAdded = () => {
+        if (!lastQuotePayload) return
+        submitMutation.mutate(lastQuotePayload)
     }
 
     const handleClassChange = (value: string) => {
@@ -314,6 +336,7 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
     }
 
     return (
+        <>
         <FormProvider {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="w-full mx-auto bg-transparent">
                 <div className="rounded-2xl border border-[#ADABAB]/50 bg-linear-to-b from-white to-neutral-50/90 p-4 shadow-sm sm:p-6">
@@ -428,5 +451,14 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
                 </CardFooter>
             </form>
         </FormProvider>
+        <AddVehicleDetailsDialog
+            open={addVehicleOpen}
+            onOpenChange={setAddVehicleOpen}
+            registrationNumber={vehicleRegistrationNumber ?? ''}
+            preview={vehiclePreview}
+            autofillSensitiveFields={false}
+            onAdded={handleVehicleAdded}
+        />
+        </>
     )
 }
