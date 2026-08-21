@@ -13,15 +13,8 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { UseAuth } from '@/stores/auth-store'
 import { resolveAdminMotorPayeeContact } from '../admin-motor-session'
-import { AdminMotorInvoicePayment } from '../steppers/invoice-payment'
-import { AdminMotorPaymentOptions } from '../steppers/payment-options'
+import { PURCHASE_STEPS } from '@/dev/steps'
 
-const PURCHASE_STEPS = [
-    { title: 'KYC', Component: KycInfo },
-    { title: 'Invoice', Component: AdminMotorInvoicePayment },
-    { title: 'Payment', Component: AdminMotorPaymentOptions },
-    { title: 'Success', Component: SuccessPurchase },
-] as const
 
 const readSessionValue = (key: string) => {
     if (typeof window === 'undefined') return null
@@ -90,7 +83,6 @@ export const AdminMotorQuotationPurchasePage = () => {
                     description=""
                 />
             </div>
-
             <StepComponent {...stepProps} />
         </div>
     )

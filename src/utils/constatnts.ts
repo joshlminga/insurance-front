@@ -282,6 +282,7 @@ export const COVER_STATUS_DISPLAY: Record<string, any> = {
     },
 };
 
+
 export const SAMPLE_NOTIFS: TNotifs[] = [
   {
   	type: 'message',

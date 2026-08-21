@@ -27,8 +27,7 @@ import {
 import { persistAdminMotorPurchaseStart } from "../../../admin-motor-session";
 import { extractErrorMessage } from "@/utils/helpers";
 import { cn } from "@/lib/utils";
-
-const PREMIUM_KEYS = new Set(["Basic Premium", "Gross Premium", "Levies"])
+import { PREMIUM_KEYS } from "@/utils/enums";
 
 function getBadgeClass(status: string): string {
     const lower = status.toLowerCase()
@@ -72,6 +71,7 @@ export const AdminMotorPostComparisonPage: React.FC<premiumPreview> = ({
         useCustomDialogContextFactory<{
             refetch?: () => Promise<any>
             data?: any
+            
         }>()
 
     const emailComponentData = {

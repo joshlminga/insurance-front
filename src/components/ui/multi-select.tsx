@@ -5,9 +5,9 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
   Command,
-  // CommandEmpty,
+  CommandEmpty,
   CommandGroup,
-  // CommandInput,
+  CommandInput,
   CommandItem,
   CommandList,
   CommandSeparator,
@@ -262,11 +262,20 @@ export function MultiSelectValue({
 
 export function MultiSelectContent({
   children,
+  search,
   ...props
 }: {
-  search?: boolean | { placeholder?: string; emptyMessage?: string }
+  search?: boolean | {
+    placeholder?: string
+    emptyMessage?: string
+    value?: string
+    onValueChange?: (value: string) => void
+  }
   children: ReactNode
 } & Omit<ComponentPropsWithoutRef<typeof Command>, "children">) {
+
+  const canSearch = Boolean(search)
+  const searchOptions = typeof search === "object" ? search : undefined
 
   return (
     <>
@@ -277,21 +286,21 @@ export function MultiSelectContent({
       </div>
       <PopoverContent className="min-w-(--radix-popover-trigger-width) p-0">
         <Command {...props}>
-          {/* {canSearch ? (
+          {canSearch ? (
             <CommandInput
-              placeholder={
-                typeof search === "object" ? search.placeholder : undefined
-              }
+              placeholder={searchOptions?.placeholder}
+              value={searchOptions?.value}
+              onValueChange={searchOptions?.onValueChange}
             />
           ) : (
             <button autoFocus className="sr-only" />
-          )} */}
+          )}
           <CommandList>
-            {/* {canSearch && (
+            {canSearch && (
               <CommandEmpty>
-                {typeof search === "object" ? search.emptyMessage : undefined}
+                {searchOptions?.emptyMessage}
               </CommandEmpty>
-            )} */}
+            )}
             {children}
           </CommandList>
         </Command>

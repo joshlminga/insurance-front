@@ -132,6 +132,7 @@ export const SORT_ORDER = {
 } as const;
 
 export type SORT_ORDER = typeof SORT_ORDER[keyof typeof SORT_ORDER];
+export const PREMIUM_KEYS = new Set(["Basic Premium", "Gross Premium", "Levies"])
 
 export const QUOTATIONCHECKBOX = [
   { id: 'excess', label: 'Excess Protector' },

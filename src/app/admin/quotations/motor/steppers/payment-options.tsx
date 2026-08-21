@@ -8,7 +8,15 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
-import { Button, ConfirmationDialog, CustomDialogComponent, ReusableDropdown, ReuseableInput, ReuseableRadioChoiceGroup, SendInvoiceViaEmail } from '@/dev/core'
+import { 
+    Button,
+    ConfirmationDialog, 
+    CustomDialogComponent, 
+    ReusableDropdown, 
+    ReuseableInput, 
+    ReuseableRadioChoiceGroup, 
+    SendInvoiceViaEmail 
+} from '@/dev/core'
 import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
 import type { MpesaPayload, SubmitResponse } from '@/types/types'
 import {
@@ -423,7 +431,7 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
                                 {visibleInstallmentCount > 0 ? (
                                     <div
                                         className={cn(
-                                            'mt-2.5 grid gap-2.5 sm:gap-4 [&_[data-slot=field-label]]:text-sm [&_[data-slot=field-label]]:mb-1',
+                                            'mt-2.5 grid gap-2.5 sm:gap-4 **:data-[slot=field-label]:text-sm **:data-[slot=field-label]:mb-1',
                                             visibleInstallmentCount === 1 && 'grid-cols-1 sm:grid-cols-2',
                                             visibleInstallmentCount === 2 && 'grid-cols-1 sm:grid-cols-2',
                                             visibleInstallmentCount >= 3 && 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'

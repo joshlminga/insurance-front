@@ -4,7 +4,7 @@ import { Button, ReuseableInput } from '@/dev/core'
 import { UseApiMutation } from '@/hooks/hooks'
 import { InvoicePaymentSchema } from '@/types/form-schema'
 import type { InvoicePaymentFormValues } from '@/types/schema'
-import type { SubmitResponse } from '@/types/types'
+import type { BoxHeaderProps, SubmitResponse } from '@/types/types'
 import { EMETHODS, INVOICE_SESSION_STORAGE_KEY } from '@/utils/constatnts'
 import { extractErrorMessage } from '@/utils/helpers'
 import { ShowToast } from '@/utils/utils'
@@ -14,11 +14,6 @@ import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import type { AdminMotorStepProps } from '../admin-step-props'
 import { readAdminMotorCustomerContact } from '../admin-motor-session'
-
-type BoxHeaderProps = {
-    title: string
-    description?: string
-}
 
 const getTodayDateString = () => new Date().toISOString().split("T")[0]
 

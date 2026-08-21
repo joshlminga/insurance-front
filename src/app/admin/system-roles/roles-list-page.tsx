@@ -21,7 +21,7 @@ import { CustomDialogComponent } from "@/dev/core"
 import { CustomBaseTable, SearchTools } from "@/dev/table"
 import { useCustomDialogContextFactory, useDebounce } from "@/hooks"
 import { UseApiMutation, UseApiQuery } from "@/hooks/hooks"
-import { SingleActionsHandler, SubmitResponse, TFilterOptions, TPaginationFilters } from "@/types/types"
+import { RolesListPageProps, SingleActionsHandler, SubmitResponse, TFilterOptions, TPaginationFilters } from "@/types/types"
 import { FILTEROPTIONS, ReusableReducer } from "@/utils/constatnts"
 import { EMETHODS } from "@/utils/constatnts"
 import { extractErrorMessage } from "@/utils/helpers"
@@ -40,14 +40,6 @@ import {
   getRoleIsEditable,
 } from "../organization-roles/role-utils"
 
-type RolesListPageProps = {
-  rolesBasePath: "global-roles" | "system-roles"
-  title: string
-  description: string
-  tableTitle: string
-}
-
-/** Shared list page for global (template) and system (admin) roles */
 export const RolesListPage = ({
   rolesBasePath,
   title,
@@ -268,10 +260,7 @@ export const RolesListPage = ({
             ],
             OtherTools: SearchTools,
             data: tableData,
-            pageCount:
-              (data as any)?.data?.pagination?.last_page ??
-              (data as any)?.pagination?.last_page ??
-              1,
+            pageCount:data?.data?.pagination?.last_page ?? 1,
             title: tableTitle,
             showPagination: true,
             setPageSize: (pageSize) =>
@@ -279,14 +268,8 @@ export const RolesListPage = ({
                 payload: { pageSize },
                 type: "pageSize",
               }),
-            pageSize:
-              (data as any)?.data?.pagination?.per_page ??
-              (data as any)?.pagination?.per_page ??
-              10,
-            page:
-              (data as any)?.data?.pagination?.current_page ??
-              (data as any)?.pagination?.current_page ??
-              1,
+            pageSize:data?.data?.pagination?.per_page ?? 10,
+            page: data?.data?.pagination?.current_page ?? 1,
             isLoading,
             isError,
             rolesBasePath,
@@ -310,8 +293,7 @@ export const RolesListPage = ({
 
       <CustomDialogComponent
         {...{ handleDialogContextSwitch, dialogOpen }}
-        className="sm:max-w-fit w-[95vw] sm:w-auto p-4 sm:p-6"
-      >
+        className="sm:max-w-fit w-[95vw] sm:w-auto p-4 sm:p-6">
         {dialogContent?.Component && (
           <dialogContent.Component
             {...{

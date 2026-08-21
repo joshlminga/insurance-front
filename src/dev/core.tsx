@@ -60,7 +60,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Fragment } from "react/jsx-runtime";
 import React, { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { Button as ShadButton } from "@/components/ui/button"
-import { Loader2, OctagonAlert, X } from "lucide-react";
+import { Check, ChevronsUpDown, Loader2, OctagonAlert, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Controller, type FieldValues } from "react-hook-form";
@@ -102,6 +102,14 @@ import {
 } from "@/components/ui/multi-select";
 import { UseApiMutation, UseApiQuery } from "@/hooks/hooks";
 import { Label } from "@/components/ui/label";
+import {
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+} from "@/components/ui/command";
 import {
     CONFIRMATION_DIALOG_CANCEL_CLASSES,
     CONFIRMATION_DIALOG_CONFIRM_CLASSES,
@@ -1107,6 +1115,95 @@ export const ReusableDropDownComponent = <T,>({
     );
 };
 
+type CommandSelectOption = {
+    value: string
+    label: React.ReactNode
+    searchValue?: string
+}
+
+type SearchableCommandSelectProps = {
+    value?: string
+    onChange?: (value: string) => void
+    options: CommandSelectOption[]
+    placeholder: string
+    searchPlaceholder: string
+    emptyMessage: string
+    disabled?: boolean
+    isLoading?: boolean
+    isFetching?: boolean
+    onSearchChange?: (value: string) => void
+    footer?: React.ReactNode
+}
+
+/** A Shadcn combobox that preserves the public API of the reusable selects. */
+const SearchableCommandSelect = ({
+    value,
+    onChange,
+    options,
+    placeholder,
+    searchPlaceholder,
+    emptyMessage,
+    disabled = false,
+    isLoading = false,
+    isFetching = false,
+    onSearchChange,
+    footer,
+}: SearchableCommandSelectProps) => {
+    const [open, setOpen] = useState(false)
+    const selectedOption = options.find((option) => option.value === value)
+
+    return (
+        <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+                <ShadButton
+                    type="button"
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={open}
+                    disabled={disabled}
+                    className="w-full h-10 justify-between rounded-[5px] border-[#ADABAB] font-normal hover:bg-transparent">
+                    <span className="truncate">
+                        {selectedOption?.label ?? (isLoading ? "Loading..." : placeholder)}
+                    </span>
+                    <ChevronsUpDown className="size-4 shrink-0 opacity-50" />
+                </ShadButton>
+            </PopoverTrigger>
+            <PopoverContent className="w-(--radix-popover-trigger-width) p-0" align="start">
+                <Command shouldFilter={!onSearchChange}>
+                    <CommandInput
+                        placeholder={searchPlaceholder}
+                        onValueChange={onSearchChange}
+                    />
+                    <CommandList>
+                        {!isLoading && !isFetching && <CommandEmpty>{emptyMessage}</CommandEmpty>}
+                        <CommandGroup>
+                            {options.map((option) => (
+                                <CommandItem
+                                    key={option.value}
+                                    value={option.searchValue ?? String(option.label)}
+                                    onSelect={() => {
+                                        onChange?.(option.value)
+                                        setOpen(false)
+                                    }}>
+                                    <Check className={cn("size-4", value === option.value ? "opacity-100" : "opacity-0")} />
+                                    {option.label}
+                                </CommandItem>
+                            ))}
+                        </CommandGroup>
+                        {(isLoading || isFetching) && (
+                            <div className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground">
+                                <Loader2 className="size-3 animate-spin" />
+                                Loading...
+                            </div>
+                        )}
+                        {footer}
+                    </CommandList>
+                </Command>
+            </PopoverContent>
+        </Popover>
+    )
+}
+
 export const ReusableCountriesInputMultiselect = ({
     value,
     onChange,
@@ -1228,44 +1325,18 @@ export function ReuseableSingleSelectCountriesInput<T extends FieldValues>({
                 </Label>
             )}
 
-            <Select value={value} onValueChange={onChange} disabled={disabled}>
-                <SelectTrigger className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]">
-                    <SelectValue
-                        placeholder={
-                            isLoading
-                                ? "Loading countries..."
-                                : placeholder
-                        }
-                    />
-                </SelectTrigger>
-                <SelectContent className="max-h-75">
-                    <div className="p-2 sticky top-0 bg-white z-10">
-                        <Input
-                            placeholder="Search country..."
-                            onChange={(e) => handleSearch(e.target.value)}
-                            className="h-8"
-                        />
-                    </div>
-                    {countries.map((country) => (
-                        <SelectItem
-                            key={country.id}
-                            value={String(country.id)}>
-                            {country.name}
-                        </SelectItem>
-                    ))}
-                    {isLoading && (
-                        <div className="px-3 py-2 text-sm text-muted-foreground">
-                            Loading...
-                        </div>
-                    )}
-                    {!isLoading && countries.length === 0 && (
-                        <div className="px-3 py-2 text-sm text-muted-foreground">
-                            No countries found
-                        </div>
-                    )}
-                    <div ref={observerRef} className="h-4" />
-                </SelectContent>
-            </Select>
+            <SearchableCommandSelect
+                value={value}
+                onChange={onChange}
+                options={countries.map((country) => ({ value: String(country.id), label: country.name ?? "" }))}
+                placeholder={placeholder}
+                searchPlaceholder="Search country..."
+                emptyMessage="No countries found"
+                disabled={disabled}
+                isLoading={isLoading}
+                onSearchChange={handleSearch}
+                footer={<div ref={observerRef} className="h-4" />}
+            />
         </div>
     )
 }
@@ -1338,44 +1409,18 @@ export function ReuseableSingleSelectNationalityInput<T extends FieldValues>({
                 </Label>
             )}
 
-            <Select value={value} onValueChange={onChange} disabled={disabled}>
-                <SelectTrigger className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]">
-                    <SelectValue
-                        placeholder={
-                            isLoading
-                                ? "Loading countries..."
-                                : placeholder
-                        }
-                    />
-                </SelectTrigger>
-                <SelectContent className="max-h-75">
-                    <div className="p-2 sticky top-0 bg-white z-10">
-                        <Input
-                            placeholder="Search country..."
-                            onChange={(e) => handleSearch(e.target.value)}
-                            className="h-8"
-                        />
-                    </div>
-                    {countries.map((country) => (
-                        <SelectItem
-                            key={country.id}
-                            value={String(country.id)}>
-                            {country.name}
-                        </SelectItem>
-                    ))}
-                    {isLoading && (
-                        <div className="px-3 py-2 text-sm text-muted-foreground">
-                            Loading...
-                        </div>
-                    )}
-                    {!isLoading && countries.length === 0 && (
-                        <div className="px-3 py-2 text-sm text-muted-foreground">
-                            No countries found
-                        </div>
-                    )}
-                    <div ref={observerRef} className="h-4" />
-                </SelectContent>
-            </Select>
+            <SearchableCommandSelect
+                value={value}
+                onChange={onChange}
+                options={countries.map((country) => ({ value: String(country.id), label: country.name ?? "" }))}
+                placeholder={placeholder}
+                searchPlaceholder="Search nationality..."
+                emptyMessage="No nationalities found"
+                disabled={disabled}
+                isLoading={isLoading}
+                onSearchChange={handleSearch}
+                footer={<div ref={observerRef} className="h-4" />}
+            />
         </div>
     )
 }
@@ -1680,42 +1725,18 @@ export function ReuseableSingleSelectVehicleUseInput<T extends FieldValues>({
                     {required && <span className="text-destructive ml-1">*</span>}
                 </Label>
             )}
-            <Select
+            <SearchableCommandSelect
                 value={value}
-                onValueChange={onChange}
-                disabled={disabled}>
-                <SelectTrigger className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]">
-                    <SelectValue placeholder={placeholder} />
-                </SelectTrigger>
-                <SelectContent>
-                    <div className="p-2">
-                        <Input
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            placeholder="Search vehicle use..."
-                            className="h-9"
-                            onKeyDown={(e) => e.stopPropagation()}
-                        />
-                    </div>
-                    {isFetching && (
-                        <div className="px-3 py-2 text-sm text-muted-foreground flex items-center gap-2">
-                            <Loader2 className="h-3 w-3 animate-spin" />
-                            Searching...
-                        </div>
-                    )}
-
-                    {vehicleUse.map((item: any) => (
-                        <SelectItem key={item.id} value={String(item.id)}>
-                            {item?.name}
-                        </SelectItem>
-                    ))}
-                    {!isLoading && !isFetching && vehicleUse.length === 0 && (
-                        <div className="px-3 py-2 text-sm text-muted-foreground">
-                            No vehicle use found
-                        </div>
-                    )}
-                </SelectContent>
-            </Select>
+                onChange={onChange}
+                options={vehicleUse.map((item: any) => ({ value: String(item.id), label: item?.name ?? "" }))}
+                placeholder={placeholder}
+                searchPlaceholder="Search vehicle use..."
+                emptyMessage="No vehicle use found"
+                disabled={disabled}
+                isLoading={isLoading}
+                isFetching={isFetching}
+                onSearchChange={setSearch}
+            />
         </div>
     );
 }
@@ -1808,42 +1829,18 @@ export function ReuseableSingleSelectCoveringInput<T extends FieldValues>({
                     {required && <span className="text-destructive ml-1">*</span>}
                 </Label>
             )}
-            <Select
+            <SearchableCommandSelect
                 value={value}
-                onValueChange={onChange}
-                disabled={disabled}>
-                <SelectTrigger className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]">
-                    <SelectValue placeholder={placeholder} />
-                </SelectTrigger>
-                <SelectContent>
-                    <div className="p-2">
-                        <Input
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            placeholder="Search vehicle use..."
-                            className="h-9"
-                            onKeyDown={(e) => e.stopPropagation()}
-                        />
-                    </div>
-                    {isFetching && (
-                        <div className="px-3 py-2 text-sm text-muted-foreground flex items-center gap-2">
-                            <Loader2 className="h-3 w-3 animate-spin" />
-                            Searching...
-                        </div>
-                    )}
-
-                    {covering.map((item: any) => (
-                        <SelectItem key={item.id} value={String(item.id)}>
-                            {item?.name}
-                        </SelectItem>
-                    ))}
-                    {!isLoading && !isFetching && covering.length === 0 && (
-                        <div className="px-3 py-2 text-sm text-muted-foreground">
-                            No covering use found
-                        </div>
-                    )}
-                </SelectContent>
-            </Select>
+                onChange={onChange}
+                options={covering.map((item: any) => ({ value: String(item.id), label: item?.name ?? "" }))}
+                placeholder={placeholder}
+                searchPlaceholder="Search covering..."
+                emptyMessage="No covering found"
+                disabled={disabled}
+                isLoading={isLoading}
+                isFetching={isFetching}
+                onSearchChange={setSearch}
+            />
         </div>
     );
 }
@@ -1897,48 +1894,21 @@ export function ReusableSingleSelectApiInput({
                     )}
                 </Label>
             )}
-            <Select
+            <SearchableCommandSelect
                 value={value}
-                onValueChange={onChange}
-                disabled={disabled}>
-                <SelectTrigger className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]">
-                    <SelectValue placeholder={placeholder} />
-                </SelectTrigger>
-
-                <SelectContent>
-                    <div className="p-2">
-                        <Input
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            placeholder={searchPlaceholder}
-                            className="h-9"
-                            onKeyDown={(e) => e.stopPropagation()}
-                        />
-                    </div>
-
-                    {isFetching && (
-                        <div className="px-3 py-2 text-sm text-muted-foreground flex items-center gap-2">
-                            <Loader2 className="h-3 w-3 animate-spin" />
-                            Searching...
-                        </div>
-                    )}
-
-                    {items.map((item: any) => (
-                        <SelectItem
-                            key={item[valueKey]}
-                            value={String(item[valueKey])}
-                        >
-                            {item[labelKey]}
-                        </SelectItem>
-                    ))}
-
-                    {!isLoading && !isFetching && items.length === 0 && (
-                        <div className="px-3 py-2 text-sm text-muted-foreground">
-                            {emptyMessage}
-                        </div>
-                    )}
-                </SelectContent>
-            </Select>
+                onChange={onChange}
+                options={items.map((item: any) => ({
+                    value: String(item[valueKey]),
+                    label: String(item[labelKey] ?? ""),
+                }))}
+                placeholder={placeholder}
+                searchPlaceholder={searchPlaceholder}
+                emptyMessage={emptyMessage}
+                disabled={disabled}
+                isLoading={isLoading}
+                isFetching={isFetching}
+                onSearchChange={setSearch}
+            />
         </div>
     );
 }
@@ -2011,16 +1981,13 @@ export function ReusableApiMultiSelect({
                 <MultiSelectTrigger disabled={disabled} className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]">
                     <MultiSelectValue placeholder={placeholder} />
                 </MultiSelectTrigger>
-                <MultiSelectContent>
-                    <div className="p-1">
-                        <Input
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            placeholder={searchPlaceholder}
-                            className="h-9"
-                            onKeyDown={(e) => e.stopPropagation()}
-                        />
-                    </div>
+                <MultiSelectContent
+                    search={{
+                        placeholder: searchPlaceholder,
+                        emptyMessage,
+                        value: search,
+                        onValueChange: setSearch,
+                    }}>
                     {isFetching && (
                         <div className="px-3 py-2 text-sm text-muted-foreground flex items-center gap-2">
                             <Loader2 className="h-3 w-3 animate-spin" />

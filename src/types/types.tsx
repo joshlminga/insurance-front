@@ -1128,3 +1128,21 @@ export type QuotationFiltersPanelProps = {
     onPriceRangeChange: (value: number[]) => void
     className?: string
 }
+
+export type BoxHeaderProps = {
+    title: string
+    description?: string
+}
+
+export type AdminMotorPayeeUser = {
+    id?: number | string | null
+    name?: string | null
+    email?: string | null
+    phone?: string | null
+}
+export type RolesListPageProps = {
+  rolesBasePath: "global-roles" | "system-roles"
+  title: string
+  description: string
+  tableTitle: string
+}
