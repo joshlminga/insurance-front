@@ -139,14 +139,14 @@ export const EditRoleModal = ({
             name="name"
             label="Role Name"
             required
-            className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+            className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
           />
 
           <ReuseableInput
             control={form.control}
             name="description"
             label="Description"
-            className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+            className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
           />
 
           <Controller

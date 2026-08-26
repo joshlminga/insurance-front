@@ -24,14 +24,14 @@ export const NotificationToggle = () => {
     return (
         <ReusablePopover
             trigger={
-                <Button variant="ghost" size="icon" className="relative">
+                <Button variant="ghost" size="icon" className="relative h-9 w-9 shrink-0">
                     <Bell className="h-5 w-5" />
                     <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-600" />
                     <span className="sr-only">Notifications</span>
                 </Button>
             }
             children={
-                <div className="max-w-96 max-h-96 overflow-hidden mr-10">
+                <div className="max-h-96 w-full overflow-hidden">
                     <div className="flex items-center justify-between px-4 py-3 bg-slate-50 border-b border-slate-200">
                         <h3 className="font-medium text-slate-900">
                             Notifications
@@ -90,6 +90,8 @@ export const NotificationToggle = () => {
                     </div>
                 </div>
             }
+            align="end"
+            className="w-[calc(100vw-2rem)] max-w-96"
         />
     )
 }

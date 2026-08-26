@@ -20,7 +20,7 @@ import { useState } from "react"
 import { cn } from "@/lib/utils"
 
 const inputClassName =
-  "w-full min-w-0 h-11 sm:h-12.75 rounded-[5px] border border-[#ADABAB]"
+  "w-full min-w-0 h-11 sm:h-10 rounded-[5px] border border-[#ADABAB]"
 
 export const CustomerVerificationDetails = ({
   goToNextStep,

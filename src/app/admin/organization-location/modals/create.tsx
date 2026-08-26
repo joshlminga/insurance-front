@@ -105,7 +105,7 @@ export const CreateOrganizationLocationModal = ({
           control={form.control}
           name="initials"
           label="Initials"
-          className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+          className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
         />
 
         <Controller
@@ -126,7 +126,7 @@ export const CreateOrganizationLocationModal = ({
           name="logo"
           type="file"
           label="Logo"
-          className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+          className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
         />
 
         <OrganizationLocationProductsField
@@ -156,4 +156,3 @@ export const CreateOrganizationLocationModal = ({
 }
 
 export default CreateOrganizationLocationModal
-

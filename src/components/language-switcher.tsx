@@ -36,12 +36,14 @@ export function LanguageSwitcher() {
           variant="ghost"
           role="combobox"
           aria-expanded={open}
-          className="w-fit justify-between">
-          <Globe className="mr-2 h-4 w-4" />
-          {value
-            ? languages.find((language) => language.value === value)?.label
-            : "Select"}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          className="h-9 w-9 justify-center px-0 sm:w-fit sm:px-3">
+          <Globe className="h-4 w-4 sm:mr-2" />
+          <span className="hidden sm:inline">
+            {value
+              ? languages.find((language) => language.value === value)?.label
+              : "Select"}
+          </span>
+          <ChevronsUpDown className="ml-2 hidden h-4 w-4 shrink-0 opacity-50 sm:block" />
         </Button>
       }
       children={

@@ -160,6 +160,7 @@ export interface AuthProviderState {
 
 export interface UseApiQueryOptions<TData = unknown> {
   url: string
+  queryKey?: readonly unknown[]
   params?: Record<string, any>
   config?: AxiosRequestConfig
   queryOptions?: Omit<UseQueryOptions<TData>, 'queryKey' | 'queryFn'>

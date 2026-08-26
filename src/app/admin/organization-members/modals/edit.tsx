@@ -180,7 +180,7 @@ export const EditMemberModal = ({
             name="name"
             label="Full Name"
             required
-            className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+            className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
           />
 
           <ReuseableInput
@@ -189,7 +189,7 @@ export const EditMemberModal = ({
             type="email"
             label="Email Address"
             required
-            className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+            className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
           />
 
           <ReuseableInput
@@ -197,7 +197,7 @@ export const EditMemberModal = ({
             name="phone"
             type="tel"
             label="Phone Number"
-            className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+            className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
           />
 
           <Controller
@@ -224,7 +224,7 @@ export const EditMemberModal = ({
             name="profile_picture"
             type="file"
             label="Profile Picture"
-            className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+            className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
           />
 
           <CardFooter className="flex flex-col sm:flex-row justify-between gap-3 mt-2 px-0">

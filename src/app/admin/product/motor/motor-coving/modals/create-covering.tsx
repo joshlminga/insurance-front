@@ -58,14 +58,14 @@ export const CreateMotorCoveringModal = ({ handleDialogContextSwitch, componentP
                     control={form.control}
                     name="name"
                     label="Motor Covering Name"
-                    className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                    className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                 />
                 <ReuseableInput
                     control={form.control}
                     name="description"
                     type="textarea"
                     label="Motor Covering Description"
-                    className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                    className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                 />
                 <CardFooter className="flex flex-col sm:flex-row justify-between gap-3 mt-2 px-0">
                     <Button

@@ -8,9 +8,21 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
-import { Button, ConfirmationDialog, CustomDialogComponent, ReusableDropdown, ReuseableInput, ReuseableRadioChoiceGroup, SendInvoiceViaEmail } from '@/dev/core'
+import { 
+    Button, 
+    ConfirmationDialog, 
+    CustomDialogComponent, 
+    ReusableDropdown, 
+    ReuseableInput, 
+    ReuseableRadioChoiceGroup, 
+    SendInvoiceViaEmail 
+} from '@/dev/core'
 import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
-import type { CustomerVerificationDetailsProps, MpesaPayload, SubmitResponse } from '@/types/types'
+import type { 
+    CustomerVerificationDetailsProps, 
+    MpesaPayload, 
+    SubmitResponse 
+} from '@/types/types'
 import {
     EMETHODS,
     INSTALLMENT_FIELDS_VISIBLE,
@@ -361,7 +373,7 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                                     <SelectTrigger
                                                         aria-invalid={fieldState.invalid}
                                                         className={cn(
-                                                            'w-full h-12.75 rounded-[3px] border border-[#ADABAB] bg-white text-sm',
+                                                            'w-full h-10 rounded-[3px] border border-[#ADABAB] bg-white text-sm',
                                                             fieldState.invalid &&
                                                             'border-red-500 focus:ring-red-500'
                                                         )}>
@@ -395,7 +407,7 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                     )}>
                                     {visibleInstallmentCount >= 1 && (
                                         <ReuseableInput
-                                            className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] bg-white text-black"
+                                            className="w-full h-10 rounded-[5px] border border-[#ADABAB] bg-white text-black"
                                             control={form.control}
                                             name="first_installment"
                                             label={
@@ -409,7 +421,7 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                     )}
                                     {visibleInstallmentCount >= 2 && (
                                         <ReuseableInput
-                                            className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] bg-white text-black"
+                                            className="w-full h-10 rounded-[5px] border border-[#ADABAB] bg-white text-black"
                                             control={form.control}
                                             name="second_installment"
                                             label="2nd installment"
@@ -419,7 +431,7 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                     )}
                                     {visibleInstallmentCount >= 3 && (
                                         <ReuseableInput
-                                            className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] bg-white text-black"
+                                            className="w-full h-10 rounded-[5px] border border-[#ADABAB] bg-white text-black"
                                             control={form.control}
                                             name="third_installment"
                                             label="3rd installment"

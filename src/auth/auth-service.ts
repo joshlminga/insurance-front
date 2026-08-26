@@ -1,4 +1,5 @@
 import apiClient from '@/lib/api-client'
+import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
 import { ORG_LOCATION_HEADER } from './constants'
 import type {
   Abilities,
@@ -20,7 +21,71 @@ function authHeaders(token: string, organizationLocationId?: number | null) {
 }
 
 /**
+ * Resolves tenant branding and location from the browser Origin.
+ * This is the React Query version for use inside React components.
+ */
+export function useResolveOrganization() {
+  return UseApiQuery<ApiSuccess<OrgResolveData>>({
+    url: 'auth/org',
+    queryKey: ['auth', 'organization'],
+    queryOptions: {
+      enabled: true,
+    },
+  })
+}
+
+/**
+ * Fetches the current user's abilities for an organization location.
+ * The token and location are included in the cache key to avoid stale permissions.
+ */
+export function useFetchAbilities(
+  token: string | null | undefined,
+  organizationLocationId?: number | null,
+) {
+  return UseApiQuery<ApiSuccess<AbilitiesData>>({
+    url: 'auth/abilities',
+    queryKey: ['auth', 'abilities', token ?? null, organizationLocationId ?? null],
+    config: token
+      ? { headers: authHeaders(token, organizationLocationId) }
+      : undefined,
+    queryOptions: {
+      enabled: Boolean(token),
+    },
+  })
+}
+
+/** Validates a stored session token. Call `mutate()` to run the check. */
+export function useCheckAuth(token: string | null | undefined) {
+  return UseApiMutation<ApiSuccess<CheckAuthData>, void>({
+    url: 'auth/check-auth',
+    config: token ? { headers: authHeaders(token) } : undefined,
+  })
+}
+
+/** Refreshes the full session and rotates the access token. */
+export function useRefreshSession(
+  token: string | null | undefined,
+  organizationLocationId?: number | null,
+) {
+  return UseApiMutation<AuthSessionPayload, void>({
+    url: 'auth/refresh',
+    config: token
+      ? { headers: authHeaders(token, organizationLocationId) }
+      : undefined,
+  })
+}
+
+/** Ends the current server session. */
+export function useLogoutOnServer(token: string | null | undefined) {
+  return UseApiMutation<void, void>({
+    url: 'auth/logout',
+    config: token ? { headers: authHeaders(token) } : undefined,
+  })
+}
+
+/**
  * Resolve tenant org location from the browser Origin header (API reads Origin).
+ * Imperative counterpart used by the non-React auth-store bootstrap.
  * Call only when organizationLocationId is not yet stored.
  */
 export async function resolveOrganization(): Promise<OrgResolveData> {

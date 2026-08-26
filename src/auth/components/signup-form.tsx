@@ -73,14 +73,14 @@ export function SignupForm({
           <Field className="py-4">
             <div className="grid grid-cols-1 gap-3 min-[400px]:grid-cols-2">
               <ReuseableInput
-                className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] pr-10"
+                className="w-full h-10 rounded-[5px] border border-[#ADABAB] pr-10"
                 control={form.control}
                 name="first_name"
                 label="First Name"
                 placeholder="Enter first name"
               />
               <ReuseableInput
-                className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] pr-10"
+                className="w-full h-10 rounded-[5px] border border-[#ADABAB] pr-10"
                 control={form.control}
                 name="last_name"
                 label="Last Name"
@@ -88,7 +88,7 @@ export function SignupForm({
               />
             </div>
             <ReuseableInput
-              className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] pr-10"
+              className="w-full h-10 rounded-[5px] border border-[#ADABAB] pr-10"
               control={form.control}
               name="email"
               label="Email Address"
@@ -97,7 +97,7 @@ export function SignupForm({
             />
             <div className="relative items-center justify-center">
               <ReuseableInput
-                className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] pr-10"
+                className="w-full h-10 rounded-[5px] border border-[#ADABAB] pr-10"
                 control={form.control}
                 name="password"
                 label="Password"
@@ -114,7 +114,7 @@ export function SignupForm({
             </div>
             <div className="relative items-center justify-center">
               <ReuseableInput
-                className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] pr-10"
+                className="w-full h-10 rounded-[5px] border border-[#ADABAB] pr-10"
                 control={form.control}
                 name="confirm_password"
                 label="Confirm Password"

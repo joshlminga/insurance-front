@@ -100,7 +100,7 @@ const VehicleDetailsBox: React.FC = () => {
             <div className="rounded-2xl border border-[#ADABAB]/35 bg-white/95 p-3 sm:p-5">
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     <ReuseableInput
-                        className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] uppercase"
+                        className="w-full h-10 rounded-[5px] border border-[#ADABAB] uppercase"
                         control={control}
                         name="vehicle_registration_number"
                         label="Vehicle Registration Number"
@@ -109,7 +109,7 @@ const VehicleDetailsBox: React.FC = () => {
                         placeholder="e.g. KAA 123A"
                     />
                     <ReuseableInput
-                        className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                        className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                         control={control}
                         name="vehicle_value"
                         label="Vehicle Value"

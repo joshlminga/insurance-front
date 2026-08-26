@@ -40,13 +40,13 @@ export const MarineQuotationsPage: React.FC<CustomerVerificationDetailsProps> = 
                         <hr className="my-4 sm:mb-6" />
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8">
                             <ReuseableInput
-                                className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                                className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                                 control={form.control}
                                 name="courtesy_car"
                                 label="Courtesy Car"
                             />
                             <ReuseableInput
-                                className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                                className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                                 control={form.control}
                                 name="road_rescue"
                                 label="Road Rescue"

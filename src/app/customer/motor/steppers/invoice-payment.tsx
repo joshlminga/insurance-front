@@ -90,7 +90,7 @@ export const InvoicePayment: React.FC<CustomerVerificationDetailsProps> = ({ goT
                         />
                         <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 sm:gap-5'>
                             <ReuseableInput
-                                className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                                className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                                 control={form.control}
                                 name="name"
                                 label="Payee Name"
@@ -98,7 +98,7 @@ export const InvoicePayment: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                 required
                             />
                             <ReuseableInput
-                                className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                                className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                                 control={form.control}
                                 name="email"
                                 label="Payee Email Address"
@@ -106,7 +106,7 @@ export const InvoicePayment: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                 required
                             />
                             <ReuseableInput
-                                className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                                className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                                 control={form.control}
                                 name="phone"
                                 label="Payee Phone Number"
@@ -114,7 +114,7 @@ export const InvoicePayment: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                 required
                             />
                             <ReuseableInput
-                                className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                                className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                                 control={form.control}
                                 type='date'
                                 name="cover_start_date"

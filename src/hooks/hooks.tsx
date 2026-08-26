@@ -14,12 +14,13 @@ import type {
 
 export function UseApiQuery<TData = unknown>({
   url,
+  queryKey,
   params,
   config,
   queryOptions,
 }: UseApiQueryOptions<TData>) {
   const query = useQuery<TData>({
-    queryKey: [url, params],
+    queryKey: queryKey ?? [url, params],
     queryFn: ({ signal }) => {
       const CancelToken = axios.CancelToken
       const source = CancelToken.source()

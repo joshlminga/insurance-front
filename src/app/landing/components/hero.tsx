@@ -41,7 +41,7 @@ export const HeroSection = () => {
     const isInView = useInView(sectionRef, { once: true, amount: 0.1 });
     return (
         <section ref={sectionRef} className="relative w-full overflow-hidden">
-            <div className="relative z-10 flex min-h-screen flex-col justify-between bg-[url('/hero.webp')] bg-contain sm:bg-cover bg-center bg-repeat-x pt-24 sm:pt-32 lg:pt-0">
+            <div className="relative z-10 flex min-h-[100svh] flex-col justify-between bg-[url('/hero.webp')] bg-contain bg-center bg-repeat-x pt-20 sm:bg-cover sm:pt-24">
                 <div className="absolute inset-0 bg-linear-to-r from-slate-900/80 via-slate-900/60 to-slate-900/40" />
                 <div className="relative z-20 mx-auto flex w-full max-w-7xl flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:px-8">
                     <div className="max-w-2xl lg:max-w-3xl">

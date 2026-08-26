@@ -94,7 +94,7 @@ export const AddMotorRateBenefits = ({ handleDialogContextSwitch, componentProps
                     type="number"
                     step="0.01"
                     required
-                    className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                    className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                 />
                 <ReuseableInput
                     control={form.control}
@@ -102,7 +102,7 @@ export const AddMotorRateBenefits = ({ handleDialogContextSwitch, componentProps
                     label="Minimum"
                     type="number"
                     step="0.01"
-                   className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                   className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                 />
                 <ReuseableInput
                     control={form.control}
@@ -110,7 +110,7 @@ export const AddMotorRateBenefits = ({ handleDialogContextSwitch, componentProps
                     label="description"
                     type='textarea'
                     rows={3}
-                   className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                   className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                 />
                 <CardFooter className="flex flex-col sm:flex-row justify-between gap-3 mt-2 px-0">
                     <Button

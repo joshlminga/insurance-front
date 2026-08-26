@@ -417,7 +417,7 @@ export const AdminMotorQuotationsPage: React.FC<AdminMotorStepProps> = ({
                             name="search"
                             type="text"
                             placeholder="Enter insurer name..."
-                            className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                            className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                         />
                     </div>
                     <h2 className="mb-1 text-lg font-semibold text-gray-900">Additional benefits</h2>

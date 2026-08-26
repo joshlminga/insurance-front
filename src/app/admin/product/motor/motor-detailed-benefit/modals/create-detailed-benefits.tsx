@@ -62,13 +62,13 @@ export const CreateDetailedBenefitsModal = ({ handleDialogContextSwitch, compone
                     control={form.control}
                     name="name"
                     label="Detailed Benefit Name"
-                    className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                    className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                 />
                  <ReuseableInput
                     control={form.control}
                     name="short_name"
                     label="Detailed Benefit Short Name (Optional)"
-                    className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                    className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                 />
                 <ReusableSelect
                     name='group'
@@ -87,7 +87,7 @@ export const CreateDetailedBenefitsModal = ({ handleDialogContextSwitch, compone
                     name="description"
                     type="textarea"
                     label="Detailed Benefit Description"
-                    className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                    className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                 />
                 <CardFooter className="flex flex-col sm:flex-row justify-between gap-3 mt-2 px-0">
                     <Button

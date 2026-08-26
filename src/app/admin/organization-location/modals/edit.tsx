@@ -197,7 +197,7 @@ export const EditOrganizationLocationModal = ({
           control={form.control}
           name="initials"
           label="Initials"
-          className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+          className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
         />
 
         <div className="flex items-center gap-2">
@@ -224,7 +224,7 @@ export const EditOrganizationLocationModal = ({
           type="file"
           label="Logo"
           disabled={removeLogo}
-          className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+          className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
         />
 
         <OrganizationLocationProductsField
@@ -257,4 +257,3 @@ export const EditOrganizationLocationModal = ({
 }
 
 export default EditOrganizationLocationModal
-

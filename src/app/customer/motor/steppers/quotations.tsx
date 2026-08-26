@@ -64,7 +64,6 @@ import {
     SheetHeader,
     SheetTitle,
 } from '@/components/ui/sheet'
-import type { Control } from 'react-hook-form'
 
 /** Sidebar + inline filters from xl up; Nest Hub / Hub Max use sheet + full-width cards below this. */
 const SIDEBAR_LAYOUT_QUERY = '(min-width: 1280px)'
@@ -93,7 +92,7 @@ export function QuotationFiltersPanel({
                     name="search"
                     type="text"
                     placeholder="Enter insurer name..."
-                    className="h-11 w-full rounded-[5px] border border-[#ADABAB] sm:h-12.75"
+                    className="h-11 w-full rounded-[5px] border border-[#ADABAB] sm:h-10"
                 />
             </div>
 

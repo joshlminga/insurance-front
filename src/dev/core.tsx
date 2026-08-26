@@ -151,8 +151,7 @@ const formatSegment = (segment: string) => {
 export const BreadCrumbComponent = () => {
     const location = useLocation();
     const pathSegments = location.pathname.split("/").filter(Boolean);
-    const isDashboardArea =
-        pathSegments[0] === EPREFIX.DASHBOARD.slice(1);
+    const isDashboardArea = pathSegments[0] === EPREFIX.DASHBOARD;
     const segments = isDashboardArea ? pathSegments.slice(1) : pathSegments;
     const basePath = isDashboardArea ? EPREFIX.DASHBOARD : "";
 
@@ -430,7 +429,7 @@ export function ReusableSelect<T extends FieldValues>({
                             <SelectTrigger
                                 aria-invalid={fieldState.invalid}
                                 className={cn(
-                                    "w-full h-12.75 rounded-[5px] border border-[#ADABAB]",
+                                    "w-full h-10 rounded-[5px] border border-[#ADABAB]",
                                     fieldState.invalid &&
                                     "border-red-500 focus:ring-red-500",
                                     triggerClassName
@@ -1233,7 +1232,7 @@ export const ReusableCountriesInputMultiselect = ({
             <MultiSelect
                 values={value ?? []}
                 onValuesChange={(vals) => onChange?.(vals)} >
-                <MultiSelectTrigger className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]">
+                <MultiSelectTrigger className="w-full h-10 rounded-[5px] border border-[#ADABAB]">
                     <MultiSelectValue placeholder={placeholder} />
                 </MultiSelectTrigger>
                 <MultiSelectContent>
@@ -1454,7 +1453,7 @@ export function ReuseableSingleSelectAdminInput<T extends FieldValues>({
                 value={value}
                 onValueChange={onChange}
                 disabled={disabled || isLoading}>
-                <SelectTrigger className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]">
+                <SelectTrigger className="w-full h-10 rounded-[5px] border border-[#ADABAB]">
                     <SelectValue
                         placeholder={isLoading ? "Loading users..." : placeholder}
                     />
@@ -1506,7 +1505,7 @@ export function ReuseableSingleSelectOrganizationInput<T extends FieldValues>({
                 onValueChange={onChange}
                 disabled={disabled || isLoading}
             >
-                <SelectTrigger className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]">
+                <SelectTrigger className="w-full h-10 rounded-[5px] border border-[#ADABAB]">
                     <SelectValue
                         placeholder={isLoading ? "Loading organizations..." : placeholder}
                     />
@@ -1559,7 +1558,7 @@ export const ReuseableSelectInsurerInput = <T extends FieldValues>({
                 value={value}
                 onValueChange={onChange}
                 disabled={disabled || isLoading}>
-                <SelectTrigger className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]">
+                <SelectTrigger className="w-full h-10 rounded-[5px] border border-[#ADABAB]">
                     <SelectValue
                         placeholder={isLoading ? "Loading users..." : placeholder}
                     />
@@ -1610,7 +1609,7 @@ export const ReusableOrganizationsInputMultiselect = ({
             <MultiSelect
                 values={value ?? []}
                 onValuesChange={(vals) => onChange?.(vals)} >
-                <MultiSelectTrigger className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]">
+                <MultiSelectTrigger className="w-full h-10 rounded-[5px] border border-[#ADABAB]">
                     <MultiSelectValue placeholder={placeholder} />
                 </MultiSelectTrigger>
                 <MultiSelectContent>
@@ -1663,7 +1662,7 @@ export function ReuseableSingleSelectclassInput<T extends FieldValues>({
                 value={value}
                 onValueChange={onChange}
                 disabled={disabled || isLoading}>
-                <SelectTrigger className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]">
+                <SelectTrigger className="w-full h-10 rounded-[5px] border border-[#ADABAB]">
                     <SelectValue
                         placeholder={isLoading ? "Loading users..." : placeholder}
                     />
@@ -1765,7 +1764,7 @@ export const ReusableCoveringInputMultiselect = ({
             <MultiSelect
                 values={value ?? []}
                 onValuesChange={(vals) => onChange?.(vals)} >
-                <MultiSelectTrigger className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]">
+                <MultiSelectTrigger className="w-full h-10 rounded-[5px] border border-[#ADABAB]">
                     <MultiSelectValue placeholder={placeholder} />
                 </MultiSelectTrigger>
                 <MultiSelectContent>
@@ -1978,7 +1977,7 @@ export function ReusableApiMultiSelect({
             <MultiSelect
                 values={controlledValue}
                 onValuesChange={(vals) => onChange?.(vals)}>
-                <MultiSelectTrigger disabled={disabled} className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]">
+                <MultiSelectTrigger disabled={disabled} className="w-full h-10 rounded-[5px] border border-[#ADABAB]">
                     <MultiSelectValue placeholder={placeholder} />
                 </MultiSelectTrigger>
                 <MultiSelectContent
@@ -2255,7 +2254,7 @@ export const SendDocumentsViaEmail = ({
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder="Enter email"
-                            className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] px-3"
+                            className="w-full h-10 rounded-[5px] border border-[#ADABAB] px-3"
                             required
                             autoComplete="off"
                         />
@@ -2445,7 +2444,7 @@ export const SendInvoiceViaEmail = ({
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder="Enter email"
-                            className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] px-3"
+                            className="w-full h-10 rounded-[5px] border border-[#ADABAB] px-3"
                             required
                             autoComplete="off"
                         />

@@ -116,7 +116,7 @@ export const CreateMemberModal = ({
           label="Full Name"
           required
           placeholder="e.g. Jane Member"
-          className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+          className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
         />
 
         <ReuseableInput
@@ -126,7 +126,7 @@ export const CreateMemberModal = ({
           label="Email Address"
           required
           placeholder="jane@example.com"
-          className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+          className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
         />
 
         <ReuseableInput
@@ -135,7 +135,7 @@ export const CreateMemberModal = ({
           type="tel"
           label="Phone Number"
           placeholder="254712345678"
-          className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+          className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
         />
 
         <Controller
@@ -160,7 +160,7 @@ export const CreateMemberModal = ({
           name="profile_picture"
           type="file"
           label="Profile Picture"
-          className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+          className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
         />
 
         <CardFooter className="flex flex-col sm:flex-row justify-between gap-3 mt-2 px-0">

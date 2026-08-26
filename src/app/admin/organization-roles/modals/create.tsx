@@ -102,7 +102,7 @@ export const CreateRoleModal = ({
           label="Role Name"
           required
           placeholder="e.g. manager"
-          className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+          className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
         />
 
         <ReuseableInput
@@ -110,7 +110,7 @@ export const CreateRoleModal = ({
           name="description"
           label="Description"
           placeholder="Organization manager"
-          className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+          className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
         />
 
         <Controller

@@ -10,12 +10,28 @@ import {
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { CardFooter } from '@/components/ui/card'
-import { Button, ReusableSelect, ReusableSingleSelectApiInput, ReuseableInput, ReuseableSingleSelectNationalityInput } from '@/dev/core'
+import { 
+    Button, 
+    ReusableSelect, 
+    ReusableSingleSelectApiInput, 
+    ReuseableInput, 
+    ReuseableSingleSelectNationalityInput 
+} from '@/dev/core'
 import { UseApiMutation } from '@/hooks/hooks'
 import { MotorKycSchema } from '@/types/form-schema'
 import type { MotorKycFormValues } from '@/types/schema'
-import type { CustomerVerificationDetailsProps, SubmitResponse } from '@/types/types'
-import { EMETHODS, IDTYPES, INVOICE_SESSION_STORAGE_KEY, PURCHASE_SESSION_STORAGE_KEY, VEHICLE_DETAILS_SESSION_STORAGE_KEY, VEHICLE_OWNERSHIP_SESSION_STORAGE_KEY } from '@/utils/constatnts'
+import type { 
+    CustomerVerificationDetailsProps, 
+    SubmitResponse 
+} from '@/types/types'
+import { 
+    EMETHODS, 
+    IDTYPES, 
+    INVOICE_SESSION_STORAGE_KEY, 
+    PURCHASE_SESSION_STORAGE_KEY, 
+    VEHICLE_DETAILS_SESSION_STORAGE_KEY, 
+    VEHICLE_OWNERSHIP_SESSION_STORAGE_KEY 
+} from '@/utils/constatnts'
 import { extractErrorMessage } from '@/utils/helpers'
 import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -127,7 +143,7 @@ const ReadOnlyVehicleField = ({ label, value }: ReadOnlyVehicleFieldProps) => (
             value={value}
             readOnly
             disabled
-            className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] bg-gray-100 px-3 text-sm text-gray-600 opacity-100 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-600"
+            className="w-full h-10 rounded-[5px] border border-[#ADABAB] bg-gray-100 px-3 text-sm text-gray-600 opacity-100 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-600"
         />
     </div>
 )
@@ -307,9 +323,9 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToPrevSt
                         />
                         <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 sm:gap-5'>
                             {/* First field, full row, highlighted so co-owned vehicles are not missed */}
-                            <div className="col-span-full border-b border-[#ADABAB]/60 pb-4 mb-1 [&_[data-slot=field-label]]:text-[#C20C0C]">
+                            <div className="col-span-full border-b border-[#ADABAB]/60 pb-4 mb-1 **:data-[slot=field-label]:text-[#C20C0C]">
                                 <ReuseableInput
-                                    className="w-full h-12.75 rounded-[5px] border-2 border-black focus-visible:ring-black"
+                                    className="w-full h-10 rounded-[5px] border-2 border-black focus-visible:ring-black"
                                     control={form.control}
                                     name="policy_holder"
                                     label="Policy Holder Name : If Vehicle is co-owned (Optional)"
@@ -319,7 +335,7 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToPrevSt
                             {isCompanyOwned ? (
                                 <>
                                     <ReuseableInput
-                                        className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                                        className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                                         control={form.control}
                                         name="company_name"
                                         label="Company Name"
@@ -352,14 +368,14 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToPrevSt
                                         )}
                                     />
                                     <ReuseableInput
-                                        className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                                        className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                                         control={form.control}
                                         name="industry_category"
                                         label="Industry Category"
                                         placeholder="Enter industry category"
                                     />
                                     <ReuseableInput
-                                        className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                                        className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                                         control={form.control}
                                         name="coi_number"
                                         label="Certificate of Incorporation Number"
@@ -396,7 +412,7 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToPrevSt
                                         required
                                     />
                                     <ReuseableInput
-                                        className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                                        className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                                         control={form.control}
                                         name="id_number"
                                         placeholder='Enter passport or ID number'
@@ -404,7 +420,7 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToPrevSt
                                         required
                                     />
                                     <ReuseableInput
-                                        className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                                        className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                                         control={form.control}
                                         type="date"
                                         name="date_of_birth"
@@ -412,7 +428,7 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToPrevSt
                                         
                                     />
                                     <ReuseableInput
-                                        className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                                        className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                                         control={form.control}
                                         name="occupation"
                                         label="Occupation (Optional)"
@@ -421,7 +437,7 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToPrevSt
                                 </>
                             )}
                             <ReuseableInput
-                                className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                                className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                                 control={form.control}
                                 name="tax_pin"
                                 label="Tax PIN"
@@ -455,7 +471,7 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToPrevSt
                         <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 sm:gap-5'>
                             {isCompanyOwned ? (
                                 <ReuseableInput
-                                    className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                                    className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                                     control={form.control}
                                     type='file'
                                     name="coi_certificate"
@@ -464,7 +480,7 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToPrevSt
                                 />
                             ) : (
                                 <ReuseableInput
-                                    className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                                    className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                                     control={form.control}
                                     type='file'
                                     name="id_document"
@@ -474,7 +490,7 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToPrevSt
                                 />
                             )}
                             <ReuseableInput
-                                className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                                className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                                 control={form.control}
                                 type='file'
                                 name="logbook"
@@ -483,7 +499,7 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToPrevSt
                                 required
                             />
                             <ReuseableInput
-                                className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                                className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                                 control={form.control}
                                 type='file'
                                 accept=".pdf,.jpg,.jpeg,.png"

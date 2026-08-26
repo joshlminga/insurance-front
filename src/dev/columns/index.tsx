@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { TActionColumnGenProps } from "@/types/types";
 import { ColumnDef } from "@tanstack/table-core";
-import { Check, ChevronDownCircle, Copy } from "lucide-react";
+import { Check, ChevronDownCircle, CircleEllipsis, Copy, Ellipsis } from "lucide-react";
 import React, { useState } from "react";
 import { Button, ReusableDropDownComponent } from "../core";
 
@@ -41,7 +41,9 @@ export const ActionColumn = <T,>({
 					<ReusableDropDownComponent<T>
 						{...{
 							triggerEl: (
-								<ChevronDownCircle className='h-6 w-6 opacity-85 select-none' />
+                                <div className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-primary transition-colors hover:bg-primary/50">
+                                    <Ellipsis className="h-5 w-5 opacity-85 select-none hover:text-accent" />
+                                </div>
 							),
 							ActionsHandlerMapping: ActionsHandlerMapping.filter(
 								({ conditional }) => (conditional ? conditional(data) : true)

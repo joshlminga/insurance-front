@@ -3,7 +3,6 @@ import { SidebarTrigger } from "@/components/ui/sidebar"
 import { LanguageSwitcher } from "@/components/language-switcher"
 import { ModeToggle } from "@/components/mode-toggle"
 // import { NavUser } from "@/components/nav-user"
-import { Search } from "@/components/search"
 // import { UseAuth } from "@/stores/auth-store"
 import { useEffect, useState } from "react"
 import { useLocation } from "react-router-dom"
@@ -31,21 +30,20 @@ export default function Header() {
   return (
      <header
       className={cn(
-        "z-50 flex h-16 w-full shrink-0 items-center justify-between gap-2 border-b bg-background px-4 transition-shadow duration-300 ease-out",
+        "z-50 flex h-16 w-full shrink-0 items-center justify-between gap-2 border-b bg-background px-2 transition-shadow duration-300 ease-out sm:px-4",
         "group-has-data-[collapsible=icon]/sidebar-wrapper:h-12",
         scrolled &&
           "border-border/60 bg-background/95 shadow-[0_4px_24px_rgb(0,0,0,0.08)] backdrop-blur-md"
       )}
     >
-      <div className="flex items-center gap-2">
+      <div className="flex min-w-0 flex-1 items-center gap-2">
         <SidebarTrigger className="-ml-1" />
         <Separator orientation="vertical" className="mr-2 h-4" />
         <div className="hidden min-w-0 flex-1 md:block">
           <BreadCrumbComponent />
         </div>
       </div>
-      <div className="flex items-center gap-4 mr-12">
-        <Search />
+      <div className="flex shrink-0 items-center gap-1 sm:gap-2">
         <ModeToggle />
         <LanguageSwitcher />
         <NotificationToggle />

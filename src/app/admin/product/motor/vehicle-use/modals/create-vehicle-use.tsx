@@ -61,14 +61,14 @@ export const CreateVehicleUsesModal = ({ handleDialogContextSwitch, componentPro
                     control={form.control}
                     name="name"
                     label="Vehicle Use Name"
-                    className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                    className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                 />
                 <ReuseableInput
                     control={form.control}
                     name="description"
                     type="textarea"
                     label="Vehicle Use Description"
-                    className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                    className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                 />
                 <Controller
                     control={form.control}

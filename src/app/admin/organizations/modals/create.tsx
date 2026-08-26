@@ -91,7 +91,7 @@ export const CreateOrganizationModal = ({ handleDialogContextSwitch, componentPr
                         control={form.control}
                         name="name"
                         label="Organization Name"
-                        className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                        className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                         required
                     />
                 </div>
@@ -141,7 +141,7 @@ export const CreateOrganizationModal = ({ handleDialogContextSwitch, componentPr
                                             field.onChange(raw)
                                         }}
                                         placeholder="e.g. acme"
-                                        className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                                        className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                                     />
                                     <span className="text-sm text-muted-foreground whitespace-nowrap">
                                         .acensure.com
@@ -174,7 +174,7 @@ export const CreateOrganizationModal = ({ handleDialogContextSwitch, componentPr
 
                 <div className="col-span-6">
                     <ReuseableInput
-                        className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                        className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                         control={form.control}
                         type="file"
                         name="logo"

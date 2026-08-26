@@ -161,19 +161,19 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
                         </div>
                         <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4'>
                             <ReuseableInput
-                                className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] bg-white"
+                                className="w-full h-10 rounded-[5px] border border-[#ADABAB] bg-white"
                                 control={form.control}
                                 name="first_installment"
                                 label="1st Installment 40%"
                             />
                             <ReuseableInput
-                                className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] bg-white"
+                                className="w-full h-10 rounded-[5px] border border-[#ADABAB] bg-white"
                                 control={form.control}
                                 name="second_installment"
                                 label="2nd Installment 30%"
                             />
                             <ReuseableInput
-                                className="w-full h-12.75 rounded-[5px] border border-[#ADABAB] bg-white sm:col-span-2 lg:col-span-1"
+                                className="w-full h-10 rounded-[5px] border border-[#ADABAB] bg-white sm:col-span-2 lg:col-span-1"
                                 control={form.control}
                                 name="third_installment"
                                 label="3rd Installment 30%"

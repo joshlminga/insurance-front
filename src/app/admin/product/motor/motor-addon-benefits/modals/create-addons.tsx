@@ -59,14 +59,14 @@ export const CreateMotorAddonBenefitsModal = ({ handleDialogContextSwitch, compo
                     control={form.control}
                     name="name"
                     label="AddOn Name"
-                    className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                    className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                 />
                 <ReuseableInput
                     control={form.control}
                     name="description"
                     type="textarea"
                     label="AddOn Description"
-                    className="w-full h-12.75 rounded-[5px] border border-[#ADABAB]"
+                    className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                 />
                 <ReusableSelect
                     control={form.control}
