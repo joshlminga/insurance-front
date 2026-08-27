@@ -76,6 +76,7 @@ const ReportsPage = lazy(() => import("./app/reports/page"))
 const StaffPage = lazy(() => import("./app/staff/page"))
 const StaffDetailPage = lazy(() => import("./app/staff/[id]/page"))
 const SettingsPage = lazy(() => import("./app/settings/page"))
+const AccountProfilePage = lazy(() => import("./app/admin/account-profile/page").then(m => ({ default: m.AccountProfilePage })))
 const OrganizationsPage = lazy(() => import("./app/admin/organizations/page"))
 const OrganizationLocationsPage = lazy(() => import("./app/admin/organization-location/page"))
 const OrganizationRolesPage = lazy(() => import("./app/admin/organization-roles/page"))
@@ -87,6 +88,7 @@ const SystemRolesPage = lazy(() => import("./app/admin/system-roles/system/page"
 const UsersPage = lazy(() => import("./app/admin/users/page").then(m => ({ default: m.UsersPage })))
 const CreditWalletPage = lazy(() => import("./app/admin/credit/wallet/page").then(m => ({ default: m.CreditWalletPage })))
 const CreditTransactionsPage = lazy(() => import("./app/admin/credit/transactions/page").then(m => ({ default: m.CreditTransactionsPage })))
+const MotorCertificatesPage = lazy(() => import("./app/admin/motor-certificates/page").then(m => ({ default: m.MotorCertificatesPage })))
 const CreditApprovalsPage = lazy(() => import("./app/admin/credit/approvals/page").then(m => ({ default: m.CreditApprovalsPage })))
 const CreditPendingPage = lazy(() => import("./app/admin/credit/pending/page").then(m => ({ default: m.CreditPendingPage })))
 const CreditPendingDetailPage = lazy(() => import("./app/admin/credit/pending/[invoiceId]/page").then(m => ({ default: m.CreditPendingDetailPage })))
@@ -112,6 +114,31 @@ const AdminMotorQuotationResultsPage = lazy(() =>
 const AdminMotorQuotationPurchasePage = lazy(() =>
   import("./app/admin/quotations/motor/purchase/page").then(m => ({
     default: m.AdminMotorQuotationPurchasePage,
+  }))
+)
+const AdminMotorQuotationFetchPage = lazy(() =>
+  import("./app/admin/quotations/motor/fetch/page").then(m => ({
+    default: m.AdminMotorQuotationFetchPage,
+  }))
+)
+const QuotationReportsMotorPage = lazy(() =>
+  import("./app/admin/reports/quotations/motor/page").then(m => ({
+    default: m.QuotationReportsMotorPage,
+  }))
+)
+const QuotationReportsTravelPage = lazy(() =>
+  import("./app/admin/reports/quotations/travel/page").then(m => ({
+    default: m.QuotationReportsTravelPage,
+  }))
+)
+const InvoiceReportsMotorPage = lazy(() =>
+  import("./app/admin/reports/invoices/motor/page").then(m => ({
+    default: m.InvoiceReportsMotorPage,
+  }))
+)
+const ReceiptReportsMotorPage = lazy(() =>
+  import("./app/admin/reports/receipts/motor/page").then(m => ({
+    default: m.ReceiptReportsMotorPage,
   }))
 )
 const FinanceParametersIndexPage = lazy(() => import("./app/admin/finance/parameters"))
@@ -520,6 +547,58 @@ export const router = createBrowserRouter([
           </S>
         ),
       },
+      {
+        path: "quotations/motor-quotations/fetch",
+        element: (
+          <S>
+            <AdminModulePage modules={[...QUOTATION_MOTOR_MODULES]}>
+              <AdminMotorQuotationFetchPage />
+            </AdminModulePage>
+          </S>
+        ),
+      },
+      {
+        path: "reports/quotations/motor",
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.REPORT_MOTOR_QUOTATION}>
+              <QuotationReportsMotorPage />
+            </AdminModulePage>
+          </S>
+        ),
+      },
+      {
+        path: "reports/quotations/travel",
+        element: (
+          <S>
+            <AdminModulePage
+              modules={[MODULES.QUOTATION_TRAVEL, MODULES.REPORT_MOTOR_QUOTATION]}
+            >
+              <QuotationReportsTravelPage />
+            </AdminModulePage>
+          </S>
+        ),
+      },
+      {
+        path: "reports/invoices/motor",
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.REPORT_MOTOR_INVOICE}>
+              <InvoiceReportsMotorPage />
+            </AdminModulePage>
+          </S>
+        ),
+      },
+      {
+        path: "reports/receipts/motor",
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.REPORT_MOTOR_RECEIPT}>
+              <ReceiptReportsMotorPage />
+            </AdminModulePage>
+          </S>
+        ),
+      },
       // products — motor
       {
         path: "products/motor",
@@ -764,6 +843,15 @@ export const router = createBrowserRouter([
           </S>
         ),
       },
+      // Account Profile — any logged-in admin (no module guard)
+      {
+        path: "account-profile",
+        element: (
+          <S>
+            <AccountProfilePage />
+          </S>
+        ),
+      },
       // Credit & Finance
       {
         path: "credit/wallet",
@@ -781,6 +869,16 @@ export const router = createBrowserRouter([
           <S>
             <AdminModulePage module={MODULES.FINANCE_CONTROL}>
               <CreditTransactionsPage />
+            </AdminModulePage>
+          </S>
+        ),
+      },
+      {
+        path: "motor-certificates",
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.DMVIC_CERTIFICATE}>
+              <MotorCertificatesPage />
             </AdminModulePage>
           </S>
         ),

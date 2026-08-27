@@ -44,7 +44,7 @@ import {
     Truck,
     type LucideIcon,
 } from 'lucide-react'
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
     Controller,
@@ -71,6 +71,7 @@ import {
     contactFromUser,
     persistAdminMotorCustomerContact,
     persistAdminMotorQuoteSession,
+    readAdminMotorDuplicatePrefill,
 } from './admin-motor-session'
 
 type ProfileCountry = {
@@ -335,6 +336,51 @@ export const MotorQuotationPage = () => {
             create_customer_account: false,
         },
     })
+
+    const appliedDuplicateRef = useRef(false)
+
+    useEffect(() => {
+        if (appliedDuplicateRef.current) return
+        const duplicate = readAdminMotorDuplicatePrefill()
+        if (!duplicate?.start_quote) return
+        appliedDuplicateRef.current = true
+
+        const sq = duplicate.start_quote
+        const fullName = [sq.first_name, sq.last_name].filter(Boolean).join(' ').trim()
+        form.reset({
+            full_name: fullName,
+            email: sq.email ?? '',
+            phone: sq.phone ?? '',
+            user_id: sq.user_id != null ? String(sq.user_id) : '',
+            country_id: sq.country_id != null ? String(sq.country_id) : '',
+            processed_by_organization_id:
+                sq.processed_by_organization_id != null
+                    ? String(sq.processed_by_organization_id)
+                    : '',
+            agency_id: sq.agency_id != null ? String(sq.agency_id) : '',
+            referral_id: sq.referral_id ?? '',
+            covertype_id: sq.covertype_id != null ? String(sq.covertype_id) : '',
+            covering_id: sq.covering_id != null ? String(sq.covering_id) : '',
+            ownership: sq.ownership ?? '',
+            vehicle_class_id: sq.vehicle_class_id != null ? String(sq.vehicle_class_id) : '',
+            used_for_id: sq.used_for_id != null ? String(sq.used_for_id) : '',
+            registration_number: sq.vehicle_registration_number ?? '',
+            vehicle_registration_number: sq.vehicle_registration_number ?? '',
+            vehicle_value: sq.vehicle_value != null ? String(sq.vehicle_value) : '',
+            valued_by_professional: Boolean(sq.valued_by_professional),
+            create_customer_account: sq.is_guest === false,
+        })
+
+        if (sq.email || sq.first_name || sq.phone) {
+            persistAdminMotorCustomerContact({
+                name: fullName || undefined,
+                email: sq.email || undefined,
+                phone: sq.phone || undefined,
+            })
+        }
+
+        ShowToast.success('Duplicate quote fields loaded — review and submit to start')
+    }, [form])
 
     const formCountryId = useWatch({ control: form.control, name: 'country_id' })
     const vehicleRegistrationNumber = useWatch({

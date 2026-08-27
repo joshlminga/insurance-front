@@ -19,12 +19,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user } = UseAuth()
   const abilities = useAuthStore((s) => s.abilities)
   const { hasModule } = useModules()
-  const { canModuleMenu } = useCan()
+  const { can, canModuleMenu } = useCan()
 
   // Re-filter when abilities change (not just function identity)
   const visibleNav = useMemo(
-    () => filterNavItems(adminNavConfig, hasModule, canModuleMenu),
-    [abilities, hasModule, canModuleMenu],
+    () => filterNavItems(adminNavConfig, hasModule, canModuleMenu, can),
+    [abilities, hasModule, canModuleMenu, can],
   )
 
   return (

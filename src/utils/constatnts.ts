@@ -53,6 +53,12 @@ export const ACCEPTED_IMAGE_TYPES = [
 
 export const ACCEPTED_FILE_TYPES = ["image/jpeg", "image/png", "image/jpg", "application/pdf"];
 
+/** Kenyan KRA PIN: letter + 9 digits + letter (exactly 11 characters). */
+export const KRA_PIN_REGEX = /^[A-Za-z][0-9]{9}[A-Za-z]$/
+
+/** Max size for each motor KYC attachment (10 MB). */
+export const MAX_KYC_FILE_BYTES = 10 * 1024 * 1024
+
 export type EMETHODS = typeof EMETHODS[keyof typeof EMETHODS]
 
 export const baseFactoryReducer = <S>(state: S, action: TActionType<S>): S => ({
@@ -235,6 +241,9 @@ export const ADMIN_MOTOR_CUSTOMER_PHONE_KEY = "admin_motor_customer_phone"
 export const ADMIN_MOTOR_QUOTE_CUSTOMER_TYPE_KEY = "admin_motor_quote_customer_type"
 export const ADMIN_MOTOR_QUOTE_IS_GUEST_KEY = "admin_motor_quote_is_guest"
 export const ADMIN_MOTOR_QUOTE_CUSTOMER_ID_KEY = "admin_motor_quote_customer_id"
+export const ADMIN_MOTOR_QUOTE_DUPLICATE_SOURCE_KEY = "admin_motor_quote_duplicate_source_id"
+export const ADMIN_MOTOR_QUOTE_DUPLICATE_PREFILL_KEY = "admin_motor_quote_duplicate_prefill"
+export const ADMIN_MOTOR_QUOTE_DUPLICATE_START_AT_KEY = "admin_motor_quote_duplicate_start_at"
 export const INVOICE_ID_KEY = "invoice_id"
 
 export const BENEFIT_TYPE_CONFIG = {

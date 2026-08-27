@@ -1,7 +1,7 @@
 import { StatsCard, StatsGrid } from "@/components/shared/stats-card"
 import type { CreditWallet } from "@/types/types"
 import { formatCurrency, parseMoneyString } from "@/lib/format"
-import { Coins, Lock, Wallet, TrendingDown } from "lucide-react"
+import { Coins, Lock, Wallet, TrendingDown, CircleDollarSign } from "lucide-react"
 
 type CreditBalanceCardProps = {
   wallet: CreditWallet | null | undefined
@@ -32,8 +32,10 @@ export function CreditBalanceCard({ wallet, isLoading }: CreditBalanceCardProps)
   const format = (value: string | null | undefined) =>
     formatCurrency(parseMoneyString(value))
 
+  // 3 columns so Allocated / Available / Used sit on the first row,
+  // and Pending / Credit floor wrap onto a second row at the same card width.
   return (
-    <StatsGrid columns={4}>
+    <StatsGrid columns={3}>
       <StatsCard
         title="Allocated"
         value={format(wallet.allocated_balance)}
@@ -45,6 +47,12 @@ export function CreditBalanceCard({ wallet, isLoading }: CreditBalanceCardProps)
         value={format(wallet.available_balance)}
         description="Spendable right now"
         icon={Wallet}
+      />
+      <StatsCard
+        title="Used"
+        value={format(wallet.used_balance)}
+        description="Outstanding credit to pay back"
+        icon={CircleDollarSign}
       />
       <StatsCard
         title="Pending"

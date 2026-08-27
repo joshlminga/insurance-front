@@ -24,6 +24,8 @@ import {
     EditProductSchema,
     UpdateProfileSchema,
     UpdatePasswordSchema,
+    AccountGeneralSchema,
+    AccountAvatarSchema,
     CreateCoveringSchema,
     CreateVehicleClassesSchema,
     CreateVehicleUsesSchema,
@@ -111,6 +113,8 @@ export type EditProductFormValues = z.infer<typeof EditProductSchema>
 
 export type UpdateProfileFormValues = z.infer<typeof UpdateProfileSchema>
 export type UpdatePasswordFormValues = z.infer<typeof UpdatePasswordSchema>
+export type AccountGeneralFormValues = z.infer<typeof AccountGeneralSchema>
+export type AccountAvatarFormValues = z.infer<typeof AccountAvatarSchema>
 export type SendViaEmailFormValues = z.infer<typeof SendViaEmailSchema>
 export type SendMessageValues = z.infer<typeof SendMessageSchema>
 

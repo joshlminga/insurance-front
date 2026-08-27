@@ -75,6 +75,7 @@ export interface PageHeaderProps {
 export type Tuser = {
   name?: string
   email?: string
+  phone?: string | null
   avatar?: string
   is_general?: boolean,
   id?: number
@@ -193,6 +194,126 @@ export type MotorQuoteSessionStartData = {
   is_guest?: boolean
 }
 
+export type MotorQuoteLastEndedStage =
+  | 'quote'
+  | 'rates'
+  | 'kyc'
+  | 'payment'
+  | 'certificate'
+
+export type MotorQuoteDuplicateStartAt = 'quote' | 'rates' | 'kyc' | 'payment'
+
+export type MotorQuoteFetchListRow = {
+  id: number
+  quote_code?: string
+  status?: string
+  current_step?: number
+  last_completed_step?: number | null
+  last_ended_stage?: MotorQuoteLastEndedStage
+  started_at?: string | null
+  last_activity_at?: string | null
+  created_at?: string | null
+  customer?: {
+    id?: number
+    type?: string
+    name?: string | null
+    email?: string | null
+    phone?: string | null
+  } | null
+  agency?: {
+    organization_id?: number
+    organization_location_id?: number
+    name?: string
+  } | null
+  location?: { id?: number; name?: string } | null
+  cover?: {
+    cover_type?: string | null
+    covering?: string | null
+    used_for?: string | null
+    vehicle_class?: string | null
+    ownership?: string | null
+  }
+  vehicle?: {
+    id?: number
+    registration_number?: string | null
+    chassis_number?: string | null
+    make?: string | null
+    model?: string | null
+  } | null
+}
+
+export type MotorQuoteFetchDetail = {
+  session?: {
+    id: number
+    quote_code?: string
+    status?: string
+    last_ended_stage?: MotorQuoteLastEndedStage
+    customer_type?: MotorQuoteSessionCustomerType
+    customer_id?: number | null
+  }
+  last_ended_stage?: MotorQuoteLastEndedStage
+  customer?: MotorQuoteFetchListRow['customer'] & {
+    first_name?: string | null
+    last_name?: string | null
+  }
+  agency?: MotorQuoteFetchListRow['agency']
+  processed_by_organization?: MotorQuoteFetchListRow['agency']
+  cover?: Record<string, unknown>
+  vehicle?: Record<string, unknown> | null
+  selected_cover?: {
+    purchase_id?: number
+    product_id?: number
+    rate_id?: number
+    product_name?: string
+    insurer_name?: string
+    premium?: Record<string, unknown>
+  } | null
+  kyc?: Record<string, unknown>
+  invoice_meta?: Record<string, unknown>
+  invoices?: Array<Record<string, unknown>>
+  certificates?: Array<Record<string, unknown>>
+  selected_benefit_ids?: number[]
+  meta?: Record<string, unknown>
+}
+
+export type MotorQuoteDuplicatePayload = {
+  source_quote_session_id: number
+  start_at: MotorQuoteDuplicateStartAt
+  last_ended_stage?: MotorQuoteLastEndedStage
+  start_quote: {
+    user_id?: number | null
+    country_id?: number | null
+    first_name?: string | null
+    last_name?: string | null
+    email?: string | null
+    phone?: string | null
+    is_guest?: boolean
+    vehicle_class_id?: number | null
+    covertype_id?: number | null
+    covering_id?: number | null
+    ownership?: string | null
+    vehicle_registration_number?: string | null
+    vehicle_value?: number | null
+    used_for_id?: number | null
+    valued_by_professional?: boolean
+    processed_by_organization_id?: number | null
+    agency_id?: number | null
+    referral_id?: string | null
+  }
+  rates?: {
+    product_id?: number | null
+    rate_id?: number | null
+    selected_benefit_ids?: number[]
+    premium?: Record<string, unknown> | null
+    purchase_id?: number | null
+  }
+  kyc?: Record<string, unknown>
+  payment?: {
+    invoice_meta?: Record<string, unknown>
+    invoices?: Array<Record<string, unknown>>
+  }
+}
+
 export interface SubmitResponse {
   message: string,
   success: string,
@@ -234,11 +355,12 @@ export type AddVehicleApiPayload = {
   model: string
   manufacture_year: number
   body_type: string
-  color: string
-  number_of_passengers: number
+  /** Optional — null when left blank */
+  color: string | null
+  number_of_passengers: number | null
   tonnage: number
-  engine_number: string
-  cubic_capacity: number
+  engine_number: string | null
+  cubic_capacity: number | null
   chassis_number: string
 }
 export interface CustomerVerificationDetailsProps {
@@ -734,6 +856,7 @@ export type CreditWallet = {
   allocated_balance: string | null
   available_balance: string | null
   pending_balance: string | null
+  used_balance?: string | null
   minimum_spend_threshold: string | null
 }
 

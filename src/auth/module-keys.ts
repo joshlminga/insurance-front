@@ -33,6 +33,16 @@ export const MODULES = {
 
   // Prepaid credit & finance control
   FINANCE_CONTROL: 'finance-control',
+
+  // Motor reports / dashboard
+  REPORT_MOTOR_DASHBOARD: 'report-motor-dashboard',
+  REPORT_MOTOR_QUOTATION: 'report-motor-quotation',
+  REPORT_MOTOR_INVOICE: 'report-motor-invoice',
+  REPORT_MOTOR_RECEIPT: 'report-motor-receipt',
+  REPORT_MOTOR_COVER: 'report-motor-cover',
+
+  // DMVIC / motor certificates
+  DMVIC_CERTIFICATE: 'dmvic-certificate',
 } as const
 
 export type ModuleKey = (typeof MODULES)[keyof typeof MODULES]

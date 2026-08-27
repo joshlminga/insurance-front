@@ -30,7 +30,7 @@ import {
     EMETHODS,
     MOTOR_QUOTE_SESSION_STORAGE_KEY,
 } from "@/utils/constatnts";
-import { persistAdminMotorPurchaseStart } from "../../admin-motor-session";
+import { persistAdminMotorPurchaseStart, readAdminMotorDuplicateSourceId, clearAdminMotorDuplicatePrefill } from "../../admin-motor-session";
 import { ShowToast } from "@/utils/utils";
 import { UseApiMutation } from "@/hooks/hooks";
 import { extractErrorMessage } from "@/utils/helpers";
@@ -119,6 +119,7 @@ export const AdminMotorQuotePreviewPage: React.FC<premiumPreview> = ({
                     vehicleInfo: data?.data?.vehicle_info,
                     ownership: data?.data?.ownership,
                 })
+                clearAdminMotorDuplicatePrefill()
                 goToNextStep?.();
                 ShowToast.success(data?.message ?? "Purchase started");
             },
@@ -134,7 +135,11 @@ export const AdminMotorQuotePreviewPage: React.FC<premiumPreview> = ({
             ShowToast.error("No active quote session found.")
             return
         }
-        submitPurchaseMutation.mutate(data)
+        const quoteDuplicate = readAdminMotorDuplicateSourceId()
+        submitPurchaseMutation.mutate({
+            ...data,
+            ...(quoteDuplicate ? { quote_duplicate: quoteDuplicate } : {}),
+        })
     }
 
     const { handleDialogContextSwitch, dialogContent, dialogOpen } =

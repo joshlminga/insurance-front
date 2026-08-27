@@ -8,6 +8,9 @@ import {
     ADMIN_MOTOR_CUSTOMER_PHONE_KEY,
     ADMIN_MOTOR_QUOTE_CUSTOMER_ID_KEY,
     ADMIN_MOTOR_QUOTE_CUSTOMER_TYPE_KEY,
+    ADMIN_MOTOR_QUOTE_DUPLICATE_PREFILL_KEY,
+    ADMIN_MOTOR_QUOTE_DUPLICATE_SOURCE_KEY,
+    ADMIN_MOTOR_QUOTE_DUPLICATE_START_AT_KEY,
     ADMIN_MOTOR_QUOTE_IS_GUEST_KEY,
     INVOICE_SESSION_STORAGE_KEY,
     MOTOR_QUOTE_SESSION_STORAGE_KEY,
@@ -16,6 +19,10 @@ import {
     VEHICLE_OWNERSHIP_SESSION_STORAGE_KEY,
 } from '@/utils/constatnts'
 import type {
+    MotorQuoteDuplicatePayload,
+    MotorQuoteDuplicateStartAt,
+    MotorQuoteFetchDetail,
+    MotorQuoteLastEndedStage,
     MotorQuoteSessionCustomerType,
     MotorQuoteSessionStartData,
 } from '@/types/types'
@@ -179,4 +186,122 @@ export function persistAdminMotorPurchaseStart({
     )
     sessionStorage.setItem(ADMIN_MOTOR_PURCHASE_STEP_KEY, '1')
     sessionStorage.removeItem(INVOICE_SESSION_STORAGE_KEY)
+}
+
+/** Resume an existing quote/purchase from fetch detail into admin stepper session keys. */
+export function persistAdminMotorResumeFromDetail(detail: MotorQuoteFetchDetail): {
+  stage: MotorQuoteLastEndedStage
+  purchaseStep: number | null
+} {
+  const sessionId = detail.session?.id
+  if (!sessionId) {
+    return { stage: 'quote', purchaseStep: null }
+  }
+
+  persistAdminMotorQuoteSession({
+    id: sessionId,
+    quote_code: detail.session?.quote_code,
+    customer_type: detail.session?.customer_type,
+    customer_id: detail.session?.customer_id ?? null,
+    is_guest: detail.customer?.type === 'guest',
+  })
+
+  const customerName =
+    detail.customer?.name ||
+    [detail.customer?.first_name, detail.customer?.last_name].filter(Boolean).join(' ')
+  persistAdminMotorCustomerContact({
+    name: customerName || undefined,
+    email: detail.customer?.email || undefined,
+    phone: detail.customer?.phone || undefined,
+  })
+
+  const stage = (detail.last_ended_stage ?? detail.session?.last_ended_stage ?? 'quote') as MotorQuoteLastEndedStage
+  const purchaseId = detail.selected_cover?.purchase_id
+  const ownership = (detail.cover as { ownership?: string } | undefined)?.ownership
+  const firstInvoiceId = Array.isArray(detail.invoices) && detail.invoices[0]
+    ? (detail.invoices[0] as { id?: number }).id
+    : undefined
+
+  if (purchaseId != null && (stage === 'kyc' || stage === 'payment' || stage === 'certificate' || stage === 'rates')) {
+    sessionStorage.setItem(PURCHASE_SESSION_STORAGE_KEY, String(purchaseId))
+    if (ownership) {
+      sessionStorage.setItem(VEHICLE_OWNERSHIP_SESSION_STORAGE_KEY, String(ownership))
+    }
+  }
+
+  if (stage === 'kyc') {
+    sessionStorage.setItem(ADMIN_MOTOR_PURCHASE_STEP_KEY, '1')
+    sessionStorage.removeItem(INVOICE_SESSION_STORAGE_KEY)
+    return { stage, purchaseStep: 1 }
+  }
+
+  if (stage === 'payment' || stage === 'certificate') {
+    sessionStorage.setItem(ADMIN_MOTOR_PURCHASE_STEP_KEY, stage === 'certificate' ? '4' : '3')
+    if (firstInvoiceId != null) {
+      sessionStorage.setItem(INVOICE_SESSION_STORAGE_KEY, String(firstInvoiceId))
+    } else if (purchaseId != null) {
+      // Invoice form uses purchase id as session key in some flows
+      sessionStorage.setItem(INVOICE_SESSION_STORAGE_KEY, String(purchaseId))
+    }
+    return { stage, purchaseStep: stage === 'certificate' ? 4 : 3 }
+  }
+
+  sessionStorage.removeItem(PURCHASE_SESSION_STORAGE_KEY)
+  sessionStorage.removeItem(INVOICE_SESSION_STORAGE_KEY)
+  sessionStorage.removeItem(ADMIN_MOTOR_PURCHASE_STEP_KEY)
+  return { stage, purchaseStep: null }
+}
+
+/** Seed payment step for Issue cover from invoice reports. */
+export function persistAdminMotorIssueCoverFromInvoice(input: {
+  purchaseId: string | number
+  invoiceId?: string | number | null
+}): void {
+  if (typeof window === 'undefined') return
+  sessionStorage.setItem(PURCHASE_SESSION_STORAGE_KEY, String(input.purchaseId))
+  sessionStorage.setItem(ADMIN_MOTOR_PURCHASE_STEP_KEY, '3')
+  if (input.invoiceId != null && String(input.invoiceId).trim() !== '') {
+    sessionStorage.setItem(INVOICE_SESSION_STORAGE_KEY, String(input.invoiceId))
+  } else {
+    sessionStorage.setItem(INVOICE_SESSION_STORAGE_KEY, String(input.purchaseId))
+  }
+}
+
+export function persistAdminMotorDuplicatePrefill(payload: MotorQuoteDuplicatePayload): void {
+  if (typeof window === 'undefined') return
+  sessionStorage.setItem(ADMIN_MOTOR_QUOTE_DUPLICATE_SOURCE_KEY, String(payload.source_quote_session_id))
+  sessionStorage.setItem(ADMIN_MOTOR_QUOTE_DUPLICATE_START_AT_KEY, payload.start_at)
+  sessionStorage.setItem(ADMIN_MOTOR_QUOTE_DUPLICATE_PREFILL_KEY, JSON.stringify(payload))
+}
+
+export function readAdminMotorDuplicatePrefill(): MotorQuoteDuplicatePayload | null {
+  if (typeof window === 'undefined') return null
+  const raw = sessionStorage.getItem(ADMIN_MOTOR_QUOTE_DUPLICATE_PREFILL_KEY)
+  if (!raw) return null
+  try {
+    return JSON.parse(raw) as MotorQuoteDuplicatePayload
+  } catch {
+    return null
+  }
+}
+
+export function readAdminMotorDuplicateSourceId(): number | null {
+  const raw = readKey(ADMIN_MOTOR_QUOTE_DUPLICATE_SOURCE_KEY)
+  const id = Number(raw)
+  return Number.isFinite(id) && id > 0 ? id : null
+}
+
+export function readAdminMotorDuplicateStartAt(): MotorQuoteDuplicateStartAt | null {
+  const raw = readKey(ADMIN_MOTOR_QUOTE_DUPLICATE_START_AT_KEY)
+  if (raw === 'quote' || raw === 'rates' || raw === 'kyc' || raw === 'payment') {
+    return raw
+  }
+  return null
+}
+
+export function clearAdminMotorDuplicatePrefill(): void {
+  if (typeof window === 'undefined') return
+  sessionStorage.removeItem(ADMIN_MOTOR_QUOTE_DUPLICATE_PREFILL_KEY)
+  sessionStorage.removeItem(ADMIN_MOTOR_QUOTE_DUPLICATE_SOURCE_KEY)
+  sessionStorage.removeItem(ADMIN_MOTOR_QUOTE_DUPLICATE_START_AT_KEY)
 }

@@ -35,7 +35,7 @@ import {
     MOTOR_QUOTE_SESSION_STORAGE_KEY,
     ReusableReducer
 } from '@/utils/constatnts'
-import { persistAdminMotorPurchaseStart } from '../admin-motor-session'
+import { persistAdminMotorPurchaseStart, readAdminMotorDuplicateSourceId, clearAdminMotorDuplicatePrefill } from '../admin-motor-session'
 import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
 import { formatCurrency } from '@/lib/format'
 import { serializeMotorPremiumParams } from '@/lib/motor-premium-params'
@@ -287,6 +287,7 @@ export const AdminMotorQuotationsPage: React.FC<AdminMotorStepProps> = ({
                     vehicleInfo: data?.data?.vehicle_info,
                     ownership: data?.data?.ownership,
                 })
+                clearAdminMotorDuplicatePrefill()
                 goToNextStep?.();
                 ShowToast.success(data?.message ?? "Purchase started");
             },
@@ -304,9 +305,11 @@ export const AdminMotorQuotationsPage: React.FC<AdminMotorStepProps> = ({
             return
         }
         setPurchasingRateId(rateId)
+        const quoteDuplicate = readAdminMotorDuplicateSourceId()
         submitPurchaseMutation.mutate({
             'product_id': productId,
             'rate_id': rateId,
+            ...(quoteDuplicate ? { quote_duplicate: quoteDuplicate } : {}),
         })
     }
 

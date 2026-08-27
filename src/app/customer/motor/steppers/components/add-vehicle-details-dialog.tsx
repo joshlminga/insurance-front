@@ -51,6 +51,19 @@ function toFormNumber(value: string): number {
     return Number(String(value).replace(/,/g, '').trim())
 }
 
+/** Empty optional text → null so the API can store null instead of "". */
+function optionalTrimmedString(value: string | undefined): string | null {
+    const trimmed = (value ?? '').trim()
+    return trimmed === '' ? null : trimmed
+}
+
+/** Empty optional number → null (avoids sending 0 for a blank field). */
+function optionalFormNumber(value: string | undefined): number | null {
+    const trimmed = (value ?? '').replace(/,/g, '').trim()
+    if (trimmed === '') return null
+    return Number(trimmed)
+}
+
 function buildAddVehiclePayload(data: AddVehicleFormValues): AddVehicleApiPayload {
     return {
         registration_number: data.registration_number.trim().toUpperCase(),
@@ -58,11 +71,11 @@ function buildAddVehiclePayload(data: AddVehicleFormValues): AddVehicleApiPayloa
         model: data.model.trim(),
         manufacture_year: toFormNumber(data.manufacture_year),
         body_type: data.body_type.trim(),
-        color: data.color.trim(),
-        number_of_passengers: toFormNumber(data.number_of_passengers),
+        color: optionalTrimmedString(data.color),
+        number_of_passengers: optionalFormNumber(data.number_of_passengers),
         tonnage: toFormNumber(data.tonnage),
-        engine_number: data.engine_number.trim(),
-        cubic_capacity: toFormNumber(data.cubic_capacity),
+        engine_number: optionalTrimmedString(data.engine_number),
+        cubic_capacity: optionalFormNumber(data.cubic_capacity),
         chassis_number: data.chassis_number.trim(),
     }
 }
@@ -221,7 +234,6 @@ export function AddVehicleDetailsDialog({
                             name="color"
                             label="Color"
                             type="text"
-                            required
                             placeholder="e.g. BLUE"
                         />
                         <ReuseableInput
@@ -230,7 +242,6 @@ export function AddVehicleDetailsDialog({
                             name="number_of_passengers"
                             label="Number of Passengers"
                             type="number"
-                            required
                             placeholder="e.g. 5"
                         />
                         <ReuseableInput
@@ -245,25 +256,8 @@ export function AddVehicleDetailsDialog({
                         />
                     </div>
 
+                    {/* Chassis first (required), then optional engine number and cubic capacity */}
                     <div className={threeColGridClassName}>
-                        <ReuseableInput
-                            className={addVehicleInputClassName}
-                            control={form.control}
-                            name="engine_number"
-                            label="Engine Number"
-                            type="text"
-                            required
-                            placeholder="e.g. 1KR-1603484"
-                        />
-                        <ReuseableInput
-                            className={addVehicleInputClassName}
-                            control={form.control}
-                            name="cubic_capacity"
-                            label="Cubic Capacity"
-                            type="number"
-                            required
-                            placeholder="e.g. 990"
-                        />
                         <ReuseableInput
                             className={addVehicleInputClassName}
                             control={form.control}
@@ -272,6 +266,22 @@ export function AddVehicleDetailsDialog({
                             type="text"
                             required
                             placeholder="e.g. KSP130-2164151"
+                        />
+                        <ReuseableInput
+                            className={addVehicleInputClassName}
+                            control={form.control}
+                            name="engine_number"
+                            label="Engine Number"
+                            type="text"
+                            placeholder="e.g. 1KR-1603484"
+                        />
+                        <ReuseableInput
+                            className={addVehicleInputClassName}
+                            control={form.control}
+                            name="cubic_capacity"
+                            label="Cubic Capacity"
+                            type="number"
+                            placeholder="e.g. 990"
                         />
                     </div>
 

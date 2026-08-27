@@ -8,6 +8,10 @@ import {
   TextQuote,
   Coins,
   Banknote,
+  FileBadge2,
+  FileText,
+  Receipt,
+  ClipboardList,
 } from 'lucide-react'
 import { MODULES, QUOTATION_MOTOR_MODULES } from '@/auth/module-keys'
 import { EPREFIX, EROUTES } from '@/utils/enums'
@@ -19,6 +23,8 @@ export type NavSubItem = {
   module?: string
   /** Case 2 (any): sub-item visible when user has any of these modules */
   modules?: string[]
+  /** Extra permission (e.g. finance-control.mine) — hidden when user lacks it */
+  permission?: string
 }
 
 export type NavItem = {
@@ -85,29 +91,70 @@ export const adminNavConfig: NavItem[] = [
   //   module: MODULES.RBAC,
   // },
   {
-    title: 'Quotations',
-    url: EROUTES.QUOTATIONS,
+    title: 'Motor Quotation',
+    url: EROUTES.MOTORQUOTATIONS,
     icon: TextQuote,
-    modules: [
-      ...QUOTATION_MOTOR_MODULES,
-      MODULES.QUOTATION_MARINE,
-      MODULES.QUOTATION_TRAVEL,
-    ],
+    modules: [...QUOTATION_MOTOR_MODULES],
     items: [
       {
-        title: 'Motor Quotation',
+        title: 'Start New',
         url: EROUTES.MOTORQUOTATIONS,
         modules: [...QUOTATION_MOTOR_MODULES],
       },
       {
-        title: 'Marine Quotation',
-        url: '',
-        module: MODULES.QUOTATION_MARINE,
+        title: 'Fetch',
+        url: EROUTES.MOTOR_QUOTATION_FETCH,
+        modules: [...QUOTATION_MOTOR_MODULES],
+      },
+    ],
+  },
+  {
+    title: 'Motor Certificates',
+    url: EROUTES.MOTOR_CERTIFICATES,
+    icon: FileBadge2,
+    module: MODULES.DMVIC_CERTIFICATE,
+  },
+  {
+    title: 'Quotation Reports',
+    url: EROUTES.REPORT_QUOTATIONS_MOTOR,
+    icon: ClipboardList,
+    modules: [MODULES.REPORT_MOTOR_QUOTATION, MODULES.QUOTATION_TRAVEL],
+    items: [
+      {
+        title: 'Motor',
+        url: EROUTES.REPORT_QUOTATIONS_MOTOR,
+        module: MODULES.REPORT_MOTOR_QUOTATION,
       },
       {
-        title: 'Travel Quotation',
-        url: '',
-        module: MODULES.QUOTATION_TRAVEL,
+        title: 'Travel',
+        url: EROUTES.REPORT_QUOTATIONS_TRAVEL,
+        modules: [MODULES.QUOTATION_TRAVEL, MODULES.REPORT_MOTOR_QUOTATION],
+      },
+    ],
+  },
+  {
+    title: 'Invoice Reports',
+    url: EROUTES.REPORT_INVOICES_MOTOR,
+    icon: FileText,
+    module: MODULES.REPORT_MOTOR_INVOICE,
+    items: [
+      {
+        title: 'Motor',
+        url: EROUTES.REPORT_INVOICES_MOTOR,
+        module: MODULES.REPORT_MOTOR_INVOICE,
+      },
+    ],
+  },
+  {
+    title: 'Receipt Reports',
+    url: EROUTES.REPORT_RECEIPTS_MOTOR,
+    icon: Receipt,
+    module: MODULES.REPORT_MOTOR_RECEIPT,
+    items: [
+      {
+        title: 'Motor',
+        url: EROUTES.REPORT_RECEIPTS_MOTOR,
+        module: MODULES.REPORT_MOTOR_RECEIPT,
       },
     ],
   },
@@ -165,40 +212,53 @@ export const adminNavConfig: NavItem[] = [
     icon: Coins,
     module: MODULES.FINANCE_CONTROL,
     items: [
-      { 
-        title: 'My Wallet', 
-        url: EROUTES.CREDIT_WALLET, 
-        module: MODULES.FINANCE_CONTROL 
+      {
+        title: 'My Wallet',
+        url: EROUTES.CREDIT_WALLET,
+        module: MODULES.FINANCE_CONTROL,
+        permission: 'finance-control.mine',
       },
-      { 
-        title: 'Transactions', 
-        url: EROUTES.CREDIT_TRANSACTIONS, 
-        module: MODULES.FINANCE_CONTROL 
+      {
+        title: 'Transactions',
+        url: EROUTES.CREDIT_TRANSACTIONS,
+        module: MODULES.FINANCE_CONTROL,
+        // Visible with finance-control.menu only (no finer route permission)
       },
-      { 
-        title: 'Credit Approval Pending', 
-        url: EROUTES.CREDIT_PENDING, 
-        module: MODULES.FINANCE_CONTROL 
+      {
+        title: 'Recharge Credit',
+        url: EROUTES.CREDIT_TRANSACTIONS,
+        module: MODULES.FINANCE_CONTROL,
+        permission: 'finance-control.action',
       },
-      { 
-        title: 'Pending Approvals', 
-        url: EROUTES.CREDIT_APPROVALS, 
-        module: MODULES.FINANCE_CONTROL 
+      {
+        title: 'Credit Approval Pending',
+        url: EROUTES.CREDIT_PENDING,
+        module: MODULES.FINANCE_CONTROL,
+        permission: 'finance-control.mine',
       },
-      { 
-        title: 'Pool Settings', 
-        url: EROUTES.CREDIT_SETUP_POOL, 
-        module: MODULES.FINANCE_CONTROL 
+      {
+        title: 'Pending Approvals',
+        url: EROUTES.CREDIT_APPROVALS,
+        module: MODULES.FINANCE_CONTROL,
+        permission: 'finance-control.approve',
       },
-      { 
-        title: 'User Allocations', 
-        url: EROUTES.CREDIT_SETUP_USERS, 
-        module: MODULES.FINANCE_CONTROL 
+      {
+        title: 'Pool Settings',
+        url: EROUTES.CREDIT_SETUP_POOL,
+        module: MODULES.FINANCE_CONTROL,
+        permission: 'finance-control.update',
       },
-      { 
-        title: 'Adjustments', 
-        url: EROUTES.CREDIT_ADJUSTMENTS, 
-        module: MODULES.FINANCE_CONTROL 
+      {
+        title: 'User Allocations',
+        url: EROUTES.CREDIT_SETUP_USERS,
+        module: MODULES.FINANCE_CONTROL,
+        permission: 'finance-control.list',
+      },
+      {
+        title: 'Adjustments',
+        url: EROUTES.CREDIT_ADJUSTMENTS,
+        module: MODULES.FINANCE_CONTROL,
+        permission: 'finance-control.adjust',
       },
     ],
   },

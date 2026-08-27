@@ -24,7 +24,7 @@ import {
     EMETHODS,
     MOTOR_QUOTE_SESSION_STORAGE_KEY,
 } from "@/utils/constatnts";
-import { persistAdminMotorPurchaseStart } from "../../../admin-motor-session";
+import { persistAdminMotorPurchaseStart, readAdminMotorDuplicateSourceId, clearAdminMotorDuplicatePrefill } from "../../../admin-motor-session";
 import { extractErrorMessage } from "@/utils/helpers";
 import { cn } from "@/lib/utils";
 import { PREMIUM_KEYS } from "@/utils/enums";
@@ -95,6 +95,7 @@ export const AdminMotorPostComparisonPage: React.FC<premiumPreview> = ({
                     vehicleInfo: data?.data?.vehicle_info,
                     ownership: data?.data?.ownership,
                 })
+                clearAdminMotorDuplicatePrefill()
                 goToNextStep?.();
                 ShowToast.success(data?.message ?? "Purchase started");
             },
@@ -112,9 +113,11 @@ export const AdminMotorPostComparisonPage: React.FC<premiumPreview> = ({
             return
         }
         setPurchasingRateId(rateId)
+        const quoteDuplicate = readAdminMotorDuplicateSourceId()
         submitPurchaseMutation.mutate({
             'product_id': productId,
             'rate_id': rateId,
+            ...(quoteDuplicate ? { quote_duplicate: quoteDuplicate } : {}),
         })
     }
 

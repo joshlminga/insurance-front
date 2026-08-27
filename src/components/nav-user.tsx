@@ -5,7 +5,6 @@ import {
   BadgeCheck,
   Bell,
   LogOut,
-  Settings,
 } from "lucide-react"
 import { Link } from "react-router-dom"
 import { UseAuth } from "@/stores/auth-store"
@@ -32,6 +31,7 @@ import {
 } from "@/components/ui/sidebar"
 import { getInitials } from "@/lib/format"
 import type { Tuser } from "@/types/types"
+import { resolveUserAvatarUrl } from "@/app/admin/account-profile/profile-api"
 
 export function NavUser({
   user,
@@ -40,6 +40,7 @@ export function NavUser({
 }) {
   const { isMobile } = useSidebar()
   const { logout } = UseAuth()
+  const avatarSrc = resolveUserAvatarUrl(user)
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -51,7 +52,7 @@ export function NavUser({
               variant='default'
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
               <Avatar className="h-8 w-8 rounded-full">
-                {user.avatar && <AvatarImage src={user?.avatar} alt={user?.name} />}
+                {avatarSrc && <AvatarImage src={avatarSrc} alt={user?.name} />}
                 <AvatarFallback className="rounded-lg text-primary text-xs">
                   {getInitials(user.name)}
                 </AvatarFallback>
@@ -71,7 +72,7 @@ export function NavUser({
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-full">
-                  {user.avatar && <AvatarImage src={user.avatar} alt={user.name} />}
+                  {avatarSrc && <AvatarImage src={avatarSrc} alt={user.name} />}
                   <AvatarFallback className="rounded-lg text-primary text-xs">
                     {getInitials(user.name)}
                   </AvatarFallback>
@@ -85,15 +86,9 @@ export function NavUser({
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
-                <Link to={EROUTES.SETTINGS}>
+                <Link to={EROUTES.ACCOUNT_PROFILE}>
                   <BadgeCheck />
-                  Account
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to={EROUTES.SETTINGS}>
-                  <Settings />
-                  Settings
+                  Account Profile
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem>

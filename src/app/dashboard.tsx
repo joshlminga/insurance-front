@@ -7,28 +7,92 @@ import {
   Users,
   Wallet,
   ShieldCheck,
-  TrendingUp,
+  FileText,
   ArrowUpRight,
   ArrowDownRight,
   Clock,
   AlertTriangle,
+  TrendingUp,
 } from "lucide-react"
-import { formatCurrency, formatDate, formatPercent } from "@/lib/format"
-import {
-  dashboardStats,
-  loanApplications,
-  transactions,
-  notifications,
-} from "@/data/dummy-data"
+import { formatCurrency, formatDate, parseMoneyString } from "@/lib/format"
 import { StatusBadge } from "@/components/shared/status-badge"
 import { Link } from "react-router-dom"
+import { UseApiQuery } from "@/hooks/hooks"
+import { REPORT_URLS, motorDashboardKey } from "@/app/admin/reports/reports-query"
+import type { SubmitResponse } from "@/types/types"
+import type { MotorDashboardReport } from "@/types/dashboard-report"
+import { EROUTES } from "@/utils/enums"
+
+const EMPTY_LIST_MESSAGE = "No available data"
+const NA = "N/A"
+
+/** Count → string; missing/unavailable → N/A. Zero is valid. */
+function displayCount(value: number | null | undefined): string {
+  if (value === null || value === undefined || Number.isNaN(value)) {
+    return NA
+  }
+  return value.toLocaleString()
+}
+
+/** Money string from API → currency; missing → N/A. */
+function displayMoney(value: string | number | null | undefined): string {
+  if (value === null || value === undefined || value === "") {
+    return NA
+  }
+  return formatCurrency(parseMoneyString(value))
+}
+
+/** Turn API event_type like "quote.started" into a short title */
+function notificationTitle(eventType: string): string {
+  return eventType
+    .split(".")
+    .map((part) => part.replace(/_/g, " "))
+    .join(" · ")
+}
+
+function resolveErrorMessage(
+  error: unknown,
+  fallbackMessage?: string
+): string {
+  const err = error as {
+    response?: { data?: { message?: string } }
+    message?: string
+  }
+  return (
+    err?.response?.data?.message ??
+    err?.message ??
+    fallbackMessage ??
+    "Could not load dashboard report."
+  )
+}
 
 export default function DashboardPage() {
-  const recentLoanApplications = loanApplications
-    .filter((l) => ["submitted", "under_review"].includes(l.status))
-    .slice(0, 5)
-  const recentTransactions = transactions.slice(0, 5)
-  const unreadNotifications = notifications.filter((n) => !n.isRead).slice(0, 4)
+  const params = { per_page: 10 }
+
+  // One call loads all dashboard KPIs + limited lists for the current org location
+  const { data, isLoading, isError, error } = UseApiQuery<SubmitResponse>({
+    url: REPORT_URLS.dashboard,
+    queryKey: motorDashboardKey(params),
+    params,
+  })
+
+  // Treat loading / error / missing payload as "unavailable" → N/A & empty lists
+  const report =
+    !isLoading && !isError && data?.data
+      ? (data.data as MotorDashboardReport)
+      : null
+  const summary = report?.summary
+  const period = report?.period
+
+  const pendingQuotations = report?.pending_quotations
+  const pendingInstallments = report?.pending_installments
+  const notifications = report?.recent_notifications
+  const failedCertificates = report?.failed_certificates
+  const certificatesTotal = report?.certificates?.total
+
+  const quotationItems = pendingQuotations?.items ?? []
+  const installmentItems = pendingInstallments?.items ?? []
+  const notificationItems = notifications?.items ?? []
 
   const currentDateTime = new Intl.DateTimeFormat("en-KE", {
     weekday: "long",
@@ -36,45 +100,64 @@ export default function DashboardPage() {
     month: "long",
     year: "numeric",
     timeZone: "Africa/Nairobi",
-  }).format(new Date());
+  }).format(new Date())
+
+  const periodLabel =
+    period != null
+      ? `${period.date_from} → ${period.date_to}`
+      : isLoading
+        ? "loading…"
+        : "current month"
+
+  const errorMessage = isError
+    ? resolveErrorMessage(error, data?.message)
+    : null
 
   return (
     <>
       <PageHeader
         title={`Marketplace Dashboard • ${currentDateTime}`}
-        description="Welcome back! Here's an overview of your insurance platform"
+        description={`Overview for this location. Period for premium & quotations: ${periodLabel}`}
       />
+
+      {errorMessage ? (
+        <p className="text-sm text-destructive rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2">
+          {errorMessage}
+        </p>
+      ) : null}
+
       <StatsGrid columns={4}>
         <StatsCard
           title="Total Policyholders"
-          value={dashboardStats.totalMembers.toLocaleString()}
-          description={`${dashboardStats.activeMembers} active accounts`}
+          value={displayCount(summary?.total_customers)}
+          description="Members with the member role"
           icon={Users}
-          trend={{ value: dashboardStats.memberGrowth, isPositive: true }}
         />
         <StatsCard
-          title="Total Premiums"
-          value={formatCurrency(dashboardStats.totalSavings)}
-          description="Total premiums collected"
+          title="Total Payments"
+          value={displayMoney(summary?.total_payments)}
+          description="Paid invoices (all time)"
           icon={Wallet}
-          trend={{ value: dashboardStats.savingsGrowth, isPositive: true }}
         />
         <StatsCard
           title="Active Policies"
-          value={dashboardStats.activeLoans.toLocaleString()}
-          description={formatCurrency(dashboardStats.totalLoans)}
+          value={displayCount(summary?.active_policies)}
+          description={
+            certificatesTotal === null || certificatesTotal === undefined
+              ? `${NA} certificates listed`
+              : `${certificatesTotal.toLocaleString()} certificates listed`
+          }
           icon={ShieldCheck}
         />
         <StatsCard
-          title="Loss Ratio"
-          value={formatPercent(dashboardStats.defaultRate)}
-          description={`${dashboardStats.activeLoans} active policies`}
-          icon={TrendingUp}
-          trend={{ value: 0.5, isPositive: false }}
+          title="Total Invoices"
+          value={displayCount(summary?.total_invoices)}
+          description="Active motor invoices"
+          icon={FileText}
         />
       </StatsGrid>
 
-      {/* Monthly Summary */}
+      {/* Period summary row */}
       <div className="grid gap-4 md:grid-cols-3">
         <Card className="py-4">
           <CardContent className="flex items-center gap-4">
@@ -82,9 +165,9 @@ export default function DashboardPage() {
               <ArrowDownRight className="h-5 w-5 text-green-600 dark:text-green-400" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Premiums this month</p>
+              <p className="text-sm text-muted-foreground">Premiums this period</p>
               <p className="text-xl font-bold">
-                {formatCurrency(dashboardStats.depositsThisMonth)}
+                {displayMoney(summary?.total_premium)}
               </p>
             </div>
           </CardContent>
@@ -92,12 +175,12 @@ export default function DashboardPage() {
         <Card className="py-4">
           <CardContent className="flex items-center gap-4">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 dark:bg-red-900">
-              <ArrowUpRight className="h-5 w-5 text-red-600 dark:text-red-400" />
+              <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Claims Paid this month</p>
+              <p className="text-sm text-muted-foreground">Failed certificates</p>
               <p className="text-xl font-bold">
-                {formatCurrency(dashboardStats.withdrawalsThisMonth)}
+                {displayCount(failedCertificates?.total)}
               </p>
             </div>
           </CardContent>
@@ -108,52 +191,115 @@ export default function DashboardPage() {
               <ShieldCheck className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Policies issued</p>
+              <p className="text-sm text-muted-foreground">Quotations this period</p>
               <p className="text-xl font-bold">
-                {formatCurrency(dashboardStats.loansDisbursedThisMonth)}
+                {displayCount(summary?.total_quotations)}
               </p>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Main Content Grid */}
       <div className="grid gap-4 lg:grid-cols-2">
-        {/* Pending Policy Applications */}
+        {/* Pending quotations */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-base font-medium">
-              Pending Policy Applications
+              Pending Quotations
+              {(pendingQuotations?.total ?? 0) > 0 ? (
+                <Badge variant="secondary" className="ml-2">
+                  {pendingQuotations!.total}
+                </Badge>
+              ) : null}
             </CardTitle>
             <Button variant="ghost" size="sm" asChild>
-              <Link to="/loans">View all</Link>
+              <Link to={EROUTES.MOTORQUOTATIONS}>View all</Link>
             </Button>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentLoanApplications.length === 0 ? (
+              {quotationItems.length === 0 ? (
                 <p className="text-sm text-muted-foreground py-4 text-center">
-                  No pending applications
+                  {EMPTY_LIST_MESSAGE}
                 </p>
               ) : (
-                recentLoanApplications.map((loan) => (
+                quotationItems.map((quote) => (
                   <div
-                    key={loan.id}
+                    key={quote.id}
                     className="flex items-center justify-between border-b pb-3 last:border-0 last:pb-0"
                   >
                     <div className="space-y-1">
-                      <p className="text-sm font-medium">{loan.memberName}</p>
+                      <p className="text-sm font-medium">
+                        {quote.customer?.name ?? "Guest"}
+                      </p>
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <span>{loan.productName}</span>
+                        <span>{quote.quote_code}</span>
                         <span>-</span>
-                        <span>{formatCurrency(loan.amount)}</span>
+                        <span>
+                          {quote.vehicle?.registration_number ?? "No plate"}
+                        </span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <StatusBadge status={loan.status} />
-                      <Button variant="outline" size="sm" asChild>
-                        <Link to={`/loans/${loan.loanId}`}>Review</Link>
-                      </Button>
+                    <StatusBadge status={quote.status} />
+                  </div>
+                ))
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Pending installments */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-base font-medium">
+              Pending Installments
+              {(pendingInstallments?.total ?? 0) > 0 ? (
+                <Badge variant="secondary" className="ml-2">
+                  {pendingInstallments!.total}
+                </Badge>
+              ) : null}
+            </CardTitle>
+            <Button variant="ghost" size="sm" asChild>
+              <Link to={EROUTES.FINANCE_INVOICES}>View all</Link>
+            </Button>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {installmentItems.length === 0 ? (
+                <p className="text-sm text-muted-foreground py-4 text-center">
+                  {EMPTY_LIST_MESSAGE}
+                </p>
+              ) : (
+                installmentItems.map((invoice) => (
+                  <div
+                    key={invoice.id}
+                    className="flex items-center justify-between border-b pb-3 last:border-0 last:pb-0"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900">
+                        <Clock className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">
+                          {invoice.customer?.name ??
+                            invoice.vehicle?.registration_number ??
+                            invoice.invoice_number}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {invoice.installment_text}
+                          {invoice.due_date
+                            ? ` · due ${formatDate(invoice.due_date)}`
+                            : ""}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-medium">
+                        {displayMoney(invoice.installment_amount)}
+                      </p>
+                      <p className="text-xs text-muted-foreground capitalize">
+                        {invoice.status}
+                      </p>
                     </div>
                   </div>
                 ))
@@ -162,109 +308,40 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Recent Transactions */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-base font-medium">
-              Recent Transactions
-            </CardTitle>
-            <Button variant="ghost" size="sm" asChild>
-              <Link to="/transactions">View all</Link>
-            </Button>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {recentTransactions.map((txn) => (
-                <div
-                  key={txn.id}
-                  className="flex items-center justify-between border-b pb-3 last:border-0 last:pb-0"
-                >
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={`flex h-8 w-8 items-center justify-center rounded-full ${txn.type === "deposit" || txn.type === "loan_repayment"
-                        ? "bg-green-100 dark:bg-green-900"
-                        : "bg-red-100 dark:bg-red-900"
-                        }`}
-                    >
-                      {txn.type === "deposit" || txn.type === "loan_repayment" ? (
-                        <ArrowDownRight className="h-4 w-4 text-green-600 dark:text-green-400" />
-                      ) : (
-                        <ArrowUpRight className="h-4 w-4 text-red-600 dark:text-red-400" />
-                      )}
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium">{txn.memberName}</p>
-                      <p className="text-xs text-muted-foreground capitalize">
-                        {txn.type.replace(/_/g, " ").replace("deposit", "premium").replace("loan repayment", "policy payment")}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p
-                      className={`text-sm font-medium ${txn.type === "deposit" || txn.type === "loan_repayment"
-                        ? "text-green-600 dark:text-green-400"
-                        : "text-red-600 dark:text-red-400"
-                        }`}
-                    >
-                      {txn.type === "deposit" || txn.type === "loan_repayment"
-                        ? "+"
-                        : "-"}
-                      {formatCurrency(txn.amount)}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {formatDate(txn.createdAt)}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Notifications */}
+        {/* Recent notifications */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-base font-medium">
               Recent Notifications
             </CardTitle>
-            {unreadNotifications.length > 0 && (
-              <Badge variant="secondary">{unreadNotifications.length} new</Badge>
-            )}
+            {(notifications?.total ?? 0) > 0 ? (
+              <Badge variant="secondary">{notifications!.total}</Badge>
+            ) : null}
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {unreadNotifications.length === 0 ? (
+              {notificationItems.length === 0 ? (
                 <p className="text-sm text-muted-foreground py-4 text-center">
-                  No new notifications
+                  {EMPTY_LIST_MESSAGE}
                 </p>
               ) : (
-                unreadNotifications.map((notification) => (
+                notificationItems.map((notification) => (
                   <div
                     key={notification.id}
                     className="flex items-start gap-3 border-b pb-3 last:border-0 last:pb-0"
                   >
-                    <div
-                      className={`flex h-8 w-8 items-center justify-center rounded-full ${notification.type === "error"
-                        ? "bg-red-100 dark:bg-red-900"
-                        : notification.type === "warning"
-                          ? "bg-yellow-100 dark:bg-yellow-900"
-                          : notification.type === "success"
-                            ? "bg-green-100 dark:bg-green-900"
-                            : "bg-blue-100 dark:bg-blue-900"
-                        }`}
-                    >
-                      {notification.type === "error" ? (
-                        <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" />
-                      ) : notification.type === "warning" ? (
-                        <Clock className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
-                      ) : (
-                        <TrendingUp className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                      )}
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900">
+                      <TrendingUp className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                     </div>
                     <div className="flex-1 space-y-1">
-                      <p className="text-sm font-medium">{notification.title}</p>
+                      <p className="text-sm font-medium capitalize">
+                        {notificationTitle(notification.event_type)}
+                      </p>
                       <p className="text-xs text-muted-foreground line-clamp-2">
-                        {notification.message}
+                        {notification.category}
+                        {notification.occurred_at
+                          ? ` · ${formatDate(notification.occurred_at)}`
+                          : ""}
                       </p>
                     </div>
                   </div>
@@ -281,28 +358,44 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-3">
-              <Button variant="outline" className="h-auto py-4 flex-col gap-2" asChild>
-                <Link to="/members/new">
+              <Button
+                variant="outline"
+                className="h-auto py-4 flex-col gap-2"
+                asChild
+              >
+                <Link to={EROUTES.ORGANIZATION_MEMBERS}>
                   <Users className="h-5 w-5" />
-                  <span className="text-xs">New Policyholder</span>
+                  <span className="text-xs">Members</span>
                 </Link>
               </Button>
-              <Button variant="outline" className="h-auto py-4 flex-col gap-2" asChild>
-                <Link to="/loans/apply">
+              <Button
+                variant="outline"
+                className="h-auto py-4 flex-col gap-2"
+                asChild
+              >
+                <Link to={EROUTES.MOTORQUOTATIONS}>
                   <ShieldCheck className="h-5 w-5" />
-                  <span className="text-xs">New Policy</span>
+                  <span className="text-xs">New Quotation</span>
                 </Link>
               </Button>
-              <Button variant="outline" className="h-auto py-4 flex-col gap-2" asChild>
-                <Link to="/transactions">
+              <Button
+                variant="outline"
+                className="h-auto py-4 flex-col gap-2"
+                asChild
+              >
+                <Link to={EROUTES.FINANCE_INVOICES}>
                   <Wallet className="h-5 w-5" />
-                  <span className="text-xs">Record Transaction</span>
+                  <span className="text-xs">Invoices</span>
                 </Link>
               </Button>
-              <Button variant="outline" className="h-auto py-4 flex-col gap-2" asChild>
-                <Link to="/reports">
-                  <TrendingUp className="h-5 w-5" />
-                  <span className="text-xs">View Insights</span>
+              <Button
+                variant="outline"
+                className="h-auto py-4 flex-col gap-2"
+                asChild
+              >
+                <Link to={EROUTES.CREDIT_WALLET}>
+                  <ArrowUpRight className="h-5 w-5" />
+                  <span className="text-xs">Credit Wallet</span>
                 </Link>
               </Button>
             </div>

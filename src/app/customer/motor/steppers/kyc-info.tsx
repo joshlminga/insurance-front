@@ -440,9 +440,9 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToPrevSt
                                 className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                                 control={form.control}
                                 name="tax_pin"
-                                label="Tax PIN"
+                                label="Tax PIN (KRA PIN)"
                                 required
-                                placeholder="Enter tax PIN"
+                                placeholder="e.g. A020828302W"
                             />
                         </div>
                     </div>
@@ -466,7 +466,7 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToPrevSt
                     <div className="rounded-2xl border border-[#ADABAB]/35 bg-white/95 p-3 sm:p-5">
                         <BoxHeader
                             title="Documents"
-                            description="Upload the supporting documents for this KYC submission."
+                            description="Upload the supporting documents for this KYC submission. Each file up to 10MB."
                         />
                         <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 sm:gap-5'>
                             {isCompanyOwned ? (

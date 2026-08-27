@@ -87,6 +87,9 @@ export const EROUTES = {
   CREDIT_SETTLEMENT: `/${EPREFIX.DASHBOARD}/credit/settlements/:id`,
   CREDIT_ADJUSTMENTS: `/${EPREFIX.DASHBOARD}/credit/adjustments`,
 
+  // Motor certificates
+  MOTOR_CERTIFICATES: `/${EPREFIX.DASHBOARD}/motor-certificates`,
+
   // Reports
   REPORTS: `/${EPREFIX.DASHBOARD}/reports`,
 
@@ -96,12 +99,21 @@ export const EROUTES = {
 
   // Settings
   SETTINGS: `/${EPREFIX.DASHBOARD}/settings`,
+  /** Logged-in user's own profile (name, email, password, avatar) */
+  ACCOUNT_PROFILE: `/${EPREFIX.DASHBOARD}/account-profile`,
 
   // Quotations
   QUOTATIONS: `/${EPREFIX.DASHBOARD}/${EPREFIX.QUOTATIONS}`,
   MOTORQUOTATIONS: `/${EPREFIX.DASHBOARD}/${EPREFIX.QUOTATIONS}/motor-quotations`,
+  MOTOR_QUOTATION_FETCH: `/${EPREFIX.DASHBOARD}/${EPREFIX.QUOTATIONS}/motor-quotations/fetch`,
   MOTOR_QUOTATION_RESULTS: `/${EPREFIX.DASHBOARD}/${EPREFIX.QUOTATIONS}/motor-quotations/results`,
   MOTOR_QUOTATION_PURCHASE: `/${EPREFIX.DASHBOARD}/${EPREFIX.QUOTATIONS}/motor-quotations/purchase`,
+
+  // Ops reports
+  REPORT_QUOTATIONS_MOTOR: `/${EPREFIX.DASHBOARD}/reports/quotations/motor`,
+  REPORT_QUOTATIONS_TRAVEL: `/${EPREFIX.DASHBOARD}/reports/quotations/travel`,
+  REPORT_INVOICES_MOTOR: `/${EPREFIX.DASHBOARD}/reports/invoices/motor`,
+  REPORT_RECEIPTS_MOTOR: `/${EPREFIX.DASHBOARD}/reports/receipts/motor`,
   // products
   // Motor
   PRODUCTS: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor`,

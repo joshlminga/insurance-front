@@ -2,9 +2,31 @@
 import {
   ACCEPTED_FILE_TYPES,
   ACCEPTED_IMAGE_TYPES,
+  KRA_PIN_REGEX,
+  MAX_KYC_FILE_BYTES,
   PRODUCT_TYPE_VALUES,
 } from "@/utils/constatnts"
 import { z } from "zod"
+
+/** Shared KRA PIN rule used by motor / legacy KYC schemas. */
+const KraPinSchema = z
+  .string()
+  .min(1, "KRA PIN is required")
+  .regex(KRA_PIN_REGEX, "KRA PIN must be a letter, 9 digits, then a letter (e.g. A020828302W)")
+
+/** MIME + 10MB size checks for a required KYC file. */
+const requiredKycFile = (requiredMessage: string) =>
+  z
+    .any()
+    .refine((file) => file instanceof File, requiredMessage)
+    .refine(
+      (file) => file instanceof File && ACCEPTED_FILE_TYPES.includes(file.type),
+      "Only .jpg, .jpeg, .png and .pdf formats are supported."
+    )
+    .refine(
+      (file) => !(file instanceof File) || file.size <= MAX_KYC_FILE_BYTES,
+      "Each file must be 10MB or smaller."
+    )
 
 export const CustomerDetailsSchema = z.object({
   first_name: z
@@ -108,11 +130,12 @@ export const AddVehicleSchema = z.object({
   model: z.string().min(1, "Model is required"),
   manufacture_year: z.string().min(1, "Year of manufacture is required"),
   body_type: z.string().min(1, "Body type is required"),
-  color: z.string().min(1, "Color is required"),
-  number_of_passengers: z.string().min(1, "Number of passengers is required"),
+  // Optional — blank is fine; API stores null
+  color: z.string().optional().or(z.literal("")),
+  number_of_passengers: z.string().optional().or(z.literal("")),
   tonnage: z.string().min(1, "Tonnage is required"),
-  engine_number: z.string().min(1, "Engine number is required"),
-  cubic_capacity: z.string().min(1, "Cubic capacity is required"),
+  engine_number: z.string().optional().or(z.literal("")),
+  cubic_capacity: z.string().optional().or(z.literal("")),
   chassis_number: z.string().min(1, "Chassis number is required"),
 })
 
@@ -184,38 +207,44 @@ export const UpdatePasswordSchema = z.object({
   path: ["confirm_password"],
 })
 
+/** Admin Account Profile — general info (requires current password to authorize) */
+export const AccountGeneralSchema = z.object({
+  name: z.string().min(2, "Name is required").max(100),
+  email: z.string().email("Invalid email address"),
+  phone: z
+    .string()
+    .min(10, "Phone number must be at least 10 digits")
+    .regex(/^(?:\+?\d{1,3})?[ -]?\d{6,14}$/, "Invalid phone number format")
+    .or(z.literal("")),
+  current_password: z.string().min(1, "Current password is required"),
+})
+
+/** Admin Account Profile — avatar upload (requires current password) */
+export const AccountAvatarSchema = z.object({
+  profile_picture: z
+    .any()
+    .refine((file) => file instanceof File, "Select a profile picture")
+    .refine(
+      (file) => file instanceof File && ACCEPTED_IMAGE_TYPES.includes(file.type),
+      "Profile picture must be jpeg, png, jpg, or webp"
+    ),
+  current_password: z.string().min(1, "Current password is required"),
+})
+
 export const KycSchema = z.object({
   nationality_id: z.string().min(1, "Select Nationality"),
   id_type: z.string().min(1, "Slect ID Type"),
   id_number: z.string().min(1, "Passport/ID No number is required"),
-  tax_pin: z.string().min(1, "Tax Number is required"),
+  tax_pin: KraPinSchema,
   color: z.string().min(1, "Car color is required"),
   chassis_number: z.string().min(1, "Vehicle chassis number is required"),
   engine_cc: z.string().min(1, "Vehicle engine capacity is required").max(5, "Engine capacity must be less than 99999 cc"),
   engine_number: z.string().min(1, "Engine number is required"),
   total_seats: z.string().min(1, "Number of seats is required").max(2, "Total seats must be less than 100"),
   tonage_capacity: z.string().min(1, "Vehicle tonage capacity is required").max(5, "Tonnage capacity must be less than 99999 Tones"),
-  logbook: z
-    .any()
-    .refine((file) => file instanceof File, "Attach a logbook")
-    .refine(
-      (file) => ACCEPTED_FILE_TYPES.includes(file?.type),
-      "Only .jpg, .jpeg, .png and .pdf formats are supported."
-    ),
-  tax_certificate: z
-    .any()
-    .refine((file) => file instanceof File, "Attach a tax certificate")
-    .refine(
-      (file) => ACCEPTED_FILE_TYPES.includes(file?.type),
-      "Only .jpg, .jpeg, .png and .pdf formats are supported."
-    ),
-  id_document: z
-    .any()
-    .refine((file) => file instanceof File, "Attach ID/Passport")
-    .refine(
-      (file) => ACCEPTED_FILE_TYPES.includes(file?.type),
-      "Only .jpg, .jpeg, .png and .pdf formats are supported."
-    ),
+  logbook: requiredKycFile("Attach a logbook"),
+  tax_certificate: requiredKycFile("Attach a tax certificate"),
+  id_document: requiredKycFile("Attach ID/Passport"),
 })
 
 const OptionalKycFileSchema = z
@@ -229,6 +258,10 @@ const OptionalKycFileSchema = z
     (file) => !file || ACCEPTED_FILE_TYPES.includes(file?.type),
     "Only .jpg, .jpeg, .png and .pdf formats are supported."
   )
+  .refine(
+    (file) => !file || !(file instanceof File) || file.size <= MAX_KYC_FILE_BYTES,
+    "Each file must be 10MB or smaller."
+  )
 
 export const MotorKycSchema = z.object({
   nationality_id: z.string().optional(),
@@ -240,7 +273,8 @@ export const MotorKycSchema = z.object({
   incorporated_in: z.string().optional(),
   industry_category: z.string().optional(),
   coi_number: z.string().optional(),
-  tax_pin: z.string().optional(),
+  // Backend requires a valid KRA PIN on every KYC submit
+  tax_pin: KraPinSchema,
   policy_holder: z.string().optional(),
   logbook: OptionalKycFileSchema,
   tax_certificate: OptionalKycFileSchema,

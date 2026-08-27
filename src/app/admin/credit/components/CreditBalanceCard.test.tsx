@@ -7,17 +7,20 @@ const sampleWallet: CreditWallet = {
   allocated_balance: "100000.00",
   available_balance: "75000.00",
   pending_balance: "10000.00",
+  used_balance: "15000.00",
   minimum_spend_threshold: "50000.00",
 }
 
 describe("CreditBalanceCard", () => {
-  it("renders four balance stats", () => {
+  it("renders five balance stats including Used", () => {
     render(<CreditBalanceCard wallet={sampleWallet} />)
 
     expect(screen.getByText("Allocated")).toBeInTheDocument()
     expect(screen.getByText("Available")).toBeInTheDocument()
+    expect(screen.getByText("Used")).toBeInTheDocument()
     expect(screen.getByText("Pending")).toBeInTheDocument()
     expect(screen.getByText("Credit floor")).toBeInTheDocument()
+    expect(screen.getByText("Outstanding credit to pay back")).toBeInTheDocument()
     expect(
       screen.getByText(
         "You must keep at least this amount available after using credit."
