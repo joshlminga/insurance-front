@@ -44,6 +44,7 @@ import {
     OrganizationMemberEditSchema,
     PoolSettingsSchema,
     AllocateCreditSchema,
+    AllocateNewCreditSchema,
     AdjustmentSchema,
     RejectApprovalSchema,
     CreateSettlementSchema,
@@ -120,6 +121,7 @@ export type OrganizationMemberCreateFormValues = z.infer<typeof OrganizationMemb
 export type OrganizationMemberEditFormValues = z.infer<typeof OrganizationMemberEditSchema>
 export type PoolSettingsFormValues = z.infer<typeof PoolSettingsSchema>
 export type AllocateCreditFormValues = z.infer<typeof AllocateCreditSchema>
+export type AllocateNewCreditFormValues = z.infer<typeof AllocateNewCreditSchema>
 export type AdjustmentFormValues = z.infer<typeof AdjustmentSchema>
 export type RejectApprovalFormValues = z.infer<typeof RejectApprovalSchema>
 export type CreateSettlementFormValues = z.infer<typeof CreateSettlementSchema>

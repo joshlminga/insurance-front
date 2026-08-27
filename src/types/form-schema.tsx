@@ -1046,6 +1046,14 @@ export const AllocateCreditSchema = z.object({
   minimum_spend_threshold: z.coerce.number().min(0, "Minimum threshold must be 0 or more"),
 })
 
+/** First-time / picker allocate — same fields plus which eligible user to assign. */
+export const AllocateNewCreditSchema = AllocateCreditSchema.extend({
+  user_id: z.union([z.string(), z.number()]).refine(
+    (value) => String(value).trim().length > 0,
+    "Select a user"
+  ),
+})
+
 export const AdjustmentSchema = z.object({
   user_id: z.union([z.string(), z.number()]).refine(
     (value) => String(value).trim().length > 0,

@@ -11,6 +11,7 @@ export const CREDIT_URLS = {
   approvalApprove: (transactionId: number | string) => `credit/approvals/${transactionId}/approve`,
   approvalReject: (transactionId: number | string) => `credit/approvals/${transactionId}/reject`,
   setupPool: "credit/setup/pool",
+  setupEligibleUsers: "credit/setup/eligible-users",
   setupUsers: "credit/setup/users",
   setupUser: (userId: number | string) => `credit/setup/users/${userId}`,
   setupUserAllocate: (userId: number | string) => `credit/setup/users/${userId}/allocate`,
@@ -53,6 +54,10 @@ export function creditSetupUsersKey(params?: Record<string, unknown>) {
   return [CREDIT_URLS.setupUsers, params] as const
 }
 
+export function creditSetupEligibleUsersKey(params?: Record<string, unknown>) {
+  return [CREDIT_URLS.setupEligibleUsers, params] as const
+}
+
 export async function invalidateCreditWallet(queryClient: QueryClient) {
   await queryClient.invalidateQueries({ queryKey: [CREDIT_URLS.wallet] })
 }
@@ -70,6 +75,7 @@ export async function invalidateCreditAll(queryClient: QueryClient) {
     invalidateCreditTransactions(queryClient),
     queryClient.invalidateQueries({ queryKey: [CREDIT_URLS.approvals] }),
     queryClient.invalidateQueries({ queryKey: [CREDIT_URLS.setupUsers] }),
+    queryClient.invalidateQueries({ queryKey: [CREDIT_URLS.setupEligibleUsers] }),
     queryClient.invalidateQueries({ queryKey: [CREDIT_URLS.setupPool] }),
   ])
 }

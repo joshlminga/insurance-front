@@ -837,11 +837,12 @@ export type CreditPool = {
 export type CreditUserAllocation = {
   id?: number
   user_id: number
-  user?: { id?: number; name?: string; email?: string }
+  user?: { id?: number; name?: string; email?: string; username?: string; is_active?: boolean }
   allocated_balance?: string | null
   available_balance?: string | null
   pending_balance?: string | null
   minimum_spend_threshold?: string | null
+  has_wallet?: boolean
 }
 
 export type CreditPaymentPendingData = {
