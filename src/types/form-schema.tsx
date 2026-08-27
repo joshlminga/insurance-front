@@ -1102,3 +1102,62 @@ export const CreateSettlementSchema = z
       })
     }
   })
+export const ParameterSchema = z
+  .object({
+    organization_id: z.coerce
+      .number()
+      .int()
+      .positive("Organization is required"),
+    product: z
+      .string()
+      .min(1, "Product type is required"),
+    code: z
+      .string()
+      .min(1, "Parameter code is required")
+      .max(20, "Parameter code must not exceed 20 characters"),
+    name: z
+      .string()
+      .min(1, "Parameter name is required")
+      .max(200, "Parameter name must not exceed 200 characters"),
+    kind: z
+      .string()
+      .min(1, "Parameter kind is required"),
+    value_mode: z.enum(["percentage", "amount"], {
+      message: "Value mode is required",
+    }),
+    percentage: z.coerce
+      .number()
+      .min(0, "Percentage cannot be negative")
+      .max(100, "Percentage cannot exceed 100")
+      .nullable(),
+    amount: z.coerce
+      .number()
+      .min(0, "Amount cannot be negative")
+      .nullable(),
+    calculation_base: z
+      .string()
+      .min(1, "Calculation base is required"),
+    payee: z
+      .string()
+      .min(1, "Payee is required"),
+  })
+  .superRefine((data, ctx) => {
+    if (data.value_mode === "percentage") {
+      if (data.percentage === null || data.percentage === undefined) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["percentage"],
+          message: "Percentage is required",
+        });
+      }
+    }
+    if (data.value_mode === "amount") {
+      if (data.amount === null || data.amount === undefined) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["amount"],
+          message: "Amount is required",
+        });
+      }
+    }
+  });

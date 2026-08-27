@@ -1,12 +1,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { CardFooter } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Button, ReusableOrganizationsInputMultiselect, ReusableSelect, ReuseableInput, ReuseableSelectInsurerInput } from '@/dev/core'
+import { 
+  Button, 
+  ReusableOrganizationsInputMultiselect, 
+  ReusableSelect, 
+  ReuseableInput, 
+  ReuseableSelectInsurerInput 
+} from '@/dev/core'
 import { UseApiMutation } from '@/hooks/hooks'
 import { EditProductSchema } from '@/types/form-schema'
 import { EditProductFormValues } from '@/types/schema'
 import { SubmitResponse } from '@/types/types'
-import { ACCESSLEVELSOPTIONS, EMETHODS, TARGET_AUDIENCE_OPTIONS } from '@/utils/constatnts'
+import { 
+  ACCESSLEVELSOPTIONS, 
+  EMETHODS, 
+  TARGET_AUDIENCE_OPTIONS 
+} from '@/utils/constatnts'
 import { extractErrorMessage } from '@/utils/helpers'
 import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -139,7 +148,7 @@ export const EditProductModal = ({ handleDialogContextSwitch, componentProps }: 
   }
 
   return (
-    <div className="w-full min-w-[600px] max-w-[600px] p-6 space-y-6">
+    <div className="w-full min-w-150 max-w-150 p-6 space-y-6">
       <div className="border-b pb-3">
         <h2 className="text-xl font-semibold">
           Edit Motor Product
@@ -166,20 +175,20 @@ export const EditProductModal = ({ handleDialogContextSwitch, componentProps }: 
           control={form.control}
           name="name"
           label="Product Motor Name"
-          className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+         className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
         />
         <ReuseableInput
           control={form.control}
           name="officename"
           label="Office Name"
-          className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+         className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
         />
         <ReuseableInput
           control={form.control}
           name="description"
           type="textarea"
           label="Product Motor Description"
-          className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+         className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
         />
         <ReusableSelect
           control={form.control}
@@ -198,14 +207,14 @@ export const EditProductModal = ({ handleDialogContextSwitch, componentProps }: 
           name="start_date"
           label="Start Date"
           type="date"
-          className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+         className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
         />
         <ReuseableInput
           control={form.control}
           name="expiry_date"
           label="Expiry Date"
           type="date"
-          className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+         className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
         />
         <div className="space-y-2">
           <label className="text-sm font-medium">Attach Brochures</label>
@@ -219,7 +228,7 @@ export const EditProductModal = ({ handleDialogContextSwitch, componentProps }: 
               <Input
                 type="file"
                 accept=".pdf,.csv,.xls,.xlsx,.docx,application/pdf,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                className="flex h-[51px] w-full 
+                className="flex h-10 w-full 
                                 rounded-[5px] border border-[#ADABAB] 
                                 bg-transparent px-3 py-2 text-sm file:mr-3 
                                 file:rounded file:border-0 file:bg-muted file:px-3 file:py-1"
@@ -268,21 +277,21 @@ export const EditProductModal = ({ handleDialogContextSwitch, componentProps }: 
             />
           )}
         />
-        <CardFooter className="flex flex-col sm:flex-row justify-between gap-3 mt-2 px-0">
+        <div className="flex flex-col sm:flex-row justify-end gap-3 mt-2 px-0">
           <Button
             type="button"
-            className="w-full sm:w-auto rounded-full border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
+            className="w-full sm:w-auto rounded-sm border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
             onClick={() => handleDialogContextSwitch({})}>
             Cancel
           </Button>
 
           <Button
             type="submit"
-            className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
+            className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-sm hover:bg-[#C20C0C]"
             loading={submitMutation.isPending}>
             Save Changes
           </Button>
-        </CardFooter>
+        </div>
       </form>
     </div>
   )

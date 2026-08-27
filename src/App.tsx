@@ -114,6 +114,10 @@ const AdminMotorQuotationPurchasePage = lazy(() =>
     default: m.AdminMotorQuotationPurchasePage,
   }))
 )
+const FinanceParametersIndexPage = lazy(() => import("./app/admin/finance/parameters"))
+const FinanceClaimsPage = lazy(() => import("./app/admin/finance/claims"))
+const FinanceInvoicesPage = lazy(() => import("./app/admin/finance/invoices"))
+const FinancePaymentsPage = lazy(() => import("./app/admin/finance/payments"))
 
 export const router = createBrowserRouter([
   {
@@ -603,6 +607,52 @@ export const router = createBrowserRouter([
           <S>
             <AdminModulePage module={MODULES.PRODUCT_MOTOR}>
               <MotorTonangePage />
+            </AdminModulePage>
+          </S>
+        ),
+      },
+
+      // Finance
+      {
+        path: "finance",
+        element: <Navigate to={EROUTES.FINANCE_PARAMETERS} replace />,
+      },
+      {
+        path: "finance/parameters",
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.FINANCE}>
+              <FinanceParametersIndexPage />
+            </AdminModulePage>
+          </S>
+        ),
+      },
+      {
+        path: "finance/claims",
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.FINANCE}>
+              <FinanceClaimsPage />
+            </AdminModulePage>
+          </S>
+        ),
+      },
+      {
+        path: "finance/invoices",
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.FINANCE}>
+              <FinanceInvoicesPage />
+            </AdminModulePage>
+          </S>
+        ),
+      },
+       {
+        path: "finance/payments",
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.FINANCE}>
+              <FinancePaymentsPage />
             </AdminModulePage>
           </S>
         ),

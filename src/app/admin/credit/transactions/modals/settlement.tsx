@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button, ReuseableInput } from "@/dev/core"
 import { CREDIT_URLS } from "@/app/admin/credit/credit-query"
-import { getCreditOutstanding } from "@/dev/columns/admin/credit/transactions"
+import { GetCreditOutstanding } from "@/dev/columns/admin/credit/transactions"
 import { interpretPaystackStatus } from "@/app/payment/payment-status"
 import { UseApiMutation, UseApiQuery } from "@/hooks/hooks"
 import { CreateSettlementSchema } from "@/types/form-schema"
@@ -58,7 +58,7 @@ export default function SettlementModal({
   const defaultAmounts = useMemo(() => {
     const map: Record<number, number> = {}
     selectedTransactions.forEach((txn) => {
-      map[txn.id] = getCreditOutstanding(txn)
+      map[txn.id] = GetCreditOutstanding(txn)
     })
     return map
   }, [selectedTransactions])
@@ -69,7 +69,7 @@ export default function SettlementModal({
   const [pendingSettlementId, setPendingSettlementId] = useState<number | null>(null)
 
   const total = selectedTransactions.reduce(
-    (sum, txn) => sum + (itemAmounts[txn.id] ?? getCreditOutstanding(txn)),
+    (sum, txn) => sum + (itemAmounts[txn.id] ?? GetCreditOutstanding(txn)),
     0
   )
 
@@ -225,7 +225,7 @@ export default function SettlementModal({
 
     const items = selectedTransactions.map((txn) => ({
       credit_transaction_id: txn.id,
-      amount: itemAmounts[txn.id] ?? getCreditOutstanding(txn),
+      amount: itemAmounts[txn.id] ?? GetCreditOutstanding(txn),
     }))
 
     if (items.some((item) => !(item.amount > 0))) {
@@ -259,7 +259,7 @@ export default function SettlementModal({
         <p className="text-2xl font-bold">{formatCurrency(total)}</p>
         <ul className="text-sm space-y-2 max-h-40 overflow-y-auto">
           {selectedTransactions.map((txn) => {
-            const maxOutstanding = getCreditOutstanding(txn)
+            const maxOutstanding = GetCreditOutstanding(txn)
             return (
               <li key={txn.id} className="flex items-center justify-between gap-3">
                 <span className="text-muted-foreground shrink-0">#{txn.id}</span>

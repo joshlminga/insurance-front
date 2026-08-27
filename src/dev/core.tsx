@@ -39,7 +39,9 @@ import type {
     ProfileMenuItemProps,
     ConfirmationDialogProps,
     ReusableSwitchToggleProps,
-    ReusablePopoverProps
+    ReusablePopoverProps,
+    SearchableCommandSelectProps,
+    ReusableTabComponentProps
 } from "@/types/types";
 import {
     Stepper,
@@ -140,6 +142,7 @@ import {
 import { ChatIndexPage } from "@/app/chat-components/page";
 import { Switch } from "@/components/ui/switch";
 import { EPREFIX, EROUTES } from "@/utils/enums";
+import { useTabs } from "@/hooks";
 
 const formatSegment = (segment: string) => {
     return segment
@@ -1114,27 +1117,6 @@ export const ReusableDropDownComponent = <T,>({
     );
 };
 
-type CommandSelectOption = {
-    value: string
-    label: React.ReactNode
-    searchValue?: string
-}
-
-type SearchableCommandSelectProps = {
-    value?: string
-    onChange?: (value: string) => void
-    options: CommandSelectOption[]
-    placeholder: string
-    searchPlaceholder: string
-    emptyMessage: string
-    disabled?: boolean
-    isLoading?: boolean
-    isFetching?: boolean
-    onSearchChange?: (value: string) => void
-    footer?: React.ReactNode
-}
-
-/** A Shadcn combobox that preserves the public API of the reusable selects. */
 const SearchableCommandSelect = ({
     value,
     onChange,
@@ -2599,3 +2581,64 @@ export function ReusablePopover({
         </Popover>
     );
 }
+
+export const ReusableTabComponent = <KeyType extends string>({
+    Children = () => <></>,
+    tabProps = {},
+    className = "",
+    defaultTab,
+    header,
+    tabs,
+}: ReusableTabComponentProps<KeyType>) => {
+    const { activeTab, tabList, activeTabComponent: ActiveTabComponent, switchTab,
+    } = useTabs<KeyType>({
+            defaultTab,
+            tabs,
+        });
+    const onValueChange = (val: string) => switchTab(val as KeyType);
+    return (
+        <div className={cn("w-full flex flex-col gap-2 py-6")}>
+            {header}
+            <Tabs
+                {...{
+                    defaultValue: defaultTab,
+                    value: activeTab,
+                    onValueChange,
+                }}>
+                <div className="w-full flex items-center justify-between mb-2">
+                    <TabsList
+                        className={cn(
+                            "bg-neutral-200 px-1.5 py-2 rounded-xl h-9",
+                            className,
+                        )}>
+                        {tabList.map(({ title, key }) => (
+                            <TabsTrigger
+                                className={cn(
+                                    "cursor-pointer rounded-sm px-3 py-1 transition-all duration-200 font-medium leading-5 text-sm h-7",
+                                    "data-[state=active]:bg-white data-[state=active]:text-dark-brown data-[state=active]:shadow-sm",
+                                    "data-[state=inactive]:text-gray-600 data-[state=inactive]:hover:text-gray-800",
+                                )}
+                                {...{ value: key }}
+                                key={key}
+                            >
+                                {title}
+                            </TabsTrigger>
+                        ))}
+                    </TabsList>
+                    {Children && <Children {...tabProps} />}
+                </div>
+                {ActiveTabComponent && (
+                    <TabsContent value={activeTab} className="mt-4">
+                        <ActiveTabComponent
+                            {...{
+                                ...tabProps,
+                                filter: activeTab,
+                                tab: activeTab,
+                            }}
+                        />
+                    </TabsContent>
+                )}
+            </Tabs>
+        </div>
+    );
+};

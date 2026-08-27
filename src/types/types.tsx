@@ -1148,3 +1148,41 @@ export type RolesListPageProps = {
   description: string
   tableTitle: string
 }
+
+export type CommandSelectOption = {
+    value: string
+    label: React.ReactNode
+    searchValue?: string
+}
+
+export type SearchableCommandSelectProps = {
+    value?: string
+    onChange?: (value: string) => void
+    options: CommandSelectOption[]
+    placeholder: string
+    searchPlaceholder: string
+    emptyMessage: string
+    disabled?: boolean
+    isLoading?: boolean
+    isFetching?: boolean
+    onSearchChange?: (value: string) => void
+    footer?: React.ReactNode
+}
+
+export type TTab<KeyType = string> = {
+  Tab: React.ComponentType<any>;
+  key: KeyType
+  title: string
+}
+export type ReusableTabComponentProps<KeyType extends string = string> = {
+  Children?: React.ComponentType<any>;
+  tabProps?: Record<string, any>;
+  tabs: TTab<KeyType>[];
+  defaultTab: KeyType;
+  header?: ReactNode;
+} & Partial<TClassType>;
+
+export type TUseTabsProps<KeyType = string> = {
+  tabs: TTab<KeyType>[];
+  defaultTab: KeyType;
+}

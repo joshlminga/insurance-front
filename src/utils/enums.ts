@@ -12,6 +12,7 @@ export const EPREFIX = {
   DASHBOARD: "dashboard",
   PRODUCTS: "products",
   QUOTATIONS: "quotations",
+  FINANCE: "finance",
 
   ERRORS: 'errors'
 } as const
@@ -122,8 +123,14 @@ export const EROUTES = {
   SYSTEM_ROLES: `/${EPREFIX.DASHBOARD}/system-roles`,
   USERS: `/${EPREFIX.DASHBOARD}/users`,
 
-  ERROR404: `/${EPREFIX.ERRORS}/errors404`
+  // finance
+  FINANCE:`/${EPREFIX.DASHBOARD}/${EPREFIX.FINANCE}`,
+  FINANCE_PARAMETERS: `/${EPREFIX.DASHBOARD}/${EPREFIX.FINANCE}/parameters`,
+  FINANCE_CLAIMS: `/${EPREFIX.DASHBOARD}/${EPREFIX.FINANCE}/claims`,
+  FINANCE_INVOICES: `/${EPREFIX.DASHBOARD}/${EPREFIX.FINANCE}/invoices`,
+  PAYMENTS: `/${EPREFIX.DASHBOARD}/${EPREFIX.FINANCE}/payments`,
 
+  ERROR404: `/${EPREFIX.ERRORS}/errors404`
 } as const
 
 export const SORT_ORDER = {
@@ -412,48 +419,6 @@ export const POST_COMPARISON_DATA = [
   },
 ];
 
-export const ongoingCovers = [
-  {
-    id: '366782717',
-    title: 'PsV Car Insurance Cover',
-    variation: 'Paperback Edition',
-    status: 'COVERED',
-    date: 'On 11-02',
-    img: '/cic.png',
-  },
-  {
-    id: '377258917',
-    title: 'Excess Protector Cover',
-    variation: '5*6',
-    status: 'COVERED',
-    date: 'On 07-02',
-    img: '/britam.png',
-  },
-  {
-    id: '345454177',
-    title: 'Madison Insurance Cover',
-    variation: null,
-    status: 'COVERED',
-    date: 'On 09-12',
-    img: '/madison.png',
-  },
-  {
-    id: '311675987',
-    title: 'Sanlam Insurance Cover',
-    variation: null,
-    status: 'COVERED',
-    date: 'On 07-11',
-    img: '/sanlam.png',
-  },
-  {
-    id: '311675987',
-    title: 'All in One Cover',
-    variation: null,
-    status: 'COVERED',
-    date: 'On 07-11',
-    img: '/britam.png',
-  },
-]
 
 export const claims: ClaimItem[] = [
   {
@@ -476,26 +441,3 @@ export const claims: ClaimItem[] = [
   },
 ]
 
-export const myCoversTestData = [
-  {
-    Cover: "KCW 123S",
-    Renewal: "2026-11-15",
-    value: "KES 45,000",
-    claims: "0",
-    is_active: true,
-  },
-  {
-    Cover: "KCA 054Y",
-    Renewal: "2026-05-20",
-    value: "KES 350,000",
-    claims: "KES100,000",
-    is_active: true,
-  },
-  {
-    Cover: "KDN 154A",
-    Renewal: "2026-01-10",
-    value: "KES 1,000,000",
-    claims: "0",
-    is_active: false,
-  },
-];

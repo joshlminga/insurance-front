@@ -1,11 +1,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { CardFooter } from '@/components/ui/card'
-import { Button, ReusableSelect, ReusableSingleSelectApiInput, ReuseableInput } from '@/dev/core'
+import { 
+    Button, 
+    ReusableSelect, 
+    ReusableSingleSelectApiInput, 
+    ReuseableInput 
+} from '@/dev/core'
 import { UseApiMutation } from '@/hooks/hooks'
 import { CreateMotorRateBenefitsSchema } from '@/types/form-schema'
-import { CreateMotorRateBenefitsFormValues, CreateMotorRateBenefitsInputValues } from '@/types/schema'
+import { 
+    CreateMotorRateBenefitsFormValues, 
+    CreateMotorRateBenefitsInputValues 
+} from '@/types/schema'
 import { SubmitResponse } from '@/types/types'
-import { BENEFITTYPESOPTIONS, EMETHODS } from '@/utils/constatnts'
+import { 
+    BENEFITTYPESOPTIONS, 
+    EMETHODS 
+} from '@/utils/constatnts'
 import { extractErrorMessage } from '@/utils/helpers'
 import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -50,7 +60,7 @@ export const EditMotorRateBenefits = ({ handleDialogContextSwitch, componentProp
     }
 
     return (
-        <div className="w-full min-w-[600px] max-w-[800px] p-6 space-y-4">
+        <div className="w-full min-w-150 max-w-200 p-6 space-y-4">
             <div className="border-b pb-3">
                 <h2 className="text-xl font-semibold">
                     Edit Optional Benefits
@@ -96,7 +106,7 @@ export const EditMotorRateBenefits = ({ handleDialogContextSwitch, componentProp
                     type="number"
                     step="0.01"
                     required
-                    className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                    className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                 />
                 <ReuseableInput
                     control={form.control}
@@ -104,7 +114,7 @@ export const EditMotorRateBenefits = ({ handleDialogContextSwitch, componentProp
                     label="Minimum"
                      type="number"
                     step="0.01"
-                    className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                    className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                 />
                 <ReuseableInput
                     control={form.control}
@@ -112,39 +122,23 @@ export const EditMotorRateBenefits = ({ handleDialogContextSwitch, componentProp
                     label="description"
                     type='textarea'
                     // rows={3}
-                    className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                    className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                 />
-                {/* <ReuseableInput
-                    control={form.control}
-                    name="start_date"
-                    label="Start Date"
-                    type="date"
-                    required
-                    className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
-                />
-                <ReuseableInput
-                    control={form.control}
-                    name="expiry_date"
-                    label="Expiry Date"
-                    type="date"
-                    required
-                    className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
-                /> */}
-                <CardFooter className="flex flex-col sm:flex-row justify-between gap-3 mt-2 px-0">
+                <div className="flex flex-col sm:flex-row justify-end gap-3 mt-2 px-0">
                     <Button
                         type="button"
-                        className="w-full sm:w-auto rounded-full border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
+                        className="w-full sm:w-auto rounded-sm border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
                         onClick={() => handleDialogContextSwitch({})}>
                         Cancel
                     </Button>
 
                     <Button
                         type="submit"
-                        className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
+                        className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-sm hover:bg-[#C20C0C]"
                         loading={submitMutation.isPending}>
                         Save Changes
                     </Button>
-                </CardFooter>
+                </div>
             </form>
 
         </div>

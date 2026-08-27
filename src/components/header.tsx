@@ -31,9 +31,10 @@ export default function Header() {
      <header
       className={cn(
         "z-50 flex h-16 w-full shrink-0 items-center justify-between gap-2 border-b bg-background px-2 transition-shadow duration-300 ease-out sm:px-4",
-        "group-has-data-[collapsible=icon]/sidebar-wrapper:h-12",
+        "group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 bg-gray-100 dark:bg-accent",
         scrolled &&
-          "border-border/60 bg-background/95 shadow-[0_4px_24px_rgb(0,0,0,0.08)] backdrop-blur-md"
+        "border-border/60 bg-gray-0 shadow-[0_4px_24px_rgb(0,0,0,0.08)] backdrop-blur-md"
+          // "border-border/60 bg-background/95 shadow-[0_4px_24px_rgb(0,0,0,0.08)] backdrop-blur-md"
       )}
     >
       <div className="flex min-w-0 flex-1 items-center gap-2">

@@ -1,6 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { CardFooter } from '@/components/ui/card'
-import { Button, ReuseableInput, ReuseableSingleSelectCountriesInput } from '@/dev/core'
+import { 
+    Button, 
+    ReuseableInput, 
+    ReuseableSingleSelectCountriesInput 
+} from '@/dev/core'
 import { UseApiMutation } from '@/hooks/hooks'
 import { UsersSchema } from '@/types/form-schema'
 import { UsersFormValues } from '@/types/schema'
@@ -51,7 +54,7 @@ export const CreateUserModal = ({ handleDialogContextSwitch, componentProps }: {
     }
 
     return (
-        <div className="w-full min-w-[600px] max-w-[600px] p-6 space-y-6">
+        <div className="w-full min-w-150 max-w-150 p-6 space-y-6">
             <div className="border-b pb-3">
                 <h2 className="text-xl font-semibold">
                     Create Users
@@ -67,20 +70,14 @@ export const CreateUserModal = ({ handleDialogContextSwitch, componentProps }: {
                     control={form.control}
                     name="name"
                     label="Full Name"
-                    className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                   className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                 />
-                {/* <ReusableSelect
-                    control={form.control}
-                    name="organization_type"
-                    label="Organization Type"
-                    options={ORGANIZATIONTYPES}
-                /> */}
                 <ReuseableInput
                     control={form.control}
                     name="email"
                     type='email'
                     label="Email Address"
-                    className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                   className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                 />
 
                 <ReuseableInput
@@ -88,20 +85,8 @@ export const CreateUserModal = ({ handleDialogContextSwitch, componentProps }: {
                     name="phone"
                     label="Phone Number"
                     type='tel'
-                    className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                   className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                 />
-                {/* <Controller
-                    control={form.control}
-                    name="country"
-                    render={({ field }) => (
-                        <ReusableCountriesInputMultiselect
-                            label="country"
-                            required
-                            value={field.value}
-                            onChange={field.onChange}
-                        />
-                    )}
-                /> */}
                 <Controller
                     control={form.control}
                     name="country"
@@ -114,21 +99,21 @@ export const CreateUserModal = ({ handleDialogContextSwitch, componentProps }: {
                         />
                     )}
                 />
-                <CardFooter className="flex flex-col sm:flex-row justify-between gap-3 mt-2 px-0">
+                <div className="flex flex-col sm:flex-row justify-end gap-3 mt-2 px-0">
                     <Button
                         type="button"
-                        className="w-full sm:w-auto rounded-full border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
+                        className="w-full sm:w-auto rounded-sm border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
                         onClick={() => handleDialogContextSwitch({})}>
                         Cancel
                     </Button>
 
                     <Button
                         type="submit"
-                        className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
+                        className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-sm hover:bg-[#C20C0C]"
                         loading={submitMutation.isPending}>
                         Save Changes
                     </Button>
-                </CardFooter>
+                </div>
             </form>
         </div>
     )

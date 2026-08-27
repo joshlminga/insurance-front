@@ -1,6 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { CardFooter } from "@/components/ui/card"
-import { Button, ReuseableInput, ReuseableSingleSelectCountriesInput, ReuseableSingleSelectOrganizationInput } from "@/dev/core"
+import { 
+  Button, 
+  ReuseableInput, 
+  ReuseableSingleSelectCountriesInput, 
+  ReuseableSingleSelectOrganizationInput 
+} from "@/dev/core"
 import { UseApiMutation } from "@/hooks/hooks"
 import { OrganizationLocationCreateSchema } from "@/types/form-schema"
 import { OrganizationLocationCreateFormValues } from "@/types/schema"
@@ -79,7 +83,7 @@ export const CreateOrganizationLocationModal = ({
   }
 
   return (
-    <div className="w-full min-w-[600px] max-w-[700px] p-6 space-y-6">
+    <div className="w-full min-w-150 max-w-175 p-6 space-y-6">
       <div className="border-b pb-3">
         <h2 className="text-xl font-semibold">Add Organization Location</h2>
         <p className="text-sm text-muted-foreground mt-1">
@@ -134,7 +138,7 @@ export const CreateOrganizationLocationModal = ({
           name="product"
         />
 
-        <CardFooter className="flex flex-col sm:flex-row justify-between gap-3 mt-2 px-0">
+        <div className="flex flex-col sm:flex-row justify-end gap-3 mt-2 px-0">
           <Button
             type="button"
             className="w-full sm:w-auto rounded-full border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
@@ -144,12 +148,12 @@ export const CreateOrganizationLocationModal = ({
 
           <Button
             type="submit"
-            className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
+            className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-sm hover:bg-[#C20C0C]"
             loading={submitMutation.isPending}
           >
             Save
           </Button>
-        </CardFooter>
+        </div>
       </form>
     </div>
   )

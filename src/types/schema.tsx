@@ -48,6 +48,7 @@ import {
     AdjustmentSchema,
     RejectApprovalSchema,
     CreateSettlementSchema,
+    ParameterSchema,
 } from "./form-schema";
 
 export type CustomerFormValues = z.infer<typeof CustomerDetailsSchema>
@@ -125,3 +126,5 @@ export type AllocateNewCreditFormValues = z.infer<typeof AllocateNewCreditSchema
 export type AdjustmentFormValues = z.infer<typeof AdjustmentSchema>
 export type RejectApprovalFormValues = z.infer<typeof RejectApprovalSchema>
 export type CreateSettlementFormValues = z.infer<typeof CreateSettlementSchema>
+
+export type ParameterFormValues = z.infer<typeof ParameterSchema>

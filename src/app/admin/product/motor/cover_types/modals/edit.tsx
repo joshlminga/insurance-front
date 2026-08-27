@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { CardFooter } from '@/components/ui/card'
-import { Button, ReuseableInput } from '@/dev/core'
+import { 
+    Button, 
+    ReuseableInput 
+} from '@/dev/core'
 import { UseApiMutation } from '@/hooks/hooks'
 import { CreateCoverTypeSchema } from '@/types/form-schema'
 import { CreateCoverTypeFormValues } from '@/types/schema'
@@ -68,20 +70,20 @@ export const EditCoverTypesModal = ({ handleDialogContextSwitch, componentProps 
                     label="Cover Description"
                     className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
                 />
-                <CardFooter className="flex flex-col sm:flex-row justify-between gap-3 mt-2 px-0">
+                <div className="flex flex-col sm:flex-row justify-end gap-3 mt-2 px-0">
                     <Button
                         type="button"
-                        className="w-full sm:w-auto rounded-full border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
+                        className="w-full sm:w-auto rounded-sm border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
                         onClick={() => handleDialogContextSwitch({})}>
                         Cancel
                     </Button>
                     <Button
                         type="submit"
-                        className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
+                        className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-sm hover:bg-[#C20C0C]"
                         loading={submitMutation.isPending}>
                         Save Changes
                     </Button>
-                </CardFooter>
+                </div>
             </form>
         </div>
     )

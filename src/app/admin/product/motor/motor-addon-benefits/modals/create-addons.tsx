@@ -1,11 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { CardFooter } from '@/components/ui/card'
-import { Button, ReusableSelect, ReuseableInput } from '@/dev/core'
+import { 
+    Button, 
+    ReusableSelect, 
+    ReuseableInput 
+} from '@/dev/core'
 import { UseApiMutation } from '@/hooks/hooks'
 import { CreateMotorAddonBenefitsSchema } from '@/types/form-schema'
 import { CreateMotorAddonBenefitsFormValues } from '@/types/schema'
 import { SubmitResponse } from '@/types/types'
-import { EMETHODS, MOTORADDONSBENEFITS } from '@/utils/constatnts'
+import { 
+    EMETHODS, 
+    MOTORADDONSBENEFITS 
+} from '@/utils/constatnts'
 import { extractErrorMessage } from '@/utils/helpers'
 import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -75,20 +81,20 @@ export const CreateMotorAddonBenefitsModal = ({ handleDialogContextSwitch, compo
                     options={MOTORADDONSBENEFITS}
                 />
                     
-                <CardFooter className="flex flex-col sm:flex-row justify-between gap-3 mt-2 px-0">
+                <div className="flex flex-col sm:flex-row justify-end gap-3 mt-2 px-0">
                     <Button
                         type="button"
-                        className="w-full sm:w-auto rounded-full border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
+                        className="w-full sm:w-auto rounded-sm border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
                         onClick={() => handleDialogContextSwitch({})}>
                         Cancel
                     </Button>
                     <Button
                         type="submit"
-                        className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
+                        className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-sm hover:bg-[#C20C0C]"
                         loading={submitMutation.isPending}>
                         Save
                     </Button>
-                </CardFooter>
+                </div>
             </form>
         </div>
     )

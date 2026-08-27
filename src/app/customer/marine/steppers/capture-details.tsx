@@ -65,26 +65,26 @@ export const MarineCustomerVerificationDetails = ({ goToNextStep, goToPrevStep }
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
               <ReuseableInput
-                className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+               className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                 control={form.control}
                 name="first_name"
                 label="First Name"
               />
               <ReuseableInput
-                className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+               className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                 control={form.control}
                 name="last_name"
                 label="Last Name"
               />
               <ReuseableInput
-                className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+               className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                 control={form.control}
                 name="email"
                 label="Email"
                 type="email"
               />
               <ReuseableInput
-                className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+               className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                 control={form.control}
                 name="mobile_number"
                 label="Mobile Number"

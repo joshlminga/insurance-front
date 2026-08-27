@@ -60,37 +60,37 @@ export const InvoicePayment: React.FC<CustomerVerificationDetailsProps> = ({ goT
                 {/* Form Fields Grid - 1 col mobile, 2 col sm, 3 col lg */}
                 <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5'>
                     <ReuseableInput
-                        className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                       className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                         control={form.control}
                         name="customer_name"
                         label="Customer Name"
                     />
                     <ReuseableInput
-                        className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                       className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                         control={form.control}
                         name="email"
                         label="Email Address"
                     />
                     <ReuseableInput
-                        className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                       className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                         control={form.control}
                         name="phone_number"
                         label="Phone Number"
                     />
                     <ReuseableInput
-                        className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                       className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                         control={form.control}
                         name="covering"
                         label="Covering"
                     />
                     <ReuseableInput
-                        className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                       className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                         control={form.control}
                         name="provider"
                         label="Provider"
                     />
                     <ReuseableInput
-                        className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                       className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                         control={form.control}
                         type='date'
                         name="cover_startdate"

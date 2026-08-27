@@ -1,12 +1,16 @@
+/* eslint-disable react-hooks/incompatible-library */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
 import {
-    Table as TableType,
     flexRender,
     getCoreRowModel,
     getFilteredRowModel,
-    useReactTable
+    getExpandedRowModel,
+    useReactTable,
+    type Table as TableType
 } from '@tanstack/react-table';
+
 import {
     Table,
     TableBody,
@@ -25,36 +29,36 @@ import {
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
-import { useRef, Fragment } from 'react';
+import { useRef } from 'react';
 import {
     CustomLoader,
     TableComponentHeadings,
     TReusablePagination
 } from './core';
-import {
-    StatusPillProps,
+import type {
     TQueryFieldProps,
     TSearchToolProps,
     TTableReusableComponent
 } from '@/types/types';
 
-
 export const DataTable = ({
+    title,
+    OtherTools,
+    OtherToolsProps,
     showPagination,
-    onPageChange,
-    pageCount,
+    onPageChange = () => undefined,
+    pageCount = 1,
     isLoading,
-    // pageSize,
+    pageSize,
     onClick,
     isError,
     table,
-    page,
-    expandedRowId,
-    getRowId,
-    canExpandRow,
-    renderExpandedRow,
+    page = 1,
 }: { table: TableType<any> } & Pick<
     TTableReusableComponent,
+    | 'title'
+    | 'OtherTools'
+    | 'OtherToolsProps'
     | 'showPagination'
     | 'onPageChange'
     | 'pageCount'
@@ -62,215 +66,21 @@ export const DataTable = ({
     | 'isLoading'
     | 'onClick'
     | 'isError'
-    | 'expandedRowId'
-    | 'getRowId'
-    | 'canExpandRow'
-    | 'renderExpandedRow'
 > &
     Required<Pick<TTableReusableComponent, 'page'>>) => {
     return (
-        <div className='w-full shadow rounded-xl border overflow-clip'>
-            <Table className='px-6 py-2'>
-                <TableHeader className='select-none rounded-xl border'>
-                    {table.getHeaderGroups().map((headerGroup, index) => (
-                        <TableRow
-                            key={`table-R-${index}`}
-                            className='h-11 overflow-auto font-medium text-[12px] leading-5'>
-                            {headerGroup.headers.map((header, index) => (
-                                <TableHead
-                                    key={`tableH-${index}`}
-                                    className={cn('text-left')}
-                                    align={'left'}>
-                                    {header.isPlaceholder
-                                        ? null
-                                        : flexRender(
-                                            header.column.columnDef.header,
-                                            header.getContext()
-                                        )}
-                                </TableHead>
-                            ))}
-                        </TableRow>
-                    ))}
-                </TableHeader>
-
-                <TableBody className='px-6 py-5 select-none'>
-                    {isLoading || isError ? (
-                        <TableRow>
-                            <TableCell
-                                colSpan={table.getAllColumns().length}
-                                className='h-24 text-center'>
-                                <CustomLoader
-                                    isError={!!isError}
-                                    title={
-                                        isError ? 'Error fetching data.' : 'Fetching data...'
-                                    }
-                                />
-                            </TableCell>
-                        </TableRow>
-                    ) : (
-                        <>
-                            {table.getRowModel().rows?.length ? (
-                                table.getRowModel().rows.map((row, index) => {
-                                    const rowId = getRowId?.(row.original)
-                                    const isExpanded =
-                                        rowId != null &&
-                                        expandedRowId != null &&
-                                        expandedRowId === rowId
-                                    const canExpand =
-                                        Boolean(renderExpandedRow) &&
-                                        (canExpandRow?.(row.original) ?? true)
-
-                                    return (
-                                        <Fragment key={`tableBody-${index}`}>
-                                            <TableRow
-                                                {...{
-                                                    ...(onClick
-                                                        ? {
-                                                            onClick: () => onClick(row),
-                                                        }
-                                                        : {}),
-                                                }}
-                                                className='h-14 overflow-auto pb-px border-b border-table-border-color px-6 py-4'
-                                                data-state={row.getIsSelected() && 'selected'}>
-                                                {row.getVisibleCells().map((cell, cellIndex) => (
-                                                    <TableCell key={`cell-index-${cellIndex}`} align={'left'}>
-                                                        {flexRender(
-                                                            cell.column.columnDef.cell,
-                                                            cell.getContext()
-                                                        )}
-                                                    </TableCell>
-                                                ))}
-                                            </TableRow>
-                                            {isExpanded && canExpand && renderExpandedRow && (
-                                                <TableRow className='bg-muted/30 hover:bg-muted/30'>
-                                                    <TableCell
-                                                        colSpan={table.getAllColumns().length}
-                                                        className='p-4'>
-                                                        {renderExpandedRow(row)}
-                                                    </TableCell>
-                                                </TableRow>
-                                            )}
-                                        </Fragment>
-                                    )
-                                })
-                            ) : (
-                                <TableRow>
-                                    <TableCell
-                                        colSpan={table.getAllColumns().length}
-                                        className='h-24 text-center'>
-                                        No data to display.
-                                    </TableCell>
-                                </TableRow>
-                            )}
-                        </>
-                    )}
-                </TableBody>
-            </Table>
-            {
-                showPagination && table.getRowModel().rows?.length > 0 ? (
-                    <div className='flex gap-5 justify-between p-5'>
-                        <Button
-                            className='flex gap-2 items-center border'
-                            {...{
-                                onClick: () => onPageChange(page > 1 ? page - 1 : page),
-                                ...(page <= 1 ? { disabled: true } : {}),
-                                variant: 'outline',
-                            }}>
-                            <ArrowRightIcon
-                                {...{
-                                    svgElementClassName: 'stroke-black hover:stroke-black/2',
-                                    className: 'w-5 h-5 rotate-180',
-                                }}
-                            />
-                            <p className='text-sm font-semibold leading-5 text-filter-stroke-color'>
-                                Previous
-                            </p>
-                        </Button>
-
-                        <TReusablePagination {...{ onPageChange, page, pageCount }} />
-
-                        <Button
-                            className='flex gap-2 items-center'
-                            {...{
-                                onClick: () => onPageChange(page < pageCount ? page + 1 : page),
-                                variant: 'outline',
-                                ...(page >= pageCount ? { disabled: true } : {}),
-                            }}>
-                            <p className='text-sm font-semibold leading-5 text-filter-stroke-color'>
-                                Next
-                            </p>
-                            <ArrowRightIcon
-                                {...{
-                                    svgElementClassName: 'stroke-black hover:stroke-black/2',
-                                    className: 'w-5 h-5',
-                                }}
-                            />
-                        </Button>
-                    </div>
-                ) : null
-            }
-        </div >
-    );
-};
-
-export const CustomBaseTable = <T,>({
-    onRowSelectionChange,
-    showPagination = false,
-    OtherToolsProps,
-    onPageChange,
-    rowSelection,
-    // setPageSize,
-    OtherTools,
-    pageCount,
-    isLoading,
-    pageSize,
-    columns,
-    isError,
-    onClick,
-    page = 1,
-    data,
-    title,
-    expandedRowId,
-    getRowId,
-    canExpandRow,
-    onToggleExpand,
-    renderExpandedRow,
-    rolesBasePath,
-}: TTableReusableComponent<T>) => {
-    // eslint-disable-next-line react-hooks/incompatible-library
-    const table = useReactTable({
-        getFilteredRowModel: getFilteredRowModel(),
-
-        getCoreRowModel: getCoreRowModel(),
-        ...(onRowSelectionChange
-            ? {
-                onRowSelectionChange,
-            }
-            : {}),
-        columns,
-        data,
-        meta: {
-            expandedRoleId: expandedRowId,
-            onToggleExpand,
-            rolesBasePath,
-        },
-        state: {
-            ...(rowSelection ? { rowSelection } : {}),
-        },
-    });
-    return (
-        <div className='md:col-span-6'>
+        <div className='w-full overflow-hidden rounded-xl shadow-none border bg-white hover:bg-white/80 px-2 dark:bg-white/10 dark:hover:bg-white/30'>
             {(title || OtherTools) && (
                 <TableComponentHeadings>
-                    <div className='flex justify-between items-center w-full gap-6 flex-wrap'>
+                    <div className='flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4'>
                         {title && (
-                            <div className='leading-7 text-label-text text-md md:text-md tracking-[-.5%] capitalize  py-3 font-semibold'>
+                            <div className='py-1 text-md font-semibold leading-7 tracking-[-.5%] text-label-text capitalize md:text-md'>
                                 {title}
                             </div>
                         )}
-                        <div className='flex justify-end gap-2 items-center'>
+                        <div className='flex w-full flex-wrap items-center gap-2 sm:w-auto sm:justify-end'>
                             {OtherTools && (
-                                <div className='w-fit'>
+                                <div className='w-full sm:w-auto'>
                                     <OtherTools
                                         {...{
                                             ...(OtherToolsProps ?? {}),
@@ -284,8 +94,179 @@ export const CustomBaseTable = <T,>({
                     </div>
                 </TableComponentHeadings>
             )}
+            <Table className='min-w-180 px-3 py-2 sm:px-4 md:min-w-full md:px-6'>
+                <TableHeader className='select-none rounded-xl'>
+                    {table.getHeaderGroups().map((headerGroup, index) => (
+                        <TableRow
+                            key={`table-R-${index}`}
+                            className='h-11 overflow-auto font-medium text-[12px] leading-5'>
+                            <TableHead
+                                className="w-14 px-2 text-left font-bold"
+                                align="left">
+                                #
+                            </TableHead>
+                            {headerGroup.headers.map((header, index) => (
+                                <TableHead
+                                    key={`tableH-${index}`}
+                                    className={cn('text-left px-2 font-bold')}
+                                    align={'left'}>
+                                    {header.isPlaceholder
+                                        ? null
+                                        : flexRender(
+                                            header.column.columnDef.header,
+                                            header.getContext()
+                                        )}
+                                </TableHead>
+                            ))}
+                        </TableRow>
+                    ))}
+                </TableHeader>
+                <TableBody className='px-6 py-5 select-none'>
+                    {isLoading || isError ? (
+                        <TableRow>
+                            <TableCell
+                                colSpan={table.getAllColumns().length}
+                                className='h-24 justify-center text-center py-5'>
+                                <CustomLoader
+                                    {...{
+                                        ...(isError ? { title: 'Error fetching data.' } : {}),
+                                    }}
+                                />
+                            </TableCell>
+                        </TableRow>
+                    ) : (
+                        <>
+                            {table.getRowModel().rows?.length ? (
+                                table.getRowModel().rows.map((row, index) => (
+                                    <TableRow
+                                        key={`tableBody-${index}`}
+                                        {...{
+                                            ...(onClick
+                                                ? {
+                                                    onClick: () => onClick(row),
+                                                }
+                                                : {}),
+                                        }}
+                                        className='h-14 overflow-auto pb-1 border-b-1px border-table-border-color px-6 py-4'
+                                        data-state={row.getIsSelected() && 'selected'}>
+
+                                        <TableCell
+                                            className="w-14 px-2 font-medium text-gray-500"
+                                            align="left"
+                                        >
+                                            {(page - 1) * pageSize + index + 1}
+                                        </TableCell>
+
+                                        {row.getVisibleCells().map((cell, index) => (
+                                            <TableCell key={`cell-index-${index}`} align={'left'}>
+                                                {flexRender(
+                                                    cell.column.columnDef.cell,
+                                                    cell.getContext()
+                                                )}
+                                            </TableCell>
+                                        ))}
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell
+                                        colSpan={table.getAllColumns().length}
+                                        className='h-24 text-center'>
+                                        No data to display.
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </>
+                    )}
+                </TableBody>
+            </Table>
+            {showPagination && table.getRowModel().rows?.length > 0 ? (
+                <div className='flex flex-col gap-3 p-3 sm:flex-row sm:items-center sm:justify-between sm:gap-5 sm:p-4 md:p-5'>
+                    <Button
+                        className='flex w-full items-center justify-center gap-2 sm:w-auto'
+                        {...{
+                            onClick: () => onPageChange(page > 1 ? page - 1 : page),
+                            ...(page <= 1 ? { disabled: true } : {}),
+                            variant: 'outline',
+                        }}>
+                        <ArrowRightIcon className='h-5 w-5 rotate-180 stroke-black' />
+                        <p className='text-sm font-semibold leading-5 text-filter-stroke-color'>
+                            Previous
+                        </p>
+                    </Button>
+
+                    <TReusablePagination {...{ onPageChange, page, pageCount }} />
+
+                    <Button
+                        className='flex w-full items-center justify-center gap-2 sm:w-auto'
+                        {...{
+                            onClick: () => onPageChange(page < pageCount ? page + 1 : page),
+                            variant: 'outline',
+                            ...(page >= pageCount ? { disabled: true } : {}),
+                        }}>
+                        <p className='text-sm font-semibold leading-5 text-filter-stroke-color'>
+                            Next
+                        </p>
+                        <ArrowRightIcon className='h-5 w-5 stroke-black' />
+                    </Button>
+                </div>
+            ) : null}
+        </div>
+    );
+};
+
+export const CustomBaseTable = <T,>({
+    onRowSelectionChange,
+    showPagination = false,
+    OtherToolsProps,
+    onPageChange,
+    rowSelection,
+    OtherTools,
+    pageCount,
+    isLoading,
+    pageSize = 10,
+    columns,
+    isError,
+    onClick,
+    page = 1,
+    data,
+    title,
+
+    // table expansion
+    expanded,
+    onExpandedChange,
+    getSubRows,
+}: TTableReusableComponent<T> & {
+    expanded?: Record<string, boolean>;
+    onExpandedChange?: any;
+    getSubRows?: (row: T) => T[] | undefined;
+}) => {
+    const table = useReactTable({
+        getFilteredRowModel: getFilteredRowModel(),
+        getCoreRowModel: getCoreRowModel(),
+        getExpandedRowModel: getExpandedRowModel(),
+        // ...(onRowSelectionChange
+        //     ? {
+        //         onRowSelectionChange,
+        //     }
+        //     : {}),
+        ...(onRowSelectionChange ? { onRowSelectionChange } : {}),
+        columns,
+        data,
+        ...(getSubRows ? { getSubRows } : {}),
+        ...(onExpandedChange ? { onExpandedChange } : {}),
+        state: {
+            ...(rowSelection ? { rowSelection } : {}),
+            ...(expanded ? { expanded } : {}),
+        },
+    });
+    return (
+        <div className='md:col-span-6 min-w-0'>
             <DataTable
                 {...{
+                    title,
+                    OtherTools,
+                    OtherToolsProps,
                     pagination: showPagination,
                     showPagination,
                     onPageChange,
@@ -296,33 +277,14 @@ export const CustomBaseTable = <T,>({
                     onClick,
                     table,
                     page,
-                    expandedRowId,
-                    getRowId,
-                    canExpandRow,
-                    renderExpandedRow,
                 }}
             />
         </div>
     );
 };
 
-export const StatusPill = ({ status, label }: StatusPillProps) => {
-    const config: Record<string, string> = {
-        active: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
-        inactive: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300",
-        suspended: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300",
-        blacklisted: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
-        P: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300",
-        A: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
-        R: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
-        U: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
-    };
-
-    return <span className={`px-2 py-1 rounded-full text-sm font-medium ${config[status] || ""}`}>{label}</span>;
-};
-
 export const SearchTools = ({
-    className = 'border-primary',
+    className = 'border-brand',
     placeholder = 'Search',
     includeFilter = false,
     advancedHandler,
@@ -346,7 +308,7 @@ export const ProductQueryField = ({
         <div className='relative'>
             <Input
                 className={cn(
-                    'rounded-lg w-55 h-8 pl-10 outline-accent border border-accent focus:border-primary focus:outline-primary',
+                    'rounded-lg w-55 h-8 pl-10 outline-accent border border-accent focus:border-primary focus:outline-primary dark:text-white',
                     className
                 )}
                 {...{
@@ -357,7 +319,7 @@ export const ProductQueryField = ({
                 }}
             />
             <SearchIcon
-                className='absolute h-4 w-4 left-4 top-[calc(calc(100%-1rem)/2)] cursor-pointer stroke-gray-400'
+                className='absolute h-4 w-4 left-4 top-[calc(calc(100%-1rem)/2)] cursor-pointer stroke-gray-400 '
                 {...{
                     onClick: () => inputRef.current?.focus(),
                 }}
@@ -370,9 +332,9 @@ export const ReusableFilterButton = ({
     advancedHandler,
 }: Partial<Pick<TSearchToolProps, 'advancedHandler'>>) => {
     return (
-        <div className='border border-neutral-300 bg-neutral-100 py-1 px-3 flex gap-2 items-center rounded-xl w-28 select-none cursor-pointer h-8'>
+        <div className='border border-gray-300 bg-gray-100 dark:bg-white/10 py-1 px-3 flex gap-2 items-center rounded-xl w-28 select-none cursor-pointer h-8'>
             <ListFilter className='size-6' />
-            <p className='font-medium text-sm leading-4 text-gray-600'>Filter</p>
+            <p className='font-medium text-sm leading-4 text-gray-600 dark:text-white'>Filter</p>
             <Separator
                 className='w-4 h-4 my-4 bg-gray-300'
                 {...{

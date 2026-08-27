@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { CardFooter } from "@/components/ui/card"
 import { DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Button, ReusableCheckboxGrid } from "@/dev/core"
 import { UseApiMutation, UseApiQuery } from "@/hooks/hooks"
@@ -258,10 +257,10 @@ export const AssignPermissionsModal = ({
         </div>
       )}
 
-      <CardFooter className="flex flex-col sm:flex-row justify-between gap-3 mt-2 px-0">
+      <div className="flex flex-col sm:flex-row justify-end gap-3 mt-2 px-0">
         <Button
           type="button"
-          className="w-full sm:w-auto rounded-full border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
+          className="w-full sm:w-auto rounded-sm border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
           onClick={() => handleDialogContextSwitch({})}
         >
           {isReadOnly ? "Close" : "Cancel"}
@@ -270,7 +269,7 @@ export const AssignPermissionsModal = ({
         {!isReadOnly && (
           <Button
             type="button"
-            className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
+            className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-sm hover:bg-[#C20C0C]"
             disabled={!roleId || !modulesCsv || saveMutation.isPending}
             loading={saveMutation.isPending}
             onClick={handleSave}
@@ -278,7 +277,7 @@ export const AssignPermissionsModal = ({
             Save Permissions
           </Button>
         )}
-      </CardFooter>
+      </div>
     </div>
   )
 }

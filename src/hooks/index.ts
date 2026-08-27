@@ -1,10 +1,11 @@
-import type { 
-	TCustomDialogPropsContextProps, 
-	TDebounceprops, 
-	TKeyValueAnyType 
+import type {
+	TCustomDialogPropsContextProps,
+	TDebounceprops,
+	TKeyValueAnyType,
+	TUseTabsProps
 } from "@/types/types";
 import { baseFactoryReducer } from "@/utils/constatnts";
-import { useReducer, useRef, useState } from "react";
+import { useCallback, useMemo, useReducer, useRef, useState } from "react";
 
 export const useCustomDialogContextFactory = <T = TKeyValueAnyType>() => {
 	const [dialogOpen, toggleDialogState] = useState<boolean>(false);
@@ -56,5 +57,23 @@ export const useDebounce = <TDebounceCallBackArgs>({
 			() => debounceCallback(args),
 			debounceTimeOut
 		);
+	};
+};
+
+export const useTabs = <KeyType extends string>({
+	tabs,
+	defaultTab
+}: TUseTabsProps<KeyType>) => {
+	const [activeTab, setActiveTab] = useState(defaultTab);
+	const switchTab = useCallback((key: KeyType) => setActiveTab(key), []);
+	const activeTabComponent = useMemo(
+		() => tabs.find((tab) => tab.key === activeTab),
+		[activeTab, tabs],
+	)
+	return {
+		tabList: tabs.map(({ title, key }) => ({ title, key })),
+		activeTabComponent: activeTabComponent?.Tab ?? null,
+		activeTab,
+		switchTab
 	};
 };

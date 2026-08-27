@@ -3,15 +3,13 @@ import {
   Settings,
   LayoutDashboard,
   Users,
-  Wallet,
-  ArrowLeftRight,
-  BarChart3,
   UserCog,
   ShieldCheck,
   TextQuote,
   Coins,
+  Banknote,
 } from 'lucide-react'
-import { MODULES, PURCHASE_MOTOR_MODULES, QUOTATION_MOTOR_MODULES } from '@/auth/module-keys'
+import { MODULES, QUOTATION_MOTOR_MODULES } from '@/auth/module-keys'
 import { EPREFIX, EROUTES } from '@/utils/enums'
 
 export type NavSubItem = {
@@ -43,49 +41,49 @@ export const adminNavConfig: NavItem[] = [
     icon: LayoutDashboard,
     isActive: true,
   },
-  {
-    title: 'Policyholders',
-    url: EROUTES.MEMBERS,
-    icon: Users,
-    module: MODULES.POLICY,
-    items: [
-      { title: 'All Policyholders', url: EROUTES.MEMBERS, module: MODULES.POLICY },
-      { title: 'New Policyholder', url: EROUTES.MEMBERS_NEW, module: MODULES.POLICY },
-    ],
-  },
-  {
-    title: 'Premiums & Claims',
-    url: EROUTES.SAVINGS,
-    icon: Wallet,
-    module: MODULES.ACCOUNT,
-    items: [
-      { title: 'Accounts', url: EROUTES.SAVINGS, module: MODULES.ACCOUNT },
-      { title: 'Insurance Products', url: EROUTES.SAVINGS_PRODUCTS, module: MODULES.ACCOUNT },
-    ],
-  },
-  {
-    title: 'Policies',
-    url: EROUTES.LOANS,
-    icon: ShieldCheck,
-    modules: [...PURCHASE_MOTOR_MODULES],
-    items: [
-      { title: 'All Policies', url: EROUTES.LOANS, modules: [...PURCHASE_MOTOR_MODULES] },
-      { title: 'New Application', url: EROUTES.LOANS_APPLY, modules: [...PURCHASE_MOTOR_MODULES] },
-      { title: 'Policy Products', url: EROUTES.LOANS_PRODUCTS, modules: [...PURCHASE_MOTOR_MODULES] },
-    ],
-  },
-  {
-    title: 'Payments',
-    url: EROUTES.TRANSACTIONS,
-    icon: ArrowLeftRight,
-    module: MODULES.ACCOUNT,
-  },
-  {
-    title: 'Insights',
-    url: EROUTES.REPORTS,
-    icon: BarChart3,
-    module: MODULES.RBAC,
-  },
+  // {
+  //   title: 'Policyholders',
+  //   url: EROUTES.MEMBERS,
+  //   icon: Users,
+  //   module: MODULES.POLICY,
+  //   items: [
+  //     { title: 'All Policyholders', url: EROUTES.MEMBERS, module: MODULES.POLICY },
+  //     { title: 'New Policyholder', url: EROUTES.MEMBERS_NEW, module: MODULES.POLICY },
+  //   ],
+  // },
+  // {
+  //   title: 'Premiums & Claims',
+  //   url: EROUTES.SAVINGS,
+  //   icon: Wallet,
+  //   module: MODULES.ACCOUNT,
+  //   items: [
+  //     { title: 'Accounts', url: EROUTES.SAVINGS, module: MODULES.ACCOUNT },
+  //     { title: 'Insurance Products', url: EROUTES.SAVINGS_PRODUCTS, module: MODULES.ACCOUNT },
+  //   ],
+  // },
+  // {
+  //   title: 'Policies',
+  //   url: EROUTES.LOANS,
+  //   icon: ShieldCheck,
+  //   modules: [...PURCHASE_MOTOR_MODULES],
+  //   items: [
+  //     { title: 'All Policies', url: EROUTES.LOANS, modules: [...PURCHASE_MOTOR_MODULES] },
+  //     { title: 'New Application', url: EROUTES.LOANS_APPLY, modules: [...PURCHASE_MOTOR_MODULES] },
+  //     { title: 'Policy Products', url: EROUTES.LOANS_PRODUCTS, modules: [...PURCHASE_MOTOR_MODULES] },
+  //   ],
+  // },
+  // {
+  //   title: 'Payments',
+  //   url: EROUTES.TRANSACTIONS,
+  //   icon: ArrowLeftRight,
+  //   module: MODULES.ACCOUNT,
+  // },
+  // {
+  //   title: 'Insights',
+  //   url: EROUTES.REPORTS,
+  //   icon: BarChart3,
+  //   module: MODULES.RBAC,
+  // },
   {
     title: 'Quotations',
     url: EROUTES.QUOTATIONS,
@@ -112,12 +110,6 @@ export const adminNavConfig: NavItem[] = [
         module: MODULES.QUOTATION_TRAVEL,
       },
     ],
-  },
-  {
-    title: 'Agents',
-    url: EROUTES.STAFF,
-    icon: UserCog,
-    module: MODULES.ROLE,
   },
   {
     title: 'Motor',
@@ -167,19 +159,75 @@ export const adminNavConfig: NavItem[] = [
       },
     ],
   },
-    {
-    title: 'Credit & Finance',
+  {
+    title: 'Credit',
     url: EROUTES.CREDIT_WALLET,
     icon: Coins,
     module: MODULES.FINANCE_CONTROL,
     items: [
-      { title: 'My Wallet', url: EROUTES.CREDIT_WALLET, module: MODULES.FINANCE_CONTROL },
-      { title: 'Transactions', url: EROUTES.CREDIT_TRANSACTIONS, module: MODULES.FINANCE_CONTROL },
-      { title: 'Credit Approval Pending', url: EROUTES.CREDIT_PENDING, module: MODULES.FINANCE_CONTROL },
-      { title: 'Pending Approvals', url: EROUTES.CREDIT_APPROVALS, module: MODULES.FINANCE_CONTROL },
-      { title: 'Pool Settings', url: EROUTES.CREDIT_SETUP_POOL, module: MODULES.FINANCE_CONTROL },
-      { title: 'User Allocations', url: EROUTES.CREDIT_SETUP_USERS, module: MODULES.FINANCE_CONTROL },
-      { title: 'Adjustments', url: EROUTES.CREDIT_ADJUSTMENTS, module: MODULES.FINANCE_CONTROL },
+      { 
+        title: 'My Wallet', 
+        url: EROUTES.CREDIT_WALLET, 
+        module: MODULES.FINANCE_CONTROL 
+      },
+      { 
+        title: 'Transactions', 
+        url: EROUTES.CREDIT_TRANSACTIONS, 
+        module: MODULES.FINANCE_CONTROL 
+      },
+      { 
+        title: 'Credit Approval Pending', 
+        url: EROUTES.CREDIT_PENDING, 
+        module: MODULES.FINANCE_CONTROL 
+      },
+      { 
+        title: 'Pending Approvals', 
+        url: EROUTES.CREDIT_APPROVALS, 
+        module: MODULES.FINANCE_CONTROL 
+      },
+      { 
+        title: 'Pool Settings', 
+        url: EROUTES.CREDIT_SETUP_POOL, 
+        module: MODULES.FINANCE_CONTROL 
+      },
+      { 
+        title: 'User Allocations', 
+        url: EROUTES.CREDIT_SETUP_USERS, 
+        module: MODULES.FINANCE_CONTROL 
+      },
+      { 
+        title: 'Adjustments', 
+        url: EROUTES.CREDIT_ADJUSTMENTS, 
+        module: MODULES.FINANCE_CONTROL 
+      },
+    ],
+  },
+  {
+    title: 'Finance',
+    url: EROUTES.FINANCE_PARAMETERS,
+    icon: Banknote,
+    module: MODULES.FINANCE,
+    items: [
+      {
+        title: 'Parameters',
+        url: EROUTES.FINANCE_PARAMETERS,
+        module: MODULES.FINANCE,
+      },
+      {
+        title: 'Claims',
+        url: EROUTES.FINANCE_CLAIMS,
+        module: MODULES.FINANCE,
+      },
+      {
+        title: 'Invoices',
+        url: EROUTES.FINANCE_INVOICES,
+        module: MODULES.FINANCE,
+      },
+       {
+        title: 'Payments',
+        url: EROUTES.PAYMENTS,
+        module: MODULES.FINANCE,
+      },
     ],
   },
   {

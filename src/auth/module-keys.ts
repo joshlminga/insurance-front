@@ -2,14 +2,13 @@
 export const MODULES = {
   // Quotations
   QUOTATION_MOTOR: 'quotation-motor',
-  /** Sales / intermediary motor quotation (API catalog alternative) */
   QUOTATION_MOTOR_ALTERNATIVE: 'quotation-motor-alternative',
   QUOTATION_MARINE: 'quotation-marine',
   QUOTATION_TRAVEL: 'quotation-travel',
+  FINANCE: 'finance-module',
 
   // Purchases
   PURCHASE_MOTOR: 'purchase-motor',
-  /** Sales / intermediary KYC purchase step (API catalog alternative) */
   PURCHASE_MOTOR_ALTERNATIVE_KYC: 'purchase-motor-alternative-kyc',
 
   // Organization

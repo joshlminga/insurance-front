@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest"
 import { render, screen } from "@testing-library/react"
-import { buildCreditTransactionColumns } from "@/dev/columns/admin/credit/transactions"
+import { BuildCreditTransactionColumns } from "@/dev/columns/admin/credit/transactions"
 import type { CreditTransaction } from "@/types/types"
 import {
   flexRender,
@@ -21,7 +21,7 @@ function TablePreview({
   showSelection?: boolean
   selectedIds?: Set<number>
 }) {
-  const columns = buildCreditTransactionColumns({
+  const columns = BuildCreditTransactionColumns({
     showSelection,
     selectedIds,
     onToggleRow: vi.fn(),
@@ -51,7 +51,7 @@ function TablePreview({
   )
 }
 
-describe("buildCreditTransactionColumns", () => {
+describe("BuildCreditTransactionColumns", () => {
   it("shows checkbox only on approved rows with outstanding > 0", () => {
     render(<TablePreview showSelection selectedIds={new Set([1])} />)
 

@@ -61,7 +61,7 @@ export const MemberPasswordModal = ({
       <div className="flex justify-end">
         <Button
           type="button"
-          className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
+          className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-sm hover:bg-[#C20C0C]"
           onClick={() => handleDialogContextSwitch({})}
         >
           Done

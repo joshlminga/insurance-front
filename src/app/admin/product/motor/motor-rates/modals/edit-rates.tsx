@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { CardFooter } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Field, FieldLabel } from '@/components/ui/field'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
@@ -16,7 +15,12 @@ import { UseApiMutation } from '@/hooks/hooks'
 import { CreateMotorProductRatesSchema } from '@/types/form-schema'
 import { CreateMotorProductRatesFormValues } from '@/types/schema'
 import { SubmitResponse } from '@/types/types'
-import { CAUDIENCE_OPTIONS, EMETHODS, RatesSteps, TAUDIENCE_OPTIONS } from '@/utils/constatnts'
+import { 
+    CAUDIENCE_OPTIONS, 
+    EMETHODS, 
+    RatesSteps, 
+    TAUDIENCE_OPTIONS 
+} from '@/utils/constatnts'
 import { extractErrorMessage } from '@/utils/helpers'
 import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -153,7 +157,7 @@ export const EditMotorProductRatesPage = ({ handleDialogContextSwitch, component
     }
 
     return (
-        <div className="w-full min-w-[800px] max-w-[800px] p-6 space-y-4">
+        <div className="w-full min-w-200 max-w-200 p-6 space-y-4">
             <div className="border-b pb-3">
                 <h2 className="text-xl font-semibold">
                     Motor Detailed Benefits
@@ -303,35 +307,35 @@ export const EditMotorProductRatesPage = ({ handleDialogContextSwitch, component
                                 name="min_tonnage"
                                 type='number'
                                 label="Min Tonage (Optional)"
-                                className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                               className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                             />
                             <ReuseableInput
                                 control={form.control}
                                 name="max_tonnage"
                                 type='number'
                                 label="Max Tonage (Optional)"
-                                className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                               className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                             />
                         </div>
 
-                        <CardFooter className="flex flex-col sm:flex-row justify-between gap-3 mt-8 px-0">
+                        <div className="flex flex-col sm:flex-row justify-end gap-3 mt-8 px-0">
                             <Button
                                 type="button"
                                 variant="outline"
                                 disabled
                                 leftIcon={<ArrowLeft />}
-                                className="w-full sm:w-auto rounded-full border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
+                                className="w-full sm:w-auto rounded-sm border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
                                 onClick={prevStep}>
                                 Previous
                             </Button>
                             <Button
                                 type="button"
-                                className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
+                                className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-sm hover:bg-[#C20C0C]"
                                 rightIcon={<ArrowRight />}
                                 onClick={nextStep}>
                                 Next
                             </Button>
-                        </CardFooter>
+                        </div>
                     </div>
 
                 )}
@@ -365,7 +369,7 @@ export const EditMotorProductRatesPage = ({ handleDialogContextSwitch, component
                                 type='number'
                                 label="Valued From"
                                 disabled={form.watch("is_all_sum")}
-                                className={`w-full h-[51px] rounded-[5px] border border-[#ADABAB] ${form.watch("is_all_sum") ? "bg-gray-100 opacity-60 cursor-not-allowed" : ""
+                                className={`w-full h-10 rounded-[5px] border border-[#ADABAB] ${form.watch("is_all_sum") ? "bg-gray-100 opacity-60 cursor-not-allowed" : ""
                                     }`}
                             />
                             <ReuseableInput
@@ -374,7 +378,7 @@ export const EditMotorProductRatesPage = ({ handleDialogContextSwitch, component
                                 type='number'
                                 label="Valued To"
                                 disabled={form.watch("is_all_sum")}
-                                className={`w-full h-[51px] rounded-[5px] border border-[#ADABAB] ${form.watch("is_all_sum") ? "bg-gray-100 opacity-10 cursor-not-allowed" : ""
+                                className={`w-full h-10 rounded-[5px] border border-[#ADABAB] ${form.watch("is_all_sum") ? "bg-gray-100 opacity-10 cursor-not-allowed" : ""
                                     }`}
                             />
                         </div>
@@ -407,7 +411,7 @@ export const EditMotorProductRatesPage = ({ handleDialogContextSwitch, component
                                 type='number'
                                 label="Age From"
                                 disabled={form.watch("is_all_age")}
-                                className={`w-full h-[51px] rounded-[5px] border border-[#ADABAB] ${form.watch("is_all_age") ? "bg-gray-100 opacity-60" : ""
+                                className={`w-full h-10 rounded-[5px] border border-[#ADABAB] ${form.watch("is_all_age") ? "bg-gray-100 opacity-60" : ""
                                     }`}
                             />
                             <ReuseableInput
@@ -416,7 +420,7 @@ export const EditMotorProductRatesPage = ({ handleDialogContextSwitch, component
                                 type='number'
                                 label="Age To"
                                 disabled={form.watch("is_all_age")}
-                                className={`w-full h-[51px] rounded-[5px] border border-[#ADABAB] ${form.watch("is_all_age") ? "bg-gray-100 opacity-60" : ""
+                                className={`w-full h-10 rounded-[5px] border border-[#ADABAB] ${form.watch("is_all_age") ? "bg-gray-100 opacity-60" : ""
                                     }`}
                             />
                         </div>
@@ -428,7 +432,7 @@ export const EditMotorProductRatesPage = ({ handleDialogContextSwitch, component
                                 type='number'
                                 label="Rate"
                                 required
-                                className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                               className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                             />
                             <ReuseableInput
                                 control={form.control}
@@ -436,33 +440,33 @@ export const EditMotorProductRatesPage = ({ handleDialogContextSwitch, component
                                 type='number'
                                 label="Minimum"
                                 required
-                                className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                               className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                             />
                             <ReuseableInput
                                 control={form.control}
                                 name="pll"
                                 type='number'
                                 label="Passenger Legal Liability (Optional)"
-                                className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                               className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                             />
                         </div>
-                        <CardFooter className="flex flex-col sm:flex-row justify-between gap-3 mt-8 px-0">
+                        <div className="flex flex-col sm:flex-row justify-end gap-3 mt-8 px-0">
                             <Button
                                 type="button"
                                 variant="outline"
                                 leftIcon={<ArrowLeft />}
-                                className="w-full sm:w-auto rounded-full border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
+                                className="w-full sm:w-auto rounded-sm border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
                                 onClick={prevStep}>
                                 Previous
                             </Button>
                             <Button
                                 type="button"
-                                className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
+                                className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-sm hover:bg-[#C20C0C]"
                                 rightIcon={<ArrowRight />}
                                 onClick={nextStep}>
                                 Next
                             </Button>
-                        </CardFooter>
+                        </div>
                     </div>
                 )}
                 {step === 3 && (
@@ -508,7 +512,7 @@ export const EditMotorProductRatesPage = ({ handleDialogContextSwitch, component
                                 type='number'
                                 label="Min Fleet"
                                 disabled={!form.watch("is_fleet")}
-                                className={`w-full h-[51px] rounded-[5px] border border-[#ADABAB] ${!form.watch("is_fleet") ? "bg-gray-100 opacity-60 cursor-not-allowed" : ""
+                                className={`w-full h-10 rounded-[5px] border border-[#ADABAB] ${!form.watch("is_fleet") ? "bg-gray-100 opacity-60 cursor-not-allowed" : ""
                                     }`}
                             />
                             <ReuseableInput
@@ -517,28 +521,28 @@ export const EditMotorProductRatesPage = ({ handleDialogContextSwitch, component
                                 type='number'
                                 label="Max Fleet"
                                 disabled={!form.watch("is_fleet")}
-                                className={`w-full h-[51px] rounded-[5px] border border-[#ADABAB] ${!form.watch("is_fleet") ? "bg-gray-100 opacity-60 cursor-not-allowed" : ""
+                                className={`w-full h-10 rounded-[5px] border border-[#ADABAB] ${!form.watch("is_fleet") ? "bg-gray-100 opacity-60 cursor-not-allowed" : ""
                                     }`}
                             />
                         </div>
 
-                        <CardFooter className="flex flex-col sm:flex-row justify-between gap-3 mt-8 px-0">
+                        <div className="flex flex-col sm:flex-row justify-end gap-3 mt-8 px-0">
                             <Button
                                 type="button"
                                 variant="outline"
                                 leftIcon={<ArrowLeft />}
-                                className="w-full sm:w-auto rounded-full border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
+                                className="w-full sm:w-auto rounded-sm border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
                                 onClick={prevStep}>
                                 Previous
                             </Button>
                             <Button
                                 type="button"
-                                className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
+                                className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-sm hover:bg-[#C20C0C]"
                                 rightIcon={<ArrowRight />}
                                 onClick={nextStep}>
                                 Next
                             </Button>
-                        </CardFooter>
+                        </div>
                     </div>
                 )}
                 {step === 4 && (
@@ -577,14 +581,14 @@ export const EditMotorProductRatesPage = ({ handleDialogContextSwitch, component
                                     name="min_age"
                                     type='number'
                                     label="Owner Min Age"
-                                    className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                                   className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                                 />
                                 <ReuseableInput
                                     control={form.control}
                                     name="max_age"
                                     type='number'
                                     label="Owner Max Age"
-                                    className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                                   className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                                 />
                             </div>
                         </div>
@@ -616,23 +620,23 @@ export const EditMotorProductRatesPage = ({ handleDialogContextSwitch, component
                                 />
                             </div>
                         </div>
-                        <CardFooter className="flex flex-col sm:flex-row justify-between gap-3 mt-8 px-0">
+                        <div className="flex flex-col sm:flex-row justify-end gap-3 mt-8 px-0">
                             <Button
                                 type="button"
                                 variant="outline"
                                 leftIcon={<ArrowLeft />}
-                                className="w-full sm:w-auto rounded-full border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
+                                className="w-full sm:w-auto rounded-sm border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
                                 onClick={prevStep}>
                                 Previous
                             </Button>
                             <Button
                                 type="button"
-                                className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
+                                className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-sm hover:bg-[#C20C0C]"
                                 rightIcon={<ArrowRight />}
                                 onClick={nextStep}>
                                 Next
                             </Button>
-                        </CardFooter>
+                        </div>
                     </div>
                 )}
                 {step === 5 && (
@@ -644,7 +648,7 @@ export const EditMotorProductRatesPage = ({ handleDialogContextSwitch, component
                                 type='date'
                                 label="Start Date"
                                 required
-                                className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                               className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                             />
                             <ReuseableInput
                                 control={form.control}
@@ -652,26 +656,26 @@ export const EditMotorProductRatesPage = ({ handleDialogContextSwitch, component
                                 type='date'
                                 label="Expiry Date"
                                 required
-                                className="w-full h-[51px] rounded-[5px] border border-[#ADABAB]"
+                               className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                             />
                         </div>
-                        <CardFooter className="flex flex-col sm:flex-row justify-between gap-3 mt-8 px-0">
+                        <div className="flex flex-col sm:flex-row justify-end gap-3 mt-8 px-0">
                             <Button
                                 type="button"
                                 variant="outline"
                                 leftIcon={<ArrowLeft />}
-                                className="w-full sm:w-auto rounded-full border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
+                                className="w-full sm:w-auto rounded-sm border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
                                 onClick={prevStep}>
                                 Previous
                             </Button>
                             <Button
                                 type="button"
-                                className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
+                                className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-sm hover:bg-[#C20C0C]"
                                 rightIcon={<ArrowRight />}
                                 onClick={nextStep}>
                                 Next
                             </Button>
-                        </CardFooter>
+                        </div>
                     </div>
                 )}
                 {step === 6 && (
@@ -703,23 +707,23 @@ export const EditMotorProductRatesPage = ({ handleDialogContextSwitch, component
                             )}
                         />
 
-                        <CardFooter className="flex flex-col sm:flex-row justify-between gap-3 mt-8 px-0">
+                        <div className="flex flex-col sm:flex-row justify-end gap-3 mt-8 px-0">
                             <Button
                                 type="button"
                                 variant="outline"
                                 leftIcon={<ArrowLeft />}
-                                className="w-full sm:w-auto rounded-full border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
+                                className="w-full sm:w-auto rounded-sm border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
                                 onClick={prevStep}>
                                 Previous
                             </Button>
                             <Button
                                 type="submit"
-                                className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
+                                className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-sm hover:bg-[#C20C0C]"
                                 rightIcon={<ArrowRight />}
                                 loading={submitMutation.isPending}>
                                 Submit
                             </Button>
-                        </CardFooter>
+                        </div>
                     </div>
                 )}
             </form>
