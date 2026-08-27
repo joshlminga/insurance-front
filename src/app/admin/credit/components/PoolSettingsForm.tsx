@@ -28,7 +28,8 @@ export function PoolSettingsForm({
           control={control}
           name="total_available"
           label="Pool ceiling (KES)"
-          type="number"
+          type="text"
+          thousandsSeparator
           required
         />
 
@@ -37,7 +38,8 @@ export function PoolSettingsForm({
             control={control}
             name="auto_approve_threshold"
             label="Auto-approve threshold (KES)"
-            type="number"
+            type="text"
+            thousandsSeparator
           />
         ) : null}
 

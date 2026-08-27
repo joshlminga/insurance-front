@@ -184,7 +184,8 @@ export function CreditAdjustmentsPage() {
             control={form.control}
             name="amount"
             label="Amount (positive adds credit, negative deducts)"
-            type="number"
+            type="text"
+            thousandsSeparator
             required
           />
 

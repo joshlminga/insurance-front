@@ -1117,6 +1117,12 @@ export const ReusableDropDownComponent = <T,>({
     );
 };
 
+// Read nested fields like "user.name" (same idea as PHP $item['user']['name']).
+// Plain keys like "name" still work because there is no dot to split.
+function getByPath(item: any, path: string) {
+    return path.split(".").reduce((acc, key) => acc?.[key], item);
+}
+
 const SearchableCommandSelect = ({
     value,
     onChange,
@@ -1879,8 +1885,8 @@ export function ReusableSingleSelectApiInput({
                 value={value}
                 onChange={onChange}
                 options={items.map((item: any) => ({
-                    value: String(item[valueKey]),
-                    label: String(item[labelKey] ?? ""),
+                    value: String(getByPath(item, valueKey) ?? ""),
+                    label: String(getByPath(item, labelKey) ?? ""),
                 }))}
                 placeholder={placeholder}
                 searchPlaceholder={searchPlaceholder}
@@ -1983,9 +1989,9 @@ export function ReusableApiMultiSelect({
                         )}
                         {filteredItems.map((item: any) => (
                             <MultiSelectItem
-                                key={item[valueKey]}
-                                value={String(item[valueKey])}>
-                                {item[labelKey]}
+                                key={String(getByPath(item, valueKey) ?? "")}
+                                value={String(getByPath(item, valueKey) ?? "")}>
+                                {getByPath(item, labelKey)}
                             </MultiSelectItem>
                         ))}
                     </MultiSelectGroup>
