@@ -255,27 +255,13 @@ export const adminNavConfig: NavItem[] = [
       },
       {
         title: 'Invoices',
-        url: EROUTES.REPORT_INVOICES_MOTOR,
-        module: MODULES.REPORT_MOTOR_INVOICE,
-        items: [
-          {
-            title: 'Motor',
-            url: EROUTES.REPORT_INVOICES_MOTOR,
-            module: MODULES.REPORT_MOTOR_INVOICE,
-          },
-        ],
+        url: EROUTES.FINANCE_INVOICES,
+        modules: [MODULES.FINANCE, MODULES.REPORT_MOTOR_INVOICE],
       },
       {
         title: 'Receipts',
-        url: EROUTES.REPORT_RECEIPTS_MOTOR,
+        url: EROUTES.FINANCE_RECEIPTS,
         module: MODULES.REPORT_MOTOR_RECEIPT,
-        items: [
-          {
-            title: 'Motor',
-            url: EROUTES.REPORT_RECEIPTS_MOTOR,
-            module: MODULES.REPORT_MOTOR_RECEIPT,
-          },
-        ],
       },
       {
         title: 'Payments',

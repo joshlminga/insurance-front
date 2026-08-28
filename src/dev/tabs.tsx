@@ -4,28 +4,47 @@ import MotorCertificatesIssuedOnlyTab from '@/app/admin/motor-certificates/tabs/
 import AllTransactionsPage from '@/app/admin/credit/transactions/tabs/all-transactions'
 import MyTransactionsPage from '@/app/admin/credit/transactions/tabs/my-transactions'
 import MotorProductTab from '@/app/admin/finance/invoices/tabs/motor'
+import MotorInvoiceReportTab from '@/app/admin/finance/invoices/tabs/motor-report'
+import TravelInvoiceTab from '@/app/admin/finance/invoices/tabs/travel'
+import MotorReceiptReportTab from '@/app/admin/finance/receipts/tabs/motor-report'
+import TravelReceiptTab from '@/app/admin/finance/receipts/tabs/travel'
 import {
   ECREDITTRANSACTIONS,
+  EFINANCE_INVOICE_TABS,
+  EFINANCE_RECEIPT_TABS,
   EINVOICES,
   EMOTORCERTIFICATES,
 } from '@/types/enums'
 import { TTab } from '@/types/types'
 
-export const InvoiceTabs: TTab<EINVOICES>[] = [
+export const FinanceInvoiceTabs: TTab<EFINANCE_INVOICE_TABS>[] = [
   {
-    key: EINVOICES.MOTOR,
-    Tab: MotorProductTab,
-    title: 'Motor Product',
+    key: EFINANCE_INVOICE_TABS.MOTOR,
+    Tab: MotorInvoiceReportTab,
+    title: 'Motor',
   },
   {
-    key: EINVOICES.MARINE,
-    Tab: MotorProductTab,
-    title: 'Marine Product',
+    key: EFINANCE_INVOICE_TABS.TRAVEL,
+    Tab: TravelInvoiceTab,
+    title: 'Travel',
   },
   {
-    key: EINVOICES.TRAVEL,
+    key: EFINANCE_INVOICE_TABS.MARINE,
     Tab: MotorProductTab,
-    title: 'Travel Product',
+    title: 'Marine',
+  },
+]
+
+export const FinanceReceiptTabs: TTab<EFINANCE_RECEIPT_TABS>[] = [
+  {
+    key: EFINANCE_RECEIPT_TABS.MOTOR,
+    Tab: MotorReceiptReportTab,
+    title: 'Motor',
+  },
+  {
+    key: EFINANCE_RECEIPT_TABS.TRAVEL,
+    Tab: TravelReceiptTab,
+    title: 'Travel',
   },
 ]
 
@@ -57,5 +76,24 @@ export const MotorCertificateTabs: TTab<EMOTORCERTIFICATES>[] = [
     key: EMOTORCERTIFICATES.FAILED,
     Tab: MotorCertificatesFailedTab,
     title: 'Failed',
+  },
+]
+
+/** @deprecated Use FinanceInvoiceTabs on the finance invoices page */
+export const InvoiceTabs: TTab<EINVOICES>[] = [
+  {
+    key: EINVOICES.MOTOR,
+    Tab: MotorProductTab,
+    title: 'Motor Product',
+  },
+  {
+    key: EINVOICES.MARINE,
+    Tab: MotorProductTab,
+    title: 'Marine Product',
+  },
+  {
+    key: EINVOICES.TRAVEL,
+    Tab: MotorProductTab,
+    title: 'Travel Product',
   },
 ]

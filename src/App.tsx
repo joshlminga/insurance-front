@@ -144,6 +144,7 @@ const ReceiptReportsMotorPage = lazy(() =>
 const FinanceParametersIndexPage = lazy(() => import("./app/admin/finance/parameters"))
 const FinanceClaimsPage = lazy(() => import("./app/admin/finance/claims"))
 const FinanceInvoicesPage = lazy(() => import("./app/admin/finance/invoices"))
+const FinanceReceiptsPage = lazy(() => import("./app/admin/finance/receipts"))
 const FinancePaymentsPage = lazy(() => import("./app/admin/finance/payments"))
 
 export const router = createBrowserRouter([
@@ -720,8 +721,18 @@ export const router = createBrowserRouter([
         path: "finance/invoices",
         element: (
           <S>
-            <AdminModulePage module={MODULES.FINANCE}>
+            <AdminModulePage modules={[MODULES.FINANCE, MODULES.REPORT_MOTOR_INVOICE]}>
               <FinanceInvoicesPage />
+            </AdminModulePage>
+          </S>
+        ),
+      },
+      {
+        path: "finance/receipts",
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.REPORT_MOTOR_RECEIPT}>
+              <FinanceReceiptsPage />
             </AdminModulePage>
           </S>
         ),
