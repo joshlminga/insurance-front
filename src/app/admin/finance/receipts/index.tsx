@@ -8,7 +8,7 @@ const ReceiptsPage = () => {
     <div className="space-y-6">
       <PageHeader
         title="Receipts"
-        description="Motor receipt reports and travel receipts (coming soon)."
+        description="Motor receipt reports. Travel is coming soon."
       />
       <div className="w-full">
         <ReusableTabComponent

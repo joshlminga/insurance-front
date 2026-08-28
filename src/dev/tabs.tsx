@@ -5,6 +5,7 @@ import AllTransactionsPage from '@/app/admin/credit/transactions/tabs/all-transa
 import MyTransactionsPage from '@/app/admin/credit/transactions/tabs/my-transactions'
 import MotorProductTab from '@/app/admin/finance/invoices/tabs/motor'
 import MotorInvoiceReportTab from '@/app/admin/finance/invoices/tabs/motor-report'
+import MarineInvoiceTab from '@/app/admin/finance/invoices/tabs/marine'
 import TravelInvoiceTab from '@/app/admin/finance/invoices/tabs/travel'
 import MotorReceiptReportTab from '@/app/admin/finance/receipts/tabs/motor-report'
 import TravelReceiptTab from '@/app/admin/finance/receipts/tabs/travel'
@@ -30,7 +31,7 @@ export const FinanceInvoiceTabs: TTab<EFINANCE_INVOICE_TABS>[] = [
   },
   {
     key: EFINANCE_INVOICE_TABS.MARINE,
-    Tab: MotorProductTab,
+    Tab: MarineInvoiceTab,
     title: 'Marine',
   },
 ]

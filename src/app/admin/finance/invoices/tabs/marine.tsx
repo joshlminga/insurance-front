@@ -1,9 +1,9 @@
-const TravelReceiptTab = () => {
+const MarineInvoiceTab = () => {
   return (
     <div className="rounded-lg border border-dashed p-10 text-center text-sm text-muted-foreground">
-      Travel receipt reporting is coming soon.
+      Marine invoice reporting is coming soon.
     </div>
   )
 }
 
-export default TravelReceiptTab
+export default MarineInvoiceTab

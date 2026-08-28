@@ -182,7 +182,64 @@ export const adminNavConfig: NavItem[] = [
     ],
   },
   {
-    title: 'Credit',
+    title: 'Finance',
+    url: EROUTES.FINANCE_PARAMETERS,
+    icon: Banknote,
+    modules: [MODULES.FINANCE, MODULES.REPORT_MOTOR_INVOICE, MODULES.REPORT_MOTOR_RECEIPT],
+    items: [
+      {
+        title: 'Parameters',
+        url: EROUTES.FINANCE_PARAMETERS,
+        module: MODULES.FINANCE,
+      },
+      {
+        title: 'Claims',
+        url: EROUTES.FINANCE_CLAIMS,
+        module: MODULES.FINANCE,
+      },
+      {
+        title: 'Invoices',
+        url: EROUTES.FINANCE_INVOICES,
+        modules: [MODULES.FINANCE, MODULES.REPORT_MOTOR_INVOICE],
+      },
+      {
+        title: 'Receipts',
+        url: EROUTES.FINANCE_RECEIPTS,
+        module: MODULES.REPORT_MOTOR_RECEIPT,
+      },
+      {
+        title: 'Payments',
+        url: EROUTES.PAYMENTS,
+        module: MODULES.FINANCE,
+      },
+    ],
+  },
+  {
+    title: 'Organization Setup',
+    url: EROUTES.ORGANIZATION,
+    icon: UserCog,
+    modules: [MODULES.ORGANIZATION, MODULES.ORGANIZATION_LOCATION],
+    items: [
+      {
+        title: 'Manage',
+        url: EROUTES.ORGANIZATION,
+        module: MODULES.ORGANIZATION,
+      },
+      {
+        title: 'Location',
+        url: EROUTES.ORGANIZATION_LOCATION,
+        module: MODULES.ORGANIZATION_LOCATION,
+      },
+    ],
+  },
+  {
+    title: 'Organization Members',
+    url: EROUTES.ORGANIZATION_MEMBERS,
+    icon: Users,
+    module: MODULES.ORGANIZATION_LOCATION_USER,
+  },
+  {
+    title: 'Organization Credit',
     url: EROUTES.CREDIT_WALLET,
     icon: Coins,
     module: MODULES.FINANCE_CONTROL,
@@ -238,69 +295,6 @@ export const adminNavConfig: NavItem[] = [
     ],
   },
   {
-    title: 'Finance',
-    url: EROUTES.FINANCE_PARAMETERS,
-    icon: Banknote,
-    modules: [MODULES.FINANCE, MODULES.REPORT_MOTOR_INVOICE, MODULES.REPORT_MOTOR_RECEIPT],
-    items: [
-      {
-        title: 'Parameters',
-        url: EROUTES.FINANCE_PARAMETERS,
-        module: MODULES.FINANCE,
-      },
-      {
-        title: 'Claims',
-        url: EROUTES.FINANCE_CLAIMS,
-        module: MODULES.FINANCE,
-      },
-      {
-        title: 'Invoices',
-        url: EROUTES.FINANCE_INVOICES,
-        modules: [MODULES.FINANCE, MODULES.REPORT_MOTOR_INVOICE],
-      },
-      {
-        title: 'Receipts',
-        url: EROUTES.FINANCE_RECEIPTS,
-        module: MODULES.REPORT_MOTOR_RECEIPT,
-      },
-      {
-        title: 'Payments',
-        url: EROUTES.PAYMENTS,
-        module: MODULES.FINANCE,
-      },
-    ],
-  },
-  {
-    title: 'Organization',
-    url: EROUTES.ORGANIZATION,
-    icon: UserCog,
-    modules: [MODULES.ORGANIZATION, MODULES.ORGANIZATION_LOCATION],
-    items: [
-      {
-        title: 'Manage',
-        url: EROUTES.ORGANIZATION,
-        module: MODULES.ORGANIZATION,
-      },
-      {
-        title: 'Location',
-        url: EROUTES.ORGANIZATION_LOCATION,
-        module: MODULES.ORGANIZATION_LOCATION,
-      },
-    ],
-  },
-  {
-    title: 'Users',
-    url: EROUTES.USERS,
-    icon: Users,
-    module: MODULES.USER,
-  },
-  {
-    title: 'Organization Members',
-    url: EROUTES.ORGANIZATION_MEMBERS,
-    icon: Users,
-    module: MODULES.ORGANIZATION_LOCATION_USER,
-  },
-  {
     title: 'Organization Roles',
     url: EROUTES.ORGANIZATION_ROLES,
     icon: ShieldCheck,
@@ -321,5 +315,11 @@ export const adminNavConfig: NavItem[] = [
     url: EROUTES.SETTINGS,
     icon: Settings,
     modules: [MODULES.SETTINGS_RBAC, MODULES.RBAC],
+  },
+  {
+    title: 'Users',
+    url: EROUTES.USERS,
+    icon: Users,
+    module: MODULES.USER,
   },
 ]
