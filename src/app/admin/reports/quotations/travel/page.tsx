@@ -4,7 +4,7 @@ export const QuotationReportsTravelPage = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Quotation Reports — Travel"
+        title="Quotation Reports"
         description="Travel quotation reporting is not available yet."
       />
       <div className="rounded-lg border border-dashed p-10 text-center text-sm text-muted-foreground">

@@ -88,7 +88,7 @@ export const InvoiceReportsMotorPage = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Invoice Reports — Motor"
+        title="Invoice Reports"
         description="Motor invoices with actions to continue payment or retry certificate issuance."
       />
       <CustomBaseTable

@@ -100,7 +100,7 @@ export const QuotationReportsMotorPage = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Quotation Reports — Motor"
+        title="Quotation Reports"
         description="Browse motor quotations across customers, vehicles, and stages."
       />
       <CustomBaseTable

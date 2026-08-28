@@ -31,7 +31,7 @@ export const ReceiptReportsMotorPage = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Receipt Reports — Motor"
+        title="Receipt Reports"
         description="Paid motor receipts linked to quotations and vehicles."
       />
       <CustomBaseTable
