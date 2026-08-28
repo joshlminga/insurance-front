@@ -44,7 +44,7 @@ import {
     Truck,
     type LucideIcon,
 } from 'lucide-react'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
     Controller,
@@ -56,22 +56,27 @@ import {
 import {
     resolveDialCode,
     type CountryGeoMeta,
-} from './admin-phone-input'
+} from '../admin-phone-input'
 import { CustomerDetailsSection } from './customer-details-section'
 import {
     motorCheckboxLabelAccentClassName,
     motorCheckboxLabelClassName,
     motorFormFieldStyles,
     motorInputClassName,
-} from './motor-field-styles'
-import { buildMotorQuotationPayload } from './motor-quotation-payload'
-import { OrganizationLocationInput } from './organization-location-input'
-import { OfficeCountrySelect } from './office-country-select'
+} from '../motor-field-styles'
+import { buildMotorQuotationPayload } from '../motor-quotation-payload'
+import { OrganizationLocationInput } from '../organization-location-input'
+import { OfficeCountrySelect } from '../office-country-select'
 import {
     contactFromUser,
     persistAdminMotorCustomerContact,
     persistAdminMotorQuoteSession,
-} from './admin-motor-session'
+    readAdminMotorDuplicatePrefill,
+    readAdminMotorDuplicateSourceId,
+    readAdminMotorDuplicateStartAt,
+    clearAdminMotorDuplicatePrefill,
+    persistAdminMotorResumeFromDetail,
+} from '../admin-motor-session'
 
 type ProfileCountry = {
     id?: number | string
@@ -258,7 +263,7 @@ function AnimatedSection({ show, children, className }: AnimatedSectionProps) {
     )
 }
 
-export const MotorQuotationPage = () => {
+export const AdminMotorDuplicateQuotationPage = () => {
     const navigate = useNavigate()
     const { user } = UseAuth()
     const { canModuleAction } = useCan()
@@ -336,6 +341,80 @@ export const MotorQuotationPage = () => {
         },
     })
 
+    const appliedDuplicateRef = useRef(false)
+    const duplicatePrefill = readAdminMotorDuplicatePrefill()
+
+    useEffect(() => {
+        if (!duplicatePrefill?.start_quote) {
+            ShowToast.error('No duplicate quotation data found. Search and duplicate a quote first.')
+            navigate(EROUTES.MOTOR_QUOTATION_FETCH, { replace: true })
+        }
+    }, [duplicatePrefill, navigate])
+
+    useEffect(() => {
+        if (appliedDuplicateRef.current) return
+        const duplicate = readAdminMotorDuplicatePrefill()
+        if (!duplicate?.start_quote) return
+        appliedDuplicateRef.current = true
+
+        const sq = duplicate.start_quote
+        const vehicle = duplicate.vehicle
+        const fullName = [sq.first_name, sq.last_name].filter(Boolean).join(' ').trim()
+
+        if (sq.vehicle_class_id != null) {
+            setSelectedTabValue(String(sq.vehicle_class_id))
+        }
+
+        if (vehicle) {
+            setVehiclePreview({
+                make: vehicle.make ?? null,
+                model: vehicle.model ?? null,
+                year: vehicle.year ?? null,
+                body_type: vehicle.body_type ?? null,
+                color: vehicle.color ?? null,
+                number_of_passengers: vehicle.number_of_passengers ?? null,
+                tonnage: vehicle.tonnage ?? null,
+                engine_number: vehicle.engine_number ?? null,
+                cubic_capacity: vehicle.cubic_capacity ?? null,
+                chassis_number: vehicle.chassis_number ?? null,
+            })
+        }
+
+        form.reset({
+            full_name: fullName,
+            email: sq.email ?? '',
+            phone: sq.phone ?? '',
+            user_id: sq.user_id != null ? String(sq.user_id) : '',
+            country_id: sq.country_id != null ? String(sq.country_id) : '',
+            processed_by_organization_id:
+                sq.processed_by_organization_id != null
+                    ? String(sq.processed_by_organization_id)
+                    : '',
+            agency_id: sq.agency_id != null ? String(sq.agency_id) : '',
+            referral_id: sq.referral_id ?? '',
+            covertype_id: sq.covertype_id != null ? String(sq.covertype_id) : '',
+            covering_id: sq.covering_id != null ? String(sq.covering_id) : '',
+            ownership: sq.ownership ?? '',
+            vehicle_class_id: sq.vehicle_class_id != null ? String(sq.vehicle_class_id) : '',
+            used_for_id: sq.used_for_id != null ? String(sq.used_for_id) : '',
+            registration_number: sq.vehicle_registration_number ?? '',
+            vehicle_registration_number: sq.vehicle_registration_number ?? '',
+            vehicle_value: sq.vehicle_value != null ? String(sq.vehicle_value) : '',
+            valued_by_professional: Boolean(sq.valued_by_professional),
+            create_customer_account: sq.is_guest === false,
+        })
+
+        if (sq.email || sq.first_name || sq.phone) {
+            persistAdminMotorCustomerContact({
+                name: fullName || undefined,
+                email: sq.email || undefined,
+                phone: sq.phone || undefined,
+            })
+        }
+
+        ShowToast.success('Duplicate quote fields loaded — review and submit to start')
+    }, [form])
+
     const formCountryId = useWatch({ control: form.control, name: 'country_id' })
     const vehicleRegistrationNumber = useWatch({
         control: form.control,
@@ -404,7 +483,7 @@ export const MotorQuotationPage = () => {
 
     const submitMutation = UseApiMutation<
         SubmitResponse & { data: MotorQuoteSessionStartData },
-        ReturnType<typeof buildMotorQuotationPayload>
+        ReturnType<typeof buildMotorQuotationPayload> & { quote_duplicate?: number }
     >({
         url: 'auto/quotation/motor',
         method: EMETHODS.POST,
@@ -423,8 +502,47 @@ export const MotorQuotationPage = () => {
                     id: quoteSessionId,
                 })
                 ShowToast.success(
-                    response?.message || 'Quotation started successfully.'
+                    response?.message || 'Duplicated quotation started successfully.'
                 )
+
+                const startAt = readAdminMotorDuplicateStartAt() ?? duplicatePrefill?.start_at ?? 'quote'
+                const sourceId = readAdminMotorDuplicateSourceId()
+
+                if (startAt === 'quote' || startAt === 'rates') {
+                    clearAdminMotorDuplicatePrefill()
+                    navigate(EROUTES.MOTOR_QUOTATION_RESULTS)
+                    return
+                }
+
+                if (duplicatePrefill && sourceId) {
+                    const detailLike = {
+                        session: {
+                            id: quoteSessionId,
+                            quote_code: session?.quote_code,
+                            customer_type: session?.customer_type,
+                            customer_id: session?.customer_id ?? null,
+                        },
+                        last_ended_stage: startAt,
+                        customer: {
+                            type: session?.is_guest ? 'guest' : session?.customer_type,
+                        },
+                        selected_cover: duplicatePrefill.rates
+                            ? {
+                                purchase_id: duplicatePrefill.rates.purchase_id,
+                                product_id: duplicatePrefill.rates.product_id,
+                                rate_id: duplicatePrefill.rates.rate_id,
+                            }
+                            : null,
+                        cover: { ownership: duplicatePrefill.start_quote?.ownership },
+                        invoices: duplicatePrefill.payment?.invoices,
+                    }
+                    persistAdminMotorResumeFromDetail(detailLike as import('@/types/types').MotorQuoteFetchDetail)
+                    clearAdminMotorDuplicatePrefill()
+                    navigate(EROUTES.MOTOR_QUOTATION_PURCHASE)
+                    return
+                }
+
+                clearAdminMotorDuplicatePrefill()
                 navigate(EROUTES.MOTOR_QUOTATION_RESULTS)
             },
             onError: (error) => {
@@ -464,8 +582,12 @@ export const MotorQuotationPage = () => {
             profileCountryId: profileCountry?.id,
             dialCode,
         })
+        const sourceId = readAdminMotorDuplicateSourceId()
         setLastQuotePayload(payload)
-        submitMutation.mutate(payload)
+        submitMutation.mutate({
+            ...payload,
+            ...(sourceId ? { quote_duplicate: sourceId } : {}),
+        })
     }
 
     const onSubmit = (data: AdminMotorQuotationFormValues) => {
@@ -501,8 +623,8 @@ export const MotorQuotationPage = () => {
         <div className="space-y-6 text-sm pb-[max(5vh,4.5rem)] mb-[5vh]">
             <div className="[&_h1]:text-lg [&_h1]:leading-7 [&_p]:text-sm [&_p]:leading-5">
                 <PageHeader
-                    title="Motor Quotations"
-                    description="Manage motor Quotations for comprehensive or 3rd party"
+                    title="Duplicate motor quotation"
+                    description="Review pre-filled details from the source quote, edit what you need, then start the new quotation."
                 />
             </div>
 
@@ -731,7 +853,7 @@ export const MotorQuotationPage = () => {
                                     !selectedTabValue ||
                                     submitMutation.isPending
                                 }>
-                                Start Quotation
+                                Start duplicated quotation
                             </Button>
                         </div>
                     </div>

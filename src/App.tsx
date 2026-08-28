@@ -106,6 +106,11 @@ const MotorDetailedBenefitPage = lazy(() => import("./app/admin/product/motor/mo
 const MotorTonangePage = lazy(() => import("./app/admin/product/motor/motor-tonage/page").then(m => ({ default: m.MotorTonangePage })))
 const MotorProductRatesPage = lazy(() => import("./app/admin/product/motor/motor-rates/page").then(m => ({ default: m.MotorProductRatesPage })))
 const MotorQuotationPage = lazy(() => import("./app/admin/quotations/motor/page").then(m => ({ default: m.MotorQuotationPage })))
+const AdminMotorDuplicateQuotationPage = lazy(() =>
+  import("./app/admin/quotations/motor/duplicate/page").then(m => ({
+    default: m.AdminMotorDuplicateQuotationPage,
+  }))
+)
 const AdminMotorQuotationResultsPage = lazy(() =>
   import("./app/admin/quotations/motor/results/page").then(m => ({
     default: m.AdminMotorQuotationResultsPage,
@@ -524,6 +529,16 @@ export const router = createBrowserRouter([
           <S>
             <AdminModulePage modules={[...QUOTATION_MOTOR_MODULES]}>
               <MotorQuotationPage />
+            </AdminModulePage>
+          </S>
+        ),
+      },
+      {
+        path: "quotations/motor-quotations/duplicate",
+        element: (
+          <S>
+            <AdminModulePage modules={[...QUOTATION_MOTOR_MODULES]}>
+              <AdminMotorDuplicateQuotationPage />
             </AdminModulePage>
           </S>
         ),

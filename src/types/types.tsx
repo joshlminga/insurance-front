@@ -300,6 +300,24 @@ export type MotorQuoteDuplicatePayload = {
     agency_id?: number | null
     referral_id?: string | null
   }
+  vehicle?: {
+    id?: number
+    registration_number?: string | null
+    chassis_number?: string | null
+    engine_number?: string | null
+    make?: string | null
+    make_id?: number | null
+    model?: string | null
+    model_id?: number | null
+    body_type?: string | null
+    body_type_id?: number | null
+    color?: string | null
+    color_id?: number | null
+    year?: number | string | null
+    number_of_passengers?: number | string | null
+    tonnage?: number | string | null
+    cubic_capacity?: number | string | null
+  } | null
   rates?: {
     product_id?: number | null
     rate_id?: number | null

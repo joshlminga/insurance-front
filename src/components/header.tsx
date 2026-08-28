@@ -7,6 +7,7 @@ import { ModeToggle } from "@/components/mode-toggle"
 import { useEffect, useState } from "react"
 import { useLocation } from "react-router-dom"
 import { BreadCrumbComponent } from "@/dev/core"
+import { MotorQuotationBreadcrumb } from "@/app/admin/quotations/motor/motor-quotation-breadcrumb"
 import { cn } from "@/lib/utils"
 import { NotificationToggle } from "./notification"
 
@@ -41,7 +42,11 @@ export default function Header() {
         <SidebarTrigger className="-ml-1" />
         <Separator orientation="vertical" className="mr-2 h-4" />
         <div className="hidden min-w-0 flex-1 md:block">
-          <BreadCrumbComponent />
+          {location.pathname.includes('/quotations/motor-quotations') ? (
+            <MotorQuotationBreadcrumb />
+          ) : (
+            <BreadCrumbComponent />
+          )}
         </div>
       </div>
       <div className="flex shrink-0 items-center gap-1 sm:gap-2">

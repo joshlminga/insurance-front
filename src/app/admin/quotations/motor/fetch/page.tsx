@@ -114,6 +114,10 @@ export const AdminMotorQuotationFetchPage = () => {
         persistAdminMotorDuplicatePrefill(payload)
         setDuplicateRow(null)
         ShowToast.success('Duplicate payload ready — review and start a new quote')
+        if (payload.start_at === 'quote') {
+          navigate(EROUTES.MOTOR_QUOTATION_DUPLICATE)
+          return
+        }
         navigate(EROUTES.MOTORQUOTATIONS)
       },
       onError: (error) => {

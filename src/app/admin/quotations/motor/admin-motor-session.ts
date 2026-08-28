@@ -305,3 +305,25 @@ export function clearAdminMotorDuplicatePrefill(): void {
   sessionStorage.removeItem(ADMIN_MOTOR_QUOTE_DUPLICATE_SOURCE_KEY)
   sessionStorage.removeItem(ADMIN_MOTOR_QUOTE_DUPLICATE_START_AT_KEY)
 }
+
+/** Clear active admin motor quote session keys (quote, purchase, invoice, vehicle). */
+export function clearAdminMotorActiveSession(options?: { clearDuplicatePrefill?: boolean }): void {
+  if (typeof window === 'undefined') return
+
+  sessionStorage.removeItem(MOTOR_QUOTE_SESSION_STORAGE_KEY)
+  sessionStorage.removeItem(PURCHASE_SESSION_STORAGE_KEY)
+  sessionStorage.removeItem(INVOICE_SESSION_STORAGE_KEY)
+  sessionStorage.removeItem(VEHICLE_DETAILS_SESSION_STORAGE_KEY)
+  sessionStorage.removeItem(VEHICLE_OWNERSHIP_SESSION_STORAGE_KEY)
+  sessionStorage.removeItem(ADMIN_MOTOR_PURCHASE_STEP_KEY)
+  sessionStorage.removeItem(ADMIN_MOTOR_CUSTOMER_EMAIL_KEY)
+  sessionStorage.removeItem(ADMIN_MOTOR_CUSTOMER_NAME_KEY)
+  sessionStorage.removeItem(ADMIN_MOTOR_CUSTOMER_PHONE_KEY)
+  sessionStorage.removeItem(ADMIN_MOTOR_QUOTE_CUSTOMER_ID_KEY)
+  sessionStorage.removeItem(ADMIN_MOTOR_QUOTE_CUSTOMER_TYPE_KEY)
+  sessionStorage.removeItem(ADMIN_MOTOR_QUOTE_IS_GUEST_KEY)
+
+  if (options?.clearDuplicatePrefill) {
+    clearAdminMotorDuplicatePrefill()
+  }
+}
