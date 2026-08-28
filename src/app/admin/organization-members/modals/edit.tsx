@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { DialogTitle, DialogDescription } from "@/components/ui/dialog"
-import { Button, ReuseableInput } from "@/dev/core"
+import { Button, ReusableApiMultiSelect, ReuseableInput } from "@/dev/core"
 import { UseApiMutation, UseApiQuery } from "@/hooks/hooks"
 import { OrganizationMemberEditSchema } from "@/types/form-schema"
 import { OrganizationMemberEditFormValues } from "@/types/schema"
@@ -17,9 +17,7 @@ import {
   getMemberUserId,
   roleValuesToIds,
 } from "../member-utils"
-import { MemberRolesField } from "./roles-field"
 
-/** Read the member's current active role ids from the role-assignments response */
 const extractAssignedRoleValues = (data: any): string[] => {
   const payload = data?.data ?? data
   const assignments = Array.isArray(payload)
@@ -37,12 +35,6 @@ const extractAssignedRoleValues = (data: any): string[] => {
     .map((id: any) => String(id))
 }
 
-/**
- * Edit a member's profile and (optionally) sync their roles at this location.
- * The API requires multipart/form-data even for text-only updates, and only
- * syncs roles when the `roles` key is present — so we send it only when the
- * role picker actually changed.
- */
 export const EditMemberModal = ({
   handleDialogContextSwitch,
   componentProps,
@@ -57,10 +49,7 @@ export const EditMemberModal = ({
   const memberUserId = getMemberUserId(componentProps?.data ?? {})
   const organizationLocationId = componentProps?.organizationLocationId
 
-  // Remember the roles the member had when the form loaded,
-  // so we can tell whether the picker was changed.
   const initialRolesRef = useRef<string[]>([])
-
   const { data: showData, isLoading } = UseApiQuery<SubmitResponse>({
     url: `organization-location-user/${memberUserId}`,
     params: { organization_location_id: organizationLocationId },
@@ -85,7 +74,7 @@ export const EditMemberModal = ({
     [showData, componentProps?.data]
   )
 
-  const form = useForm<OrganizationMemberEditFormValues>({
+  const form = useForm<any, OrganizationMemberEditFormValues>({
     resolver: zodResolver(OrganizationMemberEditSchema),
     defaultValues: {
       name: "",
@@ -143,9 +132,6 @@ export const EditMemberModal = ({
     if (data.profile_picture instanceof File) {
       formData.append("profile_picture", data.profile_picture)
     }
-
-    // Only send roles when the selection changed — sending the key triggers
-    // a full role sync at this location on the API side.
     const initial = [...initialRolesRef.current].sort().join(",")
     const current = [...data.roles].sort().join(",")
     if (initial !== current) {
@@ -158,17 +144,15 @@ export const EditMemberModal = ({
   }
 
   return (
-    <div className="w-full min-w-[600px] max-w-[700px] p-6 space-y-6">
+    <div className="w-full min-w-150 max-w-175 p-6 space-y-6">
       <div className="border-b pb-3">
         <DialogTitle className="text-xl font-semibold">Edit Member</DialogTitle>
         <DialogDescription className="mt-1">
           Update the member&apos;s profile and roles for this organization.
         </DialogDescription>
       </div>
-
       {!memberUserId ? (
         <div className="text-sm text-destructive">
-          Unable to load member: missing user id.
         </div>
       ) : isLoading || isRolesLoading ? (
         <div className="text-sm text-muted-foreground">Loading member details...</div>
@@ -181,7 +165,6 @@ export const EditMemberModal = ({
             required
             className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
           />
-
           <ReuseableInput
             control={form.control}
             name="email"
@@ -203,7 +186,8 @@ export const EditMemberModal = ({
             control={form.control}
             name="roles"
             render={({ field }) => (
-              <MemberRolesField
+              <ReusableApiMultiSelect
+                url="roles"
                 organizationLocationId={organizationLocationId}
                 value={field.value ?? []}
                 onChange={field.onChange}
@@ -211,12 +195,6 @@ export const EditMemberModal = ({
               />
             )}
           />
-
-          {form.formState.errors.roles && (
-            <p className="text-sm text-destructive">
-              {form.formState.errors.roles.message}
-            </p>
-          )}
 
           <ReuseableInput
             control={form.control}

@@ -766,6 +766,7 @@ export type ReusableApiMultiSelectProps = {
   searchKeys?: string[];
   searchPlaceholder?: string;
   emptyMessage?: string;
+  organizationLocationId?:any
 }
 
 export type VehicleClassItem = {
@@ -1308,4 +1309,9 @@ export type ReusableTabComponentProps<KeyType extends string = string> = {
 export type TUseTabsProps<KeyType = string> = {
   tabs: TTab<KeyType>[];
   defaultTab: KeyType;
+}
+
+export type CreditBalanceCardProps = {
+  wallet: CreditWallet | null | undefined
+  isLoading?: boolean
 }

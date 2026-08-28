@@ -26,10 +26,13 @@ import { CREDIT_URLS } from '../../credit-query';
 import { ECREDITTRANSACTIONS } from '@/types/enums';
 import { CreditTransactionsAllColumns } from '@/dev/columns/admin/credit/transactions';
 import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { CreditTransactionSchema } from '@/types/form-schema';
+import { CreditTransactionForm } from '@/types/schema';
 
 const AllTransactionsPage = ({
     canListAll
-}:{canListAll:boolean}) => {
+}: { canListAll: boolean }) => {
     const [filter, optionsDispatcher] = useReducer(
         ReusableReducer<TPaginationFilters & TFilterOptions & { status?: string; user_id?: string }>,
         { ...FILTEROPTIONS, page: 1, pageSize: 15, status: "", user_id: "" }
@@ -45,13 +48,12 @@ const AllTransactionsPage = ({
         }>();
 
     const { control, watch } = useForm<CreditTransactionForm>({
+        resolver:zodResolver(CreditTransactionSchema),
         defaultValues: {
             status: 'all',
         },
     })
-
     const status = watch('status')
-
     const { data, isLoading, isError } = UseApiQuery<SubmitResponse>({
         url: CREDIT_URLS.transactions,
         params: {
@@ -70,71 +72,70 @@ const AllTransactionsPage = ({
     return (
         <div className='w-full space-y-5'>
             {canListAll && (
-                <>            <div className="flex w-full justify-end">
-                <div className="w-55">
-                    <ReusableSelect
-                        label='Filter Options'
-                        name="status"
-                        control={control}
-                        options={CREDITTRANSACTIONFILTEROPTIONS}
-                    />
+                <>            
+                <div className="flex w-full justify-end">
+                    <div className="w-55">
+                        <ReusableSelect
+                            label='Filter Options'
+                            name="status"
+                            control={control}
+                            options={CREDITTRANSACTIONFILTEROPTIONS}
+                        />
+                    </div>
                 </div>
-            </div>
-            <div className='w-full'>
-                <CustomBaseTable
-                    {...{
-                        onPageChange: (page) =>
-                            optionsDispatcher({
-                                payload: { page },
-                                type: 'page',
-                            }),
-                        OtherToolsProps: {
-                            onChange: (data: any) =>
-                                optionsDispatcherDebounce({
-                                    payload: { term: data },
-                                    type: 'term',
-                                }),
-                            placeholder: 'Search',
-                            includeFilter: true,
-                        },
-                        columns: [
-                            ...CreditTransactionsAllColumns,
-                            ActionColumn({ ActionsHandlerMapping }),
-                        ],
-                        OtherTools: SearchTools,
-                        data: data?.data ?? [],
-                        pageCount: data?.pagination?.last_page ?? filter.page,
-                        title: 'All transactions',
-                        showPagination: true,
-                        setPageSize: (pageSize) =>
-                            optionsDispatcher({
-                                payload: { pageSize },
-                                type: 'pageSize',
-                            }),
-                        pageSize: data?.pagination?.per_page ?? filter?.pageSize,
-                        page: data?.pagination?.current_page ?? filter?.page,
-                        isLoading: isLoading,
-                        isError: isError
-                    }}
-                />
-
-                <CustomDialogComponent
-                    {...{ handleDialogContextSwitch, dialogOpen }}
-                    className='sm:max-w-fit w-[95vw] sm:w-auto p-4 sm:p-6'>
-                    {dialogContent?.Component && (
-                        <dialogContent.Component
+                    <div className='w-full'>
+                        <CustomBaseTable
                             {...{
-                                componentProps: dialogContent.componentProps,
-                                handleDialogContextSwitch,
+                                onPageChange: (page) =>
+                                    optionsDispatcher({
+                                        payload: { page },
+                                        type: 'page',
+                                    }),
+                                OtherToolsProps: {
+                                    onChange: (data: any) =>
+                                        optionsDispatcherDebounce({
+                                            payload: { term: data },
+                                            type: 'term',
+                                        }),
+                                    placeholder: 'Search',
+                                    includeFilter: true,
+                                },
+                                columns: [
+                                    ...CreditTransactionsAllColumns,
+                                    ActionColumn({ ActionsHandlerMapping }),
+                                ],
+                                OtherTools: SearchTools,
+                                data: data?.data ?? [],
+                                pageCount: data?.pagination?.last_page ?? filter.page,
+                                title: 'All transactions',
+                                showPagination: true,
+                                setPageSize: (pageSize) =>
+                                    optionsDispatcher({
+                                        payload: { pageSize },
+                                        type: 'pageSize',
+                                    }),
+                                pageSize: data?.pagination?.per_page ?? filter?.pageSize,
+                                page: data?.pagination?.current_page ?? filter?.page,
+                                isLoading: isLoading,
+                                isError: isError
                             }}
                         />
-                    )}
-                </CustomDialogComponent>
-            </div>
-            </>
+                        <CustomDialogComponent
+                            {...{ handleDialogContextSwitch, dialogOpen }}
+                            className='sm:max-w-fit w-[95vw] sm:w-auto p-4 sm:p-6'>
+                            {dialogContent?.Component && (
+                                <dialogContent.Component
+                                    {...{
+                                        componentProps: dialogContent.componentProps,
+                                        handleDialogContextSwitch,
+                                    }}
+                                />
+                            )}
+                        </CustomDialogComponent>
+                    </div>
+                </>
             )}
         </div>
     )
 }
-
 export default AllTransactionsPage;

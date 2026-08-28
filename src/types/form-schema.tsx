@@ -1074,7 +1074,6 @@ export const PoolSettingsSchema = z.object({
     })
   }
 })
-
 export const AllocateCreditSchema = z.object({
   amount: z.coerce.number().positive("Amount must be greater than zero"),
   minimum_spend_threshold: z.coerce.number().min(0, "Minimum threshold must be 0 or more"),
@@ -1136,6 +1135,7 @@ export const CreateSettlementSchema = z
       })
     }
   })
+
 export const ParameterSchema = z
   .object({
     organization_id: z.coerce
@@ -1195,3 +1195,7 @@ export const ParameterSchema = z
       }
     }
   });
+
+  export const CreditTransactionSchema = z.object({
+  status: z.string().optional(),
+})

@@ -49,7 +49,7 @@ export function CreditApprovalsPage() {
       transactionId?: number
     }>()
 
-  const { data, isLoading, refetch } = UseApiQuery<SubmitResponse>({
+  const { data, isLoading, refetch, isError } = UseApiQuery<SubmitResponse>({
     url: CREDIT_URLS.approvals,
     params: {
       page: filter.page,
@@ -121,37 +121,56 @@ export function CreditApprovalsPage() {
         description="Review and approve credit spending requests from your team."
       />
 
-      <CustomBaseTable
-        onPageChange={(page) => optionsDispatcher({ payload: { page }, type: "page" })}
-        OtherToolsProps={{
-          onChange: (term: string) =>
-            optionsDispatcherDebounce({ payload: { term }, type: "term" }),
-          placeholder: "Search approvals",
-          includeFilter: true,
-        }}
-        columns={[...CreditApprovalsColumns, ActionColumn({ ActionsHandlerMapping })]}
-        OtherTools={SearchTools}
-        data={approvals}
-        pageCount={data?.data?.pagination?.last_page ?? data?.pagination?.last_page ?? 1}
-        pageSize={filter.pageSize}
-        page={filter.page}
-        isLoading={isLoading}
-        showPagination
-      />
-
+      <div className="w-full">
+        <CustomBaseTable
+          {...{
+            onPageChange: (page) =>
+              optionsDispatcher({
+                payload: { page },
+                type: 'page',
+              }),
+            OtherToolsProps: {
+              onChange: (data: any) =>
+                optionsDispatcherDebounce({
+                  payload: { term: data },
+                  type: 'term',
+                }),
+              placeholder: 'Search',
+              includeFilter: true,
+            },
+            columns: [
+              ...CreditApprovalsColumns,
+              ActionColumn({ ActionsHandlerMapping }),
+            ],
+            OtherTools: SearchTools,
+            data: approvals ?? [],
+            pageCount: data?.data?.pagination?.last_page ?? filter.page,
+            title: 'Pending Approvals',
+            showPagination: true,
+            setPageSize: (pageSize) =>
+              optionsDispatcher({
+                payload: { pageSize },
+                type: 'pageSize',
+              }),
+            pageSize: data?.data?.pagination?.per_page ?? filter?.pageSize,
+            page: data?.data?.pagination?.current_page ?? filter?.page,
+            isLoading: isLoading,
+            isError: isError
+          }}
+        />
+      </div>
       <CustomDialogComponent
-        handleDialogContextSwitch={handleDialogContextSwitch}
-        dialogOpen={dialogOpen}
-        className="sm:max-w-fit w-[95vw] sm:w-auto"
-      >
+        {...{ handleDialogContextSwitch, dialogOpen }}
+        className='sm:max-w-fit w-[95vw] sm:w-auto p-4 sm:p-6'>
         {dialogContent?.Component && (
           <dialogContent.Component
-            componentProps={dialogContent.componentProps}
-            handleDialogContextSwitch={handleDialogContextSwitch}
+            {...{
+              componentProps: dialogContent.componentProps,
+              handleDialogContextSwitch,
+            }}
           />
         )}
       </CustomDialogComponent>
-
       <AlertDialog open={Boolean(approveTarget)} onOpenChange={() => setApproveTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>

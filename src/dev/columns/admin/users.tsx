@@ -124,7 +124,7 @@ export const LocationUsersColumns: ColumnDef<any>[] = [
             const isActive: boolean = row.getValue("is_active");
             return (
                 <Badge
-                    className={`rounded-full text-white font-semibold ${isActive ? "bg-green-500" : "bg-red-500"
+                    className={`rounded-lg font-semibold ${isActive ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
                         }`}>
                     {isActive ? "Active" : "Inactive"}
                 </Badge>
@@ -141,9 +141,11 @@ export const LocationUsersColumns: ColumnDef<any>[] = [
                 <Badge
                     variant="outline"
                     className={`rounded-full px-3 py-1 border-none text-white font-medium shadow-sm transition-colors ${is_general
-                        ? "bg-emerald-500"
-                        : "bg-indigo-600"
+                        ? "bg-emerald-100 text-emarald-800"
+                        : "bg-indigo-100 text-indigo-800"
                         }`}>
+                     {/* className={`rounded-lg font-semibold ${is_general ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                        }`}> */}
                     {is_general ? "General" : "Admin"}
                 </Badge>
             );
@@ -151,7 +153,6 @@ export const LocationUsersColumns: ColumnDef<any>[] = [
     },
 ];
 
-/** Organization Members table — LocationUsersColumns plus a Roles column from the list API */
 export const OrganizationMembersColumns: ColumnDef<any>[] = [
     ...LocationUsersColumns.slice(0, 3),
     {
@@ -163,15 +164,13 @@ export const OrganizationMembersColumns: ColumnDef<any>[] = [
             if (roles.length === 0) {
                 return <span className="text-sm text-muted-foreground">—</span>;
             }
-
             return (
                 <div className="flex flex-wrap gap-1">
                     {roles.map((role: any, index: number) => (
                         <Badge
                             key={`${role?.role_id ?? role?.name ?? index}-${index}`}
                             variant="outline"
-                            className="rounded-full border-transparent bg-slate-100 text-xs font-medium text-slate-800"
-                        >
+                            className="rounded-full border-transparent bg-slate-100 text-xs font-medium text-slate-800">
                             {getMemberRoleLabel(role)}
                         </Badge>
                     ))}

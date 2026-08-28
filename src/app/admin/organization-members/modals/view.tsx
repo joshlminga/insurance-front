@@ -41,7 +41,7 @@ export const ViewMemberModal = ({
     member?.organization?.name ?? member?.organization?.organization_name ?? "N/A"
 
   return (
-    <div className="w-full min-w-[600px] max-w-[860px] space-y-6 p-6">
+    <div className="w-full min-w-150 max-w-215 space-y-6 p-6">
       <div className="border-b pb-3">
         <DialogTitle className="text-xl font-semibold">Member Details</DialogTitle>
         <DialogDescription className="mt-1">
@@ -67,7 +67,7 @@ export const ViewMemberModal = ({
               label="Status"
               value={
                 <Badge
-                  className={`rounded-full text-white ${isActive ? "bg-green-500" : "bg-red-500"}`}
+                  className={`rounded-full text-white ${isActive ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}
                 >
                   {isActive ? "Active" : "Suspended"}
                 </Badge>

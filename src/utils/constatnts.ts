@@ -123,6 +123,14 @@ export const CREDITTRANSACTIONFILTEROPTIONS = [
   },
 ]
 
+export const ADJUSTMENT_TYPES = [
+  { label: "Refund", value: "refund" },
+  { label: "Write off", value: "write_off" },
+  { label: "Manual charge", value: "manual_charge" },
+  { label: "Correction", value: "correction" },
+]
+
+
 export const ACCESSLEVELSOPTIONS = [
   { label: "All", value: 'All' },
   { label: "Personal Owned", value: 'Personal Owned' },

@@ -11,7 +11,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { Button, buttonVariants } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
 import { ActionColumn } from "@/dev/columns"
 import { OrganizationMembersColumns } from "@/dev/columns/admin/users"
 import { CustomDialogComponent } from "@/dev/core"
@@ -20,12 +20,11 @@ import { useCustomDialogContextFactory, useDebounce } from "@/hooks"
 import { UseApiMutation, UseApiQuery } from "@/hooks/hooks"
 import { SingleActionsHandler, SubmitResponse, TFilterOptions, TPaginationFilters } from "@/types/types"
 import { EMETHODS, FILTEROPTIONS, ReusableReducer } from "@/utils/constatnts"
-import { EROUTES } from "@/utils/enums"
 import { extractErrorMessage } from "@/utils/helpers"
 import { ShowToast } from "@/utils/utils"
-import { ArrowLeft, Plus } from "lucide-react"
+import { Plus } from "lucide-react"
 import { useMemo, useReducer, useState } from "react"
-import { Link, useParams } from "react-router-dom"
+import { useParams } from "react-router-dom"
 
 import {
   extractMembersFromResponse,
@@ -37,11 +36,6 @@ import CreateMemberModal from "../modals/create"
 import EditMemberModal from "../modals/edit"
 import ViewMemberModal from "../modals/view"
 
-/**
- * Members table for one organization location.
- * Lists staff users and offers Add / View / Edit / Suspend / UnSuspend / Delete,
- * each action gated by the matching `organization-location-user.*` permission.
- */
 const OrganizationMembersDetailPage = () => {
   const { orgLocationId } = useParams<{ orgLocationId: string }>()
   const { can } = useAbilities()
@@ -67,7 +61,6 @@ const OrganizationMembersDetailPage = () => {
       organizationLocationId?: number | string
     }>()
 
-  // Location details for the page header
   const { data: orgLocationData } = UseApiQuery<SubmitResponse>({
     url: `organization-location/${orgLocationId}`,
     queryOptions: {
@@ -88,7 +81,6 @@ const OrganizationMembersDetailPage = () => {
   const countryName = organizationLocation?.country?.name ?? ""
   const orgLocationDisplayName = [organizationName, countryName].filter(Boolean).join(" ")
 
-  // Members list — organization_location_id is required by the API
   const { data, isLoading, refetch, isError } = UseApiQuery<SubmitResponse>({
     url: "organization-location-user",
     params: {
@@ -117,7 +109,6 @@ const OrganizationMembersDetailPage = () => {
     },
   })
 
-  // Suspend = is_active: false, UnSuspend = is_active: true
   const toggleMemberStatusMutation = UseApiMutation<
     SubmitResponse,
     { id: number | string; is_active: boolean }
@@ -149,7 +140,7 @@ const OrganizationMembersDetailPage = () => {
         })
       },
       conditional: (rowData) =>
-        Boolean(getMemberUserId(rowData)) && can("organization-location-user.read"),
+        !!(getMemberUserId(rowData)) && can("organization-location-user.read"),
     },
     {
       label: "Edit",
@@ -164,7 +155,7 @@ const OrganizationMembersDetailPage = () => {
         })
       },
       conditional: (rowData) =>
-        Boolean(getMemberUserId(rowData)) && can("organization-location-user.update"),
+        !!(getMemberUserId(rowData)) && can("organization-location-user.update"),
     },
     {
       label: "Suspend",
@@ -174,7 +165,7 @@ const OrganizationMembersDetailPage = () => {
         toggleMemberStatusMutation.mutate({ id, is_active: false })
       },
       conditional: (rowData) =>
-        Boolean(getMemberUserId(rowData)) &&
+        !!(getMemberUserId(rowData)) &&
         getMemberIsActive(rowData) &&
         can("organization-location-user.action"),
     },
@@ -209,36 +200,27 @@ const OrganizationMembersDetailPage = () => {
 
   return (
     <div>
-      <div className="mb-4">
-        <Button variant="ghost" size="sm" asChild className="mb-2 -ml-2">
-          <Link to={EROUTES.ORGANIZATION_MEMBERS}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Organizations
-          </Link>
-        </Button>
-      </div>
-
       <PageHeader
-        title={`Members — ${orgLocationDisplayName}`}
+        title={`${orgLocationDisplayName} Members`}
         description="Manage staff members for this organization"
         actions={
           can("organization-location-user.create")
             ? [
-                {
-                  icon: Plus,
-                  label: "Add New Member",
-                  variant: "default",
-                  onClick: () => {
-                    handleDialogContextSwitch({
-                      componentProps: {
-                        organizationLocationId: orgLocationId,
-                        refetch,
-                      },
-                      Component: CreateMemberModal,
-                    })
-                  },
+              {
+                icon: Plus,
+                label: "Add New Member",
+                variant: "default",
+                onClick: () => {
+                  handleDialogContextSwitch({
+                    componentProps: {
+                      organizationLocationId: orgLocationId,
+                      refetch,
+                    },
+                    Component: CreateMemberModal,
+                  })
                 },
-              ]
+              },
+            ]
             : []
         }
       />
@@ -267,9 +249,7 @@ const OrganizationMembersDetailPage = () => {
             OtherTools: SearchTools,
             data: tableData,
             pageCount:
-              (data as any)?.data?.pagination?.last_page ??
-              (data as any)?.pagination?.last_page ??
-              1,
+              data?.data?.pagination?.last_page ?? 1,
             title: "Organization Members",
             showPagination: true,
             setPageSize: (pageSize) =>
@@ -277,14 +257,8 @@ const OrganizationMembersDetailPage = () => {
                 payload: { pageSize },
                 type: "pageSize",
               }),
-            pageSize:
-              (data as any)?.data?.pagination?.per_page ??
-              (data as any)?.pagination?.per_page ??
-              10,
-            page:
-              (data as any)?.data?.pagination?.current_page ??
-              (data as any)?.pagination?.current_page ??
-              1,
+            pageSize: data?.data?.pagination?.per_page ?? filter?.pageSize,
+            page: data?.data?.pagination?.current_page ?? filter?.page,
             isLoading,
             isError,
           }}

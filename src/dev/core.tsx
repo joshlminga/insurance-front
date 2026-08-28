@@ -1198,15 +1198,12 @@ export const ReusableCountriesInputMultiselect = ({
     label,
     required = false,
 }: TCountriesInputMultiselectProps) => {
-
     const { data, isLoading } = UseApiQuery<TCountryResponse>({
         url: 'taxonomies/general/countries',
         params: { direction: 'asc' },
         queryOptions: { enabled: true },
     })
-
     const countries = data?.data ?? []
-
     return (
         <div className="space-y-2 w-full">
             {label && (
@@ -1581,9 +1578,6 @@ export const ReusableOrganizationsInputMultiselect = ({
         queryOptions: { enabled: true },
     })
     const organizations = data?.data ?? [];
-
-    console.log(organizations);
-
     return (
         <div className="space-y-2 w-full">
             {label && (
@@ -1915,6 +1909,7 @@ export function ReusableApiMultiSelect({
     searchKeys = ["name"],
     searchPlaceholder = "Search...",
     emptyMessage = "No results found",
+    organizationLocationId
 }: ReusableApiMultiSelectProps) {
     const [search, setSearch] = useState("");
     const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -1928,6 +1923,7 @@ export function ReusableApiMultiSelect({
     const { data, isLoading, isFetching } = UseApiQuery<SubmitResponse>({
         url,
         params: {
+            organization_location_id: organizationLocationId,
             direction: "asc",
             term: debouncedSearch || undefined,
             ...queryParams,
@@ -2598,9 +2594,9 @@ export const ReusableTabComponent = <KeyType extends string>({
 }: ReusableTabComponentProps<KeyType>) => {
     const { activeTab, tabList, activeTabComponent: ActiveTabComponent, switchTab,
     } = useTabs<KeyType>({
-            defaultTab,
-            tabs,
-        });
+        defaultTab,
+        tabs,
+    });
     const onValueChange = (val: string) => switchTab(val as KeyType);
     return (
         <div className={cn("w-full flex flex-col gap-2 py-6")}>

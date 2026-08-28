@@ -32,7 +32,6 @@ export function CreditWalletPage() {
         title="Credit Wallet"
         description="View your allocated credit balance and spending limits for this location."
       />
-
       <CreditBalanceCard wallet={wallet} isLoading={isLoading} />
 
       {wallet ? (

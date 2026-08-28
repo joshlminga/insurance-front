@@ -23,7 +23,6 @@ export function CreditPendingDetailPage() {
         title="Credit approval status"
         description="See whether this credit payment is waiting for approval, needs a cover date update, or was rejected."
       />
-
       {invoiceId ? (
         <CreditScheduleStatusPanel invoiceId={invoiceId} />
       ) : (

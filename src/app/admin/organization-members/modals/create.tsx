@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { DialogTitle, DialogDescription } from "@/components/ui/dialog"
-import { Button, ReuseableInput } from "@/dev/core"
+import { Button, ReusableApiMultiSelect, ReuseableInput } from "@/dev/core"
 import { UseApiMutation } from "@/hooks/hooks"
 import { OrganizationMemberCreateSchema } from "@/types/form-schema"
 import { OrganizationMemberCreateFormValues } from "@/types/schema"
@@ -13,14 +13,7 @@ import { Controller, useForm } from "react-hook-form"
 
 import { roleValuesToIds } from "../member-utils"
 import MemberPasswordModal from "./password-display"
-import { MemberRolesField } from "./roles-field"
 
-/**
- * Create a staff member at an organization location.
- * The API generates the username + password, emails the user,
- * creates the member account, and assigns the selected roles — all in one call.
- * On success we swap this dialog for the one-time password display.
- */
 export const CreateMemberModal = ({
   handleDialogContextSwitch,
   componentProps,
@@ -54,8 +47,6 @@ export const CreateMemberModal = ({
         )
         form.reset()
         componentProps?.refetch?.()
-        // Keep the dialog open (state: true) but swap the content
-        // for the one-time password display.
         handleDialogContextSwitch({
           componentProps: { data: (response as any)?.data },
           Component: MemberPasswordModal,
@@ -75,8 +66,6 @@ export const CreateMemberModal = ({
     }
 
     const roleIds = roleValuesToIds(data.roles)
-
-    // The API accepts JSON, but a file upload requires multipart/form-data.
     if (data.profile_picture instanceof File) {
       const formData = new FormData()
       formData.append("organization_location_id", String(organizationLocationId))
@@ -99,7 +88,7 @@ export const CreateMemberModal = ({
   }
 
   return (
-    <div className="w-full min-w-[600px] max-w-[700px] p-6 space-y-6">
+    <div className="w-full min-w-150 max-w-175 p-6 space-y-6">
       <div className="border-b pb-3">
         <DialogTitle className="text-xl font-semibold">Add New Member</DialogTitle>
         <DialogDescription className="mt-1">
@@ -107,7 +96,6 @@ export const CreateMemberModal = ({
           and emailed to them automatically.
         </DialogDescription>
       </div>
-
       <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
         <ReuseableInput
           control={form.control}
@@ -141,7 +129,8 @@ export const CreateMemberModal = ({
           control={form.control}
           name="roles"
           render={({ field }) => (
-            <MemberRolesField
+            <ReusableApiMultiSelect
+              url="roles"
               organizationLocationId={organizationLocationId}
               value={field.value ?? []}
               onChange={field.onChange}

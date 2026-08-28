@@ -30,7 +30,7 @@ export function CreditPendingPage() {
     debounceCallback: optionsDispatcher,
   })
 
-  const { data, isLoading } = UseApiQuery<SubmitResponse>({
+  const { data, isLoading, isError } = UseApiQuery<SubmitResponse>({
     url: CREDIT_URLS.transactionsMine,
     params: {
       page: filter.page,
@@ -69,24 +69,42 @@ export function CreditPendingPage() {
       />
 
       <CustomBaseTable
-        onPageChange={(page) => optionsDispatcher({ payload: { page }, type: "page" })}
-        OtherToolsProps={{
-          onChange: (term: string) =>
-            optionsDispatcherDebounce({ payload: { term }, type: "term" }),
-          placeholder: "Search my credit payments",
-          includeFilter: true,
+        {...{
+          onPageChange: (page) =>
+            optionsDispatcher({
+              payload: { page },
+              type: 'page',
+            }),
+          OtherToolsProps: {
+            onChange: (data: any) =>
+              optionsDispatcherDebounce({
+                payload: { term: data },
+                type: 'term',
+              }),
+            placeholder: 'Search',
+            includeFilter: true,
+          },
+          columns: [
+            ...CreditPendingScheduleColumns,
+            ActionColumn({ ActionsHandlerMapping }),
+          ],
+          OtherTools: SearchTools,
+          data: schedules ?? [],
+          pageCount: data?.data?.pagination?.last_page ?? filter.page,
+          title: 'Credit Approvals',
+          showPagination: true,
+          setPageSize: (pageSize) =>
+            optionsDispatcher({
+              payload: { pageSize },
+              type: 'pageSize',
+            }),
+          pageSize: data?.pagination?.per_page ?? filter?.pageSize,
+          page: data?.pagination?.current_page ?? filter?.page,
+          isLoading: isLoading,
+          isError: isError
         }}
-        columns={[...CreditPendingScheduleColumns, ActionColumn({ ActionsHandlerMapping })]}
-        OtherTools={SearchTools}
-        data={schedules}
-        pageCount={data?.data?.pagination?.last_page ?? data?.pagination?.last_page ?? 1}
-        pageSize={filter.pageSize}
-        page={filter.page}
-        isLoading={isLoading}
-        showPagination
       />
     </div>
   )
 }
-
-export default CreditPendingPage
+export default CreditPendingPage;

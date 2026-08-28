@@ -132,7 +132,7 @@ export const ViewMemberLocationModal = ({ componentProps }: {
     ]
 
     return (
-        <div className="w-full min-w-[600px] max-w-[800px] p-6 space-y-6">
+        <div className="w-full min-w-150 max-w-200 p-6 space-y-6">
             <div className="border-b pb-3">
                 <h2 className="text-xl font-semibold">Members Per Organization Location</h2>
                 <p className="text-sm text-muted-foreground mt-1">
