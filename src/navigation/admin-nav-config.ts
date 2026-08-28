@@ -9,8 +9,6 @@ import {
   Coins,
   Banknote,
   FileBadge2,
-  FileText,
-  Receipt,
   ClipboardList,
 } from 'lucide-react'
 import { MODULES, QUOTATION_MOTOR_MODULES } from '@/auth/module-keys'
@@ -18,13 +16,16 @@ import { EPREFIX, EROUTES } from '@/utils/enums'
 
 export type NavSubItem = {
   title: string
-  url: string
+  /** Leaf links require a url; group nodes may omit it and use the first child url */
+  url?: string
   /** Case 2: sub-item visible only when user has this module */
   module?: string
   /** Case 2 (any): sub-item visible when user has any of these modules */
   modules?: string[]
   /** Extra permission (e.g. finance-control.mine) — hidden when user lacks it */
   permission?: string
+  /** Nested sub-menu items (level 3+) */
+  items?: NavSubItem[]
 }
 
 export type NavItem = {
@@ -91,20 +92,27 @@ export const adminNavConfig: NavItem[] = [
   //   module: MODULES.RBAC,
   // },
   {
-    title: 'Motor Quotation',
+    title: 'Quotations',
     url: EROUTES.MOTORQUOTATIONS,
     icon: TextQuote,
     modules: [...QUOTATION_MOTOR_MODULES],
     items: [
       {
-        title: 'Start New',
+        title: 'Motor',
         url: EROUTES.MOTORQUOTATIONS,
         modules: [...QUOTATION_MOTOR_MODULES],
-      },
-      {
-        title: 'Fetch',
-        url: EROUTES.MOTOR_QUOTATION_FETCH,
-        modules: [...QUOTATION_MOTOR_MODULES],
+        items: [
+          {
+            title: 'Start New',
+            url: EROUTES.MOTORQUOTATIONS,
+            modules: [...QUOTATION_MOTOR_MODULES],
+          },
+          {
+            title: 'Fetch',
+            url: EROUTES.MOTOR_QUOTATION_FETCH,
+            modules: [...QUOTATION_MOTOR_MODULES],
+          },
+        ],
       },
     ],
   },
@@ -129,32 +137,6 @@ export const adminNavConfig: NavItem[] = [
         title: 'Travel',
         url: EROUTES.REPORT_QUOTATIONS_TRAVEL,
         modules: [MODULES.QUOTATION_TRAVEL, MODULES.REPORT_MOTOR_QUOTATION],
-      },
-    ],
-  },
-  {
-    title: 'Invoice Reports',
-    url: EROUTES.REPORT_INVOICES_MOTOR,
-    icon: FileText,
-    module: MODULES.REPORT_MOTOR_INVOICE,
-    items: [
-      {
-        title: 'Motor',
-        url: EROUTES.REPORT_INVOICES_MOTOR,
-        module: MODULES.REPORT_MOTOR_INVOICE,
-      },
-    ],
-  },
-  {
-    title: 'Receipt Reports',
-    url: EROUTES.REPORT_RECEIPTS_MOTOR,
-    icon: Receipt,
-    module: MODULES.REPORT_MOTOR_RECEIPT,
-    items: [
-      {
-        title: 'Motor',
-        url: EROUTES.REPORT_RECEIPTS_MOTOR,
-        module: MODULES.REPORT_MOTOR_RECEIPT,
       },
     ],
   },
@@ -266,7 +248,7 @@ export const adminNavConfig: NavItem[] = [
     title: 'Finance',
     url: EROUTES.FINANCE_PARAMETERS,
     icon: Banknote,
-    module: MODULES.FINANCE,
+    modules: [MODULES.FINANCE, MODULES.REPORT_MOTOR_RECEIPT],
     items: [
       {
         title: 'Parameters',
@@ -282,8 +264,27 @@ export const adminNavConfig: NavItem[] = [
         title: 'Invoices',
         url: EROUTES.FINANCE_INVOICES,
         module: MODULES.FINANCE,
+        items: [
+          {
+            title: 'Motor',
+            url: EROUTES.FINANCE_INVOICES,
+            module: MODULES.FINANCE,
+          },
+        ],
       },
-       {
+      {
+        title: 'Receipts',
+        url: EROUTES.REPORT_RECEIPTS_MOTOR,
+        module: MODULES.REPORT_MOTOR_RECEIPT,
+        items: [
+          {
+            title: 'Motor',
+            url: EROUTES.REPORT_RECEIPTS_MOTOR,
+            module: MODULES.REPORT_MOTOR_RECEIPT,
+          },
+        ],
+      },
+      {
         title: 'Payments',
         url: EROUTES.PAYMENTS,
         module: MODULES.FINANCE,
