@@ -241,7 +241,7 @@ export const adminNavConfig: NavItem[] = [
     title: 'Finance',
     url: EROUTES.FINANCE_PARAMETERS,
     icon: Banknote,
-    modules: [MODULES.FINANCE, MODULES.REPORT_MOTOR_RECEIPT],
+    modules: [MODULES.FINANCE, MODULES.REPORT_MOTOR_INVOICE, MODULES.REPORT_MOTOR_RECEIPT],
     items: [
       {
         title: 'Parameters',
@@ -255,13 +255,13 @@ export const adminNavConfig: NavItem[] = [
       },
       {
         title: 'Invoices',
-        url: EROUTES.FINANCE_INVOICES,
-        module: MODULES.FINANCE,
+        url: EROUTES.REPORT_INVOICES_MOTOR,
+        module: MODULES.REPORT_MOTOR_INVOICE,
         items: [
           {
             title: 'Motor',
-            url: EROUTES.FINANCE_INVOICES,
-            module: MODULES.FINANCE,
+            url: EROUTES.REPORT_INVOICES_MOTOR,
+            module: MODULES.REPORT_MOTOR_INVOICE,
           },
         ],
       },
