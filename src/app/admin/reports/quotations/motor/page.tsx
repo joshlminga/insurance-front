@@ -70,7 +70,7 @@ export const QuotationReportsMotorPage = () => {
       const response = await apiClient.get<SubmitResponse>(`quotation/motor/fetch/${row.id}`)
       const detail = response.data?.data as MotorQuoteFetchDetail
       const { stage } = persistAdminMotorResumeFromDetail(detail)
-      if (stage === 'quote' || stage === 'rates') {
+      if (stage === 'quote') {
         navigate(EROUTES.MOTOR_QUOTATION_RESULTS)
         return
       }

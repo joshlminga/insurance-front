@@ -140,7 +140,7 @@ export const AdminMotorQuotationFetchPage = () => {
       const detail = response.data?.data as MotorQuoteFetchDetail
       const { stage } = persistAdminMotorResumeFromDetail(detail)
       ShowToast.success(`Resuming from ${stage}`)
-      if (stage === 'quote' || stage === 'rates') {
+      if (stage === 'quote') {
         navigate(EROUTES.MOTOR_QUOTATION_RESULTS)
         return
       }

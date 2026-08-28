@@ -229,7 +229,7 @@ export function persistAdminMotorResumeFromDetail(detail: MotorQuoteFetchDetail)
     }
   }
 
-  if (stage === 'kyc') {
+  if (stage === 'rates' || stage === 'kyc') {
     sessionStorage.setItem(ADMIN_MOTOR_PURCHASE_STEP_KEY, '1')
     sessionStorage.removeItem(INVOICE_SESSION_STORAGE_KEY)
     return { stage, purchaseStep: 1 }
