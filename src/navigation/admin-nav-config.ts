@@ -9,7 +9,6 @@ import {
   Coins,
   Banknote,
   FileBadge2,
-  ClipboardList,
 } from 'lucide-react'
 import { MODULES, QUOTATION_MOTOR_MODULES } from '@/auth/module-keys'
 import { EPREFIX, EROUTES } from '@/utils/enums'
@@ -95,48 +94,42 @@ export const adminNavConfig: NavItem[] = [
     title: 'Quotations',
     url: EROUTES.MOTORQUOTATIONS,
     icon: TextQuote,
-    modules: [...QUOTATION_MOTOR_MODULES],
+    modules: [...QUOTATION_MOTOR_MODULES, MODULES.REPORT_MOTOR_QUOTATION],
     items: [
       {
         title: 'Motor',
         url: EROUTES.MOTORQUOTATIONS,
-        modules: [...QUOTATION_MOTOR_MODULES],
+        modules: [...QUOTATION_MOTOR_MODULES, MODULES.REPORT_MOTOR_QUOTATION],
         items: [
           {
-            title: 'Start New',
+            title: 'New',
             url: EROUTES.MOTORQUOTATIONS,
             modules: [...QUOTATION_MOTOR_MODULES],
           },
           {
-            title: 'Fetch',
+            title: 'Find',
             url: EROUTES.MOTOR_QUOTATION_FETCH,
             modules: [...QUOTATION_MOTOR_MODULES],
+          },
+          {
+            title: 'Listed',
+            url: EROUTES.REPORT_QUOTATIONS_MOTOR,
+            module: MODULES.REPORT_MOTOR_QUOTATION,
           },
         ],
       },
     ],
   },
   {
-    title: 'Motor Certificates',
+    title: 'Certificates',
     url: EROUTES.MOTOR_CERTIFICATES,
     icon: FileBadge2,
     module: MODULES.DMVIC_CERTIFICATE,
-  },
-  {
-    title: 'Quotation Reports',
-    url: EROUTES.REPORT_QUOTATIONS_MOTOR,
-    icon: ClipboardList,
-    modules: [MODULES.REPORT_MOTOR_QUOTATION, MODULES.QUOTATION_TRAVEL],
     items: [
       {
         title: 'Motor',
-        url: EROUTES.REPORT_QUOTATIONS_MOTOR,
-        module: MODULES.REPORT_MOTOR_QUOTATION,
-      },
-      {
-        title: 'Travel',
-        url: EROUTES.REPORT_QUOTATIONS_TRAVEL,
-        modules: [MODULES.QUOTATION_TRAVEL, MODULES.REPORT_MOTOR_QUOTATION],
+        url: EROUTES.MOTOR_CERTIFICATES,
+        module: MODULES.DMVIC_CERTIFICATE,
       },
     ],
   },

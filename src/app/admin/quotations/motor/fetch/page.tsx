@@ -185,13 +185,13 @@ export const AdminMotorQuotationFetchPage = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Fetch motor quotation"
-        description="Search by plate, email, chassis, quote code or ID. Resume the same session or duplicate into a new quote."
+        title="Find motor quotation"
+        description="Search by registration, email, chassis, quote code or ID. Resume the same session or duplicate into a new quote."
       />
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 rounded-lg border p-4">
         <div className="space-y-1.5">
-          <Label htmlFor="fetch-plate">Vehicle plate</Label>
+          <Label htmlFor="fetch-plate">Vehicle Registration</Label>
           <Input
             id="fetch-plate"
             placeholder="KDC324F"

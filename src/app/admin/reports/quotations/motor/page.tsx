@@ -100,7 +100,7 @@ export const QuotationReportsMotorPage = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Quotation Reports"
+        title="Listed motor quotations"
         description="Browse motor quotations across customers, vehicles, and stages."
       />
       <CustomBaseTable
@@ -110,7 +110,7 @@ export const QuotationReportsMotorPage = () => {
         OtherToolsProps={{
           onChange: (term: string) =>
             optionsDispatcherDebounce({ payload: { term }, type: 'term' }),
-          placeholder: 'Search quote code, plate, email…',
+          placeholder: 'Search quote code, registration, email…',
           includeFilter: true,
         }}
         columns={[...MotorQuoteFetchColumns, ActionColumn({ ActionsHandlerMapping })]}
