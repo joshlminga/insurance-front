@@ -1,29 +1,17 @@
-import {
-  StatsCard,
-  StatsGrid
-} from "@/components/shared/stats-card"
-import type {
-  CreditBalanceCardProps
-} from "@/types/types"
-import {
-  formatCurrency,
-  parseMoneyString
-} from "@/lib/format"
+import { StatsCard, StatsGrid } from "@/components/shared/stats-card"
+import type { CreditBalanceCardProps } from "@/types/types"
+import { formatCurrency, parseMoneyString } from "@/lib/format"
 import {
   Coins,
   Lock,
   Wallet,
-  TrendingDown
+  TrendingDown,
+  CircleDollarSign,
 } from "lucide-react"
-import { StatsCard, StatsGrid } from "@/components/shared/stats-card"
-import type { CreditWallet } from "@/types/types"
-import { formatCurrency, parseMoneyString } from "@/lib/format"
-import { Coins, Lock, Wallet, TrendingDown, CircleDollarSign } from "lucide-react"
-
 
 export function CreditBalanceCard({
   wallet,
-  isLoading
+  isLoading,
 }: CreditBalanceCardProps) {
   if (isLoading) {
     return (
@@ -47,8 +35,6 @@ export function CreditBalanceCard({
   const format = (value: string | null | undefined) =>
     formatCurrency(parseMoneyString(value))
 
-  // 3 columns so Allocated / Available / Used sit on the first row,
-  // and Pending / Credit floor wrap onto a second row at the same card width.
   return (
     <StatsGrid columns={3}>
       <StatsCard

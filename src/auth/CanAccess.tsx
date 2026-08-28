@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { useAbilities } from './useAbilities'
+import { useCan } from './useCan'
 import type { CanAccessOptions } from './types'
 
 interface CanAccessProps {
@@ -33,4 +34,16 @@ export function CanAccessHeadless({
 }: Omit<CanAccessProps, 'className'>) {
   const { canAccess } = useAbilities()
   return canAccess(requires) ? children : fallback
+}
+
+interface CanProps {
+  permission: string
+  children: ReactNode
+  fallback?: ReactNode
+}
+
+/** Conditionally render children when the user has a permission — like @can in Blade */
+export function Can({ permission, children, fallback = null }: CanProps) {
+  const { can } = useCan()
+  return can(permission) ? <>{children}</> : <>{fallback}</>
 }

@@ -36,7 +36,7 @@ const MotorProductTab = ({
             data?: any;
         }>();
 
-    const { data, isLoading, refetch, isError } = UseApiQuery<SubmitResponse>({
+    const { data, isLoading, isError } = UseApiQuery<SubmitResponse>({
         url: `finance/invoices?product=${product}`,
         params: {
             page: filter.page,

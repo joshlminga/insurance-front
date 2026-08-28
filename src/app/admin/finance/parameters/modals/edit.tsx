@@ -24,6 +24,7 @@ import {
     Controller,
     useForm
 } from 'react-hook-form';
+import z from 'zod';
 
 export const EditParameter = ({
     handleDialogContextSwitch,
@@ -32,7 +33,11 @@ export const EditParameter = ({
     handleDialogContextSwitch: (context?: any) => void;
     componentProps?: any;
 }) => {
-    const form = useForm<ParameterFormValues>({
+    const form = useForm<
+        z.input<typeof ParameterSchema>,
+        any,
+        ParameterFormValues
+    >({
         resolver: zodResolver(ParameterSchema),
         defaultValues: {
             organization_id: componentProps?.data?.organization_id ?? undefined,

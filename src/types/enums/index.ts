@@ -1,17 +1,25 @@
-export enum EINVOICES {
-    MOTOR='Motor',
-    MARINE='Marine',
-    TRAVEL='Travel',
-    MEDICAL='Medical'
-}
+export const EINVOICES = {
+  MOTOR: "Motor",
+  MARINE: "Marine",
+  TRAVEL: "Travel",
+  MEDICAL: "Medical",
+} as const
 
-export enum ECREDITTRANSACTIONS {
-    MY_TRANSACTION='mine',
-    ALL_TRANSACTION='all',
-}
+export type EINVOICES = (typeof EINVOICES)[keyof typeof EINVOICES]
 
-export enum EMOTORCERTIFICATES {
-    ALL='all',
-    ISSUED='issued',
-    FAILED='failed',
-}
+export const ECREDITTRANSACTIONS = {
+  MY_TRANSACTION: "mine",
+  ALL_TRANSACTION: "all",
+} as const
+
+export type ECREDITTRANSACTIONS =
+  (typeof ECREDITTRANSACTIONS)[keyof typeof ECREDITTRANSACTIONS]
+
+export const EMOTORCERTIFICATES = {
+  ALL: "all",
+  ISSUED: "issued",
+  FAILED: "failed",
+} as const
+
+export type EMOTORCERTIFICATES =
+  (typeof EMOTORCERTIFICATES)[keyof typeof EMOTORCERTIFICATES]

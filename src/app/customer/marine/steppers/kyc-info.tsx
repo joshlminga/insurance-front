@@ -11,20 +11,29 @@ import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowLeftCircle, ArrowRightCircle } from 'lucide-react'
 import { useForm } from 'react-hook-form'
+import z from 'zod'
 
 export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToNextStep, goToPrevStep }) => {
-    const form = useForm<KycFormValues>({
+    const form = useForm<
+        z.input<typeof KycSchema>,
+        any,
+        KycFormValues
+    >({
         resolver: zodResolver(KycSchema),
         defaultValues: {
-            passport_number: "",
-            tax_number: "",
+            nationality_id: "",
+            id_type: "",
+            id_number: "",
+            tax_pin: "",
+            color: "",
             chassis_number: "",
+            engine_cc: "",
             engine_number: "",
             total_seats: "",
             tonage_capacity: "",
-            log_book_attachment: undefined,
+            logbook: undefined,
             tax_certificate: undefined,
-            passport_attachment: undefined,
+            id_document: undefined,
         },
 
     })
@@ -62,13 +71,13 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToNextSt
                     <ReuseableInput
                        className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                         control={form.control}
-                        name="passport_number"
+                        name="id_number"
                         label="Passport/ID Number"
                     />
                     <ReuseableInput
                        className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                         control={form.control}
-                        name="tax_number"
+                        name="tax_pin"
                         label="Personal Tax Number"
                     />
                     <ReuseableInput
@@ -106,7 +115,7 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToNextSt
                        className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                         control={form.control}
                         type='file'
-                        name="log_book_attachment"
+                        name="logbook"
                         label="Attach Logbook"
                     />
                     <ReuseableInput
@@ -120,7 +129,7 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToNextSt
                         className="w-full h-[51px] rounded-[5px] border border-[#ADABAB] sm:col-span-2 lg:col-span-1"
                         control={form.control}
                         type='file'
-                        name="passport_attachment"
+                        name="id_document"
                         label="Attach ID/Passport"
                     />
                 </div>
@@ -139,9 +148,8 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToNextSt
                     type="button"
                     className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
                     rightIcon={<ArrowRightCircle />}
-                    onClick={() => goToNextStep?.()}
-                >
-                    Invoice Cover Quotation
+                    onClick={form.handleSubmit(onSubmit)}>
+                    Next
                 </Button>
             </CardFooter>
         </form>

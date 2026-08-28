@@ -6,10 +6,11 @@ import { Button, ReusableDropdown } from "@/dev/core";
 import { ArrowLeft, Download, Forward, Mail, Share2 } from "lucide-react";
 
 
-export const QuotePreviewPage = ({ componentProps }:{
-    componentProps: any,
-    handleDialogContextSwitch: any
-}) => {
+import type { TDialogComponentProps } from "@/types/types";
+
+export const QuotePreviewPage = ({
+  componentProps,
+}: TDialogComponentProps<{ data?: any }>) => {
 
     return (
         <div className="mx-auto max-w-3xl px-4 space-y-6">

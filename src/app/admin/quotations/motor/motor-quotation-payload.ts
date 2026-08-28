@@ -85,8 +85,8 @@ function buildSharedVehicleAndOfficeFields(
     | 'referral_id'
 > {
     return {
-        vehicle_class_id: data.vehicle_class_id,
-        covertype_id: data.covertype_id,
+        vehicle_class_id: data.vehicle_class_id ?? "",
+        covertype_id: data.covertype_id ?? "",
         covering_id: data.covering_id,
         ownership: data.ownership,
         vehicle_registration_number: data.vehicle_registration_number ?? '',
@@ -132,7 +132,7 @@ export function buildMotorQuotationPayload({
         }
     }
 
-    const { first_name, last_name } = mapFullNameToApiNames(data.full_name)
+    const { first_name, last_name } = mapFullNameToApiNames(data.full_name ?? "")
     const localPhone = String(data.phone ?? '').replace(/\D/g, '')
     const phone = dialCode
         ? buildFullPhone(dialCode, localPhone) || localPhone

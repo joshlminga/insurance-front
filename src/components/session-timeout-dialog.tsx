@@ -38,7 +38,7 @@ const signupPath = `/${EPREFIX.AUTH}${EROUTES.SIGNUP}`
  */
 export function SessionTimeoutDialog() {
   const { isOpen, open, close } = useSessionTimeoutStore()
-  const { setSession, logout, setGuest } = UseAuth()
+  const { setSession, setGuest } = UseAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [rememberMe, setRememberMe] = useState(false)
 
@@ -76,7 +76,7 @@ export function SessionTimeoutDialog() {
     mutationOptions: {
       onSuccess: (data: LoginResponse) => {
         if (data?.data?.status === 'NOT_VERIFIED') {
-          setGuest(data?.data?.guest)
+          setGuest(data?.data?.guest as import('@/types/types').Guest | null)
           ShowToast.info(data.message || 'Please verify your email to continue.')
           return
         }

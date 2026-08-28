@@ -69,6 +69,7 @@ const OrganizationRolesDetailPage = () => {
       data?: any
       orgId?: number | string
       organizationLocationId?: number | string
+      readOnly?: boolean
     }>()
 
   const { data: orgLocationData } = UseApiQuery<SubmitResponse>({

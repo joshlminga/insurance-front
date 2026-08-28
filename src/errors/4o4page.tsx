@@ -1,5 +1,3 @@
-import React from 'react'
-
 const Error4o4Page = () => {
   return (
     <div>4o4page</div>

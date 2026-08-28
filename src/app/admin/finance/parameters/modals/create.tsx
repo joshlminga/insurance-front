@@ -21,6 +21,7 @@ import { extractErrorMessage } from "@/utils/helpers";
 import { ShowToast } from "@/utils/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
+import z from "zod";
 
 export const CreateParameter = ({
     handleDialogContextSwitch,
@@ -29,7 +30,11 @@ export const CreateParameter = ({
     handleDialogContextSwitch: (context?: any) => void;
     componentProps?: any;
 }) => {
-    const form = useForm<ParameterFormValues>({
+    const form = useForm<
+        z.input<typeof ParameterSchema>,
+        any,
+        ParameterFormValues
+    >({
         resolver: zodResolver(ParameterSchema),
         defaultValues: {
             organization_id: undefined,

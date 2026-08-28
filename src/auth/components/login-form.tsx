@@ -47,7 +47,7 @@ export function LoginForm({
     mutationOptions: {
       onSuccess: (data: LoginResponse) => {
         if (data?.data?.status === 'NOT_VERIFIED') {
-          setGuest(data?.data?.guest);
+          setGuest(data?.data?.guest as import('@/types/types').Guest | null);
           ShowToast.info(data.message || "Please verify your email to continue.")
           navigate(`/${EPREFIX.AUTH}${EROUTES.VERIFY_EMAIL}`);
           return;

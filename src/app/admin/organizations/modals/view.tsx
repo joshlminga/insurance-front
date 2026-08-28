@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { DetailGrid, DetailItem } from '@/components/shared'
 import { Badge } from '@/components/ui/badge'
-import { Button, CustomDialogComponent } from '@/dev/core'
+import { CustomDialogComponent } from '@/dev/core'
 import { UseApiQuery } from '@/hooks/hooks'
 import { SubmitResponse } from '@/types/types'
 import { useCustomDialogContextFactory } from '@/hooks'
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 const getOrganizationName = (organization: Record<string, any>) =>
     organization?.organization_name ?? organization?.name ?? 'N/A'
@@ -25,7 +25,7 @@ export const ViewOrganizationModal = ({
             data?: any;
         }>();
 
-    const { data, isLoading, refetch } = UseApiQuery<SubmitResponse>({
+    const { data, isLoading } = UseApiQuery<SubmitResponse>({
         url: `organization/${orgId}`,
         queryOptions: {
             enabled: Boolean(orgId),

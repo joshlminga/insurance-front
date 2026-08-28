@@ -10,6 +10,7 @@ import { ShowToast } from "@/utils/utils"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
 import { useQueryClient } from "@tanstack/react-query"
+import type { Resolver } from "react-hook-form"
 
 /** Shared form shape: user_id only required for first-time allocate. */
 type AllocateFormValues = {
@@ -44,7 +45,9 @@ export default function AllocateCreditModal({
   // New allocate uses defaultValues so picking a user is not wiped on re-render.
   // Edit allocate uses values so the form stays synced to the selected row.
   const form = useForm<AllocateFormValues>({
-    resolver: zodResolver(isNewAllocation ? AllocateNewCreditSchema : AllocateCreditSchema),
+    resolver: zodResolver(
+      isNewAllocation ? AllocateNewCreditSchema : AllocateCreditSchema
+    ) as Resolver<AllocateFormValues>,
     ...(isNewAllocation
       ? {
           defaultValues: {

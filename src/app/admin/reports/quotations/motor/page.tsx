@@ -32,11 +32,11 @@ export const QuotationReportsMotorPage = () => {
 
   const { handleDialogContextSwitch, dialogContent, dialogOpen } =
     useCustomDialogContextFactory<{
-      data?: MotorQuoteFetchListRow
+      data?: MotorQuoteFetchDetail
       refetch?: () => Promise<unknown>
     }>()
 
-  const { data, isLoading, refetch, isError } = UseApiQuery<SubmitResponse>({
+  const { data, isLoading, isError } = UseApiQuery<SubmitResponse>({
     url: 'quotation/motor/fetch',
     params: {
       page: filter.page,
@@ -52,7 +52,12 @@ export const QuotationReportsMotorPage = () => {
     try {
       const response = await apiClient.get<SubmitResponse>(`quotation/motor/fetch/${row.id}`)
       handleDialogContextSwitch({
-        componentProps: { data: response.data?.data as MotorQuoteFetchDetail },
+        componentProps: {
+          data: {
+            ...(response.data?.data as MotorQuoteFetchDetail),
+            id: row.id,
+          } as MotorQuoteFetchDetail,
+        },
         Component: MotorQuoteFetchDetailDialog,
       })
     } catch (error) {

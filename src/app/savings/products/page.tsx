@@ -44,7 +44,10 @@ export default function SavingsProductsPage() {
 
       <div className="grid gap-4 md:grid-cols-2">
         {savingsProducts.map((product) => {
-          const Icon = accountTypeIcons[product.accountType] || Wallet
+          const Icon =
+            accountTypeIcons[
+              product.accountType as keyof typeof accountTypeIcons
+            ] || Wallet
           return (
             <Card key={product.id}>
               <CardHeader className="flex flex-row items-start justify-between space-y-0">

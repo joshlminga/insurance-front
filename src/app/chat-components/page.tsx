@@ -20,8 +20,7 @@ export const ChatIndexPage = ({
     isOpen: boolean;
     setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
-    const [messages, setMessages] = useState<TMessages[]>(mockMessages);
-    const [message, setMessage] = useState('');
+    const [messages] = useState<TMessages[]>(mockMessages);
 
     const form = useForm<SendMessageValues>({
         resolver: zodResolver(SendMessageSchema),

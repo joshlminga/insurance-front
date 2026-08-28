@@ -1,12 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { MotorQuoteFetchDetail } from '@/types/types'
+import type { MotorQuoteFetchDetail, TDialogComponentProps } from '@/types/types'
 
-type Props = {
-  componentProps?: {
-    data?: MotorQuoteFetchDetail
-  }
-  handleDialogContextSwitch?: (value: any) => void
-}
+type Props = TDialogComponentProps<{ data?: MotorQuoteFetchDetail }>
 
 export const MotorQuoteFetchDetailDialog = ({ componentProps }: Props) => {
   const detail = componentProps?.data

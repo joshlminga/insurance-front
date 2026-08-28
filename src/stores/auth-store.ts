@@ -8,7 +8,7 @@ import {
   resolveOrganization,
 } from '@/auth/auth-service'
 import { AUTH_STORAGE_KEY, TOKEN_REFRESH_BUFFER_SECONDS } from '@/auth/constants'
-import type { Abilities, AuthSessionPayload, OrgResolveData, OrgResolveStatus } from '@/auth/types'
+import type { Abilities, AuthSessionPayload } from '@/auth/types'
 import {
   getRequestContext,
   setRequestContextValue,

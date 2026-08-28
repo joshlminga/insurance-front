@@ -23,7 +23,7 @@ import {
     ReusableReducer
 } from '@/utils/constatnts';
 import { Plus } from 'lucide-react';
-import React, { useReducer } from 'react'
+import { useReducer } from 'react'
 
 const ClaimsPage = () => {
     const [filter, optionsDispatcher] = useReducer(
@@ -40,7 +40,7 @@ const ClaimsPage = () => {
             data?: any;
         }>();
 
-    const { data, isLoading, refetch } = UseApiQuery<SubmitResponse>({
+    const { isLoading, refetch } = UseApiQuery<SubmitResponse>({
         url: '',
         params: {
             page: filter.page,

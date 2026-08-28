@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { TActionColumnGenProps } from "@/types/types";
 import { ColumnDef } from "@tanstack/table-core";
-import { Check, ChevronDownCircle, CircleEllipsis, Copy, Ellipsis } from "lucide-react";
+import { Check, Copy, Ellipsis } from "lucide-react";
 import React, { useState } from "react";
 import { Button, ReusableDropDownComponent } from "../core";
 
@@ -47,7 +47,7 @@ export const ActionColumn = <T,>({
 							),
 							ActionsHandlerMapping: ActionsHandlerMapping.filter(
 								({ conditional }) => (conditional ? conditional(data) : true)
-							).map(({ label, onSelect, value }) => ({
+							).map(({ label, onSelect }) => ({
 								onSelect: (_: any) => onSelect(data),
 								value: data,
 								label,

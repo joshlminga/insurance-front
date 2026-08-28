@@ -146,6 +146,8 @@ export const AdminMotorQuotePreviewPage: React.FC<premiumPreview> = ({
         useCustomDialogContextFactory<{
             refetch?: () => Promise<any>
             data?: any
+            requireRecipientEmail?: boolean
+            defaultEmail?: string
         }>()
 
     return (

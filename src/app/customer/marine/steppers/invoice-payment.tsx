@@ -12,18 +12,22 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowLeftCircle, ArrowRightCircle, Eye, Mail, Share2 } from 'lucide-react'
 import React from 'react'
 import { useForm } from 'react-hook-form'
+import z from 'zod'
 
 export const InvoicePayment: React.FC<CustomerVerificationDetailsProps> = ({ goToNextStep, goToPrevStep }) => {
-    const form = useForm<InvoicePaymentFormValues>({
+    const form = useForm<
+        z.input<typeof InvoicePaymentSchema>,
+        any,
+        InvoicePaymentFormValues
+    >({
         resolver: zodResolver(InvoicePaymentSchema),
         defaultValues: {
-            customer_name: "",
+            name: "",
             email: "",
-            phone_number: "",
+            phone: "",
             covering: "",
             provider: "",
-            cover_startdate: "",
-            total_payable: "",
+            cover_start_date: "",
         },
 
     })
@@ -62,7 +66,7 @@ export const InvoicePayment: React.FC<CustomerVerificationDetailsProps> = ({ goT
                     <ReuseableInput
                        className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                         control={form.control}
-                        name="customer_name"
+                        name="name"
                         label="Customer Name"
                     />
                     <ReuseableInput
@@ -74,7 +78,7 @@ export const InvoicePayment: React.FC<CustomerVerificationDetailsProps> = ({ goT
                     <ReuseableInput
                        className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                         control={form.control}
-                        name="phone_number"
+                        name="phone"
                         label="Phone Number"
                     />
                     <ReuseableInput
@@ -93,15 +97,8 @@ export const InvoicePayment: React.FC<CustomerVerificationDetailsProps> = ({ goT
                        className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                         control={form.control}
                         type='date'
-                        name="cover_startdate"
+                        name="cover_start_date"
                         label="Cover Start Date"
-                    />
-                    <ReuseableInput
-                        className="w-full h-[51px] rounded-[5px] border border-[#ADABAB] sm:col-span-2 lg:col-span-1"
-                        control={form.control}
-                        type='number'
-                        name="total_payable"
-                        label="Total Payable"
                     />
                 </div>
             </div>

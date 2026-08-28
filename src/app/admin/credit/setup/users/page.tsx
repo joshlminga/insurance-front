@@ -2,18 +2,14 @@
 import { PageHeader, EmptyState } from "@/components/shared"
 import { ActionColumn } from "@/dev/columns"
 import { CustomDialogComponent } from "@/dev/core"
-import { 
-  CustomBaseTable, 
-  SearchTools 
+import {
+  CustomBaseTable,
+  SearchTools,
 } from "@/dev/table"
 import { CreditUserAllocationsColumns } from "@/dev/columns/admin/credit/user-allocations"
 import { CREDIT_URLS } from "@/app/admin/credit/credit-query"
-import { 
-  useCustomDialogContextFactory, 
-  useDebounce 
-} from "@/hooks"
-import { useCan } from "@/auth/useCan"
 import { useCustomDialogContextFactory, useDebounce } from "@/hooks"
+import { useCan } from "@/auth/useCan"
 import { UseApiQuery } from "@/hooks/hooks"
 import type {
   CreditUserAllocation,
@@ -22,10 +18,6 @@ import type {
   TPaginationFilters,
   TFilterOptions,
 } from "@/types/types"
-import { 
-  FILTEROPTIONS, 
-  ReusableReducer 
-} from "@/utils/constatnts"
 import { FILTEROPTIONS, ReusableReducer } from "@/utils/constatnts"
 import { Coins, Plus } from "lucide-react"
 import { useReducer } from "react"
@@ -70,17 +62,6 @@ export function CreditSetupUsersPage() {
     usersQuery.data?.data?.data ??
     (Array.isArray(usersQuery.data?.data) ? usersQuery.data.data : [])
 
-  const ActionsHandlerMapping: SingleActionsHandler<CreditUserAllocation>[] = [
-    {
-      label: "Allocate / Adjust",
-      onSelect: (user) =>
-        handleDialogContextSwitch({
-          Component: AllocateCreditModal,
-          componentProps: { user, refetch: usersQuery.refetch },
-        }),
-      conditional: (user) => !!(resolveAllocationUserId(user)),
-    },
-  ]
   const openAllocateModal = (user?: CreditUserAllocation) => {
     handleDialogContextSwitch({
       Component: AllocateCreditModal,
@@ -88,15 +69,17 @@ export function CreditSetupUsersPage() {
     })
   }
 
-  const ActionsHandlerMapping: SingleActionsHandler<CreditUserAllocation>[] = canAllocate
-    ? [
-        {
-          label: "Allocate / Adjust",
-          onSelect: (rowUser) => openAllocateModal(rowUser),
-          conditional: (rowUser) => Boolean(resolveAllocationUserId(rowUser)),
-        },
-      ]
-    : []
+  const ActionsHandlerMapping: SingleActionsHandler<CreditUserAllocation>[] =
+    canAllocate
+      ? [
+          {
+            label: "Allocate / Adjust",
+            onSelect: (rowUser) => openAllocateModal(rowUser),
+            conditional: (rowUser) =>
+              Boolean(resolveAllocationUserId(rowUser)),
+          },
+        ]
+      : []
 
   const showEmptyState = !usersQuery.isLoading && users.length === 0
 
@@ -104,45 +87,6 @@ export function CreditSetupUsersPage() {
     <div className="space-y-6">
       <PageHeader
         title="User Allocations"
-        description="Assign credit balances and minimum spend thresholds per user."
-      />
-
-      <CustomBaseTable
-        {...{
-          onPageChange: (page) =>
-            optionsDispatcher({
-              payload: { page },
-              type: 'page',
-            }),
-          OtherToolsProps: {
-            onChange: (data: any) =>
-              optionsDispatcherDebounce({
-                payload: { term: data },
-                type: 'term',
-              }),
-            placeholder: 'Search',
-            includeFilter: true,
-          },
-          columns: [
-            ...CreditUserAllocationsColumns,
-            ActionColumn({ ActionsHandlerMapping }),
-          ],
-          OtherTools: SearchTools,
-          data: users ?? [],
-          pageCount: usersQuery?.data?.pagination?.last_page ?? filter.page,
-          title: 'Allocations',
-          showPagination: true,
-          setPageSize: (pageSize) =>
-            optionsDispatcher({
-              payload: { pageSize },
-              type: 'pageSize',
-            }),
-          pageSize: usersQuery?.data?.pagination?.per_page ?? filter?.pageSize,
-          page: usersQuery?.data?.pagination?.current_page ?? filter?.page,
-          isLoading: usersQuery?.isLoading,
-          isError: usersQuery?.isError
-        }}
-      />
         description="Assign credit balances and minimum spend thresholds per user. Allocating requires finance-control.create (and finance-control.list to view this page). Recipients must belong to this location and have any active role other than member — including built-in and custom org roles such as sales. Member-only users are not eligible."
         actions={
           canAllocate
@@ -174,7 +118,9 @@ export function CreditSetupUsersPage() {
         />
       ) : (
         <CustomBaseTable
-          onPageChange={(page) => optionsDispatcher({ payload: { page }, type: "page" })}
+          onPageChange={(page) =>
+            optionsDispatcher({ payload: { page }, type: "page" })
+          }
           OtherToolsProps={{
             onChange: (term: string) =>
               optionsDispatcherDebounce({ payload: { term }, type: "term" }),
@@ -194,8 +140,19 @@ export function CreditSetupUsersPage() {
             usersQuery.data?.pagination?.last_page ??
             1
           }
-          pageSize={filter.pageSize}
-          page={filter.page}
+          pageSize={
+            usersQuery.data?.data?.pagination?.per_page ??
+            usersQuery.data?.pagination?.per_page ??
+            filter.pageSize
+          }
+          page={
+            usersQuery.data?.data?.pagination?.current_page ??
+            usersQuery.data?.pagination?.current_page ??
+            filter.page
+          }
+          setPageSize={(pageSize) =>
+            optionsDispatcher({ payload: { pageSize }, type: "pageSize" })
+          }
           isLoading={usersQuery.isLoading}
           showPagination
         />
@@ -203,7 +160,8 @@ export function CreditSetupUsersPage() {
 
       <CustomDialogComponent
         {...{ handleDialogContextSwitch, dialogOpen }}
-        className='sm:max-w-fit w-[95vw] sm:w-auto p-4 sm:p-6'>
+        className="sm:max-w-fit w-[95vw] sm:w-auto p-4 sm:p-6"
+      >
         {dialogContent?.Component && (
           <dialogContent.Component
             {...{

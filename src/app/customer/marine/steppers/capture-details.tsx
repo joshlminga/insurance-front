@@ -13,15 +13,20 @@ import { UseApiMutation } from "@/hooks/hooks"
 import type { CustomerVerificationDetailsProps, SubmitResponse } from "@/types/types"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Link } from "react-router-dom"
+import z from "zod"
 
 export const MarineCustomerVerificationDetails = ({ goToNextStep, goToPrevStep }: CustomerVerificationDetailsProps) => {
-  const form = useForm<CustomerFormValues>({
+  const form = useForm<
+    z.input<typeof CustomerDetailsSchema>,
+    any,
+    CustomerFormValues
+  >({
     resolver: zodResolver(CustomerDetailsSchema),
     defaultValues: {
       first_name: "",
       last_name: "",
       email: "",
-      mobile_number: "",
+      phone: "",
     },
   })
   const submitMutation = UseApiMutation<SubmitResponse, CustomerFormValues>({
@@ -86,7 +91,7 @@ export const MarineCustomerVerificationDetails = ({ goToNextStep, goToPrevStep }
               <ReuseableInput
                className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                 control={form.control}
-                name="mobile_number"
+                name="phone"
                 label="Mobile Number"
                 type="tel"
               />

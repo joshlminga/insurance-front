@@ -316,7 +316,7 @@ export type MotorQuoteDuplicatePayload = {
 
 export interface SubmitResponse {
   message: string,
-  success: string,
+  success: string | boolean,
   data: any,
   pagination?: {
     total: number,
@@ -418,7 +418,7 @@ export type TRHFSelectProps<T extends FieldValues> = {
   name: Path<T>
   label?: string
   placeholder?: string
-  options: TSelectOption[]
+  options: readonly TSelectOption[] | TSelectOption[]
   required?: boolean
   disabled?: boolean
   className?: string
@@ -485,11 +485,13 @@ export type TNavBarUrlType = {
   url?: string;
 };
 
+export type TDialogComponentProps<T = TKeyValueStringType> = {
+  handleDialogContextSwitch: (context?: any) => void
+  componentProps?: T
+}
+
 export type TComponent<T = TKeyValueStringType> = {
-  Component?: ComponentType<
-    Pick<TCustomDialogProps<T>,
-      'handleDialogContextSwitch'>
-  >;
+  Component?: ComponentType<TDialogComponentProps<T>>
 };
 
 export type TKeyValueStringType = Record<string, string>;
@@ -780,6 +782,7 @@ export type MpesaPayload = {
   phone: string
   amount: number
   invoice_id: string
+  account_reference?: string
   transaction_desc?: string
 }
 

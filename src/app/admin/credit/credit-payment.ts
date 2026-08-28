@@ -61,7 +61,9 @@ export async function submitMotorCreditPayment(
     )
 
     if (response.status === 202) {
-      return pendingFromBody(response.data as CreditPaymentPendingResponse)
+      return pendingFromBody(
+        response.data as unknown as CreditPaymentPendingResponse
+      )
     }
 
     return {
@@ -71,18 +73,25 @@ export async function submitMotorCreditPayment(
     }
   } catch (error: unknown) {
     const axiosError = error as {
-      response?: { status?: number; data?: CreditPaymentPendingResponse & SubmitResponse }
+      response?: {
+        status?: number
+        data?: CreditPaymentPendingResponse | SubmitResponse
+      }
     }
     const status = axiosError.response?.status
     const body = axiosError.response?.data
 
     if (status === 202) {
-      return pendingFromBody(body)
+      return pendingFromBody(body as CreditPaymentPendingResponse | undefined)
     }
 
     if (status === 422) {
       const message =
-        (typeof body?.message === "string" && body.message) ||
+        (body &&
+          typeof body === "object" &&
+          "message" in body &&
+          typeof body.message === "string" &&
+          body.message) ||
         "Credit validation failed. Check your balance and spending limits."
       return { kind: "validation_error", message }
     }

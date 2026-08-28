@@ -10,7 +10,7 @@ type StepperState = {
   goPrev: (flow: PurchaseFlow) => void
 }
 
-export const useStepperStore = create<StepperState>((set, get) => ({
+export const useStepperStore = create<StepperState>((set, _get) => ({
   motorStep: 1,
   marineStep: 1,
   setStep: (flow, step) =>

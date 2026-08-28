@@ -16,7 +16,7 @@ export function getOrganizationLocationFromResponse(response: unknown) {
 
 export function isOrganizationLocationMutationSuccess(response: unknown) {
   const payload = response as SubmitResponse
-  if (payload?.success === false) return false
+  if (payload?.success === false || payload?.success === "false") return false
 
   const { success } = payload ?? {}
   if (typeof success === "boolean") return success

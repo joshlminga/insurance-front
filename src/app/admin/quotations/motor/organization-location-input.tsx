@@ -55,7 +55,7 @@ export const OrganizationLocationInput = ({
             country_id: countryId,
             direction: 'asc',
         }
-        if (!override && user?.id != null && user.id !== '') {
+        if (!override && user?.id != null) {
             params.user_id = user.id
         }
         return params
@@ -67,7 +67,7 @@ export const OrganizationLocationInput = ({
             direction: 'asc',
             organization_type: [...AGENCY_ORGANIZATION_TYPES],
         }
-        if (user?.id != null && user.id !== '') {
+        if (user?.id != null) {
             params.user_id = user.id
         }
         return params

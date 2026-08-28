@@ -2,11 +2,10 @@ import { FieldGroup } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Field, FieldError, FieldLabel } from '@/components/ui/field'
 import React, { useRef } from 'react'
-import { useFormContext, Controller } from 'react-hook-form'
-import type { PaymentFormValues } from '@/types/schema'
+import { useFormContext, Controller, type FieldValues } from 'react-hook-form'
 
 export const CardsTabPage: React.FC = () => {
-    const { control } = useFormContext<PaymentFormValues>()
+    const { control } = useFormContext<FieldValues>()
     const expiryRef = useRef<HTMLInputElement>(null)
     const cvvRef = useRef<HTMLInputElement>(null)
 

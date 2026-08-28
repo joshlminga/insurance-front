@@ -1,49 +1,24 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { PageHeader } from "@/components/shared"
-import {
-  Button,
-  ReuseableInput,
-  ReusableSelect,
-  ReusableSingleSelectApiInput
-} from "@/dev/core"
-import { CREDIT_URLS } from "@/app/admin/credit/credit-query"
-import { UseApiMutation } from "@/hooks/hooks"
 import { Button, ReuseableInput, ReusableSelect } from "@/dev/core"
-import { CREDIT_URLS, invalidateCreditAll } from "@/app/admin/credit/credit-query"
+import { CREDIT_URLS } from "@/app/admin/credit/credit-query"
 import { useCan } from "@/auth/useCan"
 import { UseApiMutation, UseApiQuery } from "@/hooks/hooks"
 import { AdjustmentSchema } from "@/types/form-schema"
 import type { AdjustmentFormValues } from "@/types/schema"
 import type { SubmitResponse } from "@/types/types"
-import {
-  ADJUSTMENT_TYPES,
-  EMETHODS
-} from "@/utils/constatnts"
-import { EMETHODS } from "@/utils/constatnts"
+import { ADJUSTMENT_TYPES, EMETHODS } from "@/utils/constatnts"
 import { EROUTES } from "@/utils/enums"
 import { extractErrorMessage } from "@/utils/helpers"
 import { ShowToast } from "@/utils/utils"
 import { zodResolver } from "@hookform/resolvers/zod"
-import {
-  Controller,
-  useForm
-} from "react-hook-form"
+import { useForm } from "react-hook-form"
 import { Card } from "@/components/ui/card"
 import z from "zod"
-import { useForm } from "react-hook-form"
-import { useQueryClient } from "@tanstack/react-query"
 import { Link } from "react-router-dom"
-
-const ADJUSTMENT_TYPES = [
-  { label: "Refund", value: "refund" },
-  { label: "Write off", value: "write_off" },
-  { label: "Manual charge", value: "manual_charge" },
-  { label: "Correction", value: "correction" },
-]
 
 function parseWalletUsers(response?: SubmitResponse): any[] {
   const payload = response?.data
-  // API successPaginated shape: { data: [...] }
   if (Array.isArray(payload)) {
     return payload
   }
@@ -63,19 +38,6 @@ function parseWalletUsers(response?: SubmitResponse): any[] {
 }
 
 export function CreditAdjustmentsPage() {
-  const form = useForm<
-    z.input<typeof AdjustmentSchema>,
-    any,
-    AdjustmentFormValues>({
-      resolver: zodResolver(AdjustmentSchema),
-      defaultValues: {
-        user_id: undefined,
-        amount: undefined,
-        type: "correction",
-        reason: "",
-      },
-    })
-  const queryClient = useQueryClient()
   const { can } = useCan()
   const canListUsers = can("finance-control.list")
 
@@ -98,7 +60,11 @@ export function CreditAdjustmentsPage() {
     })
     .filter(Boolean) as Array<{ label: string; value: string }>
 
-  const form = useForm<AdjustmentFormValues>({
+  const form = useForm<
+    z.input<typeof AdjustmentSchema>,
+    any,
+    AdjustmentFormValues
+  >({
     resolver: zodResolver(AdjustmentSchema),
     defaultValues: {
       user_id: undefined,
@@ -110,19 +76,20 @@ export function CreditAdjustmentsPage() {
 
   const adjustMutation = UseApiMutation<
     SubmitResponse,
-    AdjustmentFormValues & { user_id: number }>({
-      url: CREDIT_URLS.adjustments,
-      method: EMETHODS.POST,
-      mutationOptions: {
-        onSuccess: (response) => {
-          ShowToast.success(response?.message || "Adjustment applied")
-          form.reset();
-        },
-        onError: (error) => {
-          ShowToast.error(extractErrorMessage(error))
-        },
+    AdjustmentFormValues & { user_id: number }
+  >({
+    url: CREDIT_URLS.adjustments,
+    method: EMETHODS.POST,
+    mutationOptions: {
+      onSuccess: (response) => {
+        ShowToast.success(response?.message || "Adjustment applied")
+        form.reset()
       },
-    })
+      onError: (error) => {
+        ShowToast.error(extractErrorMessage(error))
+      },
+    },
+  })
 
   const onSubmit = (values: AdjustmentFormValues) => {
     adjustMutation.mutate({
@@ -157,36 +124,6 @@ export function CreditAdjustmentsPage() {
 
       <Card className="max-w-7xl shadow-none p-6 space-y-4">
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid grid-cols-2 gap-2 items-center">
-            <Controller
-              control={form.control}
-              name="user_id"
-              render={({ field }) => (
-                <ReusableSingleSelectApiInput
-                  url={CREDIT_URLS.setupUsers}
-                  value={String(field.value)}
-                  onChange={field.onChange}
-                  label="User"
-                  required
-                  placeholder="Select user"
-                />
-              )}
-            />
-            <ReusableSelect
-              control={form.control}
-              name="type"
-              label="Adjustment type"
-              options={ADJUSTMENT_TYPES}
-              required
-            />
-            <ReuseableInput
-              control={form.control}
-              name="amount"
-              label="Amount (positive adds credit, negative deducts)"
-              type="number"
-              required
-            />
-          </div>
           <div className="space-y-1.5">
             <ReusableSelect
               control={form.control}
@@ -200,10 +137,11 @@ export function CreditAdjustmentsPage() {
 
             {!canListUsers && (
               <p className="text-sm text-muted-foreground">
-                Your role needs <code className="text-xs">finance-control.list</code> to
-                load users for this dropdown, and{" "}
-                <code className="text-xs">finance-control.adjust</code> to apply an
-                adjustment.
+                Your role needs{" "}
+                <code className="text-xs">finance-control.list</code> to load
+                users for this dropdown, and{" "}
+                <code className="text-xs">finance-control.adjust</code> to apply
+                an adjustment.
               </p>
             )}
 
@@ -251,9 +189,7 @@ export function CreditAdjustmentsPage() {
             placeholder="Explain this adjustment for the audit trail"
             required
           />
-          <Button
-            type="submit"
-            loading={adjustMutation.isPending}>
+          <Button type="submit" loading={adjustMutation.isPending}>
             Apply adjustment
           </Button>
         </form>
@@ -261,4 +197,5 @@ export function CreditAdjustmentsPage() {
     </div>
   )
 }
-export default CreditAdjustmentsPage;
+
+export default CreditAdjustmentsPage

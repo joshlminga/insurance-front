@@ -8,6 +8,7 @@ import {
     getFilteredRowModel,
     getExpandedRowModel,
     useReactTable,
+    type ColumnDef,
     type Table as TableType
 } from '@tanstack/react-table';
 
@@ -251,7 +252,7 @@ export const CustomBaseTable = <T,>({
         //     }
         //     : {}),
         ...(onRowSelectionChange ? { onRowSelectionChange } : {}),
-        columns,
+        columns: columns as ColumnDef<T, any>[],
         data,
         ...(getSubRows ? { getSubRows } : {}),
         ...(onExpandedChange ? { onExpandedChange } : {}),
@@ -328,9 +329,7 @@ export const ProductQueryField = ({
     );
 };
 
-export const ReusableFilterButton = ({
-    advancedHandler,
-}: Partial<Pick<TSearchToolProps, 'advancedHandler'>>) => {
+export const ReusableFilterButton = (_props: Partial<Pick<TSearchToolProps, 'advancedHandler'>>) => {
     return (
         <div className='border border-gray-300 bg-gray-100 dark:bg-white/10 py-1 px-3 flex gap-2 items-center rounded-xl w-28 select-none cursor-pointer h-8'>
             <ListFilter className='size-6' />

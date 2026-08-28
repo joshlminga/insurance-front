@@ -17,7 +17,7 @@ import {
   ReusableReducer
 } from '@/utils/constatnts';
 import { Plus } from 'lucide-react';
-import React, { useReducer } from 'react'
+import { useReducer } from 'react'
 import { CreateParameter } from './modals/create';
 import { ParametersColumns } from '@/dev/columns/admin/finance/parameters';
 import { ShowToast } from '@/utils/utils';

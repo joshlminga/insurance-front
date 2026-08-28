@@ -119,7 +119,7 @@ export const AdminMotorQuotationsPage: React.FC<AdminMotorStepProps> = ({
         [filter.page, filter.pageSize, appliedBenefitIds]
     )
 
-    const { data, isPending, isFetching, refetch: refetchPremium } = UseApiQuery<SubmitResponse>({
+    const { data, isPending, isFetching } = UseApiQuery<SubmitResponse>({
         url: premiumUrl,
         params: premiumQueryParams as Record<string, unknown>,
         config: {

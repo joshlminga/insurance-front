@@ -12,13 +12,18 @@ import { ShowToast } from "@/utils/utils";
 import { UseApiMutation } from "@/hooks/hooks";
 import { OTPVerificationSchema } from "@/types/form-schema";
 import type { OTPFormValues } from "@/types/schema";
+import z from "zod";
 
 export default function OTPVerificationMarinePage({ goToNextStep, goToPrevStep }: CustomerVerificationDetailsProps) {
   
-    const methods = useForm<OTPFormValues>({
+    const methods = useForm<
+      z.input<typeof OTPVerificationSchema>,
+      any,
+      OTPFormValues
+    >({
       resolver: zodResolver(OTPVerificationSchema),
       defaultValues: {
-        otp: "",
+        token: "",
       },
     })
 

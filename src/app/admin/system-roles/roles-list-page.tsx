@@ -67,6 +67,7 @@ export const RolesListPage = ({
       refetch?: () => Promise<any>
       data?: any
       rolesBasePath?: string
+      readOnly?: boolean
     }>()
 
   const { data, isLoading, refetch, isError } = UseApiQuery<SubmitResponse>({

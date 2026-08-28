@@ -71,7 +71,8 @@ export const AdminMotorPostComparisonPage: React.FC<premiumPreview> = ({
         useCustomDialogContextFactory<{
             refetch?: () => Promise<any>
             data?: any
-            
+            requireRecipientEmail?: boolean
+            defaultEmail?: string
         }>()
 
     const emailComponentData = {
