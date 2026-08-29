@@ -30,7 +30,7 @@ import {
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
-import { useRef } from 'react';
+import { useRef, type RefObject } from 'react';
 import {
     CustomLoader,
     TableComponentHeadings,
@@ -291,10 +291,21 @@ export const SearchTools = ({
     advancedHandler,
     onChange,
 }: TSearchToolProps) => {
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    // X on the filter chip: wipe the search box + parent filter state
+    const handleClearFilter = () => {
+        if (inputRef.current) {
+            inputRef.current.value = '';
+        }
+        onChange('');
+        advancedHandler?.();
+    };
+
     return (
         <div className='flex gap-4 flex-wrap items-center select-none'>
-            <ProductQueryField {...{ onChange, placeholder, className }} />
-            {includeFilter && <ReusableFilterButton {...{ advancedHandler }} />}
+            <ProductQueryField {...{ onChange, placeholder, className, inputRef }} />
+            {includeFilter && <ReusableFilterButton onClear={handleClearFilter} />}
         </div>
     );
 };
@@ -303,8 +314,12 @@ export const ProductQueryField = ({
     className = 'bg-secondary border-primary',
     placeholder,
     onChange,
-}: TQueryFieldProps) => {
-    const inputRef = useRef<HTMLInputElement>(null);
+    inputRef: externalInputRef,
+}: TQueryFieldProps & {
+    inputRef?: RefObject<HTMLInputElement | null>;
+}) => {
+    const localInputRef = useRef<HTMLInputElement>(null);
+    const inputRef = externalInputRef ?? localInputRef;
     return (
         <div className='relative'>
             <Input
@@ -329,9 +344,13 @@ export const ProductQueryField = ({
     );
 };
 
-export const ReusableFilterButton = (_props: Partial<Pick<TSearchToolProps, 'advancedHandler'>>) => {
+export const ReusableFilterButton = ({
+    onClear,
+}: {
+    onClear?: () => void;
+}) => {
     return (
-        <div className='border border-gray-300 bg-gray-100 dark:bg-white/10 py-1 px-3 flex gap-2 items-center rounded-xl w-28 select-none cursor-pointer h-8'>
+        <div className='border border-gray-300 bg-gray-100 dark:bg-white/10 py-1 px-3 flex gap-2 items-center rounded-xl w-28 select-none h-8'>
             <ListFilter className='size-6' />
             <p className='font-medium text-sm leading-4 text-gray-600 dark:text-white'>Filter</p>
             <Separator
@@ -340,7 +359,14 @@ export const ReusableFilterButton = (_props: Partial<Pick<TSearchToolProps, 'adv
                     orientation: 'vertical',
                 }}
             />
-            <XIcon className='size-6' />
+            <button
+                type="button"
+                aria-label="Clear filter"
+                className="cursor-pointer"
+                onClick={onClear}
+            >
+                <XIcon className='size-6' />
+            </button>
         </div>
     );
 };

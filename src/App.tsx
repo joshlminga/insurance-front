@@ -563,6 +563,47 @@ export const router = createBrowserRouter([
           </S>
         ),
       },
+      // Payment outcomes — reuse public page components inside admin Layout
+      {
+        path: "payment/mpesa/return",
+        element: <S><MpesaReturnPage /></S>,
+      },
+      {
+        path: "payment/mpesa/success",
+        element: <S><MpesaSuccessPage /></S>,
+      },
+      {
+        path: "payment/mpesa/failed",
+        element: <S><MpesaFailedPage /></S>,
+      },
+      {
+        path: "payment/credit/return",
+        element: <S><CreditReturnPage /></S>,
+      },
+      {
+        path: "payment/credit/success",
+        element: <S><CreditSuccessPage /></S>,
+      },
+      {
+        path: "payment/credit/pending",
+        element: <S><PaymentCreditPendingPage /></S>,
+      },
+      {
+        path: "payment/credit/failed",
+        element: <S><CreditFailedPage /></S>,
+      },
+      {
+        path: "payment/paystack/return",
+        element: <S><PaystackReturnPage /></S>,
+      },
+      {
+        path: "payment/paystack/success",
+        element: <S><PaystackSuccessPage /></S>,
+      },
+      {
+        path: "payment/paystack/failed",
+        element: <S><PaystackFailedPage /></S>,
+      },
       {
         path: "quotations/motor-quotations/fetch",
         element: (

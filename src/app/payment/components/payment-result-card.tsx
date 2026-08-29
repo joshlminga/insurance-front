@@ -55,7 +55,7 @@ export const PaymentResultCard = ({
     const Icon = style.icon
 
     return (
-        <section className="w-full mx-auto bg-transparent">
+        <section className="w-full max-w-xl mx-auto mt-16 sm:mt-24 lg:mt-32 mb-10 bg-transparent">
             <div className="rounded-2xl border border-[#ADABAB]/50 bg-linear-to-b from-white to-neutral-50/90 p-4 shadow-sm sm:p-6">
                 <div className="w-full pb-2">
                     <h1 className="text-xl font-bold leading-tight tracking-tight sm:text-2xl">

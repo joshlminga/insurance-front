@@ -1,7 +1,7 @@
 import { CreditScheduleStatusPanel } from '@/app/admin/credit/components/CreditScheduleStatusPanel'
 import { PaymentResultCard } from '@/app/payment/components/payment-result-card'
-import { EROUTES } from '@/utils/enums'
 import {
+    getPaymentStatusPath,
     patchPaymentStatusSession,
     readPaymentStatusSession,
 } from '@/app/payment/payment-session'
@@ -32,7 +32,7 @@ export const CreditPendingPage: React.FC = () => {
     const goToCreditSuccess = React.useCallback(() => {
         if (redirectedRef.current) return
         redirectedRef.current = true
-        navigate(EROUTES.PAYMENT_CREDIT_SUCCESS, { replace: true })
+        navigate(getPaymentStatusPath('credit', 'success'), { replace: true })
     }, [navigate])
 
     return (

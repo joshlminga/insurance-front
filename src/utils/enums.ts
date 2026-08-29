@@ -39,6 +39,18 @@ export const EROUTES = {
   PAYMENT_PAYSTACK_RETURN: '/payment/paystack/return',
   PAYMENT_PAYSTACK_SUCCESS: '/payment/paystack/success',
   PAYMENT_PAYSTACK_FAILED: '/payment/paystack/failed',
+
+  // Admin dashboard mirrors — same pages, stay inside admin Layout
+  ADMIN_PAYMENT_MPESA_RETURN: `/${EPREFIX.DASHBOARD}/payment/mpesa/return`,
+  ADMIN_PAYMENT_MPESA_SUCCESS: `/${EPREFIX.DASHBOARD}/payment/mpesa/success`,
+  ADMIN_PAYMENT_MPESA_FAILED: `/${EPREFIX.DASHBOARD}/payment/mpesa/failed`,
+  ADMIN_PAYMENT_CREDIT_RETURN: `/${EPREFIX.DASHBOARD}/payment/credit/return`,
+  ADMIN_PAYMENT_CREDIT_SUCCESS: `/${EPREFIX.DASHBOARD}/payment/credit/success`,
+  ADMIN_PAYMENT_CREDIT_PENDING: `/${EPREFIX.DASHBOARD}/payment/credit/pending`,
+  ADMIN_PAYMENT_CREDIT_FAILED: `/${EPREFIX.DASHBOARD}/payment/credit/failed`,
+  ADMIN_PAYMENT_PAYSTACK_RETURN: `/${EPREFIX.DASHBOARD}/payment/paystack/return`,
+  ADMIN_PAYMENT_PAYSTACK_SUCCESS: `/${EPREFIX.DASHBOARD}/payment/paystack/success`,
+  ADMIN_PAYMENT_PAYSTACK_FAILED: `/${EPREFIX.DASHBOARD}/payment/paystack/failed`,
   LIFE: '/life',
   PROFILE: '/profile',
   ACCOUNTSETTINGS: '/profile/account-settings',

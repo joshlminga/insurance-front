@@ -25,13 +25,15 @@ import {
     ReuseableInput,
 } from '@/dev/core'
 import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
+import apiClient from '@/lib/api-client'
 import { cn } from '@/lib/utils'
 import { UseAuth } from '@/stores/auth-store'
 import { AdminMotorQuotationSchema } from '@/types/form-schema'
 import type { AdminMotorQuotationFormValues } from '@/types/schema'
 import type { SubmitResponse, VehicleClassItem, MotorQuoteSessionStartData, VehiclePreview } from '@/types/types'
+import { ADMIN_MOTOR_PURCHASE_PAYMENT_STEP, ADMIN_MOTOR_PURCHASE_STEP_KEY } from '@/app/payment/payment-session'
 import { EROUTES, PROFFESIONALVALUATIONCHECKBOX } from '@/utils/enums'
-import { EMETHODS, OWNERSHIPOPTIONS } from '@/utils/constatnts'
+import { ADMIN_MOTOR_QUOTE_DUPLICATE_PREFILL_KEY, EMETHODS, OWNERSHIPOPTIONS } from '@/utils/constatnts'
 import { extractErrorMessage, getInvalidVehicleRegistrationError } from '@/utils/helpers'
 import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -71,11 +73,11 @@ import {
     contactFromUser,
     persistAdminMotorCustomerContact,
     persistAdminMotorQuoteSession,
+    persistAdminMotorPurchaseStart,
     readAdminMotorDuplicatePrefill,
     readAdminMotorDuplicateSourceId,
     readAdminMotorDuplicateStartAt,
     clearAdminMotorDuplicatePrefill,
-    persistAdminMotorResumeFromDetail,
 } from '../admin-motor-session'
 
 type ProfileCountry = {
@@ -342,14 +344,20 @@ export const AdminMotorDuplicateQuotationPage = () => {
     })
 
     const appliedDuplicateRef = useRef(false)
-    const duplicatePrefill = readAdminMotorDuplicatePrefill()
+    const prefillGuardCheckedRef = useRef(false)
 
     useEffect(() => {
-        if (!duplicatePrefill?.start_quote) {
+        if (prefillGuardCheckedRef.current) {
+            return
+        }
+        prefillGuardCheckedRef.current = true
+
+        const prefill = readAdminMotorDuplicatePrefill()
+        if (!prefill?.start_quote) {
             ShowToast.error('No duplicate quotation data found. Search and duplicate a quote first.')
             navigate(EROUTES.MOTOR_QUOTATION_FETCH, { replace: true })
         }
-    }, [duplicatePrefill, navigate])
+    }, [navigate])
 
     useEffect(() => {
         if (appliedDuplicateRef.current) return
@@ -401,7 +409,8 @@ export const AdminMotorDuplicateQuotationPage = () => {
             vehicle_registration_number: sq.vehicle_registration_number ?? '',
             vehicle_value: sq.vehicle_value != null ? String(sq.vehicle_value) : '',
             valued_by_professional: Boolean(sq.valued_by_professional),
-            create_customer_account: sq.is_guest === false,
+            // Never force "create account" on duplicate — guest unless existing member user_id
+            create_customer_account: false,
         })
 
         if (sq.email || sq.first_name || sq.phone) {
@@ -488,7 +497,7 @@ export const AdminMotorDuplicateQuotationPage = () => {
         url: 'auto/quotation/motor',
         method: EMETHODS.POST,
         mutationOptions: {
-            onSuccess: (response) => {
+            onSuccess: async (response) => {
                 const session = response?.data as MotorQuoteSessionStartData | undefined
                 const quoteSessionId = Number(session?.id)
                 if (!Number.isFinite(quoteSessionId) || quoteSessionId <= 0) {
@@ -501,49 +510,78 @@ export const AdminMotorDuplicateQuotationPage = () => {
                     ...session,
                     id: quoteSessionId,
                 })
-                ShowToast.success(
-                    response?.message || 'Duplicated quotation started successfully.'
-                )
 
-                const startAt = readAdminMotorDuplicateStartAt() ?? duplicatePrefill?.start_at ?? 'quote'
+                const duplicateSnapshot = readAdminMotorDuplicatePrefill()
+                const startAt = readAdminMotorDuplicateStartAt() ?? duplicateSnapshot?.start_at ?? 'quote'
                 const sourceId = readAdminMotorDuplicateSourceId()
 
                 if (startAt === 'quote' || startAt === 'rates') {
-                    clearAdminMotorDuplicatePrefill()
+                    // Keep source id for later purchase when start_at is rates
+                    if (startAt === 'rates') {
+                        sessionStorage.removeItem(ADMIN_MOTOR_QUOTE_DUPLICATE_PREFILL_KEY)
+                    } else {
+                        clearAdminMotorDuplicatePrefill()
+                    }
+                    ShowToast.success(
+                        response?.message || 'Duplicated quotation started successfully.'
+                    )
                     navigate(EROUTES.MOTOR_QUOTATION_RESULTS)
                     return
                 }
 
-                if (duplicatePrefill && sourceId) {
-                    const detailLike = {
-                        session: {
-                            id: quoteSessionId,
-                            quote_code: session?.quote_code,
-                            customer_type: session?.customer_type,
-                            customer_id: session?.customer_id ?? null,
-                        },
-                        last_ended_stage: startAt,
-                        customer: {
-                            type: session?.is_guest ? 'guest' : session?.customer_type,
-                        },
-                        selected_cover: duplicatePrefill.rates
-                            ? {
-                                purchase_id: duplicatePrefill.rates.purchase_id,
-                                product_id: duplicatePrefill.rates.product_id,
-                                rate_id: duplicatePrefill.rates.rate_id,
-                            }
-                            : null,
-                        cover: { ownership: duplicatePrefill.start_quote?.ownership },
-                        invoices: duplicatePrefill.payment?.invoices,
-                    }
-                    persistAdminMotorResumeFromDetail(detailLike as import('@/types/types').MotorQuoteFetchDetail)
+                const productId = duplicateSnapshot?.rates?.product_id
+                const rateId = duplicateSnapshot?.rates?.rate_id
+                if (productId == null || rateId == null) {
                     clearAdminMotorDuplicatePrefill()
-                    navigate(EROUTES.MOTOR_QUOTATION_PURCHASE)
+                    ShowToast.success(
+                        response?.message || 'Duplicated quotation started successfully.'
+                    )
+                    navigate(EROUTES.MOTOR_QUOTATION_RESULTS)
                     return
                 }
 
-                clearAdminMotorDuplicatePrefill()
-                navigate(EROUTES.MOTOR_QUOTATION_RESULTS)
+                try {
+                    const purchaseResponse = await apiClient.post<SubmitResponse>(
+                        `purchase/motor/${quoteSessionId}`,
+                        {
+                            product_id: productId,
+                            rate_id: rateId,
+                            ...(sourceId ? { quote_duplicate: sourceId } : {}),
+                        }
+                    )
+                    const purchaseData = purchaseResponse.data?.data as
+                        | {
+                              purchase_id?: number | string
+                              vehicle_info?: unknown
+                              ownership?: unknown
+                          }
+                        | undefined
+                    const purchaseId = purchaseData?.purchase_id
+                    if (purchaseId === undefined) {
+                        ShowToast.error('Purchase could not be started for duplicate.')
+                        return
+                    }
+                    persistAdminMotorPurchaseStart({
+                        purchaseId,
+                        vehicleInfo: purchaseData?.vehicle_info,
+                        ownership:
+                            purchaseData?.ownership ??
+                            duplicateSnapshot?.start_quote?.ownership,
+                    })
+                    if (startAt === 'payment') {
+                        sessionStorage.setItem(
+                            ADMIN_MOTOR_PURCHASE_STEP_KEY,
+                            String(ADMIN_MOTOR_PURCHASE_PAYMENT_STEP)
+                        )
+                    }
+                    clearAdminMotorDuplicatePrefill()
+                    ShowToast.success(
+                        response?.message || 'Duplicated quotation ready at ' + startAt
+                    )
+                    navigate(EROUTES.MOTOR_QUOTATION_PURCHASE)
+                } catch (error) {
+                    ShowToast.error(extractErrorMessage(error) || 'Failed to open purchase for duplicate')
+                }
             },
             onError: (error) => {
                 const invalidRegistration = getInvalidVehicleRegistrationError(error)
@@ -578,7 +616,8 @@ export const AdminMotorDuplicateQuotationPage = () => {
                 }
         )
         const payload = buildMotorQuotationPayload({
-            data,
+            // Duplicate never creates a member account — guest unless user_id already set
+            data: { ...data, create_customer_account: false },
             profileCountryId: profileCountry?.id,
             dialCode,
         })

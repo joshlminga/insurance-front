@@ -6,6 +6,7 @@ import {
     readPaymentStatusSession,
 } from '@/app/payment/payment-session'
 import { interpretCreditScheduleStatus, readCreditSchedule } from '@/app/payment/payment-status'
+import { usePreferAdminPaymentReturn } from '@/app/payment/use-prefer-admin-payment-return'
 import { UseApiQuery } from '@/hooks/hooks'
 import type { SubmitResponse } from '@/types/types'
 import React from 'react'
@@ -18,6 +19,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 export const CreditReturnPage: React.FC = () => {
     const navigate = useNavigate()
     const [searchParams] = useSearchParams()
+    const layoutReady = usePreferAdminPaymentReturn('credit')
     const [invoiceId] = React.useState(() => {
         const fromQuery = searchParams.get('invoice_id')?.trim()
         const fromSession = readPaymentStatusSession()?.invoiceId
@@ -27,12 +29,14 @@ export const CreditReturnPage: React.FC = () => {
     const scheduleQuery = UseApiQuery<SubmitResponse>({
         url: CREDIT_URLS.invoiceSchedule(invoiceId),
         queryOptions: {
-            enabled: Boolean(invoiceId),
+            enabled: layoutReady && Boolean(invoiceId),
             retry: 1,
         },
     })
 
     React.useEffect(() => {
+        if (!layoutReady) return
+
         if (!invoiceId) {
             navigate(getPaymentStatusPath('credit', 'failed'), { replace: true })
             return
@@ -64,6 +68,7 @@ export const CreditReturnPage: React.FC = () => {
         navigate(getPaymentStatusPath('credit', 'failed'), { replace: true })
     }, [
         invoiceId,
+        layoutReady,
         navigate,
         scheduleQuery.data,
         scheduleQuery.isError,

@@ -210,6 +210,8 @@ export type MotorQuoteFetchListRow = {
   current_step?: number
   last_completed_step?: number | null
   last_ended_stage?: MotorQuoteLastEndedStage
+  /** True when API allows cancel (unpaid + cancelable status). */
+  can_cancel?: boolean
   started_at?: string | null
   last_activity_at?: string | null
   created_at?: string | null

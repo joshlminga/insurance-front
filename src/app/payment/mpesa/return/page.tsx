@@ -1,6 +1,7 @@
 import { PaymentChecking } from '@/app/payment/components/payment-checking'
 import { getPaymentStatusPath, patchPaymentStatusSession, readPaymentStatusSession } from '@/app/payment/payment-session'
 import { interpretMpesaStatus } from '@/app/payment/payment-status'
+import { usePreferAdminPaymentReturn } from '@/app/payment/use-prefer-admin-payment-return'
 import { UseApiQuery } from '@/hooks/hooks'
 import type { MpesaPollResponse } from '@/types/types'
 import React from 'react'
@@ -9,11 +10,12 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 /**
  * Gateway / poll callback for M-Pesa.
  * Reads checkout_request_id from the URL (or session), asks the API once, then
- * sends the user to /payment/mpesa/success or /failed.
+ * sends the user to success or failed (admin or public path from session flow).
  */
 export const MpesaReturnPage: React.FC = () => {
     const navigate = useNavigate()
     const [searchParams] = useSearchParams()
+    const layoutReady = usePreferAdminPaymentReturn('mpesa')
     const [checkoutRequestId] = React.useState(() => {
         const fromQuery =
             searchParams.get('checkout_request_id') ||
@@ -26,12 +28,14 @@ export const MpesaReturnPage: React.FC = () => {
         url: 'mpesa/status',
         params: checkoutRequestId ? { checkout_request_id: checkoutRequestId } : undefined,
         queryOptions: {
-            enabled: Boolean(checkoutRequestId),
+            enabled: layoutReady && Boolean(checkoutRequestId),
             retry: 1,
         },
     })
 
     React.useEffect(() => {
+        if (!layoutReady) return
+
         if (!checkoutRequestId) {
             navigate(getPaymentStatusPath('mpesa', 'failed'), { replace: true })
             return
@@ -52,6 +56,7 @@ export const MpesaReturnPage: React.FC = () => {
         })
     }, [
         checkoutRequestId,
+        layoutReady,
         navigate,
         statusQuery.data,
         statusQuery.isError,

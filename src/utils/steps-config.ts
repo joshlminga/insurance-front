@@ -14,7 +14,6 @@ import { CardsTabPage } from "@/app/customer/motor/steppers/payment-tabs/card";
 import { CashTabPage } from "@/app/customer/motor/steppers/payment-tabs/cash";
 import { CreditTabPage } from "@/app/customer/motor/steppers/payment-tabs/credit";
 import { MpesaPageTab } from "@/app/customer/motor/steppers/payment-tabs/mpesa";
-import { PaypalTabPage } from "@/app/customer/motor/steppers/payment-tabs/paypal";
 import { QuotationsPage } from "@/app/customer/motor/steppers/quotations";
 import { SuccessPurchase } from "@/app/customer/motor/steppers/success-purchase";
 import { VehicleDetailsPage } from "@/app/customer/motor/steppers/vehicle-details";
@@ -131,11 +130,7 @@ export const EPAYMENTTABS = [
         image: '/visamastercard.png',
         component: CardsTabPage,
     },
-    {
-        value: "paypal",
-        image: '/paypal.png',
-        component: PaypalTabPage,
-    },
+    // PayPal hidden for now — restore entry + PaypalTabPage import to re-enable
     {
         value: "credit",
         image: '/paycredit.png',

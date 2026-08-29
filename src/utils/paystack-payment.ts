@@ -1,8 +1,15 @@
 import { EROUTES } from './enums'
+import { getPaymentReturnPath } from '@/app/payment/payment-session'
 
 const PAYSTACK_INLINE_SCRIPT = 'https://js.paystack.co/v2/inline.js'
 
+/** Public default; prefer getPaystackReturnRoute() when flow may be admin. */
 export const PAYSTACK_RETURN_ROUTE = EROUTES.PAYMENT_PAYSTACK_RETURN
+
+/** Admin vs public Paystack return/checking URL from payment session flow. */
+export function getPaystackReturnRoute(): string {
+  return getPaymentReturnPath('paystack')
+}
 
 type PaystackPopupCallbacks = {
   onSuccess?: (transaction?: { reference?: string }) => void

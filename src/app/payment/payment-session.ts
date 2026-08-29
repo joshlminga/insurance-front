@@ -57,13 +57,39 @@ export function patchPaymentStatusSession(partial: Partial<PaymentStatusSession>
 }
 
 export function getPaymentStatusPath(method: PaymentMethodKey, outcome: PaymentOutcome): string {
-    if (method === 'mpesa' && outcome === 'success') return EROUTES.PAYMENT_MPESA_SUCCESS
-    if (method === 'mpesa' && outcome === 'failed') return EROUTES.PAYMENT_MPESA_FAILED
-    if (method === 'credit' && outcome === 'success') return EROUTES.PAYMENT_CREDIT_SUCCESS
-    if (method === 'credit' && outcome === 'pending') return EROUTES.PAYMENT_CREDIT_PENDING
-    if (method === 'credit' && outcome === 'failed') return EROUTES.PAYMENT_CREDIT_FAILED
-    if (method === 'paystack' && outcome === 'success') return EROUTES.PAYMENT_PAYSTACK_SUCCESS
-    return EROUTES.PAYMENT_PAYSTACK_FAILED
+    const isAdmin = readPaymentStatusSession()?.flow === 'admin'
+
+    if (method === 'mpesa' && outcome === 'success') {
+        return isAdmin ? EROUTES.ADMIN_PAYMENT_MPESA_SUCCESS : EROUTES.PAYMENT_MPESA_SUCCESS
+    }
+    if (method === 'mpesa' && outcome === 'failed') {
+        return isAdmin ? EROUTES.ADMIN_PAYMENT_MPESA_FAILED : EROUTES.PAYMENT_MPESA_FAILED
+    }
+    if (method === 'credit' && outcome === 'success') {
+        return isAdmin ? EROUTES.ADMIN_PAYMENT_CREDIT_SUCCESS : EROUTES.PAYMENT_CREDIT_SUCCESS
+    }
+    if (method === 'credit' && outcome === 'pending') {
+        return isAdmin ? EROUTES.ADMIN_PAYMENT_CREDIT_PENDING : EROUTES.PAYMENT_CREDIT_PENDING
+    }
+    if (method === 'credit' && outcome === 'failed') {
+        return isAdmin ? EROUTES.ADMIN_PAYMENT_CREDIT_FAILED : EROUTES.PAYMENT_CREDIT_FAILED
+    }
+    if (method === 'paystack' && outcome === 'success') {
+        return isAdmin ? EROUTES.ADMIN_PAYMENT_PAYSTACK_SUCCESS : EROUTES.PAYMENT_PAYSTACK_SUCCESS
+    }
+    return isAdmin ? EROUTES.ADMIN_PAYMENT_PAYSTACK_FAILED : EROUTES.PAYMENT_PAYSTACK_FAILED
+}
+
+/** Return/checking page for a method — admin stays under dashboard Layout. */
+export function getPaymentReturnPath(method: PaymentMethodKey): string {
+    const isAdmin = readPaymentStatusSession()?.flow === 'admin'
+    if (method === 'mpesa') {
+        return isAdmin ? EROUTES.ADMIN_PAYMENT_MPESA_RETURN : EROUTES.PAYMENT_MPESA_RETURN
+    }
+    if (method === 'credit') {
+        return isAdmin ? EROUTES.ADMIN_PAYMENT_CREDIT_RETURN : EROUTES.PAYMENT_CREDIT_RETURN
+    }
+    return isAdmin ? EROUTES.ADMIN_PAYMENT_PAYSTACK_RETURN : EROUTES.PAYMENT_PAYSTACK_RETURN
 }
 
 /** URL of the payment step the user came from (Try again). */

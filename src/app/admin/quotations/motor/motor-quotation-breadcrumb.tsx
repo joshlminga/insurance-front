@@ -18,6 +18,10 @@ import {
 } from '@/components/ui/breadcrumb'
 import { ADMIN_MOTOR_PURCHASE_STEP_KEY } from '@/app/payment/payment-session'
 import { EROUTES, EPREFIX } from '@/utils/enums'
+import {
+  CONFIRMATION_DIALOG_CANCEL_CLASSES,
+  CONFIRMATION_DIALOG_CONFIRM_CLASSES,
+} from '@/utils/constatnts'
 import { extractErrorMessage } from '@/utils/helpers'
 import { ShowToast } from '@/utils/utils'
 import apiClient from '@/lib/api-client'
@@ -28,11 +32,12 @@ import type {
 } from '@/types/types'
 import { Fragment, useMemo, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { UseAuth } from '@/stores/auth-store'
 import {
   clearAdminMotorActiveSession,
-  persistAdminMotorDuplicatePrefill,
   readAdminMotorQuoteSession,
 } from './admin-motor-session'
+import { continueAdminMotorDuplicateFlow } from './continue-duplicate-flow'
 
 type MotorStage = 'quote' | 'rates' | 'kyc' | 'payment'
 
@@ -96,22 +101,6 @@ function startAtForStage(stage: MotorStage): MotorQuoteDuplicateStartAt {
   if (stage === 'rates') return 'rates'
   if (stage === 'kyc') return 'kyc'
   return 'payment'
-}
-
-function navigateAfterDuplicate(
-  navigate: ReturnType<typeof useNavigate>,
-  payload: MotorQuoteDuplicatePayload
-): void {
-  const startAt = payload.start_at
-  if (startAt === 'quote') {
-    navigate(EROUTES.MOTOR_QUOTATION_DUPLICATE)
-    return
-  }
-  if (startAt === 'rates') {
-    navigate(EROUTES.MOTOR_QUOTATION_RESULTS)
-    return
-  }
-  navigate(EROUTES.MOTOR_QUOTATION_PURCHASE)
 }
 
 type BreadcrumbSegment = {
@@ -189,11 +178,10 @@ function buildMotorSegments(pathname: string): BreadcrumbSegment[] {
   return segments
 }
 
-type BackNavAction = 'cancel' | 'duplicate' | 'duplicate-cancel'
-
 export function MotorQuotationBreadcrumb() {
   const location = useLocation()
   const navigate = useNavigate()
+  const { user } = UseAuth()
   const pathname = location.pathname
 
   const [pendingNav, setPendingNav] = useState<{
@@ -223,7 +211,8 @@ export function MotorQuotationBreadcrumb() {
     setPendingNav({ href: segment.href, targetStage })
   }
 
-  const runBackNavigation = async (action: BackNavAction) => {
+  // "Yes Go back" = cancel the current quote and open a duplicate at the target step
+  const runCancelAndDuplicate = async () => {
     if (!pendingNav || !activeSession?.quoteSessionId) return
 
     setIsSubmitting(true)
@@ -231,23 +220,10 @@ export function MotorQuotationBreadcrumb() {
     const startAt = startAtForStage(pendingNav.targetStage)
 
     try {
-      if (action === 'cancel') {
-        await apiClient.post(`quotation/motor/fetch/${sessionId}/cancel`)
-        clearAdminMotorActiveSession({ clearDuplicatePrefill: true })
-        ShowToast.success('Quotation cancelled')
-        setPendingNav(null)
-        navigate(pendingNav.href)
-        return
-      }
-
-      const endpoint =
-        action === 'duplicate-cancel'
-          ? `quotation/motor/fetch/${sessionId}/duplicate-cancel`
-          : `quotation/motor/fetch/${sessionId}/duplicate`
-
-      const response = await apiClient.post<SubmitResponse>(endpoint, {
-        start_at: startAt,
-      })
+      const response = await apiClient.post<SubmitResponse>(
+        `quotation/motor/fetch/${sessionId}/duplicate-cancel`,
+        { start_at: startAt }
+      )
 
       const payload = response.data?.data as MotorQuoteDuplicatePayload
       if (!payload?.start_quote) {
@@ -255,15 +231,11 @@ export function MotorQuotationBreadcrumb() {
         return
       }
 
-      persistAdminMotorDuplicatePrefill(payload)
       clearAdminMotorActiveSession()
-      ShowToast.success(
-        action === 'duplicate-cancel'
-          ? 'Previous quote cancelled — duplicate ready'
-          : 'Duplicate payload ready'
-      )
+      const result = await continueAdminMotorDuplicateFlow(payload, user)
+      ShowToast.success('Previous quote cancelled — duplicate ready')
       setPendingNav(null)
-      navigateAfterDuplicate(navigate, payload)
+      navigate(result.route)
     } catch (error) {
       ShowToast.error(extractErrorMessage(error) || 'Action failed')
     } finally {
@@ -306,47 +278,39 @@ export function MotorQuotationBreadcrumb() {
           if (!open && !isSubmitting) setPendingNav(null)
         }}
       >
+        {/* Keep fixed centering — do not add `relative` (it overrides `fixed` via twMerge) */}
         <AlertDialogContent size="sm" className="sm:max-w-md">
           <AlertDialogHeader>
             <AlertDialogTitle>Leave this quotation step?</AlertDialogTitle>
             <AlertDialogDescription>
-              You have an active motor quotation. Choose how to go back to{' '}
+              You have an active motor quotation. Going back to{' '}
               <span className="font-semibold text-foreground">
                 {pendingNav ? STAGE_LABEL[pendingNav.targetStage] : 'the previous step'}
-              </span>
-              .
+              </span>{' '}
+              will take you back steps behind.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="flex-col gap-2 sm:flex-col sm:space-x-0">
-            <AlertDialogAction
-              className="w-full rounded-full bg-[#C20C0C] hover:bg-[#C20C0C]/90"
-              disabled={isSubmitting}
-              onClick={(event) => {
-                event.preventDefault()
-                void runBackNavigation('duplicate-cancel')
-              }}
-            >
-              Duplicate and cancel previous
-            </AlertDialogAction>
-            <AlertDialogAction
-              className="w-full rounded-full"
-              disabled={isSubmitting}
-              onClick={(event) => {
-                event.preventDefault()
-                void runBackNavigation('duplicate')
-              }}
-            >
-              Duplicate
-            </AlertDialogAction>
+
+          {/* Same layout/colors as ConfirmationDialog in payment-options */}
+          <AlertDialogFooter>
             <AlertDialogCancel
+              variant="ghost"
+              disabled={isSubmitting}
+              className={CONFIRMATION_DIALOG_CANCEL_CLASSES}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              className={CONFIRMATION_DIALOG_CONFIRM_CLASSES}
               disabled={isSubmitting}
               onClick={(event) => {
                 event.preventDefault()
-                void runBackNavigation('cancel')
+                void runCancelAndDuplicate()
               }}
             >
-              Cancel fetched quotation
-            </AlertDialogCancel>
+              {isSubmitting ? 'Processing...' : 'Yes Go back'}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

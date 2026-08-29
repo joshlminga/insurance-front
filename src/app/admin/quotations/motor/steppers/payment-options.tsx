@@ -41,8 +41,7 @@ import { usePesapalPaymentFlow } from '@/hooks/use-pesapal-payment-flow'
 import { usePaystackPaymentFlow } from '@/hooks/use-paystack-payment-flow'
 import { submitMotorCreditPayment } from '@/app/admin/credit/credit-payment'
 import { CreditPendingBanner } from '@/app/admin/credit/components/CreditPendingBanner'
-import { storePaymentStatusSession } from '@/app/payment/payment-session'
-import { EROUTES } from '@/utils/enums'
+import { getPaymentStatusPath, storePaymentStatusSession } from '@/app/payment/payment-session'
 import type { AdminMotorStepProps } from '../admin-step-props'
 import { readAdminMotorCustomerContact } from '../admin-motor-session'
 import { useNavigate } from 'react-router-dom'
@@ -285,7 +284,7 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
                         invoiceId,
                     })
                     ShowToast.success(result.message)
-                    navigate(`${EROUTES.PAYMENT_CREDIT_PENDING}?invoice_id=${encodeURIComponent(invoiceId)}`)
+                    navigate(`${getPaymentStatusPath('credit', 'pending')}?invoice_id=${encodeURIComponent(invoiceId)}`)
                     return
                 }
                 if (result.kind === 'validation_error') {
@@ -293,10 +292,10 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
                     return
                 }
                 ShowToast.success(result.message || 'Credit payment submitted successfully')
-                navigate(EROUTES.PAYMENT_CREDIT_SUCCESS)
+                navigate(getPaymentStatusPath('credit', 'success'))
             } catch (error) {
                 ShowToast.error(extractErrorMessage(error))
-                navigate(EROUTES.PAYMENT_CREDIT_FAILED)
+                navigate(getPaymentStatusPath('credit', 'failed'))
             } finally {
                 setIsCreditSubmitting(false)
             }

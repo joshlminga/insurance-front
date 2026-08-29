@@ -1,6 +1,7 @@
 import { PaymentChecking } from '@/app/payment/components/payment-checking'
 import { getPaymentStatusPath, patchPaymentStatusSession } from '@/app/payment/payment-session'
 import { interpretPaystackStatus, readPaystackSettlementId } from '@/app/payment/payment-status'
+import { usePreferAdminPaymentReturn } from '@/app/payment/use-prefer-admin-payment-return'
 import { UseApiQuery } from '@/hooks/hooks'
 import type { PaystackPollResponse } from '@/types/types'
 import { POLL_INTERVAL_MS, POLL_TIMEOUT_MS } from '@/utils/constatnts'
@@ -19,6 +20,7 @@ function creditSettlementPath(id: number): string {
 export const PaystackReturnPage: React.FC = () => {
     const navigate = useNavigate()
     const [searchParams] = useSearchParams()
+    const layoutReady = usePreferAdminPaymentReturn('paystack')
     const [reference] = React.useState(() => {
         const fromQuery =
             searchParams.get('reference') ||
@@ -30,17 +32,17 @@ export const PaystackReturnPage: React.FC = () => {
     const [timedOut, setTimedOut] = React.useState(false)
 
     React.useEffect(() => {
-        if (!reference) return
+        if (!layoutReady || !reference) return
         patchPaymentStatusSession({ reference })
         const timeoutId = window.setTimeout(() => setTimedOut(true), POLL_TIMEOUT_MS)
         return () => window.clearTimeout(timeoutId)
-    }, [reference])
+    }, [layoutReady, reference])
 
     const statusQuery = UseApiQuery<PaystackPollResponse>({
         url: 'paystack/status',
         params: reference ? { reference } : undefined,
         queryOptions: {
-            enabled: Boolean(reference) && !timedOut,
+            enabled: layoutReady && Boolean(reference) && !timedOut,
             retry: 1,
             refetchInterval: POLL_INTERVAL_MS,
             refetchIntervalInBackground: true,
@@ -48,6 +50,8 @@ export const PaystackReturnPage: React.FC = () => {
     })
 
     React.useEffect(() => {
+        if (!layoutReady) return
+
         if (!reference) {
             navigate(getPaymentStatusPath('paystack', 'failed'), { replace: true })
             return
@@ -88,6 +92,7 @@ export const PaystackReturnPage: React.FC = () => {
             navigate(getPaymentStatusPath('paystack', 'failed'), { replace: true })
         }
     }, [
+        layoutReady,
         navigate,
         reference,
         statusQuery.data,
