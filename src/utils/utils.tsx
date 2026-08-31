@@ -89,3 +89,6 @@ export const ShowToast = {
     })
   },
 }
+
+export const invalidSelectClassName = "data-[invalid=true]:[&_[data-slot=select-trigger]]:border-red-500 data-[invalid=true]:[&_[data-slot=select-trigger]]:focus:ring-red-500"
+export const SIDEBAR_LAYOUT_QUERY = '(min-width: 1280px)'

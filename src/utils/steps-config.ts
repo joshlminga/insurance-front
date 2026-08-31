@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 
 import { MarineCustomerVerificationDetails } from "@/app/customer/marine/steppers/capture-details";
 import { MarineDetailsPage } from "@/app/customer/marine/steppers/marine-details";
@@ -17,6 +18,14 @@ import { MpesaPageTab } from "@/app/customer/motor/steppers/payment-tabs/mpesa";
 import { QuotationsPage } from "@/app/customer/motor/steppers/quotations";
 import { SuccessPurchase } from "@/app/customer/motor/steppers/success-purchase";
 import { VehicleDetailsPage } from "@/app/customer/motor/steppers/vehicle-details";
+import {  CustomerVerificationPage } from "@/app/customer/travel/steppers/customer-details";
+import { TravellerDestinationDetailsPage } from "@/app/customer/travel/steppers/destination-details";
+import { TravelKycDetailsPage } from "@/app/customer/travel/steppers/kyc-details";
+import OTPTravelVerificationPage from "@/app/customer/travel/steppers/otp-verification";
+import { TravelQuotationsPage } from "@/app/customer/travel/steppers/quotations";
+import { TravelInvoicesPage } from "@/app/customer/travel/steppers/travel-invoices";
+import { TravelPaymentOptionsPage } from "@/app/customer/travel/steppers/travel-payment-options";
+import { TravellerDetailsPage } from "@/app/customer/travel/steppers/traveller-details";
 import { ArrowUpToLine, Download } from "lucide-react";
 
 export const getMotorSteps = (isAuthenticated: boolean) => {
@@ -62,7 +71,6 @@ export const getMotorSteps = (isAuthenticated: boolean) => {
             content: SuccessPurchase,
         },
     ]
-    
     return isAuthenticated ? allSteps.slice(2) : allSteps
 }
 
@@ -101,6 +109,59 @@ export const EMARINESTEPS = [
         content: SuccessPurchase,
     },
 ]
+
+
+export const getTravelSteps = (isAuthenticated: boolean) => {
+    const allSteps = [
+        {
+            disabled: true,
+            title: "",
+            content: CustomerVerificationPage,
+        },
+        {
+            disabled: true,
+            title: "",
+            content: OTPTravelVerificationPage,
+        },
+        {
+            disabled: true,
+            title: "",
+            content: TravellerDetailsPage,
+        },
+        {
+            disabled: false,
+            title: "",
+            content: TravellerDestinationDetailsPage,
+        },
+        {
+            disabled: false,
+            title: "",
+            content: TravelQuotationsPage,
+        },
+        {
+            disabled: false,
+            title: "",
+            content: TravelKycDetailsPage,
+        },
+        {
+            disabled: false,
+            title: "",
+            content: TravelInvoicesPage,
+        },
+        {
+            disabled: false,
+            title: "",
+            content: TravelPaymentOptionsPage,
+        },
+        {
+            disabled: false,
+            title: "",
+            content: SuccessPurchase,
+        },
+    ]
+    return allSteps
+    // return isAuthenticated ? allSteps.slice(2) : allSteps
+}
 
 export const EMARINETABS = [
     {

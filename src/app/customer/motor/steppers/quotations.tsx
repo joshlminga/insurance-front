@@ -45,7 +45,7 @@ import {
 import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
 import { formatCurrency } from '@/lib/format'
 import { serializeMotorPremiumParams } from '@/lib/motor-premium-params'
-import { ShowToast } from '@/utils/utils'
+import { ShowToast, SIDEBAR_LAYOUT_QUERY } from '@/utils/utils'
 import {
     benefitGroupFormKey,
     benefitIdsEqual,
@@ -64,9 +64,6 @@ import {
     SheetHeader,
     SheetTitle,
 } from '@/components/ui/sheet'
-
-/** Sidebar + inline filters from xl up; Nest Hub / Hub Max use sheet + full-width cards below this. */
-const SIDEBAR_LAYOUT_QUERY = '(min-width: 1280px)'
 
 export function QuotationFiltersPanel({
     idPrefix = 'quotation',

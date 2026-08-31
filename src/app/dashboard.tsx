@@ -17,115 +17,21 @@ import {
 import { formatCurrency, formatDate, parseMoneyString } from "@/lib/format"
 import { StatusBadge } from "@/components/shared/status-badge"
 import { Link } from "react-router-dom"
-import { UseApiQuery } from "@/hooks/hooks"
-import { REPORT_URLS, motorDashboardKey } from "@/app/admin/reports/reports-query"
-import type { SubmitResponse } from "@/types/types"
-import type { MotorDashboardReport } from "@/types/dashboard-report"
-import { EROUTES } from "@/utils/enums"
-
-const EMPTY_LIST_MESSAGE = "No available data"
-const NA = "N/A"
-
-/** Count → string; missing/unavailable → N/A. Zero is valid. */
-function displayCount(value: number | null | undefined): string {
-  if (value === null || value === undefined || Number.isNaN(value)) {
-    return NA
-  }
-  return value.toLocaleString()
-}
-
-/** Money string from API → currency; missing → N/A. */
-function displayMoney(value: string | number | null | undefined): string {
-  if (value === null || value === undefined || value === "") {
-    return NA
-  }
-  return formatCurrency(parseMoneyString(value))
-}
-
-/** Turn API event_type like "quote.started" into a short title */
-function notificationTitle(eventType: string): string {
-  return eventType
-    .split(".")
-    .map((part) => part.replace(/_/g, " "))
-    .join(" · ")
-}
-
-function resolveErrorMessage(
-  error: unknown,
-  fallbackMessage?: string
-): string {
-  const err = error as {
-    response?: { data?: { message?: string } }
-    message?: string
-  }
-  return (
-    err?.response?.data?.message ??
-    err?.message ??
-    fallbackMessage ??
-    "Could not load dashboard report."
-  )
-}
+import { currentDateTime } from "@/utils/helpers"
 
 export default function DashboardPage() {
-  const params = { per_page: 10 }
-
-  // One call loads all dashboard KPIs + limited lists for the current org location
-  const { data, isLoading, isError, error } = UseApiQuery<SubmitResponse>({
-    url: REPORT_URLS.dashboard,
-    queryKey: motorDashboardKey(params),
-    params,
-  })
-
-  // Treat loading / error / missing payload as "unavailable" → N/A & empty lists
-  const report =
-    !isLoading && !isError && data?.data
-      ? (data.data as MotorDashboardReport)
-      : null
-  const summary = report?.summary
-  const period = report?.period
-
-  const pendingQuotations = report?.pending_quotations
-  const pendingInstallments = report?.pending_installments
-  const notifications = report?.recent_notifications
-  const failedCertificates = report?.failed_certificates
-  const certificatesTotal = report?.certificates?.total
-
-  const quotationItems = pendingQuotations?.items ?? []
-  const installmentItems = pendingInstallments?.items ?? []
-  const notificationItems = notifications?.items ?? []
-
-  const currentDateTime = new Intl.DateTimeFormat("en-KE", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    timeZone: "Africa/Nairobi",
-  }).format(new Date())
-
-  const periodLabel =
-    period != null
-      ? `${period.date_from} → ${period.date_to}`
-      : isLoading
-        ? "loading…"
-        : "current month"
-
-  const errorMessage = isError
-    ? resolveErrorMessage(error, data?.message)
-    : null
+  const recentLoanApplications = loanApplications
+    .filter((l) => ["submitted", "under_review"].includes(l.status))
+    .slice(0, 5)
+  const recentTransactions = transactions.slice(0, 5)
+  const unreadNotifications = notifications.filter((n) => !n.isRead).slice(0, 4)
 
   return (
     <>
       <PageHeader
-        title={`Marketplace Dashboard • ${currentDateTime}`}
-        description={`Overview for this location. Period for premium & quotations: ${periodLabel}`}
+        title="Dashboard"
+        description={`Welcome back • ${currentDateTime}`}
       />
-
-      {errorMessage ? (
-        <p className="text-sm text-destructive rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2">
-          {errorMessage}
-        </p>
-      ) : null}
-
       <StatsGrid columns={4}>
         <StatsCard
           title="Total Policyholders"
@@ -159,7 +65,7 @@ export default function DashboardPage() {
 
       {/* Period summary row */}
       <div className="grid gap-4 md:grid-cols-3">
-        <Card className="py-4">
+        <Card className="py-4 shadow-none">
           <CardContent className="flex items-center gap-4">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
               <ArrowDownRight className="h-5 w-5 text-green-600 dark:text-green-400" />
@@ -172,7 +78,7 @@ export default function DashboardPage() {
             </div>
           </CardContent>
         </Card>
-        <Card className="py-4">
+        <Card className="py-4 shadow-none">
           <CardContent className="flex items-center gap-4">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 dark:bg-red-900">
               <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
@@ -185,7 +91,7 @@ export default function DashboardPage() {
             </div>
           </CardContent>
         </Card>
-        <Card className="py-4">
+        <Card className="py-4 shadow-none">
           <CardContent className="flex items-center gap-4">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900">
               <ShieldCheck className="h-5 w-5 text-blue-600 dark:text-blue-400" />
@@ -201,8 +107,8 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        {/* Pending quotations */}
-        <Card>
+        {/* Pending Policy Applications */}
+        <Card className="shadow-none">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-base font-medium">
               Pending Quotations
@@ -248,8 +154,8 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Pending installments */}
-        <Card>
+        {/* Recent Transactions */}
+        <Card className="shadow-none">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-base font-medium">
               Pending Installments
@@ -308,8 +214,8 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Recent notifications */}
-        <Card>
+        {/* Notifications */}
+        <Card className="shadow-none">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-base font-medium">
               Recent Notifications
@@ -352,7 +258,7 @@ export default function DashboardPage() {
         </Card>
 
         {/* Quick Actions */}
-        <Card>
+        <Card className="shadow-none">
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-medium">Quick Actions</CardTitle>
           </CardHeader>

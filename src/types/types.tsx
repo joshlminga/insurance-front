@@ -1276,6 +1276,7 @@ export type QuotationFiltersPanelProps = {
     priceRange: number[]
     onPriceRangeChange: (value: number[]) => void
     className?: string
+   [key: string]: any;
 }
 
 export type BoxHeaderProps = {

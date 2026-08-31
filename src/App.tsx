@@ -48,6 +48,10 @@ const CustomerCoversPage = lazy(() => import("./app/customer/profile-settings/co
 const CustomerPaymentHistoryPage = lazy(() => import("./app/customer/profile-settings/payment-history").then(m => ({ default: m.PaymentHistoryPage })))
 const CustomerSingleCustomerCoversPage = lazy(() => import("./app/customer/profile-settings/[id]/cover[id]").then(m => ({ default: m.SingleCoverPage })))
 
+// travel
+const TravelLandingPage = lazy(() => import("./app/customer/travel/page").then(m => ({ default: m.TravelLandingPage })))
+const TravelStepPage = lazy(() => import("./app/customer/travel/steppers/index").then(m => ({ default: m.TravelStepPage })))
+
 
 // Auth pages
 const AuthLayoutPage = lazy(() => import("./auth/layout"))
@@ -194,6 +198,22 @@ export const router = createBrowserRouter([
       {
         path: EROUTES.MOTOR.slice(1),
         element: <S><StepPage /></S>,
+      },
+    ],
+  },
+
+  // travel
+  {
+    path: EPREFIX.CUSTOMER,
+    element: (
+      <CustomerPublicRoute>
+        <S><TravelLandingPage/></S>
+      </CustomerPublicRoute>
+    ),
+    children: [
+      {
+        path: EROUTES.TRAVEL.slice(1),
+        element: <S><TravelStepPage /></S>,
       },
     ],
   },

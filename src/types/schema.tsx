@@ -52,6 +52,10 @@ import {
     CreateSettlementSchema,
     ParameterSchema,
     CreditTransactionSchema,
+    TravellerDetailsSchema,
+    OutBoundDestinationSchema,
+    InBoundDestinationSchema,
+    TravelKycSchema,
 } from "./form-schema";
 
 export type CustomerFormValues = z.infer<typeof CustomerDetailsSchema>
@@ -134,4 +138,9 @@ export type CreateSettlementFormValues = z.infer<typeof CreateSettlementSchema>
 
 export type ParameterFormValues = z.infer<typeof ParameterSchema>
 export type CreditTransactionForm = z.infer<typeof CreditTransactionSchema>
-// export type PoolSettingsSchemaForm = z.infer<typeof PoolSettingsSchema>
+
+export type TravellerFormValues = z.infer<typeof TravellerDetailsSchema>
+export type OutboundFormValues = z.infer<typeof OutBoundDestinationSchema>
+export type InboundFormValues = z.infer<typeof InBoundDestinationSchema>
+export type TravelKycFormValues = z.infer<typeof TravelKycSchema>
+

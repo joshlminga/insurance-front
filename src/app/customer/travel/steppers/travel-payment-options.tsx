@@ -1,57 +1,32 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { CreditPendingBanner } from '@/app/admin/credit/components/CreditPendingBanner'
+import { CreditScheduleStatusPanel } from '@/app/admin/credit/components/CreditScheduleStatusPanel'
+import { submitMotorCreditPayment } from '@/app/admin/credit/credit-payment'
+import { storePaymentStatusSession } from '@/app/payment/payment-session'
 import { CardFooter } from '@/components/ui/card'
 import { Field, FieldError } from '@/components/ui/field'
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select'
-import { 
-    Button, 
-    ConfirmationDialog, 
-    CustomDialogComponent, 
-    ReusableDropdown, 
-    ReuseableInput, 
-    ReuseableRadioChoiceGroup, 
-    SendInvoiceViaEmail 
-} from '@/dev/core'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Button, ConfirmationDialog, CustomDialogComponent, ReusableDropdown, ReuseableInput, ReuseableRadioChoiceGroup, SendInvoiceViaEmail } from '@/dev/core'
+import { useCustomDialogContextFactory } from '@/hooks'
 import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
-import type { 
-    CustomerVerificationDetailsProps, 
-    MpesaPayload, 
-    SubmitResponse 
-} from '@/types/types'
-import {
-    EMETHODS,
-    INSTALLMENT_FIELDS_VISIBLE,
-    INVOICE_SESSION_STORAGE_KEY,
-    PAYMENTPLANS,
-    PURCHASE_SESSION_STORAGE_KEY
-} from '@/utils/constatnts'
+import { usePaystackPaymentFlow } from '@/hooks/use-paystack-payment-flow'
+import { usePesapalPaymentFlow } from '@/hooks/use-pesapal-payment-flow'
+import { cn } from '@/lib/utils'
+import { PaymentDetailsSchema } from '@/types/form-schema'
+import { PaymentFormInput } from '@/types/schema'
+import { CustomerVerificationDetailsProps, MpesaPayload, SubmitResponse } from '@/types/types'
+import { EMETHODS, INSTALLMENT_FIELDS_VISIBLE, INVOICE_SESSION_STORAGE_KEY, PAYMENTPLANS, PURCHASE_SESSION_STORAGE_KEY } from '@/utils/constatnts'
+import { EROUTES } from '@/utils/enums'
+import { extractErrorMessage } from '@/utils/helpers'
 import { EPAYMENTTABS } from '@/utils/steps-config'
 import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowLeftCircle, ArrowRightCircle, Eye, Mail, Share2 } from 'lucide-react'
 import React from 'react'
-import { Controller, FormProvider, useForm, type Resolver } from 'react-hook-form'
-import { PaymentDetailsSchema } from '@/types/form-schema'
-import type { PaymentFormInput } from '@/types/schema'
-import { extractErrorMessage } from '@/utils/helpers'
-import { cn } from '@/lib/utils'
-import { useCustomDialogContextFactory } from '@/hooks'
-import { usePesapalPaymentFlow } from '@/hooks/use-pesapal-payment-flow'
-import { usePaystackPaymentFlow } from '@/hooks/use-paystack-payment-flow'
-import { submitMotorCreditPayment } from '@/app/admin/credit/credit-payment'
-import { CreditPendingBanner } from '@/app/admin/credit/components/CreditPendingBanner'
-import { CreditScheduleStatusPanel } from '@/app/admin/credit/components/CreditScheduleStatusPanel'
-import { storePaymentStatusSession } from '@/app/payment/payment-session'
-import { EROUTES } from '@/utils/enums'
+import { Controller, FormProvider, Resolver, useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 
-
-export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goToNextStep, goToPrevStep }) => {
+export const TravelPaymentOptionsPage: React.FC<CustomerVerificationDetailsProps> = ({ goToNextStep, goToPrevStep }) => {
     const navigate = useNavigate()
     const [selectedPaymentMethod, setSelectedPaymentMethod] = React.useState<string>('mpesa');
     const [purchaseSessionId, setPurchaseSessionId] = React.useState<string | null>(null);
@@ -561,13 +536,15 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                     }
                                 ]} />
                             <Button
-                                type="submit"
-                                disabled={isPolling || isPesapalSubmitting || isPaystackSubmitting || isCreditSubmitting}
+                                // type="submit"
+                                type='button'
+                                // disabled={isPolling || isPesapalSubmitting || isPaystackSubmitting || isCreditSubmitting}
                                 className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
                                 rightIcon={<ArrowRightCircle />}>
-                                {isPolling || isPesapalSubmitting || isPaystackSubmitting || isCreditSubmitting
+                                    Proceed To Payment
+                                {/* {isPolling || isPesapalSubmitting || isPaystackSubmitting || isCreditSubmitting
                                     ? 'Processing...'
-                                    : 'Proceed To Payment'}
+                                    : 'Proceed To Payment'} */}
                             </Button>
                         </div>
                     </CardFooter>
@@ -586,6 +563,7 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
                     />
                 )}
             </CustomDialogComponent>
+
         </>
-    )
+  )
 }

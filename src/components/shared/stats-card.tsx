@@ -23,7 +23,7 @@ export function StatsCard({
   className,
 }: StatsCardProps) {
   return (
-    <Card className={cn("py-4", className)}>
+    <Card className={cn("py-4 shadow-none", className)}>
       <CardContent className="flex items-center gap-4">
         {Icon && (
           <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">

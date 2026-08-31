@@ -39,11 +39,6 @@ export const extractErrorMessage = (error: any): string => {
   return error?.message || "Submission failed!";
 };
 
-/**
- * Quote start can reject a plate that NTSA still "knows".
- * Laravel then sends errors.vehicle_registration_number plus vehicle_preview.
- * If that field error is present we open the add-vehicle dialog instead of a toast.
- */
 export function getInvalidVehicleRegistrationError(
   error: unknown
 ): InvalidVehicleRegistrationError | null {
@@ -184,3 +179,12 @@ export function benefitIdsEqual(a: number[], b: number[]): boolean {
 
 export const installmentText = (invoice: MotorUserCoverInvoice) =>
     `Installment ${invoice.installment_number} of ${invoice.total_installments}`
+
+export const currentDateTime = new Intl.DateTimeFormat("en-KE", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "Africa/Nairobi",
+  }).format(new Date());
+

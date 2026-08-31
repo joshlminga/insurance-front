@@ -1,10 +1,22 @@
 import { useCallback } from 'react'
-import { useStepperStore, type PurchaseFlow } from '@/stores/stepper-store'
+
+import {
+  useStepperStore,
+  type PurchaseFlow,
+} from '@/stores/stepper-store'
 
 export function usePurchaseStepper(flow: PurchaseFlow) {
-  const currentStep = useStepperStore((s) =>
-    flow === 'motor' ? s.motorStep : s.marineStep
-  )
+  const currentStep = useStepperStore((state) => {
+    if (flow === 'motor') {
+      return state.motorStep
+    }
+
+    if (flow === 'marine') {
+      return state.marineStep
+    }
+
+    return state.travelStep
+  })
 
   const setCurrentStep = useCallback(
     (step: number) => {
@@ -21,7 +33,10 @@ export function usePurchaseStepper(flow: PurchaseFlow) {
     useStepperStore.getState().goPrev(flow)
   }, [flow])
 
-  return { currentStep, setCurrentStep, goToNextStep, goToPrevStep }
+  return {
+    currentStep,
+    setCurrentStep,
+    goToNextStep,
+    goToPrevStep,
+  }
 }
-
-export type { PurchaseFlow }

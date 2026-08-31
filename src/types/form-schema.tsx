@@ -1196,6 +1196,160 @@ export const ParameterSchema = z
     }
   });
 
-  export const CreditTransactionSchema = z.object({
+export const CreditTransactionSchema = z.object({
   status: z.string().optional(),
+})
+
+
+// travel schema
+export const TravellerDetailsSchema = z.object({
+  first_name: z
+    .string()
+    .min(2, "First name is required")
+    .max(50),
+
+  sur_name: z
+    .string()
+    .min(2, "Last name is required")
+    .max(50),
+
+  email: z
+    .string()
+    .email("Invalid email address")
+    .min(5)
+    .max(32)
+    .optional()
+    .or(z.literal("")),
+
+  phone: z
+    .string()
+    .min(7, "Invalid phone number")
+    .optional()
+    .or(z.literal("")),
+
+  d_o_b: z
+    .string()
+    .min(1, "Date of birth is required"),
+
+  nationality: z
+    .string()
+    .min(1, "Select a country"),
+})
+
+export const OutBoundDestinationSchema = z.object({
+  travel_as: z
+    .string()
+    .min(1, "Please select how you are travelling"),
+
+  type_of_trip: z
+    .string()
+    .min(1, "Please select the type of trip"),
+
+  country_of_depature: z
+    .string()
+    .min(1, "Please select your departure country"),
+
+  country_of_arrival: z
+    .string()
+    .min(1, "Please select your arrival country"),
+
+  date_of_depature: z
+    .string()
+    .min(1, "Departure date is required"),
+
+  date_of_return: z
+    .string()
+    .min(1, "Return date is required"),
+
+  reason_for_travel: z
+    .string()
+    .min(2, "Reason for travel is required")
+    .max(255, "Reason for travel cannot exceed 255 characters"),
+})
+
+export const InBoundDestinationSchema = z.object({
+  travel_as: z
+    .string()
+    .min(1, "Please select how you are travelling"),
+
+  type_of_trip: z
+    .string()
+    .min(1, "Please select the type of trip"),
+
+  country_of_depature: z
+    .string()
+    .min(1, "Please select your departure country"),
+
+  country_of_arrival: z
+    .string()
+    .min(1, "Please select your arrival country"),
+
+  date_of_depature: z
+    .string()
+    .min(1, "Departure date is required"),
+
+  date_of_return: z
+    .string()
+    .min(1, "Return date is required"),
+
+  reason_for_travel: z
+    .string()
+    .min(2, "Reason for travel is required")
+    .max(255, "Reason for travel cannot exceed 255 characters"),
+})
+
+export const TravelKycSchema = z.object({
+  first_name: z
+    .string()
+    .min(2, "First name is required")
+    .max(50, "First name cannot exceed 50 characters"),
+
+  middle_name: z
+    .string()
+    .max(50, "Middle name cannot exceed 50 characters")
+    .optional()
+    .or(z.literal("")),
+
+  sur_name: z
+    .string()
+    .min(2, "Surname is required")
+    .max(50, "Surname cannot exceed 50 characters"),
+
+  email: z
+    .string()
+    .email("Invalid email address")
+    .max(100, "Email cannot exceed 100 characters"),
+
+  phone_number: z
+    .string()
+    .min(7, "Phone number is required")
+    .max(20, "Phone number cannot exceed 20 characters"),
+
+  date_or_birth: z
+    .string()
+    .min(1, "Date of birth is required"),
+
+  nationality: z
+    .string()
+    .min(1, "Nationality is required"),
+
+  passport_number: z
+    .string()
+    .min(2, "Passport number is required")
+    .max(30, "Passport number cannot exceed 30 characters"),
+
+  tax_number: z
+    .string()
+    .min(1, "Tax number is required")
+    .max(50, "Tax number cannot exceed 50 characters"),
+
+  tax_certificate: z
+    .instanceof(File, {
+      message: "Tax certificate is required",
+    }),
+
+  passport_attachment: z
+    .instanceof(File, {
+      message: "Passport or ID attachment is required",
+    }),
 })
