@@ -57,7 +57,6 @@ export default function AuthLayoutPage({
                 <>
                   <Field className="mb-4 grid gap-4 sm:grid-cols-1">
                     <Button
-                      onClick={() => console.log('Google Auth Clicked')}
                       type="button"
                       variant="outline"
                       className="w-full justify-center gap-2"

@@ -109,7 +109,6 @@ export const MotorProductPage = () => {
         {
             label: 'Edit',
             onSelect: (data) => {
-                console.log('Edit product:', data)
                 handleDialogContextSwitch({
                     componentProps: { data, refetch },
                     Component: EditProductModal,

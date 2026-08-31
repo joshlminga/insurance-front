@@ -572,7 +572,6 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
                                     {
                                         label: "WhatsApp",
                                         icon: <Share2 className="w-4 h-4" />,
-                                        onClick: () => console.log("WhatsApp"),
                                     },
                                     {
                                         label: "Email",

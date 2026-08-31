@@ -4,44 +4,17 @@ import { Button, CustomDialogComponent, ReusableCard } from '@/dev/core'
 import { useCustomDialogContextFactory } from '@/hooks'
 import { ECOMPARISONSAMPLEDATA } from '@/utils/enums'
 import { ArrowDown, MoveLeft } from 'lucide-react'
-// import React, { useEffect, useState } from 'react'
 import { PostComparisonPage } from './[id]/page'
-// import { MOTOR_QUOTE_SESSION_STORAGE_KEY } from '@/utils/constatnts'
-// import { UseApiQuery } from '@/hooks/hooks'
-// import { SubmitResponse } from '@/types/types'
 
-export const ComparisonPage = ({
-    componentProps,
-}: {
+export const ComparisonPage = (_props: {
     handleDialogContextSwitch: (context?: any) => void
     componentProps?: any
 }) => {
-
-    console.log(componentProps?.data?.data);
-    // const [quoteSessionId, setQuoteSessionId] = useState<number | null>(null)
-
     const { handleDialogContextSwitch, dialogContent, dialogOpen } =
         useCustomDialogContextFactory<{
             refetch?: () => Promise<any>;
             data?: any;
         }>();
-
-    // useEffect(() => {
-    //     const storedSessionId = Number(sessionStorage.getItem(MOTOR_QUOTE_SESSION_STORAGE_KEY))
-    //     if (Number.isFinite(storedSessionId) && storedSessionId > 0) {
-    //         setQuoteSessionId(storedSessionId)
-    //     } else {
-    //         setQuoteSessionId(null)
-    //     }
-    // }, [])
-
-    // const { data, isLoading } = UseApiQuery<SubmitResponse>({
-    //         url: `document/motor/comparison/${quoteSessionId}`,
-    //         queryOptions: {
-    //             enabled: true,
-    //         },
-    //     })
-
 
     return (
         <div className=''>

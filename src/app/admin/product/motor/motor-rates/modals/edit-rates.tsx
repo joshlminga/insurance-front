@@ -34,7 +34,6 @@ export const EditMotorProductRatesPage = ({ handleDialogContextSwitch, component
     componentProps?: any
 }) => {
 
-    console.log(componentProps?.data)
     const { slung } = useParams();
     const [step, setStep] = useState(1);
     const normalizeMakeModelIds = (items: any): number[] => {
@@ -117,7 +116,6 @@ export const EditMotorProductRatesPage = ({ handleDialogContextSwitch, component
     }
 
     const onFormError = (errors: any) => {
-        console.error("Form validation errors (detailed):", JSON.stringify(errors, null, 2))
         const firstErrorKey = Object.keys(errors)[0]
         const firstError = errors[firstErrorKey] as any
 

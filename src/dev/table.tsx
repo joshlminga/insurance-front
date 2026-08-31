@@ -86,7 +86,7 @@ export const DataTable = ({
                                         {...{
                                             ...(OtherToolsProps ?? {}),
                                             onChange:
-                                                OtherToolsProps?.onChange ?? ((data: any) => console.log(data)),
+                                                OtherToolsProps?.onChange ?? (() => {}),
                                         }}
                                     />
                                 </div>

@@ -1,12 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// import { ActionColumn } from '@/dev/columns';
 import { MyPaymentHistory } from '@/dev/columns/customer/motor/payment-history';
 import { CustomBaseTable, SearchTools } from '@/dev/table';
 import { useDebounce } from '@/hooks';
 import { UseApiQuery } from '@/hooks/hooks';
 import { SubmitResponse, TFilterOptions, TPaginationFilters } from '@/types/types';
 import { FILTEROPTIONS, ReusableReducer } from '@/utils/constatnts';
-// import { Eye } from 'lucide-react';
 import { useReducer } from 'react'
 
 export const PaymentHistoryPage = () => {
@@ -29,20 +26,6 @@ export const PaymentHistoryPage = () => {
             enabled: true,
         },
     })
-    // const ActionsHandlerMapping: SingleActionsHandler<any>[] = [
-    //     {
-    //         label: 'View',
-    //         icon: Eye,
-    //         onSelect: (data) => {
-    //             console.log(data);
-    //             handleDialogContextSwitch({
-    //               componentProps: { data, refetch },
-    //               Component: ViewOrganizationModal,
-    //             })
-    //         }
-    //     },
-    // ];
-
     return (
         <section>
             <div className="grid grid-cols-1 lg:grid-cols-1">

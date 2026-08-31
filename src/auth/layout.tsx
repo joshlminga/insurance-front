@@ -35,9 +35,6 @@ export default function AuthLayoutPage({
             <>
               <Field className="grid gap-4 sm:grid-cols-1">
                 <Button
-                  {...{
-                    onClick: () => console.log()
-                  }}
                   type="button"
                   variant="outline">
                   <FcGoogle size={20} />

@@ -96,7 +96,6 @@ export const AddMotorProductRatesPage = ({ handleDialogContextSwitch, componentP
     }
 
     const onFormError = (errors: any) => {
-        console.error("Form validation errors (detailed):", JSON.stringify(errors, null, 2))
         const firstErrorKey = Object.keys(errors)[0]
         const firstError = errors[firstErrorKey] as any
 

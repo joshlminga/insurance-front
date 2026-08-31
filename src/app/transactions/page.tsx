@@ -285,7 +285,6 @@ function TransactionModal({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    console.log(`${type} submitted:`, formData)
     onOpenChange(false)
     setFormData({
       memberId: "",

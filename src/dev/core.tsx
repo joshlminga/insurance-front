@@ -240,7 +240,6 @@ export function ReusableStepper({
         }
     }
     const goToStep = (step: number) => handleStepChange(step)
-    console.log(value);
 
     return (
         <Stepper value={currentStep} onValueChange={handleStepChange} className={className}>

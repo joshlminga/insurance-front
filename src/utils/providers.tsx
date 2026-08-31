@@ -23,8 +23,6 @@ export function QueryProvider({ children }: { children: React.ReactNode }) {
     <QueryClientProvider client={queryClient}>
       {children}
       <Toaster richColors closeButton position="bottom-right" />
-      {/* Optional: Remove in production */}
-      {/* <ReactQueryDevtools initialIsOpen={false} /> */}
     </QueryClientProvider>
   )
 }

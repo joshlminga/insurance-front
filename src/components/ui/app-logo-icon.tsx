@@ -7,8 +7,8 @@ export default function AppLogoIcon({ className = '' }: HTMLAttributes<HTMLImage
     try {
         const sidebar = useSidebar();
         state = sidebar.state;
-    } catch (e) {
-        console.log(e);
+    } catch {
+        // useSidebar throws when this logo is rendered outside a sidebar
     }
     const src = state === 'collapsed' ? '/logo/logo3.png' : '/logo/logo.png';
 

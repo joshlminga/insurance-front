@@ -33,10 +33,6 @@ export const ChatIndexPage = ({
         url: "integrations/chatwoot/chat/session",
         method: EMETHODS.POST,
         mutationOptions: {
-            onSuccess: (data) => {
-                console.log(data);
-                // form.reset()
-            },
             onError: (error: unknown) => {
                 const message = extractErrorMessage(error)
                 ShowToast.error(message || "Submission failed!")

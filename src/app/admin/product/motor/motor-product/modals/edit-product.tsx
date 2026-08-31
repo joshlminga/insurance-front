@@ -54,9 +54,6 @@ export const EditProductModal = ({ handleDialogContextSwitch, componentProps }: 
     ? productData.meta.brochure
     : []
 
-  console.log('EditProductModal props:', componentProps
-
-  )
   const [brochureInputs, setBrochureInputs] = useState<Array<{ id: number, file?: File }>>([
     { id: Date.now() },
   ])

@@ -76,12 +76,11 @@ export const TravelQuotePreviewPage = ({ componentProps }:{
                         {
                             label: "Email",
                             icon: <Mail className="w-4 h-4" />,
-                            onClick: () => console.log("Email"),
                         },
                         {
                             label: "WhatsApp",
                             icon: <Share2 className="w-4 h-4" />,
-                            onClick: () => console.log("WhatsApp"),
+                        },
                         },
                     ]} />
             </CardFooter>
