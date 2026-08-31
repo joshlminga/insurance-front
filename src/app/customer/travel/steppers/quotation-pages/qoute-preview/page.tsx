@@ -81,7 +81,6 @@ export const TravelQuotePreviewPage = ({ componentProps }:{
                             label: "WhatsApp",
                             icon: <Share2 className="w-4 h-4" />,
                         },
-                        },
                     ]} />
             </CardFooter>
         </div>
