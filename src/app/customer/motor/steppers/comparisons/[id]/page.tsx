@@ -25,7 +25,7 @@ import {
     MOTOR_QUOTE_SESSION_STORAGE_KEY,
     PURCHASE_SESSION_STORAGE_KEY
 } from "@/utils/constatnts";
-import { extractErrorMessage } from "@/utils/helpers";
+import { extractErrorMessage, canPurchaseCover } from "@/utils/helpers";
 import { UseAuth } from "@/stores/auth-store";
 import { Link } from "react-router-dom";
 import {
@@ -204,11 +204,14 @@ export const PostComparisonPage: React.FC<premiumPreview> = ({
                                                 leftIcon={<ShoppingCart />}
                                                 onClick={() => onPurchase(item?.product_id, item?.rate_id)}
                                                 loading={submitPurchaseMutation.isPending && purchasingRateId === item?.rate_id}
-                                                disabled={submitPurchaseMutation.isPending && purchasingRateId !== item?.rate_id}
+                                                disabled={
+                                                    !canPurchaseCover(item)
+                                                    || (submitPurchaseMutation.isPending && purchasingRateId !== item?.rate_id)
+                                                }
                                                 className=" w-full border-[#C20C0C] bg-[#FFF5F5] text-[#C20C0C] hover:bg-[#C20C0C] hover:text-white focus-visible:ring-[#C20C0C]/30">
                                                 Purchase Cover
                                             </Button>
-                                        ) : (
+                                        ) : canPurchaseCover(item) ? (
                                             <Link
                                                 to={`/${EPREFIX.AUTH}${EROUTES.SIGNUP}`}
                                                 state={{
@@ -223,6 +226,14 @@ export const PostComparisonPage: React.FC<premiumPreview> = ({
                                                     Purchase Cover
                                                 </Button>
                                             </Link>
+                                        ) : (
+                                            <Button
+                                                variant="outline"
+                                                type="button"
+                                                disabled
+                                                className=" w-full lg:w-auto border-[#C20C0C] bg-[#FFF5F5] text-[#C20C0C]">
+                                                Purchase Cover
+                                            </Button>
                                         )}
                                     </CardFooter>
                                 </Card>

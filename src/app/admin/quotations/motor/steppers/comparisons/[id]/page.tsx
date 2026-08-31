@@ -25,7 +25,7 @@ import {
     MOTOR_QUOTE_SESSION_STORAGE_KEY,
 } from "@/utils/constatnts";
 import { persistAdminMotorPurchaseStart, readAdminMotorDuplicateSourceId, clearAdminMotorDuplicatePrefill } from "../../../admin-motor-session";
-import { extractErrorMessage } from "@/utils/helpers";
+import { extractErrorMessage, canPurchaseCover } from "@/utils/helpers";
 import { cn } from "@/lib/utils";
 import { PREMIUM_KEYS } from "@/utils/enums";
 
@@ -192,7 +192,10 @@ export const AdminMotorPostComparisonPage: React.FC<premiumPreview> = ({
                                             leftIcon={<ShoppingCart />}
                                             onClick={() => onPurchase(item?.product_id, item?.rate_id)}
                                             loading={submitPurchaseMutation.isPending && purchasingRateId === item?.rate_id}
-                                            disabled={submitPurchaseMutation.isPending && purchasingRateId !== item?.rate_id}
+                                            disabled={
+                                                !canPurchaseCover(item)
+                                                || (submitPurchaseMutation.isPending && purchasingRateId !== item?.rate_id)
+                                            }
                                             className=" w-full border-[#C20C0C] bg-[#FFF5F5] text-[#C20C0C] hover:bg-[#C20C0C] hover:text-white focus-visible:ring-[#C20C0C]/30">
                                             Purchase Cover
                                         </Button>

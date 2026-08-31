@@ -37,7 +37,7 @@ import {
 } from "@/utils/constatnts";
 import { ShowToast } from "@/utils/utils";
 import { UseApiMutation } from "@/hooks/hooks";
-import { extractErrorMessage } from "@/utils/helpers";
+import { extractErrorMessage, canPurchaseCover } from "@/utils/helpers";
 import { useCustomDialogContextFactory } from "@/hooks";
 import React from "react";
 
@@ -243,10 +243,11 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
                             onPurchase(data);
                         }}
                         loading={submitPurchaseMutation.isPending}
+                        disabled={!canPurchaseCover(data)}
                         className="w-full 2xl:w-auto border-[#C20C0C] bg-[#FFF5F5] text-[#C20C0C] hover:bg-[#C20C0C] hover:text-white focus-visible:ring-[#C20C0C]/30">
                         Purchase Cover
                     </Button>
-                ) : (
+                ) : canPurchaseCover(data) ? (
                     <Link
                         to={`/${EPREFIX.AUTH}${EROUTES.SIGNUP}`}
                         state={{ returnTo: location.pathname, stepperStep: currentStep }}
@@ -257,6 +258,13 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
                             Purchase Cover
                         </Button>
                     </Link>
+                ) : (
+                    <Button
+                        type="button"
+                        disabled
+                        className="w-full 2xl:w-auto border-[#C20C0C] bg-[#FFF5F5] text-[#C20C0C]">
+                        Purchase Cover
+                    </Button>
                 )}
             </CardFooter>
             <CustomDialogComponent

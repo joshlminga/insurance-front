@@ -4,6 +4,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { cn } from '@/lib/utils'
 import type { PaymentFormInput } from '@/types/schema'
 import { ReuseableInput } from '@/dev/core'
+import { PESAPAL_PAYMENT_ENABLED } from '@/utils/constatnts'
 import { CircleAlert } from 'lucide-react'
 import React from 'react'
 import { Controller, useFormContext } from 'react-hook-form'
@@ -14,9 +15,19 @@ export const CARD_PROVIDERS = [
     { value: 'pesapal', label: 'PesaPal', image: '/pesapal.png' },
 ] as const
 
+export const visibleCardProviders = CARD_PROVIDERS.filter(
+    (provider) => provider.value !== 'pesapal' || PESAPAL_PAYMENT_ENABLED,
+)
+
 export const CardsTabPage: React.FC = () => {
-    const { control, watch } = useFormContext<PaymentFormInput>()
+    const { control, watch, setValue } = useFormContext<PaymentFormInput>()
     const cardProvider = watch('card_provider') ?? 'paystack'
+
+    React.useEffect(() => {
+        if (!PESAPAL_PAYMENT_ENABLED && cardProvider === 'pesapal') {
+            setValue('card_provider', 'paystack')
+        }
+    }, [cardProvider, setValue])
 
     return (
         <div className="w-full">
@@ -38,7 +49,7 @@ export const CardsTabPage: React.FC = () => {
                                         onValueChange={field.onChange}
                                         className="grid w-full grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6"
                                     >
-                                        {CARD_PROVIDERS.map((provider) => {
+                                        {visibleCardProviders.map((provider) => {
                                             const inputId = `card-provider-${provider.value}`
                                             const isSelected = field.value === provider.value
                                             return (
@@ -97,7 +108,7 @@ export const CardsTabPage: React.FC = () => {
                         </div>
                     ) : null}
 
-                    {cardProvider === 'pesapal' ? (
+                    {PESAPAL_PAYMENT_ENABLED && cardProvider === 'pesapal' ? (
                         <div className="mt-4 rounded-lg border border-black/20 bg-white p-3 shadow-sm">
                             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                                 <ReuseableInput

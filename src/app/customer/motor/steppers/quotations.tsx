@@ -51,6 +51,7 @@ import {
     benefitIdsEqual,
     benefitOptionLabel,
     collectBenefitIdsFromValues,
+    canPurchaseCover,
     extractErrorMessage,
     resolveListedBenefitValue
 } from '@/utils/helpers'
@@ -691,11 +692,14 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                                                         type="button"
                                                         onClick={() => onPurchase(item?.product?.id, item?.rate_id)}
                                                         loading={submitPurchaseMutation.isPending && purchasingRateId === item?.rate_id}
-                                                        disabled={submitPurchaseMutation.isPending && purchasingRateId !== item?.rate_id}
+                                                        disabled={
+                                                            !canPurchaseCover(item)
+                                                            || (submitPurchaseMutation.isPending && purchasingRateId !== item?.rate_id)
+                                                        }
                                                         className="w-full border-[#C20C0C] bg-[#FFF5F5] text-[#C20C0C] hover:bg-[#C20C0C] hover:text-white focus-visible:ring-[#C20C0C]/30 min-[1600px]:w-auto">
                                                         Purchase Cover
                                                     </Button>
-                                                ) : (
+                                                ) : canPurchaseCover(item) ? (
                                                     <Link
                                                         to={`/${EPREFIX.AUTH}${EROUTES.SIGNUP}`}
                                                         state={{
@@ -709,6 +713,13 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
                                                             Purchase Cover
                                                         </Button>
                                                     </Link>
+                                                ) : (
+                                                    <Button
+                                                        type="button"
+                                                        disabled
+                                                        className="w-full border-[#C20C0C] bg-[#FFF5F5] text-[#C20C0C] min-[1600px]:w-auto">
+                                                        Purchase Cover
+                                                    </Button>
                                                 )}
                                             </>
                                         }>

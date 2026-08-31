@@ -177,6 +177,11 @@ export function benefitIdsEqual(a: number[], b: number[]): boolean {
     return sortedA.every((id, i) => id === sortedB[i])
 }
 
+/** API sets allow_purchase on premium/comparison rows when DMVIC stock is ready for this insurer office. */
+export function canPurchaseCover(item: { allow_purchase?: boolean } | null | undefined): boolean {
+    return item?.allow_purchase === true
+}
+
 export const installmentText = (invoice: MotorUserCoverInvoice) =>
     `Installment ${invoice.installment_number} of ${invoice.total_installments}`
 

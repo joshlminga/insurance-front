@@ -13,7 +13,7 @@ import type {
   PaystackPollResponse,
   SubmitResponse,
 } from "@/types/types"
-import { EMETHODS, POLL_INTERVAL_MS, POLL_TIMEOUT_MS } from "@/utils/constatnts"
+import { EMETHODS, PESAPAL_PAYMENT_ENABLED, POLL_INTERVAL_MS, POLL_TIMEOUT_MS } from "@/utils/constatnts"
 import { extractErrorMessage } from "@/utils/helpers"
 import { ShowToast } from "@/utils/utils"
 import { storePesapalCheckoutSession } from "@/utils/pesapal-payment"
@@ -301,10 +301,12 @@ export default function SettlementModal({
                   <RadioGroupItem value="mpesa" id="gateway-mpesa" />
                   <Label htmlFor="gateway-mpesa">M-Pesa</Label>
                 </div>
-                <div className="flex items-center gap-2">
-                  <RadioGroupItem value="pesapal" id="gateway-pesapal" />
-                  <Label htmlFor="gateway-pesapal">Pesapal</Label>
-                </div>
+                {PESAPAL_PAYMENT_ENABLED ? (
+                  <div className="flex items-center gap-2">
+                    <RadioGroupItem value="pesapal" id="gateway-pesapal" />
+                    <Label htmlFor="gateway-pesapal">Pesapal</Label>
+                  </div>
+                ) : null}
                 <div className="flex items-center gap-2">
                   <RadioGroupItem value="paystack" id="gateway-paystack" />
                   <Label htmlFor="gateway-paystack">Paystack</Label>

@@ -241,6 +241,9 @@ export const CREDIT_SUMMARY_URL = "credit/wallet/mine"
 /** Flip to true when backend bank-payment-details endpoint is ready */
 export const BANK_PAYMENT_DETAILS_API_ENABLED = false
 export const BANK_PAYMENT_DETAILS_URL = "purchase/motor/bank-payment-details"
+
+/** Flip to true to show Pesapal as a card / settlement payment option */
+export const PESAPAL_PAYMENT_ENABLED = false
 export const VEHICLE_DETAILS_SESSION_STORAGE_KEY = "vehicle_info_session"
 export const VEHICLE_OWNERSHIP_SESSION_STORAGE_KEY = "vehicle_ownership_session"
 export const ADMIN_MOTOR_CUSTOMER_EMAIL_KEY = "admin_motor_customer_email"

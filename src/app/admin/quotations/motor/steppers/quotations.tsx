@@ -45,6 +45,7 @@ import {
     benefitIdsEqual, 
     benefitOptionLabel, 
     collectBenefitIdsFromValues, 
+    canPurchaseCover,
     extractErrorMessage, 
     resolveListedBenefitValue 
 } from '@/utils/helpers'
@@ -591,7 +592,10 @@ export const AdminMotorQuotationsPage: React.FC<AdminMotorStepProps> = ({
                                                     type="button"
                                                     onClick={() => onPurchase(item?.product?.id, item?.rate_id)}
                                                     loading={submitPurchaseMutation.isPending && purchasingRateId === item?.rate_id}
-                                                    disabled={submitPurchaseMutation.isPending && purchasingRateId !== item?.rate_id}
+                                                    disabled={
+                                                        !canPurchaseCover(item)
+                                                        || (submitPurchaseMutation.isPending && purchasingRateId !== item?.rate_id)
+                                                    }
                                                     className=" w-full lg:w-auto border-[#C20C0C] bg-[#FFF5F5] text-[#C20C0C] hover:bg-[#C20C0C] hover:text-white focus-visible:ring-[#C20C0C]/30">
                                                     Purchase Cover
                                                 </Button>
