@@ -9,7 +9,6 @@ import {
     EmptyState,
     ReusableCard,
     ReusablePagination,
-    ReusableSelect,
     SendDocumentsViaEmail,
     SkeletonCard
 } from '@/dev/core'
@@ -22,9 +21,9 @@ import type {
     TFilterOptions,
     TPaginationFilters
 } from '@/types/types'
-import { ArrowLeftCircle, ArrowRightCircle, X } from 'lucide-react'
+import { ArrowLeftCircle, ArrowRightCircle, ListFilter, X } from 'lucide-react'
 import React, { useCallback, useEffect, useMemo, useReducer, useState, useRef } from 'react'
-import type { FieldValues, Path } from 'react-hook-form'
+import type { FieldValues } from 'react-hook-form'
 import { useForm } from 'react-hook-form'
 import { AdminMotorQuotePreviewPage } from './qoute-preview/page'
 import {
@@ -39,20 +38,23 @@ import { persistAdminMotorPurchaseStart, readAdminMotorDuplicateSourceId, clearA
 import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
 import { formatCurrency } from '@/lib/format'
 import { serializeMotorPremiumParams } from '@/lib/motor-premium-params'
-import { ShowToast } from '@/utils/utils'
+import { ShowToast, SIDEBAR_LAYOUT_QUERY } from '@/utils/utils'
 import { 
     benefitGroupFormKey, 
     benefitIdsEqual, 
-    benefitOptionLabel, 
     collectBenefitIdsFromValues, 
     canPurchaseCover,
     extractErrorMessage, 
     resolveListedBenefitValue 
 } from '@/utils/helpers'
 import { AdminMotorPostComparisonPage } from './comparisons/[id]/page'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Slider } from '@/components/ui/slider'
+import { QuotationFiltersPanel } from '@/app/customer/motor/steppers/components/quotation-filters-panel'
+import {
+    Sheet,
+    SheetContent,
+    SheetHeader,
+    SheetTitle,
+} from '@/components/ui/sheet'
 import type { AdminMotorStepProps } from '../admin-step-props'
 import { buildAdminShareDialogProps } from '../admin-step-props'
 
@@ -69,6 +71,24 @@ export const AdminMotorQuotationsPage: React.FC<AdminMotorStepProps> = ({
     const [purchasingRateId, setPurchasingRateId] = useState<string | number | null>(null)
     const [appliedBenefitIds, setAppliedBenefitIds] = useState<number[]>([])
     const [value, setValue] = useState([0, 100])
+    const [filterSheetOpen, setFilterSheetOpen] = useState(false)
+    const [isSidebarLayout, setIsSidebarLayout] = useState(() =>
+        typeof window !== 'undefined'
+            ? window.matchMedia(SIDEBAR_LAYOUT_QUERY).matches
+            : true
+    )
+
+    useEffect(() => {
+        const mediaQuery = window.matchMedia(SIDEBAR_LAYOUT_QUERY)
+        const onChange = (event: MediaQueryListEvent) => setIsSidebarLayout(event.matches)
+        setIsSidebarLayout(mediaQuery.matches)
+        mediaQuery.addEventListener('change', onChange)
+        return () => mediaQuery.removeEventListener('change', onChange)
+    }, [])
+
+    useEffect(() => {
+        if (isSidebarLayout) setFilterSheetOpen(false)
+    }, [isSidebarLayout])
 
     const benefitForm = useForm<FieldValues>({ defaultValues: {} })
 
@@ -403,6 +423,17 @@ export const AdminMotorQuotationsPage: React.FC<AdminMotorStepProps> = ({
         }
     }
 
+    const filterPanelProps = {
+        quoteSessionId,
+        isPending,
+        isFetching,
+        data,
+        benefitGroups,
+        benefitFormControl: benefitForm.control,
+        priceRange: value,
+        onPriceRangeChange: setValue,
+    }
+
     return (
         <div className="space-y-6">
             {!quoteSessionId && (
@@ -412,75 +443,33 @@ export const AdminMotorQuotationsPage: React.FC<AdminMotorStepProps> = ({
                 </div>
             )}
 
-            <div className='2xl:flex gap-2'>
-                <section className="hidden w-72 shrink-0 px-4 py-5 sm:px-6 sm:py-6 2xl:flex 2xl:flex-col">
-                    <div className="grid gap-2 mb-5">
-                        <Label htmlFor="search">Search by Insurer</Label>
-                        <Input
-                            id="search"
-                            name="search"
-                            type="text"
-                            placeholder="Enter insurer name..."
-                            className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
+            <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:gap-5 min-[1600px]:gap-6">
+                {isSidebarLayout ? (
+                    <aside className="w-full shrink-0 xl:flex xl:w-64 min-[1600px]:w-72">
+                        <QuotationFiltersPanel
+                            {...filterPanelProps}
+                            className="sticky top-24 w-full rounded-lg border border-gray-200 bg-white px-4 py-5 xl:px-5 xl:py-6"
                         />
-                    </div>
-                    <h2 className="mb-1 text-lg font-semibold text-gray-900">Additional benefits</h2>
-                    <hr className="mb-5" />
-                    <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
-                        {!quoteSessionId ? null : isPending && !data && benefitGroups.length === 0 ? (
-                            <p className="text-sm text-muted-foreground">Loading benefit options…</p>
-                        ) : benefitGroups.length === 0 ? (
-                            <p className="text-sm text-muted-foreground">
-                                No optional benefits are available for this quote yet.
-                            </p>
-                        ) : (
-                            <div className="grid grid-cols-1 gap-4 md:grid-cols-1 xl:grid-cols-1">
-                                {benefitGroups.map(({ group, items }) => {
-                                    const fieldName = benefitGroupFormKey(group)
-                                    const options = [
-                                        { value: BENEFIT_SELECT_NONE, label: '-- none --' },
-                                        ...items.map((item) => ({
-                                            value: String(item.id),
-                                            label: benefitOptionLabel(item),
-                                        })),
-                                    ]
-                                    return (
-                                        <ReusableSelect
-                                            key={group}
-                                            control={benefitForm.control}
-                                            name={fieldName as Path<FieldValues>}
-                                            label={group}
-                                            placeholder={`Choose in ${group}`}
-                                            options={options}
-                                            disabled={isFetching}
-                                            triggerClassName="border-[#ADABAB]"
-                                        />
-                                    )
-                                })}
-                            </div>
-                        )}
-                    </form>
-                    <hr className="mb-5" />
-                    <h2 className="mb-1 text-lg font-semibold text-gray-900">Price Range</h2>
-                    <div className="mx-auto grid w-full max-w-xs gap-3">
-                        <div className="flex items-center justify-between gap-2">
-                            <Label htmlFor="slider-demo-temperature">Price</Label>
-                            <span className="text-sm text-muted-foreground">
-                                {value.join(", ")}
-                            </span>
-                        </div>
-                        <Slider
-                            id="slider-demo-temperature"
-                            value={value}
-                            onValueChange={setValue}
-                            min={0}
-                            max={100}
-                            step={0.1}
-                        />
-                    </div>
-                </section>
+                    </aside>
+                ) : (
+                    <Sheet open={filterSheetOpen} onOpenChange={setFilterSheetOpen}>
+                        <SheetContent
+                            side="left"
+                            className="w-[min(100vw-2rem,20rem)] overflow-y-auto p-0"
+                        >
+                            <SheetHeader className="border-b px-4 py-4 text-left">
+                                <SheetTitle>Filters</SheetTitle>
+                            </SheetHeader>
+                            <QuotationFiltersPanel
+                                {...filterPanelProps}
+                                idPrefix="admin-quotation"
+                                className="px-4 py-5"
+                            />
+                        </SheetContent>
+                    </Sheet>
+                )}
 
-                <section className="flex-1 min-w-0 space-y-4 px-4 py-5 sm:px-6 sm:py-6">
+                <section className="min-w-0 flex-1 space-y-4 px-4 py-5 sm:px-6 sm:py-6">
 
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                         <div className="flex min-w-0 flex-1 flex-col gap-2.5">
@@ -524,11 +513,22 @@ export const AdminMotorQuotationsPage: React.FC<AdminMotorStepProps> = ({
                             )}
                         </div>
 
-                        <div className="flex shrink-0 items-center justify-between gap-3 sm:justify-end">
+                        <div className="flex w-full shrink-0 flex-wrap items-center justify-end gap-2 sm:w-auto sm:gap-3">
                             {isFetching && (
-                                <span className="animate-pulse text-xs text-gray-400">
+                                <span className="w-full animate-pulse text-xs text-gray-400 sm:w-auto">
                                     Fetching premium quotations…
                                 </span>
+                            )}
+                            {!isSidebarLayout && (
+                                <Button
+                                    variant="outline"
+                                    type="button"
+                                    className="flex w-full items-center justify-center gap-2 sm:w-auto"
+                                    onClick={() => setFilterSheetOpen(true)}
+                                    leftIcon={<ListFilter className="h-4 w-4" />}
+                                >
+                                    Filter
+                                </Button>
                             )}
                             <Button
                                 type="button"

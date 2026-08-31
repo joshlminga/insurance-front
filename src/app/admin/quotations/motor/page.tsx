@@ -262,9 +262,6 @@ export const MotorQuotationPage = () => {
     const navigate = useNavigate()
     const { user } = UseAuth()
     const { canModuleAction } = useCan()
-    // #region agent log
-    fetch('http://127.0.0.1:7410/ingest/d44f0587-d252-4b9d-983a-196162e430ad',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'1b1716'},body:JSON.stringify({sessionId:'1b1716',runId:'post-fix',hypothesisId:'D',location:'src/app/admin/quotations/motor/page.tsx',message:'MotorQuotationPage rendered',data:{hasUser:Boolean(user),path:'/dashboard quotations motor'},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
     const canMotorOverride = QUOTATION_MOTOR_MODULES.some((module) =>
         canModuleAction(module, 'override')
     )

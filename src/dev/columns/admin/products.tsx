@@ -12,6 +12,14 @@ export const MotorProductsColumns: ColumnDef<any>[] = [
         },
     },
     {
+        id: "insurer",
+        header: () => <div>Insurer</div>,
+        cell: ({ row }) => {
+            const insurerName = row.original?.organization?.name ?? "N/A";
+            return <div>{insurerName}</div>;
+        },
+    },
+    {
         accessorKey: "officename",
         header: () => <div>Office Name</div>,
         cell: ({ row }) => {
