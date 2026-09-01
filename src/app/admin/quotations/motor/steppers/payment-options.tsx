@@ -171,14 +171,10 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
         }
     }, [SummaryData, form])
 
-    const isPaymentPlanLocked = React.useMemo(() => {
-        const invoice = SummaryData?.data?.invoice
-        if (!invoice) return false
-        if (invoice.lock_payment_plan === true || invoice.lock_payment_plan === 'true') {
-            return true
-        }
-        return Boolean(invoice.cover_end_date)
-    }, [SummaryData])
+    const isPaymentPlanLocked = React.useMemo(
+        () => Boolean(SummaryData?.data?.invoice?.cover_end_date),
+        [SummaryData],
+    )
 
     const availablePaymentPlans = React.useMemo(
         () => (isPaymentPlanLocked ? PAYMENTPLANS.filter((plan) => plan.value === 'Full') : PAYMENTPLANS),
