@@ -219,6 +219,27 @@ export const PARAMETER_PAYEE = [
 /** API payload uses PRODUCT_TYPES `value` (e.g. "Motor"), not the display label. */
 export const PRODUCT_TYPE_VALUES = PRODUCT_TYPES.map((item) => item.value)
 
+/** DMVIC certificate types — values match App\\Enums\\Dmvic\\DmvicCertificate in the API. */
+export const DMVIC_CERTIFICATE_TYPES = [
+  { label: 'Class A - PSV Unmarked', value: 'ClassA_PsvUnmarked' },
+  { label: 'Type A - Taxi', value: 'TypeA_Taxi' },
+  { label: 'Type B - Commercial Vehicle', value: 'TypeB_CommercialVehicle' },
+  { label: 'Type C - Private Car', value: 'TypeC_PrivateCar' },
+  { label: 'Type D - Motor Cycle', value: 'TypeD_MotorCycle' },
+  { label: 'Type D - PSV', value: 'TypeD_Psv' },
+  { label: 'Type D - Motor Cycle Commercial', value: 'TypeD_MotorCycleCommercial' },
+] as const
+
+export const DMVIC_CERTIFICATE_TYPE_VALUES = DMVIC_CERTIFICATE_TYPES.map((item) => item.value)
+
+export function dmvicCertificateTypeLabel(value: string | null | undefined): string {
+  if (!value) {
+    return '-'
+  }
+  const match = DMVIC_CERTIFICATE_TYPES.find((item) => item.value === value)
+  return match?.label ?? value
+}
+
 export const RatesSteps = [
   { title: 'Product', fields: ['coverfor_id', 'covertype_id', 'covering_id', 'usedfor_id', 'bodytype_id', 'used_tonnage_id'] },
   { title: 'Vehicle Info', fields: ['valued_from', 'valued_to', 'age_from', 'age_to', 'rate', 'minimum', 'pll'] },

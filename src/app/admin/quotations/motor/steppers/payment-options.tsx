@@ -171,6 +171,26 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
         }
     }, [SummaryData, form])
 
+    const isPaymentPlanLocked = React.useMemo(() => {
+        const invoice = SummaryData?.data?.invoice
+        if (!invoice) return false
+        if (invoice.lock_payment_plan === true || invoice.lock_payment_plan === 'true') {
+            return true
+        }
+        return Boolean(invoice.cover_end_date)
+    }, [SummaryData])
+
+    const availablePaymentPlans = React.useMemo(
+        () => (isPaymentPlanLocked ? PAYMENTPLANS.filter((plan) => plan.value === 'Full') : PAYMENTPLANS),
+        [isPaymentPlanLocked],
+    )
+
+    React.useEffect(() => {
+        if (!isPaymentPlanLocked) return
+        form.setValue('payment_plans', 'Full')
+        lastAppliedPlanRef.current = 'Full'
+    }, [isPaymentPlanLocked, form])
+
     const paymentPlanMutation = UseApiMutation<SubmitResponse, { payment_plan: string }>({
         url: `purchase/motor/${purchaseSessionId}/payment-plan`,
         method: EMETHODS.POST,
@@ -391,6 +411,7 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
                                                 className="w-full">
                                                 <Select
                                                     value={field.value || undefined}
+                                                    disabled={isPaymentPlanLocked}
                                                     onValueChange={(value) => {
                                                         const previous = field.value ?? ''
                                                         if (value === previous) return
@@ -411,7 +432,7 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
                                                         <SelectValue placeholder="Select an option" />
                                                     </SelectTrigger>
                                                     <SelectContent className="">
-                                                        {PAYMENTPLANS.map((option) => (
+                                                        {availablePaymentPlans.map((option) => (
                                                             <SelectItem key={option.value} value={option.value}>
                                                                 {option.label}
                                                             </SelectItem>
@@ -474,7 +495,9 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
                                     </div>
                                 ) : (
                                     <p className="mt-2.5 text-sm text-black/70">
-                                        Select a payment plan above to see the installment schedule.
+                                        {isPaymentPlanLocked
+                                            ? 'Full payment only — a custom cover end date was set on this purchase.'
+                                            : 'Select a payment plan above to see the installment schedule.'}
                                     </p>
                                 )}
                             </div>

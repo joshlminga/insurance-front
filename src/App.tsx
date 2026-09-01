@@ -93,6 +93,8 @@ const UsersPage = lazy(() => import("./app/admin/users/page").then(m => ({ defau
 const CreditWalletPage = lazy(() => import("./app/admin/credit/wallet/page").then(m => ({ default: m.CreditWalletPage })))
 const CreditTransactionsPage = lazy(() => import("./app/admin/credit/transactions/page").then(m => ({ default: m.CreditTransactionsPage })))
 const MotorCertificatesPage = lazy(() => import("./app/admin/motor-certificates/page").then(m => ({ default: m.MotorCertificatesPage })))
+const DmvicStockPage = lazy(() => import("./app/admin/dmvic-stock/page").then(m => ({ default: m.DmvicStockPage })))
+const DmvicStockDetailPage = lazy(() => import("./app/admin/dmvic-stock/[id]/page").then(m => ({ default: m.DmvicStockDetailPage })))
 const CreditApprovalsPage = lazy(() => import("./app/admin/credit/approvals/page").then(m => ({ default: m.CreditApprovalsPage })))
 const CreditPendingPage = lazy(() => import("./app/admin/credit/pending/page").then(m => ({ default: m.CreditPendingPage })))
 const CreditPendingDetailPage = lazy(() => import("./app/admin/credit/pending/[invoiceId]/page").then(m => ({ default: m.CreditPendingDetailPage })))
@@ -966,6 +968,26 @@ export const router = createBrowserRouter([
           <S>
             <AdminModulePage module={MODULES.DMVIC_CERTIFICATE}>
               <MotorCertificatesPage />
+            </AdminModulePage>
+          </S>
+        ),
+      },
+      {
+        path: "dmvic-stock",
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.DMVIC_STOCK}>
+              <DmvicStockPage />
+            </AdminModulePage>
+          </S>
+        ),
+      },
+      {
+        path: "dmvic-stock/:id",
+        element: (
+          <S>
+            <AdminModulePage module={MODULES.DMVIC_STOCK}>
+              <DmvicStockDetailPage />
             </AdminModulePage>
           </S>
         ),

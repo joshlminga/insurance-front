@@ -152,7 +152,7 @@ export async function continueAdminMotorDuplicateFlow(
 
   persistAdminMotorPurchaseStart({
     purchaseId,
-    vehicleInfo: purchaseData?.vehicle_info,
+    vehicleInfo: purchaseData?.vehicle_info ?? payload.vehicle,
     ownership: purchaseData?.ownership ?? sq.ownership,
   })
 

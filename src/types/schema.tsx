@@ -56,6 +56,10 @@ import {
     OutBoundDestinationSchema,
     InBoundDestinationSchema,
     TravelKycSchema,
+    CreateDmvicStockSchema,
+    EditDmvicStockSchema,
+    CreateDmvicPolicyNumberRuleSchema,
+    EditDmvicPolicyNumberRuleSchema,
 } from "./form-schema";
 
 export type CustomerFormValues = z.infer<typeof CustomerDetailsSchema>
@@ -143,4 +147,13 @@ export type TravellerFormValues = z.infer<typeof TravellerDetailsSchema>
 export type OutboundFormValues = z.infer<typeof OutBoundDestinationSchema>
 export type InboundFormValues = z.infer<typeof InBoundDestinationSchema>
 export type TravelKycFormValues = z.infer<typeof TravelKycSchema>
+
+export type CreateDmvicStockFormValues = z.infer<typeof CreateDmvicStockSchema>
+export type EditDmvicStockFormValues = z.infer<typeof EditDmvicStockSchema>
+export type CreateDmvicPolicyNumberRuleFormValues = z.infer<
+  typeof CreateDmvicPolicyNumberRuleSchema
+>
+export type EditDmvicPolicyNumberRuleFormValues = z.infer<
+  typeof EditDmvicPolicyNumberRuleSchema
+>
 

@@ -563,7 +563,8 @@ export const AdminMotorDuplicateQuotationPage = () => {
                     }
                     persistAdminMotorPurchaseStart({
                         purchaseId,
-                        vehicleInfo: purchaseData?.vehicle_info,
+                        vehicleInfo:
+                            purchaseData?.vehicle_info ?? duplicateSnapshot?.vehicle,
                         ownership:
                             purchaseData?.ownership ??
                             duplicateSnapshot?.start_quote?.ownership,

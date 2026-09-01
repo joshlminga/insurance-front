@@ -767,6 +767,7 @@ export type ReusableSingleSelectApiInputProps = {
   disabled?: boolean;
   className?: string;
   queryParams?: Record<string, any>;
+  config?: AxiosRequestConfig;
   labelKey?: string;
   valueKey?: string;
   searchPlaceholder?: string;

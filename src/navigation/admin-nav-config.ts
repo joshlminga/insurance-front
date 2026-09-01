@@ -9,6 +9,7 @@ import {
   Coins,
   Banknote,
   FileBadge2,
+  FolderCog,
 } from 'lucide-react'
 import { MODULES, QUOTATION_MOTOR_MODULES } from '@/auth/module-keys'
 import { EPREFIX, EROUTES } from '@/utils/enums'
@@ -308,6 +309,19 @@ export const adminNavConfig: NavItem[] = [
     items: [
       { title: 'General', url: EROUTES.GLOBAL_ROLES, module: MODULES.RBAC },
       { title: 'System', url: EROUTES.SYSTEM_ROLES, module: MODULES.RBAC },
+    ],
+  },
+  {
+    title: 'DMVIC Setup',
+    url: EROUTES.DMVIC_STOCK,
+    icon: FolderCog,
+    module: MODULES.DMVIC_STOCK,
+    items: [
+      {
+        title: 'Policy Numbers',
+        url: EROUTES.DMVIC_STOCK,
+        module: MODULES.DMVIC_STOCK,
+      },
     ],
   },
   {

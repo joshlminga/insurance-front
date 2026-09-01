@@ -1835,6 +1835,7 @@ export function ReusableSingleSelectApiInput({
     disabled = false,
     className,
     queryParams = {},
+    config,
     labelKey = "name",
     valueKey = "id",
     searchPlaceholder = "Search...",
@@ -1857,6 +1858,7 @@ export function ReusableSingleSelectApiInput({
             term: debouncedSearch || undefined,
             ...queryParams,
         },
+        config,
         queryOptions: {
             enabled: !!url,
             staleTime: 1000 * 60 * 5,

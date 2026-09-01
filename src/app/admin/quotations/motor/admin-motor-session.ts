@@ -27,6 +27,7 @@ import type {
     MotorQuoteSessionStartData,
 } from '@/types/types'
 import { isSelfCoverLookup } from './customer-lookup-utils'
+import { normalizeMotorVehicleForKycSession } from './motor-vehicle-session'
 
 const readKey = (key: string) => {
     if (typeof window === 'undefined') return ''
@@ -175,10 +176,12 @@ export function persistAdminMotorPurchaseStart({
 }: PersistAdminMotorPurchaseStartInput): void {
     if (typeof window === 'undefined') return
 
+    const normalizedVehicle = normalizeMotorVehicleForKycSession(vehicleInfo)
+
     sessionStorage.setItem(PURCHASE_SESSION_STORAGE_KEY, String(purchaseId))
     sessionStorage.setItem(
         VEHICLE_DETAILS_SESSION_STORAGE_KEY,
-        vehicleInfo ? JSON.stringify(vehicleInfo) : ''
+        normalizedVehicle ? JSON.stringify(normalizedVehicle) : ''
     )
     sessionStorage.setItem(
         VEHICLE_OWNERSHIP_SESSION_STORAGE_KEY,
@@ -221,6 +224,16 @@ export function persistAdminMotorResumeFromDetail(detail: MotorQuoteFetchDetail)
   const firstInvoiceId = Array.isArray(detail.invoices) && detail.invoices[0]
     ? (detail.invoices[0] as { id?: number }).id
     : undefined
+
+  const normalizedVehicle = normalizeMotorVehicleForKycSession(detail.vehicle)
+  if (normalizedVehicle) {
+    sessionStorage.setItem(
+      VEHICLE_DETAILS_SESSION_STORAGE_KEY,
+      JSON.stringify(normalizedVehicle)
+    )
+  } else {
+    sessionStorage.removeItem(VEHICLE_DETAILS_SESSION_STORAGE_KEY)
+  }
 
   if (purchaseId != null && (stage === 'kyc' || stage === 'payment' || stage === 'certificate' || stage === 'rates')) {
     sessionStorage.setItem(PURCHASE_SESSION_STORAGE_KEY, String(purchaseId))

@@ -296,7 +296,43 @@ export const InvoicePaymentSchema = z.object({
       (date) => date >= new Date().toISOString().split("T")[0],
       "Cover start date must be today or later",
     ),
+  // Admin-only optional fields (not shown on customer checkout)
+  cover_end_date: z.string().optional(),
+  policy_number: z.string().optional(),
   // total_payable: z.string().min(1, "Total payable is required"),
+}).superRefine((data, ctx) => {
+  const endDate = data.cover_end_date?.trim()
+  if (!endDate) {
+    return
+  }
+
+  const startDate = data.cover_start_date
+  if (!startDate) {
+    return
+  }
+
+  if (endDate <= startDate) {
+    ctx.addIssue({
+      code: "custom",
+      message: "Cover end date must be after the cover start date",
+      path: ["cover_end_date"],
+    })
+    return
+  }
+
+  const start = new Date(`${startDate}T00:00:00`)
+  const maxEnd = new Date(start)
+  maxEnd.setMonth(maxEnd.getMonth() + 12)
+  maxEnd.setDate(maxEnd.getDate() - 1)
+  const maxEndString = maxEnd.toISOString().split("T")[0]
+
+  if (endDate > maxEndString) {
+    ctx.addIssue({
+      code: "custom",
+      message: `Cover end date must not exceed ${maxEndString}`,
+      path: ["cover_end_date"],
+    })
+  }
 })
 
 // Base payment schema with common fields
@@ -1353,3 +1389,81 @@ export const TravelKycSchema = z.object({
       message: "Passport or ID attachment is required",
     }),
 })
+
+/** DMVIC broker stock — office + certificate type (remaining stock comes from rules). */
+export const CreateDmvicStockSchema = z.object({
+  organization_location_id: z.string().min(1, 'Organization location is required'),
+  product_type: z.string().min(1, 'Product type is required'),
+  type_of_certificate: z.string().min(1, 'Certificate type is required'),
+  stock: z.coerce.number().int().min(2, 'Stock must be at least 2'),
+})
+
+export const EditDmvicStockSchema = CreateDmvicStockSchema.omit({ stock: true })
+
+const dmvicPolicyNumberRuleBase = z.object({
+  template: z.string().min(1, 'Template is required').max(255),
+  series: z.string().min(1, 'Series is required').max(255),
+  sequence_placeholder: z.string().min(1, 'Sequence placeholder is required').max(20),
+  stock: z.coerce.number().int().min(2, 'Stock must be at least 2'),
+  sequence_start: z.string().regex(/^\d+$/, 'Sequence start must be numeric'),
+  maintain_policy_number: z.boolean(),
+  effective_from: z.string().min(1, 'Effective from date is required'),
+  effective_until: z.string().optional().or(z.literal('')),
+})
+
+/** Policy number rule — template + sequence; API generates actual policy numbers. */
+export const CreateDmvicPolicyNumberRuleSchema = dmvicPolicyNumberRuleBase
+  .extend({
+    dmvic_stock_id: z.coerce.number().int().positive('Stock is required'),
+  })
+  .superRefine((data, ctx) => {
+    if (
+      data.sequence_placeholder !== '' &&
+      !data.template.includes(data.sequence_placeholder)
+    ) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Sequence placeholder must exist in the template',
+        path: ['sequence_placeholder'],
+      })
+    }
+    if (
+      data.effective_until &&
+      data.effective_until !== '' &&
+      data.effective_from &&
+      data.effective_until < data.effective_from
+    ) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Effective until must be on or after effective from',
+        path: ['effective_until'],
+      })
+    }
+  })
+
+export const EditDmvicPolicyNumberRuleSchema = dmvicPolicyNumberRuleBase.superRefine(
+  (data, ctx) => {
+    if (
+      data.sequence_placeholder !== '' &&
+      !data.template.includes(data.sequence_placeholder)
+    ) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Sequence placeholder must exist in the template',
+        path: ['sequence_placeholder'],
+      })
+    }
+    if (
+      data.effective_until &&
+      data.effective_until !== '' &&
+      data.effective_from &&
+      data.effective_until < data.effective_from
+    ) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Effective until must be on or after effective from',
+        path: ['effective_until'],
+      })
+    }
+  },
+)

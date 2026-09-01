@@ -49,10 +49,14 @@ export const AdminMotorInvoicePayment: React.FC<AdminMotorStepProps> = ({
             email: contact.email ?? "",
             phone: contact.phone ?? "",
             cover_start_date: "",
+            cover_end_date: "",
+            policy_number: "",
             payment_plan: "Full",
         },
 
     })
+
+    const coverStartDate = form.watch("cover_start_date")
 
     const submitMutation = UseApiMutation<SubmitResponse, InvoicePaymentFormValues>({
         url: `purchase/motor/${purchaseSessionId}/invoice`,
@@ -69,7 +73,14 @@ export const AdminMotorInvoicePayment: React.FC<AdminMotorStepProps> = ({
         },
     })
     const onSubmit = (data: InvoicePaymentFormValues) => {
-        submitMutation.mutate(data)
+        const payload: InvoicePaymentFormValues = { ...data }
+        if (!payload.cover_end_date?.trim()) {
+            delete payload.cover_end_date
+        }
+        if (!payload.policy_number?.trim()) {
+            delete payload.policy_number
+        }
+        submitMutation.mutate(payload)
     }
 
     return (
@@ -88,9 +99,9 @@ export const AdminMotorInvoicePayment: React.FC<AdminMotorStepProps> = ({
                     <div className="rounded-2xl border border-[#ADABAB]/35 bg-white/95 p-3 sm:p-5">
                         <BoxHeader
                             title="Payee Details"
-                            description="Enter the contact information and preferred cover start date."
+                            description="Enter the contact information for the person paying for this cover."
                         />
-                        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 sm:gap-5'>
+                        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5'>
                             <ReuseableInput
                                 className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                                 control={form.control}
@@ -115,6 +126,15 @@ export const AdminMotorInvoicePayment: React.FC<AdminMotorStepProps> = ({
                                 placeholder="07XXXXXXXX"
                                 required
                             />
+                        </div>
+                    </div>
+
+                    <div className="rounded-2xl border border-[#ADABAB]/35 bg-white/95 p-3 sm:p-5">
+                        <BoxHeader
+                            title="Cover & Policy"
+                            description="Set cover dates and optionally reuse an existing policy number (admin only)."
+                        />
+                        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5'>
                             <ReuseableInput
                                 className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                                 control={form.control}
@@ -125,7 +145,26 @@ export const AdminMotorInvoicePayment: React.FC<AdminMotorStepProps> = ({
                                 required
                                 min={todayMinDate}
                             />
+                            <ReuseableInput
+                                className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
+                                control={form.control}
+                                type='date'
+                                name="cover_end_date"
+                                label="Cover End Date (optional)"
+                                placeholder="DD/MM/YYYY"
+                                min={coverStartDate || todayMinDate}
+                            />
+                            <ReuseableInput
+                                className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
+                                control={form.control}
+                                name="policy_number"
+                                label="Policy Number (optional)"
+                                placeholder="Leave blank to auto-allocate"
+                            />
                         </div>
+                        <p className="mt-3 text-xs text-muted-foreground sm:text-sm">
+                            A custom cover end date limits this purchase to full payment only. Max cover is 12 months from the start date.
+                        </p>
                     </div>
                 </div>
             </div>

@@ -43,6 +43,7 @@ export const MODULES = {
 
   // DMVIC / motor certificates
   DMVIC_CERTIFICATE: 'dmvic-certificate',
+  DMVIC_STOCK: 'dmvic-stock',
 } as const
 
 export type ModuleKey = (typeof MODULES)[keyof typeof MODULES]

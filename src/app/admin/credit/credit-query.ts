@@ -46,16 +46,19 @@ export function creditInvoiceScheduleKey(invoiceId: number | string) {
   return [CREDIT_URLS.invoiceSchedule(invoiceId), undefined] as const
 }
 
-export function creditSetupPoolKey() {
-  return [CREDIT_URLS.setupPool, undefined] as const
+export function creditSetupPoolKey(organizationLocationId?: string | number | null) {
+  return [CREDIT_URLS.setupPool, organizationLocationId ?? undefined] as const
 }
 
-export function creditSetupUsersKey(params?: Record<string, unknown>) {
-  return [CREDIT_URLS.setupUsers, params] as const
+export function creditSetupUsersKey(
+  params?: Record<string, unknown>,
+  organizationLocationId?: string | number | null,
+) {
+  return [CREDIT_URLS.setupUsers, organizationLocationId ?? undefined, params] as const
 }
 
-export function creditSetupEligibleUsersKey(params?: Record<string, unknown>) {
-  return [CREDIT_URLS.setupEligibleUsers, params] as const
+export function creditSetupEligibleUsersKey(organizationLocationId?: string | number | null) {
+  return [CREDIT_URLS.setupEligibleUsers, organizationLocationId ?? undefined] as const
 }
 
 export async function invalidateCreditWallet(queryClient: QueryClient) {

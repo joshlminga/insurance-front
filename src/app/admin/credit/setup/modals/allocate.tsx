@@ -29,6 +29,8 @@ type AllocateCreditModalProps = {
   componentProps?: {
     user?: CreditUserAllocation
     refetch?: () => Promise<any>
+    /** Per-request org header for super-admin credit setup (not global session). */
+    orgContextHeaders?: Record<string, string>
   }
 }
 
@@ -38,6 +40,7 @@ export default function AllocateCreditModal({
 }: AllocateCreditModalProps) {
   const queryClient = useQueryClient()
   const user = componentProps?.user
+  const orgContextHeaders = componentProps?.orgContextHeaders
   // Existing row edit: user already known. New allocation: pick from eligible list.
   const existingUserId = user?.user_id ?? user?.user?.id ?? user?.id
   const isNewAllocation = existingUserId == null
@@ -72,6 +75,7 @@ export default function AllocateCreditModal({
   const allocateMutation = UseApiMutation<SubmitResponse, AllocatePayload>({
     url: CREDIT_URLS.setupUserAllocate(String(allocateTargetId ?? "")),
     method: EMETHODS.POST,
+    config: orgContextHeaders ? { headers: orgContextHeaders } : undefined,
     mutationOptions: {
       onSuccess: async (response) => {
         ShowToast.success(response?.message || "Credit allocated successfully")
@@ -132,6 +136,7 @@ export default function AllocateCreditModal({
                   labelKey="user.name"
                   valueKey="user_id"
                   emptyMessage="No eligible users found"
+                  config={orgContextHeaders ? { headers: orgContextHeaders } : undefined}
                   className={
                     form.formState.errors.user_id
                       ? "**:data-[slot=select-trigger]:border-red-500 **:data-[slot=select-trigger]:focus-visible:ring-red-500"

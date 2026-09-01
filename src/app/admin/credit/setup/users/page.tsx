@@ -7,7 +7,9 @@ import {
   SearchTools,
 } from "@/dev/table"
 import { CreditUserAllocationsColumns } from "@/dev/columns/admin/credit/user-allocations"
-import { CREDIT_URLS } from "@/app/admin/credit/credit-query"
+import { CREDIT_URLS, creditSetupUsersKey } from "@/app/admin/credit/credit-query"
+import { CreditSetupOrgPicker } from "@/app/admin/credit/setup/credit-setup-org-picker"
+import { useCreditSetupOrg } from "@/app/admin/credit/setup/use-credit-setup-org"
 import { useCustomDialogContextFactory, useDebounce } from "@/hooks"
 import { useCan } from "@/auth/useCan"
 import { UseApiQuery } from "@/hooks/hooks"
@@ -19,8 +21,9 @@ import type {
   TFilterOptions,
 } from "@/types/types"
 import { FILTEROPTIONS, ReusableReducer } from "@/utils/constatnts"
-import { Coins, Plus } from "lucide-react"
+import { Building2, Coins, Plus } from "lucide-react"
 import { useReducer } from "react"
+import { Card } from "@/components/ui/card"
 import AllocateCreditModal from "../modals/allocate"
 
 function resolveAllocationUserId(user?: CreditUserAllocation) {
@@ -30,6 +33,13 @@ function resolveAllocationUserId(user?: CreditUserAllocation) {
 export function CreditSetupUsersPage() {
   const { can } = useCan()
   const canAllocate = can("finance-control.create")
+  const {
+    isBypass,
+    selectedLocationId,
+    setLocationId,
+    orgContextHeaders,
+    canFetchCreditSetup,
+  } = useCreditSetupOrg()
 
   const [filter, optionsDispatcher] = useReducer(
     ReusableReducer<TPaginationFilters & TFilterOptions>,
@@ -44,16 +54,21 @@ export function CreditSetupUsersPage() {
     useCustomDialogContextFactory<{
       refetch?: () => Promise<any>
       user?: CreditUserAllocation
+      orgContextHeaders?: Record<string, string>
     }>()
+
+  const listParams = {
+    page: filter.page,
+    per_page: filter.pageSize,
+    term: filter.term,
+  }
 
   const usersQuery = UseApiQuery<SubmitResponse>({
     url: CREDIT_URLS.setupUsers,
-    params: {
-      page: filter.page,
-      per_page: filter.pageSize,
-      term: filter.term,
-    },
-    queryOptions: { enabled: true },
+    queryKey: creditSetupUsersKey(listParams, selectedLocationId || null),
+    params: listParams,
+    config: orgContextHeaders ? { headers: orgContextHeaders } : undefined,
+    queryOptions: { enabled: canFetchCreditSetup },
   })
 
   const users: CreditUserAllocation[] =
@@ -65,7 +80,11 @@ export function CreditSetupUsersPage() {
   const openAllocateModal = (user?: CreditUserAllocation) => {
     handleDialogContextSwitch({
       Component: AllocateCreditModal,
-      componentProps: { user, refetch: usersQuery.refetch },
+      componentProps: {
+        user,
+        refetch: usersQuery.refetch,
+        orgContextHeaders,
+      },
     })
   }
 
@@ -81,7 +100,7 @@ export function CreditSetupUsersPage() {
         ]
       : []
 
-  const showEmptyState = !usersQuery.isLoading && users.length === 0
+  const showEmptyState = canFetchCreditSetup && !usersQuery.isLoading && users.length === 0
 
   return (
     <div className="space-y-6">
@@ -89,7 +108,7 @@ export function CreditSetupUsersPage() {
         title="User Allocations"
         description="Assign credit balances and minimum spend thresholds per user. Allocating requires finance-control.create (and finance-control.list to view this page). Recipients must belong to this location and have any active role other than member — including built-in and custom org roles such as sales. Member-only users are not eligible."
         actions={
-          canAllocate
+          canAllocate && canFetchCreditSetup
             ? [
                 {
                   icon: Plus,
@@ -102,7 +121,22 @@ export function CreditSetupUsersPage() {
         }
       />
 
-      {showEmptyState ? (
+      {isBypass ? (
+        <Card className="shadow-none p-6">
+          <CreditSetupOrgPicker
+            value={selectedLocationId}
+            onChange={setLocationId}
+          />
+        </Card>
+      ) : null}
+
+      {!canFetchCreditSetup ? (
+        <EmptyState
+          icon={Building2}
+          title="Select an organization location"
+          description="Choose a Company, Organization, or Partner location above to view and manage user credit allocations."
+        />
+      ) : showEmptyState ? (
         <EmptyState
           icon={Coins}
           title="No credit wallets yet"

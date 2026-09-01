@@ -101,6 +101,8 @@ export const EROUTES = {
 
   // Motor certificates
   MOTOR_CERTIFICATES: `/${EPREFIX.DASHBOARD}/motor-certificates`,
+  DMVIC_STOCK: `/${EPREFIX.DASHBOARD}/dmvic-stock`,
+  DMVIC_STOCK_DETAIL: `/${EPREFIX.DASHBOARD}/dmvic-stock/:id`,
 
   // Reports
   REPORTS: `/${EPREFIX.DASHBOARD}/reports`,

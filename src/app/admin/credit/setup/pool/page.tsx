@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { PageHeader } from "@/components/shared"
-import { CREDIT_URLS } from "@/app/admin/credit/credit-query"
+import { PageHeader, EmptyState } from "@/components/shared"
+import { CREDIT_URLS, creditSetupPoolKey } from "@/app/admin/credit/credit-query"
+import { CreditSetupOrgPicker } from "@/app/admin/credit/setup/credit-setup-org-picker"
+import { useCreditSetupOrg } from "@/app/admin/credit/setup/use-credit-setup-org"
 import { UseApiMutation, UseApiQuery } from "@/hooks/hooks"
 import type { CreditPool, SubmitResponse } from "@/types/types"
 import { PoolSettingsSchema } from "@/types/form-schema"
@@ -14,36 +16,28 @@ import { Card } from "@/components/ui/card"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import { Button, ReusableSingleSelectApiInput, ReuseableInput } from "@/dev/core"
+import { Building2 } from "lucide-react"
 import z from "zod"
 
 export function CreditSetupPoolPage() {
+  const {
+    isBypass,
+    selectedLocationId,
+    setLocationId,
+    orgContextHeaders,
+    canFetchCreditSetup,
+  } = useCreditSetupOrg()
 
   const { data: poolQuery, refetch: PoolQueryRefetch } = UseApiQuery<SubmitResponse>({
     url: CREDIT_URLS.setupPool,
+    queryKey: creditSetupPoolKey(selectedLocationId || null),
+    config: orgContextHeaders ? { headers: orgContextHeaders } : undefined,
     queryOptions: {
-      enabled: true,
+      enabled: canFetchCreditSetup,
     },
   })
   const pool = (poolQuery?.data?.pool ?? poolQuery?.data) as CreditPool | undefined
 
-  // const form = useForm<PoolSettingsFormValues>({
-  //   resolver: zodResolver(PoolSettingsSchema),
-  //   values: {
-  //     total_available: pool?.total_available ? Number(pool.total_available) : 0,
-  //     requires_approval: pool?.requires_approval ?? false,
-  //     auto_approve_threshold: pool?.auto_approve_threshold
-  //       ? Number(pool.auto_approve_threshold)
-  //       : null,
-  //     finance_can_override_without_payment:
-  //       pool?.finance_can_override_without_payment ?? false,
-  //     finance_role_id: pool?.finance_role_id
-  //       ? String(pool.finance_role_id)
-  //       : undefined,
-  //     overall_manager_role_id: pool?.overall_manager_role_id
-  //       ? String(pool.overall_manager_role_id)
-  //       : undefined,
-  //   },
-  // })
   const form = useForm<
     z.input<typeof PoolSettingsSchema>,
     any,
@@ -81,11 +75,11 @@ export function CreditSetupPoolPage() {
   const savePoolMutation = UseApiMutation<SubmitResponse, Partial<PoolSettingsFormValues>>({
     url: CREDIT_URLS.setupPool,
     method: EMETHODS.PATCH,
+    config: orgContextHeaders ? { headers: orgContextHeaders } : undefined,
     mutationOptions: {
       onSuccess: (response) => {
         ShowToast.success(response?.message || "Pool settings saved")
-        PoolQueryRefetch();
-        // await Promise.all([poolQuery.refetch(), invalidateCreditAll(queryClient)])
+        PoolQueryRefetch()
       },
       onError: (error) => {
         ShowToast.error(extractErrorMessage(error))
@@ -111,89 +105,107 @@ export function CreditSetupPoolPage() {
         title="Pool Settings"
         description="Configure org credit pool rules and finance governance for this location."
       />
-      <Card className="shadow-none p-6 space-y-5">
-        <form onSubmit={form.handleSubmit(onSavePool)} className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <ReuseableInput
-              control={form.control}
-              name="total_available"
-              label="Pool ceiling (KES)"
-              type="number"
-              required
-            />
-            {requiresApproval ? (
+
+      {isBypass ? (
+        <Card className="shadow-none p-6">
+          <CreditSetupOrgPicker
+            value={selectedLocationId}
+            onChange={setLocationId}
+          />
+        </Card>
+      ) : null}
+
+      {!canFetchCreditSetup ? (
+        <EmptyState
+          icon={Building2}
+          title="Select an organization location"
+          description="Choose a Company, Organization, or Partner location above to load and edit pool settings."
+        />
+      ) : (
+        <Card className="shadow-none p-6 space-y-5">
+          <form onSubmit={form.handleSubmit(onSavePool)} className="space-y-4">
+            <div className="grid gap-4 sm:grid-cols-2">
               <ReuseableInput
                 control={form.control}
-                name="auto_approve_threshold"
-                label="Auto-approve threshold (KES)"
+                name="total_available"
+                label="Pool ceiling (KES)"
                 type="number"
+                required
               />
-            ) : null}
-            <Controller
-              control={form.control}
-              name="finance_role_id"
-              render={({ field }) => (
-                <ReusableSingleSelectApiInput
-                  url="roles"
-                  value={String(field.value)}
-                  onChange={field.onChange}
-                  label="Finance role"
-                  required
-                  placeholder="Select role"
+              {requiresApproval ? (
+                <ReuseableInput
+                  control={form.control}
+                  name="auto_approve_threshold"
+                  label="Auto-approve threshold (KES)"
+                  type="number"
                 />
-              )}
-            />
-            <Controller
-              control={form.control}
-              name="overall_manager_role_id"
-              render={({ field }) => (
-                <ReusableSingleSelectApiInput
-                  url="roles"
-                  value={String(field.value)}
-                  onChange={field.onChange}
-                  label="Overall manager role"
-                  required
-                  placeholder="Select role"
-                />
-              )}
-            />
-
-          </div>
-
-          <div className="flex flex-wrap gap-6">
-            <Controller
-              name="requires_approval"
-              control={form.control}
-              render={({ field }) => (
-                <div className="flex items-center gap-3">
-                  <Switch checked={field.value} onCheckedChange={field.onChange} id="requires_approval" />
-                  <Label htmlFor="requires_approval">Require approval before deduction</Label>
-                </div>
-              )}
-            />
-            <Controller
-              name="finance_can_override_without_payment"
-              control={form.control}
-              render={({ field }) => (
-                <div className="flex items-center gap-3">
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                    id="finance_override"
+              ) : null}
+              <Controller
+                control={form.control}
+                name="finance_role_id"
+                render={({ field }) => (
+                  <ReusableSingleSelectApiInput
+                    url="roles"
+                    value={String(field.value)}
+                    onChange={field.onChange}
+                    label="Finance role"
+                    required
+                    placeholder="Select role"
                   />
-                  <Label htmlFor="finance_override">Finance can override without payment</Label>
-                </div>
-              )}
-            />
-          </div>
+                )}
+              />
+              <Controller
+                control={form.control}
+                name="overall_manager_role_id"
+                render={({ field }) => (
+                  <ReusableSingleSelectApiInput
+                    url="roles"
+                    value={String(field.value)}
+                    onChange={field.onChange}
+                    label="Overall manager role"
+                    required
+                    placeholder="Select role"
+                  />
+                )}
+              />
 
-          <Button type="submit"
-            loading={savePoolMutation.isPending}>
-            Save pool settings
-          </Button>
-        </form>
+            </div>
 
-      </Card>
+            <div className="flex flex-wrap gap-6">
+              <Controller
+                name="requires_approval"
+                control={form.control}
+                render={({ field }) => (
+                  <div className="flex items-center gap-3">
+                    <Switch checked={field.value} onCheckedChange={field.onChange} id="requires_approval" />
+                    <Label htmlFor="requires_approval">Require approval before deduction</Label>
+                  </div>
+                )}
+              />
+              <Controller
+                name="finance_can_override_without_payment"
+                control={form.control}
+                render={({ field }) => (
+                  <div className="flex items-center gap-3">
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      id="finance_override"
+                    />
+                    <Label htmlFor="finance_override">Finance can override without payment</Label>
+                  </div>
+                )}
+              />
+            </div>
+
+            <Button type="submit"
+              loading={savePoolMutation.isPending}>
+              Save pool settings
+            </Button>
+          </form>
+
+        </Card>
+      )}
     </div>
   )
 }
