@@ -391,11 +391,14 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
                                 Payment <span className="text-[#BF162E]">Options</span>
                             </h1>
                             <p className="mt-2 max-w-2xl text-sm text-black/70 sm:text-base">
-                                Choose a payment plan and select how the customer will pay for this motor cover.
+                                {isPaymentPlanLocked
+                                    ? 'Select how the customer will pay for this motor cover.'
+                                    : 'Choose a payment plan and select how the customer will pay for this motor cover.'}
                             </p>
                         </div>
 
                         <div className="mt-4 space-y-4">
+                            {!isPaymentPlanLocked ? (
                             <div className="rounded-xl border border-black/20 bg-white p-2.5 sm:p-4">
                                 <BoxHeader
                                     title="Payment Plans"
@@ -495,12 +498,11 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
                                     </div>
                                 ) : (
                                     <p className="mt-2.5 text-sm text-black/70">
-                                        {isPaymentPlanLocked
-                                            ? 'Full payment only — a custom cover end date was set on this purchase.'
-                                            : 'Select a payment plan above to see the installment schedule.'}
+                                        Select a payment plan above to see the installment schedule.
                                     </p>
                                 )}
                             </div>
+                            ) : null}
 
                             <div className="rounded-xl border border-black/20 bg-white p-2.5 sm:p-4 [&_h2]:text-black [&_p]:text-black/70 [&_.mt-6]:mt-4.5">
                                 <BoxHeader

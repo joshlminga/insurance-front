@@ -155,7 +155,7 @@ export const AdminMotorInvoicePayment: React.FC<AdminMotorStepProps> = ({
                                 min={coverStartDate || todayMinDate}
                             />
                             <ReuseableInput
-                                className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
+                                className="w-full h-10 rounded-[5px] border-2 border-[#C20C0C]"
                                 control={form.control}
                                 name="policy_number"
                                 label="Policy Number (optional)"
