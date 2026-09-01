@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CardFooter } from '@/components/ui/card'
-import { Field, FieldError } from '@/components/ui/field'
+import { Field, FieldError, FieldLabel } from '@/components/ui/field'
 import {
     Select,
     SelectContent,
@@ -45,6 +45,9 @@ import { getPaymentStatusPath, storePaymentStatusSession } from '@/app/payment/p
 import type { AdminMotorStepProps } from '../admin-step-props'
 import { readAdminMotorCustomerContact } from '../admin-motor-session'
 import { useNavigate } from 'react-router-dom'
+import {
+    motorPurchaseSummaryQueryOptions,
+} from '@/app/customer/motor/motor-purchase-query'
 
 type BoxHeaderProps = {
     title: string
@@ -64,6 +67,9 @@ const BoxHeader = ({ title, description }: BoxHeaderProps) => (
 
 const compactFieldClass =
     'w-full h-9.5 rounded-[4px] border border-black/30 bg-white text-sm text-black'
+
+const breakdownInputClass =
+    'w-full h-9.5 rounded-[4px] border border-[#ADABAB] bg-neutral-50 text-sm text-black shadow-none disabled:opacity-100 disabled:cursor-default disabled:bg-neutral-50'
 
 export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
     goToNextStep,
@@ -85,6 +91,7 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
         invoiceId?: string
     } | null>(null)
     const [isCreditSubmitting, setIsCreditSubmitting] = React.useState(false)
+    const [isPlanBreakdownUpdating, setIsPlanBreakdownUpdating] = React.useState(false)
 
     const {
         pollMode,
@@ -133,6 +140,7 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
         queryOptions: {
             enabled: !!purchaseSessionId,
             retry: 1,
+            ...motorPurchaseSummaryQueryOptions,
         },
     })
 
@@ -209,6 +217,14 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
         },
     })
 
+    const isInteractionBlocked =
+        isPlanBreakdownUpdating
+        || paymentPlanMutation.isPending
+        || isPolling
+        || isPesapalSubmitting
+        || isPaystackSubmitting
+        || isCreditSubmitting
+
     const selectedPaymentPlan = form.watch('payment_plans')
 
     const visibleInstallmentCount = selectedPaymentPlan
@@ -232,12 +248,17 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
 
     const confirmPlanChange = React.useCallback(async () => {
         isConfirmingPlanRef.current = true
+        setIsPlanBreakdownUpdating(true)
         try {
             const nextPlan = pendingPlanRef.current
             if (!nextPlan || !purchaseSessionId) return
             form.setValue('payment_plans', nextPlan)
+            form.setValue('first_installment', '')
+            form.setValue('second_installment', '')
+            form.setValue('third_installment', '')
             try {
                 await paymentPlanMutation.mutateAsync({ payment_plan: nextPlan })
+                await refetchSummary()
             } catch {
                 form.setValue('payment_plans', lastAppliedPlanRef.current)
             }
@@ -245,8 +266,9 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
             isConfirmingPlanRef.current = false
             pendingPlanRef.current = null
             setIsPlanConfirmOpen(false)
+            setIsPlanBreakdownUpdating(false)
         }
-    }, [form, paymentPlanMutation, purchaseSessionId])
+    }, [form, paymentPlanMutation, purchaseSessionId, refetchSummary])
 
     const handlePaymentMethodChange = (value: string) => {
         setSelectedPaymentMethod(value)
@@ -398,19 +420,21 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
                             <div className="rounded-xl border border-black/20 bg-white p-2.5 sm:p-4">
                                 <BoxHeader
                                     title="Payment Plans"
-                                    description="Select an installment schedule and review the amounts due."
+                                    description="Review the amounts due for each installment."
                                 />
-                                <div className="w-full sm:w-fit sm:min-w-37.5">
+                                <div className="mt-2.5 grid grid-cols-1 gap-4 lg:grid-cols-12 lg:items-end **:data-[slot=field-label]:text-sm **:data-[slot=field-label]:mb-1">
+                                    <div className="w-full lg:col-span-4">
                                     <Controller
                                         name="payment_plans"
                                         control={form.control}
                                         render={({ field, fieldState }) => (
                                             <Field
                                                 data-invalid={fieldState.invalid}
-                                                className="w-full">
+                                                className="w-full flex-col gap-0">
+                                                <FieldLabel>Select an installment schedule.</FieldLabel>
                                                 <Select
                                                     value={field.value || undefined}
-                                                    disabled={isPaymentPlanLocked}
+                                                    disabled={isPaymentPlanLocked || isInteractionBlocked}
                                                     onValueChange={(value) => {
                                                         const previous = field.value ?? ''
                                                         if (value === previous) return
@@ -446,19 +470,19 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
                                             </Field>
                                         )}
                                     />
-                                </div>
+                                    </div>
+                                    <div className="w-full lg:col-span-8">
                                 {visibleInstallmentCount > 0 ? (
                                     <div
                                         className={cn(
-                                            'mt-2.5 grid gap-2.5 sm:gap-4 **:data-[slot=field-label]:text-sm **:data-[slot=field-label]:mb-1',
-                                            visibleInstallmentCount === 1 && 'grid-cols-1 sm:grid-cols-2',
+                                            'grid gap-2.5 sm:gap-4',
+                                            visibleInstallmentCount === 1 && 'grid-cols-1',
                                             visibleInstallmentCount === 2 && 'grid-cols-1 sm:grid-cols-2',
                                             visibleInstallmentCount >= 3 && 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
                                         )}>
                                         {visibleInstallmentCount >= 1 && (
-                                            <div className={cn(visibleInstallmentCount === 1 && 'sm:max-w-[37.5%]')}>
                                             <ReuseableInput
-                                                className={compactFieldClass}
+                                                className={breakdownInputClass}
                                                 control={form.control}
                                                 name="first_installment"
                                                 label={
@@ -469,11 +493,10 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
                                                 disabled
                                                 thousandsSeparator
                                             />
-                                            </div>
                                         )}
                                         {visibleInstallmentCount >= 2 && (
                                             <ReuseableInput
-                                                className={compactFieldClass}
+                                                className={breakdownInputClass}
                                                 control={form.control}
                                                 name="second_installment"
                                                 label="2nd installment"
@@ -483,7 +506,7 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
                                         )}
                                         {visibleInstallmentCount >= 3 && (
                                             <ReuseableInput
-                                                className={compactFieldClass}
+                                                className={breakdownInputClass}
                                                 control={form.control}
                                                 name="third_installment"
                                                 label="3rd installment"
@@ -493,10 +516,17 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
                                         )}
                                     </div>
                                 ) : (
-                                    <p className="mt-2.5 text-sm text-black/70">
-                                        Select a payment plan above to see the installment schedule.
-                                    </p>
+                                    <Field className="w-full flex-col gap-0">
+                                        <FieldLabel className="invisible" aria-hidden="true">
+                                            Select an installment schedule.
+                                        </FieldLabel>
+                                        <p className="flex h-9.5 items-center text-sm text-black/70">
+                                            Select a payment plan to see the installment breakdown.
+                                        </p>
+                                    </Field>
                                 )}
+                                    </div>
+                                </div>
                             </div>
                             ) : null}
 
@@ -536,8 +566,22 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
                         cancelButtonText="Cancel"
                         onConfirm={confirmPlanChange}
                         onCancel={cancelPlanChange}
-                        isPending={paymentPlanMutation.isPending}
+                        isPending={paymentPlanMutation.isPending || isPlanBreakdownUpdating}
                     />
+
+                    {(isPlanBreakdownUpdating || paymentPlanMutation.isPending) && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+                            <div className="mx-4 flex max-w-sm flex-col items-center gap-4 rounded-2xl border border-black/20 bg-white p-8 shadow-xl">
+                                <div className="h-12 w-12 animate-spin rounded-full border-4 border-[#BF162E] border-t-transparent" />
+                                <p className="text-center font-medium text-black/80">
+                                    Updating payment plan…
+                                </p>
+                                <p className="text-center text-sm text-black/60">
+                                    Please wait while we recalculate the installment breakdown.
+                                </p>
+                            </div>
+                        </div>
+                    )}
 
                     {isPolling && (
                         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
@@ -574,7 +618,8 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
                     <CardFooter className="mt-4 w-full flex flex-col gap-3 px-0 sm:flex-row sm:items-center sm:justify-between">
                         <Button
                             type="button"
-                            className="w-full rounded-full border border-[#BF162E] bg-transparent text-[#BF162E] hover:bg-[#BF162E]/10 sm:w-auto"
+                            disabled={isInteractionBlocked}
+                            className="w-full rounded-full border border-[#BF162E] bg-transparent text-[#BF162E] hover:bg-[#BF162E]/10 sm:w-auto disabled:opacity-50"
                             leftIcon={<ArrowLeftCircle />}
                             onClick={() => goToPrevStep?.()}>
                             Previous
@@ -585,7 +630,8 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
                                 trigger={
                                     <Button
                                         variant="outline"
-                                        className="w-full border-[#BF162E] bg-transparent text-[#BF162E] hover:bg-[#BF162E] hover:text-white focus-visible:ring-[#BF162E]/30 lg:w-auto">
+                                        disabled={isInteractionBlocked}
+                                        className="w-full border-[#BF162E] bg-transparent text-[#BF162E] hover:bg-[#BF162E] hover:text-white focus-visible:ring-[#BF162E]/30 disabled:opacity-50 lg:w-auto">
                                         Generate Invoice
                                     </Button>
                                 }
@@ -618,10 +664,12 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
                                 ]} />
                             <Button
                                 type="submit"
-                                disabled={isPolling || isPesapalSubmitting || isPaystackSubmitting || isCreditSubmitting}
-                                className="w-full rounded-full bg-[#BF162E]/90 hover:bg-[#BF162E] sm:w-auto"
+                                disabled={isInteractionBlocked}
+                                className="w-full rounded-full bg-[#BF162E]/90 hover:bg-[#BF162E] sm:w-auto disabled:opacity-50"
                                 rightIcon={<ArrowRightCircle />}>
-                                {isPolling || isPesapalSubmitting || isPaystackSubmitting || isCreditSubmitting
+                                {isPlanBreakdownUpdating || paymentPlanMutation.isPending
+                                    ? 'Updating plan...'
+                                    : isPolling || isPesapalSubmitting || isPaystackSubmitting || isCreditSubmitting
                                     ? 'Processing...'
                                     : 'Proceed To Payment'}
                             </Button>

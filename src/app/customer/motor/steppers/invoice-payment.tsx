@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CardFooter } from '@/components/ui/card'
 import { Button, ReuseableInput } from '@/dev/core'
+import { refreshMotorPurchaseSummary } from '@/app/customer/motor/motor-purchase-query'
 import { UseApiMutation } from '@/hooks/hooks'
+import { useQueryClient } from '@tanstack/react-query'
 import { InvoicePaymentSchema } from '@/types/form-schema'
 import type { InvoicePaymentFormValues } from '@/types/schema'
 import type { CustomerVerificationDetailsProps, SubmitResponse } from '@/types/types'
@@ -37,6 +39,7 @@ const BoxHeader = ({ title, description }: BoxHeaderProps) => (
 )
 
 export const InvoicePayment: React.FC<CustomerVerificationDetailsProps> = ({ goToNextStep, goToPrevStep }) => {
+    const queryClient = useQueryClient()
     const [purchaseSessionId] = useState(() => readSessionValue(INVOICE_SESSION_STORAGE_KEY))
     const todayMinDate = getTodayDateString()
 
@@ -56,7 +59,10 @@ export const InvoicePayment: React.FC<CustomerVerificationDetailsProps> = ({ goT
         url: `purchase/motor/${purchaseSessionId}/invoice`,
         method: EMETHODS.POST,
         mutationOptions: {
-            onSuccess: (data) => {
+            onSuccess: async (data) => {
+                if (purchaseSessionId) {
+                    await refreshMotorPurchaseSummary(queryClient, purchaseSessionId)
+                }
                 goToNextStep?.()
                 ShowToast.success(data.message || "Submitted successfully!")
             },

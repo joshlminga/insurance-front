@@ -88,22 +88,27 @@ export const CardsTabPage: React.FC = () => {
 
                     {cardProvider === 'paystack' ? (
                         <div className="mt-4 rounded-lg border border-black/20 bg-white p-3 shadow-sm">
-                            <ReuseableInput
-                                className="w-full h-10 rounded-sm border border-black/30 bg-white text-black"
-                                control={control}
-                                name="paystack_email"
-                                label="Email Address"
-                                type="email"
-                                placeholder="name@example.com"
-                            />
-                            <div className="mt-3 flex items-start gap-3 rounded-md border border-black/20 bg-white p-3">
-                                <div className="mt-1 text-[#BF162E]">
-                                    <CircleAlert className="h-4 w-4" />
+                            <div className="grid grid-cols-1 gap-4 lg:grid-cols-12 lg:items-end">
+                                <div className="lg:col-span-5">
+                                    <ReuseableInput
+                                        className="w-full h-10 rounded-sm border border-black/30 bg-white text-black"
+                                        control={control}
+                                        name="paystack_email"
+                                        label="Email Address"
+                                        type="email"
+                                        placeholder="name@example.com"
+                                    />
                                 </div>
-                                <span className="text-xs sm:text-sm text-black/80 leading-relaxed">
-                                    Paystack will open a card checkout. If the popup is blocked, we
-                                    send you to Paystack&apos;s payment page instead.
-                                </span>
+                                <div className="lg:col-span-7">
+                                    <div className="flex h-10 items-center gap-3 rounded-md border border-black/20 bg-white px-3">
+                                        <div className="shrink-0 text-[#BF162E]">
+                                            <CircleAlert className="h-4 w-4" />
+                                        </div>
+                                        <span className="text-xs sm:text-sm text-black/80 leading-relaxed">
+                                            We will open a checkout via Paystack.
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     ) : null}

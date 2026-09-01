@@ -49,6 +49,7 @@ import { CreditScheduleStatusPanel } from '@/app/admin/credit/components/CreditS
 import { storePaymentStatusSession } from '@/app/payment/payment-session'
 import { EROUTES } from '@/utils/enums'
 import { useNavigate } from 'react-router-dom'
+import { motorPurchaseSummaryQueryOptions } from '@/app/customer/motor/motor-purchase-query'
 
 
 export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goToNextStep, goToPrevStep }) => {
@@ -114,6 +115,7 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
         queryOptions: {
             enabled: !!purchaseSessionId,
             retry: 1,
+            ...motorPurchaseSummaryQueryOptions,
         },
     })
 
