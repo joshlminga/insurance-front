@@ -43,10 +43,16 @@ import { submitMotorCreditPayment } from '@/app/admin/credit/credit-payment'
 import { CreditPendingBanner } from '@/app/admin/credit/components/CreditPendingBanner'
 import { getPaymentStatusPath, storePaymentStatusSession } from '@/app/payment/payment-session'
 import type { AdminMotorStepProps } from '../admin-step-props'
-import { readAdminMotorCustomerContact } from '../admin-motor-session'
+import {
+    readAdminMotorCustomerContact,
+    readAdminMotorTargetInvoiceAmount,
+    readAdminMotorTargetInvoiceId,
+} from '../admin-motor-session'
 import { useNavigate } from 'react-router-dom'
 import {
     motorPurchaseSummaryQueryOptions,
+    MOTOR_PURCHASE_URLS,
+    resolveTargetInvoiceBreakdownItem,
 } from '@/app/customer/motor/motor-purchase-query'
 
 type BoxHeaderProps = {
@@ -79,12 +85,13 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
     const customerEmail = defaultCustomerContact?.email ?? readAdminMotorCustomerContact().email
     const navigate = useNavigate()
     const [selectedPaymentMethod, setSelectedPaymentMethod] = React.useState<string>('mpesa');
-    const [purchaseSessionId, setPurchaseSessionId] = React.useState<string | null>(null);
+    const [purchaseId, setPurchaseId] = React.useState<string | null>(null);
     const [isPlanConfirmOpen, setIsPlanConfirmOpen] = React.useState(false);
     const lastAppliedPlanRef = React.useRef<string>('');
     const pendingPlanRef = React.useRef<string | null>(null);
     const isConfirmingPlanRef = React.useRef(false);
-    const [purchaseId, setPurchaseId] = React.useState<string | null>(null)
+    const [targetInvoiceId] = React.useState<string | null>(() => readAdminMotorTargetInvoiceId());
+    const [fallbackInvoiceAmount] = React.useState<string | null>(() => readAdminMotorTargetInvoiceAmount());
     const [creditPending, setCreditPending] = React.useState<{
         message: string
         creditTransactionId?: number
@@ -118,7 +125,10 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
     const stopPolling = isPaystackPolling ? stopPaystackPolling : stopGatewayPolling
 
     React.useEffect(() => {
-        const storedPurchaseKey = String(sessionStorage.getItem(PURCHASE_SESSION_STORAGE_KEY))
+        const storedPurchaseKey =
+            sessionStorage.getItem(PURCHASE_SESSION_STORAGE_KEY)
+            ?? sessionStorage.getItem(INVOICE_SESSION_STORAGE_KEY)
+
         if (storedPurchaseKey) {
             setPurchaseId(storedPurchaseKey)
         } else {
@@ -126,19 +136,11 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
         }
     }, [])
 
-    React.useEffect(() => {
-        const storedPurchaseKey = String(sessionStorage.getItem(INVOICE_SESSION_STORAGE_KEY))
-        if (storedPurchaseKey) {
-            setPurchaseSessionId(storedPurchaseKey)
-        } else {
-            setPurchaseSessionId(null)
-        }
-    }, [])
-
     const { data: SummaryData, refetch: refetchSummary } = UseApiQuery<SubmitResponse>({
-        url: `purchase/motor/${purchaseSessionId}/summary`,
+        url: purchaseId ? MOTOR_PURCHASE_URLS.summary(purchaseId) : '',
+        params: targetInvoiceId ? { target_invoice_id: targetInvoiceId } : undefined,
         queryOptions: {
-            enabled: !!purchaseSessionId,
+            enabled: !!purchaseId,
             retry: 1,
             ...motorPurchaseSummaryQueryOptions,
         },
@@ -170,33 +172,41 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
 
     React.useEffect(() => {
         if (!SummaryData?.data) return
-        const firstItem = SummaryData.data.invoice_breakdown?.items?.[0]
-        if (firstItem?.installment_amount) {
-            form.setValue('amount', Number(firstItem.installment_amount))
-        }
-        if (firstItem?.id) {
-            form.setValue('invoice_id', String(firstItem.id))
-        }
-    }, [SummaryData, form])
 
-    const isPaymentPlanLocked = React.useMemo(
-        () => Boolean(SummaryData?.data?.invoice?.cover_end_date),
+        const items = SummaryData.data.invoice_breakdown?.items as Parameters<
+            typeof resolveTargetInvoiceBreakdownItem
+        >[0]
+        const targetItem = resolveTargetInvoiceBreakdownItem(items, targetInvoiceId)
+
+        if (targetItem?.installment_amount) {
+            form.setValue('amount', Number(targetItem.installment_amount))
+        } else if (fallbackInvoiceAmount) {
+            form.setValue('amount', Number(fallbackInvoiceAmount))
+        }
+
+        if (targetItem?.id) {
+            form.setValue('invoice_id', String(targetItem.id))
+        }
+    }, [SummaryData, form, targetInvoiceId, fallbackInvoiceAmount])
+
+    const paymentPlansLocked = React.useMemo(
+        () => Boolean(SummaryData?.data?.payment_plans_locked),
         [SummaryData],
     )
 
     const availablePaymentPlans = React.useMemo(
-        () => (isPaymentPlanLocked ? PAYMENTPLANS.filter((plan) => plan.value === 'Full') : PAYMENTPLANS),
-        [isPaymentPlanLocked],
+        () => (paymentPlansLocked ? PAYMENTPLANS.filter((plan) => plan.value === 'Full') : PAYMENTPLANS),
+        [paymentPlansLocked],
     )
 
     React.useEffect(() => {
-        if (!isPaymentPlanLocked) return
+        if (!paymentPlansLocked) return
         form.setValue('payment_plans', 'Full')
         lastAppliedPlanRef.current = 'Full'
-    }, [isPaymentPlanLocked, form])
+    }, [paymentPlansLocked, form])
 
     const paymentPlanMutation = UseApiMutation<SubmitResponse, { payment_plan: string }>({
-        url: `purchase/motor/${purchaseSessionId}/payment-plan`,
+        url: `purchase/motor/${purchaseId}/payment-plan`,
         method: EMETHODS.POST,
         mutationOptions: {
             onSuccess: (data, variables) => {
@@ -251,7 +261,7 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
         setIsPlanBreakdownUpdating(true)
         try {
             const nextPlan = pendingPlanRef.current
-            if (!nextPlan || !purchaseSessionId) return
+            if (!nextPlan || !purchaseId) return
             form.setValue('payment_plans', nextPlan)
             form.setValue('first_installment', '')
             form.setValue('second_installment', '')
@@ -268,7 +278,7 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
             setIsPlanConfirmOpen(false)
             setIsPlanBreakdownUpdating(false)
         }
-    }, [form, paymentPlanMutation, purchaseSessionId, refetchSummary])
+    }, [form, paymentPlanMutation, purchaseId, refetchSummary])
 
     const handlePaymentMethodChange = (value: string) => {
         setSelectedPaymentMethod(value)
@@ -409,14 +419,14 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
                                 Payment <span className="text-[#BF162E]">Options</span>
                             </h1>
                             <p className="mt-2 max-w-2xl text-sm text-black/70 sm:text-base">
-                                {isPaymentPlanLocked
-                                    ? 'Select how the customer will pay for this motor cover.'
+                                {paymentPlansLocked
+                                    ? 'Complete payment for the outstanding invoice installment.'
                                     : 'Choose a payment plan and select how the customer will pay for this motor cover.'}
                             </p>
                         </div>
 
                         <div className="mt-4 space-y-4">
-                            {!isPaymentPlanLocked ? (
+                            {!paymentPlansLocked ? (
                             <div className="rounded-xl border border-black/20 bg-white p-2.5 sm:p-4">
                                 <BoxHeader
                                     title="Payment Plans"
@@ -434,11 +444,11 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
                                                 <FieldLabel>Select an installment schedule.</FieldLabel>
                                                 <Select
                                                     value={field.value || undefined}
-                                                    disabled={isPaymentPlanLocked || isInteractionBlocked}
+                                                    disabled={paymentPlansLocked || isInteractionBlocked}
                                                     onValueChange={(value) => {
                                                         const previous = field.value ?? ''
                                                         if (value === previous) return
-                                                        if (!purchaseSessionId) {
+                                                        if (!purchaseId) {
                                                             field.onChange(value)
                                                             return
                                                         }

@@ -1,13 +1,22 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CardFooter } from '@/components/ui/card'
 import { Button, ReuseableInput } from '@/dev/core'
-import { refreshMotorPurchaseSummary } from '@/app/customer/motor/motor-purchase-query'
-import { UseApiMutation } from '@/hooks/hooks'
+import {
+    MOTOR_PURCHASE_URLS,
+    motorPurchaseSummaryQueryOptions,
+    refreshMotorPurchaseSummary,
+    resolveTargetInvoiceBreakdownItem,
+} from '@/app/customer/motor/motor-purchase-query'
+import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
 import { useQueryClient } from '@tanstack/react-query'
 import { InvoicePaymentSchema } from '@/types/form-schema'
 import type { InvoicePaymentFormValues } from '@/types/schema'
 import type { BoxHeaderProps, SubmitResponse } from '@/types/types'
-import { EMETHODS, INVOICE_SESSION_STORAGE_KEY } from '@/utils/constatnts'
+import {
+    EMETHODS,
+    INVOICE_SESSION_STORAGE_KEY,
+    PURCHASE_SESSION_STORAGE_KEY,
+} from '@/utils/constatnts'
 import { extractErrorMessage } from '@/utils/helpers'
 import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -19,9 +28,12 @@ import { readAdminMotorCustomerContact } from '../admin-motor-session'
 
 const getTodayDateString = () => new Date().toISOString().split("T")[0]
 
-const readSessionValue = (key: string) => {
+const readPurchaseSessionId = () => {
     if (typeof window === "undefined") return null
-    return sessionStorage.getItem(key)
+    return (
+        sessionStorage.getItem(PURCHASE_SESSION_STORAGE_KEY)
+        ?? sessionStorage.getItem(INVOICE_SESSION_STORAGE_KEY)
+    )
 }
 
 const BoxHeader = ({ title, description }: BoxHeaderProps) => (
@@ -42,7 +54,7 @@ export const AdminMotorInvoicePayment: React.FC<AdminMotorStepProps> = ({
 }) => {
     const queryClient = useQueryClient()
     const contact = defaultCustomerContact ?? readAdminMotorCustomerContact()
-    const [purchaseSessionId] = useState(() => readSessionValue(INVOICE_SESSION_STORAGE_KEY))
+    const [purchaseSessionId] = useState(() => readPurchaseSessionId())
     const todayMinDate = getTodayDateString()
 
     const form = useForm<InvoicePaymentFormValues>({
@@ -60,6 +72,28 @@ export const AdminMotorInvoicePayment: React.FC<AdminMotorStepProps> = ({
     })
 
     const coverStartDate = form.watch("cover_start_date")
+
+    const { data: summaryData } = UseApiQuery<SubmitResponse>({
+        url: purchaseSessionId ? MOTOR_PURCHASE_URLS.summary(purchaseSessionId) : '',
+        queryOptions: {
+            enabled: !!purchaseSessionId,
+            retry: 1,
+            ...motorPurchaseSummaryQueryOptions,
+        },
+    })
+
+    React.useEffect(() => {
+        const invoice = summaryData?.data?.invoice as Record<string, string | undefined> | undefined
+        if (!invoice) return
+
+        if (invoice.name) form.setValue('name', invoice.name)
+        if (invoice.email) form.setValue('email', invoice.email)
+        if (invoice.phone) form.setValue('phone', invoice.phone)
+        if (invoice.cover_start_date) form.setValue('cover_start_date', invoice.cover_start_date)
+        if (invoice.cover_end_date) form.setValue('cover_end_date', invoice.cover_end_date)
+        if (invoice.policy_number) form.setValue('policy_number', invoice.policy_number)
+        if (invoice.payment_plan) form.setValue('payment_plan', invoice.payment_plan)
+    }, [summaryData, form])
 
     const submitMutation = UseApiMutation<SubmitResponse, InvoicePaymentFormValues>({
         url: `purchase/motor/${purchaseSessionId}/invoice`,
@@ -169,7 +203,7 @@ export const AdminMotorInvoicePayment: React.FC<AdminMotorStepProps> = ({
                             />
                         </div>
                         <p className="mt-3 text-xs text-muted-foreground sm:text-sm">
-                            A custom cover end date limits this purchase to full payment only. Max cover is 12 months from the start date.
+                            A custom cover end date defers DMVIC certificate issuance until cover is issued manually. Max cover is 12 months from the start date.
                         </p>
                     </div>
                 </div>

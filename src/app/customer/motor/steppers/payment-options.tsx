@@ -49,18 +49,17 @@ import { CreditScheduleStatusPanel } from '@/app/admin/credit/components/CreditS
 import { storePaymentStatusSession } from '@/app/payment/payment-session'
 import { EROUTES } from '@/utils/enums'
 import { useNavigate } from 'react-router-dom'
-import { motorPurchaseSummaryQueryOptions } from '@/app/customer/motor/motor-purchase-query'
+import { motorPurchaseSummaryQueryOptions, MOTOR_PURCHASE_URLS, resolveTargetInvoiceBreakdownItem } from '@/app/customer/motor/motor-purchase-query'
 
 
 export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goToNextStep, goToPrevStep }) => {
     const navigate = useNavigate()
     const [selectedPaymentMethod, setSelectedPaymentMethod] = React.useState<string>('mpesa');
-    const [purchaseSessionId, setPurchaseSessionId] = React.useState<string | null>(null);
+    const [purchaseId, setPurchaseId] = React.useState<string | null>(null)
     const [isPlanConfirmOpen, setIsPlanConfirmOpen] = React.useState(false);
     const lastAppliedPlanRef = React.useRef<string>('');
     const pendingPlanRef = React.useRef<string | null>(null);
     const isConfirmingPlanRef = React.useRef(false);
-    const [purchaseId, setPurchaseId] = React.useState<string | null>(null)
     const [creditPending, setCreditPending] = React.useState<{
         message: string
         creditTransactionId?: number
@@ -93,7 +92,10 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
     const stopPolling = isPaystackPolling ? stopPaystackPolling : stopGatewayPolling
 
     React.useEffect(() => {
-        const storedPurchaseKey = String(sessionStorage.getItem(PURCHASE_SESSION_STORAGE_KEY))
+        const storedPurchaseKey =
+            sessionStorage.getItem(PURCHASE_SESSION_STORAGE_KEY)
+            ?? sessionStorage.getItem(INVOICE_SESSION_STORAGE_KEY)
+
         if (storedPurchaseKey) {
             setPurchaseId(storedPurchaseKey)
         } else {
@@ -101,19 +103,10 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
         }
     }, [])
 
-    React.useEffect(() => {
-        const storedPurchaseKey = String(sessionStorage.getItem(INVOICE_SESSION_STORAGE_KEY))
-        if (storedPurchaseKey) {
-            setPurchaseSessionId(storedPurchaseKey)
-        } else {
-            setPurchaseSessionId(null)
-        }
-    }, [])
-
     const { data: SummaryData, refetch: refetchSummary } = UseApiQuery<SubmitResponse>({
-        url: `purchase/motor/${purchaseSessionId}/summary`,
+        url: purchaseId ? MOTOR_PURCHASE_URLS.summary(purchaseId) : '',
         queryOptions: {
-            enabled: !!purchaseSessionId,
+            enabled: !!purchaseId,
             retry: 1,
             ...motorPurchaseSummaryQueryOptions,
         },
@@ -145,17 +138,20 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
 
     React.useEffect(() => {
         if (!SummaryData?.data) return
-        const firstItem = SummaryData.data.invoice_breakdown?.items?.[0]
-        if (firstItem?.installment_amount) {
-            form.setValue('amount', Number(firstItem.installment_amount))
+        const items = SummaryData.data.invoice_breakdown?.items as Parameters<
+            typeof resolveTargetInvoiceBreakdownItem
+        >[0]
+        const targetItem = resolveTargetInvoiceBreakdownItem(items, null)
+        if (targetItem?.installment_amount) {
+            form.setValue('amount', Number(targetItem.installment_amount))
         }
-        if (firstItem?.id) {
-            form.setValue('invoice_id', String(firstItem.id))
+        if (targetItem?.id) {
+            form.setValue('invoice_id', String(targetItem.id))
         }
     }, [SummaryData, form])
 
     const paymentPlanMutation = UseApiMutation<SubmitResponse, { payment_plan: string }>({
-        url: `purchase/motor/${purchaseSessionId}/payment-plan`,
+        url: `purchase/motor/${purchaseId}/payment-plan`,
         method: EMETHODS.POST,
         mutationOptions: {
             onSuccess: (data, variables) => {
@@ -201,7 +197,7 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
         isConfirmingPlanRef.current = true
         try {
             const nextPlan = pendingPlanRef.current
-            if (!nextPlan || !purchaseSessionId) return
+            if (!nextPlan || !purchaseId) return
             form.setValue('payment_plans', nextPlan)
             try {
                 await paymentPlanMutation.mutateAsync({ payment_plan: nextPlan })
@@ -213,7 +209,7 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
             pendingPlanRef.current = null
             setIsPlanConfirmOpen(false)
         }
-    }, [form, paymentPlanMutation, purchaseSessionId])
+    }, [form, paymentPlanMutation, purchaseId])
 
     const handlePaymentMethodChange = (value: string) => {
         setSelectedPaymentMethod(value)
@@ -365,7 +361,7 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                                     onValueChange={(value) => {
                                                         const previous = field.value ?? ''
                                                         if (value === previous) return
-                                                        if (!purchaseSessionId) {
+                                                        if (!purchaseId) {
                                                             field.onChange(value)
                                                             return
                                                         }

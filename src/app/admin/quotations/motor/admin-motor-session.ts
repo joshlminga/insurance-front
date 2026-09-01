@@ -11,6 +11,9 @@ import {
     ADMIN_MOTOR_QUOTE_DUPLICATE_PREFILL_KEY,
     ADMIN_MOTOR_QUOTE_DUPLICATE_SOURCE_KEY,
     ADMIN_MOTOR_QUOTE_DUPLICATE_START_AT_KEY,
+    ADMIN_MOTOR_ISSUE_COVER_FLOW_KEY,
+    ADMIN_MOTOR_TARGET_INVOICE_AMOUNT_KEY,
+    ADMIN_MOTOR_TARGET_INVOICE_ID_KEY,
     ADMIN_MOTOR_QUOTE_IS_GUEST_KEY,
     INVOICE_SESSION_STORAGE_KEY,
     MOTOR_QUOTE_SESSION_STORAGE_KEY,
@@ -250,11 +253,11 @@ export function persistAdminMotorResumeFromDetail(detail: MotorQuoteFetchDetail)
 
   if (stage === 'payment' || stage === 'certificate') {
     sessionStorage.setItem(ADMIN_MOTOR_PURCHASE_STEP_KEY, stage === 'certificate' ? '4' : '3')
-    if (firstInvoiceId != null) {
-      sessionStorage.setItem(INVOICE_SESSION_STORAGE_KEY, String(firstInvoiceId))
-    } else if (purchaseId != null) {
-      // Invoice form uses purchase id as session key in some flows
+    if (purchaseId != null) {
       sessionStorage.setItem(INVOICE_SESSION_STORAGE_KEY, String(purchaseId))
+    }
+    if (firstInvoiceId != null) {
+      sessionStorage.setItem(ADMIN_MOTOR_TARGET_INVOICE_ID_KEY, String(firstInvoiceId))
     }
     return { stage, purchaseStep: stage === 'certificate' ? 4 : 3 }
   }
@@ -265,19 +268,53 @@ export function persistAdminMotorResumeFromDetail(detail: MotorQuoteFetchDetail)
   return { stage, purchaseStep: null }
 }
 
-/** Seed payment step for Issue cover from invoice reports. */
+/** Seed purchase flow for Issue cover from invoice reports. */
 export function persistAdminMotorIssueCoverFromInvoice(input: {
   purchaseId: string | number
   invoiceId?: string | number | null
+  lockPaymentPlan?: boolean
+  installmentAmount?: string | number | null
 }): void {
   if (typeof window === 'undefined') return
-  sessionStorage.setItem(PURCHASE_SESSION_STORAGE_KEY, String(input.purchaseId))
-  sessionStorage.setItem(ADMIN_MOTOR_PURCHASE_STEP_KEY, '3')
+
+  const purchaseId = String(input.purchaseId)
+  sessionStorage.setItem(PURCHASE_SESSION_STORAGE_KEY, purchaseId)
+  sessionStorage.setItem(INVOICE_SESSION_STORAGE_KEY, purchaseId)
+  sessionStorage.setItem(ADMIN_MOTOR_ISSUE_COVER_FLOW_KEY, 'true')
+
+  const targetStep = input.lockPaymentPlan ? '2' : '3'
+  sessionStorage.setItem(ADMIN_MOTOR_PURCHASE_STEP_KEY, targetStep)
+
   if (input.invoiceId != null && String(input.invoiceId).trim() !== '') {
-    sessionStorage.setItem(INVOICE_SESSION_STORAGE_KEY, String(input.invoiceId))
+    sessionStorage.setItem(ADMIN_MOTOR_TARGET_INVOICE_ID_KEY, String(input.invoiceId))
   } else {
-    sessionStorage.setItem(INVOICE_SESSION_STORAGE_KEY, String(input.purchaseId))
+    sessionStorage.removeItem(ADMIN_MOTOR_TARGET_INVOICE_ID_KEY)
   }
+
+  if (input.installmentAmount != null && String(input.installmentAmount).trim() !== '') {
+    sessionStorage.setItem(ADMIN_MOTOR_TARGET_INVOICE_AMOUNT_KEY, String(input.installmentAmount))
+  } else {
+    sessionStorage.removeItem(ADMIN_MOTOR_TARGET_INVOICE_AMOUNT_KEY)
+  }
+}
+
+export function readAdminMotorTargetInvoiceId(): string | null {
+  return readKey(ADMIN_MOTOR_TARGET_INVOICE_ID_KEY)
+}
+
+export function readAdminMotorTargetInvoiceAmount(): string | null {
+  return readKey(ADMIN_MOTOR_TARGET_INVOICE_AMOUNT_KEY)
+}
+
+export function isAdminMotorIssueCoverFlow(): boolean {
+  return readKey(ADMIN_MOTOR_ISSUE_COVER_FLOW_KEY) === 'true'
+}
+
+export function clearAdminMotorIssueCoverSession(): void {
+  if (typeof window === 'undefined') return
+  sessionStorage.removeItem(ADMIN_MOTOR_ISSUE_COVER_FLOW_KEY)
+  sessionStorage.removeItem(ADMIN_MOTOR_TARGET_INVOICE_ID_KEY)
+  sessionStorage.removeItem(ADMIN_MOTOR_TARGET_INVOICE_AMOUNT_KEY)
 }
 
 export function persistAdminMotorDuplicatePrefill(payload: MotorQuoteDuplicatePayload): void {
@@ -329,6 +366,9 @@ export function clearAdminMotorActiveSession(options?: { clearDuplicatePrefill?:
   sessionStorage.removeItem(VEHICLE_DETAILS_SESSION_STORAGE_KEY)
   sessionStorage.removeItem(VEHICLE_OWNERSHIP_SESSION_STORAGE_KEY)
   sessionStorage.removeItem(ADMIN_MOTOR_PURCHASE_STEP_KEY)
+  sessionStorage.removeItem(ADMIN_MOTOR_ISSUE_COVER_FLOW_KEY)
+  sessionStorage.removeItem(ADMIN_MOTOR_TARGET_INVOICE_ID_KEY)
+  sessionStorage.removeItem(ADMIN_MOTOR_TARGET_INVOICE_AMOUNT_KEY)
   sessionStorage.removeItem(ADMIN_MOTOR_CUSTOMER_EMAIL_KEY)
   sessionStorage.removeItem(ADMIN_MOTOR_CUSTOMER_NAME_KEY)
   sessionStorage.removeItem(ADMIN_MOTOR_CUSTOMER_PHONE_KEY)

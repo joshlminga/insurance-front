@@ -254,6 +254,9 @@ export const POLL_TIMEOUT_MS = 90000
 export const MOTOR_QUOTE_SESSION_STORAGE_KEY = "motor_quote_session_id"
 export const PURCHASE_SESSION_STORAGE_KEY = "purchase_session_id"
 export const INVOICE_SESSION_STORAGE_KEY = "invoice_purchase_session_id"
+export const ADMIN_MOTOR_TARGET_INVOICE_ID_KEY = "admin_motor_target_invoice_id"
+export const ADMIN_MOTOR_TARGET_INVOICE_AMOUNT_KEY = "admin_motor_target_invoice_amount"
+export const ADMIN_MOTOR_ISSUE_COVER_FLOW_KEY = "admin_motor_issue_cover_flow"
 
 /** Flip to true when backend credit-summary endpoint is ready */
 export const CREDIT_SUMMARY_API_ENABLED = true

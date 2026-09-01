@@ -111,6 +111,8 @@ const MotorInvoiceReportTab = () => {
         persistAdminMotorIssueCoverFromInvoice({
           purchaseId,
           invoiceId: row?.id,
+          lockPaymentPlan: Boolean(row?.lock_payment_plan),
+          installmentAmount: row?.installment_amount,
         })
         navigate(EROUTES.MOTOR_QUOTATION_PURCHASE)
       },
