@@ -8,6 +8,16 @@ import {
   resolveOrganization,
 } from '@/auth/auth-service'
 import { AUTH_STORAGE_KEY, TOKEN_REFRESH_BUFFER_SECONDS } from '@/auth/constants'
+import { syncAccessToken } from '@/auth/access-token'
+import {
+  clearAuthWiped,
+  isAuthWiped,
+  markAuthWiped,
+  wipeStoredAuth,
+} from '@/auth/session-wipe'
+import { useSessionTimeoutStore } from '@/stores/session-timeout-store'
+import { queryClient } from '@/utils/providers'
+import { EPREFIX, EROUTES } from '@/utils/enums'
 import type { Abilities, AuthSessionPayload } from '@/auth/types'
 import {
   getRequestContext,
@@ -94,6 +104,62 @@ function writePersistedAuth(payload: string | null) {
   }
 }
 
+let suppressAuthPersist = false
+
+function persistAuthState(): void {
+  const state = useAuthStore.getState()
+
+  // Logout asked this tab to start clean — never write a JWT back.
+  if (suppressAuthPersist || isAuthWiped()) {
+    syncAccessToken(state.token)
+    if (!state.token) {
+      wipeStoredAuth()
+    }
+    return
+  }
+
+  syncAccessToken(state.token)
+
+  if (!(state.user || state.token || state.guest || state.organizationLocationId != null)) {
+    writePersistedAuth(null)
+    return
+  }
+
+  try {
+    const next = JSON.stringify({
+      user: state.user,
+      token: state.token,
+      guest: state.guest,
+      isGeneral: state.isGeneral,
+      abilities: state.abilities,
+      expiresAt: state.expiresAt,
+      organizationLocationId: state.organizationLocationId,
+    })
+    if (localStorage.getItem(AUTH_STORAGE_KEY) !== next) {
+      writePersistedAuth(next)
+    }
+  } catch {
+    writePersistedAuth(JSON.stringify({
+      user: state.user
+        ? {
+            id: state.user.id,
+            name: state.user.name,
+            email: state.user.email,
+            username: state.user.username ?? null,
+            is_general: state.user.is_general,
+            is_active: state.user.is_active,
+          }
+        : null,
+      token: state.token,
+      guest: state.guest,
+      isGeneral: state.isGeneral,
+      abilities: state.abilities,
+      expiresAt: state.expiresAt,
+      organizationLocationId: state.organizationLocationId,
+    }))
+  }
+}
+
 function applyPersistedPayload(raw: string | null) {
   if (raw == null) {
     useAuthStore.setState({
@@ -107,6 +173,7 @@ function applyPersistedPayload(raw: string | null) {
       resolvedOrganization: null,
       orgResolveStatus: 'idle',
     })
+    syncAccessToken(null)
     return
   }
   try {
@@ -122,8 +189,10 @@ function applyPersistedPayload(raw: string | null) {
       resolvedOrganization: null,
       orgResolveStatus: 'idle',
     })
+    syncAccessToken(parsed.token ?? null)
   } catch {
     writePersistedAuth(null)
+    syncAccessToken(null)
   }
 }
 
@@ -144,6 +213,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   setSession: (payload: AuthSessionPayload) => {
     const expiresAt = Date.now() + payload.expires_in * 1000
+    suppressAuthPersist = false
+    clearAuthWiped()
     set({
       user: payload.user,
       token: payload.access_token,
@@ -151,6 +222,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       abilities: payload.abilities,
       expiresAt,
     })
+    persistAuthState()
     scheduleTokenRefresh(expiresAt, async () => {
       const { token, organizationLocationId } = get()
       if (!token) return
@@ -233,7 +305,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         /* best-effort server logout */
       })
     }
-    // Keep organizationLocationId — tenant comes from URL Origin, not the user session
+    // Stop this tab from picking the old JWT back up from cache or another tab.
+    suppressAuthPersist = true
+    markAuthWiped()
+    syncAccessToken(null)
+    wipeStoredAuth()
+    queryClient.clear()
+    useSessionTimeoutStore.getState().close()
     set({
       user: null,
       token: null,
@@ -242,6 +320,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       abilities: null,
       expiresAt: null,
     })
+    if (typeof window !== 'undefined') {
+      window.location.replace(`/${EPREFIX.AUTH}${EROUTES.SIGNIN}`)
+    }
   },
 
   updateUser: (updates) => {
@@ -271,45 +352,41 @@ export async function initAuthStore() {
 
     window.addEventListener('storage', (e) => {
       if (e.key !== AUTH_STORAGE_KEY || e.storageArea !== localStorage) return
+      if (isAuthWiped()) return
+      const current = useAuthStore.getState()
+      if (e.newValue && current.token) {
+        try {
+          const incoming = JSON.parse(e.newValue) as PersistedAuth
+          // Another tab still has the expired JWT — do not overwrite this tab's new login.
+          if (
+            incoming.token &&
+            incoming.token !== current.token &&
+            (current.expiresAt ?? 0) >= (incoming.expiresAt ?? 0)
+          ) {
+            return
+          }
+        } catch {
+          /* fall through and apply */
+        }
+      }
       applyPersistedPayload(e.newValue)
     })
 
-    useAuthStore.subscribe((state) => {
-      // Persist session OR tenant-only context (org id before login)
-      if (state.user || state.token || state.guest || state.organizationLocationId != null) {
-        const next = JSON.stringify({
-          user: state.user,
-          token: state.token,
-          guest: state.guest,
-          isGeneral: state.isGeneral,
-          abilities: state.abilities,
-          expiresAt: state.expiresAt,
-          organizationLocationId: state.organizationLocationId,
-        })
-        try {
-          if (localStorage.getItem(AUTH_STORAGE_KEY) !== next) {
-            writePersistedAuth(next)
-          }
-        } catch {
-          writePersistedAuth(next)
-        }
-      } else {
-        try {
-          if (localStorage.getItem(AUTH_STORAGE_KEY) != null) {
-            writePersistedAuth(null)
-          }
-        } catch {
-          writePersistedAuth(null)
-        }
-      }
+    useAuthStore.subscribe(() => {
+      persistAuthState()
     })
   }
 
   if (!useAuthStore.getState().hasHydrated) {
     try {
-      const raw = readPersistedAuth()
-      if (raw) {
-        applyPersistedPayload(raw)
+      if (isAuthWiped()) {
+        wipeStoredAuth()
+        syncAccessToken(null)
+      } else {
+        const raw = readPersistedAuth()
+        if (raw) {
+          applyPersistedPayload(raw)
+        }
       }
     } catch {
       writePersistedAuth(null)

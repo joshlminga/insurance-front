@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { 
     Button, 
-    ReusableOrganizationsInputMultiselect, 
     ReusableSelect, 
+    ReusableSingleSelectApiInput,
     ReuseableInput, 
     ReuseableSelectInsurerInput 
 } from "@/dev/core"
@@ -12,6 +12,7 @@ import { SubmitResponse } from "@/types/types"
 import { 
     ACCESSLEVELSOPTIONS, 
     EMETHODS, 
+    EORGANIZATIONTYPES,
     TARGET_AUDIENCE_OPTIONS 
 } from "@/utils/constatnts"
 import { extractErrorMessage } from "@/utils/helpers"
@@ -44,7 +45,7 @@ export const CreateProductModal = ({ handleDialogContextSwitch, componentProps }
             start_date: "",
             expiry_date: "",
             brochure: [],
-            organization_location_ids: [],
+            organization_location_ids: '',
         },
     })
 
@@ -108,9 +109,7 @@ export const CreateProductModal = ({ handleDialogContextSwitch, componentProps }
         formData.append("for_public", data.for_public)
         formData.append("start_date", data.start_date)
         formData.append("expiry_date", data.expiry_date)
-        data.organization_location_ids.forEach((id) => {
-            formData.append("organization_location_ids[]", id)
-        })
+        formData.append("organization_location_ids", data.organization_location_ids)
         data.brochure.forEach((file) => {
             formData.append("brochure[]", file)
         })
@@ -135,7 +134,7 @@ export const CreateProductModal = ({ handleDialogContextSwitch, componentProps }
                     name="organization_location_id"
                     render={({ field }) => (
                         <ReuseableSelectInsurerInput
-                            label="Organization Location"
+                            label="Insurer Name"
                             required
                             value={field.value}
                             onChange={field.onChange}
@@ -235,11 +234,18 @@ export const CreateProductModal = ({ handleDialogContextSwitch, componentProps }
                     control={form.control}
                     name="organization_location_ids"
                     render={({ field }) => (
-                        <ReusableOrganizationsInputMultiselect
-                            label="Organization Locations"
-                            required
+                        <ReusableSingleSelectApiInput
+                            url="organization-location"
+                            queryParams={{ exclude_organization_type: EORGANIZATIONTYPES.INSURER }}
                             value={field.value}
                             onChange={field.onChange}
+                            valueKey="organization_location_id"
+                            labelKey="organization_name"
+                            label="Pick Organization"
+                            required
+                            placeholder="Select organization..."
+                            searchPlaceholder="Search organization..."
+                            emptyMessage="No organizations found"
                         />
                     )}
                 />

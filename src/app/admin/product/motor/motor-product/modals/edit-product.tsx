@@ -2,8 +2,8 @@
 import { Input } from '@/components/ui/input'
 import { 
   Button, 
-  ReusableOrganizationsInputMultiselect, 
   ReusableSelect, 
+  ReusableSingleSelectApiInput,
   ReuseableInput, 
   ReuseableSelectInsurerInput 
 } from '@/dev/core'
@@ -14,6 +14,7 @@ import { SubmitResponse } from '@/types/types'
 import { 
   ACCESSLEVELSOPTIONS, 
   EMETHODS, 
+  EORGANIZATIONTYPES,
   TARGET_AUDIENCE_OPTIONS 
 } from '@/utils/constatnts'
 import { extractErrorMessage } from '@/utils/helpers'
@@ -33,26 +34,46 @@ export const EditProductModal = ({ handleDialogContextSwitch, componentProps }: 
     return "false"
   }
 
-  const normalizeTargetLocationIds = (targets: unknown): string[] => {
-    if (!Array.isArray(targets)) return []
+  const normalizeTargetLocationId = (targets: unknown): string => {
+    if (!Array.isArray(targets) || targets.length === 0) return ''
 
-    const ids = targets
-      .map((target: any) =>
-        target?.organization_location_id ??
-        target?.target_organization_location_id ??
-        target?.location?.organization_location_id ??
-        target?.ace_organization_location_id ??
-        target?.location_id
-      )
-      .filter((id) => id !== null && id !== undefined && String(id).trim().length > 0)
-      .map((id) => String(id))
+    const firstTarget = targets[0]
+    const id =
+      firstTarget?.organization_location_id ??
+      firstTarget?.target_organization_location_id ??
+      firstTarget?.location?.organization_location_id ??
+      firstTarget?.ace_organization_location_id ??
+      firstTarget?.location_id
 
-    return Array.from(new Set(ids))
+    return id !== null && id !== undefined && String(id).trim().length > 0
+      ? String(id)
+      : ''
   }
 
   const existingBrochures = Array.isArray(productData?.meta?.brochure)
     ? productData.meta.brochure
     : []
+
+  const targets = Array.isArray(productData?.targets) ? productData.targets : []
+  const firstTarget = targets[0]
+  const selectedOrganizationOption = firstTarget
+    ? {
+        value: String(
+          firstTarget?.organization_location_id ??
+          firstTarget?.target_organization_location_id ??
+          firstTarget?.location?.organization_location_id ??
+          firstTarget?.ace_organization_location_id ??
+          firstTarget?.location_id ??
+          ''
+        ),
+        label: String(
+          firstTarget?.targeted_organization_name ??
+          firstTarget?.organization_name ??
+          firstTarget?.location?.organization_name ??
+          ''
+        ),
+      }
+    : undefined
 
   const [brochureInputs, setBrochureInputs] = useState<Array<{ id: number, file?: File }>>([
     { id: Date.now() },
@@ -70,7 +91,7 @@ export const EditProductModal = ({ handleDialogContextSwitch, componentProps }: 
       start_date: productData?.start_date ?? productData?.cover_start_date ?? "",
       expiry_date: productData?.expiry_date ?? productData?.cover_expiry_date ?? "",
       brochure: [],
-      organization_location_ids: normalizeTargetLocationIds(productData?.targets),
+      organization_location_ids: normalizeTargetLocationId(productData?.targets),
     },
   })
 
@@ -134,9 +155,9 @@ export const EditProductModal = ({ handleDialogContextSwitch, componentProps }: 
     formData.append("for_public", data.for_public)
     formData.append("start_date", data.start_date)
     formData.append("expiry_date", data.expiry_date)
-    data.organization_location_ids.forEach((id) => {
-      formData.append("organization_location_ids[]", id)
-    })
+    if (data.organization_location_ids) {
+      formData.append("organization_location_ids", data.organization_location_ids)
+    }
     data.brochure.forEach((file) => {
       formData.append("brochure[]", file)
     })
@@ -266,11 +287,23 @@ export const EditProductModal = ({ handleDialogContextSwitch, componentProps }: 
           control={form.control}
           name="organization_location_ids"
           render={({ field }) => (
-            <ReusableOrganizationsInputMultiselect
-              label="Organization Locations"
-              required
+            <ReusableSingleSelectApiInput
+              url="organization-location"
+              queryParams={{ exclude_organization_type: EORGANIZATIONTYPES.INSURER }}
               value={field.value}
               onChange={field.onChange}
+              valueKey="organization_location_id"
+              labelKey="organization_name"
+              label="Organization Locations"
+              required
+              placeholder="Select organization..."
+              searchPlaceholder="Search organization..."
+              emptyMessage="No organizations found"
+              selectedOption={
+                selectedOrganizationOption?.value
+                  ? selectedOrganizationOption
+                  : undefined
+              }
             />
           )}
         />

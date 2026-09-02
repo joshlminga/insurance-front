@@ -974,8 +974,8 @@ export const CreateProductSchema = z.object({
       "Brochure files must be PDF, CSV, XLS, XLSX, or DOCX"
     ),
   organization_location_ids: z
-    .array(z.string().min(1))
-    .min(1, "At least one organization location is required"),
+    .string()
+    .min(1, "Organization location is required"),
 })
   .refine(
     (data) => new Date(data.expiry_date) >= new Date(data.start_date),
@@ -1012,7 +1012,9 @@ export const EditProductSchema = z.object({
       "Brochure files must be PDF, CSV, XLS, XLSX, or DOCX"
     ),
   organization_location_ids: z
-    .array(z.string().min(1)),
+    .string()
+    .optional()
+    .or(z.literal("")),
 })
   .refine(
     (data) => new Date(data.expiry_date) >= new Date(data.start_date),

@@ -27,6 +27,7 @@ import { normalizeLoginResponse } from '@/auth/session'
 import { EMETHODS } from '@/utils/constatnts'
 import { EPREFIX, EROUTES } from '@/utils/enums'
 import { extractErrorMessage } from '@/utils/helpers'
+import { queryClient } from '@/utils/providers'
 import { ShowToast } from '@/utils/utils'
 
 const REMEMBER_EMAIL_KEY = 'session-timeout-remember-email'
@@ -83,6 +84,8 @@ export function SessionTimeoutDialog() {
 
         ShowToast.success(data.message || 'Login successful!')
         setSession(normalizeLoginResponse(data))
+        // Re-run page queries with the new token instead of keeping failed 401 retries.
+        void queryClient.invalidateQueries()
 
         if (rememberMe) {
           localStorage.setItem(REMEMBER_EMAIL_KEY, form.getValues('email'))
