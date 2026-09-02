@@ -1,110 +1,100 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Badge } from "@/components/ui/badge";
-import { formatDate, twoDecimalformatter } from "@/utils/helpers";
+import {
+    formatMotorRateAge,
+    formatMotorRateValue,
+    formatOptionalDecimal,
+    formatTaxonomyName,
+} from "@/utils/helpers";
 import { ColumnDef } from "@tanstack/table-core";
 
 export const MotorRateColumns: ColumnDef<any>[] = [
     {
-        accessorKey: "product",
+        id: "product_name",
         header: () => <div>Product Name</div>,
         cell: ({ row }) => {
-            const product: any = row.getValue("product");
-            return <div>{product?.name}</div>;
+            const rowData = row.original as any;
+            return <div>{formatTaxonomyName(rowData?.product)}</div>;
         },
     },
     {
-        accessorKey: "covertype",
+        id: "covertype_name",
         header: () => <div>Cover Type</div>,
         cell: ({ row }) => {
-            const covertype: any = row.getValue("covertype");
-            return <div>{covertype?.name}</div>;
+            const rowData = row.original as any;
+            return <div>{formatTaxonomyName(rowData?.covertype)}</div>;
         },
     },
     {
-        accessorKey: "coverfor",
+        id: "coverfor_name",
         header: () => <div>Class</div>,
         cell: ({ row }) => {
-            const coverfor: any = row.getValue("coverfor");
-            return <div>{coverfor?.name}</div>;
+            const rowData = row.original as any;
+            return <div>{formatTaxonomyName(rowData?.coverfor)}</div>;
         },
     },
     {
-        accessorKey: "covering",
+        id: "covering_name",
         header: () => <div>Covering</div>,
         cell: ({ row }) => {
-            const covering: any = row.getValue("covering");
-            return <div>{covering?.name}</div>;
+            const rowData = row.original as any;
+            return <div>{formatTaxonomyName(rowData?.covering)}</div>;
         },
     },
     {
-        accessorKey: "bodytype",
-        header: () => <div>Vehicle Body Type</div>,
-        cell: ({ row }) => {
-            const bodytype: any = row.getValue("bodytype");
-            return <div>{bodytype?.name}</div>;
-        },
-    },
-    {
-        accessorKey: "usedfor",
+        id: "usedfor_name",
         header: () => <div>Vehicle Use</div>,
         cell: ({ row }) => {
-            const usedfor: any = row.getValue("usedfor");
-            return <div>{usedfor?.name}</div>;
+            const rowData = row.original as any;
+            return <div>{formatTaxonomyName(rowData?.usedfor)}</div>;
         },
     },
     {
-        accessorKey: "age_from",
+        id: "age_range",
         header: () => <div>Age</div>,
         cell: ({ row }) => {
             const rowData = row.original as any;
-            const isAllAge = Boolean(rowData?.is_all_age);
-            const ageFrom = rowData?.age_from;
-            const ageTo = rowData?.age_to;
-            if (isAllAge) {
-                return <div>-</div>;
-            }
-            if (ageFrom != null && ageTo != null) {
-                return <div>{`${ageFrom} - ${ageTo}`}</div>;
-            }
-            return <div>-</div>;
+            return (
+                <div>
+                    {formatMotorRateAge(
+                        Boolean(rowData?.is_all_age),
+                        rowData?.age_from,
+                        rowData?.age_to,
+                    )}
+                </div>
+            );
+        },
+    },
+    {
+        id: "value_range",
+        header: () => <div>Value</div>,
+        cell: ({ row }) => {
+            const rowData = row.original as any;
+            return (
+                <div>
+                    {formatMotorRateValue(
+                        Boolean(rowData?.is_all_sum),
+                        rowData?.valued_from,
+                        rowData?.valued_to,
+                    )}
+                </div>
+            );
         },
     },
     {
         accessorKey: "rate",
         header: () => <div>Rate</div>,
         cell: ({ row }) => {
-            const rate: number = row.getValue("rate");
-            return <div>{twoDecimalformatter(rate)}</div>;
+            const rowData = row.original as any;
+            return <div>{formatOptionalDecimal(rowData?.rate)}</div>;
         },
     },
     {
-        accessorKey: "min_tonnage",
-        header: () => <div>Tonnage</div>,
+        accessorKey: "minimum",
+        header: () => <div>Minimum</div>,
         cell: ({ row }) => {
             const rowData = row.original as any;
-            const min_tonnage = rowData?.min_tonnage;
-            const max_tonnage = rowData?.max_tonnage;
-            if (min_tonnage != null && max_tonnage != null) {
-                return <div>{`${min_tonnage} - ${max_tonnage}`}</div>;
-            }
-            return <div>-</div>;
-        },
-    },
-    {
-        accessorKey: "valued_from",
-        header: () => <div>Value</div>,
-        cell: ({ row }) => {
-            const rowData = row.original as any;
-            const isAllSum = Boolean(rowData?.is_all_sum);
-            const valuedFrom = rowData?.valued_from;
-            const valuedTo = rowData?.valued_to;
-            if (isAllSum) {
-                return <div>-</div>;
-            }
-            if (valuedFrom != null && valuedTo != null) {
-                return <div>{`${valuedFrom} - ${valuedTo}`}</div>;
-            }
-            return <div>-</div>;
+            return <div>{formatOptionalDecimal(rowData?.minimum)}</div>;
         },
     },
     {
@@ -122,30 +112,17 @@ export const MotorRateColumns: ColumnDef<any>[] = [
                     </Badge>
                 );
             }
-            if (minFleet != null && maxFleet != null && isFleet) {
+            if (minFleet != null && isFleet) {
+                const fleetLabel = maxFleet != null
+                    ? `Fleet ${minFleet} - ${maxFleet}`
+                    : `Fleet ${minFleet}+`;
                 return (
                     <div>
-                        <Badge className="rounded-lg text-white font-semibold bg-cyan-400">Fleet {`${minFleet} - ${maxFleet}`}</Badge>
+                        <Badge className="rounded-lg text-white font-semibold bg-cyan-400">{fleetLabel}</Badge>
                     </div>
                 );
             }
             return <div>-</div>;
-        },
-    },
-    {
-        accessorKey: "start_date",
-        header: () => <div>Start Date</div>,
-        cell: ({ row }) => {
-            const start_date: string = row.getValue("start_date");
-            return <div>{formatDate(start_date)}</div>;
-        },
-    },
-    {
-        accessorKey: "expiry_date",
-        header: () => <div>Expiry Date</div>,
-        cell: ({ row }) => {
-            const expiry_date: string = row.getValue("expiry_date");
-            return <div>{formatDate(expiry_date)}</div>;
         },
     },
     {

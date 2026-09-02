@@ -175,11 +175,6 @@ export const adminNavConfig: NavItem[] = [
         url: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/detailed-benefits`,
         module: MODULES.PRODUCT_MOTOR,
       },
-      {
-        title: 'Motor Tonage',
-        url: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/tonage`,
-        module: MODULES.PRODUCT_MOTOR,
-      },
     ],
   },
   {

@@ -31,7 +31,6 @@ import {
     CreateVehicleUsesSchema,
     CreateMotorAddonBenefitsSchema,
     CreateMotorDetailedBenefitsSchema,
-    CreateMotorTonageSchema,
     CreateMotorProductRatesSchema,
     CreateMotorRateBenefitsSchema,
     CreateMotorRateExcessBenefitsSchema,
@@ -112,7 +111,7 @@ export type CreateVehicleClassesFormValues = z.infer<typeof CreateVehicleClasses
 export type CreateVehicleUsesFormValues = z.infer<typeof CreateVehicleUsesSchema>
 export type CreateMotorAddonBenefitsFormValues = z.infer<typeof CreateMotorAddonBenefitsSchema>
 export type CreateMotorDetailedBenefitsFormValues = z.infer<typeof CreateMotorDetailedBenefitsSchema>
-export type CreateMotorTonageFormValues = z.infer<typeof CreateMotorTonageSchema>
+export type CreateMotorProductRatesInputValues = z.input<typeof CreateMotorProductRatesSchema>
 export type CreateMotorProductRatesFormValues = z.infer<typeof CreateMotorProductRatesSchema>
 export type CreateMotorRateBenefitsInputValues = z.input<typeof CreateMotorRateBenefitsSchema>
 export type CreateMotorRateBenefitsFormValues = z.infer<typeof CreateMotorRateBenefitsSchema>

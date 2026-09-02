@@ -97,6 +97,7 @@ export const MOTORADDONSBENEFITS = [
   { label: "Courtesy", value: "Courtesy" },
   { label: "Rescue", value: "Rescue" },
   { label: "Accident", value: "Accident" },
+  { label: "Loss", value: "Loss" },
 ]
 
 export const BOOLEANOPTIONS = [

@@ -30,8 +30,8 @@ export const EditMotorRateBenefits = ({ handleDialogContextSwitch, componentProp
         resolver: zodResolver(CreateMotorRateBenefitsSchema),
         defaultValues: {
             benefit_id: String(componentProps?.data?.benefit_id ?? ""),
-            rate: componentProps?.data?.rate ?? "",
-            minimum: componentProps?.data?.minimum ?? "",
+            rate: componentProps?.data?.rate != null ? String(componentProps.data.rate) : "",
+            minimum: componentProps?.data?.minimum != null ? String(componentProps.data.minimum) : "",
             benefit_type: componentProps?.data?.benefit_type ?? "",
             description: componentProps?.data?.description ?? "",
             // start_date: componentProps?.data?.start_date ?? "",
@@ -102,16 +102,15 @@ export const EditMotorRateBenefits = ({ handleDialogContextSwitch, componentProp
                 <ReuseableInput
                     control={form.control}
                     name="rate"
-                    label="Rate"
+                    label="Rate (Optional)"
                     type="number"
                     step="0.01"
-                    required
                     className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                 />
                 <ReuseableInput
                     control={form.control}
                     name="minimum"
-                    label="Minimum"
+                    label="Minimum (Optional)"
                      type="number"
                     step="0.01"
                     className="w-full h-10 rounded-[5px] border border-[#ADABAB]"

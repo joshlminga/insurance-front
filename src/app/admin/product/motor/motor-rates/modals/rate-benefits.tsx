@@ -121,7 +121,7 @@ export const MotorRateBenefitsPage = ({ componentProps }: {
                         {componentProps?.data?.product?.name} - Optional Benefits
                     </h2>
                     <p className="text-sm text-muted-foreground mt-1">
-                        Fill in the details below to register a motor Detailed benefits.
+                        Fill in the details below to register a motor Optional benefits.
                     </p>
                 </div>
                 <Button

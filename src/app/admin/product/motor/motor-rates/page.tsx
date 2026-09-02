@@ -40,7 +40,7 @@ export const MotorProductRatesPage = () => {
         url: `products/motor/rates/${slung}`,
         params: {
             page: filter.page,
-            pageSize: filter.pageSize,
+            per_page: filter.pageSize,
             term: filter.term,
         },
         queryOptions: {

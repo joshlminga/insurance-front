@@ -128,7 +128,7 @@ import {
     PopoverTrigger
 } from "@/components/ui/popover";
 import { ShowToast } from "@/utils/utils";
-import { extractErrorMessage } from "@/utils/helpers";
+import { extractErrorMessage, mergeSelectedOption } from "@/utils/helpers";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -1134,9 +1134,11 @@ const SearchableCommandSelect = ({
     isFetching = false,
     onSearchChange,
     footer,
+    selectedOption,
 }: SearchableCommandSelectProps) => {
     const [open, setOpen] = useState(false)
-    const selectedOption = options.find((option) => option.value === value)
+    const mergedOptions = mergeSelectedOption(options, selectedOption, value)
+    const selectedOptionEntry = mergedOptions.find((option) => option.value === value)
 
     return (
         <Popover open={open} onOpenChange={setOpen}>
@@ -1149,7 +1151,7 @@ const SearchableCommandSelect = ({
                     disabled={disabled}
                     className="w-full h-10 justify-between rounded-[5px] border-[#ADABAB] font-normal hover:bg-transparent">
                     <span className="truncate">
-                        {selectedOption?.label ?? (isLoading ? "Loading..." : placeholder)}
+                        {selectedOptionEntry?.label ?? (isLoading ? "Loading..." : placeholder)}
                     </span>
                     <ChevronsUpDown className="size-4 shrink-0 opacity-50" />
                 </ShadButton>
@@ -1163,7 +1165,7 @@ const SearchableCommandSelect = ({
                     <CommandList>
                         {!isLoading && !isFetching && <CommandEmpty>{emptyMessage}</CommandEmpty>}
                         <CommandGroup>
-                            {options.map((option) => (
+                            {mergedOptions.map((option) => (
                                 <CommandItem
                                     key={option.value}
                                     value={option.searchValue ?? String(option.label)}
@@ -1622,7 +1624,7 @@ export function ReuseableSingleSelectclassInput<T extends FieldValues>({
     required = false,
     disabled = false,
     className,
-
+    selectedOption,
 }: ReuseableSingleSelectCountriesInputProps<T>) {
     const { data, isLoading } = UseApiQuery<SubmitResponse>({
         url: "motor/vehicle-classes",
@@ -1630,6 +1632,17 @@ export function ReuseableSingleSelectclassInput<T extends FieldValues>({
         queryOptions: { enabled: true },
     })
     const classes = data?.data ?? [];
+    const displayClasses = [...classes];
+    if (
+        selectedOption &&
+        value &&
+        !classes.some((item: any) => String(item.id) === value)
+    ) {
+        displayClasses.unshift({
+            id: Number(selectedOption.value),
+            name: selectedOption.label,
+        });
+    }
 
     return (
         <div className={`space-y-2 ${className ?? ""}`}>
@@ -1649,12 +1662,12 @@ export function ReuseableSingleSelectclassInput<T extends FieldValues>({
                     />
                 </SelectTrigger>
                 <SelectContent>
-                    {classes.map((user: any) => (
+                    {displayClasses.map((user: any) => (
                         <SelectItem key={user.id} value={String(user.id)}>
                             {user?.name}
                         </SelectItem>
                     ))}
-                    {!isLoading && classes.length === 0 && (
+                    {!isLoading && displayClasses.length === 0 && (
                         <div className="px-3 py-2 text-sm text-muted-foreground">
                             No classes found
                         </div>
@@ -1673,6 +1686,7 @@ export function ReuseableSingleSelectVehicleUseInput<T extends FieldValues>({
     required = false,
     disabled = false,
     className,
+    selectedOption,
 }: ReuseableSingleSelectCountriesInputProps<T>) {
     const [search, setSearch] = useState("");
     const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -1716,6 +1730,7 @@ export function ReuseableSingleSelectVehicleUseInput<T extends FieldValues>({
                 isLoading={isLoading}
                 isFetching={isFetching}
                 onSearchChange={setSearch}
+                selectedOption={selectedOption}
             />
         </div>
     );
@@ -1777,6 +1792,7 @@ export function ReuseableSingleSelectCoveringInput<T extends FieldValues>({
     required = false,
     disabled = false,
     className,
+    selectedOption,
 }: ReuseableSingleSelectCountriesInputProps<T>) {
     const [search, setSearch] = useState("");
     const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -1820,6 +1836,7 @@ export function ReuseableSingleSelectCoveringInput<T extends FieldValues>({
                 isLoading={isLoading}
                 isFetching={isFetching}
                 onSearchChange={setSearch}
+                selectedOption={selectedOption}
             />
         </div>
     );
@@ -1840,6 +1857,7 @@ export function ReusableSingleSelectApiInput({
     valueKey = "id",
     searchPlaceholder = "Search...",
     emptyMessage = "No results found",
+    selectedOption,
 }: ReusableSingleSelectApiInputProps) {
     const [search, setSearch] = useState("");
     const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -1890,6 +1908,7 @@ export function ReusableSingleSelectApiInput({
                 isLoading={isLoading}
                 isFetching={isFetching}
                 onSearchChange={setSearch}
+                selectedOption={selectedOption}
             />
         </div>
     );
@@ -1910,7 +1929,8 @@ export function ReusableApiMultiSelect({
     searchKeys = ["name"],
     searchPlaceholder = "Search...",
     emptyMessage = "No results found",
-    organizationLocationId
+    organizationLocationId,
+    seedItems = [],
 }: ReusableApiMultiSelectProps) {
     const [search, setSearch] = useState("");
     const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -1936,17 +1956,31 @@ export function ReusableApiMultiSelect({
         },
     });
     const items = data?.data ?? [];
+    const mergedItems = useMemo(() => {
+        const byId = new Map<string, any>();
+        seedItems.forEach((seedItem) => {
+            const id = String(seedItem.id);
+            byId.set(id, { id: seedItem.id, name: seedItem.name });
+        });
+        items.forEach((item: any) => {
+            const id = String(getByPath(item, valueKey) ?? "");
+            if (id) {
+                byId.set(id, item);
+            }
+        });
+        return Array.from(byId.values());
+    }, [items, seedItems, valueKey]);
     const filteredItems = useMemo(() => {
-        if (!search) return items;
+        if (!search) return mergedItems;
         const lowerSearch = search.toLowerCase();
-        return items.filter((item: any) =>
+        return mergedItems.filter((item: any) =>
             searchKeys.some((key) =>
                 String(item?.[key] ?? "")
                     .toLowerCase()
                     .includes(lowerSearch)
             )
         );
-    }, [items, search, searchKeys]);
+    }, [mergedItems, search, searchKeys]);
     const controlledValue = Array.isArray(value) ? value : [];
 
     return (

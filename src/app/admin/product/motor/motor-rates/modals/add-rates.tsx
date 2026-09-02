@@ -16,7 +16,7 @@ import {
 } from '@/dev/core'
 import { UseApiMutation } from '@/hooks/hooks'
 import { CreateMotorProductRatesSchema } from '@/types/form-schema'
-import { CreateMotorProductRatesFormValues } from '@/types/schema'
+import { CreateMotorProductRatesInputValues, CreateMotorProductRatesFormValues } from '@/types/schema'
 import { SubmitResponse } from '@/types/types'
 import {
     CAUDIENCE_OPTIONS,
@@ -38,7 +38,7 @@ export const AddMotorProductRatesPage = ({ handleDialogContextSwitch, componentP
 }) => {
     const { slung } = useParams();
     const [step, setStep] = useState(1);
-    const form = useForm<CreateMotorProductRatesFormValues>({
+    const form = useForm<CreateMotorProductRatesInputValues, any, CreateMotorProductRatesFormValues>({
         resolver: zodResolver(CreateMotorProductRatesSchema),
         defaultValues: {
             coverfor_id: "",
@@ -114,7 +114,7 @@ export const AddMotorProductRatesPage = ({ handleDialogContextSwitch, componentP
     const nextStep = async () => {
         const currentStep = RatesSteps[step - 1]
         if (!currentStep) return
-        const fields = currentStep.fields as (keyof CreateMotorProductRatesFormValues)[]
+        const fields = currentStep.fields as (keyof CreateMotorProductRatesInputValues)[]
         const isValid = await form.trigger(fields)
         if (!isValid) {
             const errors = form.formState.errors as Record<string, any>
@@ -253,8 +253,7 @@ export const AddMotorProductRatesPage = ({ handleDialogContextSwitch, componentP
                                         url="motor/vehicle-body-type"
                                         value={field.value}
                                         onChange={field.onChange}
-                                        label="Vehicle Body Type"
-                                        required
+                                        label="Vehicle Body Type (Optional)"
                                         placeholder="Select vehicle body type..."
                                         className={form.formState.errors.bodytype_id ? "**:data-[slot=select-trigger]:border-red-500 **:data-[slot=select-trigger]:focus-visible:ring-red-500" : ""}
                                     />
@@ -408,16 +407,14 @@ export const AddMotorProductRatesPage = ({ handleDialogContextSwitch, componentP
                                 control={form.control}
                                 name="rate"
                                 type='number'
-                                label="Rate"
-                                required
+                                label="Rate (Optional)"
                                 className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                             />
                             <ReuseableInput
                                 control={form.control}
                                 name="minimum"
                                 type='number'
-                                label="Minimum"
-                                required
+                                label="Minimum (defaults to 0)"
                                 className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                             />
                             <ReuseableInput

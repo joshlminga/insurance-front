@@ -714,6 +714,7 @@ export type ReuseableSingleSelectCountriesInputProps<T extends FieldValues> = {
   required?: boolean
   disabled?: boolean
   className?: string
+  selectedOption?: { value: string; label: string }
 }
 
 export type UserMenuItem = {
@@ -772,6 +773,7 @@ export type ReusableSingleSelectApiInputProps = {
   valueKey?: string;
   searchPlaceholder?: string;
   emptyMessage?: string;
+  selectedOption?: { value: string; label: string };
 }
 
 export type ReusableApiMultiSelectProps = {
@@ -790,6 +792,7 @@ export type ReusableApiMultiSelectProps = {
   searchPlaceholder?: string;
   emptyMessage?: string;
   organizationLocationId?:any
+  seedItems?: Array<{ id: number | string; name: string }>;
 }
 
 export type VehicleClassItem = {
@@ -1316,6 +1319,7 @@ export type SearchableCommandSelectProps = {
     isFetching?: boolean
     onSearchChange?: (value: string) => void
     footer?: React.ReactNode
+    selectedOption?: { value: string; label: string }
 }
 
 export type TTab<KeyType = string> = {

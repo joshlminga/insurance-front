@@ -97,16 +97,15 @@ export const AddMotorRateBenefits = ({ handleDialogContextSwitch, componentProps
                 <ReuseableInput
                     control={form.control}
                     name="rate"
-                    label="Rate"
+                    label="Rate (Optional)"
                     type="number"
                     step="0.01"
-                    required
                     className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                 />
                 <ReuseableInput
                     control={form.control}
                     name="minimum"
-                    label="Minimum"
+                    label="Minimum (Optional)"
                     type="number"
                     step="0.01"
                    className="w-full h-10 rounded-[5px] border border-[#ADABAB]"

@@ -13,7 +13,7 @@ import {
 } from '@/dev/core'
 import { UseApiMutation } from '@/hooks/hooks'
 import { CreateMotorProductRatesSchema } from '@/types/form-schema'
-import { CreateMotorProductRatesFormValues } from '@/types/schema'
+import { CreateMotorProductRatesInputValues, CreateMotorProductRatesFormValues } from '@/types/schema'
 import { SubmitResponse } from '@/types/types'
 import { 
     CAUDIENCE_OPTIONS, 
@@ -21,11 +21,11 @@ import {
     RatesSteps, 
     TAUDIENCE_OPTIONS 
 } from '@/utils/constatnts'
-import { extractErrorMessage } from '@/utils/helpers'
+import { extractErrorMessage, mapMotorRateToFormValues, taxonomyToSelectOption } from '@/utils/helpers'
 import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { useParams } from 'react-router-dom'
 
@@ -36,67 +36,22 @@ export const EditMotorProductRatesPage = ({ handleDialogContextSwitch, component
 
     const { slung } = useParams();
     const [step, setStep] = useState(1);
-    const normalizeMakeModelIds = (items: any): number[] => {
-        if (!Array.isArray(items)) return []
+    const rateData = componentProps?.data
 
-        return items
-            .map((item) => {
-                if (typeof item === "number") return item
-                if (typeof item === "string") return Number(item)
-                if (item && typeof item === "object") {
-                    return Number(item.id ?? item.value)
-                }
-                return NaN
-            })
-            .filter((id) => Number.isFinite(id))
-    }
-
-    const makeModelOffered = normalizeMakeModelIds(
-        componentProps?.data?.meta?.makemodel_offered ?? componentProps?.data?.makemodel_offered
-    )
-    const makeModelNotOffered = normalizeMakeModelIds(
-        componentProps?.data?.meta?.makemodel_notoffered ?? componentProps?.data?.makemodel_notoffered
-    )
-
-    const form = useForm<CreateMotorProductRatesFormValues>({
+    const form = useForm<CreateMotorProductRatesInputValues, any, CreateMotorProductRatesFormValues>({
         resolver: zodResolver(CreateMotorProductRatesSchema),
-        defaultValues: {
-            coverfor_id: String(componentProps?.data?.coverfor_id ?? ""),
-            covertype_id: String(componentProps?.data?.covertype_id ?? ""),
-            covering_id: String(componentProps?.data?.covering_id ?? ""),
-            usedfor_id: String(componentProps?.data?.usedfor_id ?? ""),
-            bodytype_id: String(componentProps?.data?.bodytype_id ?? ""),
-            used_tonnage_id: String(componentProps?.data?.used_tonnage_id ?? ""),
-            min_tonnage: componentProps?.data?.min_tonnage ?? "",
-            max_tonnage: componentProps?.data?.max_tonnage ?? "",
-            is_all_sum: componentProps?.data?.is_all_sum ?? false,
-            valued_from: componentProps?.data?.valued_from ?? "",
-            valued_to: componentProps?.data?.valued_to ?? "",
-            is_all_age: Boolean(componentProps?.data?.is_all_age ?? false),
-            age_from: componentProps?.data?.age_from ?? "",
-            age_to: componentProps?.data?.age_to ?? "",
-            rate: componentProps?.data?.rate ?? "",
-            minimum: componentProps?.data?.minimum ?? "",
-            pll: componentProps?.data?.pll ?? "",
-            is_fleet: Boolean(componentProps?.data?.is_fleet ?? false),
-            min_fleet: componentProps?.data?.min_fleet ?? "",
-            max_fleet: componentProps?.data?.max_fleet ?? "",
-            target_audience: componentProps?.data?.target_audience ?? "",
-            cover_target: componentProps?.data?.cover_target ?? "",
-            min_age: componentProps?.data?.min_age ?? "",
-            max_age: componentProps?.data?.max_age ?? "",
-            start_date: componentProps?.data?.start_date ?? "",
-            expiry_date: componentProps?.data?.expiry_date ?? "",
-            is_active: Boolean(componentProps?.data?.is_active ?? true),
-            makemodel_offered: makeModelOffered,
-            makemodel_notoffered: makeModelNotOffered,
-            meta: [],
-        },
+        defaultValues: mapMotorRateToFormValues(rateData),
     })
 
+    useEffect(() => {
+        if (rateData) {
+            form.reset(mapMotorRateToFormValues(rateData))
+        }
+    }, [rateData, form])
+
     const submitMutation = UseApiMutation<SubmitResponse, CreateMotorProductRatesFormValues>({
-        url: `products/motor/rates/${slung}`,
-        method: EMETHODS.POST,
+        url: `products/motor/rates/${slung}/${rateData?.id}`,
+        method: EMETHODS.PATCH,
         mutationOptions: {
             onSuccess: (data) => {
                 ShowToast.success(data.message || "Submitted successfully!")
@@ -134,7 +89,7 @@ export const EditMotorProductRatesPage = ({ handleDialogContextSwitch, component
     const nextStep = async () => {
         const currentStep = RatesSteps[step - 1]
         if (!currentStep) return
-        const fields = currentStep.fields as (keyof CreateMotorProductRatesFormValues)[]
+        const fields = currentStep.fields as (keyof CreateMotorProductRatesInputValues)[]
         const isValid = await form.trigger(fields)
         if (!isValid) {
             const errors = form.formState.errors as Record<string, any>
@@ -158,10 +113,10 @@ export const EditMotorProductRatesPage = ({ handleDialogContextSwitch, component
         <div className="w-full min-w-200 max-w-200 p-6 space-y-4">
             <div className="border-b pb-3">
                 <h2 className="text-xl font-semibold">
-                    Motor Detailed Benefits
+                    Motor Rates
                 </h2>
                 <p className="text-sm text-muted-foreground mt-1">
-                    Fill in the details below to register a motor Detailed benefits.
+                    Update the motor rate details below.
                 </p>
             </div>
             <div className="flex justify-between items-center mb-6 px-2">
@@ -192,6 +147,7 @@ export const EditMotorProductRatesPage = ({ handleDialogContextSwitch, component
                                         required
                                         value={field.value}
                                         onChange={field.onChange}
+                                        selectedOption={taxonomyToSelectOption(rateData?.coverfor)}
                                         className={form.formState.errors.coverfor_id ? "**:data-[slot=select-trigger]:border-red-500 **:data-[slot=select-trigger]:focus-visible:ring-red-500" : ""}
                                     />
                                     {form.formState.errors.coverfor_id?.message && (
@@ -214,6 +170,7 @@ export const EditMotorProductRatesPage = ({ handleDialogContextSwitch, component
                                         label="Cover Type"
                                         required
                                         placeholder="Select Cover Type..."
+                                        selectedOption={taxonomyToSelectOption(rateData?.covertype)}
                                         className={form.formState.errors.covertype_id ? "**:data-[slot=select-trigger]:border-red-500 **:data-[slot=select-trigger]:focus-visible:ring-red-500" : ""}
                                     />
                                     {form.formState.errors.covertype_id?.message && (
@@ -234,6 +191,7 @@ export const EditMotorProductRatesPage = ({ handleDialogContextSwitch, component
                                         required
                                         value={field.value}
                                         onChange={field.onChange}
+                                        selectedOption={taxonomyToSelectOption(rateData?.covering)}
                                         className={form.formState.errors.covering_id ? "**:data-[slot=select-trigger]:border-red-500 **:data-[slot=select-trigger]:focus-visible:ring-red-500" : ""}
                                     />
                                     {form.formState.errors.covering_id?.message && (
@@ -254,6 +212,7 @@ export const EditMotorProductRatesPage = ({ handleDialogContextSwitch, component
                                         required
                                         value={field.value}
                                         onChange={field.onChange}
+                                        selectedOption={taxonomyToSelectOption(rateData?.usedfor)}
                                         className={form.formState.errors.usedfor_id ? "**:data-[slot=select-trigger]:border-red-500 **:data-[slot=select-trigger]:focus-visible:ring-red-500" : ""}
                                     />
                                     {form.formState.errors.usedfor_id?.message && (
@@ -273,9 +232,9 @@ export const EditMotorProductRatesPage = ({ handleDialogContextSwitch, component
                                         url="motor/vehicle-body-type"
                                         value={field.value}
                                         onChange={field.onChange}
-                                        label="Vehicle Body Type"
-                                        required
+                                        label="Vehicle Body Type (Optional)"
                                         placeholder="Select vehicle body type..."
+                                        selectedOption={taxonomyToSelectOption(rateData?.bodytype)}
                                         className={form.formState.errors.bodytype_id ? "**:data-[slot=select-trigger]:border-red-500 **:data-[slot=select-trigger]:focus-visible:ring-red-500" : ""}
                                     />
                                     {form.formState.errors.bodytype_id?.message && (
@@ -296,6 +255,7 @@ export const EditMotorProductRatesPage = ({ handleDialogContextSwitch, component
                                     onChange={field.onChange}
                                     label="Vehicle Tonnage (Optional)"
                                     placeholder="Select vehicle tonnage..."
+                                    selectedOption={taxonomyToSelectOption(rateData?.used_tonnage)}
                                 />
                             )}
                         />
@@ -428,16 +388,14 @@ export const EditMotorProductRatesPage = ({ handleDialogContextSwitch, component
                                 control={form.control}
                                 name="rate"
                                 type='number'
-                                label="Rate"
-                                required
+                                label="Rate (Optional)"
                                className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                             />
                             <ReuseableInput
                                 control={form.control}
                                 name="minimum"
                                 type='number'
-                                label="Minimum"
-                                required
+                                label="Minimum (defaults to 0)"
                                className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                             />
                             <ReuseableInput
@@ -688,6 +646,7 @@ export const EditMotorProductRatesPage = ({ handleDialogContextSwitch, component
                                     onChange={(vals) => field.onChange(vals.map(Number).filter(n => !isNaN(n)))}
                                     label="Make and Model Offered (Optional)"
                                     placeholder="Select Make and Model Offered..."
+                                    seedItems={rateData?.meta?.makemodel_offered ?? []}
                                 />
                             )}
                         />
@@ -701,6 +660,7 @@ export const EditMotorProductRatesPage = ({ handleDialogContextSwitch, component
                                     onChange={(vals) => field.onChange(vals.map(Number).filter(n => !isNaN(n)))}
                                     label="Make and Model Not Offered (Optional)"
                                     placeholder="Select Make and Model Not Offered..."
+                                    seedItems={rateData?.meta?.makemodel_notoffered ?? []}
                                 />
                             )}
                         />

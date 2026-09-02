@@ -823,53 +823,55 @@ export const CreateMotorDetailedBenefitsSchema = z.object({
     .max(1000, "Description is too long"),
 })
 
-export const CreateMotorTonageSchema = z.object({
-  name: z
-    .string()
-    .min(2, "Tonage name must be at least 2 characters")
-    .max(100, "Tonage name is too long"),
-  vehicle_use_id: z
-    .string()
-    .min(1, "Vehicle use is required"),
-  description: z
-    .string()
-    .min(5, "Description must be at least 5 characters")
-    .max(1000, "Description is too long"),
-})
+const numericCoerce = z.union([
+  z.number(),
+  z.string().refine((val) => !isNaN(Number(val)) && val !== "", {
+    message: "Must be a valid number",
+  }).transform((val) => Number(val)),
+]);
+
+/** Optional number field: empty input becomes null for the API */
+const optionalNumericField = z
+  .union([numericCoerce, z.literal(""), z.undefined()])
+  .optional()
+  .transform((val) => (val === "" || val === undefined ? null : val));
+
+/** Optional taxonomy id: empty input becomes null for the API */
+const optionalIdField = z
+  .union([z.string().min(1), z.literal(""), z.undefined()])
+  .optional()
+  .transform((val) => (val === "" || val === undefined ? null : val));
 
 export const CreateMotorProductRatesSchema = z.object({
   coverfor_id: z.string().min(1, "Cover for is required"),
   covertype_id: z.string().min(1, "Cover type is required"),
   covering_id: z.string().min(1, "Covering is required"),
   usedfor_id: z.string().min(1, "Used for is required"),
-  bodytype_id: z.string().min(1, "Body type is required"),
-  used_tonnage_id: z.string().optional().or(z.literal("")),
-  min_tonnage: z.union([z.string(), z.number(), z.literal("")]).optional(),
-  max_tonnage: z.union([z.string(), z.number(), z.literal("")]).optional(),
+  bodytype_id: optionalIdField,
+  used_tonnage_id: optionalIdField,
+  min_tonnage: optionalNumericField,
+  max_tonnage: optionalNumericField,
 
-  // Valued Sum Section
   is_all_sum: z.boolean(),
-  valued_from: z.union([z.string(), z.number(), z.literal("")]).optional(),
-  valued_to: z.union([z.string(), z.number(), z.literal("")]).optional(),
+  valued_from: optionalNumericField,
+  valued_to: optionalNumericField,
 
-  // Age Section
   is_all_age: z.boolean(),
-  age_from: z.union([z.string(), z.number(), z.literal("")]).optional(),
-  age_to: z.union([z.string(), z.number(), z.literal("")]).optional(),
+  age_from: optionalNumericField,
+  age_to: optionalNumericField,
 
-  rate: z.union([z.string().min(1, "Rate is required"), z.number()]),
-  minimum: z.union([z.string().min(1, "Minimum is required"), z.number()]),
-  pll: z.union([z.string(), z.number()]).optional(),
+  rate: optionalNumericField,
+  minimum: optionalNumericField.transform((val) => (val === null ? 0 : val)),
+  pll: optionalNumericField,
 
-  // Fleet Section
   is_fleet: z.boolean(),
-  min_fleet: z.union([z.string(), z.number(), z.literal("")]).optional(),
-  max_fleet: z.union([z.string(), z.number(), z.literal("")]).optional(),
+  min_fleet: optionalNumericField,
+  max_fleet: optionalNumericField,
 
   target_audience: z.string(),
   cover_target: z.string(),
-  min_age: z.union([z.string(), z.number()]).optional(),
-  max_age: z.union([z.string(), z.number()]).optional(),
+  min_age: optionalNumericField,
+  max_age: optionalNumericField,
   start_date: z.string().min(1, "Start date is required"),
   expiry_date: z.string().min(1, "Expiry date is required"),
   is_active: z.boolean(),
@@ -881,8 +883,8 @@ export const CreateMotorProductRatesSchema = z.object({
   }))
 })
   .refine((data) => {
-    const from = data.valued_from !== "" ? Number(data.valued_from) : null;
-    const to = data.valued_to !== "" ? Number(data.valued_to) : null;
+    const from = data.valued_from != null ? Number(data.valued_from) : null;
+    const to = data.valued_to != null ? Number(data.valued_to) : null;
 
     if (from !== null && to !== null && !isNaN(from) && !isNaN(to)) {
       return to >= from;
@@ -892,11 +894,9 @@ export const CreateMotorProductRatesSchema = z.object({
     message: "Valued To must be greater than or equal to Valued From",
     path: ["valued_to"]
   })
-
-  // 2. Age Range Validation
   .refine((data) => {
-    const from = data.age_from !== "" ? Number(data.age_from) : null;
-    const to = data.age_to !== "" ? Number(data.age_to) : null;
+    const from = data.age_from != null ? Number(data.age_from) : null;
+    const to = data.age_to != null ? Number(data.age_to) : null;
 
     if (from !== null && to !== null && !isNaN(from) && !isNaN(to)) {
       return to >= from;
@@ -907,8 +907,8 @@ export const CreateMotorProductRatesSchema = z.object({
     path: ["age_to"]
   })
   .refine((data) => {
-    const min = data.min_fleet !== "" ? Number(data.min_fleet) : null;
-    const max = data.max_fleet !== "" ? Number(data.max_fleet) : null;
+    const min = data.min_fleet != null ? Number(data.min_fleet) : null;
+    const max = data.max_fleet != null ? Number(data.max_fleet) : null;
 
     if (min !== null && max !== null && !isNaN(min) && !isNaN(max)) {
       return max >= min;
@@ -919,25 +919,23 @@ export const CreateMotorProductRatesSchema = z.object({
     path: ["max_fleet"]
   });
 
-const numericCoerce = z.union([
-  z.number(),
-  z.string().refine((val) => !isNaN(Number(val)) && val !== "", {
-    message: "Must be a valid number",
-  }).transform((val) => Number(val)),
-]);
-
-export const CreateMotorRateBenefitsSchema = z.object({
-  benefit_id: z.string().min(1, "Benefit is required"),
-  rate: numericCoerce,
-  minimum: z.union([
-    numericCoerce,
-    z.literal(""),
-    z.undefined()
-  ]).optional(),
-
-  benefit_type: z.string().optional().or(z.literal("")),
-  description: z.string().optional().or(z.literal("")),
-})
+export const CreateMotorRateBenefitsSchema = z
+  .object({
+    benefit_id: z.string().min(1, "Benefit is required"),
+    rate: optionalNumericField,
+    minimum: optionalNumericField,
+    benefit_type: z.string().optional().or(z.literal("")),
+    description: z.string().optional().or(z.literal("")),
+  })
+  .superRefine((data, ctx) => {
+    if (data.rate == null && data.minimum == null) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "At least one of rate or minimum must have a value.",
+        path: ["rate"],
+      });
+    }
+  });
 
 export const CreateMotorRateExcessBenefitsSchema = z.object({
   detail_benefit_id: z.string().min(1, "Detailed Benefit is required"),
