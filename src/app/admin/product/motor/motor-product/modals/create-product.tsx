@@ -138,12 +138,14 @@ export const CreateProductModal = ({ handleDialogContextSwitch, componentProps }
                     control={form.control}
                     name="name"
                     label="Product Motor Name"
+                    required
                     className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                 />
                 <ReuseableInput
                     control={form.control}
                     name="officename"
                     label="Office Name"
+                    required
                    className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                 />
                 <ReuseableInput
@@ -157,12 +159,14 @@ export const CreateProductModal = ({ handleDialogContextSwitch, componentProps }
                     control={form.control}
                     name="access"
                     label="Access Level"
+                    required
                     options={ACCESSLEVELSOPTIONS}
                 />
                 <ReusableSelect
                     control={form.control}
                     name="for_public"
                     label="Public Product (Accessible by All)"
+                    required
                     options={TARGET_AUDIENCE_OPTIONS}
                 />
                 <ReuseableInput
@@ -214,9 +218,9 @@ export const CreateProductModal = ({ handleDialogContextSwitch, componentProps }
                             </Button>
                         </div>
                     ))}
-                    {form.watch("brochure")?.length ? (
+                    {(form.watch("brochure")?.length ?? 0) > 0 ? (
                         <p className="text-xs text-muted-foreground">
-                            {form.watch("brochure").length} file{form.watch("brochure").length === 1 ? "" : "s"} selected
+                            {form.watch("brochure")?.length ?? 0} file{(form.watch("brochure")?.length ?? 0) === 1 ? "" : "s"} selected
                         </p>
                     ) : null}
                     {form.formState.errors.brochure?.message ? (
