@@ -20,7 +20,8 @@ import { ShowToast } from "@/utils/utils"
 import type { LoginResponse } from "@/types/types"
 import { normalizeLoginResponse } from '@/auth/session'
 import { extractErrorMessage } from "@/utils/helpers"
-import { useState } from "react"
+import { clearTabSignedOut } from '@/auth/session-wipe'
+import { useRef, useState } from "react"
 import { Eye, EyeOff } from "lucide-react"
 
 export function LoginForm({
@@ -30,6 +31,7 @@ export function LoginForm({
 }: React.ComponentProps<"div"> & { variant?: 'default' | 'org' }) {
 
   const [show, setShow] = useState(false);
+  const allowSubmit = useRef(false)
   const { setSession, setGuest } = UseAuth()
   const navigate = useNavigate()
   const location = useLocation()
@@ -53,6 +55,12 @@ export function LoginForm({
           return;
         }
         ShowToast.success(data.message || "Login successful!")
+        if (!data?.access_token || !data?.user) {
+          ShowToast.error("Login did not return a valid session.")
+          return
+        }
+        // Password login is allowed to store a new session; this flag blocks silent re-login after Log out.
+        clearTabSignedOut()
         setSession(normalizeLoginResponse(data))
         if (returnTo) {
           navigate(returnTo)
@@ -69,17 +77,27 @@ export function LoginForm({
     }
   })
 
-  const onSubmit = async (data: LoginFormValues) => {
-    try {
-      loginMutation.mutate(data)
-    } catch (error: any) {
-      ShowToast.error(extractErrorMessage(error?.message || "Login failed!"))
+  const onSubmit = (data: LoginFormValues) => {
+    if (!allowSubmit.current) return
+    allowSubmit.current = false
+    if (!data.password.trim()) {
+      ShowToast.error("Password is required")
+      return
     }
+    loginMutation.mutate(data)
   }
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        onKeyDown={(event) => {
+          // Enter in the email field must not submit. Login only after the user clicks Login.
+          if (event.key === 'Enter' && (event.target as HTMLElement).getAttribute('name') === 'email') {
+            event.preventDefault()
+          }
+        }}
+      >
         <FieldGroup className="flex flex-col gap-4">
           <Field>
             <ReuseableInput
@@ -89,6 +107,7 @@ export function LoginForm({
               label="Email Address"
               type="email"
               placeholder="Enter email address"
+              autoComplete="username"
             />
           </Field>
           <Field className="flex flex-col gap-1">
@@ -100,14 +119,15 @@ export function LoginForm({
               </Link>
             </div>
             <div className="relative">
-              <ReuseableInput
-                className="w-full h-12 rounded-md border border-gray-300 pr-10"
-                control={form.control}
-                name="password"
-                label="Password"
-                type={show ? "text" : "password"}
-                placeholder="Enter your password"
-              />
+                <ReuseableInput
+                  className="w-full h-12 rounded-md border border-gray-300 pr-10"
+                  control={form.control}
+                  name="password"
+                  label="Password"
+                  type={show ? "text" : "password"}
+                  placeholder="Enter your password"
+                  autoComplete="current-password"
+                />
               <button
                 type="button"
                 onClick={() => setShow((prev) => !prev)}
@@ -119,9 +139,13 @@ export function LoginForm({
           </Field>
           <Field>
             <Button
-              className="w-full h-12 bg-[#C20C0C] hover:bg-[#C20C0C]/80"
-              type="submit"
-              loading={loginMutation.isPending}>
+                className="w-full h-12 bg-[#C20C0C] hover:bg-[#C20C0C]/80"
+                type="submit"
+                loading={loginMutation.isPending}
+                onClick={() => {
+                  allowSubmit.current = true
+                }}
+              >
               <span className="font-semibold text-sm">
                 {variant === 'org' ? 'Secure Login' : 'Login'}
               </span>

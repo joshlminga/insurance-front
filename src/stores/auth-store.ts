@@ -7,14 +7,9 @@ import {
   refreshSession,
   resolveOrganization,
 } from '@/auth/auth-service'
-import { AUTH_STORAGE_KEY, TOKEN_REFRESH_BUFFER_SECONDS } from '@/auth/constants'
+import { AUTH_STORAGE_KEY, AUTH_LOGOUT_BROADCAST_KEY, TOKEN_REFRESH_BUFFER_SECONDS } from '@/auth/constants'
 import { syncAccessToken } from '@/auth/access-token'
-import {
-  clearAuthWiped,
-  isAuthWiped,
-  markAuthWiped,
-  wipeStoredAuth,
-} from '@/auth/session-wipe'
+import { broadcastLogout, isTabSignedOut, markTabSignedOut, wipeStoredAuth } from '@/auth/session-wipe'
 import { useSessionTimeoutStore } from '@/stores/session-timeout-store'
 import { queryClient } from '@/utils/providers'
 import { EPREFIX, EROUTES } from '@/utils/enums'
@@ -106,22 +101,28 @@ function writePersistedAuth(payload: string | null) {
 
 let suppressAuthPersist = false
 
-function persistAuthState(): void {
+function persistTenantOnly(organizationLocationId: number | null): void {
+  if (organizationLocationId == null) {
+    writePersistedAuth(null)
+    return
+  }
+  writePersistedAuth(JSON.stringify({ organizationLocationId }))
+}
+
+export function persistAuthState(): void {
   const state = useAuthStore.getState()
 
-  // Logout asked this tab to start clean — never write a JWT back.
-  if (suppressAuthPersist || isAuthWiped()) {
-    syncAccessToken(state.token)
-    if (!state.token) {
-      wipeStoredAuth()
-    }
+  if (suppressAuthPersist || isTabSignedOut()) {
+    syncAccessToken(null)
+    wipeStoredAuth()
     return
   }
 
   syncAccessToken(state.token)
 
-  if (!(state.user || state.token || state.guest || state.organizationLocationId != null)) {
-    writePersistedAuth(null)
+  // Never leave a JWT / user / abilities blob in localStorage after the session is gone.
+  if (!state.token || !state.user) {
+    persistTenantOnly(state.organizationLocationId)
     return
   }
 
@@ -139,24 +140,7 @@ function persistAuthState(): void {
       writePersistedAuth(next)
     }
   } catch {
-    writePersistedAuth(JSON.stringify({
-      user: state.user
-        ? {
-            id: state.user.id,
-            name: state.user.name,
-            email: state.user.email,
-            username: state.user.username ?? null,
-            is_general: state.user.is_general,
-            is_active: state.user.is_active,
-          }
-        : null,
-      token: state.token,
-      guest: state.guest,
-      isGeneral: state.isGeneral,
-      abilities: state.abilities,
-      expiresAt: state.expiresAt,
-      organizationLocationId: state.organizationLocationId,
-    }))
+    persistTenantOnly(state.organizationLocationId)
   }
 }
 
@@ -196,6 +180,22 @@ function applyPersistedPayload(raw: string | null) {
   }
 }
 
+/** Clear this tab's user in memory. Does not touch localStorage (other tabs stay logged in). */
+function dropSession(): void {
+  clearTokenRefreshTimer()
+  suppressAuthPersist = true
+  useAuthStore.setState({
+    user: null,
+    token: null,
+    guest: null,
+    isGeneral: null,
+    abilities: null,
+    expiresAt: null,
+  })
+  syncAccessToken(null)
+  suppressAuthPersist = false
+}
+
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   token: null,
@@ -212,9 +212,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   alpha: 'KE',
 
   setSession: (payload: AuthSessionPayload) => {
+    // A late token-refresh must not recreate the session after Log out.
+    if (isTabSignedOut()) return
     const expiresAt = Date.now() + payload.expires_in * 1000
     suppressAuthPersist = false
-    clearAuthWiped()
     set({
       user: payload.user,
       token: payload.access_token,
@@ -230,7 +231,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         const refreshed = await refreshSession(token, organizationLocationId)
         get().setSession(refreshed)
       } catch {
-        get().logout()
+        dropSession()
       }
     })
   },
@@ -252,25 +253,21 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   restoreSession: async () => {
+    if (isTabSignedOut()) return false
     const { token, expiresAt } = get()
     if (!token) return false
-
-    if (expiresAt != null && expiresAt < Date.now()) {
-      get().logout()
-      return false
-    }
 
     try {
       const data = await checkAuth(token)
       if (!data.is_logged || !data.user) {
-        get().logout()
+        dropSession()
         return false
       }
 
       const isGeneral = data.is_general ?? data.user.is_general
       const remainingSeconds =
-        expiresAt != null
-          ? Math.max(0, Math.floor((expiresAt - Date.now()) / 1000))
+        expiresAt != null && expiresAt > Date.now()
+          ? Math.max(1, Math.floor((expiresAt - Date.now()) / 1000))
           : 3600
 
       get().setSession({
@@ -283,8 +280,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       })
       return true
     } catch {
-      get().logout()
-      return false
+      // Keep the stored session if check-auth cannot be reached (new tab / network).
+      return Boolean(get().user && get().token)
     }
   },
 
@@ -300,14 +297,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   logout: () => {
     clearTokenRefreshTimer()
     const { token } = get()
-    if (token) {
-      void logoutOnServer(token).catch(() => {
-        /* best-effort server logout */
-      })
-    }
-    // Stop this tab from picking the old JWT back up from cache or another tab.
+
+    // Wipe the JWT from this browser immediately — do not wait on the API.
+    markTabSignedOut()
     suppressAuthPersist = true
-    markAuthWiped()
     syncAccessToken(null)
     wipeStoredAuth()
     queryClient.clear()
@@ -320,9 +313,28 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       abilities: null,
       expiresAt: null,
     })
-    if (typeof window !== 'undefined') {
-      window.location.replace(`/${EPREFIX.AUTH}${EROUTES.SIGNIN}`)
+    wipeStoredAuth()
+
+    const goToSignIn = () => {
+      broadcastLogout()
+      wipeStoredAuth()
+      if (typeof window !== 'undefined') {
+        window.location.replace(`/${EPREFIX.AUTH}${EROUTES.SIGNIN}`)
+      }
     }
+
+    if (!token) {
+      goToSignIn()
+      return
+    }
+
+    void logoutOnServer(token)
+      .catch(() => {
+        /* local wipe already happened */
+      })
+      .finally(() => {
+        goToSignIn()
+      })
   },
 
   updateUser: (updates) => {
@@ -351,24 +363,21 @@ export async function initAuthStore() {
     authListenerAttached = true
 
     window.addEventListener('storage', (e) => {
-      if (e.key !== AUTH_STORAGE_KEY || e.storageArea !== localStorage) return
-      if (isAuthWiped()) return
-      const current = useAuthStore.getState()
-      if (e.newValue && current.token) {
-        try {
-          const incoming = JSON.parse(e.newValue) as PersistedAuth
-          // Another tab still has the expired JWT — do not overwrite this tab's new login.
-          if (
-            incoming.token &&
-            incoming.token !== current.token &&
-            (current.expiresAt ?? 0) >= (incoming.expiresAt ?? 0)
-          ) {
-            return
-          }
-        } catch {
-          /* fall through and apply */
-        }
+      if (e.storageArea !== localStorage) return
+
+      // Another tab clicked Log out.
+      if (e.key === AUTH_LOGOUT_BROADCAST_KEY || (e.key === AUTH_STORAGE_KEY && e.newValue == null)) {
+        suppressAuthPersist = true
+        applyPersistedPayload(null)
+        queryClient.clear()
+        useSessionTimeoutStore.getState().close()
+        window.location.replace(`/${EPREFIX.AUTH}${EROUTES.SIGNIN}`)
+        return
       }
+
+      if (e.key !== AUTH_STORAGE_KEY) return
+      // This tab signed out. Another tab's saved login must not log us in without a password.
+      if (isTabSignedOut()) return
       applyPersistedPayload(e.newValue)
     })
 
@@ -379,14 +388,9 @@ export async function initAuthStore() {
 
   if (!useAuthStore.getState().hasHydrated) {
     try {
-      if (isAuthWiped()) {
-        wipeStoredAuth()
-        syncAccessToken(null)
-      } else {
-        const raw = readPersistedAuth()
-        if (raw) {
-          applyPersistedPayload(raw)
-        }
+      const raw = readPersistedAuth()
+      if (raw && !isTabSignedOut()) {
+        applyPersistedPayload(raw)
       }
     } catch {
       writePersistedAuth(null)

@@ -1,7 +1,6 @@
 import axios from 'axios'
 import { isBypassUser } from '@/auth/can'
 import { AUTH_STORAGE_KEY, ORG_LOCATION_HEADER } from '@/auth/constants'
-import { isAuthWiped } from '@/auth/session-wipe'
 import type { Abilities } from '@/auth/types'
 import { buildRequestContextHeaders } from '@/lib/request-context-headers'
 import { getAccessToken } from '@/auth/access-token'
@@ -20,7 +19,6 @@ type PersistedAuth = {
 
 function readStoredToken(): string | null {
     if (typeof window === 'undefined') return null
-    if (isAuthWiped()) return null
     try {
         const raw = localStorage.getItem(AUTH_STORAGE_KEY)
         if (!raw) return null
@@ -50,6 +48,7 @@ apiClient.interceptors.request.use(
         const requestUrl = String(config.url ?? '')
         // Login must not send the old JWT — the API would treat it as an expired session.
         const isLoginRequest = requestUrl.includes('auth/login')
+        const isOrgRequest = requestUrl.includes('auth/org')
 
         const authStorage = localStorage.getItem(AUTH_STORAGE_KEY)
         const storedToken = (() => {
@@ -62,7 +61,7 @@ apiClient.interceptors.request.use(
         })()
         const liveToken = getAccessToken(storedToken)
 
-        if (liveToken && !isLoginRequest) {
+        if (liveToken && !isLoginRequest && !isOrgRequest) {
             config.headers.Authorization = `Bearer ${liveToken}`
         }
 

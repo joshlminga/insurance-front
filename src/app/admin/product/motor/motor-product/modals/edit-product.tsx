@@ -4,10 +4,9 @@ import {
   Button, 
   ReusableSelect, 
   ReusableSingleSelectApiInput,
-  ReuseableInput, 
-  ReuseableSelectInsurerInput 
+  ReuseableInput,
 } from '@/dev/core'
-import { UseApiMutation } from '@/hooks/hooks'
+import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
 import { EditProductSchema } from '@/types/form-schema'
 import { EditProductFormValues } from '@/types/schema'
 import { SubmitResponse } from '@/types/types'
@@ -20,60 +19,46 @@ import {
 import { extractErrorMessage } from '@/utils/helpers'
 import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
+import { buildMotorProductFormData } from './build-motor-product-form-data'
+import {
+  getInsurerSelectedOption,
+  getTargetOrganizationSelectedOption,
+  mapProductToEditFormValues,
+} from './motor-product-form-utils'
 
 export const EditProductModal = ({ handleDialogContextSwitch, componentProps }: {
   handleDialogContextSwitch: (context?: any) => void
   componentProps?: any
 }) => {
-  const productData = componentProps?.data ?? {}
+  const productId = componentProps?.data?.id
 
-  const normalizeBooleanSelectValue = (value: unknown): "true" | "false" => {
-    if (value === true || value === "true") return "true"
-    return "false"
-  }
+  const { data: showData, isLoading: isLoadingProduct } = UseApiQuery<SubmitResponse>({
+    url: `products/motor/${productId}`,
+    queryOptions: {
+      enabled: Boolean(productId),
+    },
+  })
 
-  const normalizeTargetLocationId = (targets: unknown): string => {
-    if (!Array.isArray(targets) || targets.length === 0) return ''
+  const productData = useMemo(
+    () => (showData as any)?.data?.product ?? componentProps?.data ?? {},
+    [showData, componentProps?.data]
+  )
 
-    const firstTarget = targets[0]
-    const id =
-      firstTarget?.organization_location_id ??
-      firstTarget?.target_organization_location_id ??
-      firstTarget?.location?.organization_location_id ??
-      firstTarget?.ace_organization_location_id ??
-      firstTarget?.location_id
+  const selectedInsurerOption = useMemo(
+    () => getInsurerSelectedOption(productData),
+    [productData]
+  )
 
-    return id !== null && id !== undefined && String(id).trim().length > 0
-      ? String(id)
-      : ''
-  }
+  const selectedOrganizationOption = useMemo(
+    () => getTargetOrganizationSelectedOption(productData),
+    [productData]
+  )
 
   const existingBrochures = Array.isArray(productData?.meta?.brochure)
     ? productData.meta.brochure
     : []
-
-  const targets = Array.isArray(productData?.targets) ? productData.targets : []
-  const firstTarget = targets[0]
-  const selectedOrganizationOption = firstTarget
-    ? {
-        value: String(
-          firstTarget?.organization_location_id ??
-          firstTarget?.target_organization_location_id ??
-          firstTarget?.location?.organization_location_id ??
-          firstTarget?.ace_organization_location_id ??
-          firstTarget?.location_id ??
-          ''
-        ),
-        label: String(
-          firstTarget?.targeted_organization_name ??
-          firstTarget?.organization_name ??
-          firstTarget?.location?.organization_name ??
-          ''
-        ),
-      }
-    : undefined
 
   const [brochureInputs, setBrochureInputs] = useState<Array<{ id: number, file?: File }>>([
     { id: Date.now() },
@@ -81,19 +66,14 @@ export const EditProductModal = ({ handleDialogContextSwitch, componentProps }: 
 
   const form = useForm<EditProductFormValues>({
     resolver: zodResolver(EditProductSchema),
-    defaultValues: {
-      organization_location_id: String(productData?.organization_location_id ?? ''),
-      name: productData?.name ?? "",
-      officename: productData?.officename ?? "",
-      description: productData?.meta?.description ?? "",
-      access: productData?.access ?? "",
-      for_public: normalizeBooleanSelectValue(productData?.for_public),
-      start_date: productData?.start_date ?? productData?.cover_start_date ?? "",
-      expiry_date: productData?.expiry_date ?? productData?.cover_expiry_date ?? "",
-      brochure: [],
-      organization_location_ids: normalizeTargetLocationId(productData?.targets),
-    },
+    defaultValues: mapProductToEditFormValues(productData),
   })
+
+  useEffect(() => {
+    if (productData?.id) {
+      form.reset(mapProductToEditFormValues(productData))
+    }
+  }, [productData, form])
 
   const syncBrochures = (inputs: Array<{ id: number, file?: File }>) => {
     const files = inputs
@@ -124,8 +104,8 @@ export const EditProductModal = ({ handleDialogContextSwitch, componentProps }: 
   }
 
   const submitMutation = UseApiMutation<SubmitResponse, FormData>({
-    url: `products/motor/${componentProps?.data?.id}`,
-    method: EMETHODS.PATCH,
+    url: `products/motor/${productId}`,
+    method: EMETHODS.POST,
     config: {
       headers: {
         "Content-Type": "multipart/form-data",
@@ -145,24 +125,25 @@ export const EditProductModal = ({ handleDialogContextSwitch, componentProps }: 
       },
     },
   })
-  const onSubmit = (data: EditProductFormValues) => {
-    const formData = new FormData()
-    formData.append("organization_location_id", data.organization_location_id)
-    formData.append("name", data.name)
-    formData.append("officename", data.officename)
-    formData.append("description", data.description)
-    formData.append("access", data.access)
-    formData.append("for_public", data.for_public)
-    formData.append("start_date", data.start_date)
-    formData.append("expiry_date", data.expiry_date)
-    if (data.organization_location_ids) {
-      formData.append("organization_location_ids", data.organization_location_ids)
-    }
-    data.brochure.forEach((file) => {
-      formData.append("brochure[]", file)
-    })
 
-    submitMutation.mutate(formData)
+  const onSubmit = (data: EditProductFormValues) => {
+    submitMutation.mutate(buildMotorProductFormData(data))
+  }
+
+  if (!productId) {
+    return (
+      <div className="w-full min-w-150 max-w-150 p-6">
+        <p className="text-sm text-destructive">Unable to edit product: missing product id.</p>
+      </div>
+    )
+  }
+
+  if (isLoadingProduct) {
+    return (
+      <div className="w-full min-w-150 max-w-150 p-6">
+        <p className="text-sm text-muted-foreground">Loading product details...</p>
+      </div>
+    )
   }
 
   return (
@@ -181,11 +162,21 @@ export const EditProductModal = ({ handleDialogContextSwitch, componentProps }: 
           control={form.control}
           name="organization_location_id"
           render={({ field }) => (
-            <ReuseableSelectInsurerInput
-              label="Organization Location"
-              required
+            <ReusableSingleSelectApiInput
+              url="organization-location"
+              queryParams={{ organization_type: EORGANIZATIONTYPES.INSURER }}
               value={field.value}
               onChange={field.onChange}
+              valueKey="organization_location_id"
+              labelKey="organization_name"
+              label="Organization Location"
+              required
+              placeholder="Select insurer..."
+              searchPlaceholder="Search insurer..."
+              emptyMessage="No insurers found"
+              selectedOption={
+                selectedInsurerOption?.value ? selectedInsurerOption : undefined
+              }
             />
           )}
         />
@@ -217,7 +208,7 @@ export const EditProductModal = ({ handleDialogContextSwitch, componentProps }: 
         <ReusableSelect
           control={form.control}
           name="for_public"
-          label="Target Audience (public or private)"
+          label="Public Product (Accessible by All)"
           options={TARGET_AUDIENCE_OPTIONS}
         />
         <ReuseableInput

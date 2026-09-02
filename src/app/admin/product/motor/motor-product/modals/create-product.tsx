@@ -3,8 +3,7 @@ import {
     Button, 
     ReusableSelect, 
     ReusableSingleSelectApiInput,
-    ReuseableInput, 
-    ReuseableSelectInsurerInput 
+    ReuseableInput,
 } from "@/dev/core"
 import { UseApiMutation } from "@/hooks/hooks"
 import { CreateProductSchema } from "@/types/form-schema"
@@ -22,6 +21,7 @@ import { useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { Input } from "@/components/ui/input"
 import { CreateProductFormValues } from "@/types/schema"
+import { buildMotorProductFormData } from "./build-motor-product-form-data"
 
 
 
@@ -100,21 +100,7 @@ export const CreateProductModal = ({ handleDialogContextSwitch, componentProps }
         },
     })
     const onSubmit = (data: CreateProductFormValues) => {
-        const formData = new FormData()
-        formData.append("organization_location_id", data.organization_location_id)
-        formData.append("name", data.name)
-        formData.append("officename", data.officename)
-        formData.append("description", data.description)
-        formData.append("access", data.access)
-        formData.append("for_public", data.for_public)
-        formData.append("start_date", data.start_date)
-        formData.append("expiry_date", data.expiry_date)
-        formData.append("organization_location_ids", data.organization_location_ids)
-        data.brochure.forEach((file) => {
-            formData.append("brochure[]", file)
-        })
-
-        submitMutation.mutate(formData)
+        submitMutation.mutate(buildMotorProductFormData(data))
     }
 
     return (
@@ -133,11 +119,18 @@ export const CreateProductModal = ({ handleDialogContextSwitch, componentProps }
                     control={form.control}
                     name="organization_location_id"
                     render={({ field }) => (
-                        <ReuseableSelectInsurerInput
-                            label="Insurer Name"
-                            required
+                        <ReusableSingleSelectApiInput
+                            url="organization-location"
+                            queryParams={{ organization_type: EORGANIZATIONTYPES.INSURER }}
                             value={field.value}
                             onChange={field.onChange}
+                            valueKey="organization_location_id"
+                            labelKey="organization_name"
+                            label="Insurer Name"
+                            required
+                            placeholder="Select insurer..."
+                            searchPlaceholder="Search insurer..."
+                            emptyMessage="No insurers found"
                         />
                     )}
                 />
@@ -169,7 +162,7 @@ export const CreateProductModal = ({ handleDialogContextSwitch, componentProps }
                 <ReusableSelect
                     control={form.control}
                     name="for_public"
-                    label="Target Audience (public or private)"
+                    label="Public Product (Accessible by All)"
                     options={TARGET_AUDIENCE_OPTIONS}
                 />
                 <ReuseableInput

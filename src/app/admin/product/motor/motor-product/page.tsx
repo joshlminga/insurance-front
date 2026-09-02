@@ -38,7 +38,7 @@ export const MotorProductPage = () => {
         url: 'products/motor',
         params: {
             page: filter.page,
-            pageSize: filter.pageSize,
+            per_page: filter.pageSize,
             term: filter.term,
         },
         queryOptions: {
@@ -60,22 +60,8 @@ export const MotorProductPage = () => {
         },
     })
 
-    const toggleMotorProductActivateMutation = UseApiMutation<SubmitResponse, { id: number | string, is_active: boolean }>({
-        url: ({ id }) => `products/motor/${id}/activate`,
-        method: EMETHODS.PATCH,
-        mutationOptions: {
-            onSuccess: (response) => {
-                ShowToast.success(response?.message || 'Motor product status updated successfully')
-                refetch()
-            },
-            onError: (error) => {
-                ShowToast.error(extractErrorMessage(error))
-            },
-        },
-    })
-
-    const toggleMotorProductDeactivateMutation = UseApiMutation<SubmitResponse, { id: number | string, is_active: boolean }>({
-        url: ({ id }) => `products/motor/${id}/deactivate`,
+    const toggleMotorProductStatusMutation = UseApiMutation<SubmitResponse, { id: number | string, is_active: boolean }>({
+        url: ({ id }) => `products/motor/${id}/status`,
         method: EMETHODS.PATCH,
         mutationOptions: {
             onSuccess: (response) => {
@@ -127,7 +113,7 @@ export const MotorProductPage = () => {
         {
             label: 'Deactivate',
             onSelect: (data) => {
-                toggleMotorProductDeactivateMutation.mutate({
+                toggleMotorProductStatusMutation.mutate({
                     is_active: false,
                     id: data?.id,
                 })
@@ -137,7 +123,7 @@ export const MotorProductPage = () => {
         {
             label: 'Activate',
             onSelect: (data) => {
-                toggleMotorProductActivateMutation.mutate({
+                toggleMotorProductStatusMutation.mutate({
                     is_active: true,
                     id: data?.id,
                 })

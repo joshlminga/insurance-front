@@ -27,6 +27,7 @@ import { normalizeLoginResponse } from '@/auth/session'
 import { EMETHODS } from '@/utils/constatnts'
 import { EPREFIX, EROUTES } from '@/utils/enums'
 import { extractErrorMessage } from '@/utils/helpers'
+import { clearTabSignedOut } from '@/auth/session-wipe'
 import { queryClient } from '@/utils/providers'
 import { ShowToast } from '@/utils/utils'
 
@@ -83,6 +84,11 @@ export function SessionTimeoutDialog() {
         }
 
         ShowToast.success(data.message || 'Login successful!')
+        if (!data?.access_token || !data?.user) {
+          ShowToast.error('Login did not return a valid session.')
+          return
+        }
+        clearTabSignedOut()
         setSession(normalizeLoginResponse(data))
         // Re-run page queries with the new token instead of keeping failed 401 retries.
         void queryClient.invalidateQueries()

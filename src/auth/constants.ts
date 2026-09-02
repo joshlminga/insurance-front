@@ -16,5 +16,8 @@ export const ORG_LOCATION_STORAGE_KEY = 'selected_org_location_id'
 /** Refresh token this many seconds before expiry */
 export const TOKEN_REFRESH_BUFFER_SECONDS = 300
 
-/** Per-tab flag: this window logged out and must not import another tab's JWT. */
-export const AUTH_LOCAL_WIPE_KEY = 'auth-local-wipe'
+/** Other tabs listen for this key so Log out clears every window. */
+export const AUTH_LOGOUT_BROADCAST_KEY = 'auth-logout-broadcast'
+
+/** This tab signed out — do not import another tab's JWT until password login succeeds. */
+export const AUTH_TAB_SIGNED_OUT_KEY = 'auth-tab-signed-out'

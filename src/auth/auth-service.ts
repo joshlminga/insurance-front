@@ -127,7 +127,14 @@ export async function refreshSession(
   return data
 }
 
-/** Server-side logout (best-effort; always clear local state in finally) */
+/** Server-side logout — blacklist the JWT. Always send the current Bearer token. */
 export async function logoutOnServer(token: string): Promise<void> {
-  await apiClient.post('auth/logout', {}, { headers: authHeaders(token) })
+  await apiClient.post(
+    'auth/logout',
+    {},
+    {
+      headers: authHeaders(token),
+      timeout: 8000,
+    },
+  )
 }

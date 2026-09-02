@@ -77,7 +77,7 @@ export const ViewProductModal = ({ handleDialogContextSwitch, componentProps }: 
                         <DetailItem label="Office Name" value={product?.officename ?? 'N/A'} />
                         <DetailItem label="Access" value={getAccessLabel(product?.access)} />
                         <DetailItem
-                            label="Target Audience"
+                            label="Public Product (Accessible by All)"
                             value={
                                 <Badge className={`rounded-full text-white ${getAudienceLabel(product?.for_public) === 'Public' ? 'bg-blue-600' : 'bg-slate-600'}`}>
                                     {getAudienceLabel(product?.for_public)}

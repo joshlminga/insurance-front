@@ -4,6 +4,7 @@ import axios from 'axios'
 import apiClient from '@/lib/api-client'
 import { EMETHODS } from '@/utils/constatnts'
 import { UseAuth } from '@/stores/auth-store'
+import { isTabSignedOut } from '@/auth/session-wipe'
 import { EROUTES, EPREFIX } from '@/utils/enums'
 import { Navigate, useLocation } from 'react-router-dom'
 import type { 
@@ -115,6 +116,10 @@ export function PublicRoute({ children }: ProtectedRouteProps) {
 
   if (isLoading) {
     return <div>Loading...</div>
+  }
+  // After Log out this tab must stay on sign-in until the user submits email + password.
+  if (isTabSignedOut() && location.pathname.startsWith(`/${EPREFIX.AUTH}`)) {
+    return <>{children}</>
   }
   if (isAuthenticated && isGeneral !== null) {
     if (isGeneral === false) {
