@@ -671,6 +671,8 @@ export type TDropDownProps<T = string> = {
 export type TActionColumnGenProps<T = string> = {
   ActionsHandlerMapping: SingleActionsHandler<T>[];
   layout?: 'dropdown' | 'horizontal',
+  /** When true for a row, the Action button shows a spinner instead of the menu. */
+  isRowLoading?: (row: T) => boolean;
 };
 
 export type TReusableDropdownProp<T> = {

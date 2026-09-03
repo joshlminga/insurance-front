@@ -2,13 +2,14 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { TActionColumnGenProps } from "@/types/types";
 import { ColumnDef } from "@tanstack/table-core";
-import { Check, Copy, Ellipsis } from "lucide-react";
+import { Check, Copy, Ellipsis, Loader2 } from "lucide-react";
 import React, { useState } from "react";
 import { Button, ReusableDropDownComponent } from "../core";
 
 export const ActionColumn = <T,>({
 	ActionsHandlerMapping,
 	layout = 'dropdown',
+	isRowLoading,
 }: TActionColumnGenProps<T>): ColumnDef<T> => {
 	return {
 		enableHiding: false,
@@ -19,6 +20,7 @@ export const ActionColumn = <T,>({
 			const availableActions = ActionsHandlerMapping.filter(
                 ({ conditional }) => (conditional ? conditional(data) : true)
             );
+			const rowIsLoading = Boolean(isRowLoading?.(data));
 			if (layout === 'horizontal') {
                 return (
                     <div className="flex items-center gap-2">
@@ -27,15 +29,32 @@ export const ActionColumn = <T,>({
 							variant="ghost"
                                 key={index}
                                 onClick={() => onSelect(data)}
+                                disabled={rowIsLoading}
                                 className="text-[#BF162E] hover:text-[#BF162E]/80 bg-none "
                                 title={label}
                                 aria-label={label}>
-                                {Icon ? <Icon className="h-5 w-5" /> : <span>{label}</span>}
+                                {rowIsLoading ? (
+                                    <Loader2 className="h-5 w-5 animate-spin" />
+                                ) : Icon ? (
+                                    <Icon className="h-5 w-5" />
+                                ) : (
+                                    <span>{label}</span>
+                                )}
                             </Button>
                         ))}
                     </div>
                 );
             }
+			if (rowIsLoading) {
+				return (
+					<div
+						className="flex h-8 w-8 items-center justify-center rounded-full border border-primary"
+						aria-label="Loading"
+						aria-busy="true">
+						<Loader2 className="h-5 w-5 animate-spin" />
+					</div>
+				);
+			}
 			return (
 				<React.Fragment>
 					<ReusableDropDownComponent<T>

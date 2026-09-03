@@ -9,6 +9,7 @@ import { CustomBaseTable, SearchTools } from '@/dev/table'
 import { SingleActionsHandler, SubmitResponse, TFilterOptions, TPaginationFilters } from '@/types/types'
 import { EMETHODS, FILTEROPTIONS, ReusableReducer } from '@/utils/constatnts'
 import { useReducer } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { ActionColumn } from '@/dev/columns'
 import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
 import { MotorProductsColumns } from '@/dev/columns/admin/products'
@@ -19,6 +20,7 @@ import { ViewProductModal } from './modals/view-product'
 import { EPREFIX } from '@/utils/enums'
 
 export const MotorProductPage = () => {
+    const navigate = useNavigate()
 
     const [filter, optionsDispatcher] = useReducer(
         ReusableReducer<TPaginationFilters & TFilterOptions>,
@@ -87,9 +89,7 @@ export const MotorProductPage = () => {
         {
             label: 'View Rates',
             onSelect: (data) => {
-                const path = `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor-rates/${data?.id}`;
-                window.open(path, '_blank', 'noopener,noreferrer');
-                // navigate(`/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor-rates/${data?.id}`)
+                navigate(`/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor-rates/${data?.id}`)
             },
         },
         {
@@ -162,10 +162,10 @@ export const MotorProductPage = () => {
                         OtherToolsProps: {
                             onChange: (data: any) =>
                                 optionsDispatcherDebounce({
-                                    payload: { term: data },
+                                    payload: { term: data, page: 1 },
                                     type: 'term',
                                 }),
-                            placeholder: 'Search',
+                            placeholder: 'Search by name or insurer',
                             includeFilter: true,
                         },
                         columns: [

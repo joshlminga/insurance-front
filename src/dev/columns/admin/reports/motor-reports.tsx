@@ -16,11 +16,35 @@ export const MotorInvoiceReportColumns: ColumnDef<any>[] = [
   {
     accessorKey: 'status',
     header: () => <div>Status</div>,
-    cell: ({ row }) => (
-      <Badge variant="outline" className="rounded-full">
-        {row.original.status ?? '—'}
-      </Badge>
-    ),
+    cell: ({ row }) => {
+      const status = String(row.original.status ?? '').toLowerCase()
+      const label = row.original.status ?? '—'
+
+      if (status === 'paid') {
+        return (
+          <Badge className="rounded-full border-transparent bg-black text-white hover:bg-black">
+            {label}
+          </Badge>
+        )
+      }
+
+      if (status === 'pending') {
+        return (
+          <Badge
+            variant="outline"
+            className="rounded-full border-[#BF162E] bg-transparent text-black"
+          >
+            {label}
+          </Badge>
+        )
+      }
+
+      return (
+        <Badge variant="outline" className="rounded-full">
+          {label}
+        </Badge>
+      )
+    },
   },
   {
     id: 'customer',

@@ -34,7 +34,7 @@ const InvoicesPage = () => {
     <div className="space-y-6">
       <PageHeader
         title="Invoices"
-        description="Motor invoice reports. Travel and Marine are coming soon."
+        description="Motor invoice reports for your organization location. Travel and Marine are coming soon."
       />
       {visibleTabs.length > 0 ? (
         <div className="w-full">

@@ -8,12 +8,76 @@ import {
     formatOptionalDecimal,
     formatTaxonomyName,
     formatWholeNumber,
+    getDmvicValidationOverrideError,
     mapMotorRateToFormValues,
+    maxCoverEndDate,
     mergeSelectedOption,
     toFormDate,
     toFormId,
     toFormNumber,
 } from "./helpers"
+
+describe("getDmvicValidationOverrideError", () => {
+    it("returns messages when can_proceed is true and errors.dmvic is present", () => {
+        const result = getDmvicValidationOverrideError({
+            response: {
+                data: {
+                    can_proceed: true,
+                    errors: {
+                        dmvic: [
+                            "ER007: There is a 203 days gap between the previous insurance and the proposed one",
+                            "ER005: Double Insurance",
+                        ],
+                    },
+                },
+            },
+        })
+
+        expect(result).toEqual({
+            canProceed: true,
+            messages: [
+                "ER007: There is a 203 days gap between the previous insurance and the proposed one",
+                "ER005: Double Insurance",
+            ],
+        })
+    })
+
+    it("returns null when can_proceed is false or missing", () => {
+        expect(
+            getDmvicValidationOverrideError({
+                response: {
+                    data: {
+                        can_proceed: false,
+                        errors: { dmvic: ["ER003: Missing"] },
+                    },
+                },
+            }),
+        ).toBeNull()
+
+        expect(
+            getDmvicValidationOverrideError({
+                response: {
+                    data: {
+                        errors: { dmvic: ["ER007: Gap"] },
+                    },
+                },
+            }),
+        ).toBeNull()
+    })
+
+    it("returns null when dmvic messages are empty", () => {
+        expect(
+            getDmvicValidationOverrideError({
+                response: {
+                    data: {
+                        can_proceed: true,
+                        errors: { dmvic: [] },
+                    },
+                },
+            }),
+        ).toBeNull()
+    })
+})
 
 describe("canPurchaseCover", () => {
     it("returns true only when allow_purchase is explicitly true", () => {
@@ -167,6 +231,20 @@ describe("mergeSelectedOption", () => {
 
         expect(merged).toHaveLength(2)
         expect(merged[0]).toEqual({ value: "1", label: "Saved" })
+    })
+})
+
+describe("maxCoverEndDate", () => {
+    it("returns same day next year minus 1 day (18 Sep → 17 Sep)", () => {
+        expect(maxCoverEndDate("2026-09-18", 12)).toBe("2027-09-17")
+    })
+
+    it("returns last day of previous month for 1 Sep start (31 Aug)", () => {
+        expect(maxCoverEndDate("2026-09-01", 12)).toBe("2027-08-31")
+    })
+
+    it("supports one-month cover windows", () => {
+        expect(maxCoverEndDate("2026-09-18", 1)).toBe("2026-10-17")
     })
 })
 

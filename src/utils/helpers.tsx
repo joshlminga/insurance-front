@@ -39,6 +39,40 @@ export const extractErrorMessage = (error: any): string => {
   return error?.message || "Submission failed!";
 };
 
+/**
+ * DMVIC cover validation may return can_proceed + errors.dmvic.
+ * When can_proceed is true the user may confirm and continue regardless.
+ */
+export type DmvicValidationOverrideError = {
+  canProceed: true
+  messages: string[]
+}
+
+export function getDmvicValidationOverrideError(
+  error: unknown
+): DmvicValidationOverrideError | null {
+  const response = (error as any)?.response?.data
+  if (!response || response.can_proceed !== true) {
+    return null
+  }
+
+  const raw = response?.errors?.dmvic
+  const messages = Array.isArray(raw)
+    ? raw.map((item) => String(item)).filter((item) => item.trim() !== "")
+    : typeof raw === "string" && raw.trim() !== ""
+      ? [raw]
+      : []
+
+  if (messages.length === 0) {
+    return null
+  }
+
+  return {
+    canProceed: true,
+    messages,
+  }
+}
+
 export function getInvalidVehicleRegistrationError(
   error: unknown
 ): InvalidVehicleRegistrationError | null {
@@ -302,6 +336,23 @@ export const toFormDate = (value: unknown): string => {
     return ""
   }
   return String(value).slice(0, 10)
+}
+
+/**
+ * Last covered day for N months from start: same calendar day + N months, then minus 1 day.
+ * Uses local year/month/day only — never toISOString() — so UTC+ offsets (e.g. Kenya) do not shift the day.
+ */
+export const maxCoverEndDate = (startDateYmd: string, months = 12): string => {
+  const [year, month, day] = startDateYmd.split("-").map(Number)
+  // Date months are 0-based; YYYY-MM-DD months are 1-based
+  const date = new Date(year, month - 1, day)
+  date.setMonth(date.getMonth() + months)
+  date.setDate(date.getDate() - 1)
+
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, "0")
+  const d = String(date.getDate()).padStart(2, "0")
+  return `${y}-${m}-${d}`
 }
 
 /** Merge a saved select value into options when it is missing from the fetched page. */

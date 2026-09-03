@@ -6,6 +6,7 @@ import {
   MAX_KYC_FILE_BYTES,
   PRODUCT_TYPE_VALUES,
 } from "@/utils/constatnts"
+import { maxCoverEndDate } from "@/utils/helpers"
 import { z } from "zod"
 
 /** Shared KRA PIN rule used by motor / legacy KYC schemas. */
@@ -299,6 +300,9 @@ export const InvoicePaymentSchema = z.object({
   // Admin-only optional fields (not shown on customer checkout)
   cover_end_date: z.string().optional(),
   policy_number: z.string().optional(),
+  // Set true after user confirms DMVIC ER005/ER007 override in the popup
+  confirm_certificate_issuance: z.boolean().optional(),
+  validate_double_insurance: z.boolean().optional(),
   // total_payable: z.string().min(1, "Total payable is required"),
 }).superRefine((data, ctx) => {
   const endDate = data.cover_end_date?.trim()
@@ -320,11 +324,8 @@ export const InvoicePaymentSchema = z.object({
     return
   }
 
-  const start = new Date(`${startDate}T00:00:00`)
-  const maxEnd = new Date(start)
-  maxEnd.setMonth(maxEnd.getMonth() + 12)
-  maxEnd.setDate(maxEnd.getDate() - 1)
-  const maxEndString = maxEnd.toISOString().split("T")[0]
+  // Same calendar day next year, minus 1 day (local YMD — avoids UTC off-by-one in Kenya)
+  const maxEndString = maxCoverEndDate(startDate, 12)
 
   if (endDate > maxEndString) {
     ctx.addIssue({
@@ -928,6 +929,11 @@ export const CreateMotorRateBenefitsSchema = z
     description: z.string().optional().or(z.literal("")),
   })
   .superRefine((data, ctx) => {
+    // Inclusive benefits do not add premium — rate and minimum may both be empty.
+    if (data.benefit_type === "Inclusive") {
+      return;
+    }
+
     if (data.rate == null && data.minimum == null) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
