@@ -141,7 +141,6 @@ export const AdminMotorInvoicePayment: React.FC<AdminMotorStepProps> = ({
         if (!payload.policy_number?.trim()) {
             delete payload.policy_number
         }
-        delete payload.confirm_certificate_issuance
         delete payload.validate_double_insurance
         return payload
     }
@@ -156,7 +155,6 @@ export const AdminMotorInvoicePayment: React.FC<AdminMotorStepProps> = ({
         const base = pendingOverridePayload ?? buildPayload(form.getValues())
         submitMutation.mutate({
             ...base,
-            confirm_certificate_issuance: true,
             validate_double_insurance: true,
         })
     }

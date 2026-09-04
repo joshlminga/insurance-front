@@ -90,7 +90,6 @@ export const InvoicePayment: React.FC<CustomerVerificationDetailsProps> = ({ goT
 
     const onSubmit = (data: InvoicePaymentFormValues) => {
         const payload: InvoicePaymentFormValues = { ...data }
-        delete payload.confirm_certificate_issuance
         delete payload.validate_double_insurance
         setPendingOverridePayload(payload)
         submitMutation.mutate(payload)
@@ -100,7 +99,6 @@ export const InvoicePayment: React.FC<CustomerVerificationDetailsProps> = ({ goT
         const base = pendingOverridePayload ?? form.getValues()
         submitMutation.mutate({
             ...base,
-            confirm_certificate_issuance: true,
             validate_double_insurance: true,
         })
     }

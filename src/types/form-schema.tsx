@@ -301,7 +301,6 @@ export const InvoicePaymentSchema = z.object({
   cover_end_date: z.string().optional(),
   policy_number: z.string().optional(),
   // Set true after user confirms DMVIC ER005/ER007 override in the popup
-  confirm_certificate_issuance: z.boolean().optional(),
   validate_double_insurance: z.boolean().optional(),
   // total_payable: z.string().min(1, "Total payable is required"),
 }).superRefine((data, ctx) => {
