@@ -42,15 +42,26 @@ export const extractErrorMessage = (error: any): string => {
 /**
  * DMVIC cover validation may return can_proceed + errors.dmvic.
  * When can_proceed is true the user may confirm and continue regardless.
+ *
+ * Temporarily disabled until ValidateDoubleInsurance is reliable — always
+ * return null so invoice steppers show the normal toast (including the
+ * required cover start date) instead of the "Continue regardless" dialog.
+ * Re-enable by removing the early return below.
  */
 export type DmvicValidationOverrideError = {
   canProceed: true
   messages: string[]
 }
 
+const DMVIC_OVERRIDE_DIALOG_ENABLED = false
+
 export function getDmvicValidationOverrideError(
   error: unknown
 ): DmvicValidationOverrideError | null {
+  if (!DMVIC_OVERRIDE_DIALOG_ENABLED) {
+    return null
+  }
+
   const response = (error as any)?.response?.data
   if (!response || response.can_proceed !== true) {
     return null
