@@ -182,7 +182,7 @@ export interface ToastOptions {
 
 export type MotorQuoteSessionCustomerType = 'guest' | 'member' | 'agency'
 
-/** POST auto/quotation/motor — quote session summary in `data`. */
+/** POST auto/quotation/motor - quote session summary in `data`. */
 export type MotorQuoteSessionStartData = {
   id: number
   quote_code?: string
@@ -368,14 +368,14 @@ export type InvalidVehicleRegistrationError = {
   preview: VehiclePreview | null
 }
 
-/** POST /vehicle/add-vehicle body — numbers are coerced from the dialog form strings. */
+/** POST /vehicle/add-vehicle body - numbers are coerced from the dialog form strings. */
 export type AddVehicleApiPayload = {
   registration_number: string
   make: string
   model: string
   manufacture_year: number
   body_type: string
-  /** Optional — null when left blank */
+  /** Optional - null when left blank */
   color: string | null
   number_of_passengers: number | null
   tonnage: number
@@ -793,7 +793,7 @@ export type ReusableApiMultiSelectProps = {
   searchKeys?: string[];
   searchPlaceholder?: string;
   emptyMessage?: string;
-  organizationLocationId?:any
+  organizationLocationId?: any
   seedItems?: Array<{ id: number | string; name: string }>;
 }
 
@@ -1182,87 +1182,87 @@ export interface ReusableSwitchToggleProps {
 }
 
 export type SelectedQuoteEntry = {
-    product_id: string | number
-    rate_id: string | number
-    insurerName?: string
-    logo?: string
-    totalPremium?: string
+  product_id: string | number
+  rate_id: string | number
+  insurerName?: string
+  logo?: string
+  totalPremium?: string
 }
 
 /** Single motor cover from reports/motor/user/covers/{purchase_id} */
 export interface MotorUserCoverBenefit {
-    id: number
-    benefit_id: number
-    name: string
-    premium: number
+  id: number
+  benefit_id: number
+  name: string
+  premium: number
 }
 
 export interface MotorUserCoverInvoice {
-    id: number
-    purchase_id: number
-    invoice_number: string
-    cover_status: string
-    plan_type: string
-    installment_number: number
-    total_installments: number
-    gross_premium: number
-    installment_amount: number
-    percentage: number
-    payment_status: string
-    status: string
-    due_date: string
-    is_active: boolean
-    is_overdue: boolean
+  id: number
+  purchase_id: number
+  invoice_number: string
+  cover_status: string
+  plan_type: string
+  installment_number: number
+  total_installments: number
+  gross_premium: number
+  installment_amount: number
+  percentage: number
+  payment_status: string
+  status: string
+  due_date: string
+  is_active: boolean
+  is_overdue: boolean
 }
 
 export interface MotorUserCoverDetail {
-    purchase_id: number
-    quote_session_id: number
-    quote_code: string
-    purchase_status: string
-    product: string
-    currency: string
-    cover_type: string
-    covering: string
-    vehicle_use: string
-    provider: { name: string; product_name?: string }
-    agency: { name: string }
-    vehicle: {
-        registration_number: string
-        chassis_number: string
-        engine_number: string
-        make: string
-        model: string
-        body_type: string
-        color: string
-        year: number
-        seats: number
-        number_of_passengers: number
-        cubic_capacity: number
-        tonnage: number
-    }
-    vehicle_valuated_value: number
-    total_premium: number
-    cover_dates: {
-        start_date: string
-        issued_date: string
-        expiry_date: string
-        end_date: string
-    }
-    benefits: MotorUserCoverBenefit[]
-    invoices: MotorUserCoverInvoice[]
+  purchase_id: number
+  quote_session_id: number
+  quote_code: string
+  purchase_status: string
+  product: string
+  currency: string
+  cover_type: string
+  covering: string
+  vehicle_use: string
+  provider: { name: string; product_name?: string }
+  agency: { name: string }
+  vehicle: {
+    registration_number: string
+    chassis_number: string
+    engine_number: string
+    make: string
+    model: string
+    body_type: string
+    color: string
+    year: number
+    seats: number
+    number_of_passengers: number
+    cubic_capacity: number
+    tonnage: number
+  }
+  vehicle_valuated_value: number
+  total_premium: number
+  cover_dates: {
+    start_date: string
+    issued_date: string
+    expiry_date: string
+    end_date: string
+  }
+  benefits: MotorUserCoverBenefit[]
+  invoices: MotorUserCoverInvoice[]
 }
 
 export interface ReusablePopoverProps {
-    trigger: React.ReactNode;
-    children: React.ReactNode;
-    className?: string;
-    align?: "start" | "center" | "end";
-    side?: "top" | "right" | "bottom" | "left";
+  trigger: React.ReactNode;
+  children: React.ReactNode;
+  className?: string;
+  align?: "start" | "center" | "end";
+  side?: "top" | "right" | "bottom" | "left";
 }
 
 export type TNotifs = {
-  id?:string;
+  id?: string;
   message: string;
   unread: boolean;
   avatar?: string;
@@ -1272,29 +1272,29 @@ export type TNotifs = {
 }
 
 export type QuotationFiltersPanelProps = {
-    idPrefix?: string
-    quoteSessionId: number | null
-    isPending: boolean
-    isFetching: boolean
-    data: SubmitResponse | undefined
-    benefitGroups: BenefitGroup[]
-    benefitFormControl: Control<FieldValues>
-    priceRange: number[]
-    onPriceRangeChange: (value: number[]) => void
-    className?: string
-   [key: string]: any;
+  idPrefix?: string
+  quoteSessionId: number | null
+  isPending: boolean
+  isFetching: boolean
+  data: SubmitResponse | undefined
+  benefitGroups: BenefitGroup[]
+  benefitFormControl: Control<FieldValues>
+  priceRange: number[]
+  onPriceRangeChange: (value: number[]) => void
+  className?: string
+  [key: string]: any;
 }
 
 export type BoxHeaderProps = {
-    title: string
-    description?: string
+  title: string
+  description?: string
 }
 
 export type AdminMotorPayeeUser = {
-    id?: number | string | null
-    name?: string | null
-    email?: string | null
-    phone?: string | null
+  id?: number | string | null
+  name?: string | null
+  email?: string | null
+  phone?: string | null
 }
 export type RolesListPageProps = {
   rolesBasePath: "global-roles" | "system-roles"
@@ -1304,24 +1304,24 @@ export type RolesListPageProps = {
 }
 
 export type CommandSelectOption = {
-    value: string
-    label: React.ReactNode
-    searchValue?: string
+  value: string
+  label: React.ReactNode
+  searchValue?: string
 }
 
 export type SearchableCommandSelectProps = {
-    value?: string
-    onChange?: (value: string) => void
-    options: CommandSelectOption[]
-    placeholder: string
-    searchPlaceholder: string
-    emptyMessage: string
-    disabled?: boolean
-    isLoading?: boolean
-    isFetching?: boolean
-    onSearchChange?: (value: string) => void
-    footer?: React.ReactNode
-    selectedOption?: { value: string; label: string }
+  value?: string
+  onChange?: (value: string) => void
+  options: CommandSelectOption[]
+  placeholder: string
+  searchPlaceholder: string
+  emptyMessage: string
+  disabled?: boolean
+  isLoading?: boolean
+  isFetching?: boolean
+  onSearchChange?: (value: string) => void
+  footer?: React.ReactNode
+  selectedOption?: { value: string; label: string }
 }
 
 export type TTab<KeyType = string> = {
@@ -1336,13 +1336,61 @@ export type ReusableTabComponentProps<KeyType extends string = string> = {
   defaultTab: KeyType;
   header?: ReactNode;
 } & Partial<TClassType>;
-
 export type TUseTabsProps<KeyType = string> = {
   tabs: TTab<KeyType>[];
   defaultTab: KeyType;
 }
-
 export type CreditBalanceCardProps = {
   wallet: CreditWallet | null | undefined
   isLoading?: boolean
+}
+export type DmvicOrganizationLocation = {
+  organization_location_id: number
+  organization_id?: number | null
+  organization_name?: string | null
+  location?: { id: number; name: string } | null
+}
+export type DmvicBrokerStockRow = {
+  id: number
+  organization_location_id: number
+  organization_location?: DmvicOrganizationLocation | null
+  product_type?: string | null
+  type_of_certificate?: string | null
+  stock?: number | null
+  live_member_id?: number | null
+  demo_member_id?: number | null
+  is_active?: boolean
+  created_at?: string | null
+  updated_at?: string | null
+}
+
+
+export type DmvicPolicyNumberRuleRow = {
+  id: number
+  dmvic_stock_id: number
+  template: string
+  series: string
+  sequence_placeholder: string
+  stock: number
+  sequence_start: string
+  sequence_end: string
+  sequence_next: string
+  maintain_policy_number: boolean
+  effective_from: string
+  effective_until?: string | null
+  is_active: boolean
+  created_at?: string | null
+  updated_at?: string | null
+}
+
+export type DmvicPolicyNumberPreview = {
+  rule_id: number
+  current_policy_number: string | null
+  next_policy_number: string
+  cover_policy_number: string
+  sequence_start: string
+  sequence_end: string
+  sequence_next: string
+  remaining: number
+  is_exhausted: boolean
 }

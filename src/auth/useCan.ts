@@ -14,7 +14,7 @@ import { SUPER_ADMIN_ROLE } from './constants'
 import { getActivePermissionSet } from './org-context'
 
 /**
- * Permission-check hook — like $user->can() in Laravel.
+ * Permission-check hook - like $user->can() in Laravel.
  * Builds permission Sets once per abilities change for fast lookups.
  */
 export function useCan() {

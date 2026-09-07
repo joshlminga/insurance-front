@@ -4,20 +4,18 @@ import { Switch } from '@/components/ui/switch'
 import { Button, ReuseableInput } from '@/dev/core'
 import { UseApiMutation } from '@/hooks/hooks'
 import { CreateDmvicPolicyNumberRuleSchema } from '@/types/form-schema'
-import type { CreateDmvicPolicyNumberRuleFormValues } from '@/types/schema'
+import type { 
+  CreateDmvicPolicyNumberRuleFormInput, 
+  CreateDmvicPolicyNumberRuleFormValues 
+} from '@/types/schema'
 import type { SubmitResponse } from '@/types/types'
 import { EMETHODS } from '@/utils/constatnts'
 import { extractErrorMessage } from '@/utils/helpers'
 import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Controller, useForm } from 'react-hook-form'
-import { DMVIC_POLICY_RULE_URLS } from '../dmvic-stock-query'
 import { PolicyNumberRuleFormatHints } from '../policy-number-rule-hints'
 
-/**
- * Create a policy-number rule — seeds internal certificates and sets the numbering sequence.
- * Policy numbers are generated on the API when certificates are issued.
- */
 export function CreateDmvicPolicyNumberRuleModal({
   handleDialogContextSwitch,
   componentProps,
@@ -28,23 +26,26 @@ export function CreateDmvicPolicyNumberRuleModal({
     stockId?: number
   }
 }) {
-  const form = useForm<CreateDmvicPolicyNumberRuleFormValues>({
-    resolver: zodResolver(CreateDmvicPolicyNumberRuleSchema),
-    defaultValues: {
-      dmvic_stock_id: componentProps?.stockId ?? 0,
-      template: 'HQ/0809/YYYY/01/05XXX',
-      series: '05XXX',
-      sequence_placeholder: 'XXX',
-      stock: 20,
-      sequence_start: '1',
-      maintain_policy_number: true,
-      effective_from: new Date().toISOString().slice(0, 10),
-      effective_until: '',
-    },
-  })
+  const form = useForm<
+    CreateDmvicPolicyNumberRuleFormInput,
+    unknown,
+    CreateDmvicPolicyNumberRuleFormValues>({
+      resolver: zodResolver(CreateDmvicPolicyNumberRuleSchema),
+      defaultValues: {
+        dmvic_stock_id: componentProps?.stockId ?? 0,
+        template: '',
+        series: '',
+        sequence_placeholder: 'XXX',
+        stock: undefined,
+        sequence_start: '1',
+        maintain_policy_number: true,
+        effective_from: new Date().toISOString().slice(0, 10),
+        effective_until: '',
+      },
+    })
 
   const submitMutation = UseApiMutation<SubmitResponse, Record<string, unknown>>({
-    url: DMVIC_POLICY_RULE_URLS.create,
+    url: 'dmvic/policy-number-rules',
     method: EMETHODS.POST,
     mutationOptions: {
       onSuccess: (data) => {
@@ -72,7 +73,6 @@ export function CreateDmvicPolicyNumberRuleModal({
       effective_until: data.effective_until || null,
     })
   }
-
   return (
     <div className="w-full min-w-150 max-w-175 p-6 space-y-6">
       <div className="border-b pb-3">

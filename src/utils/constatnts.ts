@@ -220,7 +220,7 @@ export const PARAMETER_PAYEE = [
 /** API payload uses PRODUCT_TYPES `value` (e.g. "Motor"), not the display label. */
 export const PRODUCT_TYPE_VALUES = PRODUCT_TYPES.map((item) => item.value)
 
-/** DMVIC certificate types — values match App\\Enums\\Dmvic\\DmvicCertificate in the API. */
+/** DMVIC certificate types - values match App\\Enums\\Dmvic\\DmvicCertificate in the API. */
 export const DMVIC_CERTIFICATE_TYPES = [
   { label: 'Class A - PSV Unmarked', value: 'ClassA_PsvUnmarked' },
   { label: 'Type A - Taxi', value: 'TypeA_Taxi' },

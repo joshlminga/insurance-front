@@ -20,7 +20,7 @@ export type OrganizationLocationInputVariant = 'onBehalf' | 'agency'
 type OrganizationLocationInputProps = {
     variant?: OrganizationLocationInputVariant
     countryId: string
-    /** Admin override — only used for onBehalf variant */
+    /** Admin override - only used for onBehalf variant */
     override?: boolean
     value?: string
     onChange?: (value: string) => void

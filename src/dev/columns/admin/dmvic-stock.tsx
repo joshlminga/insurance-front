@@ -1,12 +1,10 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import type { DmvicBrokerStockRow } from '@/app/admin/dmvic-stock/dmvic-stock-query'
+
 import { Badge } from '@/components/ui/badge'
+import { DmvicBrokerStockRow } from '@/types/types'
 import { dmvicCertificateTypeLabel } from '@/utils/constatnts'
 import { ColumnDef } from '@tanstack/table-core'
 
-export type DmvicStockTableRow = DmvicBrokerStockRow
-
-export const DmvicStockColumns: ColumnDef<DmvicStockTableRow>[] = [
+export const DmvicStockColumns: ColumnDef<DmvicBrokerStockRow>[] = [
   {
     id: 'organization_name',
     header: () => <div>Organization</div>,

@@ -48,7 +48,7 @@ export default function BulkRetryModal({
         if (failed.length > 0) {
           const first = failed[0]
           ShowToast.error(
-            `${failed.length} failed. First: invoice #${first.invoice_id} — ${first.reason}`
+            `${failed.length} failed. First: invoice #${first.invoice_id} - ${first.reason}`
           )
         }
 
@@ -78,7 +78,7 @@ export default function BulkRetryModal({
               {row.invoice_number ?? `#${row.invoice_id}`}
             </span>
             <span className="text-muted-foreground">
-              {row.registration_number ?? '—'}
+              {row.registration_number ?? '-'}
             </span>
           </li>
         ))}

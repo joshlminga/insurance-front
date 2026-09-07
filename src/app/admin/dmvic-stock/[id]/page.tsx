@@ -3,34 +3,58 @@ import { useCan } from '@/auth/useCan'
 import { MODULES } from '@/auth/module-keys'
 import { PageHeader } from '@/components/shared'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle
+} from '@/components/ui/card'
 import { ActionColumn } from '@/dev/columns'
-import { DmvicPolicyNumberRuleColumns } from '@/dev/columns/admin/dmvic-policy-number-rules'
+import {
+  DmvicPolicyNumberRuleColumns
+} from '@/dev/columns/admin/dmvic-policy-number-rules'
 import { CustomDialogComponent } from '@/dev/core'
 import { CustomBaseTable } from '@/dev/table'
-import { useCustomDialogContextFactory } from '@/hooks'
-import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
-import type { SingleActionsHandler, SubmitResponse } from '@/types/types'
-import { dmvicCertificateTypeLabel, EMETHODS } from '@/utils/constatnts'
+import {
+  useCustomDialogContextFactory,
+  useDebounce
+} from '@/hooks'
+import {
+  UseApiMutation,
+  UseApiQuery
+} from '@/hooks/hooks'
+import type {
+  DmvicBrokerStockRow,
+  DmvicPolicyNumberPreview,
+  DmvicPolicyNumberRuleRow,
+  SingleActionsHandler,
+  SubmitResponse,
+  TFilterOptions,
+  TPaginationFilters
+} from '@/types/types'
+import {
+  dmvicCertificateTypeLabel,
+  EMETHODS,
+  FILTEROPTIONS,
+  ReusableReducer
+} from '@/utils/constatnts'
 import { extractErrorMessage } from '@/utils/helpers'
-import { ShowToast } from '@/utils/utils'
+import { formatDmvicOrganizationLocation, ShowToast } from '@/utils/utils'
 import { Plus } from 'lucide-react'
 import { useParams } from 'react-router-dom'
-import {
-  DMVIC_POLICY_RULE_URLS,
-  DMVIC_STOCK_URLS,
-  formatDmvicOrganizationLocation,
-  type DmvicBrokerStockRow,
-  type DmvicPolicyNumberPreview,
-  type DmvicPolicyNumberRuleRow,
-} from '../dmvic-stock-query'
 import { CreateDmvicPolicyNumberRuleModal } from '../modals/create-rule'
 import { EditDmvicPolicyNumberRuleModal } from '../modals/edit-rule'
+import { useReducer } from 'react'
 
-/** Stock detail — preview current/next policy numbers and manage numbering rules. */
 export function DmvicStockDetailPage() {
+  const [filter, optionsDispatcher] = useReducer(
+    ReusableReducer<TPaginationFilters & TFilterOptions>,
+    { ...FILTEROPTIONS, page: 1, pageSize: 10 },
+  )
+
   const { id } = useParams<{ id: string }>()
   const stockId = Number(id)
+
   const { canModuleAction } = useCan()
   const canCreate = canModuleAction(MODULES.DMVIC_STOCK, 'create')
   const canUpdate = canModuleAction(MODULES.DMVIC_STOCK, 'update')
@@ -42,68 +66,60 @@ export function DmvicStockDetailPage() {
       stockId?: number
       data?: DmvicPolicyNumberRuleRow
     }>()
+  const optionsDispatcherDebounce = useDebounce({
+    debounceCallback: optionsDispatcher,
+  });
 
-  const {
-    data: stockResponse,
-    isLoading: stockLoading,
-    refetch: refetchStock,
-  } = UseApiQuery<SubmitResponse>({
-    url: DMVIC_STOCK_URLS.show(stockId),
-    queryOptions: { enabled: Number.isFinite(stockId) && stockId > 0 },
+  const { data: stockResponse, isLoading: stockLoading, refetch: refetchStock, } = UseApiQuery<SubmitResponse>({
+    url: `dmvic/stocks/${stockId}`,
+    queryOptions: {
+      enabled: Number.isFinite(stockId) && stockId > 0
+    },
   })
 
-  const {
-    data: previewResponse,
-    isLoading: previewLoading,
-    refetch: refetchPreview,
-  } = UseApiQuery<SubmitResponse>({
-    url: DMVIC_STOCK_URLS.policyNumbers(stockId),
-    queryOptions: { enabled: Number.isFinite(stockId) && stockId > 0 },
+
+  const { data: previewResponse, isLoading: previewLoading, refetch: refetchPreview, } = UseApiQuery<SubmitResponse>({
+    url: `dmvic/stocks/${stockId}/policy-numbers`,
+    queryOptions: {
+      enabled: Number.isFinite(stockId) && stockId > 0
+    },
   })
 
-  const {
-    data: rulesResponse,
-    isLoading: rulesLoading,
-    refetch: refetchRules,
-  } = UseApiQuery<SubmitResponse>({
-    url: DMVIC_POLICY_RULE_URLS.list,
+  const { data: rulesResponse, isLoading: rulesLoading, refetch: refetchRules, isError: isErrorRules } = UseApiQuery<SubmitResponse>({
+    url: 'dmvic/stocks',
     params: {
       dmvic_stock_id: stockId,
-      per_page: 50,
+      per_page: filter?.pageSize,
       sort_by: 'id',
       direction: 'desc',
     },
-    queryOptions: { enabled: Number.isFinite(stockId) && stockId > 0 },
+    queryOptions: {
+      enabled: Number.isFinite(stockId) && stockId > 0
+    },
   })
 
   const stock = stockResponse?.data as DmvicBrokerStockRow | undefined
   const preview = previewResponse?.data as DmvicPolicyNumberPreview | undefined
-  const rules = (Array.isArray(rulesResponse?.data)
-    ? rulesResponse.data
-    : []) as DmvicPolicyNumberRuleRow[]
-
   const locationLabel = formatDmvicOrganizationLocation(stock?.organization_location)
-
   const refetchAll = async () => {
     await Promise.all([refetchStock(), refetchPreview(), refetchRules()])
   }
 
   const statusMutation = UseApiMutation<
     SubmitResponse,
-    { id: number | string; is_active: boolean }
-  >({
-    url: ({ id: ruleId }) => DMVIC_POLICY_RULE_URLS.status(ruleId),
-    method: EMETHODS.PATCH,
-    mutationOptions: {
-      onSuccess: (response) => {
-        ShowToast.success(response?.message || 'Rule status updated')
-        refetchAll()
+    { id: number | string; is_active: boolean }>({
+      url: ({ id: ruleId }) => `dmvic/policy-number-rules/${ruleId}`,
+      method: EMETHODS.PATCH,
+      mutationOptions: {
+        onSuccess: (response) => {
+          ShowToast.success(response?.message || 'Rule status updated')
+          refetchAll()
+        },
+        onError: (error) => {
+          ShowToast.error(extractErrorMessage(error))
+        },
       },
-      onError: (error) => {
-        ShowToast.error(extractErrorMessage(error))
-      },
-    },
-  })
+    })
 
   const ActionsHandlerMapping: SingleActionsHandler<DmvicPolicyNumberRuleRow>[] = [
     {
@@ -128,34 +144,25 @@ export function DmvicStockDetailPage() {
     },
   ]
 
-  if (!Number.isFinite(stockId) || stockId <= 0) {
-    return (
-      <div className="space-y-4">
-        <p className="text-muted-foreground">Invalid stock ID.</p>
-      </div>
-    )
-  }
-
   return (
     <div className="space-y-6">
       <PageHeader
-        title={`Stock #${stockId}`}
+        title="Stocks"
         description={`${locationLabel} · ${dmvicCertificateTypeLabel(stock?.type_of_certificate)} · Remaining: ${stock?.stock ?? 0}`}
         actions={
           canCreate
             ? [
-                {
-                  icon: Plus,
-                  label: 'Add Policy Rule',
-                  variant: 'default' as const,
-                  onClick: () => {
-                    handleDialogContextSwitch({
-                      componentProps: { stockId, refetch: refetchAll },
-                      Component: CreateDmvicPolicyNumberRuleModal,
-                    })
-                  },
+              {
+                icon: Plus,
+                label: 'Add Policy Rule',
+                onClick: () => {
+                  handleDialogContextSwitch({
+                    componentProps: { stockId, refetch: refetchAll },
+                    Component: CreateDmvicPolicyNumberRuleModal,
+                  })
                 },
-              ]
+              },
+            ]
             : undefined
         }
       />
@@ -169,7 +176,7 @@ export function DmvicStockDetailPage() {
             <p className="text-sm text-muted-foreground">Loading preview…</p>
           ) : preview ? (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <PreviewField label="Current" value={preview.current_policy_number ?? '—'} />
+              <PreviewField label="Current" value={preview.current_policy_number ?? '-'} />
               <PreviewField label="Next" value={preview.next_policy_number} />
               <PreviewField label="Cover" value={preview.cover_policy_number} />
               <div>
@@ -190,30 +197,55 @@ export function DmvicStockDetailPage() {
           )}
         </CardContent>
       </Card>
-
-      <CustomBaseTable
-        {...{
-          columns: [...DmvicPolicyNumberRuleColumns, ActionColumn({ ActionsHandlerMapping })],
-          data: rules,
-          pageCount: 1,
-          title: 'Policy number rules',
-          showPagination: false,
-          pageSize: rules.length || 10,
-          page: 1,
-          isLoading: rulesLoading || stockLoading,
-        }}
-      />
+      <div className='w-full'>
+        <CustomBaseTable
+          {...{
+            onPageChange: (page) =>
+              optionsDispatcher({
+                payload: { page },
+                type: 'page',
+              }),
+            OtherToolsProps: {
+              onChange: (data: any) =>
+                optionsDispatcherDebounce({
+                  payload: { term: data },
+                  type: 'term',
+                }),
+              placeholder: 'Search',
+              includeFilter: true,
+            },
+            columns: [
+              ...DmvicPolicyNumberRuleColumns,
+              ActionColumn({ ActionsHandlerMapping }),
+            ],
+            data: rulesResponse?.data ?? [],
+            pageCount: rulesResponse?.pagination?.last_page ?? 1,
+            title: 'Rules',
+            showPagination: true,
+            setPageSize: (pageSize) =>
+              optionsDispatcher({
+                payload: { pageSize },
+                type: 'pageSize',
+              }),
+            pageSize: rulesResponse?.pagination?.per_page ?? filter?.pageSize,
+            page: rulesResponse?.pagination?.current_page ?? filter.page,
+            isLoading: rulesLoading || stockLoading,
+            isError: isErrorRules
+          }}
+        />
+      </div>
 
       <CustomDialogComponent
         {...{ handleDialogContextSwitch, dialogOpen }}
-        className="sm:max-w-fit w-[95vw] sm:w-auto p-4 sm:p-6"
-      >
-        {dialogContent?.Component ? (
+        className='sm:max-w-fit w-[95vw] sm:w-auto p-4 sm:p-6'>
+        {dialogContent?.Component && (
           <dialogContent.Component
-            componentProps={dialogContent.componentProps}
-            handleDialogContextSwitch={handleDialogContextSwitch}
+            {...{
+              componentProps: dialogContent.componentProps,
+              handleDialogContextSwitch,
+            }}
           />
-        ) : null}
+        )}
       </CustomDialogComponent>
     </div>
   )

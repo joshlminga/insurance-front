@@ -22,7 +22,7 @@ export const MotorQuoteFetchColumns: ColumnDef<MotorQuoteFetchListRow>[] = [
   {
     accessorKey: 'quote_code',
     header: () => <div>Quote code</div>,
-    cell: ({ row }) => <div className="font-medium">{row.original.quote_code ?? '—'}</div>,
+    cell: ({ row }) => <div className="font-medium">{row.original.quote_code ?? '-'}</div>,
   },
   {
     accessorKey: 'id',
@@ -34,7 +34,7 @@ export const MotorQuoteFetchColumns: ColumnDef<MotorQuoteFetchListRow>[] = [
     header: () => <div>Status</div>,
     cell: ({ row }) => (
       <Badge variant="outline" className="rounded-full capitalize">
-        {(row.original.status ?? '—').replaceAll('_', ' ')}
+        {(row.original.status ?? '-').replaceAll('_', ' ')}
       </Badge>
     ),
   },
@@ -43,7 +43,7 @@ export const MotorQuoteFetchColumns: ColumnDef<MotorQuoteFetchListRow>[] = [
     header: () => <div>Last stage</div>,
     cell: ({ row }) => (
       <Badge className={`rounded-full capitalize ${stageBadgeClass(row.original.last_ended_stage)}`}>
-        {row.original.last_ended_stage ?? '—'}
+        {row.original.last_ended_stage ?? '-'}
       </Badge>
     ),
   },
@@ -54,7 +54,7 @@ export const MotorQuoteFetchColumns: ColumnDef<MotorQuoteFetchListRow>[] = [
       const c = row.original.customer
       return (
         <div className="space-y-0.5">
-          <div>{c?.name ?? '—'}</div>
+          <div>{c?.name ?? '-'}</div>
           <div className="text-xs text-muted-foreground">{c?.email ?? c?.phone ?? ''}</div>
         </div>
       )
@@ -67,7 +67,7 @@ export const MotorQuoteFetchColumns: ColumnDef<MotorQuoteFetchListRow>[] = [
       const v = row.original.vehicle
       return (
         <div className="space-y-0.5">
-          <div>{v?.registration_number ?? '—'}</div>
+          <div>{v?.registration_number ?? '-'}</div>
           <div className="text-xs text-muted-foreground">{v?.chassis_number ?? ''}</div>
         </div>
       )
@@ -76,19 +76,19 @@ export const MotorQuoteFetchColumns: ColumnDef<MotorQuoteFetchListRow>[] = [
   {
     id: 'cover',
     header: () => <div>Cover</div>,
-    cell: ({ row }) => <div>{row.original.cover?.cover_type ?? '—'}</div>,
+    cell: ({ row }) => <div>{row.original.cover?.cover_type ?? '-'}</div>,
   },
   {
     id: 'agency',
     header: () => <div>Agency</div>,
-    cell: ({ row }) => <div>{row.original.agency?.name ?? '—'}</div>,
+    cell: ({ row }) => <div>{row.original.agency?.name ?? '-'}</div>,
   },
   {
     accessorKey: 'started_at',
     header: () => <div>Started</div>,
     cell: ({ row }) => {
       const value = row.original.started_at
-      if (!value) return <div>—</div>
+      if (!value) return <div>-</div>
       try {
         return <div>{new Date(value).toLocaleString()}</div>
       } catch {

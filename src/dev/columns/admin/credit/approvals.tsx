@@ -18,7 +18,7 @@ export const CreditApprovalsColumns: ColumnDef<CreditApprovalQueueItem>[] = [
       <div>
         {row.original.credit_transaction?.user?.name ??
           row.original.credit_transaction?.user?.email ??
-          "—"}
+          "-"}
       </div>
     ),
   },
@@ -38,7 +38,7 @@ export const CreditApprovalsColumns: ColumnDef<CreditApprovalQueueItem>[] = [
     cell: ({ row }) => {
       const txn = row.original.credit_transaction
       if (!txn?.transactionable_type && !txn?.transactionable_id) {
-        return <span className="text-muted-foreground">—</span>
+        return <span className="text-muted-foreground">-</span>
       }
       return (
         <div className="text-sm">
@@ -57,7 +57,7 @@ export const CreditApprovalsColumns: ColumnDef<CreditApprovalQueueItem>[] = [
     accessorKey: "created_at",
     header: () => <div>Submitted</div>,
     cell: ({ row }) => (
-      <div>{row.original.created_at ? formatDate(row.original.created_at) : "—"}</div>
+      <div>{row.original.created_at ? formatDate(row.original.created_at) : "-"}</div>
     ),
   },
 ]

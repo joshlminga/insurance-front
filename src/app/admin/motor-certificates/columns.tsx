@@ -27,27 +27,27 @@ export function BuildMotorCertificateColumns(
       accessorKey: 'registration_number',
       header: () => <div>Registration</div>,
       cell: ({ row }) => (
-        <div>{row.original.registration_number ?? '—'}</div>
+        <div>{row.original.registration_number ?? '-'}</div>
       ),
     },
     {
       accessorKey: 'certificate_number',
       header: () => <div>Certificate</div>,
       cell: ({ row }) => (
-        <div>{row.original.certificate_number ?? '—'}</div>
+        <div>{row.original.certificate_number ?? '-'}</div>
       ),
     },
     {
       accessorKey: 'policy_number',
       header: () => <div>Policy</div>,
-      cell: ({ row }) => <div>{row.original.policy_number ?? '—'}</div>,
+      cell: ({ row }) => <div>{row.original.policy_number ?? '-'}</div>,
     },
     {
       accessorKey: 'customer',
       header: () => <div>Customer</div>,
       cell: ({ row }) => (
         <div className="text-sm">
-          <div>{row.original.customer?.name ?? '—'}</div>
+          <div>{row.original.customer?.name ?? '-'}</div>
           <div className="text-muted-foreground">
             {row.original.customer?.email ?? ''}
           </div>
@@ -61,7 +61,7 @@ export function BuildMotorCertificateColumns(
         <div>
           {row.original.issued_date
             ? formatDate(row.original.issued_date)
-            : '—'}
+            : '-'}
         </div>
       ),
     },
@@ -72,7 +72,7 @@ export function BuildMotorCertificateColumns(
         <div>
           {row.original.expiry_date
             ? formatDate(row.original.expiry_date)
-            : '—'}
+            : '-'}
         </div>
       ),
     },
@@ -138,7 +138,7 @@ export function BuildFailedMotorCertificateColumns(
       accessorKey: 'registration_number',
       header: () => <div>Registration</div>,
       cell: ({ row }) => (
-        <div>{row.original.registration_number ?? '—'}</div>
+        <div>{row.original.registration_number ?? '-'}</div>
       ),
     },
     {
@@ -146,7 +146,7 @@ export function BuildFailedMotorCertificateColumns(
       header: () => <div>Customer</div>,
       cell: ({ row }) => (
         <div className="text-sm">
-          <div>{row.original.customer?.name ?? '—'}</div>
+          <div>{row.original.customer?.name ?? '-'}</div>
           <div className="text-muted-foreground">
             {row.original.customer?.email ?? ''}
           </div>
@@ -160,7 +160,7 @@ export function BuildFailedMotorCertificateColumns(
         <div>
           {row.original.dmvic_issuance_failed_at
             ? formatDate(row.original.dmvic_issuance_failed_at)
-            : '—'}
+            : '-'}
         </div>
       ),
     },
@@ -171,7 +171,7 @@ export function BuildFailedMotorCertificateColumns(
         <div>
           {row.original.paid_at_hint
             ? formatDate(row.original.paid_at_hint)
-            : '—'}
+            : '-'}
         </div>
       ),
     }

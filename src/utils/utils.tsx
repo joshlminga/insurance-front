@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { toast } from "sonner"
 import React from "react"
-import type { ToastOptions } from "@/types/types"
+import type { DmvicOrganizationLocation, DmvicPolicyNumberRuleRow, ToastOptions } from "@/types/types"
 
 export const ShowToast = {
   success: (message: string, options?: ToastOptions) => {
@@ -92,3 +92,19 @@ export const ShowToast = {
 
 export const invalidSelectClassName = "data-[invalid=true]:[&_[data-slot=select-trigger]]:border-red-500 data-[invalid=true]:[&_[data-slot=select-trigger]]:focus:ring-red-500"
 export const SIDEBAR_LAYOUT_QUERY = '(min-width: 1280px)'
+
+
+export function formatDmvicOrganizationLocation(
+  organizationLocation?: DmvicOrganizationLocation | null,
+): string {
+  if (!organizationLocation) {
+    return '-'
+  }
+  const name = organizationLocation.organization_name ?? 'Unknown organization'
+  const country = organizationLocation.location?.name
+  return country ? `${name} - ${country}` : name
+}
+
+export function dmvicRuleHasAllocations(rule: DmvicPolicyNumberRuleRow): boolean {
+  return rule.sequence_next !== rule.sequence_start
+}

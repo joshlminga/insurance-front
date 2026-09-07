@@ -19,5 +19,5 @@ export const TOKEN_REFRESH_BUFFER_SECONDS = 300
 /** Other tabs listen for this key so Log out clears every window. */
 export const AUTH_LOGOUT_BROADCAST_KEY = 'auth-logout-broadcast'
 
-/** This tab signed out — do not import another tab's JWT until password login succeeds. */
+/** This tab signed out - do not import another tab's JWT until password login succeeds. */
 export const AUTH_TAB_SIGNED_OUT_KEY = 'auth-tab-signed-out'

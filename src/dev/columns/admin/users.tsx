@@ -162,7 +162,7 @@ export const OrganizationMembersColumns: ColumnDef<any>[] = [
             const roles = getMemberRoles(row.original);
 
             if (roles.length === 0) {
-                return <span className="text-sm text-muted-foreground">—</span>;
+                return <span className="text-sm text-muted-foreground">-</span>;
             }
             return (
                 <div className="flex flex-wrap gap-1">

@@ -1,4 +1,4 @@
-/** RBAC module keys from the API catalog — use instead of string literals */
+/** RBAC module keys from the API catalog - use instead of string literals */
 export const MODULES = {
   // Quotations
   QUOTATION_MOTOR: 'quotation-motor',

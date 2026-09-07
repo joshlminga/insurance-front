@@ -107,7 +107,7 @@ export const AdminMotorQuotationFetchPage = () => {
           setDuplicateRow(null)
           ShowToast.success(
             result.startAt === 'quote'
-              ? 'Duplicate payload ready — review and start a new quote'
+              ? 'Duplicate payload ready - review and start a new quote'
               : `Duplicated quotation ready at ${result.startAt}`
           )
           navigate(result.route)
@@ -121,7 +121,7 @@ export const AdminMotorQuotationFetchPage = () => {
     },
   })
 
-  // POST cancel — only works for unpaid cancelable quotes (API enforces can_cancel rules)
+  // POST cancel - only works for unpaid cancelable quotes (API enforces can_cancel rules)
   const cancelMutation = UseApiMutation<
     SubmitResponse,
     { sessionId: number; cancellation_reason?: string }
@@ -311,7 +311,7 @@ export const AdminMotorQuotationFetchPage = () => {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Confirm cancel — only shown for rows where can_cancel is true */}
+      {/* Confirm cancel - only shown for rows where can_cancel is true */}
       <AlertDialog
         open={Boolean(cancelRow)}
         onOpenChange={(open) => {

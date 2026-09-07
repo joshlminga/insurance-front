@@ -103,7 +103,7 @@ export async function checkAuth(token: string): Promise<CheckAuthData> {
   return data.data
 }
 
-/** Lightweight abilities refresh — no new token (after role change or location switch) */
+/** Lightweight abilities refresh - no new token (after role change or location switch) */
 export async function fetchAbilities(
   token: string,
   organizationLocationId?: number | null,
@@ -114,7 +114,7 @@ export async function fetchAbilities(
   return data.data.abilities
 }
 
-/** Full session refresh — new token + fresh abilities */
+/** Full session refresh - new token + fresh abilities */
 export async function refreshSession(
   token: string,
   organizationLocationId?: number | null,
@@ -127,7 +127,7 @@ export async function refreshSession(
   return data
 }
 
-/** Server-side logout — blacklist the JWT. Always send the current Bearer token. */
+/** Server-side logout - blacklist the JWT. Always send the current Bearer token. */
 export async function logoutOnServer(token: string): Promise<void> {
   await apiClient.post(
     'auth/logout',

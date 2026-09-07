@@ -95,9 +95,9 @@ export function AdminPhoneInput<T extends FieldValues>({
     const maxDigits = buildMaxLocalDigits(country)
 
     const dialDisplay = useMemo(() => {
-        if (!countryId) return '—'
+        if (!countryId) return '-'
         if (isLoading) return '…'
-        return dialCode || '—'
+        return dialCode || '-'
     }, [countryId, isLoading, dialCode])
 
     return (

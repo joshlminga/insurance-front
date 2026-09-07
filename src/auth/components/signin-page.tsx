@@ -36,7 +36,7 @@ export default function SignInPage() {
     return <OrgNotFoundPanel />
   }
 
-  // Root domain — general login unchanged
+  // Root domain - general login unchanged
   return (
     <AuthLayoutPage title="Please sign in" description="to purchase your cover">
       <LoginForm />

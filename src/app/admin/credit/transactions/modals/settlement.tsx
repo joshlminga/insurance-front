@@ -54,7 +54,7 @@ export default function SettlementModal({
   const navigate = useNavigate()
   const selectedTransactions = componentProps?.selectedTransactions ?? []
 
-  // Editable per-item amounts — default to outstanding (partial settle supported)
+  // Editable per-item amounts - default to outstanding (partial settle supported)
   const defaultAmounts = useMemo(() => {
     const map: Record<number, number> = {}
     selectedTransactions.forEach((txn) => {
@@ -186,7 +186,7 @@ export default function SettlementModal({
         const orderTrackingId = payment.order_tracking_id
         const checkoutRequestId = payment.checkout_request_id
 
-        // Paystack: popup first, hosted checkout as fallback — stay on this modal while we poll.
+        // Paystack: popup first, hosted checkout as fallback - stay on this modal while we poll.
         if (settlementId && payment.gateway === "paystack") {
           void startPaystackCheckout(payment, settlementId)
           return
@@ -202,7 +202,7 @@ export default function SettlementModal({
           return
         }
 
-        // M-Pesa: STK already started — poll on detail page
+        // M-Pesa: STK already started - poll on detail page
         if (checkoutRequestId) {
           ShowToast.success("Check your phone and enter your M-Pesa PIN.")
         }

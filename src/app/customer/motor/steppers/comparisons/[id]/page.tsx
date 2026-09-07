@@ -167,7 +167,7 @@ export const PostComparisonPage: React.FC<premiumPreview> = ({
                                         <div className="grid grid-cols-2 gap-y-3 text-sm">
                                             <span className="text-muted-foreground">Basic Premium</span>
                                             <span className="font-medium text-right">
-                                                {breakdown["Basic Premium"] ?? "—"}
+                                                {breakdown["Basic Premium"] ?? "-"}
                                             </span>
                                             <Separator className="col-span-2 my-1" />
                                             {coverages.map(([label, status], covIdx) => (
@@ -185,14 +185,14 @@ export const PostComparisonPage: React.FC<premiumPreview> = ({
 
                                             <span className="text-muted-foreground">Levies</span>
                                             <span className="font-medium text-right">
-                                                {breakdown["Levies"] ?? "—"}
+                                                {breakdown["Levies"] ?? "-"}
                                             </span>
                                         </div>
                                         <Separator />
                                         <div className="grid grid-cols-2 text-sm font-semibold">
                                             <span>Total Premium</span>
                                             <span className="text-right">
-                                                {breakdown["Gross Premium"] ?? "—"}
+                                                {breakdown["Gross Premium"] ?? "-"}
                                             </span>
                                         </div>
                                     </CardContent>

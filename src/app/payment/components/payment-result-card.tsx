@@ -39,7 +39,7 @@ const variantStyles: Record<
 
 /**
  * One card used by every payment outcome page (success / failed / pending).
- * Pass different title/copy per method — the layout stays the same.
+ * Pass different title/copy per method - the layout stays the same.
  */
 export const PaymentResultCard = ({
     variant,

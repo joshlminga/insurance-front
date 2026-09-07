@@ -10,7 +10,7 @@ interface CanAccessProps {
   className?: string
 }
 
-/** Conditional render by module and/or permission — ready for when you gate UI */
+/** Conditional render by module and/or permission - ready for when you gate UI */
 export function CanAccess({
   requires,
   children,
@@ -26,7 +26,7 @@ export function CanAccess({
   return <div className={className}>{children}</div>
 }
 
-/** Headless variant — no wrapper div */
+/** Headless variant - no wrapper div */
 export function CanAccessHeadless({
   requires,
   children,
@@ -42,7 +42,7 @@ interface CanProps {
   fallback?: ReactNode
 }
 
-/** Conditionally render children when the user has a permission — like @can in Blade */
+/** Conditionally render children when the user has a permission - like @can in Blade */
 export function Can({ permission, children, fallback = null }: CanProps) {
   const { can } = useCan()
   return can(permission) ? <>{children}</> : <>{fallback}</>

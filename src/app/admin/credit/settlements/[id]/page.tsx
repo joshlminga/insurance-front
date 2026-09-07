@@ -154,11 +154,11 @@ export function CreditSettlementDetailPage() {
             <div className="grid gap-3 sm:grid-cols-2 text-sm">
               <div>
                 <span className="text-muted-foreground">Gateway: </span>
-                {settlement.payment_gateway ?? settlement.payment_method ?? "—"}
+                {settlement.payment_gateway ?? settlement.payment_method ?? "-"}
               </div>
               <div>
                 <span className="text-muted-foreground">Created: </span>
-                {settlement.created_at ? formatDate(settlement.created_at) : "—"}
+                {settlement.created_at ? formatDate(settlement.created_at) : "-"}
               </div>
               {settlement.completed_at ? (
                 <div>

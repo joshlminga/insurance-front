@@ -583,92 +583,67 @@ export function RouteTabNav({ tabs, basePath, className }: TRouteTabNavProps) {
     )
 }
 
-export const ReusablePagination = ({
-    currentPage: currentPageProp,
-    totalPages: totalPagesProp,
+export const TReusablePagination = ({
     onPageChange,
-    siblingCount = 1,
-    disabled = false,
-    className,
-    page: pageProp,
-    pageCount: pageCountProp,
-}: ReusablePaginationProps) => {
-    const currentPage = pageProp ?? currentPageProp ?? 1
-    const totalPages = pageCountProp ?? totalPagesProp ?? 1
-
-    if (totalPages < 1) return null
-    const range = (start: number, end: number) =>
-        Array.from({ length: Math.max(0, end - start + 1) }, (_, i) => start + i)
-    const leftSibling = Math.max(currentPage - siblingCount, 1)
-    const rightSibling = Math.min(currentPage + siblingCount, totalPages)
-    const showLeftEllipsis = leftSibling > 2
-    const showRightEllipsis = rightSibling < totalPages - 1
-
-    const pages: (number | "ellipsis")[] = []
-    pages.push(1)
-    if (showLeftEllipsis) pages.push("ellipsis")
-    pages.push(...range(leftSibling, rightSibling).filter(p => p !== 1 && p !== totalPages))
-    if (showRightEllipsis) pages.push("ellipsis")
-    if (totalPages > 1) pages.push(totalPages)
-
-    const goToPage = (page: number) => {
-        if (disabled || page < 1 || page > totalPages || page === currentPage) return
-        onPageChange(page)
-    }
-
-    const isPrevDisabled = disabled || currentPage <= 1
-    const isNextDisabled = disabled || currentPage >= totalPages
-
+    pageCount,
+    page,
+}: Pick<TTableReusableComponent, "onPageChange" | "pageCount"> &
+    Required<Pick<TTableReusableComponent, "page">>) => {
     return (
-        <Pagination className={cn(className)}>
-            <PaginationContent>
-                <PaginationItem>
-                    <PaginationPrevious
-                        href="#"
-                        onClick={(e) => {
-                            e.preventDefault()
-                            goToPage(currentPage - 1)
-                        }}
-                        aria-disabled={isPrevDisabled}
-                        className={cn(isPrevDisabled && "pointer-events-none opacity-50")}
-                    />
-                </PaginationItem>
+        <div className="flex flex-col items-center">
+            <div className="flex items-center justify-center">
+                {pageCount > 6 ? (
+                    <>
+                        {/* First 3 pages */}
+                        {new Array(3).fill(0).map((_, index) => {
+                            const pageNumber = index + 1;
 
-                {pages.map((page, index) => (
-                    <PaginationItem key={page === "ellipsis" ? `ellipsis-${index}` : page}>
-                        {page === "ellipsis" ? (
-                            <PaginationEllipsis />
-                        ) : (
-                            <PaginationLink
-                                href="#"
-                                isActive={page === currentPage}
-                                onClick={(e) => {
-                                    e.preventDefault()
-                                    goToPage(page)
-                                }}
-                                className={cn(disabled && "pointer-events-none opacity-50")}
-                            >
-                                {page}
-                            </PaginationLink>
-                        )}
-                    </PaginationItem>
-                ))}
+                            return (
+                                <PageForPagination
+                                    key={pageNumber}
+                                    handler={() => onPageChange(pageNumber)}
+                                    active={page === pageNumber}
+                                    content={`${pageNumber}`}
+                                />
+                            );
+                        })}
+                        <PageForPagination
+                            handler={() => { }}
+                            active={false}
+                            content="..."
+                        />
+                        {new Array(3).fill(0).map((_, index) => {
+                            const pageNumber = pageCount - 2 + index;
+                            return (
+                                <PageForPagination
+                                    key={pageNumber}
+                                    handler={() => onPageChange(pageNumber)}
+                                    active={page === pageNumber}
+                                    content={`${pageNumber}`}
+                                />
+                            );
+                        })}
+                    </>
+                ) : (
+                    <>
+                        {new Array(pageCount).fill(0).map((_, index) => {
+                            const pageNumber = index + 1;
 
-                <PaginationItem>
-                    <PaginationNext
-                        href="#"
-                        onClick={(e) => {
-                            e.preventDefault()
-                            goToPage(currentPage + 1)
-                        }}
-                        aria-disabled={isNextDisabled}
-                        className={cn(isNextDisabled && "pointer-events-none opacity-50")}
-                    />
-                </PaginationItem>
-            </PaginationContent>
-        </Pagination>
-    )
-}
+                            return (
+                                <PageForPagination
+                                    key={pageNumber}
+                                    content={`${pageNumber}`}
+                                    handler={() => onPageChange(pageNumber)}
+                                    active={page === pageNumber}
+                                />
+                            );
+                        })}
+                    </>
+                )}
+            </div>
+        </div>
+    );
+};
 
 export const ReusableCard = ({
     header,
@@ -1026,66 +1001,6 @@ export const PageForPagination = ({
     </div>
 );
 
-export const TReusablePagination = ({
-    onPageChange,
-    pageCount,
-    page,
-}: Pick<TTableReusableComponent, 'onPageChange' | 'pageCount'> &
-    Required<Pick<TTableReusableComponent, 'page'>>) => {
-    return (
-        <div className='flex flex-col items-center'>
-            <div className='flex items-center justify-center'>
-                {pageCount > 6 ? (
-                    <>
-                        {new Array(3).fill(0).map((_, index) => (
-                            <PageForPagination
-                                {...{
-                                    handler: () => onPageChange(1 + index),
-                                    active: page === index + 1,
-                                    content: `${1 + index}`,
-                                }}
-                                key={index}
-                            />
-                        ))}
-
-                        <PageForPagination
-                            {...{
-                                handler: () => { },
-                                active: false,
-                                content: '...',
-                            }}
-                        />
-
-                        {new Array(3).fill(0).map((_, index) => (
-                            <PageForPagination
-                                {...{
-                                    handler: () => onPageChange(pageCount - (3 - index)),
-                                    active: page === pageCount + (3 - index),
-                                    content: `${3 - index}`,
-                                }}
-                                key={index}
-                            />
-                        ))}
-                    </>
-                ) : (
-                    <>
-                        {new Array(pageCount).fill(0).map((_, index) => (
-                            <PageForPagination
-                                {...{
-                                    content: `${index + 1}`,
-                                    handler: () => onPageChange(index + 1),
-                                    active: page === index + 1,
-                                }}
-                                key={index}
-                            />
-                        ))}
-                    </>
-                )}
-            </div>
-        </div>
-    );
-};
-
 export const ReusableDropDownComponent = <T,>({
     className = "w-fit max-w-20",
     ActionsHandlerMapping,
@@ -1116,8 +1031,6 @@ export const ReusableDropDownComponent = <T,>({
     );
 };
 
-// Read nested fields like "user.name" (same idea as PHP $item['user']['name']).
-// Plain keys like "name" still work because there is no dot to split.
 function getByPath(item: any, path: string) {
     return path.split(".").reduce((acc, key) => acc?.[key], item);
 }
@@ -2652,7 +2565,7 @@ export const ReusableTabComponent = <KeyType extends string>({
                             <TabsTrigger
                                 className={cn(
                                     "cursor-pointer rounded-sm px-3 py-1 transition-all duration-200 font-medium leading-5 text-sm h-7",
-                                    "data-[state=active]:bg-white data-[state=active]:text-dark-brown data-[state=active]:shadow-sm",
+                                    "data-[state=active]:bg-[#C20C0C] data-[state=active]:text-white data-[state=active]:shadow-none",
                                     "data-[state=inactive]:text-gray-600 data-[state=inactive]:hover:text-gray-800",
                                 )}
                                 {...{ value: key }}

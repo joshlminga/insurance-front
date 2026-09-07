@@ -131,7 +131,7 @@ const MyTransactionsPage = () => {
           <p className="text-sm">
             {selectedIds.size > 0 ? (
               <>
-                {selectedIds.size} transaction(s) selected — total{" "}
+                {selectedIds.size} transaction(s) selected - total{" "}
                 <span className="font-semibold">
                   {formatCurrency(selectedTotal)}
                 </span>

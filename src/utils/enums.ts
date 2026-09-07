@@ -40,7 +40,7 @@ export const EROUTES = {
   PAYMENT_PAYSTACK_SUCCESS: '/payment/paystack/success',
   PAYMENT_PAYSTACK_FAILED: '/payment/paystack/failed',
 
-  // Admin dashboard mirrors — same pages, stay inside admin Layout
+  // Admin dashboard mirrors - same pages, stay inside admin Layout
   ADMIN_PAYMENT_MPESA_RETURN: `/${EPREFIX.DASHBOARD}/payment/mpesa/return`,
   ADMIN_PAYMENT_MPESA_SUCCESS: `/${EPREFIX.DASHBOARD}/payment/mpesa/success`,
   ADMIN_PAYMENT_MPESA_FAILED: `/${EPREFIX.DASHBOARD}/payment/mpesa/failed`,

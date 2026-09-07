@@ -12,7 +12,7 @@ export const queryClient = new QueryClient({
     queries: {
       staleTime: 60 * 1000,
       refetchOnWindowFocus: false,
-      // 401 means the token is dead — retrying the same call just reopens the session popup.
+      // 401 means the token is dead - retrying the same call just reopens the session popup.
       retry: (failureCount, error) => {
         if (isUnauthorized(error)) return false
         return failureCount < 3

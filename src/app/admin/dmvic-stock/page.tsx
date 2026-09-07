@@ -7,28 +7,31 @@ import { DmvicStockColumns } from '@/dev/columns/admin/dmvic-stock'
 import { CustomDialogComponent } from '@/dev/core'
 import { CustomBaseTable, SearchTools } from '@/dev/table'
 import { useCustomDialogContextFactory, useDebounce } from '@/hooks'
-import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
+import {
+  UseApiMutation,
+  UseApiQuery
+} from '@/hooks/hooks'
 import type {
+  DmvicBrokerStockRow,
   SingleActionsHandler,
   SubmitResponse,
   TFilterOptions,
   TPaginationFilters,
 } from '@/types/types'
-import { EMETHODS, FILTEROPTIONS, ReusableReducer } from '@/utils/constatnts'
+import {
+  EMETHODS,
+  FILTEROPTIONS,
+  ReusableReducer
+} from '@/utils/constatnts'
 import { extractErrorMessage } from '@/utils/helpers'
 import { EROUTES } from '@/utils/enums'
 import { ShowToast } from '@/utils/utils'
 import { Plus } from 'lucide-react'
 import { useReducer } from 'react'
 import { useNavigate } from 'react-router-dom'
-import {
-  DMVIC_STOCK_URLS,
-  type DmvicBrokerStockRow,
-} from './dmvic-stock-query'
 import { CreateDmvicStockModal } from './modals/create-stock'
 import { EditDmvicStockModal } from './modals/edit-stock'
 
-/** List DMVIC broker stocks — each row links to policy-number rules on the detail page. */
 export function DmvicStockPage() {
   const navigate = useNavigate()
   const { canModuleAction } = useCan()
@@ -54,8 +57,8 @@ export function DmvicStockPage() {
       data?: DmvicBrokerStockRow
     }>()
 
-  const { data, isLoading, refetch } = UseApiQuery<SubmitResponse>({
-    url: DMVIC_STOCK_URLS.list,
+  const { data, isLoading, refetch, isError } = UseApiQuery<SubmitResponse>({
+    url: 'dmvic/stocks',
     params: {
       page: filter.page,
       sort_by: 'id',
@@ -65,7 +68,7 @@ export function DmvicStockPage() {
   })
 
   const deleteMutation = UseApiMutation<SubmitResponse, { id: number | string }>({
-    url: ({ id }) => DMVIC_STOCK_URLS.delete(id),
+    url: ({ id }) => `dmvic/stocks/${id}`,
     method: EMETHODS.DELETE,
     mutationOptions: {
       onSuccess: (response) => {
@@ -80,20 +83,19 @@ export function DmvicStockPage() {
 
   const statusMutation = UseApiMutation<
     SubmitResponse,
-    { id: number | string; is_active: boolean }
-  >({
-    url: ({ id }) => DMVIC_STOCK_URLS.status(id),
-    method: EMETHODS.PATCH,
-    mutationOptions: {
-      onSuccess: (response) => {
-        ShowToast.success(response?.message || 'Stock status updated')
-        refetch()
+    { id: number | string; is_active: boolean }>({
+      url: ({ id }) => `dmvic/stocks/${id}/status`,
+      method: EMETHODS.PATCH,
+      mutationOptions: {
+        onSuccess: (response) => {
+          ShowToast.success(response?.message || 'Stock status updated')
+          refetch()
+        },
+        onError: (error) => {
+          ShowToast.error(extractErrorMessage(error))
+        },
       },
-      onError: (error) => {
-        ShowToast.error(extractErrorMessage(error))
-      },
-    },
-  })
+    })
 
   const ActionsHandlerMapping: SingleActionsHandler<DmvicBrokerStockRow>[] = [
     {
@@ -114,7 +116,7 @@ export function DmvicStockPage() {
     {
       label: 'Deactivate',
       onSelect: (row) => statusMutation.mutate({ id: row.id, is_active: false }),
-      conditional: (row) => canAction && Boolean(row.is_active),
+      conditional: (row) => canAction && !!(row.is_active),
     },
     {
       label: 'Activate',
@@ -128,9 +130,6 @@ export function DmvicStockPage() {
     },
   ]
 
-  const rawRows = (Array.isArray(data?.data) ? data.data : []) as DmvicBrokerStockRow[]
-  const pagination = data?.pagination
-
   return (
     <div className="space-y-6">
       <PageHeader
@@ -139,60 +138,72 @@ export function DmvicStockPage() {
         actions={
           canCreate
             ? [
-                {
-                  icon: Plus,
-                  label: 'Add Stock',
-                  variant: 'default' as const,
-                  onClick: () => {
-                    handleDialogContextSwitch({
-                      componentProps: { refetch },
-                      Component: CreateDmvicStockModal,
-                    })
-                  },
+              {
+                icon: Plus,
+                label: 'Add Stock',
+                variant: 'default' as const,
+                onClick: () => {
+                  handleDialogContextSwitch({
+                    componentProps: { refetch },
+                    Component: CreateDmvicStockModal,
+                  })
                 },
-              ]
+              },
+            ]
             : undefined
         }
       />
 
-      <CustomBaseTable
-        {...{
-          onPageChange: (page) =>
-            optionsDispatcher({
-              payload: { page },
-              type: 'page',
-            }),
-          OtherToolsProps: {
-            onChange: (term: string) =>
-              optionsDispatcherDebounce({
-                payload: { term, page: 1 },
-                type: 'term',
+      <div className='w-full'>
+        <CustomBaseTable
+          {...{
+            onPageChange: (page) =>
+              optionsDispatcher({
+                payload: { page },
+                type: 'page',
               }),
-            placeholder: 'Search by organization or location',
-            includeFilter: true,
-          },
-          columns: [...DmvicStockColumns, ActionColumn({ ActionsHandlerMapping })],
-          OtherTools: SearchTools,
-          data: rawRows,
-          pageCount: pagination?.last_page ?? 1,
-          title: 'DMVIC Stocks',
-          showPagination: true,
-          pageSize: pagination?.per_page ?? STOCK_PAGE_SIZE,
-          page: pagination?.current_page ?? filter.page,
-          isLoading,
-        }}
-      />
+            OtherToolsProps: {
+              onChange: (data: any) =>
+                optionsDispatcherDebounce({
+                  payload: { term: data },
+                  type: 'term',
+                }),
+              placeholder: 'Search',
+              includeFilter: true,
+            },
+            columns: [
+              ...DmvicStockColumns,
+              ActionColumn({ ActionsHandlerMapping }),
+            ],
+            OtherTools: SearchTools,
+            data: data?.data ?? [],
+            pageCount: data?.pagination?.last_page ?? 1,
+            title: 'Policy Numbers',
+            showPagination: true,
+            setPageSize: (pageSize) =>
+              optionsDispatcher({
+                payload: { pageSize },
+                type: 'pageSize',
+              }),
+            pageSize: data?.pagination?.per_page ?? STOCK_PAGE_SIZE,
+            page: data?.pagination?.current_page ?? filter.page,
+            isLoading: isLoading,
+            isError: isError
+          }}
+        />
+      </div>
 
       <CustomDialogComponent
         {...{ handleDialogContextSwitch, dialogOpen }}
-        className="sm:max-w-fit w-[95vw] sm:w-auto p-4 sm:p-6"
-      >
-        {dialogContent?.Component ? (
+        className='sm:max-w-fit w-[95vw] sm:w-auto p-4 sm:p-6'>
+        {dialogContent?.Component && (
           <dialogContent.Component
-            componentProps={dialogContent.componentProps}
-            handleDialogContextSwitch={handleDialogContextSwitch}
+            {...{
+              componentProps: dialogContent.componentProps,
+              handleDialogContextSwitch,
+            }}
           />
-        ) : null}
+        )}
       </CustomDialogComponent>
     </div>
   )

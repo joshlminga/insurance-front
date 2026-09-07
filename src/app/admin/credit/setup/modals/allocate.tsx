@@ -115,7 +115,7 @@ export default function AllocateCreditModal({
         <p className="text-sm text-muted-foreground mt-1">
           {isNewAllocation
             ? "Pick an eligible location member, then set their allocated balance and minimum spend threshold."
-            : `${user?.user?.name ?? user?.user?.email ?? "User"} — set allocated balance and minimum spend threshold.`}
+            : `${user?.user?.name ?? user?.user?.email ?? "User"} - set allocated balance and minimum spend threshold.`}
         </p>
       </div>
 

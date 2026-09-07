@@ -4,7 +4,7 @@ import { Outlet } from 'react-router-dom'
 
 /**
  * Shared chrome for all /payment/* pages.
- * Outlet is React Router's placeholder — child routes (success, failed, return) render here.
+ * Outlet is React Router's placeholder - child routes (success, failed, return) render here.
  */
 export const PaymentLayout = () => {
     return (

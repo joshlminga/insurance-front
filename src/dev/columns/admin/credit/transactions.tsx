@@ -5,7 +5,7 @@ import type { CreditTransaction } from "@/types/types"
 import { formatDate, parseMoneyString } from "@/lib/format"
 import type { ColumnDef } from "@tanstack/table-core"
 
-/** Outstanding amount to settle — falls back to amount_used when API omits the field */
+/** Outstanding amount to settle - falls back to amount_used when API omits the field */
 export function GetCreditOutstanding(txn: CreditTransaction): number {
   return parseMoneyString(txn.outstanding_amount ?? txn.amount_used)
 }
@@ -94,7 +94,7 @@ export function BuildCreditTransactionColumns(
       cell: ({ row }) => {
         const type = row.original.transactionable_type
         const id = row.original.transactionable_id
-        if (!type && !id) return <span className="text-muted-foreground">—</span>
+        if (!type && !id) return <span className="text-muted-foreground">-</span>
         return (
           <div className="text-sm">
             {type ? type.split("\\").pop() : "Item"} {id ? `#${id}` : ""}
@@ -106,7 +106,7 @@ export function BuildCreditTransactionColumns(
       accessorKey: "created_at",
       header: () => <div>Date</div>,
       cell: ({ row }) => (
-        <div>{row.original.created_at ? formatDate(row.original.created_at) : "—"}</div>
+        <div>{row.original.created_at ? formatDate(row.original.created_at) : "-"}</div>
       ),
     }
   )
@@ -116,7 +116,7 @@ export function BuildCreditTransactionColumns(
       accessorKey: "user",
       header: () => <div>User</div>,
       cell: ({ row }) => (
-        <div>{row.original.user?.name ?? row.original.user?.email ?? "—"}</div>
+        <div>{row.original.user?.name ?? row.original.user?.email ?? "-"}</div>
       ),
     })
   }

@@ -46,7 +46,7 @@ export const getOrgLocationId = (rowData: Record<string, any>) =>
 export const getRoleId = (rowData: Record<string, any>) =>
   rowData?.id ?? rowData?.role_id ?? rowData?.roleId
 
-/** Human-readable role label — org roles use display_name; global/system use name */
+/** Human-readable role label - org roles use display_name; global/system use name */
 export const getRoleLabel = (
   rowData: Record<string, any>,
   rolesBasePath = "roles"

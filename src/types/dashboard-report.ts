@@ -23,7 +23,7 @@ export type MotorDashboardCustomer = {
   email?: string | null
 }
 
-/** KPI totals — period fields are only premium + quotations */
+/** KPI totals - period fields are only premium + quotations */
 export type MotorDashboardSummary = {
   total_customers: number
   total_invoices: number

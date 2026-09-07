@@ -409,7 +409,7 @@ export const AdminMotorDuplicateQuotationPage = () => {
             vehicle_registration_number: sq.vehicle_registration_number ?? '',
             vehicle_value: sq.vehicle_value != null ? String(sq.vehicle_value) : '',
             valued_by_professional: Boolean(sq.valued_by_professional),
-            // Never force "create account" on duplicate — guest unless existing member user_id
+            // Never force "create account" on duplicate - guest unless existing member user_id
             create_customer_account: false,
         })
 
@@ -421,7 +421,7 @@ export const AdminMotorDuplicateQuotationPage = () => {
             })
         }
 
-        ShowToast.success('Duplicate quote fields loaded — review and submit to start')
+        ShowToast.success('Duplicate quote fields loaded - review and submit to start')
     }, [form])
 
     const formCountryId = useWatch({ control: form.control, name: 'country_id' })
@@ -617,7 +617,7 @@ export const AdminMotorDuplicateQuotationPage = () => {
                 }
         )
         const payload = buildMotorQuotationPayload({
-            // Duplicate never creates a member account — guest unless user_id already set
+            // Duplicate never creates a member account - guest unless user_id already set
             data: { ...data, create_customer_account: false },
             profileCountryId: profileCountry?.id,
             dialCode,
@@ -804,7 +804,7 @@ export const AdminMotorDuplicateQuotationPage = () => {
                                 Vehicle class
                             </Label>
                             <p className="mt-1 text-xs text-muted-foreground">
-                                Tap one option — only one class applies.
+                                Tap one option - only one class applies.
                             </p>
 
                             {isClassTabsLoading ? (
@@ -919,7 +919,7 @@ export const AdminMotorDuplicateQuotationPage = () => {
                         <AlertDialogTitle>No customer contact details</AlertDialogTitle>
                         <AlertDialogDescription>
                             Email and phone were not provided. No guest record will be
-                            created — this quotation will be tied to your agent account (
+                            created - this quotation will be tied to your agent account (
                             <span className="font-semibold text-foreground">
                                 {loggedInUserName}
                             </span>

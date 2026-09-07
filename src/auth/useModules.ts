@@ -3,7 +3,7 @@ import { useAuthStore } from '@/stores/auth-store'
 import { isBypassUser } from './can'
 import { buildModuleSet, hasAnyModule, hasModule } from './modules'
 
-/** Module visibility hook — for sidebar / route gating (when you wire it up) */
+/** Module visibility hook - for sidebar / route gating (when you wire it up) */
 export function useModules() {
   const abilities = useAuthStore((s) => s.abilities)
 
@@ -24,7 +24,7 @@ export function useModules() {
     hasAnyModule: checkAnyModule,
     moduleSet,
     modules: abilities?.modules ?? [],
-    /** true for super_admin / is_general — all hasModule() checks return true */
+    /** true for super_admin / is_general - all hasModule() checks return true */
     isBypass: isBypassUser(abilities),
   }
 }

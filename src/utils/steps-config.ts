@@ -191,7 +191,7 @@ export const EPAYMENTTABS = [
         image: '/visamastercard.png',
         component: CardsTabPage,
     },
-    // PayPal hidden for now — restore entry + PaypalTabPage import to re-enable
+    // PayPal hidden for now - restore entry + PaypalTabPage import to re-enable
     {
         value: "credit",
         image: '/paycredit.png',

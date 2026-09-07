@@ -1,6 +1,6 @@
 // Formatting utilities for the Accensure system
 
-/** Parse API decimal string (e.g. "75000.00") for display — not for arithmetic */
+/** Parse API decimal string (e.g. "75000.00") for display - not for arithmetic */
 export function parseMoneyString(value: string | number | null | undefined): number {
   if (value === null || value === undefined || value === "") return 0
   const num = typeof value === "number" ? value : parseFloat(String(value))

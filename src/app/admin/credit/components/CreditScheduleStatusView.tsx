@@ -92,12 +92,12 @@ export function CreditScheduleStatusView({
       <dl className="grid gap-3 rounded-lg border bg-muted/20 p-4 text-sm sm:grid-cols-2">
         <div>
           <dt className="text-muted-foreground">Invoice</dt>
-          <dd className="font-medium">#{schedule.invoice_id ?? "—"}</dd>
+          <dd className="font-medium">#{schedule.invoice_id ?? "-"}</dd>
         </div>
         <div>
           <dt className="text-muted-foreground">Cover start date</dt>
           <dd className="font-medium">
-            {schedule.cover_start_date ? formatDate(schedule.cover_start_date) : "—"}
+            {schedule.cover_start_date ? formatDate(schedule.cover_start_date) : "-"}
           </dd>
         </div>
       </dl>

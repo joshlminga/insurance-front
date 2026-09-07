@@ -298,7 +298,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     clearTokenRefreshTimer()
     const { token } = get()
 
-    // Wipe the JWT from this browser immediately — do not wait on the API.
+    // Wipe the JWT from this browser immediately - do not wait on the API.
     markTabSignedOut()
     suppressAuthPersist = true
     syncAccessToken(null)
@@ -352,9 +352,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 }))
-
 let authListenerAttached = false
-
 export async function initAuthStore() {
   if (typeof window === 'undefined') return
 

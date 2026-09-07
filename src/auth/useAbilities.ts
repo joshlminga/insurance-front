@@ -10,7 +10,7 @@ import {
 import type { CanAccessOptions } from './types'
 
 /**
- * Combined RBAC hook — permissions, modules, roles, and org context in one place.
+ * Combined RBAC hook - permissions, modules, roles, and org context in one place.
  */
 export function useAbilities() {
   const abilities = useAuthStore((s) => s.abilities)

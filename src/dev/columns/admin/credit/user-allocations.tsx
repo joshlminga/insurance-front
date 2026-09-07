@@ -9,7 +9,7 @@ export const CreditUserAllocationsColumns: ColumnDef<CreditUserAllocation>[] = [
     header: () => <div>User</div>,
     cell: ({ row }) => (
       <div>
-        <p className="font-medium">{row.original.user?.name ?? "—"}</p>
+        <p className="font-medium">{row.original.user?.name ?? "-"}</p>
         <p className="text-xs text-muted-foreground">{row.original.user?.email ?? ""}</p>
       </div>
     ),

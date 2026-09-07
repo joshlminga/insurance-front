@@ -6,7 +6,7 @@ type CreditPendingBannerProps = {
   message: string
   creditTransactionId?: number
   invoiceId?: string | number
-  /** Customer payment step has no credit dashboard — hide the link. */
+  /** Customer payment step has no credit dashboard - hide the link. */
   showDashboardLink?: boolean
 }
 

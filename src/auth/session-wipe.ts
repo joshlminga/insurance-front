@@ -29,7 +29,7 @@ export function broadcastLogout(): void {
   }
 }
 
-/** This browser tab chose Log out — it must not silently become logged in again. */
+/** This browser tab chose Log out - it must not silently become logged in again. */
 export function markTabSignedOut(): void {
   if (typeof window === 'undefined') return
   sessionStorage.setItem(AUTH_TAB_SIGNED_OUT_KEY, '1')

@@ -15,7 +15,7 @@ export const CreditPendingScheduleColumns: ColumnDef<CreditTransaction>[] = [
     header: () => <div>Invoice</div>,
     cell: ({ row }) => {
       const invoiceId = row.original.schedule?.invoice_id ?? row.original.transactionable_id
-      return <div>{invoiceId ? `#${invoiceId}` : "—"}</div>
+      return <div>{invoiceId ? `#${invoiceId}` : "-"}</div>
     },
   },
   {
@@ -30,7 +30,7 @@ export const CreditPendingScheduleColumns: ColumnDef<CreditTransaction>[] = [
     header: () => <div>Cover start</div>,
     cell: ({ row }) => {
       const date = row.original.schedule?.cover_start_date
-      return <div>{date ? formatDate(date) : "—"}</div>
+      return <div>{date ? formatDate(date) : "-"}</div>
     },
   },
   {
@@ -38,7 +38,7 @@ export const CreditPendingScheduleColumns: ColumnDef<CreditTransaction>[] = [
     header: () => <div>Updated</div>,
     cell: ({ row }) => {
       const date = row.original.schedule?.updated_at ?? row.original.created_at
-      return <div>{date ? formatDate(date) : "—"}</div>
+      return <div>{date ? formatDate(date) : "-"}</div>
     },
   },
 ]

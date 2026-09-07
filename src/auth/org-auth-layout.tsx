@@ -18,7 +18,7 @@ export default function OrgAuthLayout({ organization, children }: OrgAuthLayoutP
 
   return (
     <main className="flex min-h-dvh flex-col md:flex-row">
-      {/* Left branding panel — hidden on small screens */}
+      {/* Left branding panel - hidden on small screens */}
       <section
         className="relative hidden w-full overflow-hidden md:flex md:w-1/2 md:min-h-dvh md:flex-col"
         aria-hidden="true">

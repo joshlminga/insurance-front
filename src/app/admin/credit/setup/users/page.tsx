@@ -106,7 +106,7 @@ export function CreditSetupUsersPage() {
     <div className="space-y-6">
       <PageHeader
         title="User Allocations"
-        description="Assign credit balances and minimum spend thresholds per user. Allocating requires finance-control.create (and finance-control.list to view this page). Recipients must belong to this location and have any active role other than member — including built-in and custom org roles such as sales. Member-only users are not eligible."
+        description="Assign credit balances and minimum spend thresholds per user. Allocating requires finance-control.create (and finance-control.list to view this page). Recipients must belong to this location and have any active role other than member - including built-in and custom org roles such as sales. Member-only users are not eligible."
         actions={
           canAllocate && canFetchCreditSetup
             ? [

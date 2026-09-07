@@ -80,7 +80,7 @@ export function getPaymentStatusPath(method: PaymentMethodKey, outcome: PaymentO
     return isAdmin ? EROUTES.ADMIN_PAYMENT_PAYSTACK_FAILED : EROUTES.PAYMENT_PAYSTACK_FAILED
 }
 
-/** Return/checking page for a method — admin stays under dashboard Layout. */
+/** Return/checking page for a method - admin stays under dashboard Layout. */
 export function getPaymentReturnPath(method: PaymentMethodKey): string {
     const isAdmin = readPaymentStatusSession()?.flow === 'admin'
     if (method === 'mpesa') {
@@ -101,7 +101,7 @@ export function getPaymentRetryUrl(flow?: PaymentStatusFlow): string {
 
 /**
  * Jump to the existing receipt UI (SuccessPurchase stepper step).
- * This is not a new route — we set the stepper index then go back to the purchase URL.
+ * This is not a new route - we set the stepper index then go back to the purchase URL.
  */
 export function goToReceipt(navigate: NavigateFunction, isAuthenticated: boolean): void {
     const session = readPaymentStatusSession()

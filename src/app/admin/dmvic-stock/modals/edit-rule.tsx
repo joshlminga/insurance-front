@@ -4,22 +4,15 @@ import { Switch } from '@/components/ui/switch'
 import { Button, ReuseableInput } from '@/dev/core'
 import { UseApiMutation } from '@/hooks/hooks'
 import { EditDmvicPolicyNumberRuleSchema } from '@/types/form-schema'
-import type { EditDmvicPolicyNumberRuleFormValues } from '@/types/schema'
-import type { SubmitResponse } from '@/types/types'
+import type { EditDmvicPolicyNumberRuleFormInput, EditDmvicPolicyNumberRuleFormValues } from '@/types/schema'
+import type { DmvicPolicyNumberRuleRow, SubmitResponse } from '@/types/types'
 import { EMETHODS } from '@/utils/constatnts'
 import { extractErrorMessage } from '@/utils/helpers'
-import { ShowToast } from '@/utils/utils'
+import { dmvicRuleHasAllocations, ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Controller, useForm } from 'react-hook-form'
-import { useEffect } from 'react'
-import {
-  dmvicRuleHasAllocations,
-  type DmvicPolicyNumberRuleRow,
-  DMVIC_POLICY_RULE_URLS,
-} from '../dmvic-stock-query'
 import { PolicyNumberRuleFormatHints } from '../policy-number-rule-hints'
 
-/** Edit rule — format/sequence fields lock after the first allocation. */
 export function EditDmvicPolicyNumberRuleModal({
   handleDialogContextSwitch,
   componentProps,
@@ -32,61 +25,46 @@ export function EditDmvicPolicyNumberRuleModal({
 }) {
   const rule = componentProps?.data
   const locked = rule ? dmvicRuleHasAllocations(rule) : false
-
-  const form = useForm<EditDmvicPolicyNumberRuleFormValues>({
+  const form = useForm<EditDmvicPolicyNumberRuleFormInput,
+    unknown,
+    EditDmvicPolicyNumberRuleFormValues
+  >({
     resolver: zodResolver(EditDmvicPolicyNumberRuleSchema),
     defaultValues: {
-      template: '',
-      series: '',
-      sequence_placeholder: '',
-      stock: 2,
-      sequence_start: '1',
-      maintain_policy_number: true,
-      effective_from: '',
-      effective_until: '',
+      template: componentProps?.data?.template ?? '',
+      series: componentProps?.data?.series ?? '',
+      sequence_placeholder: componentProps?.data?.sequence_placeholder ?? '',
+      stock: componentProps?.data?.stock ?? undefined,
+      sequence_start: componentProps?.data?.sequence_start ?? undefined,
+      maintain_policy_number: componentProps?.data?.maintain_policy_number ?? true,
+      effective_from: componentProps?.data?.effective_from?.slice(0, 10) ?? '',
+      effective_until: componentProps?.data?.effective_until?.slice(0, 10) ?? '',
     },
   })
-
-  useEffect(() => {
-    if (!rule) {
-      return
-    }
-    form.reset({
-      template: rule.template,
-      series: rule.series,
-      sequence_placeholder: rule.sequence_placeholder,
-      stock: rule.stock,
-      sequence_start: rule.sequence_start,
-      maintain_policy_number: rule.maintain_policy_number,
-      effective_from: rule.effective_from?.slice(0, 10) ?? '',
-      effective_until: rule.effective_until?.slice(0, 10) ?? '',
-    })
-  }, [rule, form])
 
   const submitMutation = UseApiMutation<
     SubmitResponse,
-    Record<string, unknown> & { id: number }
-  >({
-    url: ({ id }) => DMVIC_POLICY_RULE_URLS.update(id),
-    method: EMETHODS.PATCH,
-    mutationOptions: {
-      onSuccess: (data) => {
-        ShowToast.success(data.message || 'Policy number rule updated successfully')
-        componentProps?.refetch?.()
-        handleDialogContextSwitch({ refetch: true })
+    Record<string, unknown> & { id: number }>({
+      url: ({ id }) => `dmvic/policy-number-rules/${id}`,
+      method: EMETHODS.PATCH,
+      mutationOptions: {
+        onSuccess: (data) => {
+          ShowToast.success(data.message || 'Policy number rule updated successfully')
+          componentProps?.refetch?.()
+          handleDialogContextSwitch({ refetch: true })
+        },
+        onError: (error: unknown) => {
+          ShowToast.error(extractErrorMessage(error) || 'Failed to update rule')
+        },
       },
-      onError: (error: unknown) => {
-        ShowToast.error(extractErrorMessage(error) || 'Failed to update rule')
-      },
-    },
-  })
+    })
 
   const onSubmit = (data: EditDmvicPolicyNumberRuleFormValues) => {
     if (!rule?.id) {
       return
     }
 
-    const payload: Record<string, unknown> = {
+    const payload: Record<string, unknown> & { id: number } = {
       id: rule.id,
       maintain_policy_number: data.maintain_policy_number,
       effective_until: data.effective_until || null,

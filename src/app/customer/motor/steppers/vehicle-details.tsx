@@ -306,7 +306,7 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
             vehicle_value: data.vehicle_value,
             vehicle_class_id: data.vehicle_class_id,
             used_for_id: data.used_for_id,
-            // Legacy fields — null until UI collects them again (old API compatibility)
+            // Legacy fields - null until UI collects them again (old API compatibility)
             registration_number: null,
             vehicle_model: null,
             vehicle_make: null,
@@ -355,7 +355,7 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
                             Vehicle class
                         </Label>
                         <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
-                            Tap one option — only one class applies.
+                            Tap one option - only one class applies.
                         </p>
 
                         {isClassTabsLoading ? (

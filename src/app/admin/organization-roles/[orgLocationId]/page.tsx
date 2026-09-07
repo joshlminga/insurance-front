@@ -240,7 +240,7 @@ const OrganizationRolesDetailPage = () => {
       </div>
 
       <PageHeader
-        title={`Roles — ${orgLocationDisplayName}`}
+        title={`Roles - ${orgLocationDisplayName}`}
         description="Manage roles and permissions for this organization"
         actions={[
           {

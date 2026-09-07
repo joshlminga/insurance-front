@@ -10,7 +10,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 
 /**
  * Waiting-for-approval page. When the schedule is completed (or the user clicks
- * Proceed), we go to credit success — still not straight to the receipt.
+ * Proceed), we go to credit success - still not straight to the receipt.
  */
 export const CreditPendingPage: React.FC = () => {
     const navigate = useNavigate()

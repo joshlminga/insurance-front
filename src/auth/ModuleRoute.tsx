@@ -17,7 +17,7 @@ interface ModuleRouteProps {
 }
 
 /**
- * Route guard for direct URL access (case 3) — like Laravel middleware on a route group.
+ * Route guard for direct URL access (case 3) - like Laravel middleware on a route group.
  * Redirects to dashboard when the user lacks the required module or permission.
  */
 export function ModuleRoute({

@@ -6,7 +6,7 @@ export function buildPermissionSet(permissions: string[]): Set<string> {
   return new Set(permissions)
 }
 
-/** Platform admin or general user — bypass all permission checks */
+/** Platform admin or general user - bypass all permission checks */
 export function isBypassUser(abilities: Abilities | null | undefined): boolean {
   if (!abilities) return false
   if (abilities.is_general) return true
@@ -14,7 +14,7 @@ export function isBypassUser(abilities: Abilities | null | undefined): boolean {
 }
 
 /**
- * Check a single permission — mirrors API AutoPermissionMiddleware bypass order:
+ * Check a single permission - mirrors API AutoPermissionMiddleware bypass order:
  * 1. is_general → allow
  * 2. super_admin role → allow
  * 3. permission in active set → allow

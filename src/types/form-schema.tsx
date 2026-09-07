@@ -131,7 +131,7 @@ export const AddVehicleSchema = z.object({
   model: z.string().min(1, "Model is required"),
   manufacture_year: z.string().min(1, "Year of manufacture is required"),
   body_type: z.string().min(1, "Body type is required"),
-  // Optional — blank is fine; API stores null
+  // Optional - blank is fine; API stores null
   color: z.string().optional().or(z.literal("")),
   number_of_passengers: z.string().optional().or(z.literal("")),
   tonnage: z.string().min(1, "Tonnage is required"),
@@ -208,7 +208,6 @@ export const UpdatePasswordSchema = z.object({
   path: ["confirm_password"],
 })
 
-/** Admin Account Profile — general info (requires current password to authorize) */
 export const AccountGeneralSchema = z.object({
   name: z.string().min(2, "Name is required").max(100),
   email: z.string().email("Invalid email address"),
@@ -217,10 +216,8 @@ export const AccountGeneralSchema = z.object({
     .min(10, "Phone number must be at least 10 digits")
     .regex(/^(?:\+?\d{1,3})?[ -]?\d{6,14}$/, "Invalid phone number format")
     .or(z.literal("")),
-  current_password: z.string().min(1, "Current password is required"),
 })
 
-/** Admin Account Profile — avatar upload (requires current password) */
 export const AccountAvatarSchema = z.object({
   profile_picture: z
     .any()
@@ -229,7 +226,6 @@ export const AccountAvatarSchema = z.object({
       (file) => file instanceof File && ACCEPTED_IMAGE_TYPES.includes(file.type),
       "Profile picture must be jpeg, png, jpg, or webp"
     ),
-  current_password: z.string().min(1, "Current password is required"),
 })
 
 export const KycSchema = z.object({
@@ -1094,7 +1090,7 @@ export const OrganizationMemberCreateSchema = z.object({
 
 export const OrganizationMemberEditSchema = OrganizationMemberCreateSchema
 
-/** Organization role create/edit — authority is sent as hidden default "comp" */
+/** Organization role create/edit - authority is sent as hidden default "comp" */
 export const RoleCreateSchema = z.object({
   name: z.string().min(2, "Role name is required").max(100),
   description: z.string().max(500).optional().or(z.literal("")),
@@ -1128,7 +1124,7 @@ export const AllocateCreditSchema = z.object({
   minimum_spend_threshold: z.coerce.number().min(0, "Minimum threshold must be 0 or more"),
 })
 
-/** First-time / picker allocate — same fields plus which eligible user to assign. */
+/** First-time / picker allocate - same fields plus which eligible user to assign. */
 export const AllocateNewCreditSchema = AllocateCreditSchema.extend({
   user_id: z.union([z.string(), z.number()]).refine(
     (value) => String(value).trim().length > 0,
@@ -1402,57 +1398,85 @@ export const TravelKycSchema = z.object({
       message: "Passport or ID attachment is required",
     }),
 })
-
-/** DMVIC broker stock — office + certificate type (remaining stock comes from rules). */
 export const CreateDmvicStockSchema = z.object({
   organization_location_id: z.string().min(1, 'Organization location is required'),
   product_type: z.string().min(1, 'Product type is required'),
   type_of_certificate: z.string().min(1, 'Certificate type is required'),
   stock: z.coerce.number().int().min(2, 'Stock must be at least 2'),
 })
-
 export const EditDmvicStockSchema = CreateDmvicStockSchema.omit({ stock: true })
-
 const dmvicPolicyNumberRuleBase = z.object({
-  template: z.string().min(1, 'Template is required').max(255),
-  series: z.string().min(1, 'Series is required').max(255),
-  sequence_placeholder: z.string().min(1, 'Sequence placeholder is required').max(20),
-  stock: z.coerce.number().int().min(2, 'Stock must be at least 2'),
-  sequence_start: z.string().regex(/^\d+$/, 'Sequence start must be numeric'),
-  maintain_policy_number: z.boolean(),
-  effective_from: z.string().min(1, 'Effective from date is required'),
-  effective_until: z.string().optional().or(z.literal('')),
-})
+  template: z
+    .string()
+    .min(1, 'Template is required')
+    .max(255),
 
-/** Policy number rule — template + sequence; API generates actual policy numbers. */
-export const CreateDmvicPolicyNumberRuleSchema = dmvicPolicyNumberRuleBase
-  .extend({
-    dmvic_stock_id: z.coerce.number().int().positive('Stock is required'),
-  })
-  .superRefine((data, ctx) => {
-    if (
-      data.sequence_placeholder !== '' &&
-      !data.template.includes(data.sequence_placeholder)
-    ) {
-      ctx.addIssue({
-        code: 'custom',
-        message: 'Sequence placeholder must exist in the template',
-        path: ['sequence_placeholder'],
-      })
-    }
-    if (
-      data.effective_until &&
-      data.effective_until !== '' &&
-      data.effective_from &&
-      data.effective_until < data.effective_from
-    ) {
-      ctx.addIssue({
-        code: 'custom',
-        message: 'Effective until must be on or after effective from',
-        path: ['effective_until'],
-      })
-    }
-  })
+  series: z
+    .string()
+    .min(1, 'Series is required')
+    .max(255),
+
+  sequence_placeholder: z
+    .string()
+    .min(1, 'Sequence placeholder is required')
+    .max(20),
+
+  stock: z
+    .coerce
+    .number()
+    .int()
+    .min(2, 'Stock must be at least 2'),
+
+  sequence_start: z
+    .string()
+    .regex(/^\d+$/, 'Sequence start must be numeric'),
+
+  maintain_policy_number: z.boolean(),
+
+  effective_from: z
+    .string()
+    .min(1, 'Effective from date is required'),
+
+  effective_until: z
+    .string()
+    .optional()
+    .or(z.literal('')),
+});
+
+export const CreateDmvicPolicyNumberRuleSchema =
+  dmvicPolicyNumberRuleBase
+    .extend({
+      dmvic_stock_id: z
+        .coerce
+        .number()
+        .int()
+        .positive('Stock is required'),
+    })
+    .superRefine((data, ctx) => {
+      if (
+        data.sequence_placeholder !== '' &&
+        !data.template.includes(data.sequence_placeholder)
+      ) {
+        ctx.addIssue({
+          code: 'custom',
+          message: 'Sequence placeholder must exist in the template',
+          path: ['sequence_placeholder'],
+        });
+      }
+
+      if (
+        data.effective_until &&
+        data.effective_until !== '' &&
+        data.effective_from &&
+        data.effective_until < data.effective_from
+      ) {
+        ctx.addIssue({
+          code: 'custom',
+          message: 'Effective until must be on or after effective from',
+          path: ['effective_until'],
+        });
+      }
+    });
 
 export const EditDmvicPolicyNumberRuleSchema = dmvicPolicyNumberRuleBase.superRefine(
   (data, ctx) => {

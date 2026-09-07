@@ -233,7 +233,7 @@ export function MotorQuotationBreadcrumb() {
 
       clearAdminMotorActiveSession()
       const result = await continueAdminMotorDuplicateFlow(payload, user)
-      ShowToast.success('Previous quote cancelled — duplicate ready')
+      ShowToast.success('Previous quote cancelled - duplicate ready')
       setPendingNav(null)
       navigate(result.route)
     } catch (error) {
@@ -278,7 +278,7 @@ export function MotorQuotationBreadcrumb() {
           if (!open && !isSubmitting) setPendingNav(null)
         }}
       >
-        {/* Keep fixed centering — do not add `relative` (it overrides `fixed` via twMerge) */}
+        {/* Keep fixed centering - do not add `relative` (it overrides `fixed` via twMerge) */}
         <AlertDialogContent size="sm" className="sm:max-w-md">
           <AlertDialogHeader>
             <AlertDialogTitle>Leave this quotation step?</AlertDialogTitle>

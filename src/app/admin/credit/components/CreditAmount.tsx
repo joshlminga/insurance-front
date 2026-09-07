@@ -7,7 +7,7 @@ type CreditAmountProps = {
 }
 
 /** Safely display API decimal strings as formatted KES amounts */
-export function CreditAmount({ value, className, fallback = "—" }: CreditAmountProps) {
+export function CreditAmount({ value, className, fallback = "-" }: CreditAmountProps) {
   if (value === null || value === undefined || value === "") {
     return <span className={className}>{fallback}</span>
   }

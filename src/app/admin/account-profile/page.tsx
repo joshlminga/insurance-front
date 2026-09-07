@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Eye, EyeOff } from "lucide-react"
+import { Eye, EyeOff, Pencil } from "lucide-react"
 import { PageHeader } from "@/components/shared"
 import {
   Card,
@@ -11,7 +11,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage
+} from "@/components/ui/avatar"
 import { Button, ReuseableInput } from "@/dev/core"
 import { UseApiMutation } from "@/hooks/hooks"
 import { UseAuth } from "@/stores/auth-store"
@@ -30,60 +34,43 @@ import { ACCEPTED_IMAGE_TYPES, EMETHODS } from "@/utils/constatnts"
 import { extractErrorMessage } from "@/utils/helpers"
 import { ShowToast } from "@/utils/utils"
 import { getInitials } from "@/lib/format"
-import { CurrentPasswordField } from "./current-password-field"
 import {
   resolveMediaUrl,
   resolveUserAvatarUrl,
   toProfilePasswordPayload,
 } from "./profile-api"
+import { cn } from "@/lib/utils"
 
 type ProfilePasswordPayload = ReturnType<typeof toProfilePasswordPayload>
 
-/**
- * Account Profile — three independent forms (like 3 separate Laravel Form Requests).
- * useForm ≈ keeping old() input + validation per segment.
- * UseAuth().user ≈ Auth::user() session data.
- * Wired to PATCH profile, PATCH profile/password, POST profile/picture.
- */
 export function AccountProfilePage() {
   const { user, updateUser } = UseAuth()
   const avatarSrc = resolveUserAvatarUrl(user as any)
+   const [showCurrent, setShowCurrent] = useState(false)
+  const [showNew, setShowNew] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
+  const [updateProfile, setUpdateProfile] = useState(false);
 
-  // --- Segment 1: General info ---
   const generalForm = useForm<AccountGeneralFormValues>({
     resolver: zodResolver(AccountGeneralSchema),
     defaultValues: {
-      name: "",
-      email: "",
-      phone: "",
-      current_password: "",
+      name: user?.name ?? "",
+      email: user?.email ?? "",
+      phone: user?.phone ?? "",
     },
   })
 
-  // Prefill from session user when it loads / changes
-  useEffect(() => {
-    if (!user) return
-    generalForm.reset({
-      name: user.name ?? "",
-      email: user.email ?? "",
-      phone: user.phone ?? "",
-      current_password: "",
-    })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.name, user?.email, user?.phone])
 
   const generalMutation = UseApiMutation<SubmitResponse, AccountGeneralFormValues>({
     url: "profile",
     method: EMETHODS.PATCH,
     mutationOptions: {
       onSuccess: (data, variables) => {
-        // Update sidebar name/email/phone immediately (like refreshing Auth::user())
         updateUser({
           name: variables.name,
           email: variables.email,
           phone: variables.phone || null,
         })
-        generalForm.setValue("current_password", "")
         ShowToast.success(data?.message || "Profile updated successfully")
       },
       onError: (error: any) => {
@@ -92,9 +79,6 @@ export function AccountProfilePage() {
     },
   })
 
-  // --- Segment 2: Password ---
-  const [showNew, setShowNew] = useState(false)
-  const [showConfirm, setShowConfirm] = useState(false)
 
   const passwordForm = useForm<UpdatePasswordFormValues>({
     resolver: zodResolver(UpdatePasswordSchema),
@@ -119,12 +103,10 @@ export function AccountProfilePage() {
     },
   })
 
-  // --- Segment 3: Profile picture ---
   const avatarForm = useForm<AccountAvatarFormValues>({
     resolver: zodResolver(AccountAvatarSchema),
     defaultValues: {
       profile_picture: undefined,
-      current_password: "",
     },
   })
 
@@ -143,10 +125,8 @@ export function AccountProfilePage() {
           (data?.data as any)?.avatar_url ??
           (data?.data as any)?.profile_picture
         if (typeof rawPath === "string" && rawPath) {
-          // Store absolute URL so sidebar Avatar can load it
           updateUser({ avatar: resolveMediaUrl(rawPath) })
         }
-        avatarForm.reset({ profile_picture: undefined, current_password: "" })
         ShowToast.success(data?.message || "Profile picture updated successfully")
       },
       onError: (error: any) => {
@@ -157,7 +137,6 @@ export function AccountProfilePage() {
 
   const onSubmitAvatar = (data: AccountAvatarFormValues) => {
     const formData = new FormData()
-    formData.append("current_password", data.current_password)
     if (data.profile_picture instanceof File) {
       formData.append("profile_picture", data.profile_picture)
     }
@@ -172,8 +151,7 @@ export function AccountProfilePage() {
       />
 
       <div className="space-y-4">
-        {/* Segment 1 — General: 3 fields per row */}
-        <Card>
+        <Card className="shadow-none">
           <CardHeader className="pb-3">
             <CardTitle>General information</CardTitle>
             <CardDescription>
@@ -183,9 +161,8 @@ export function AccountProfilePage() {
           <CardContent>
             <form
               onSubmit={generalForm.handleSubmit((data) => generalMutation.mutate(data))}
-              className="space-y-4"
-            >
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              className="space-y-4" >
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-2">
                 <ReuseableInput
                   control={generalForm.control}
                   name="name"
@@ -211,12 +188,10 @@ export function AccountProfilePage() {
                   placeholder="e.g. +254712345678"
                   className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
                 />
-                <CurrentPasswordField
-                  control={generalForm.control}
-                  name="current_password"
-                />
                 <div className="flex items-end sm:col-span-2 lg:col-span-2">
-                  <Button type="submit" loading={generalMutation.isPending}>
+                  <Button type="submit"
+                    className={cn('justify-end')}
+                    loading={generalMutation.isPending}>
                     Update profile
                   </Button>
                 </div>
@@ -225,8 +200,7 @@ export function AccountProfilePage() {
           </CardContent>
         </Card>
 
-        {/* Segment 2 — Password: 3 fields per row */}
-        <Card>
+        <Card className="shadow-none">
           <CardHeader className="pb-3">
             <CardTitle>Password</CardTitle>
             <CardDescription>
@@ -240,11 +214,27 @@ export function AccountProfilePage() {
               )}
               className="space-y-4"
             >
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                <CurrentPasswordField
-                  control={passwordForm.control}
-                  name="current_password"
-                />
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-2">
+                 <div className="relative">
+                <ReuseableInput
+                    control={passwordForm.control}
+                    name="current_password"
+                    label="Current Password"
+                    type={showCurrent ? "text" : "password"}
+                    placeholder="Enter current password"
+                    required
+                    autoComplete="current-password"
+                    className="w-full h-10 rounded-[5px] border border-[#ADABAB] pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowCurrent((v) => !v)}
+                    className="absolute right-3 top-9 text-muted-foreground hover:text-foreground"
+                    aria-label={showCurrent ? "Hide password" : "Show password"} >
+                    {showCurrent ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                  </div>
+
                 <div className="relative">
                   <ReuseableInput
                     control={passwordForm.control}
@@ -260,8 +250,7 @@ export function AccountProfilePage() {
                     type="button"
                     onClick={() => setShowNew((v) => !v)}
                     className="absolute right-3 top-9 text-muted-foreground hover:text-foreground"
-                    aria-label={showNew ? "Hide password" : "Show password"}
-                  >
+                    aria-label={showNew ? "Hide password" : "Show password"} >
                     {showNew ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
@@ -293,8 +282,7 @@ export function AccountProfilePage() {
           </CardContent>
         </Card>
 
-        {/* Segment 3 — Profile picture: compact row */}
-        <Card>
+        <Card className="shadow-none">
           <CardHeader className="pb-3">
             <CardTitle>Profile picture</CardTitle>
             <CardDescription>
@@ -302,42 +290,68 @@ export function AccountProfilePage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form
-              onSubmit={avatarForm.handleSubmit(onSubmitAvatar)}
-              className="space-y-4"
-            >
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 items-end">
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-14 w-14 shrink-0 rounded-full">
+            {updateProfile ? (
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <Avatar className="h-20 w-20 rounded-full">
                     {avatarSrc && (
-                      <AvatarImage src={avatarSrc} alt={user?.name ?? "Avatar"} />
+                      <AvatarImage
+                        src={avatarSrc}
+                        alt={user?.name ?? "Avatar"}
+                        className="object-cover"
+                      />
                     )}
-                    <AvatarFallback className="rounded-full text-primary text-sm">
+                    <AvatarFallback className="rounded-full text-primary text-lg">
                       {getInitials(user?.name ?? "")}
                     </AvatarFallback>
                   </Avatar>
-                  <p className="text-sm text-muted-foreground leading-snug">
-                    Current photo. Choose a new file to replace it.
+                  <button
+                    type="button"
+                    onClick={() => setUpdateProfile((prev) => !prev)}
+                    className={cn(
+                      "absolute bottom-0 right-0",
+                      "flex h-7 w-7 items-center justify-center",
+                      "rounded-full border-2 border-background",
+                      "bg-primary text-primary-foreground",
+                      "shadow-sm transition-colors",
+                      "hover:bg-primary/90"
+                    )}
+                    aria-label="Edit profile picture">
+                    <Pencil className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+                <div>
+                  <p className="font-medium">
+                    {user?.name ?? "Profile picture"}
+                  </p>
+
+                  <p className="text-sm text-muted-foreground">
+                    Click the pencil to change your photo.
                   </p>
                 </div>
-                <ReuseableInput
-                  control={avatarForm.control}
-                  name="profile_picture"
-                  type="file"
-                  label="Profile picture"
-                  required
-                  accept={ACCEPTED_IMAGE_TYPES.join(",")}
-                  className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
-                />
-                <CurrentPasswordField
-                  control={avatarForm.control}
-                  name="current_password"
-                />
               </div>
-              <Button type="submit" loading={avatarMutation.isPending}>
-                Update picture
-              </Button>
-            </form>
+            ) : (
+              <form
+                onSubmit={avatarForm.handleSubmit(onSubmitAvatar)}
+                className="space-y-4" >
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 items-end">
+                  <ReuseableInput
+                    control={avatarForm.control}
+                    name="profile_picture"
+                    type="file"
+                    label="Profile picture"
+                    required
+                    accept={ACCEPTED_IMAGE_TYPES.join(",")}
+                    className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
+                  />
+                </div>
+                <Button type="submit" loading={avatarMutation.isPending}>
+                  Update picture
+                </Button>
+              </form>
+
+
+            )}
           </CardContent>
         </Card>
       </div>

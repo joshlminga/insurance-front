@@ -9,7 +9,7 @@ interface AdminModulePageProps {
 }
 
 /**
- * Wraps a lazy-loaded admin page with ModuleRoute — use inside App.tsx <S> blocks.
+ * Wraps a lazy-loaded admin page with ModuleRoute - use inside App.tsx <S> blocks.
  * Like Laravel route middleware: `->middleware('module:product-motor')`
  */
 export function AdminModulePage({

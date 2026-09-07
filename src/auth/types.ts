@@ -1,5 +1,5 @@
 /**
- * RBAC auth types — aligned with Acensure API login / check-auth responses.
+ * RBAC auth types - aligned with Acensure API login / check-auth responses.
  * Think of `abilities` as a cached Spatie permissions snapshot for the SPA session.
  */
 
@@ -78,7 +78,7 @@ export interface AbilitiesData {
   abilities: Abilities
 }
 
-/** Response from GET /auth/org — tenant resolved from browser Origin */
+/** Response from GET /auth/org - tenant resolved from browser Origin */
 export interface OrgResolveData {
   origin: string
   location_code: string | null

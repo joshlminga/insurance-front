@@ -7,19 +7,20 @@ import {
 } from '@/dev/core'
 import { UseApiMutation } from '@/hooks/hooks'
 import { CreateDmvicStockSchema } from '@/types/form-schema'
-import type { CreateDmvicStockFormValues } from '@/types/schema'
+import type { 
+  CreateDmvicStockFormInput, 
+  CreateDmvicStockFormValues 
+ } from '@/types/schema'
 import type { SubmitResponse } from '@/types/types'
-import { DMVIC_CERTIFICATE_TYPES, EMETHODS, PRODUCT_TYPES } from '@/utils/constatnts'
+import {
+  DMVIC_CERTIFICATE_TYPES,
+  EMETHODS, PRODUCT_TYPES
+} from '@/utils/constatnts'
 import { extractErrorMessage } from '@/utils/helpers'
 import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Controller, useForm } from 'react-hook-form'
-import { DMVIC_STOCK_URLS } from '../dmvic-stock-query'
 
-/**
- * Create a DMVIC stock row (office + certificate type).
- * Remaining certificate count is updated when a policy-number rule is added.
- */
 export function CreateDmvicStockModal({
   handleDialogContextSwitch,
   componentProps,
@@ -27,18 +28,23 @@ export function CreateDmvicStockModal({
   handleDialogContextSwitch: (context?: any) => void
   componentProps?: { refetch?: () => Promise<any> }
 }) {
-  const form = useForm<CreateDmvicStockFormValues>({
+
+  const form = useForm<
+    CreateDmvicStockFormInput,
+    unknown,
+    CreateDmvicStockFormValues
+  >({
     resolver: zodResolver(CreateDmvicStockSchema),
     defaultValues: {
       organization_location_id: '',
-      product_type: 'Motor',
+      product_type: '',
       type_of_certificate: '',
-      stock: 2,
+      stock: undefined,
     },
   })
 
   const submitMutation = UseApiMutation<SubmitResponse, Record<string, unknown>>({
-    url: DMVIC_STOCK_URLS.create,
+    url: 'dmvic/stocks',
     method: EMETHODS.POST,
     mutationOptions: {
       onSuccess: (data) => {
@@ -109,10 +115,15 @@ export function CreateDmvicStockModal({
         />
 
         <div className="flex justify-end gap-3 pt-2">
-          <Button type="button" variant="outline" onClick={() => handleDialogContextSwitch({})}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => handleDialogContextSwitch({})}>
             Cancel
           </Button>
-          <Button type="submit" loading={submitMutation.isPending}>
+          <Button
+            type="submit"
+            loading={submitMutation.isPending}>
             Create Stock
           </Button>
         </div>

@@ -322,7 +322,6 @@ export const KycInfo: React.FC<CustomerVerificationDetailsProps> = ({ goToPrevSt
                             }
                         />
                         <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 sm:gap-5'>
-                            {/* First field, full row, highlighted so co-owned vehicles are not missed */}
                             <div className="col-span-full border-b border-[#ADABAB]/60 pb-4 mb-1 **:data-[slot=field-label]:text-[#C20C0C]">
                                 <ReuseableInput
                                     className="w-full h-10 rounded-[5px] border-2 border-black focus-visible:ring-black"

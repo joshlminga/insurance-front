@@ -27,7 +27,7 @@ export const MemberPasswordModal = ({
       <div className="border-b pb-3">
         <DialogTitle className="text-xl font-semibold">Member Created</DialogTitle>
         <DialogDescription className="mt-1">
-          Share this password with the member — it is shown only once. It has
+          Share this password with the member - it is shown only once. It has
           also been emailed to them along with a verification link.
         </DialogDescription>
       </div>
@@ -43,7 +43,7 @@ export const MemberPasswordModal = ({
             </div>
           ) : (
             <p className="text-sm text-muted-foreground">
-              No password returned — the member will receive it by email.
+              No password returned - the member will receive it by email.
             </p>
           )}
         </div>

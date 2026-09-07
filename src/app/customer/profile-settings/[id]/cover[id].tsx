@@ -32,7 +32,7 @@ const coversListPath = `/${EPREFIX.CUSTOMER}${EROUTES.COVERS}`
 
 type InfoField = { label: string; value?: ReactNode }
 
-/** Compact grid: "Label : value" — max 4 items per row. */
+/** Compact grid: "Label : value" - max 4 items per row. */
 const CompactInfoGrid = ({
     items,
     className,

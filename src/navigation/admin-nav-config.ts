@@ -22,7 +22,7 @@ export type NavSubItem = {
   module?: string
   /** Case 2 (any): sub-item visible when user has any of these modules */
   modules?: string[]
-  /** Extra permission (e.g. finance-control.mine) — hidden when user lacks it */
+  /** Extra permission (e.g. finance-control.mine) - hidden when user lacks it */
   permission?: string
   /** Nested sub-menu items (level 3+) */
   items?: NavSubItem[]
@@ -40,7 +40,7 @@ export type NavItem = {
   items?: NavSubItem[]
 }
 
-/** Full admin sidebar config — module keys match API rbac-modules catalog */
+/** Full admin sidebar config - module keys match API rbac-modules catalog */
 export const adminNavConfig: NavItem[] = [
   {
     title: 'Dashboard',

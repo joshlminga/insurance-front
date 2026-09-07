@@ -49,7 +49,7 @@ function pendingFromBody(
   }
 }
 
-/** Pay an invoice with prepaid credit — handles 200, 202, 422. Branch on HTTP 202, not success. */
+/** Pay an invoice with prepaid credit - handles 200, 202, 422. Branch on HTTP 202, not success. */
 export async function submitMotorCreditPayment(
   invoiceId: string,
   payload: Record<string, unknown> = {}

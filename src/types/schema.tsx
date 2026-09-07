@@ -147,12 +147,11 @@ export type OutboundFormValues = z.infer<typeof OutBoundDestinationSchema>
 export type InboundFormValues = z.infer<typeof InBoundDestinationSchema>
 export type TravelKycFormValues = z.infer<typeof TravelKycSchema>
 
-export type CreateDmvicStockFormValues = z.infer<typeof CreateDmvicStockSchema>
-export type EditDmvicStockFormValues = z.infer<typeof EditDmvicStockSchema>
-export type CreateDmvicPolicyNumberRuleFormValues = z.infer<
-  typeof CreateDmvicPolicyNumberRuleSchema
->
-export type EditDmvicPolicyNumberRuleFormValues = z.infer<
-  typeof EditDmvicPolicyNumberRuleSchema
->
+export type CreateDmvicStockFormInput = z.input<typeof CreateDmvicStockSchema>
+export type CreateDmvicStockFormValues = z.output<typeof CreateDmvicStockSchema>
 
+export type EditDmvicStockFormValues = z.infer<typeof EditDmvicStockSchema>
+export type CreateDmvicPolicyNumberRuleFormInput = z.input<typeof CreateDmvicPolicyNumberRuleSchema>;
+export type CreateDmvicPolicyNumberRuleFormValues = z.output<typeof CreateDmvicPolicyNumberRuleSchema>;
+export type EditDmvicPolicyNumberRuleFormInput = z.input<typeof EditDmvicPolicyNumberRuleSchema>;
+export type EditDmvicPolicyNumberRuleFormValues = z.output<typeof EditDmvicPolicyNumberRuleSchema>;

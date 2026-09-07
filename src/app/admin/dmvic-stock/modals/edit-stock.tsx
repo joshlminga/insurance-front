@@ -7,18 +7,18 @@ import {
 import { UseApiMutation } from '@/hooks/hooks'
 import { EditDmvicStockSchema } from '@/types/form-schema'
 import type { EditDmvicStockFormValues } from '@/types/schema'
-import type { SubmitResponse } from '@/types/types'
-import { DMVIC_CERTIFICATE_TYPES, dmvicCertificateTypeLabel, PRODUCT_TYPES } from '@/utils/constatnts'
+import type { DmvicBrokerStockRow, SubmitResponse } from '@/types/types'
+import {
+  DMVIC_CERTIFICATE_TYPES,
+  dmvicCertificateTypeLabel,
+  PRODUCT_TYPES
+} from '@/utils/constatnts'
 import { EMETHODS } from '@/utils/constatnts'
 import { extractErrorMessage } from '@/utils/helpers'
 import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Controller, useForm } from 'react-hook-form'
-import { useEffect } from 'react'
-import type { DmvicBrokerStockRow } from '../dmvic-stock-query'
-import { DMVIC_STOCK_URLS } from '../dmvic-stock-query'
 
-/** Edit stock metadata — remaining stock count is read-only (managed by rules/allocations). */
 export function EditDmvicStockModal({
   handleDialogContextSwitch,
   componentProps,
@@ -30,44 +30,32 @@ export function EditDmvicStockModal({
   }
 }) {
   const stock = componentProps?.data
-
   const form = useForm<EditDmvicStockFormValues>({
     resolver: zodResolver(EditDmvicStockSchema),
     defaultValues: {
-      organization_location_id: '',
-      product_type: 'Motor',
-      type_of_certificate: '',
+      organization_location_id: String(componentProps?.data?.organization_location_id ?? ''),
+      product_type: componentProps?.data?.product_type ?? 'Motor',
+      type_of_certificate: componentProps?.data?.type_of_certificate ?? '',
     },
   })
 
-  useEffect(() => {
-    if (!stock) {
-      return
-    }
-    form.reset({
-      organization_location_id: String(stock.organization_location_id ?? ''),
-      product_type: stock.product_type ?? 'Motor',
-      type_of_certificate: stock.type_of_certificate ?? '',
-    })
-  }, [stock, form])
 
   const submitMutation = UseApiMutation<
     SubmitResponse,
-    Record<string, unknown> & { id: number }
-  >({
-    url: ({ id }) => DMVIC_STOCK_URLS.update(id),
-    method: EMETHODS.PATCH,
-    mutationOptions: {
-      onSuccess: (data) => {
-        ShowToast.success(data.message || 'DMVIC stock updated successfully')
-        componentProps?.refetch?.()
-        handleDialogContextSwitch({ refetch: true })
+    Record<string, unknown> & { id: number }>({
+      url: ({ id }) => `dmvic/stocks/${id}`,
+      method: EMETHODS.PATCH,
+      mutationOptions: {
+        onSuccess: (data) => {
+          ShowToast.success(data.message || 'DMVIC stock updated successfully')
+          componentProps?.refetch?.()
+          handleDialogContextSwitch({ refetch: true })
+        },
+        onError: (error: unknown) => {
+          ShowToast.error(extractErrorMessage(error) || 'Failed to update stock')
+        },
       },
-      onError: (error: unknown) => {
-        ShowToast.error(extractErrorMessage(error) || 'Failed to update stock')
-      },
-    },
-  })
+    })
 
   const onSubmit = (data: EditDmvicStockFormValues) => {
     if (!stock?.id) {
@@ -87,7 +75,7 @@ export function EditDmvicStockModal({
         <h2 className="text-xl font-semibold">Edit DMVIC Stock</h2>
         <p className="text-sm text-muted-foreground mt-1">
           Remaining stock ({stock?.stock ?? 0}) is updated when you add rules or issue
-          certificates — it cannot be edited here.
+          certificates - it cannot be edited here.
         </p>
       </div>
 

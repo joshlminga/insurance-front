@@ -55,10 +55,10 @@ const humanizeKey = (key: string) =>
     .replace(/_/g, ' ')
     .replace(/\b\w/g, (char) => char.toUpperCase())
 
-/** Show KYC values readably — files/URLs as short text, objects as JSON. */
+/** Show KYC values readably - files/URLs as short text, objects as JSON. */
 const formatKycValue = (value: unknown): ReactNode => {
   if (value === null || value === undefined || value === '') {
-    return '—'
+    return '-'
   }
   if (typeof value === 'boolean') {
     return value ? 'Yes' : 'No'
@@ -67,7 +67,7 @@ const formatKycValue = (value: unknown): ReactNode => {
     return String(value)
   }
   if (typeof value === 'string') {
-    // Stored document paths/URLs — show filename only
+    // Stored document paths/URLs - show filename only
     if (
       value.includes('/') ||
       value.startsWith('http') ||
@@ -135,27 +135,27 @@ export const MotorQuoteFetchDetailDialog = ({ componentProps }: Props) => {
       <div>
         <h2 className="text-lg font-semibold">Quote details</h2>
         <p className="text-muted-foreground">
-          {detail.session?.quote_code ?? '—'} · Stage: {detail.last_ended_stage ?? '—'}
+          {detail.session?.quote_code ?? '-'} · Stage: {detail.last_ended_stage ?? '-'}
         </p>
       </div>
 
       <section className="grid gap-3 sm:grid-cols-2">
         <div className="rounded-md border p-3 space-y-1">
           <div className="font-medium">Customer</div>
-          <div>{customer?.name ?? '—'}</div>
-          <div className="text-muted-foreground">{customer?.email ?? '—'}</div>
-          <div className="text-muted-foreground">{customer?.phone ?? '—'}</div>
+          <div>{customer?.name ?? '-'}</div>
+          <div className="text-muted-foreground">{customer?.email ?? '-'}</div>
+          <div className="text-muted-foreground">{customer?.phone ?? '-'}</div>
         </div>
         <div className="rounded-md border p-3 space-y-1">
           <div className="font-medium">Agency / location</div>
-          <div>{detail.agency?.name ?? '—'}</div>
+          <div>{detail.agency?.name ?? '-'}</div>
           <div className="text-muted-foreground">
-            {detail.processed_by_organization?.name ?? '—'}
+            {detail.processed_by_organization?.name ?? '-'}
           </div>
         </div>
         <div className="rounded-md border p-3 space-y-1">
           <div className="font-medium">Vehicle</div>
-          <div>{String(vehicle?.registration_number ?? '—')}</div>
+          <div>{String(vehicle?.registration_number ?? '-')}</div>
           <div className="text-muted-foreground">{String(vehicle?.chassis_number ?? '')}</div>
           <div className="text-muted-foreground">
             {[vehicle?.make, vehicle?.model, vehicle?.year].filter(Boolean).join(' · ')}
@@ -163,7 +163,7 @@ export const MotorQuoteFetchDetailDialog = ({ componentProps }: Props) => {
         </div>
         <div className="rounded-md border p-3 space-y-1">
           <div className="font-medium">Cover</div>
-          <div>{String(cover?.cover_type ?? cover?.covertype_id ?? '—')}</div>
+          <div>{String(cover?.cover_type ?? cover?.covertype_id ?? '-')}</div>
           <div className="text-muted-foreground">{String(cover?.ownership ?? '')}</div>
           {detail.selected_cover && (
             <div className="text-muted-foreground">
@@ -173,7 +173,7 @@ export const MotorQuoteFetchDetailDialog = ({ componentProps }: Props) => {
         </div>
       </section>
 
-      {/* KYC — view-only field/value table */}
+      {/* KYC - view-only field/value table */}
       {kycEntries.length > 0 && (
         <SectionTable title="KYC">
           <Table>
@@ -199,7 +199,7 @@ export const MotorQuoteFetchDetailDialog = ({ componentProps }: Props) => {
         </SectionTable>
       )}
 
-      {/* Invoices — same columns as member cover, no actions */}
+      {/* Invoices - same columns as member cover, no actions */}
       {invoices.length > 0 && (
         <SectionTable title="Invoices">
           <Table>
@@ -217,28 +217,28 @@ export const MotorQuoteFetchDetailDialog = ({ componentProps }: Props) => {
               {invoices.map((invoice) => (
                 <TableRow key={invoice.id ?? invoice.invoice_number}>
                   <TableCell className="font-medium">
-                    {invoice.invoice_number ?? '—'}
+                    {invoice.invoice_number ?? '-'}
                   </TableCell>
                   <TableCell>
                     {invoice.installment_number != null &&
                     invoice.total_installments != null
                       ? `${invoice.installment_number} of ${invoice.total_installments}`
-                      : '—'}
+                      : '-'}
                   </TableCell>
                   <TableCell>
                     {invoice.installment_amount != null
                       ? formatCurrency(invoice.installment_amount)
                       : invoice.gross_premium != null
                         ? formatCurrency(invoice.gross_premium)
-                        : '—'}
+                        : '-'}
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline" className="rounded-full">
-                      {invoice.status ?? '—'}
+                      {invoice.status ?? '-'}
                     </Badge>
                   </TableCell>
-                  <TableCell>{invoice.due_date ?? '—'}</TableCell>
-                  <TableCell>{invoice.plan_type ?? '—'}</TableCell>
+                  <TableCell>{invoice.due_date ?? '-'}</TableCell>
+                  <TableCell>{invoice.plan_type ?? '-'}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -246,7 +246,7 @@ export const MotorQuoteFetchDetailDialog = ({ componentProps }: Props) => {
         </SectionTable>
       )}
 
-      {/* Receipts — flattened from invoices, view-only */}
+      {/* Receipts - flattened from invoices, view-only */}
       {receipts.length > 0 && (
         <SectionTable title="Receipts">
           <Table>
@@ -264,18 +264,18 @@ export const MotorQuoteFetchDetailDialog = ({ componentProps }: Props) => {
               {receipts.map((receipt) => (
                 <TableRow key={receipt.id ?? receipt.receipt_number}>
                   <TableCell className="font-medium">
-                    {receipt.receipt_number ?? '—'}
+                    {receipt.receipt_number ?? '-'}
                   </TableCell>
-                  <TableCell>{receipt.invoice_number ?? '—'}</TableCell>
-                  <TableCell>{receipt.via ?? '—'}</TableCell>
+                  <TableCell>{receipt.invoice_number ?? '-'}</TableCell>
+                  <TableCell>{receipt.via ?? '-'}</TableCell>
                   <TableCell>
                     {receipt.amount != null
                       ? formatCurrency(receipt.amount)
-                      : '—'}
+                      : '-'}
                   </TableCell>
-                  <TableCell>{receipt.payment_for ?? '—'}</TableCell>
+                  <TableCell>{receipt.payment_for ?? '-'}</TableCell>
                   <TableCell className="max-w-[12rem] truncate">
-                    {receipt.payment_note || '—'}
+                    {receipt.payment_note || '-'}
                   </TableCell>
                 </TableRow>
               ))}
@@ -284,7 +284,7 @@ export const MotorQuoteFetchDetailDialog = ({ componentProps }: Props) => {
         </SectionTable>
       )}
 
-      {/* Certificates — view-only */}
+      {/* Certificates - view-only */}
       {certificates.length > 0 && (
         <SectionTable title="Certificates">
           <Table>
@@ -302,15 +302,15 @@ export const MotorQuoteFetchDetailDialog = ({ componentProps }: Props) => {
               {certificates.map((cert) => (
                 <TableRow key={cert.id ?? `${cert.invoice_id}-${cert.certificate_number}`}>
                   <TableCell className="font-medium">
-                    {cert.certificate_number ?? '—'}
+                    {cert.certificate_number ?? '-'}
                   </TableCell>
-                  <TableCell>{cert.policy_number ?? '—'}</TableCell>
-                  <TableCell>{cert.registration_number ?? '—'}</TableCell>
-                  <TableCell>{cert.issued_date ?? '—'}</TableCell>
-                  <TableCell>{cert.expiry_date ?? '—'}</TableCell>
+                  <TableCell>{cert.policy_number ?? '-'}</TableCell>
+                  <TableCell>{cert.registration_number ?? '-'}</TableCell>
+                  <TableCell>{cert.issued_date ?? '-'}</TableCell>
+                  <TableCell>{cert.expiry_date ?? '-'}</TableCell>
                   <TableCell>
                     <Badge variant="outline" className="rounded-full">
-                      {cert.policy_allocation_status ?? '—'}
+                      {cert.policy_allocation_status ?? '-'}
                     </Badge>
                   </TableCell>
                 </TableRow>

@@ -642,7 +642,7 @@ export const MotorQuotationPage = () => {
                                 Vehicle class
                             </Label>
                             <p className="mt-1 text-xs text-muted-foreground">
-                                Tap one option — only one class applies.
+                                Tap one option - only one class applies.
                             </p>
 
                             {isClassTabsLoading ? (
@@ -757,7 +757,7 @@ export const MotorQuotationPage = () => {
                         <AlertDialogTitle>No customer contact details</AlertDialogTitle>
                         <AlertDialogDescription>
                             Email and phone were not provided. No guest record will be
-                            created — this quotation will be tied to your agent account (
+                            created - this quotation will be tied to your agent account (
                             <span className="font-semibold text-foreground">
                                 {loggedInUserName}
                             </span>

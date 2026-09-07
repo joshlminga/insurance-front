@@ -13,7 +13,7 @@ import React from 'react'
 import { useFormContext } from 'react-hook-form'
 import { PaymentAmountSummary } from './payment-amount-summary'
 
-const PLACEHOLDER = '—'
+const PLACEHOLDER = '-'
 
 const buildPaymentOptions = (details?: BankPaymentDetailsResponse): CashPaymentOption[] => {
     if (details?.payment_options?.length) {

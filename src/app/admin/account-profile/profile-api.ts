@@ -46,7 +46,6 @@ function readMetaValue(
   return typeof value === "string" && value ? value : null
 }
 
-/** Map Account Profile password form fields to the API body. */
 export function toProfilePasswordPayload(data: {
   current_password: string
   new_password: string
