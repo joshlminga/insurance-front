@@ -47,12 +47,19 @@ import {
     readAdminMotorCustomerContact,
     readAdminMotorTargetInvoiceAmount,
     readAdminMotorTargetInvoiceId,
+    isAdminMotorIssueCoverFlow,
 } from '../admin-motor-session'
 import { useNavigate } from 'react-router-dom'
 import {
+    motorInvoiceSummaryKey,
     motorPurchaseSummaryQueryOptions,
     MOTOR_PURCHASE_URLS,
+    motorPurchaseSummaryKey,
     resolveTargetInvoiceBreakdownItem,
+    shouldLockMotorPaymentPlan,
+    formatMotorInstallmentLabel,
+    resolveMotorStoredPaymentPlan,
+    type MotorPurchaseSummaryData,
 } from '@/app/customer/motor/motor-purchase-query'
 
 type BoxHeaderProps = {
@@ -91,6 +98,7 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
     const pendingPlanRef = React.useRef<string | null>(null);
     const isConfirmingPlanRef = React.useRef(false);
     const [targetInvoiceId] = React.useState<string | null>(() => readAdminMotorTargetInvoiceId());
+    const [isIssueCoverFlow] = React.useState(() => isAdminMotorIssueCoverFlow());
     const [fallbackInvoiceAmount] = React.useState<string | null>(() => readAdminMotorTargetInvoiceAmount());
     const [creditPending, setCreditPending] = React.useState<{
         message: string
@@ -136,11 +144,24 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
         }
     }, [])
 
+    const useInvoiceSummary = isIssueCoverFlow && Boolean(targetInvoiceId)
+
     const { data: SummaryData, refetch: refetchSummary } = UseApiQuery<SubmitResponse>({
-        url: purchaseId ? MOTOR_PURCHASE_URLS.summary(purchaseId) : '',
-        params: targetInvoiceId ? { target_invoice_id: targetInvoiceId } : undefined,
+        url: useInvoiceSummary
+            ? MOTOR_PURCHASE_URLS.invoiceSummary(targetInvoiceId!)
+            : purchaseId
+                ? MOTOR_PURCHASE_URLS.summary(purchaseId)
+                : '',
+        queryKey: useInvoiceSummary
+            ? motorInvoiceSummaryKey(targetInvoiceId!)
+            : motorPurchaseSummaryKey(purchaseId ?? '', targetInvoiceId),
+        params: useInvoiceSummary
+            ? undefined
+            : targetInvoiceId
+                ? { target_invoice_id: targetInvoiceId }
+                : undefined,
         queryOptions: {
-            enabled: !!purchaseId,
+            enabled: useInvoiceSummary ? Boolean(targetInvoiceId) : Boolean(purchaseId),
             retry: 1,
             ...motorPurchaseSummaryQueryOptions,
         },
@@ -170,40 +191,76 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
         },
     })
 
+    const summaryData = SummaryData?.data as MotorPurchaseSummaryData | undefined
+
+    const payableItem = React.useMemo(() => {
+        if (!summaryData) {
+            return null
+        }
+
+        return resolveTargetInvoiceBreakdownItem(
+            summaryData.invoice_breakdown?.items,
+            targetInvoiceId,
+        )
+    }, [summaryData, targetInvoiceId])
+
     React.useEffect(() => {
-        if (!SummaryData?.data) return
+        if (!summaryData) return
 
-        const items = SummaryData.data.invoice_breakdown?.items as Parameters<
-            typeof resolveTargetInvoiceBreakdownItem
-        >[0]
-        const targetItem = resolveTargetInvoiceBreakdownItem(items, targetInvoiceId)
-
-        if (targetItem?.installment_amount) {
-            form.setValue('amount', Number(targetItem.installment_amount))
+        if (payableItem?.installment_amount) {
+            form.setValue('amount', Number(payableItem.installment_amount))
         } else if (fallbackInvoiceAmount) {
             form.setValue('amount', Number(fallbackInvoiceAmount))
         }
 
-        if (targetItem?.id) {
-            form.setValue('invoice_id', String(targetItem.id))
+        if (payableItem?.id) {
+            form.setValue('invoice_id', String(payableItem.id))
         }
-    }, [SummaryData, form, targetInvoiceId, fallbackInvoiceAmount])
+    }, [summaryData, payableItem, form, fallbackInvoiceAmount])
 
     const paymentPlansLocked = React.useMemo(
-        () => Boolean(SummaryData?.data?.payment_plans_locked),
-        [SummaryData],
+        () => shouldLockMotorPaymentPlan(summaryData, payableItem),
+        [summaryData, payableItem],
     )
 
-    const availablePaymentPlans = React.useMemo(
-        () => (paymentPlansLocked ? PAYMENTPLANS.filter((plan) => plan.value === 'Full') : PAYMENTPLANS),
-        [paymentPlansLocked],
+    const lockedPaymentPlan = React.useMemo(
+        () => resolveMotorStoredPaymentPlan(summaryData),
+        [summaryData],
     )
+
+    const lockedPaymentPlanLabel = React.useMemo(() => {
+        if (!lockedPaymentPlan) {
+            return null
+        }
+
+        return PAYMENTPLANS.find((plan) => plan.value === lockedPaymentPlan)?.label ?? lockedPaymentPlan
+    }, [lockedPaymentPlan])
+
+    const installmentLabel = React.useMemo(
+        () => formatMotorInstallmentLabel(
+            payableItem?.installment_number,
+            payableItem?.total_installments,
+        ),
+        [payableItem],
+    )
+
+    const paymentPlansSubtitle = React.useMemo(() => {
+        if (!paymentPlansLocked) {
+            return 'Choose a payment plan and select how the customer will pay for this motor cover.'
+        }
+
+        if (installmentLabel) {
+            return `Pay the ${installmentLabel.toLowerCase()} for this cover.`
+        }
+
+        return 'Complete payment for the outstanding invoice installment.'
+    }, [paymentPlansLocked, installmentLabel])
 
     React.useEffect(() => {
-        if (!paymentPlansLocked) return
-        form.setValue('payment_plans', 'Full')
-        lastAppliedPlanRef.current = 'Full'
-    }, [paymentPlansLocked, form])
+        if (!paymentPlansLocked || !lockedPaymentPlan) return
+        form.setValue('payment_plans', lockedPaymentPlan)
+        lastAppliedPlanRef.current = lockedPaymentPlan
+    }, [paymentPlansLocked, lockedPaymentPlan, form])
 
     const paymentPlanMutation = UseApiMutation<SubmitResponse, { payment_plan: string }>({
         url: `purchase/motor/${purchaseId}/payment-plan`,
@@ -419,9 +476,7 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
                                 Payment <span className="text-[#BF162E]">Options</span>
                             </h1>
                             <p className="mt-2 max-w-2xl text-sm text-black/70 sm:text-base">
-                                {paymentPlansLocked
-                                    ? 'Complete payment for the outstanding invoice installment.'
-                                    : 'Choose a payment plan and select how the customer will pay for this motor cover.'}
+                                {paymentPlansSubtitle}
                             </p>
                         </div>
 
@@ -465,7 +520,7 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
                                                         <SelectValue placeholder="Select an option" />
                                                     </SelectTrigger>
                                                     <SelectContent className="">
-                                                        {availablePaymentPlans.map((option) => (
+                                                        {PAYMENTPLANS.map((option) => (
                                                             <SelectItem key={option.value} value={option.value}>
                                                                 {option.label}
                                                             </SelectItem>
@@ -538,7 +593,36 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
                                     </div>
                                 </div>
                             </div>
-                            ) : null}
+                            ) : (
+                            <div className="rounded-xl border border-black/20 bg-white p-2.5 sm:p-4">
+                                <BoxHeader
+                                    title="Payment Plan"
+                                    description="This installment is fixed because earlier payments have already been made."
+                                />
+                                <div className="mt-2.5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                                    <div className="rounded-[4px] border border-[#ADABAB] bg-neutral-50 px-3 py-2.5">
+                                        <p className="text-xs text-black/60">Plan</p>
+                                        <p className="text-sm font-medium text-black">
+                                            {lockedPaymentPlanLabel ?? 'Installment plan'}
+                                        </p>
+                                    </div>
+                                    {installmentLabel ? (
+                                        <div className="rounded-[4px] border border-[#ADABAB] bg-neutral-50 px-3 py-2.5">
+                                            <p className="text-xs text-black/60">Installment</p>
+                                            <p className="text-sm font-medium text-black">{installmentLabel}</p>
+                                        </div>
+                                    ) : null}
+                                    <div className="rounded-[4px] border border-[#ADABAB] bg-neutral-50 px-3 py-2.5">
+                                        <p className="text-xs text-black/60">Amount due</p>
+                                        <p className="text-sm font-medium text-black">
+                                            {payableItem?.installment_amount
+                                                ? Number(payableItem.installment_amount).toLocaleString()
+                                                : '—'}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            )}
 
                             <div className="rounded-xl border border-black/20 bg-white p-2.5 sm:p-4 [&_h2]:text-black [&_p]:text-black/70 [&_.mt-6]:mt-4.5">
                                 <BoxHeader

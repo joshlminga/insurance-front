@@ -4,6 +4,7 @@ import { DmvicValidationOverrideDialog } from '@/components/shared'
 import { Button, ReuseableInput } from '@/dev/core'
 import {
     MOTOR_PURCHASE_URLS,
+    motorInvoiceSummaryKey,
     motorPurchaseSummaryQueryOptions,
     refreshMotorPurchaseSummary,
 } from '@/app/customer/motor/motor-purchase-query'
@@ -28,7 +29,11 @@ import { ArrowLeftCircle, ArrowRightCircle } from 'lucide-react'
 import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import type { AdminMotorStepProps } from '../admin-step-props'
-import { readAdminMotorCustomerContact } from '../admin-motor-session'
+import {
+    readAdminMotorCustomerContact,
+    readAdminMotorTargetInvoiceId,
+    isAdminMotorIssueCoverFlow,
+} from '../admin-motor-session'
 
 const getTodayDateString = () => new Date().toISOString().split("T")[0]
 
@@ -59,6 +64,9 @@ export const AdminMotorInvoicePayment: React.FC<AdminMotorStepProps> = ({
     const queryClient = useQueryClient()
     const contact = defaultCustomerContact ?? readAdminMotorCustomerContact()
     const [purchaseSessionId] = useState(() => readPurchaseSessionId())
+    const [targetInvoiceId] = useState<string | null>(() => readAdminMotorTargetInvoiceId())
+    const [isIssueCoverFlow] = useState(() => isAdminMotorIssueCoverFlow())
+    const useInvoiceSummary = isIssueCoverFlow && Boolean(targetInvoiceId)
     const todayMinDate = getTodayDateString()
     const [overrideDialogOpen, setOverrideDialogOpen] = useState(false)
     const [overrideMessages, setOverrideMessages] = useState<string[]>([])
@@ -84,9 +92,16 @@ export const AdminMotorInvoicePayment: React.FC<AdminMotorStepProps> = ({
     const coverEndMaxDate = coverStartDate ? maxCoverEndDate(coverStartDate, 12) : undefined
 
     const { data: summaryData } = UseApiQuery<SubmitResponse>({
-        url: purchaseSessionId ? MOTOR_PURCHASE_URLS.summary(purchaseSessionId) : '',
+        url: useInvoiceSummary
+            ? MOTOR_PURCHASE_URLS.invoiceSummary(targetInvoiceId!)
+            : purchaseSessionId
+                ? MOTOR_PURCHASE_URLS.summary(purchaseSessionId)
+                : '',
+        queryKey: useInvoiceSummary
+            ? motorInvoiceSummaryKey(targetInvoiceId!)
+            : undefined,
         queryOptions: {
-            enabled: !!purchaseSessionId,
+            enabled: useInvoiceSummary ? Boolean(targetInvoiceId) : Boolean(purchaseSessionId),
             retry: 1,
             ...motorPurchaseSummaryQueryOptions,
         },

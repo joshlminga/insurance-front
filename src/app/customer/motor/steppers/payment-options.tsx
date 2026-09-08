@@ -49,7 +49,15 @@ import { CreditScheduleStatusPanel } from '@/app/admin/credit/components/CreditS
 import { storePaymentStatusSession } from '@/app/payment/payment-session'
 import { EROUTES } from '@/utils/enums'
 import { useNavigate } from 'react-router-dom'
-import { motorPurchaseSummaryQueryOptions, MOTOR_PURCHASE_URLS, resolveTargetInvoiceBreakdownItem } from '@/app/customer/motor/motor-purchase-query'
+import {
+    motorPurchaseSummaryQueryOptions,
+    MOTOR_PURCHASE_URLS,
+    resolveTargetInvoiceBreakdownItem,
+    shouldLockMotorPaymentPlan,
+    formatMotorInstallmentLabel,
+    resolveMotorStoredPaymentPlan,
+    type MotorPurchaseSummaryData,
+} from '@/app/customer/motor/motor-purchase-query'
 
 
 export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goToNextStep, goToPrevStep }) => {
@@ -136,19 +144,62 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
         },
     })
 
+    const summaryData = SummaryData?.data as MotorPurchaseSummaryData | undefined
+
+    const payableItem = React.useMemo(() => {
+        if (!summaryData) {
+            return null
+        }
+
+        return resolveTargetInvoiceBreakdownItem(
+            summaryData.invoice_breakdown?.items,
+            null,
+        )
+    }, [summaryData])
+
     React.useEffect(() => {
-        if (!SummaryData?.data) return
-        const items = SummaryData.data.invoice_breakdown?.items as Parameters<
-            typeof resolveTargetInvoiceBreakdownItem
-        >[0]
-        const targetItem = resolveTargetInvoiceBreakdownItem(items, null)
-        if (targetItem?.installment_amount) {
-            form.setValue('amount', Number(targetItem.installment_amount))
+        if (!summaryData) return
+
+        if (payableItem?.installment_amount) {
+            form.setValue('amount', Number(payableItem.installment_amount))
         }
-        if (targetItem?.id) {
-            form.setValue('invoice_id', String(targetItem.id))
+
+        if (payableItem?.id) {
+            form.setValue('invoice_id', String(payableItem.id))
         }
-    }, [SummaryData, form])
+    }, [summaryData, payableItem, form])
+
+    const paymentPlansLocked = React.useMemo(
+        () => shouldLockMotorPaymentPlan(summaryData, payableItem),
+        [summaryData, payableItem],
+    )
+
+    const lockedPaymentPlan = React.useMemo(
+        () => resolveMotorStoredPaymentPlan(summaryData),
+        [summaryData],
+    )
+
+    const lockedPaymentPlanLabel = React.useMemo(() => {
+        if (!lockedPaymentPlan) {
+            return null
+        }
+
+        return PAYMENTPLANS.find((plan) => plan.value === lockedPaymentPlan)?.label ?? lockedPaymentPlan
+    }, [lockedPaymentPlan])
+
+    const installmentLabel = React.useMemo(
+        () => formatMotorInstallmentLabel(
+            payableItem?.installment_number,
+            payableItem?.total_installments,
+        ),
+        [payableItem],
+    )
+
+    React.useEffect(() => {
+        if (!paymentPlansLocked || !lockedPaymentPlan) return
+        form.setValue('payment_plans', lockedPaymentPlan)
+        lastAppliedPlanRef.current = lockedPaymentPlan
+    }, [paymentPlansLocked, lockedPaymentPlan, form])
 
     const paymentPlanMutation = UseApiMutation<SubmitResponse, { payment_plan: string }>({
         url: `purchase/motor/${purchaseId}/payment-plan`,
@@ -344,6 +395,8 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
                 <form onSubmit={form.handleSubmit(onSubmit)} className="w-full mx-auto bg-transparent">
                     <div className='w-full items-center justify-center p-2 sm:p-4'>
                         <div className="w-full min-h-45.5 h-auto rounded-[3px] bg-[#D9D9D95E] shadow-[0px_4px_4px_0px_#00000040] p-4 sm:p-6 mb-4">
+                            {!paymentPlansLocked ? (
+                            <>
                             <div className="w-full sm:w-auto mb-4">
                                 <label htmlFor="payment_plans" className="font-medium text-[15px] text-black block mb-2">
                                     Payment Plans:
@@ -442,6 +495,41 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                 <p className="text-sm text-muted-foreground">
                                     Select a payment plan above to see the installment schedule.
                                 </p>
+                            )}
+                            </>
+                            ) : (
+                            <div className="space-y-4">
+                                <div>
+                                    <p className="font-medium text-[15px] text-black">Payment Plan</p>
+                                    <p className="mt-1 text-sm text-muted-foreground">
+                                        {installmentLabel
+                                            ? `Pay the ${installmentLabel.toLowerCase()} for this cover.`
+                                            : 'Complete payment for the outstanding invoice installment.'}
+                                    </p>
+                                </div>
+                                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                                    <div className="rounded-[5px] border border-[#ADABAB] bg-white px-3 py-2.5">
+                                        <p className="text-xs text-muted-foreground">Plan</p>
+                                        <p className="text-sm font-medium text-black">
+                                            {lockedPaymentPlanLabel ?? 'Installment plan'}
+                                        </p>
+                                    </div>
+                                    {installmentLabel ? (
+                                        <div className="rounded-[5px] border border-[#ADABAB] bg-white px-3 py-2.5">
+                                            <p className="text-xs text-muted-foreground">Installment</p>
+                                            <p className="text-sm font-medium text-black">{installmentLabel}</p>
+                                        </div>
+                                    ) : null}
+                                    <div className="rounded-[5px] border border-[#ADABAB] bg-white px-3 py-2.5">
+                                        <p className="text-xs text-muted-foreground">Amount due</p>
+                                        <p className="text-sm font-medium text-black">
+                                            {payableItem?.installment_amount
+                                                ? Number(payableItem.installment_amount).toLocaleString()
+                                                : '—'}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
                             )}
                         </div>
                         <div className="w-full py-3">

@@ -645,6 +645,30 @@ export const TReusablePagination = ({
     );
 };
 
+/** Quote/list paginator. Callers send currentPage/totalPages or page/pageCount. */
+export const ReusablePagination = ({
+    currentPage,
+    totalPages,
+    onPageChange,
+    disabled = false,
+    className,
+    page,
+    pageCount,
+}: ReusablePaginationProps) => {
+    const resolvedPage = currentPage ?? page ?? 1
+    const resolvedCount = Math.max(1, totalPages ?? pageCount ?? 1)
+
+    return (
+        <div className={cn(disabled && "pointer-events-none opacity-50", className)}>
+            <TReusablePagination
+                page={resolvedPage}
+                pageCount={resolvedCount}
+                onPageChange={onPageChange}
+            />
+        </div>
+    )
+}
+
 export const ReusableCard = ({
     header,
     children,

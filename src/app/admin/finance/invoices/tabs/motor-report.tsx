@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { FINANCE_REPORTS_ORG_STORAGE_KEY } from '@/app/admin/finance/finance-reports-org'
 import { persistAdminMotorIssueCoverFromInvoice } from '@/app/admin/quotations/motor/admin-motor-session'
+import { MOTOR_PURCHASE_URLS } from '@/app/customer/motor/motor-purchase-query'
 import { useBypassOrgLocation } from '@/auth/use-bypass-org-location'
 import { BypassOrgLocationPicker, EmptyState } from '@/components/shared'
 import { Card } from '@/components/ui/card'
@@ -57,8 +58,8 @@ const MotorInvoiceReportTab = () => {
   // Org-location list (all invoices for current branch) — not the customer "my invoices" endpoint.
   // Super Admin must pick organization_location_id (sent as X-Organization-Location-Id).
   const { data, isLoading, refetch, isError } = UseApiQuery<SubmitResponse>({
-    url: 'reports/motor/invoices',
-    queryKey: ['reports/motor/invoices', listParams, selectedLocationId || null],
+    url: 'finance/invoices/motor',
+    queryKey: ['finance/invoices/motor', listParams, selectedLocationId || null],
     params: listParams,
     config: orgContextHeaders ? { headers: orgContextHeaders } : undefined,
     queryOptions: { enabled: canFetch },
@@ -68,6 +69,34 @@ const MotorInvoiceReportTab = () => {
     (id) => `document/motor/invoice/${id}`,
     'Invoice'
   )
+
+  const issueCoverMutation = UseApiMutation<SubmitResponse, { invoiceId: number | string }>({
+    url: ({ invoiceId }) => MOTOR_PURCHASE_URLS.invoiceSummary(invoiceId),
+    method: EMETHODS.GET,
+    config: orgContextHeaders ? { headers: orgContextHeaders } : undefined,
+    mutationOptions: {
+      onSuccess: (response, variables) => {
+        const purchaseId = response?.data?.purchase_id
+        if (!purchaseId) {
+          ShowToast.error('Purchase id missing from invoice summary')
+          return
+        }
+        const row = (data?.data ?? []).find(
+          (item: { id?: number | string }) => String(item?.id) === String(variables.invoiceId)
+        )
+        persistAdminMotorIssueCoverFromInvoice({
+          purchaseId,
+          invoiceId: variables.invoiceId,
+          lockPaymentPlan: Boolean(row?.lock_payment_plan),
+          installmentAmount: row?.installment_amount,
+        })
+        navigate(EROUTES.MOTOR_QUOTATION_PURCHASE)
+      },
+      onError: (error) => {
+        ShowToast.error(extractErrorMessage(error) || 'Cannot issue cover for this invoice')
+      },
+    },
+  })
 
   const retryIssuingMutation = UseApiMutation<SubmitResponse, { invoiceId: number | string }>({
     url: ({ invoiceId }) => `dmvic/motor/certificates/${invoiceId}/retry-issuing`,
@@ -123,18 +152,11 @@ const MotorInvoiceReportTab = () => {
     {
       label: 'Issue cover',
       onSelect: (row) => {
-        const purchaseId = row?.purchase_id
-        if (!purchaseId) {
-          ShowToast.error('Purchase id missing on this invoice')
+        if (!row?.id) {
+          ShowToast.error('Invoice id missing on this row')
           return
         }
-        persistAdminMotorIssueCoverFromInvoice({
-          purchaseId,
-          invoiceId: row?.id,
-          lockPaymentPlan: Boolean(row?.lock_payment_plan),
-          installmentAmount: row?.installment_amount,
-        })
-        navigate(EROUTES.MOTOR_QUOTATION_PURCHASE)
+        issueCoverMutation.mutate({ invoiceId: row.id })
       },
       conditional: (row) => {
         const status = String(row?.status ?? '').toLowerCase()
@@ -187,10 +209,11 @@ const MotorInvoiceReportTab = () => {
             ...MotorInvoiceReportColumns,
             ActionColumn({
               ActionsHandlerMapping,
-              // Spinner on the Action button while this row's retry is in flight
               isRowLoading: (row) =>
-                retryIssuingMutation.isPending &&
-                String(retryIssuingMutation.variables?.invoiceId) === String(row?.id),
+                (issueCoverMutation.isPending &&
+                  String(issueCoverMutation.variables?.invoiceId) === String(row?.id)) ||
+                (retryIssuingMutation.isPending &&
+                  String(retryIssuingMutation.variables?.invoiceId) === String(row?.id)),
             }),
           ]}
           OtherTools={SearchTools}

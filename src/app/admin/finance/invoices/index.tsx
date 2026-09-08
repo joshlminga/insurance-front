@@ -38,7 +38,11 @@ const InvoicesPage = () => {
       />
       {visibleTabs.length > 0 ? (
         <div className="w-full">
-          <ReusableTabComponent tabs={visibleTabs} defaultTab={defaultTab} />
+          <ReusableTabComponent 
+          tabs={visibleTabs} 
+          defaultTab={defaultTab} 
+          tabProps={{}}
+          />
         </div>
       ) : (
         <div className="rounded-lg border border-dashed p-10 text-center text-sm text-muted-foreground">

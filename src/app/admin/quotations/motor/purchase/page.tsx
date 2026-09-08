@@ -15,7 +15,6 @@ import { UseAuth } from '@/stores/auth-store'
 import { resolveAdminMotorPayeeContact } from '../admin-motor-session'
 import { PURCHASE_STEPS } from '@/dev/steps'
 
-
 const readSessionValue = (key: string) => {
     if (typeof window === 'undefined') return null
     const value = sessionStorage.getItem(key)?.trim()
