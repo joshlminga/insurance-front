@@ -366,9 +366,11 @@ export type VehiclePreview = {
 export type InvalidVehicleRegistrationError = {
   message: string
   preview: VehiclePreview | null
+  /** Present when the vehicle row exists but required fields are incomplete. */
+  vehicle_table_id: number | null
 }
 
-/** POST /vehicle/add-vehicle body - numbers are coerced from the dialog form strings. */
+/** POST /vehicle/add-vehicle or PATCH /vehicle/{id} body - numbers are coerced from the dialog form strings. */
 export type AddVehicleApiPayload = {
   registration_number: string
   make: string
@@ -378,7 +380,8 @@ export type AddVehicleApiPayload = {
   /** Optional - null when left blank */
   color: string | null
   number_of_passengers: number | null
-  tonnage: number
+  /** Required on create; optional on incomplete-vehicle PATCH (Private does not need it). */
+  tonnage: number | null
   engine_number: string | null
   cubic_capacity: number | null
   chassis_number: string

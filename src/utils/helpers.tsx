@@ -91,9 +91,20 @@ export function getInvalidVehicleRegistrationError(
       ? (rawPreview as VehiclePreview)
       : null
 
+  const rawVehicleTableId = response?.vehicle_table_id
+  const vehicleTableId =
+    typeof rawVehicleTableId === "number" && Number.isFinite(rawVehicleTableId)
+      ? rawVehicleTableId
+      : typeof rawVehicleTableId === "string" &&
+          rawVehicleTableId.trim() !== "" &&
+          Number.isFinite(Number(rawVehicleTableId))
+        ? Number(rawVehicleTableId)
+        : null
+
   return {
     message: message || "Invalid vehicle registration number",
     preview,
+    vehicle_table_id: vehicleTableId,
   }
 }
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dialog'
 import { Button, ReuseableInput } from '@/dev/core'
 import { UseApiMutation } from '@/hooks/hooks'
-import { AddVehicleSchema } from '@/types/form-schema'
+import { AddVehicleSchema, CompleteVehicleSchema } from '@/types/form-schema'
 import type { AddVehicleFormValues } from '@/types/schema'
 import type {
     AddVehicleApiPayload,
@@ -36,6 +36,8 @@ type AddVehicleDetailsDialogProps = {
     onOpenChange: (open: boolean) => void
     registrationNumber: string
     preview: VehiclePreview | null
+    /** When set, dialog PATCHes this vehicle instead of POSTing add-vehicle. */
+    vehicleTableId?: number | null
     /** Admin: fill engine/cc/chassis from preview. Customer: leave those three blank. */
     autofillSensitiveFields: boolean
     /** After the vehicle is saved, retry the original quote start request. */
@@ -64,7 +66,10 @@ function optionalFormNumber(value: string | undefined): number | null {
     return Number(trimmed)
 }
 
-function buildAddVehiclePayload(data: AddVehicleFormValues): AddVehicleApiPayload {
+function buildAddVehiclePayload(
+    data: AddVehicleFormValues,
+    isUpdate: boolean
+): AddVehicleApiPayload {
     return {
         registration_number: data.registration_number.trim().toUpperCase(),
         make: data.make.trim(),
@@ -73,7 +78,10 @@ function buildAddVehiclePayload(data: AddVehicleFormValues): AddVehicleApiPayloa
         body_type: data.body_type.trim(),
         color: optionalTrimmedString(data.color),
         number_of_passengers: optionalFormNumber(data.number_of_passengers),
-        tonnage: toFormNumber(data.tonnage),
+        // Create API still requires tonnage; update allows null for Private.
+        tonnage: isUpdate
+            ? optionalFormNumber(data.tonnage)
+            : toFormNumber(data.tonnage),
         engine_number: optionalTrimmedString(data.engine_number),
         cubic_capacity: optionalFormNumber(data.cubic_capacity),
         chassis_number: data.chassis_number.trim(),
@@ -83,8 +91,13 @@ function buildAddVehiclePayload(data: AddVehicleFormValues): AddVehicleApiPayloa
 function buildDefaultValues(
     registrationNumber: string,
     preview: VehiclePreview | null,
-    autofillSensitiveFields: boolean
+    autofillSensitiveFields: boolean,
+    isUpdate: boolean
 ): AddVehicleFormValues {
+    // Incomplete-vehicle update: always prefill chassis/engine/cc from the existing row.
+    // Create (not found): admin may autofill; customer leaves those blank.
+    const fillSensitive = isUpdate || autofillSensitiveFields
+
     return {
         registration_number: registrationNumber.trim().toUpperCase(),
         make: previewToString(preview?.make),
@@ -94,13 +107,13 @@ function buildDefaultValues(
         color: previewToString(preview?.color),
         number_of_passengers: previewToString(preview?.number_of_passengers),
         tonnage: previewToString(preview?.tonnage),
-        engine_number: autofillSensitiveFields
+        engine_number: fillSensitive
             ? previewToString(preview?.engine_number)
             : '',
-        cubic_capacity: autofillSensitiveFields
+        cubic_capacity: fillSensitive
             ? previewToString(preview?.cubic_capacity)
             : '',
-        chassis_number: autofillSensitiveFields
+        chassis_number: fillSensitive
             ? previewToString(preview?.chassis_number)
             : '',
     }
@@ -111,17 +124,25 @@ export function AddVehicleDetailsDialog({
     onOpenChange,
     registrationNumber,
     preview,
+    vehicleTableId = null,
     autofillSensitiveFields,
     onAdded,
 }: AddVehicleDetailsDialogProps) {
     const [submitError, setSubmitError] = useState<string | null>(null)
+    const isUpdate = vehicleTableId != null && vehicleTableId > 0
+
+    const formSchema = useMemo(
+        () => (isUpdate ? CompleteVehicleSchema : AddVehicleSchema),
+        [isUpdate]
+    )
 
     const form = useForm<AddVehicleFormValues>({
-        resolver: zodResolver(AddVehicleSchema),
+        resolver: zodResolver(formSchema),
         defaultValues: buildDefaultValues(
             registrationNumber,
             preview,
-            autofillSensitiveFields
+            autofillSensitiveFields,
+            isUpdate
         ),
     })
 
@@ -130,16 +151,21 @@ export function AddVehicleDetailsDialog({
         if (!open) return
         setSubmitError(null)
         form.reset(
-            buildDefaultValues(registrationNumber, preview, autofillSensitiveFields)
+            buildDefaultValues(
+                registrationNumber,
+                preview,
+                autofillSensitiveFields,
+                isUpdate
+            )
         )
-    }, [open, registrationNumber, preview, autofillSensitiveFields, form])
+    }, [open, registrationNumber, preview, autofillSensitiveFields, isUpdate, form])
 
-    const addVehicleMutation = UseApiMutation<
+    const saveVehicleMutation = UseApiMutation<
         SubmitResponse,
         AddVehicleApiPayload
     >({
-        url: 'vehicle/add-vehicle',
-        method: EMETHODS.POST,
+        url: isUpdate ? `vehicle/${vehicleTableId}` : 'vehicle/add-vehicle',
+        method: isUpdate ? EMETHODS.PATCH : EMETHODS.POST,
         mutationOptions: {
             onSuccess: () => {
                 setSubmitError(null)
@@ -154,18 +180,20 @@ export function AddVehicleDetailsDialog({
 
     const onSubmit = (data: AddVehicleFormValues) => {
         setSubmitError(null)
-        addVehicleMutation.mutate(buildAddVehiclePayload(data))
+        saveVehicleMutation.mutate(buildAddVehiclePayload(data, isUpdate))
     }
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-5xl">
                 <DialogHeader>
-                    <DialogTitle>Add vehicle details</DialogTitle>
+                    <DialogTitle>
+                        {isUpdate ? 'Complete vehicle details' : 'Add vehicle details'}
+                    </DialogTitle>
                     <DialogDescription>
-                        This registration number was not accepted. Confirm or complete
-                        the vehicle details below so we can add it, then we will retry
-                        your quotation.
+                        {isUpdate
+                            ? 'Some required vehicle fields are missing. Confirm or complete the details below, then we will retry your quotation.'
+                            : 'This registration number was not accepted. Confirm or complete the vehicle details below so we can add it, then we will retry your quotation.'}
                     </DialogDescription>
                 </DialogHeader>
 
@@ -251,7 +279,7 @@ export function AddVehicleDetailsDialog({
                             label="Tonnage"
                             type="number"
                             step="0.01"
-                            required
+                            required={!isUpdate}
                             placeholder="e.g. 970"
                         />
                     </div>
@@ -290,14 +318,14 @@ export function AddVehicleDetailsDialog({
                             type="button"
                             className="w-full rounded-full border border-[#C20C0C] bg-transparent text-[#C20C0C] hover:bg-[#C20C0C]/10 sm:w-auto"
                             onClick={() => onOpenChange(false)}
-                            disabled={addVehicleMutation.isPending}>
+                            disabled={saveVehicleMutation.isPending}>
                             Cancel
                         </Button>
                         <Button
                             type="submit"
                             className="w-full rounded-full bg-[#C20C0C]/90 text-sm hover:bg-[#C20C0C] sm:w-auto"
-                            loading={addVehicleMutation.isPending}
-                            disabled={addVehicleMutation.isPending}>
+                            loading={saveVehicleMutation.isPending}
+                            disabled={saveVehicleMutation.isPending}>
                             Save and continue
                         </Button>
                     </DialogFooter>

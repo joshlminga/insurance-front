@@ -205,6 +205,7 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
     const [selectedTabValue, setSelectedTabValue] = useState<string>("");
     const [addVehicleOpen, setAddVehicleOpen] = useState(false)
     const [vehiclePreview, setVehiclePreview] = useState<VehiclePreview | null>(null)
+    const [vehicleTableId, setVehicleTableId] = useState<number | null>(null)
     const [lastQuotePayload, setLastQuotePayload] = useState<Record<string, any> | null>(null)
 
     const { user, alpha } = UseAuth();
@@ -282,6 +283,7 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
                 const invalidRegistration = getInvalidVehicleRegistrationError(error)
                 if (invalidRegistration) {
                     setVehiclePreview(invalidRegistration.preview)
+                    setVehicleTableId(invalidRegistration.vehicle_table_id)
                     setAddVehicleOpen(true)
                     return
                 }
@@ -456,6 +458,7 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
             onOpenChange={setAddVehicleOpen}
             registrationNumber={vehicleRegistrationNumber ?? ''}
             preview={vehiclePreview}
+            vehicleTableId={vehicleTableId}
             autofillSensitiveFields={false}
             onAdded={handleVehicleAdded}
         />

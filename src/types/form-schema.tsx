@@ -140,6 +140,11 @@ export const AddVehicleSchema = z.object({
   chassis_number: z.string().min(1, "Chassis number is required"),
 })
 
+/** Same fields as add-vehicle, but tonnage is optional (Private class does not need it). */
+export const CompleteVehicleSchema = AddVehicleSchema.extend({
+  tonnage: z.string().optional().or(z.literal("")),
+})
+
 export const AdminMotorQuotationSchema = CustomerDetailsSchema
   .omit({ country: true, first_name: true, last_name: true })
   .merge(VehicleDetailsSchema)

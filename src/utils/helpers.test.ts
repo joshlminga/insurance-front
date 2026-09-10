@@ -9,6 +9,7 @@ import {
     formatTaxonomyName,
     formatWholeNumber,
     getDmvicValidationOverrideError,
+    getInvalidVehicleRegistrationError,
     mapMotorRateToFormValues,
     maxCoverEndDate,
     mergeSelectedOption,
@@ -16,6 +17,90 @@ import {
     toFormId,
     toFormNumber,
 } from "./helpers"
+
+describe("getInvalidVehicleRegistrationError", () => {
+    it("returns preview and null vehicle_table_id for not-found style errors", () => {
+        const result = getInvalidVehicleRegistrationError({
+            response: {
+                data: {
+                    errors: {
+                        vehicle_registration_number: [
+                            "We could not verify the vehicle information",
+                        ],
+                    },
+                    vehicle_preview: {
+                        make: "Toyota",
+                        model: "Vitz",
+                        year: 2016,
+                    },
+                },
+            },
+        })
+
+        expect(result).toEqual({
+            message: "We could not verify the vehicle information",
+            preview: {
+                make: "Toyota",
+                model: "Vitz",
+                year: 2016,
+            },
+            vehicle_table_id: null,
+        })
+    })
+
+    it("returns vehicle_table_id for incomplete vehicle errors", () => {
+        const result = getInvalidVehicleRegistrationError({
+            response: {
+                data: {
+                    errors: {
+                        vehicle_registration_number: [
+                            "Vehicle details are incomplete. Complete the missing fields to continue.",
+                        ],
+                        vehicle_make_id: [
+                            "Vehicle make is missing. Complete vehicle details via registration lookup before starting a quote.",
+                        ],
+                    },
+                    vehicle_preview: {
+                        make: null,
+                        model: "Corolla",
+                        chassis_number: "CHASSIS1",
+                    },
+                    vehicle_table_id: 42,
+                },
+            },
+        })
+
+        expect(result?.vehicle_table_id).toBe(42)
+        expect(result?.preview?.chassis_number).toBe("CHASSIS1")
+        expect(result?.message).toContain("incomplete")
+    })
+
+    it("parses string vehicle_table_id", () => {
+        const result = getInvalidVehicleRegistrationError({
+            response: {
+                data: {
+                    errors: { vehicle_registration_number: ["Incomplete"] },
+                    vehicle_table_id: "99",
+                },
+            },
+        })
+
+        expect(result?.vehicle_table_id).toBe(99)
+    })
+
+    it("returns null when vehicle_registration_number errors are missing", () => {
+        expect(
+            getInvalidVehicleRegistrationError({
+                response: {
+                    data: {
+                        errors: { number_of_passengers: ["Missing"] },
+                        vehicle_table_id: 1,
+                    },
+                },
+            }),
+        ).toBeNull()
+    })
+})
 
 describe("getDmvicValidationOverrideError", () => {
     it("returns messages when can_proceed is true with dmvic errors", () => {

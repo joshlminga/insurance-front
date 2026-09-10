@@ -279,6 +279,7 @@ export const AdminMotorDuplicateQuotationPage = () => {
         useState<AdminMotorQuotationFormValues | null>(null)
     const [addVehicleOpen, setAddVehicleOpen] = useState(false)
     const [vehiclePreview, setVehiclePreview] = useState<VehiclePreview | null>(null)
+    const [vehicleTableId, setVehicleTableId] = useState<number | null>(null)
     const [lastQuotePayload, setLastQuotePayload] = useState<ReturnType<
         typeof buildMotorQuotationPayload
     > | null>(null)
@@ -588,6 +589,7 @@ export const AdminMotorDuplicateQuotationPage = () => {
                 const invalidRegistration = getInvalidVehicleRegistrationError(error)
                 if (invalidRegistration) {
                     setVehiclePreview(invalidRegistration.preview)
+                    setVehicleTableId(invalidRegistration.vehicle_table_id)
                     setAddVehicleOpen(true)
                     return
                 }
@@ -905,6 +907,7 @@ export const AdminMotorDuplicateQuotationPage = () => {
                 onOpenChange={setAddVehicleOpen}
                 registrationNumber={vehicleRegistrationNumber ?? ''}
                 preview={vehiclePreview}
+                vehicleTableId={vehicleTableId}
                 autofillSensitiveFields
                 onAdded={handleVehicleAdded}
             />
