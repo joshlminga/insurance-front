@@ -18,23 +18,21 @@ import {
 } from "./helpers"
 
 describe("getDmvicValidationOverrideError", () => {
-    // Override dialog is temporarily disabled until ValidateDoubleInsurance is reliable.
-    it("returns null even when can_proceed is true (dialog disabled)", () => {
+    it("returns messages when can_proceed is true with dmvic errors", () => {
+        const messages = [
+            "ER007: There is a 203 days gap between the previous insurance and the proposed one",
+            "ER005: Double Insurance",
+        ]
         const result = getDmvicValidationOverrideError({
             response: {
                 data: {
                     can_proceed: true,
-                    errors: {
-                        dmvic: [
-                            "ER007: There is a 203 days gap between the previous insurance and the proposed one",
-                            "ER005: Double Insurance",
-                        ],
-                    },
+                    errors: { dmvic: messages },
                 },
             },
         })
 
-        expect(result).toBeNull()
+        expect(result).toEqual({ canProceed: true, messages })
     })
 
     it("returns null when can_proceed is false or missing", () => {
