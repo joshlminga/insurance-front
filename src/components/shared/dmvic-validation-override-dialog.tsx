@@ -28,7 +28,7 @@ type DmvicValidationOverrideDialogProps = {
 }
 
 /**
- * Shown when DMVIC cover validation returns only overridable errors (ER005 / ER007).
+ * Shown when DMVIC cover validation returns only overridable ER007 gap errors.
  * Cancel keeps the user on the form; Continue resubmits with override flags.
  * User must check "Is logbook verified" before Continue is enabled.
  */
@@ -73,16 +73,16 @@ export function DmvicValidationOverrideDialog({
         </AlertDialogHeader>
 
         <div className="space-y-4 px-1">
-          <label className="flex cursor-pointer items-start gap-3 text-sm text-foreground">
+          <label className="flex cursor-pointer items-start gap-3 text-sm text-[#C20C0C]">
             <Checkbox
               checked={isLogbookVerified}
               disabled={isPending}
               onCheckedChange={(checked) => setIsLogbookVerified(checked === true)}
-              className="mt-0.5"
+              className="mt-0.5 border-[#C20C0C] data-[state=checked]:border-[#C20C0C] data-[state=checked]:bg-[#C20C0C]"
             />
             <span>
               Is logbook verified
-              <span className="mt-0.5 block text-xs text-muted-foreground">
+              <span className="mt-0.5 block text-xs text-[#C20C0C]">
                 Required before you can continue.
               </span>
             </span>
@@ -99,10 +99,14 @@ export function DmvicValidationOverrideDialog({
               id="dmvic-additional-comments"
               value={additionalComments}
               disabled={isPending}
-              maxLength={500}
+              maxLength={200}
               placeholder="Optional note for DMVIC confirmation"
+              className="border-black focus-visible:ring-black"
               onChange={(event) => setAdditionalComments(event.target.value)}
             />
+            <p className="text-xs text-muted-foreground">
+              {additionalComments.length}/200
+            </p>
           </div>
         </div>
 

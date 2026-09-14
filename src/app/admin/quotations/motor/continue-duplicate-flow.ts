@@ -1,7 +1,3 @@
-import {
-  ADMIN_MOTOR_PURCHASE_PAYMENT_STEP,
-  ADMIN_MOTOR_PURCHASE_STEP_KEY,
-} from '@/app/payment/payment-session'
 import apiClient from '@/lib/api-client'
 import type {
   MotorQuoteDuplicatePayload,
@@ -66,7 +62,7 @@ export function buildDuplicateStartQuoteBody(
  * - quote  → review/edit form (new session not created yet)
  * - rates  → start new session, then rates/results
  * - kyc    → start session + purchase selected cover, then KYC
- * - payment → start session + purchase, then payment step
+ * - payment → start session + purchase, then KYC (new purchase has no invoices yet)
  */
 export async function continueAdminMotorDuplicateFlow(
   payload: MotorQuoteDuplicatePayload,
@@ -156,18 +152,16 @@ export async function continueAdminMotorDuplicateFlow(
     ownership: purchaseData?.ownership ?? sq.ownership,
   })
 
-  if (startAt === 'payment') {
-    sessionStorage.setItem(
-      ADMIN_MOTOR_PURCHASE_STEP_KEY,
-      String(ADMIN_MOTOR_PURCHASE_PAYMENT_STEP)
-    )
-  }
+  // New purchase has no invoices yet. Jumping to payment step (3) leaves
+  // invoice_purchase_session_id empty and purchase/page redirects to results.
+  // Always open KYC (step 1); user continues to invoice/payment after KYC.
+  const effectiveStartAt = startAt === 'payment' ? 'kyc' : startAt
 
   clearAdminMotorDuplicatePrefill()
 
   return {
     route: EROUTES.MOTOR_QUOTATION_PURCHASE,
-    startAt,
+    startAt: effectiveStartAt,
     quoteSessionId,
   }
 }

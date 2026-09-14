@@ -2,13 +2,19 @@
 import { CardFooter } from '@/components/ui/card'
 import { DmvicValidationOverrideDialog } from '@/components/shared'
 import { Button, ReuseableInput } from '@/dev/core'
-import { refreshMotorPurchaseSummary } from '@/app/customer/motor/motor-purchase-query'
-import { UseApiMutation } from '@/hooks/hooks'
+import {
+    MOTOR_PURCHASE_URLS,
+    motorPurchaseSummaryQueryOptions,
+    refreshMotorPurchaseSummary,
+    type MotorPurchaseSummaryData,
+} from '@/app/customer/motor/motor-purchase-query'
+import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
 import { useQueryClient } from '@tanstack/react-query'
 import { InvoicePaymentSchema } from '@/types/form-schema'
 import type { InvoicePaymentFormValues } from '@/types/schema'
 import type { CustomerVerificationDetailsProps, SubmitResponse } from '@/types/types'
 import { EMETHODS, INVOICE_SESSION_STORAGE_KEY } from '@/utils/constatnts'
+import { validateDoubleInsurancePreflight } from '@/utils/dmvic-double-insurance'
 import { extractErrorMessage, getDmvicValidationOverrideError } from '@/utils/helpers'
 import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -47,6 +53,8 @@ export const InvoicePayment: React.FC<CustomerVerificationDetailsProps> = ({ goT
     const [overrideMessages, setOverrideMessages] = useState<string[]>([])
     const [pendingOverridePayload, setPendingOverridePayload] =
         useState<InvoicePaymentFormValues | null>(null)
+    // Separate loading flag so preflight + invoice submit don't stack confusing spinners
+    const [isPreflightPending, setIsPreflightPending] = useState(false)
 
     const form = useForm<InvoicePaymentFormValues>({
         resolver: zodResolver(InvoicePaymentSchema),
@@ -59,6 +67,18 @@ export const InvoicePayment: React.FC<CustomerVerificationDetailsProps> = ({ goT
         },
 
     })
+
+    // Need plate/chassis for the double-insurance preflight (not stored on this form)
+    const { data: summaryResponse } = UseApiQuery<SubmitResponse>({
+        url: purchaseSessionId ? MOTOR_PURCHASE_URLS.summary(purchaseSessionId) : '',
+        queryOptions: {
+            enabled: Boolean(purchaseSessionId),
+            retry: 1,
+            ...motorPurchaseSummaryQueryOptions,
+        },
+    })
+
+    const summary = summaryResponse?.data as MotorPurchaseSummaryData | undefined
 
     const submitMutation = UseApiMutation<SubmitResponse, InvoicePaymentFormValues>({
         url: `purchase/motor/${purchaseSessionId}/invoice`,
@@ -88,14 +108,55 @@ export const InvoicePayment: React.FC<CustomerVerificationDetailsProps> = ({ goT
         },
     })
 
-    const onSubmit = (data: InvoicePaymentFormValues) => {
+    const onSubmit = async (data: InvoicePaymentFormValues) => {
         const payload: InvoicePaymentFormValues = { ...data }
         // Strip override flags on first submit; popup retry adds them back
         delete payload.validate_double_insurance
         delete payload.is_logbook_verified
         delete payload.additional_comments
-        setPendingOverridePayload(payload)
-        submitMutation.mutate(payload)
+
+        const registration =
+            summary?.vehicle?.registration_number
+            ?? summary?.kyc?.vehicle_registration_number
+            ?? null
+        const chassis =
+            summary?.vehicle?.chassis_number
+            ?? summary?.kyc?.chassis_number
+            ?? null
+
+        setIsPreflightPending(true)
+        try {
+            // 1) Double insurance (dates only) — separate HTTP call to avoid PHP timeout with Type A/C
+            const preflight = await validateDoubleInsurancePreflight({
+                coverStartDate: data.cover_start_date,
+                vehicleRegistrationNumber: registration,
+                chassisNumber: chassis,
+            })
+
+            if (!preflight.clear) {
+                if (preflight.suggestedCoverStartDate) {
+                    form.setValue('cover_start_date', preflight.suggestedCoverStartDate, {
+                        shouldValidate: true,
+                        shouldDirty: true,
+                    })
+                }
+                form.setError('cover_start_date', {
+                    type: 'manual',
+                    message: preflight.message,
+                })
+                ShowToast.error(preflight.message)
+                return
+            }
+
+            // 2) Invoice submit runs Type A/C validate on the server
+            setPendingOverridePayload(payload)
+            submitMutation.mutate(payload)
+        } catch (error: any) {
+            const message = extractErrorMessage(error)
+            ShowToast.error(message || "Double insurance check failed!")
+        } finally {
+            setIsPreflightPending(false)
+        }
     }
 
     const onConfirmOverride = (values: {
@@ -110,6 +171,8 @@ export const InvoicePayment: React.FC<CustomerVerificationDetailsProps> = ({ goT
             additional_comments: values.additional_comments,
         })
     }
+
+    const isSubmitting = isPreflightPending || submitMutation.isPending
 
     return (
         <>
@@ -182,7 +245,7 @@ export const InvoicePayment: React.FC<CustomerVerificationDetailsProps> = ({ goT
                         type="submit"
                         className="w-full rounded-full bg-[#C20C0C]/90 hover:bg-[#C20C0C] sm:w-auto"
                         rightIcon={<ArrowRightCircle />}
-                        loading={submitMutation.isPending}>
+                        loading={isSubmitting}>
                         Complete Payment
                     </Button>
                 </CardFooter>

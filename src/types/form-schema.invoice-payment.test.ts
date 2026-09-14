@@ -53,10 +53,10 @@ describe("InvoicePaymentSchema DMVIC override fields", () => {
     expect(result.success).toBe(true)
   })
 
-  it("rejects additional_comments over 500 characters", () => {
+  it("rejects additional_comments over 200 characters", () => {
     const result = InvoicePaymentSchema.safeParse({
       ...baseInvoicePayload,
-      additional_comments: "a".repeat(501),
+      additional_comments: "a".repeat(201),
     })
 
     expect(result.success).toBe(false)

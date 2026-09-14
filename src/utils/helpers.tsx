@@ -42,7 +42,7 @@ export const extractErrorMessage = (error: any): string => {
 /**
  * DMVIC cover validation may return can_proceed + errors.dmvic.
  * When can_proceed is true the user may confirm and continue regardless
- * (ER005 double insurance / ER007 cover gap).
+ * (ER007 cover gap). ER005 active cover is a normal field error, not this dialog.
  */
 export type DmvicValidationOverrideError = {
   canProceed: true

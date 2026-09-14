@@ -321,12 +321,13 @@ export const InvoicePaymentSchema = z.object({
   // Admin-only optional fields (not shown on customer checkout)
   cover_end_date: z.string().optional(),
   policy_number: z.string().optional(),
-  // Set true after user confirms DMVIC ER005/ER007 override in the popup
+  // Set true after user confirms DMVIC ER007 gap override in the popup
+  // (not the ValidateDoubleInsurance preflight — that runs separately before submit)
   validate_double_insurance: z.boolean().optional(),
   // Required true when validate_double_insurance is true (set from override popup)
   is_logbook_verified: z.boolean().optional(),
   // Optional note sent to DMVIC ConfirmCertificateIssuance
-  additional_comments: z.string().max(500).optional(),
+  additional_comments: z.string().max(200).optional(),
   // total_payable: z.string().min(1, "Total payable is required"),
 }).superRefine((data, ctx) => {
   const endDate = data.cover_end_date?.trim()

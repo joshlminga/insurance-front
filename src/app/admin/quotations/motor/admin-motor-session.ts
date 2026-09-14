@@ -192,6 +192,9 @@ export function persistAdminMotorPurchaseStart({
     )
     sessionStorage.setItem(ADMIN_MOTOR_PURCHASE_STEP_KEY, '1')
     sessionStorage.removeItem(INVOICE_SESSION_STORAGE_KEY)
+    // Drop leftover Issue-cover / resume target invoice so Payment Options
+    // does not filter summary to an invoice from a previous purchase.
+    clearAdminMotorIssueCoverSession()
 }
 
 /** Resume an existing quote/purchase from fetch detail into admin stepper session keys. */

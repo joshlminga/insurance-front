@@ -37,6 +37,7 @@ export default function BulkRetryModal({
         const skipped = response.data?.skipped?.length ?? 0
         const failed = response.data?.failed ?? []
 
+
         if (issued > 0) {
           ShowToast.success(
             `Issued ${issued} certificate(s)${skipped ? `, skipped ${skipped}` : ''}.`
@@ -53,7 +54,7 @@ export default function BulkRetryModal({
         }
 
         await componentProps?.refetch?.()
-        handleDialogContextSwitch()
+        handleDialogContextSwitch({})
       },
       onError: (error: unknown) => {
         ShowToast.error(extractErrorMessage(error) || 'Bulk retry failed.')
@@ -88,7 +89,7 @@ export default function BulkRetryModal({
         <Button
           type="button"
           variant="outline"
-          onClick={() => handleDialogContextSwitch()}
+          onClick={() => handleDialogContextSwitch({})}
           disabled={bulkMutation.isPending}
         >
           Cancel

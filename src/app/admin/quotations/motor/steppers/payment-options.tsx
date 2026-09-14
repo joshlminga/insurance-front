@@ -100,6 +100,9 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
     const [targetInvoiceId] = React.useState<string | null>(() => readAdminMotorTargetInvoiceId());
     const [isIssueCoverFlow] = React.useState(() => isAdminMotorIssueCoverFlow());
     const [fallbackInvoiceAmount] = React.useState<string | null>(() => readAdminMotorTargetInvoiceAmount());
+    // Only honor a target invoice when this session is Issue-cover; otherwise a
+    // stale session key filters summary to another purchase's invoice (empty breakdown).
+    const effectiveTargetInvoiceId = isIssueCoverFlow ? targetInvoiceId : null
     const [creditPending, setCreditPending] = React.useState<{
         message: string
         creditTransactionId?: number
@@ -144,24 +147,24 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
         }
     }, [])
 
-    const useInvoiceSummary = isIssueCoverFlow && Boolean(targetInvoiceId)
+    const useInvoiceSummary = isIssueCoverFlow && Boolean(effectiveTargetInvoiceId)
 
     const { data: SummaryData, refetch: refetchSummary } = UseApiQuery<SubmitResponse>({
         url: useInvoiceSummary
-            ? MOTOR_PURCHASE_URLS.invoiceSummary(targetInvoiceId!)
+            ? MOTOR_PURCHASE_URLS.invoiceSummary(effectiveTargetInvoiceId!)
             : purchaseId
                 ? MOTOR_PURCHASE_URLS.summary(purchaseId)
                 : '',
         queryKey: useInvoiceSummary
-            ? motorInvoiceSummaryKey(targetInvoiceId!)
-            : motorPurchaseSummaryKey(purchaseId ?? '', targetInvoiceId),
+            ? motorInvoiceSummaryKey(effectiveTargetInvoiceId!)
+            : motorPurchaseSummaryKey(purchaseId ?? '', effectiveTargetInvoiceId),
         params: useInvoiceSummary
             ? undefined
-            : targetInvoiceId
-                ? { target_invoice_id: targetInvoiceId }
+            : effectiveTargetInvoiceId
+                ? { target_invoice_id: effectiveTargetInvoiceId }
                 : undefined,
         queryOptions: {
-            enabled: useInvoiceSummary ? Boolean(targetInvoiceId) : Boolean(purchaseId),
+            enabled: useInvoiceSummary ? Boolean(effectiveTargetInvoiceId) : Boolean(purchaseId),
             retry: 1,
             ...motorPurchaseSummaryQueryOptions,
         },
@@ -200,9 +203,9 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
 
         return resolveTargetInvoiceBreakdownItem(
             summaryData.invoice_breakdown?.items,
-            targetInvoiceId,
+            effectiveTargetInvoiceId,
         )
-    }, [summaryData, targetInvoiceId])
+    }, [summaryData, effectiveTargetInvoiceId])
 
     React.useEffect(() => {
         if (!summaryData) return
@@ -469,7 +472,19 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
     return (
         <>
             <FormProvider {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="w-full mx-auto bg-transparent">
+                <form
+                    onSubmit={form.handleSubmit(onSubmit, (errors) => {
+                        // invoice_id is hidden — surface it so Proceed does not look "dead"
+                        if (errors.invoice_id?.message) {
+                            ShowToast.error(String(errors.invoice_id.message))
+                            return
+                        }
+                        const first = Object.values(errors)[0] as { message?: string } | undefined
+                        if (first?.message) {
+                            ShowToast.error(String(first.message))
+                        }
+                    })}
+                    className="w-full mx-auto bg-transparent">
                     <div className="rounded-2xl border border-[#ADABAB]/50 bg-linear-to-b from-white to-neutral-50/90 p-4 shadow-sm sm:p-6">
                         <div className="w-full pb-2">
                             <h1 className="text-xl font-bold leading-tight tracking-tight sm:text-2xl">

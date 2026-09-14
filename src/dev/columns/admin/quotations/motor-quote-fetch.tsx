@@ -3,6 +3,23 @@ import { Badge } from '@/components/ui/badge'
 import type { MotorQuoteFetchListRow } from '@/types/types'
 import { ColumnDef } from '@tanstack/table-core'
 
+// Status badge colors for quote rates / session status
+const statusBadgeClass = (status?: string) => {
+  switch (status) {
+    case 'cancelled':
+      // Red border + red text, transparent fill
+      return 'border border-[#C20C0C] bg-transparent text-[#C20C0C]'
+    case 'calculated':
+      // Black background + white text
+      return 'border-transparent bg-black text-white'
+    case 'in_progress':
+      // Red background + white text
+      return 'border-transparent bg-[#C20C0C] text-white'
+    default:
+      return 'border-transparent bg-slate-100 text-slate-800'
+  }
+}
+
 const stageBadgeClass = (stage?: string) => {
   switch (stage) {
     case 'certificate':
@@ -33,7 +50,10 @@ export const MotorQuoteFetchColumns: ColumnDef<MotorQuoteFetchListRow>[] = [
     accessorKey: 'status',
     header: () => <div>Status</div>,
     cell: ({ row }) => (
-      <Badge variant="outline" className="rounded-full capitalize">
+      <Badge
+        variant="outline"
+        className={`rounded-full capitalize ${statusBadgeClass(row.original.status)}`}
+      >
         {(row.original.status ?? '-').replaceAll('_', ' ')}
       </Badge>
     ),

@@ -23,6 +23,20 @@ export type MotorPurchaseSummaryData = {
     invoice_plan_type?: string
     invoice?: {
         payment_plan?: string
+        cover_start_date?: string
+        cover_end_date?: string
+        name?: string
+        email?: string
+        phone?: string
+        policy_number?: string
+    }
+    vehicle?: {
+        registration_number?: string | null
+        chassis_number?: string | null
+    }
+    kyc?: {
+        vehicle_registration_number?: string | null
+        chassis_number?: string | null
     }
     invoice_breakdown?: {
         items?: MotorInvoiceBreakdownItem[]

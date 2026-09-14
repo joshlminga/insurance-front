@@ -7,6 +7,7 @@ import {
     motorInvoiceSummaryKey,
     motorPurchaseSummaryQueryOptions,
     refreshMotorPurchaseSummary,
+    type MotorPurchaseSummaryData,
 } from '@/app/customer/motor/motor-purchase-query'
 import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
 import { useQueryClient } from '@tanstack/react-query'
@@ -18,6 +19,7 @@ import {
     INVOICE_SESSION_STORAGE_KEY,
     PURCHASE_SESSION_STORAGE_KEY,
 } from '@/utils/constatnts'
+import { validateDoubleInsurancePreflight } from '@/utils/dmvic-double-insurance'
 import {
     extractErrorMessage,
     getDmvicValidationOverrideError,
@@ -66,12 +68,15 @@ export const AdminMotorInvoicePayment: React.FC<AdminMotorStepProps> = ({
     const [purchaseSessionId] = useState(() => readPurchaseSessionId())
     const [targetInvoiceId] = useState<string | null>(() => readAdminMotorTargetInvoiceId())
     const [isIssueCoverFlow] = useState(() => isAdminMotorIssueCoverFlow())
-    const useInvoiceSummary = isIssueCoverFlow && Boolean(targetInvoiceId)
+    // Ignore stale target invoice outside Issue-cover (filters summary to wrong purchase).
+    const effectiveTargetInvoiceId = isIssueCoverFlow ? targetInvoiceId : null
+    const useInvoiceSummary = Boolean(effectiveTargetInvoiceId)
     const todayMinDate = getTodayDateString()
     const [overrideDialogOpen, setOverrideDialogOpen] = useState(false)
     const [overrideMessages, setOverrideMessages] = useState<string[]>([])
     const [pendingOverridePayload, setPendingOverridePayload] =
         useState<InvoicePaymentFormValues | null>(null)
+    const [isPreflightPending, setIsPreflightPending] = useState(false)
 
     const form = useForm<InvoicePaymentFormValues>({
         resolver: zodResolver(InvoicePaymentSchema),
@@ -93,19 +98,21 @@ export const AdminMotorInvoicePayment: React.FC<AdminMotorStepProps> = ({
 
     const { data: summaryData } = UseApiQuery<SubmitResponse>({
         url: useInvoiceSummary
-            ? MOTOR_PURCHASE_URLS.invoiceSummary(targetInvoiceId!)
+            ? MOTOR_PURCHASE_URLS.invoiceSummary(effectiveTargetInvoiceId!)
             : purchaseSessionId
                 ? MOTOR_PURCHASE_URLS.summary(purchaseSessionId)
                 : '',
         queryKey: useInvoiceSummary
-            ? motorInvoiceSummaryKey(targetInvoiceId!)
+            ? motorInvoiceSummaryKey(effectiveTargetInvoiceId!)
             : undefined,
         queryOptions: {
-            enabled: useInvoiceSummary ? Boolean(targetInvoiceId) : Boolean(purchaseSessionId),
+            enabled: useInvoiceSummary ? Boolean(effectiveTargetInvoiceId) : Boolean(purchaseSessionId),
             retry: 1,
             ...motorPurchaseSummaryQueryOptions,
         },
     })
+
+    const summary = summaryData?.data as MotorPurchaseSummaryData | undefined
 
     React.useEffect(() => {
         const invoice = summaryData?.data?.invoice as Record<string, string | undefined> | undefined
@@ -163,10 +170,52 @@ export const AdminMotorInvoicePayment: React.FC<AdminMotorStepProps> = ({
         return payload
     }
 
-    const onSubmit = (data: InvoicePaymentFormValues) => {
+    const onSubmit = async (data: InvoicePaymentFormValues) => {
         const payload = buildPayload(data)
-        setPendingOverridePayload(payload)
-        submitMutation.mutate(payload)
+
+        const registration =
+            summary?.vehicle?.registration_number
+            ?? summary?.kyc?.vehicle_registration_number
+            ?? null
+        const chassis =
+            summary?.vehicle?.chassis_number
+            ?? summary?.kyc?.chassis_number
+            ?? null
+
+        setIsPreflightPending(true)
+        try {
+            // 1) Double insurance preflight (separate from Type A/C on invoice POST)
+            const preflight = await validateDoubleInsurancePreflight({
+                coverStartDate: data.cover_start_date,
+                coverEndDate: data.cover_end_date,
+                vehicleRegistrationNumber: registration,
+                chassisNumber: chassis,
+            })
+
+            if (!preflight.clear) {
+                if (preflight.suggestedCoverStartDate) {
+                    form.setValue('cover_start_date', preflight.suggestedCoverStartDate, {
+                        shouldValidate: true,
+                        shouldDirty: true,
+                    })
+                }
+                form.setError('cover_start_date', {
+                    type: 'manual',
+                    message: preflight.message,
+                })
+                ShowToast.error(preflight.message)
+                return
+            }
+
+            // 2) Invoice submit → server Type A/C validate
+            setPendingOverridePayload(payload)
+            submitMutation.mutate(payload)
+        } catch (error: any) {
+            const message = extractErrorMessage(error)
+            ShowToast.error(message || "Double insurance check failed!")
+        } finally {
+            setIsPreflightPending(false)
+        }
     }
 
     const onConfirmOverride = (values: {
@@ -181,6 +230,8 @@ export const AdminMotorInvoicePayment: React.FC<AdminMotorStepProps> = ({
             additional_comments: values.additional_comments,
         })
     }
+
+    const isSubmitting = isPreflightPending || submitMutation.isPending
 
     return (
         <>
@@ -282,7 +333,7 @@ export const AdminMotorInvoicePayment: React.FC<AdminMotorStepProps> = ({
                         type="submit"
                         className="w-full rounded-full bg-[#C20C0C]/90 hover:bg-[#C20C0C] sm:w-auto"
                         rightIcon={<ArrowRightCircle />}
-                        loading={submitMutation.isPending}>
+                        loading={isSubmitting}>
                         Complete Payment
                     </Button>
                 </CardFooter>

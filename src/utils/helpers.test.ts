@@ -106,7 +106,6 @@ describe("getDmvicValidationOverrideError", () => {
     it("returns messages when can_proceed is true with dmvic errors", () => {
         const messages = [
             "ER007: There is a 203 days gap between the previous insurance and the proposed one",
-            "ER005: Double Insurance",
         ]
         const result = getDmvicValidationOverrideError({
             response: {
@@ -118,6 +117,23 @@ describe("getDmvicValidationOverrideError", () => {
         })
 
         expect(result).toEqual({ canProceed: true, messages })
+    })
+
+    it("returns null for ER005-style cover_start field errors", () => {
+        expect(
+            getDmvicValidationOverrideError({
+                response: {
+                    data: {
+                        can_proceed: false,
+                        errors: {
+                            cover_start_date: [
+                                "This vehicle is already covered under an active policy. Please use cover start date 15/09/2026.",
+                            ],
+                        },
+                    },
+                },
+            }),
+        ).toBeNull()
     })
 
     it("returns null when can_proceed is false or missing", () => {

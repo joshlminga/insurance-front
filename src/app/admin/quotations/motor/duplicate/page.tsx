@@ -31,7 +31,6 @@ import { UseAuth } from '@/stores/auth-store'
 import { AdminMotorQuotationSchema } from '@/types/form-schema'
 import type { AdminMotorQuotationFormValues } from '@/types/schema'
 import type { SubmitResponse, VehicleClassItem, MotorQuoteSessionStartData, VehiclePreview } from '@/types/types'
-import { ADMIN_MOTOR_PURCHASE_PAYMENT_STEP, ADMIN_MOTOR_PURCHASE_STEP_KEY } from '@/app/payment/payment-session'
 import { EROUTES, PROFFESIONALVALUATIONCHECKBOX } from '@/utils/enums'
 import { ADMIN_MOTOR_QUOTE_DUPLICATE_PREFILL_KEY, EMETHODS, OWNERSHIPOPTIONS } from '@/utils/constatnts'
 import { extractErrorMessage, getInvalidVehicleRegistrationError } from '@/utils/helpers'
@@ -574,15 +573,13 @@ export const AdminMotorDuplicateQuotationPage = () => {
                             purchaseData?.ownership ??
                             duplicateSnapshot?.start_quote?.ownership,
                     })
-                    if (startAt === 'payment') {
-                        sessionStorage.setItem(
-                            ADMIN_MOTOR_PURCHASE_STEP_KEY,
-                            String(ADMIN_MOTOR_PURCHASE_PAYMENT_STEP)
-                        )
-                    }
+                    // New purchase has no invoices yet — stay on KYC (step 1).
+                    // Jumping to payment step 3 caused purchase/page to redirect away.
+                    const effectiveStartAt = startAt === 'payment' ? 'kyc' : startAt
                     clearAdminMotorDuplicatePrefill()
                     ShowToast.success(
-                        response?.message || 'Duplicated quotation ready at ' + startAt
+                        response?.message ||
+                            'Duplicated quotation ready at ' + effectiveStartAt
                     )
                     navigate(EROUTES.MOTOR_QUOTATION_PURCHASE)
                 } catch (error) {
