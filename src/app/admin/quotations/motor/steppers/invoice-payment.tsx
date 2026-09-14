@@ -156,7 +156,10 @@ export const AdminMotorInvoicePayment: React.FC<AdminMotorStepProps> = ({
         if (!payload.policy_number?.trim()) {
             delete payload.policy_number
         }
+        // Strip override flags on first submit; popup retry adds them back
         delete payload.validate_double_insurance
+        delete payload.is_logbook_verified
+        delete payload.additional_comments
         return payload
     }
 
@@ -166,11 +169,16 @@ export const AdminMotorInvoicePayment: React.FC<AdminMotorStepProps> = ({
         submitMutation.mutate(payload)
     }
 
-    const onConfirmOverride = () => {
+    const onConfirmOverride = (values: {
+        is_logbook_verified: true
+        additional_comments: string
+    }) => {
         const base = pendingOverridePayload ?? buildPayload(form.getValues())
         submitMutation.mutate({
             ...base,
             validate_double_insurance: true,
+            is_logbook_verified: values.is_logbook_verified,
+            additional_comments: values.additional_comments,
         })
     }
 

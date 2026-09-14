@@ -342,6 +342,10 @@ export const MotorQuotationPage = () => {
         control: form.control,
         name: 'vehicle_registration_number',
     })
+    const selectedVehicleClassSlug = useMemo(
+        () => motoTabs.find((tab) => tab.value === selectedTabValue)?.slug ?? '',
+        [motoTabs, selectedTabValue]
+    )
 
     // const effectiveCountryId = useMemo(() => {
     //     if (formCountryId) return formCountryId
@@ -746,6 +750,7 @@ export const MotorQuotationPage = () => {
                 registrationNumber={vehicleRegistrationNumber ?? ''}
                 preview={vehiclePreview}
                 vehicleTableId={vehicleTableId}
+                vehicleClassSlug={selectedVehicleClassSlug}
                 autofillSensitiveFields
                 onAdded={handleVehicleAdded}
             />

@@ -43,7 +43,7 @@ type VehicleDetails = Record<string, unknown>
 
 const EMPTY_VEHICLE_VALUE = "Not available"
 const COMPANY_OWNED = "Company Owned"
-const AKI_REGISTRATION_WARNING = "This vehicle as issue in AKI registration, we will verify before issuing cover"
+const AKI_REGISTRATION_WARNING = "This vehicle is not found in AKI registration, we will verify it before issuing cover"
 
 type ReadOnlyVehicleFieldProps = {
     label: string

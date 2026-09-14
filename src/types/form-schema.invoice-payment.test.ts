@@ -40,3 +40,25 @@ describe("InvoicePaymentSchema cover_end_date", () => {
     expect(result.success).toBe(true)
   })
 })
+
+describe("InvoicePaymentSchema DMVIC override fields", () => {
+  it("accepts override flags from the confirm popup", () => {
+    const result = InvoicePaymentSchema.safeParse({
+      ...baseInvoicePayload,
+      validate_double_insurance: true,
+      is_logbook_verified: true,
+      additional_comments: "Optional note",
+    })
+
+    expect(result.success).toBe(true)
+  })
+
+  it("rejects additional_comments over 500 characters", () => {
+    const result = InvoicePaymentSchema.safeParse({
+      ...baseInvoicePayload,
+      additional_comments: "a".repeat(501),
+    })
+
+    expect(result.success).toBe(false)
+  })
+})

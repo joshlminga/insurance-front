@@ -264,6 +264,10 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
         control: form.control,
         name: 'vehicle_registration_number',
     })
+    const selectedVehicleClassSlug = useMemo(
+        () => motoTabs.find((tab) => tab.value === selectedTabValue)?.slug ?? '',
+        [motoTabs, selectedTabValue]
+    )
 
     const submitMutation = UseApiMutation<SubmitResponse, Record<string, any>>({
         url: "alternative/quotation/motor",
@@ -459,6 +463,7 @@ export const VehicleDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
             registrationNumber={vehicleRegistrationNumber ?? ''}
             preview={vehiclePreview}
             vehicleTableId={vehicleTableId}
+            vehicleClassSlug={selectedVehicleClassSlug}
             autofillSensitiveFields={false}
             onAdded={handleVehicleAdded}
         />

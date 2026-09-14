@@ -145,6 +145,26 @@ export const CompleteVehicleSchema = AddVehicleSchema.extend({
   tonnage: z.string().optional().or(z.literal("")),
 })
 
+/**
+ * Dialog schema: PSV/Commercial always require passengers + tonnage.
+ * Create always requires tonnage (API). Private update keeps both optional.
+ */
+export function buildVehicleDialogSchema(options: {
+  isUpdate: boolean
+  requiresPassengersAndTonnage: boolean
+}) {
+  const { isUpdate, requiresPassengersAndTonnage } = options
+  const requireTonnage = requiresPassengersAndTonnage || !isUpdate
+
+  return AddVehicleSchema.extend({
+    number_of_passengers: requiresPassengersAndTonnage
+      ? z.string().min(1, "Number of passengers is required")
+      : z.string().optional().or(z.literal("")),
+    tonnage: requireTonnage
+      ? z.string().min(1, "Tonnage is required")
+      : z.string().optional().or(z.literal("")),
+  })
+}
 export const AdminMotorQuotationSchema = CustomerDetailsSchema
   .omit({ country: true, first_name: true, last_name: true })
   .merge(VehicleDetailsSchema)
@@ -303,6 +323,10 @@ export const InvoicePaymentSchema = z.object({
   policy_number: z.string().optional(),
   // Set true after user confirms DMVIC ER005/ER007 override in the popup
   validate_double_insurance: z.boolean().optional(),
+  // Required true when validate_double_insurance is true (set from override popup)
+  is_logbook_verified: z.boolean().optional(),
+  // Optional note sent to DMVIC ConfirmCertificateIssuance
+  additional_comments: z.string().max(500).optional(),
   // total_payable: z.string().min(1, "Total payable is required"),
 }).superRefine((data, ctx) => {
   const endDate = data.cover_end_date?.trim()

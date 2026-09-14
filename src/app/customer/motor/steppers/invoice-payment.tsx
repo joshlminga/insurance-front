@@ -90,16 +90,24 @@ export const InvoicePayment: React.FC<CustomerVerificationDetailsProps> = ({ goT
 
     const onSubmit = (data: InvoicePaymentFormValues) => {
         const payload: InvoicePaymentFormValues = { ...data }
+        // Strip override flags on first submit; popup retry adds them back
         delete payload.validate_double_insurance
+        delete payload.is_logbook_verified
+        delete payload.additional_comments
         setPendingOverridePayload(payload)
         submitMutation.mutate(payload)
     }
 
-    const onConfirmOverride = () => {
+    const onConfirmOverride = (values: {
+        is_logbook_verified: true
+        additional_comments: string
+    }) => {
         const base = pendingOverridePayload ?? form.getValues()
         submitMutation.mutate({
             ...base,
             validate_double_insurance: true,
+            is_logbook_verified: values.is_logbook_verified,
+            additional_comments: values.additional_comments,
         })
     }
 

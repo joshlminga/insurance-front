@@ -7,5 +7,8 @@ export { FormField, TextareaField, SelectField, FormGrid } from "./form-field"
 export { EmptyState } from "./empty-state"
 export { BypassOrgLocationPicker } from "./bypass-org-location-picker"
 export { ConfirmDialog } from "./confirm-dialog"
-export { DmvicValidationOverrideDialog } from "./dmvic-validation-override-dialog"
+export {
+  DmvicValidationOverrideDialog,
+  type DmvicValidationOverrideConfirmValues,
+} from "./dmvic-validation-override-dialog"
 export { DetailItem, DetailGrid } from "./detail-item"

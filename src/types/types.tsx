@@ -377,13 +377,13 @@ export type AddVehicleApiPayload = {
   model: string
   manufacture_year: number
   body_type: string
-  /** Optional - null when left blank */
-  color: string | null
-  number_of_passengers: number | null
+  /** Optional - omitted on PATCH when blank so existing DB values are not wiped. */
+  color?: string | null
+  number_of_passengers?: number | null
   /** Required on create; optional on incomplete-vehicle PATCH (Private does not need it). */
-  tonnage: number | null
-  engine_number: string | null
-  cubic_capacity: number | null
+  tonnage?: number | null
+  engine_number?: string | null
+  cubic_capacity?: number | null
   chassis_number: string
 }
 export interface CustomerVerificationDetailsProps {

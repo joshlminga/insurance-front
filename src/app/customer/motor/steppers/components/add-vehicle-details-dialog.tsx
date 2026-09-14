@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dialog'
 import { Button, ReuseableInput } from '@/dev/core'
 import { UseApiMutation } from '@/hooks/hooks'
-import { AddVehicleSchema, CompleteVehicleSchema } from '@/types/form-schema'
+import { buildVehicleDialogSchema } from '@/types/form-schema'
 import type { AddVehicleFormValues } from '@/types/schema'
 import type {
     AddVehicleApiPayload,
@@ -31,6 +31,15 @@ const fourColGridClassName =
 const threeColGridClassName =
     'grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3'
 
+/** Canonical class keys that need passengers + tonnage (matches backend config IDs). */
+function classRequiresPassengersAndTonnage(slug: string | null | undefined): boolean {
+    const key = String(slug ?? '')
+        .trim()
+        .toLowerCase()
+        .replace(/[\s\-_]+/g, '')
+    return key === 'psv' || key === 'commercial'
+}
+
 type AddVehicleDetailsDialogProps = {
     open: boolean
     onOpenChange: (open: boolean) => void
@@ -38,6 +47,8 @@ type AddVehicleDetailsDialogProps = {
     preview: VehiclePreview | null
     /** When set, dialog PATCHes this vehicle instead of POSTing add-vehicle. */
     vehicleTableId?: number | null
+    /** Selected motor class slug (private / psv / commercial / specialvehicle). */
+    vehicleClassSlug?: string | null
     /** Admin: fill engine/cc/chassis from preview. Customer: leave those three blank. */
     autofillSensitiveFields: boolean
     /** After the vehicle is saved, retry the original quote start request. */
@@ -68,9 +79,11 @@ function optionalFormNumber(value: string | undefined): number | null {
 
 function buildAddVehiclePayload(
     data: AddVehicleFormValues,
-    isUpdate: boolean
+    isUpdate: boolean,
+    requiresPassengersAndTonnage: boolean
 ): AddVehicleApiPayload {
-    return {
+    // Required named fields (always sent on create and update).
+    const payload: AddVehicleApiPayload = {
         registration_number: data.registration_number.trim().toUpperCase(),
         make: data.make.trim(),
         model: data.model.trim(),
@@ -78,14 +91,35 @@ function buildAddVehiclePayload(
         body_type: data.body_type.trim(),
         color: optionalTrimmedString(data.color),
         number_of_passengers: optionalFormNumber(data.number_of_passengers),
-        // Create API still requires tonnage; update allows null for Private.
-        tonnage: isUpdate
-            ? optionalFormNumber(data.tonnage)
-            : toFormNumber(data.tonnage),
+        // Create API still requires tonnage; PSV/Commercial always need it; Private update may omit.
+        tonnage:
+            isUpdate && !requiresPassengersAndTonnage
+                ? optionalFormNumber(data.tonnage)
+                : toFormNumber(data.tonnage),
         engine_number: optionalTrimmedString(data.engine_number),
         cubic_capacity: optionalFormNumber(data.cubic_capacity),
         chassis_number: data.chassis_number.trim(),
     }
+
+    // PATCH: omit null optionals so the API does not wipe existing columns.
+    // Keep passengers/tonnage when the selected class requires them.
+    if (isUpdate) {
+        const optionalKeys = [
+            'color',
+            'engine_number',
+            'cubic_capacity',
+            ...(requiresPassengersAndTonnage
+                ? ([] as const)
+                : (['number_of_passengers', 'tonnage'] as const)),
+        ] as const
+        for (const key of optionalKeys) {
+            if (payload[key] === null) {
+                delete payload[key]
+            }
+        }
+    }
+
+    return payload
 }
 
 function buildDefaultValues(
@@ -125,15 +159,22 @@ export function AddVehicleDetailsDialog({
     registrationNumber,
     preview,
     vehicleTableId = null,
+    vehicleClassSlug = null,
     autofillSensitiveFields,
     onAdded,
 }: AddVehicleDetailsDialogProps) {
     const [submitError, setSubmitError] = useState<string | null>(null)
     const isUpdate = vehicleTableId != null && vehicleTableId > 0
+    const requiresPassengersAndTonnage =
+        classRequiresPassengersAndTonnage(vehicleClassSlug)
 
     const formSchema = useMemo(
-        () => (isUpdate ? CompleteVehicleSchema : AddVehicleSchema),
-        [isUpdate]
+        () =>
+            buildVehicleDialogSchema({
+                isUpdate,
+                requiresPassengersAndTonnage,
+            }),
+        [isUpdate, requiresPassengersAndTonnage]
     )
 
     const form = useForm<AddVehicleFormValues>({
@@ -180,7 +221,9 @@ export function AddVehicleDetailsDialog({
 
     const onSubmit = (data: AddVehicleFormValues) => {
         setSubmitError(null)
-        saveVehicleMutation.mutate(buildAddVehiclePayload(data, isUpdate))
+        saveVehicleMutation.mutate(
+            buildAddVehiclePayload(data, isUpdate, requiresPassengersAndTonnage)
+        )
     }
 
     return (
@@ -270,6 +313,7 @@ export function AddVehicleDetailsDialog({
                             name="number_of_passengers"
                             label="Number of Passengers"
                             type="number"
+                            required={requiresPassengersAndTonnage}
                             placeholder="e.g. 5"
                         />
                         <ReuseableInput
@@ -279,7 +323,7 @@ export function AddVehicleDetailsDialog({
                             label="Tonnage"
                             type="number"
                             step="0.01"
-                            required={!isUpdate}
+                            required={requiresPassengersAndTonnage || !isUpdate}
                             placeholder="e.g. 970"
                         />
                     </div>
