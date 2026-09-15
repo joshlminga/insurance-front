@@ -10,6 +10,7 @@ import {
   Banknote,
   FileBadge2,
   FolderCog,
+  Plane,
 } from 'lucide-react'
 import { MODULES, QUOTATION_MOTOR_MODULES } from '@/auth/module-keys'
 import { EPREFIX, EROUTES } from '@/utils/enums'
@@ -178,6 +179,33 @@ export const adminNavConfig: NavItem[] = [
     ],
   },
   {
+    title: 'Travel',
+    url: EROUTES.TRAVEL_PRODUCTS,
+    icon: Plane,
+    items: [
+      {
+        title: 'Products',
+        url: EROUTES.TRAVEL_PRODUCTS,
+      },
+      {
+        title: 'Coverage',
+        url: EROUTES.TRAVEL_COVERAGE,
+      },
+      {
+        title: 'Bound',
+        url: EROUTES.TRAVEL_BOUND,
+      },
+      {
+        title: 'Trip Type',
+        url: EROUTES.TRAVEL_TRIP_TYPE,
+      },
+      {
+        title: 'Plan Type',
+        url: EROUTES.TRAVEL_PLAN_TYPE,
+      },
+    ],
+  },
+  {
     title: 'Finance',
     url: EROUTES.FINANCE_PARAMETERS,
     icon: Banknote,
@@ -316,6 +344,33 @@ export const adminNavConfig: NavItem[] = [
         title: 'Policy Numbers',
         url: EROUTES.DMVIC_STOCK,
         module: MODULES.DMVIC_STOCK,
+      },
+    ],
+  },
+  {
+    title: 'Currencies',
+    url: EROUTES.CURRENCIES_AVAILABLE,
+    icon: Coins,
+    modules: [
+      MODULES.ATU_MULTICURRENCY_CURRENCY,
+      MODULES.ATU_MULTICURRENCY_LOG,
+      MODULES.ATU_MULTICURRENCY_SETTINGS,
+    ],
+    items: [
+      {
+        title: 'Available',
+        url: EROUTES.CURRENCIES_AVAILABLE,
+        module: MODULES.ATU_MULTICURRENCY_CURRENCY,
+      },
+      {
+        title: 'Activity Logs',
+        url: EROUTES.CURRENCIES_ACTIVITY_LOGS,
+        module: MODULES.ATU_MULTICURRENCY_LOG,
+      },
+      {
+        title: 'Configuration',
+        url: EROUTES.CURRENCIES_CONFIGURATION,
+        module: MODULES.ATU_MULTICURRENCY_SETTINGS,
       },
     ],
   },

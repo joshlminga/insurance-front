@@ -413,19 +413,22 @@ export async function initAuthStore() {
         useAuthStore.setState({ alpha: org.location_code })
       }
     } catch (error) {
-      console.error('Failed to resolve organization from Origin:', error)
+      // 404 = unknown tenant domain — expected; only log unexpected failures
       if (axios.isAxiosError(error) && error.response?.status === 404) {
         useAuthStore.setState({
           orgResolveStatus: 'not_found',
           resolvedOrganization: null,
         })
-      } else if (isTenantSubdomain()) {
-        useAuthStore.setState({
-          orgResolveStatus: 'failed',
-          resolvedOrganization: null,
-        })
       } else {
-        useAuthStore.setState({ orgResolveStatus: 'idle' })
+        console.error('Failed to resolve organization from Origin:', error)
+        if (isTenantSubdomain()) {
+          useAuthStore.setState({
+            orgResolveStatus: 'failed',
+            resolvedOrganization: null,
+          })
+        } else {
+          useAuthStore.setState({ orgResolveStatus: 'idle' })
+        }
       }
     }
 

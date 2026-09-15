@@ -44,6 +44,11 @@ export const MODULES = {
   // DMVIC / motor certificates
   DMVIC_CERTIFICATE: 'dmvic-certificate',
   DMVIC_STOCK: 'dmvic-stock',
+
+  // ATU multi-currency
+  ATU_MULTICURRENCY_CURRENCY: 'atu-multicurrency-currency',
+  ATU_MULTICURRENCY_LOG: 'atu-multicurrency-log',
+  ATU_MULTICURRENCY_SETTINGS: 'atu-multicurrency-settings',
 } as const
 
 export type ModuleKey = (typeof MODULES)[keyof typeof MODULES]

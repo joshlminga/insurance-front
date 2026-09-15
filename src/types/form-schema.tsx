@@ -1534,3 +1534,64 @@ export const EditDmvicPolicyNumberRuleSchema = dmvicPolicyNumberRuleBase.superRe
     }
   },
 )
+
+/** ATU multi-currency — create currency form (is_auto UI uses "1" | "0") */
+export const CreateCurrencySchema = z
+  .object({
+    code: z
+      .string()
+      .trim()
+      .max(4, 'Currency code must be 3–4 characters')
+      .optional()
+      .or(z.literal('')),
+    symbol: z.string().trim().optional().or(z.literal('')),
+    name: z.string().trim().optional().or(z.literal('')),
+    rate: z.coerce.number({ message: 'Conversion rate is required' }).positive('Rate must be greater than zero'),
+    is_auto: z.enum(['0', '1'], { message: 'Select Auto or Manual' }),
+    fee: z.coerce.number().min(0, 'Fee cannot be negative').optional().nullable(),
+    country_id: z.string().optional().or(z.literal('')),
+  })
+  .superRefine((data, ctx) => {
+    const code = (data.code ?? '').trim()
+    const symbol = (data.symbol ?? '').trim()
+    if (!code && !symbol) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Provide a Currency Code or Currency Symbol',
+        path: ['code'],
+      })
+    }
+    if (code && (code.length < 3 || code.length > 4)) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Currency code must be 3–4 characters',
+        path: ['code'],
+      })
+    }
+  })
+
+/** ATU multi-currency — edit currency (API requires code + symbol) */
+export const EditCurrencySchema = z.object({
+  code: z
+    .string()
+    .trim()
+    .min(3, 'Currency code must be 3–4 characters')
+    .max(4, 'Currency code must be 3–4 characters'),
+  symbol: z.string().trim().min(1, 'Currency symbol is required').max(10),
+  name: z.string().trim().optional().or(z.literal('')),
+  rate: z.coerce.number({ message: 'Conversion rate is required' }).positive('Rate must be greater than zero'),
+  is_auto: z.enum(['0', '1'], { message: 'Select Auto or Manual' }),
+  fee: z.coerce.number().min(0, 'Fee cannot be negative').optional().nullable(),
+  country_id: z.string().optional().or(z.literal('')),
+})
+
+/** ATU multi-currency — configuration settings (editable fields only) */
+export const MulticurrencySettingsSchema = z.object({
+  apply_fees: z.boolean(),
+  log_conversions: z.boolean(),
+  round_precision: z.coerce
+    .number()
+    .int('Round precision must be a whole number')
+    .min(0, 'Round precision must be 0–10')
+    .max(10, 'Round precision must be 0–10'),
+})

@@ -110,6 +110,31 @@ const VehicleUsePage = lazy(() => import("./app/admin/product/motor/vehicle-use/
 const MotorAddonBenefitsPage = lazy(() => import("./app/admin/product/motor/motor-addon-benefits/page").then(m => ({ default: m.MotorAddonBenefitsPage })))
 const MotorDetailedBenefitPage = lazy(() => import("./app/admin/product/motor/motor-detailed-benefit/page").then(m => ({ default: m.MotorDetailedBenefitPage })))
 const MotorProductRatesPage = lazy(() => import("./app/admin/product/motor/motor-rates/page").then(m => ({ default: m.MotorProductRatesPage })))
+const TravelProductsPage = lazy(() =>
+  import("./app/admin/product/travel/products/page").then(m => ({
+    default: m.TravelProductsPage,
+  }))
+)
+const TravelCoveragePage = lazy(() =>
+  import("./app/admin/product/travel/coverage/page").then(m => ({
+    default: m.TravelCoveragePage,
+  }))
+)
+const TravelBoundPage = lazy(() =>
+  import("./app/admin/product/travel/bound/page").then(m => ({
+    default: m.TravelBoundPage,
+  }))
+)
+const TravelTripTypePage = lazy(() =>
+  import("./app/admin/product/travel/trip-type/page").then(m => ({
+    default: m.TravelTripTypePage,
+  }))
+)
+const TravelPlanTypePage = lazy(() =>
+  import("./app/admin/product/travel/plan-type/page").then(m => ({
+    default: m.TravelPlanTypePage,
+  }))
+)
 const MotorQuotationPage = lazy(() => import("./app/admin/quotations/motor/page").then(m => ({ default: m.MotorQuotationPage })))
 const AdminMotorDuplicateQuotationPage = lazy(() =>
   import("./app/admin/quotations/motor/duplicate/page").then(m => ({
@@ -156,6 +181,21 @@ const FinanceClaimsPage = lazy(() => import("./app/admin/finance/claims"))
 const FinanceInvoicesPage = lazy(() => import("./app/admin/finance/invoices"))
 const FinanceReceiptsPage = lazy(() => import("./app/admin/finance/receipts"))
 const FinancePaymentsPage = lazy(() => import("./app/admin/finance/payments"))
+const CurrenciesAvailablePage = lazy(() =>
+  import("./app/admin/currencies/available/page").then(m => ({
+    default: m.CurrenciesAvailablePage,
+  }))
+)
+const CurrenciesActivityLogsPage = lazy(() =>
+  import("./app/admin/currencies/activity-logs/page").then(m => ({
+    default: m.CurrenciesActivityLogsPage,
+  }))
+)
+const CurrenciesConfigurationPage = lazy(() =>
+  import("./app/admin/currencies/configuration/page").then(m => ({
+    default: m.CurrenciesConfigurationPage,
+  }))
+)
 
 export const router = createBrowserRouter([
   {
@@ -840,6 +880,48 @@ export const router = createBrowserRouter([
             ),
           },
 
+          // products - travel (placeholders until screens are built)
+          {
+            path: "products/travel",
+            element: (
+              <S>
+                <TravelProductsPage />
+              </S>
+            ),
+          },
+          {
+            path: "products/travel/coverage",
+            element: (
+              <S>
+                <TravelCoveragePage />
+              </S>
+            ),
+          },
+          {
+            path: "products/travel/bound",
+            element: (
+              <S>
+                <TravelBoundPage />
+              </S>
+            ),
+          },
+          {
+            path: "products/travel/trip-type",
+            element: (
+              <S>
+                <TravelTripTypePage />
+              </S>
+            ),
+          },
+          {
+            path: "products/travel/plan-type",
+            element: (
+              <S>
+                <TravelPlanTypePage />
+              </S>
+            ),
+          },
+
           // Finance
           {
             path: "finance",
@@ -895,6 +977,42 @@ export const router = createBrowserRouter([
               <S>
                 <AdminModulePage module={MODULES.FINANCE}>
                   <FinancePaymentsPage />
+                </AdminModulePage>
+              </S>
+            ),
+          },
+
+          // ATU Multi Currency
+          {
+            path: "currencies",
+            element: <Navigate to={EROUTES.CURRENCIES_AVAILABLE} replace />,
+          },
+          {
+            path: "currencies/available",
+            element: (
+              <S>
+                <AdminModulePage module={MODULES.ATU_MULTICURRENCY_CURRENCY}>
+                  <CurrenciesAvailablePage />
+                </AdminModulePage>
+              </S>
+            ),
+          },
+          {
+            path: "currencies/activity-logs",
+            element: (
+              <S>
+                <AdminModulePage module={MODULES.ATU_MULTICURRENCY_LOG}>
+                  <CurrenciesActivityLogsPage />
+                </AdminModulePage>
+              </S>
+            ),
+          },
+          {
+            path: "currencies/configuration",
+            element: (
+              <S>
+                <AdminModulePage module={MODULES.ATU_MULTICURRENCY_SETTINGS}>
+                  <CurrenciesConfigurationPage />
                 </AdminModulePage>
               </S>
             ),

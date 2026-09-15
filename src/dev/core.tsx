@@ -777,13 +777,12 @@ export const CustomDialogComponent = <T = TKeyValueStringType,>({
             }}>
             <DialogContent
                 onOpenAutoFocus={(e) => e.preventDefault()}
+                aria-describedby={undefined}
                 className={cn(
                     "select-none max-h-[80dvh] flex flex-col overflow-hidden p-0! m-0!",
                     className ?? ""
                 )}>
-                {title ? (
-                    <DialogTitle className="sr-only">{title}</DialogTitle>
-                ) : null}
+                <DialogTitle className="sr-only">{title ?? "Dialog"}</DialogTitle>
                 <div
                     {...{
                         className: `relative w-full flex-1 h-full overflow-y-auto py-5! px-5`,

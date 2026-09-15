@@ -59,6 +59,9 @@ import {
     EditDmvicStockSchema,
     CreateDmvicPolicyNumberRuleSchema,
     EditDmvicPolicyNumberRuleSchema,
+    CreateCurrencySchema,
+    EditCurrencySchema,
+    MulticurrencySettingsSchema,
 } from "./form-schema";
 
 export type CustomerFormValues = z.infer<typeof CustomerDetailsSchema>
@@ -155,3 +158,7 @@ export type CreateDmvicPolicyNumberRuleFormInput = z.input<typeof CreateDmvicPol
 export type CreateDmvicPolicyNumberRuleFormValues = z.output<typeof CreateDmvicPolicyNumberRuleSchema>;
 export type EditDmvicPolicyNumberRuleFormInput = z.input<typeof EditDmvicPolicyNumberRuleSchema>;
 export type EditDmvicPolicyNumberRuleFormValues = z.output<typeof EditDmvicPolicyNumberRuleSchema>;
+
+export type CreateCurrencyFormValues = z.infer<typeof CreateCurrencySchema>
+export type EditCurrencyFormValues = z.infer<typeof EditCurrencySchema>
+export type MulticurrencySettingsFormValues = z.infer<typeof MulticurrencySettingsSchema>
