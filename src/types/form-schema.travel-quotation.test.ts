@@ -121,3 +121,41 @@ describe('TravelQuotationTravelerSchema date of birth', () => {
     }
   })
 })
+
+describe('TravelQuotationSchema Individual traveler count', () => {
+  it('accepts Individual with one traveler', () => {
+    const result = TravelQuotationSchema.safeParse({
+      ...basePayload,
+      travel_as: 'Individual',
+      travelers: [validTraveler],
+    })
+
+    expect(result.success).toBe(true)
+  })
+
+  it('rejects Individual with two travelers', () => {
+    const result = TravelQuotationSchema.safeParse({
+      ...basePayload,
+      travel_as: 'Individual',
+      travelers: [validTraveler, { ...validTraveler, first_name: 'John' }],
+    })
+
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      const travelerIssues = result.error.issues.filter((issue) =>
+        issue.path.includes('travelers'),
+      )
+      expect(travelerIssues[0]?.message).toContain('only one traveler')
+    }
+  })
+
+  it('accepts Family with two travelers', () => {
+    const result = TravelQuotationSchema.safeParse({
+      ...basePayload,
+      travel_as: 'Family',
+      travelers: [validTraveler, { ...validTraveler, first_name: 'John' }],
+    })
+
+    expect(result.success).toBe(true)
+  })
+})

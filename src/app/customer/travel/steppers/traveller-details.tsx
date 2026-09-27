@@ -20,6 +20,7 @@ import type { CustomerVerificationDetailsProps } from '@/types/types'
 import { UseAuth } from '@/stores/auth-store'
 import { TravelerNationalitySelect } from '@/app/customer/travel/steppers/traveler-nationality-select'
 import {
+    TRAVEL_AS,
     TRAVEL_AS_OPTIONS,
     TRAVEL_BOUND,
     TRAVEL_BOUND_OPTIONS,
@@ -38,7 +39,7 @@ import {
     X,
     type LucideIcon,
 } from 'lucide-react'
-import React, { useMemo } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import {
     Controller,
     FormProvider,
@@ -223,18 +224,35 @@ const TripScheduleBox: React.FC = () => {
 
 /** Multi-traveler field array — unlocks when schedule row is complete */
 const TravelersBox: React.FC = () => {
-    const { control } = useFormContext<TravelQuotationFormValues>()
-    const { fields, append, remove } = useFieldArray({
+    const { control, getValues } = useFormContext<TravelQuotationFormValues>()
+    const travelAs = useWatch({ control, name: 'travel_as' })
+    const isIndividual = travelAs === TRAVEL_AS.Individual
+    const { fields, append, remove, replace } = useFieldArray({
         control,
         name: 'travelers',
     })
+
+    // Individual cover is one person — drop extras if Travel As changes
+    useEffect(() => {
+        if (!isIndividual || fields.length <= 1) {
+            return
+        }
+        const travelers = getValues('travelers')
+        const first = travelers[0]
+        if (!first) {
+            return
+        }
+        replace([first])
+    }, [isIndividual, fields.length, getValues, replace])
 
     return (
         <>
             <div className="flex flex-col gap-0.5 pb-3">
                 <h3 className="text-base font-semibold sm:text-lg">Traveler Details</h3>
                 <p className="text-xs text-muted-foreground sm:text-sm">
-                    Add everyone who will be covered on this trip.
+                    {isIndividual
+                        ? 'Individual cover includes one traveler.'
+                        : 'Add everyone who will be covered on this trip.'}
                 </p>
             </div>
 
@@ -244,16 +262,16 @@ const TravelersBox: React.FC = () => {
                         key={field.id}
                         className="relative rounded-2xl border border-[#ADABAB]/35 bg-white/95 p-3 sm:p-5"
                     >
-                        {fields.length > 1 ? (
+                        {!isIndividual && fields.length > 1 ? (
                             <Button
                                 type="button"
                                 variant="ghost"
                                 size="icon"
-                                className="absolute right-2 top-2 h-8 w-8 text-muted-foreground hover:text-[#C20C0C]"
+                                className="absolute right-2 top-2 h-8 w-8 text-[#C20C0C] hover:bg-[#C20C0C]/10 hover:text-[#C20C0C]"
                                 aria-label={`Remove traveler ${index + 1}`}
                                 onClick={() => remove(index)}
                             >
-                                <X className="h-4 w-4" />
+                                <X className="h-5 w-5" strokeWidth={2.75} />
                             </Button>
                         ) : null}
 
@@ -285,15 +303,29 @@ const TravelersBox: React.FC = () => {
                             <Controller
                                 control={control}
                                 name={`travelers.${index}.date_of_birth`}
-                                render={({ field, fieldState }) => (
+                                render={({ field: dobField, fieldState }) => (
                                     <DdMmYyyyDateInput
                                         id={`traveler-${index}-dob`}
                                         label="Date of Birth"
                                         required
-                                        value={field.value}
-                                        onChange={field.onChange}
+                                        value={dobField.value}
+                                        onChange={dobField.onChange}
                                         maxIso={travelLocalIsoDate()}
                                         invalid={fieldState.invalid}
+                                    />
+                                )}
+                            />
+                            <Controller
+                                control={control}
+                                name={`travelers.${index}.nationality`}
+                                render={({ field: nationalityField }) => (
+                                    <TravelerNationalitySelect
+                                        instanceId={`traveler-${index}`}
+                                        value={nationalityField.value}
+                                        onChange={nationalityField.onChange}
+                                        label="Nationality"
+                                        required
+                                        placeholder="Select nationality..."
                                     />
                                 )}
                             />
@@ -313,36 +345,23 @@ const TravelersBox: React.FC = () => {
                                 type="tel"
                                 required
                             />
-                            <Controller
-                                control={control}
-                                name={`travelers.${index}.nationality`}
-                                render={({ field: nationalityField }) => (
-                                    <TravelerNationalitySelect
-                                        instanceId={`traveler-${index}`}
-                                        value={nationalityField.value}
-                                        onChange={nationalityField.onChange}
-                                        label="Nationality"
-                                        required
-                                        placeholder="Select nationality..."
-                                    />
-                                )}
-                            />
                         </div>
                     </div>
                 ))}
             </div>
 
-            <div className="mt-4">
-                <Button
-                    type="button"
-                    variant="outline"
-                    className="rounded-full border-dashed border-[#ADABAB] text-sm"
-                    leftIcon={<PlusCircle className="h-4 w-4" />}
-                    onClick={() => append(blankTraveler())}
-                >
-                    Add traveler
-                </Button>
-            </div>
+            {!isIndividual ? (
+                <div className="mt-4">
+                    <Button
+                        type="button"
+                        className="rounded-full bg-black text-sm text-white hover:bg-black/90 hover:text-white"
+                        leftIcon={<PlusCircle className="h-4 w-4" />}
+                        onClick={() => append(blankTraveler())}
+                    >
+                        Add traveler
+                    </Button>
+                </div>
+            ) : null}
         </>
     )
 }

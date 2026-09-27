@@ -1311,68 +1311,6 @@ export const TravellerDetailsSchema = z.object({
     .min(1, "Select a country"),
 })
 
-export const OutBoundDestinationSchema = z.object({
-  travel_as: z
-    .string()
-    .min(1, "Please select how you are travelling"),
-
-  type_of_trip: z
-    .string()
-    .min(1, "Please select the type of trip"),
-
-  country_of_depature: z
-    .string()
-    .min(1, "Please select your departure country"),
-
-  country_of_arrival: z
-    .string()
-    .min(1, "Please select your arrival country"),
-
-  date_of_depature: z
-    .string()
-    .min(1, "Departure date is required"),
-
-  date_of_return: z
-    .string()
-    .min(1, "Return date is required"),
-
-  reason_for_travel: z
-    .string()
-    .min(2, "Reason for travel is required")
-    .max(255, "Reason for travel cannot exceed 255 characters"),
-})
-
-export const InBoundDestinationSchema = z.object({
-  travel_as: z
-    .string()
-    .min(1, "Please select how you are travelling"),
-
-  type_of_trip: z
-    .string()
-    .min(1, "Please select the type of trip"),
-
-  country_of_depature: z
-    .string()
-    .min(1, "Please select your departure country"),
-
-  country_of_arrival: z
-    .string()
-    .min(1, "Please select your arrival country"),
-
-  date_of_depature: z
-    .string()
-    .min(1, "Departure date is required"),
-
-  date_of_return: z
-    .string()
-    .min(1, "Return date is required"),
-
-  reason_for_travel: z
-    .string()
-    .min(2, "Reason for travel is required")
-    .max(255, "Reason for travel cannot exceed 255 characters"),
-})
-
 /** Local calendar YYYY-MM-DD (avoids UTC shift from toISOString). */
 export function travelLocalIsoDate(date: Date = new Date()): string {
   const y = date.getFullYear()
@@ -1482,6 +1420,14 @@ export const TravelQuotationSchema = z
           message: "Return date must be at least the day after departure",
         })
       }
+    }
+
+    if (data.travel_as === "Individual" && data.travelers.length > 1) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["travelers"],
+        message: "Individual travel allows only one traveler",
+      })
     }
   })
 

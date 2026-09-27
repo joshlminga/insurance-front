@@ -26,8 +26,3 @@ export enum EFINANCE_RECEIPT_TABS {
     MOTOR='motor',
     TRAVEL='travel',
 }
-
-export enum ETRAVELLERDESTINATION {
-    OUTBOUND='out_bounr',
-    INBOUND='in_bound',
-}

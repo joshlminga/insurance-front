@@ -9,15 +9,12 @@ import MarineInvoiceTab from '@/app/admin/finance/invoices/tabs/marine'
 import TravelInvoiceTab from '@/app/admin/finance/invoices/tabs/travel'
 import MotorReceiptReportTab from '@/app/admin/finance/receipts/tabs/motor-report'
 import TravelReceiptTab from '@/app/admin/finance/receipts/tabs/travel'
-import { TravellerDstinationInboundDetails } from "@/app/customer/travel/steppers/traveller-details-tab/inbound";
-import { TravellerDstinationOutboundDetails } from "@/app/customer/travel/steppers/traveller-details-tab/outbound";
 import {
   ECREDITTRANSACTIONS,
   EFINANCE_INVOICE_TABS,
   EFINANCE_RECEIPT_TABS,
   EINVOICES,
   EMOTORCERTIFICATES,
-  ETRAVELLERDESTINATION,
 } from "@/types/enums";
 import { TTab } from "@/types/types";
 
@@ -99,18 +96,5 @@ export const InvoiceTabs: TTab<EINVOICES>[] = [
         key: EINVOICES.TRAVEL,
         Tab: MotorProductTab,
         title: 'Travel Product'
-    }
-]
-
-export const TravvelerDestinationDetailsTabs: TTab<ETRAVELLERDESTINATION>[] = [
-    {
-        key: ETRAVELLERDESTINATION.OUTBOUND,
-        Tab: TravellerDstinationOutboundDetails,
-        title: 'OutBound',
-    },
-    {
-        key: ETRAVELLERDESTINATION.INBOUND,
-        Tab: TravellerDstinationInboundDetails,
-        title: 'InBound'
     }
 ]

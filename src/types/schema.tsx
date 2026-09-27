@@ -52,8 +52,6 @@ import {
     ParameterSchema,
     CreditTransactionSchema,
     TravellerDetailsSchema,
-    OutBoundDestinationSchema,
-    InBoundDestinationSchema,
     TravelQuotationSchema,
     TravelKycSchema,
     CreateDmvicStockSchema,
@@ -147,8 +145,6 @@ export type ParameterFormValues = z.infer<typeof ParameterSchema>
 export type CreditTransactionForm = z.infer<typeof CreditTransactionSchema>
 
 export type TravellerFormValues = z.infer<typeof TravellerDetailsSchema>
-export type OutboundFormValues = z.infer<typeof OutBoundDestinationSchema>
-export type InboundFormValues = z.infer<typeof InBoundDestinationSchema>
 export type TravelQuotationFormValues = z.infer<typeof TravelQuotationSchema>
 export type TravelKycFormValues = z.infer<typeof TravelKycSchema>
 
