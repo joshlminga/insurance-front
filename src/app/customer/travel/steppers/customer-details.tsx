@@ -41,7 +41,7 @@ export const CustomerVerificationPage = ({
     })
 
     const submitMutation = UseApiMutation<SubmitResponse, CustomerFormValues>({
-        url: "",
+        url: "guest/register",
         method: EMETHODS.POST,
         mutationOptions: {
             onSuccess: (data) => {
@@ -163,12 +163,10 @@ export const CustomerVerificationPage = ({
                         Previous
                     </Button>
                     <Button
-                        // type="submit"
-                        type='button'
+                        type="submit"
                         className="w-full sm:w-auto min-h-11 bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C] px-8"
                         rightIcon={<ArrowRightCircle className="shrink-0" />}
-                        // loading={submitMutation.isPending}
-                        onClick={() => goToNextStep?.()}>
+                        loading={submitMutation.isPending}>
                         Next
                     </Button>
                 </div>

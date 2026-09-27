@@ -20,6 +20,8 @@ import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { UseAuth } from "@/stores/auth-store";
+import type { Guest } from "@/types/types";
 
 export function SignupForm({
   className,
@@ -32,6 +34,7 @@ export function SignupForm({
 
   const navigate = useNavigate()
   const location = useLocation()
+  const { setGuest } = UseAuth()
   // const returnTo = (location.state as any)?.returnTo
   const form = useForm<SignUpFormValues>({
     resolver: zodResolver(SignUpSchema),
@@ -48,8 +51,15 @@ export function SignupForm({
     method: EMETHODS.POST,
     mutationOptions: {
       onSuccess: (data: any) => {
+        // guest/register returns { guestId, verification } for the OTP page
+        const payload = data?.data
+        if (payload?.guestId && payload?.verification) {
+          setGuest({
+            guestId: payload.guestId,
+            verification: payload.verification,
+          } as Guest)
+        }
         ShowToast.success(data.message || "Signup successful!")
-        // navigate(returnTo || EROUTES.LANDING)
         navigate(`/${EPREFIX.AUTH}${EROUTES.VERIFY_EMAIL}`)
       },
       onError: (error: any) => {
@@ -177,6 +187,14 @@ export function SignupForm({
           </Field>
         </FieldGroup>
       </form>
+      <FieldDescription className="text-center text-sm">
+        Need a verification code?{" "}
+        <Link
+          to={`/${EPREFIX.AUTH}${EROUTES.REQUEST_VERIFICATION}`}
+          className="text-[#C20C0C] font-medium hover:underline">
+          Request one
+        </Link>
+      </FieldDescription>
       <FieldDescription>
         Already have an account?
         <Link to={`/${EPREFIX.AUTH}${EROUTES.SIGNIN}`}

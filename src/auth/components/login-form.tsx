@@ -17,8 +17,9 @@ import { LoginSchema } from "@/types/form-schema"
 import { type LoginFormValues } from "@/types/schema"
 import { UseApiMutation } from "@/hooks/hooks"
 import { ShowToast } from "@/utils/utils"
-import type { LoginResponse } from "@/types/types"
+import type { Guest, LoginResponse } from "@/types/types"
 import { normalizeLoginResponse } from '@/auth/session'
+import { homePathForAbilities } from '@/auth/role-destination'
 import { extractErrorMessage } from "@/utils/helpers"
 import { clearTabSignedOut } from '@/auth/session-wipe'
 import { useRef, useState } from "react"
@@ -49,7 +50,8 @@ export function LoginForm({
     mutationOptions: {
       onSuccess: (data: LoginResponse) => {
         if (data?.data?.status === 'NOT_VERIFIED') {
-          setGuest(data?.data?.guest as import('@/types/types').Guest | null);
+          const guestPayload = data?.data?.guest as Guest | null
+          setGuest(guestPayload);
           ShowToast.info(data.message || "Please verify your email to continue.")
           navigate(`/${EPREFIX.AUTH}${EROUTES.VERIFY_EMAIL}`);
           return;
@@ -61,13 +63,12 @@ export function LoginForm({
         }
         // Password login is allowed to store a new session; this flag blocks silent re-login after Log out.
         clearTabSignedOut()
-        setSession(normalizeLoginResponse(data))
+        const session = normalizeLoginResponse(data)
+        setSession(session)
         if (returnTo) {
           navigate(returnTo)
-        } else if (data.is_general) {
-          navigate(EROUTES.LANDING)
         } else {
-          navigate(EROUTES.DASHBOARD);
+          navigate(homePathForAbilities(session.abilities));
         }
       },
       onError: (error: any) => {
@@ -154,6 +155,15 @@ export function LoginForm({
         </FieldGroup>
       </form>
       {variant !== 'org' && (
+      <>
+      <FieldDescription className="text-center text-sm">
+        Need a verification code?{" "}
+        <Link
+          to={`/${EPREFIX.AUTH}${EROUTES.REQUEST_VERIFICATION}`}
+          className="text-[#C20C0C] font-medium hover:underline">
+          Request one
+        </Link>
+      </FieldDescription>
       <FieldDescription className="text-center text-sm">
         Don&apos;t have an account?{" "}
         <Link
@@ -168,6 +178,7 @@ export function LoginForm({
           Sign Up
         </Link>
       </FieldDescription>
+      </>
       )}
     </div>
   );

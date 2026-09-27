@@ -5,27 +5,35 @@ import { UseApiMutation } from '@/hooks/hooks'
 import { cn } from '@/lib/utils'
 import { UseAuth } from '@/stores/auth-store'
 import { OTPVerificationSchema } from '@/types/form-schema'
-import { OTPFormValues } from '@/types/schema'
+import { OTPFormValues, ResendOTPFormValues } from '@/types/schema'
 import { LoginResponse } from '@/types/types'
 import { normalizeLoginResponse } from '@/auth/session'
+import { homePathForAbilities } from '@/auth/role-destination'
 import { EMETHODS } from '@/utils/constatnts'
 import { extractErrorMessage } from '@/utils/helpers'
 import { ShowToast } from '@/utils/utils'
+import { EPREFIX, EROUTES } from '@/utils/enums'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { FormProvider, useForm } from 'react-hook-form'
+import { Link, useNavigate } from 'react-router-dom'
 
 export function OtpVerificationAuthForm({
   className,
   ...props
 }: React.ComponentProps<'div'>) {
   const { setSession, guest } = UseAuth()
+  const navigate = useNavigate()
 
   const form = useForm<OTPFormValues>({
     resolver: zodResolver(OTPVerificationSchema),
     defaultValues: {
       token: '',
       token_type: 'email_verification',
-      token_name: guest?.verification?.phone?.verification_token_name,
+      // Prefer email token name from auth verification; fall back to phone (quote flows)
+      token_name:
+        guest?.verification?.email?.verification_token_name
+        ?? guest?.verification?.phone?.verification_token_name
+        ?? 'register',
     },
   })
 
@@ -34,11 +42,26 @@ export function OtpVerificationAuthForm({
     method: EMETHODS.POST,
     mutationOptions: {
       onSuccess: (data) => {
-        setSession(normalizeLoginResponse(data))
+        const session = normalizeLoginResponse(data)
+        setSession(session)
         ShowToast.success(data.message || 'Verified successfully!')
+        navigate(homePathForAbilities(session.abilities))
       },
       onError: (error: any) => {
         ShowToast.error(extractErrorMessage(error) || 'Submission failed!')
+      },
+    },
+  })
+
+  const resendMutation = UseApiMutation<LoginResponse, ResendOTPFormValues>({
+    url: 'auth/account-verification/retry',
+    method: EMETHODS.POST,
+    mutationOptions: {
+      onSuccess: (data) => {
+        ShowToast.success(data.message || 'Verification code resent!')
+      },
+      onError: (error: any) => {
+        ShowToast.error(extractErrorMessage(error) || 'Failed to resend code.')
       },
     },
   })
@@ -52,6 +75,30 @@ export function OtpVerificationAuthForm({
     form.handleSubmit(onSubmit)()
   }
 
+  const canResendWithGuestId = Boolean(guest?.guestId)
+
+  const resendOtp = () => {
+    if (!canResendWithGuestId) {
+      navigate(`/${EPREFIX.AUTH}${EROUTES.REQUEST_VERIFICATION}`)
+      return
+    }
+
+    const payload: ResendOTPFormValues = {
+      type: 'guest',
+      id: Number(guest?.guestId),
+      token_type: String(
+        guest?.verification?.email?.verification_token_type
+        ?? guest?.verification?.phone?.verification_token_type
+        ?? 'email_verification',
+      ),
+      token_name: String(
+        guest?.verification?.email?.verification_token_name
+        ?? guest?.verification?.phone?.verification_token_name
+        ?? 'register',
+      ),
+    }
+    resendMutation.mutate(payload)
+  }
 
   return (
     <FormProvider {...form}>
@@ -67,6 +114,26 @@ export function OtpVerificationAuthForm({
               title=''
               description=''
             />
+            <p className="text-center text-sm text-muted-foreground mt-4">
+              Didn&apos;t receive the code?{' '}
+              {canResendWithGuestId ? (
+                <Link
+                  to="#"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    resendOtp()
+                  }}
+                  className="text-[#C20C0C] font-semibold underline">
+                  Resend
+                </Link>
+              ) : (
+                <Link
+                  to={`/${EPREFIX.AUTH}${EROUTES.REQUEST_VERIFICATION}`}
+                  className="text-[#C20C0C] font-semibold underline">
+                  Request a new code
+                </Link>
+              )}
+            </p>
           </div>
 
           <Button

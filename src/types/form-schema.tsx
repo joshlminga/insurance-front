@@ -1373,6 +1373,118 @@ export const InBoundDestinationSchema = z.object({
     .max(255, "Reason for travel cannot exceed 255 characters"),
 })
 
+/** Local calendar YYYY-MM-DD (avoids UTC shift from toISOString). */
+export function travelLocalIsoDate(date: Date = new Date()): string {
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, "0")
+  const d = String(date.getDate()).padStart(2, "0")
+  return `${y}-${m}-${d}`
+}
+
+/** Add whole calendar days to a YYYY-MM-DD string. */
+export function travelAddDaysIso(isoDate: string, days: number): string {
+  const [y, m, d] = isoDate.split("-").map(Number)
+  if (!y || !m || !d) {
+    return isoDate
+  }
+  const next = new Date(y, m - 1, d)
+  next.setDate(next.getDate() + days)
+  return travelLocalIsoDate(next)
+}
+
+/** One person covered on a travel quotation */
+export const TravelQuotationTravelerSchema = z.object({
+  first_name: z
+    .string()
+    .min(2, "First name is required")
+    .max(50, "First name cannot exceed 50 characters"),
+  middle_name: z
+    .string()
+    .max(50, "Middle name cannot exceed 50 characters")
+    .optional()
+    .or(z.literal("")),
+  surname: z
+    .string()
+    .min(2, "Surname is required")
+    .max(50, "Surname cannot exceed 50 characters"),
+  date_of_birth: z
+    .string()
+    .min(1, "Date of birth is required")
+    .refine((dob) => dob <= travelLocalIsoDate(), {
+      message: "Date of birth cannot be after today",
+    }),
+  email: z
+    .string()
+    .email("Invalid email address")
+    .min(5, "Email is required")
+    .max(100, "Email cannot exceed 100 characters"),
+  phone: z
+    .string()
+    .min(7, "Phone number is required")
+    .max(20, "Phone number cannot exceed 20 characters"),
+  nationality: z
+    .string()
+    .min(1, "Nationality is required"),
+})
+
+/**
+ * Combined progressive Travel quotation form:
+ * Bound → countries / Travel As → dates / trip / reason → travelers
+ */
+export const TravelQuotationSchema = z
+  .object({
+    bound: z.enum(["Inbound", "Outbound"], {
+      message: "Please select Inbound or Outbound",
+    }),
+    country_of_departure: z
+      .string()
+      .min(1, "Please select your departure country"),
+    country_of_arrival: z
+      .string()
+      .min(1, "Please select your arrival country"),
+    travel_as: z.enum(
+      ["Individual", "Family", "Group", "Student", "Corporate"],
+      { message: "Please select how you are travelling" },
+    ),
+    date_of_departure: z
+      .string()
+      .min(1, "Departure date is required"),
+    date_of_return: z
+      .string()
+      .min(1, "Return date is required"),
+    type_of_trip: z.enum(["Single", "Multi", "Annual"], {
+      message: "Please select the type of trip",
+    }),
+    reason_for_travel: z
+      .string()
+      .min(1, "Reason for travel is required"),
+    travelers: z
+      .array(TravelQuotationTravelerSchema)
+      .min(1, "Add at least one traveler"),
+  })
+  .superRefine((data, ctx) => {
+    const today = travelLocalIsoDate()
+
+    if (data.date_of_departure && data.date_of_departure < today) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["date_of_departure"],
+        message: "Departure date cannot be before today",
+      })
+    }
+
+    if (data.date_of_departure && data.date_of_return) {
+      const minReturn = travelAddDaysIso(data.date_of_departure, 1)
+      if (data.date_of_return < minReturn) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["date_of_return"],
+          message: "Return date must be at least the day after departure",
+        })
+      }
+    }
+  })
+
 export const TravelKycSchema = z.object({
   first_name: z
     .string()

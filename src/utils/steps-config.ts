@@ -19,7 +19,6 @@ import { QuotationsPage } from "@/app/customer/motor/steppers/quotations";
 import { SuccessPurchase } from "@/app/customer/motor/steppers/success-purchase";
 import { VehicleDetailsPage } from "@/app/customer/motor/steppers/vehicle-details";
 import {  CustomerVerificationPage } from "@/app/customer/travel/steppers/customer-details";
-import { TravellerDestinationDetailsPage } from "@/app/customer/travel/steppers/destination-details";
 import { TravelKycDetailsPage } from "@/app/customer/travel/steppers/kyc-details";
 import OTPTravelVerificationPage from "@/app/customer/travel/steppers/otp-verification";
 import { TravelQuotationsPage } from "@/app/customer/travel/steppers/quotations";
@@ -131,11 +130,6 @@ export const getTravelSteps = (isAuthenticated: boolean) => {
         {
             disabled: false,
             title: "",
-            content: TravellerDestinationDetailsPage,
-        },
-        {
-            disabled: false,
-            title: "",
             content: TravelQuotationsPage,
         },
         {
@@ -159,8 +153,7 @@ export const getTravelSteps = (isAuthenticated: boolean) => {
             content: SuccessPurchase,
         },
     ]
-    return allSteps
-    // return isAuthenticated ? allSteps.slice(2) : allSteps
+    return isAuthenticated ? allSteps.slice(2) : allSteps
 }
 
 export const EMARINETABS = [

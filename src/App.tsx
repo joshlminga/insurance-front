@@ -58,6 +58,7 @@ const AuthLayoutPage = lazy(() => import("./auth/layout"))
 const SignInPage = lazy(() => import("./auth/components/signin-page"))
 const SignupForm = lazy(() => import("./auth/components/signup-form").then(m => ({ default: m.SignupForm })))
 const ForgotPasswordForm = lazy(() => import("./auth/components/forgot-password-form"))
+const RequestVerificationForm = lazy(() => import("./auth/components/request-verification-form"))
 const ResetPasswordForm = lazy(() => import("./auth/components/rest-password-form").then(m => ({ default: m.ResetPasswordForm })))
 const OtpVerificationAuthForm = lazy(() => import("./auth/components/otp-verification-form").then(m => ({ default: m.OtpVerificationAuthForm })))
 
@@ -447,6 +448,20 @@ export const router = createBrowserRouter([
                     title="Forgot Password"
                     description="">
                     <ForgotPasswordForm />
+                  </AuthLayoutPage>
+                </S>
+              </PublicRoute>
+            ),
+          },
+          {
+            path: EROUTES.REQUEST_VERIFICATION.slice(1),
+            element: (
+              <PublicRoute>
+                <S>
+                  <AuthLayoutPage
+                    title="Request Verification Code"
+                    description="Enter your email to receive a new verification code.">
+                    <RequestVerificationForm />
                   </AuthLayoutPage>
                 </S>
               </PublicRoute>

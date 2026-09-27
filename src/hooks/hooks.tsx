@@ -5,6 +5,7 @@ import apiClient from '@/lib/api-client'
 import { EMETHODS } from '@/utils/constatnts'
 import { UseAuth } from '@/stores/auth-store'
 import { isTabSignedOut } from '@/auth/session-wipe'
+import { isPublicAppUser } from '@/auth/role-destination'
 import { EROUTES, EPREFIX } from '@/utils/enums'
 import { Navigate, useLocation } from 'react-router-dom'
 import type { 
@@ -79,16 +80,21 @@ export function UseApiMutation<TData = unknown, TVariables = unknown, TContext =
 }
 
 export function ProtectedRoute({ children, requireGeneral }: ProtectedRouteProps) {
-  const { isAuthenticated, isLoading, isGeneral } = UseAuth()
+  const { isAuthenticated, isLoading, isGeneral, abilities } = UseAuth()
 
   if (isLoading) {
     return <div>Loading...</div>
   }
-  if (requireGeneral !== undefined && isGeneral !== null) {
-    if (requireGeneral && isGeneral === false) {
+
+  // Prefer role-based destination; fall back to is_general when abilities are missing
+  const isPublic =
+    abilities != null ? isPublicAppUser(abilities) : isGeneral === true
+
+  if (requireGeneral !== undefined && (abilities != null || isGeneral !== null)) {
+    if (requireGeneral && !isPublic) {
       return <Navigate to={EROUTES.DASHBOARD} replace />
     }
-    if (!requireGeneral && isGeneral === true) {
+    if (!requireGeneral && isPublic) {
       return <Navigate to={EROUTES.LANDING} replace />
     }
   }
@@ -111,7 +117,7 @@ export function CustomerPublicRoute({ children }: ProtectedRouteProps) {
 }
 
 export function PublicRoute({ children }: ProtectedRouteProps) {
-  const { isAuthenticated, isLoading, isGeneral } = UseAuth()
+  const { isAuthenticated, isLoading, isGeneral, abilities } = UseAuth()
   const location = useLocation()
 
   if (isLoading) {
@@ -121,8 +127,11 @@ export function PublicRoute({ children }: ProtectedRouteProps) {
   if (isTabSignedOut() && location.pathname.startsWith(`/${EPREFIX.AUTH}`)) {
     return <>{children}</>
   }
-  if (isAuthenticated && isGeneral !== null) {
-    if (isGeneral === false) {
+  if (isAuthenticated && (abilities != null || isGeneral !== null)) {
+    const isPublic =
+      abilities != null ? isPublicAppUser(abilities) : isGeneral === true
+
+    if (!isPublic) {
       return <Navigate to={EROUTES.DASHBOARD} replace />
     }
     if (location.pathname !== EROUTES.LANDING) {
