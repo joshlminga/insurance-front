@@ -19,14 +19,14 @@ export const TRAVEL_BOUND_OPTIONS: Array<{
   summary: string
 }> = [
   {
-    value: TRAVEL_BOUND.Inbound,
-    label: 'Inbound',
-    summary: 'Visitors traveling into a destination country',
-  },
-  {
     value: TRAVEL_BOUND.Outbound,
     label: 'Outbound',
     summary: 'Residents leaving home to travel internationally',
+  },
+  {
+    value: TRAVEL_BOUND.Inbound,
+    label: 'Inbound',
+    summary: 'Visitors traveling into a destination country',
   },
 ]
 
