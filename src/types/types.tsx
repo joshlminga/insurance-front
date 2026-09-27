@@ -194,6 +194,17 @@ export type MotorQuoteSessionStartData = {
   is_guest?: boolean
 }
 
+/** POST auto/quotation/travel - quote session summary in `data`. */
+export type TravelQuoteSessionStartData = {
+  id: number
+  quote_code?: string
+  customer_type?: MotorQuoteSessionCustomerType
+  customer_id?: number | null
+  guest_id?: number | null
+  user_id?: number | null
+  is_guest?: boolean
+}
+
 export type MotorQuoteLastEndedStage =
   | 'quote'
   | 'rates'

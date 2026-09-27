@@ -9,6 +9,7 @@ import { DdMmYyyyDateInput } from '@/components/dd-mm-yyyy-date-input'
 import { CardFooter } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { UseApiMutation } from '@/hooks/hooks'
 import { cn } from '@/lib/utils'
 import {
     TravelQuotationSchema,
@@ -16,15 +17,22 @@ import {
     travelLocalIsoDate,
 } from '@/types/form-schema'
 import type { TravelQuotationFormValues } from '@/types/schema'
-import type { CustomerVerificationDetailsProps } from '@/types/types'
+import type {
+    CustomerVerificationDetailsProps,
+    SubmitResponse,
+    TravelQuoteSessionStartData,
+} from '@/types/types'
 import { UseAuth } from '@/stores/auth-store'
 import { TravelerNationalitySelect } from '@/app/customer/travel/steppers/traveler-nationality-select'
+import { EMETHODS } from '@/utils/constatnts'
+import { extractErrorMessage } from '@/utils/helpers'
 import {
     TRAVEL_AS,
     TRAVEL_AS_OPTIONS,
     TRAVEL_BOUND,
     TRAVEL_BOUND_OPTIONS,
     TRAVEL_QUOTATION_FORM_SESSION_KEY,
+    TRAVEL_QUOTE_SESSION_STORAGE_KEY,
     TRAVEL_TRIP_OPTIONS,
     type TravelBoundValue,
 } from '@/utils/travel-enums'
@@ -47,7 +55,48 @@ import {
     useForm,
     useFormContext,
     useWatch,
+    type Path,
 } from 'react-hook-form'
+
+/** Customer travel start — form fields plus guest flag for the API. */
+type TravelQuoteStartPayload = TravelQuotationFormValues & {
+    is_guest: true
+}
+
+type ServerFieldError = {
+    name: Path<TravelQuotationFormValues>
+    message: string
+}
+
+const formatServerErrorValue = (value: unknown): string | null => {
+    if (Array.isArray(value)) {
+        return value.filter(Boolean).join('\n')
+    }
+    if (typeof value === 'string') {
+        return value
+    }
+    return null
+}
+
+/**
+ * Map Laravel 422 `errors` object onto RHF paths.
+ * Nested keys like `travelers.1.first_name` keep field-array rows mounted.
+ */
+const extractServerFieldErrors = (error: any): ServerFieldError[] => {
+    const errors = error?.response?.data?.errors
+    if (!errors || typeof errors !== 'object' || Array.isArray(errors)) {
+        return []
+    }
+
+    return Object.entries(errors)
+        .map(([name, value]) => ({
+            name: name as Path<TravelQuotationFormValues>,
+            message: formatServerErrorValue(value),
+        }))
+        .filter((fieldError): fieldError is ServerFieldError =>
+            Boolean(fieldError.message)
+        )
+}
 
 const inputClassName =
     'w-full min-w-0 h-11 sm:h-10 rounded-[5px] border border-[#ADABAB]'
@@ -434,8 +483,58 @@ export const TravellerDetailsPage: React.FC<CustomerVerificationDetailsProps> = 
         [hasRouteRow, dateOfDeparture, dateOfReturn, typeOfTrip, reasonForTravel]
     )
 
+    const submitMutation = UseApiMutation<
+        SubmitResponse & { data: TravelQuoteSessionStartData },
+        TravelQuoteStartPayload
+    >({
+        url: 'auto/quotation/travel',
+        method: EMETHODS.POST,
+        mutationOptions: {
+            onSuccess: (response) => {
+                const session = response?.data as TravelQuoteSessionStartData | undefined
+                const quoteSessionId = Number(session?.id)
+                if (!Number.isFinite(quoteSessionId) || quoteSessionId <= 0) {
+                    ShowToast.error(
+                        'Quote session could not be initialized. Please try again.'
+                    )
+                    return
+                }
+
+                try {
+                    sessionStorage.setItem(
+                        TRAVEL_QUOTE_SESSION_STORAGE_KEY,
+                        String(quoteSessionId)
+                    )
+                } catch {
+                    ShowToast.error('Could not save quote session. Please try again.')
+                    return
+                }
+
+                goToNextStep?.()
+                ShowToast.success(
+                    response?.message || 'Travel quotation started successfully.'
+                )
+            },
+            onError: (error: any) => {
+                // Apply 422 field errors without remounting — traveler boxes stay
+                const fieldErrors = extractServerFieldErrors(error)
+                fieldErrors.forEach(({ name, message }) => {
+                    form.setError(name, { type: 'server', message })
+                })
+
+                const message =
+                    fieldErrors.length > 0
+                        ? 'Please check the highlighted fields.'
+                        : extractErrorMessage(error)
+                ShowToast.error(message || 'Submission failed!')
+            },
+        },
+    })
+
     const onSubmit = (data: TravelQuotationFormValues) => {
-        // No travel quote create API yet — stash locally and continue to Quotations
+        form.clearErrors()
+
+        // Keep local form stash for later steps; API owns the quote session
         try {
             sessionStorage.setItem(
                 TRAVEL_QUOTATION_FORM_SESSION_KEY,
@@ -445,7 +544,11 @@ export const TravellerDetailsPage: React.FC<CustomerVerificationDetailsProps> = 
             ShowToast.error('Could not save travel details. Please try again.')
             return
         }
-        goToNextStep?.()
+
+        submitMutation.mutate({
+            ...data,
+            is_guest: true,
+        })
     }
 
     const handleBoundChange = (value: string) => {
@@ -454,6 +557,8 @@ export const TravellerDetailsPage: React.FC<CustomerVerificationDetailsProps> = 
             shouldDirty: true,
         })
     }
+
+    const isSubmitting = submitMutation.isPending
 
     return (
         <FormProvider {...form}>
@@ -550,6 +655,7 @@ export const TravellerDetailsPage: React.FC<CustomerVerificationDetailsProps> = 
                         className="w-full rounded-full border border-[#C20C0C] bg-transparent text-[#C20C0C] hover:bg-[#C20C0C]/10 sm:w-auto"
                         leftIcon={<ArrowLeftCircle />}
                         onClick={() => goToPrevStep?.()}
+                        disabled={isSubmitting}
                     >
                         Previous
                     </Button>
@@ -557,9 +663,9 @@ export const TravellerDetailsPage: React.FC<CustomerVerificationDetailsProps> = 
                         type="submit"
                         className="w-full rounded-full bg-[#C20C0C]/90 hover:bg-[#C20C0C] sm:w-auto"
                         rightIcon={<ArrowRightCircle />}
-                        disabled={!form.formState.isValid}
+                        disabled={!form.formState.isValid || isSubmitting}
                     >
-                        Next
+                        {isSubmitting ? 'Submitting…' : 'Next'}
                     </Button>
                 </CardFooter>
             </form>
