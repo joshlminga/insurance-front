@@ -194,7 +194,7 @@ export type MotorQuoteSessionStartData = {
   is_guest?: boolean
 }
 
-/** POST auto/quotation/travel - quote session summary in `data`. */
+/** POST quotation/travel - quote session summary in `data`. */
 export type TravelQuoteSessionStartData = {
   id: number
   quote_code?: string

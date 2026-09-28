@@ -72,5 +72,5 @@ export const TRAVEL_TRIP_OPTIONS: Array<{
 /** sessionStorage key for the progressive travel quotation form payload */
 export const TRAVEL_QUOTATION_FORM_SESSION_KEY = 'travel_quotation_form'
 
-/** sessionStorage key for quote session id from POST auto/quotation/travel */
+/** sessionStorage key for quote session id from POST quotation/travel */
 export const TRAVEL_QUOTE_SESSION_STORAGE_KEY = 'travel_quote_session_id'

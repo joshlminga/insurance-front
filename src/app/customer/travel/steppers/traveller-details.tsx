@@ -493,7 +493,7 @@ export const TravellerDetailsPage: React.FC<CustomerVerificationDetailsProps> = 
         SubmitResponse & { data: TravelQuoteSessionStartData },
         TravelQuoteStartPayload
     >({
-        url: 'auto/quotation/travel',
+        url: 'quotation/travel',
         method: EMETHODS.POST,
         mutationOptions: {
             onSuccess: (response) => {
