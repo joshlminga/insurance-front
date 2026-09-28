@@ -156,7 +156,7 @@ function AnimatedSection({ show, children, className }: AnimatedSectionProps) {
             className={cn(
                 'transition-all duration-300 ease-out',
                 show
-                    ? 'opacity-100 translate-y-0 max-h-500'
+                    ? 'opacity-100 translate-y-0 max-h-[9999px] overflow-visible'
                     : 'pointer-events-none opacity-0 -translate-y-1 max-h-0 overflow-hidden',
                 className
             )}
@@ -275,7 +275,13 @@ const TripScheduleBox: React.FC = () => {
 const TravelersBox: React.FC = () => {
     const { control, getValues } = useFormContext<TravelQuotationFormValues>()
     const travelAs = useWatch({ control, name: 'travel_as' })
+    // Only Individual is single-traveler; Family/Group/Student/Corporate can add more
     const isIndividual = travelAs === TRAVEL_AS.Individual
+    const canAddTravelers =
+        travelAs === TRAVEL_AS.Family ||
+        travelAs === TRAVEL_AS.Group ||
+        travelAs === TRAVEL_AS.Student ||
+        travelAs === TRAVEL_AS.Corporate
     const { fields, append, remove, replace } = useFieldArray({
         control,
         name: 'travelers',
@@ -311,7 +317,7 @@ const TravelersBox: React.FC = () => {
                         key={field.id}
                         className="relative rounded-2xl border border-[#ADABAB]/35 bg-white/95 p-3 sm:p-5"
                     >
-                        {!isIndividual && fields.length > 1 ? (
+                        {canAddTravelers && fields.length > 1 ? (
                             <Button
                                 type="button"
                                 variant="ghost"
@@ -399,7 +405,7 @@ const TravelersBox: React.FC = () => {
                 ))}
             </div>
 
-            {!isIndividual ? (
+            {canAddTravelers ? (
                 <div className="mt-4">
                     <Button
                         type="button"

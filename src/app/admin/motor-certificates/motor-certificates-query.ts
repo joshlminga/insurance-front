@@ -5,6 +5,8 @@ export const DMVIC_CERT_URLS = {
     `dmvic/motor/certificates/${invoiceId}`,
   retry: (invoiceId: number | string) =>
     `dmvic/motor/certificates/${invoiceId}/retry-issuing`,
+  refresh: (invoiceId: number | string) =>
+    `dmvic/motor/certificates/${invoiceId}/refresh`,
   bulk: 'dmvic/motor/certificates/bulk-issuing',
 } as const
 

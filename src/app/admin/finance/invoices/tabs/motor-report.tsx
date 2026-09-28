@@ -98,6 +98,21 @@ const MotorInvoiceReportTab = () => {
     },
   })
 
+  const refreshIssuingMutation = UseApiMutation<SubmitResponse, { invoiceId: number | string }>({
+    url: ({ invoiceId }) => `dmvic/motor/certificates/${invoiceId}/refresh`,
+    method: EMETHODS.POST,
+    config: orgContextHeaders ? { headers: orgContextHeaders } : undefined,
+    mutationOptions: {
+      onSuccess: (response) => {
+        ShowToast.success(response?.message || 'Certificate refreshed from DMVIC')
+        void refetch()
+      },
+      onError: (error) => {
+        ShowToast.error(extractErrorMessage(error) || 'Refresh failed')
+      },
+    },
+  })
+
   const retryIssuingMutation = UseApiMutation<SubmitResponse, { invoiceId: number | string }>({
     url: ({ invoiceId }) => `dmvic/motor/certificates/${invoiceId}/retry-issuing`,
     method: EMETHODS.POST,
@@ -164,6 +179,17 @@ const MotorInvoiceReportTab = () => {
       },
     },
     {
+      label: 'Refresh',
+      onSelect: (row) => {
+        if (!row?.id) return
+        refreshIssuingMutation.mutate({ invoiceId: row.id })
+      },
+      conditional: (row) => {
+        const status = String(row?.status ?? '').toLowerCase()
+        return status === 'paid'
+      },
+    },
+    {
       label: 'Retry issue',
       onSelect: (row) => {
         if (!row?.id) return
@@ -212,6 +238,8 @@ const MotorInvoiceReportTab = () => {
               isRowLoading: (row) =>
                 (issueCoverMutation.isPending &&
                   String(issueCoverMutation.variables?.invoiceId) === String(row?.id)) ||
+                (refreshIssuingMutation.isPending &&
+                  String(refreshIssuingMutation.variables?.invoiceId) === String(row?.id)) ||
                 (retryIssuingMutation.isPending &&
                   String(retryIssuingMutation.variables?.invoiceId) === String(row?.id)),
             }),

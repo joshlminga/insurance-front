@@ -24,7 +24,7 @@ import type {
 import { EMETHODS, FILTEROPTIONS, ReusableReducer } from '@/utils/constatnts'
 import { extractErrorMessage } from '@/utils/helpers'
 import { ShowToast } from '@/utils/utils'
-import { RefreshCw } from 'lucide-react'
+import { RefreshCw, RotateCcw } from 'lucide-react'
 import { useCallback, useMemo, useReducer, useState } from 'react'
 
 export default function MotorCertificatesFailedTab() {
@@ -63,6 +63,26 @@ export default function MotorCertificatesFailedTab() {
     () => rows.filter((row) => selectedIds.has(row.invoice_id)),
     [rows, selectedIds]
   )
+
+  const refreshMutation = UseApiMutation<
+    SubmitResponse,
+    { invoice_id: number }
+  >({
+    url: (vars) => DMVIC_CERT_URLS.refresh(vars.invoice_id),
+    method: EMETHODS.POST,
+    mutationOptions: {
+      onSuccess: async (response) => {
+        ShowToast.success(
+          response.message || 'Certificate refreshed from DMVIC.'
+        )
+        await refetch()
+        setSelectedIds(new Set())
+      },
+      onError: (error: unknown) => {
+        ShowToast.error(extractErrorMessage(error) || 'Refresh failed.')
+      },
+    },
+  })
 
   const retryMutation = UseApiMutation<
     SubmitResponse,
@@ -135,6 +155,14 @@ export default function MotorCertificatesFailedTab() {
   const ActionsHandlerMapping: SingleActionsHandler<FailedMotorCertificateRow>[] =
     [
       {
+        label: 'Refresh',
+        icon: RotateCcw,
+        conditional: () => canRetry,
+        onSelect: (row) => {
+          refreshMutation.mutate({ invoice_id: row.invoice_id })
+        },
+      },
+      {
         label: 'Retry',
         icon: RefreshCw,
         conditional: () => canRetry,
@@ -189,7 +217,8 @@ export default function MotorCertificatesFailedTab() {
             }),
           pageSize: data?.pagination?.per_page ?? filter?.pageSize,
           page: data?.pagination?.current_page ?? filter?.page,
-          isLoading: isLoading || retryMutation.isPending,
+          isLoading:
+            isLoading || refreshMutation.isPending || retryMutation.isPending,
           isError: isError,
         }}
       />
