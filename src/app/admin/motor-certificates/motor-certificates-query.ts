@@ -8,7 +8,46 @@ export const DMVIC_CERT_URLS = {
   refresh: (invoiceId: number | string) =>
     `dmvic/motor/certificates/${invoiceId}/refresh`,
   bulk: 'dmvic/motor/certificates/bulk-issuing',
+  cancelReasons: 'dmvic/motor/certificates/cancel-reasons',
+  cancel: (invoiceId: number | string) =>
+    `dmvic/motor/certificates/${invoiceId}/cancel`,
 } as const
+
+/** One option from GET cancel-reasons (keys match the DMVIC config casing). */
+export type CancelReasonOption = {
+  CancelReasonID: number
+  CancelReason: string
+}
+
+/** Body sent to POST .../{invoice_id}/cancel */
+export type CancelCertificatePayload = {
+  cancel_reason_id: number
+  description?: string
+}
+
+/**
+ * Lifecycle status from the API. Casing may differ (e.g. "Issued" vs "issued"),
+ * so always compare with `isCertificateCancellable` instead of `===`.
+ */
+export type MotorCertificateStatus =
+  | 'Pending'
+  | 'Issued'
+  | 'Revoked'
+  | 'Expired'
+  | (string & {})
+
+/**
+ * A certificate can be cancelled only when DMVIC has issued a number and it
+ * is not already revoked/expired. If the API omits `status`, fall back to
+ * "has certificate number".
+ */
+export const isCertificateCancellable = (
+  row: Pick<MotorCertificateRow, 'certificate_number' | 'status'>
+): boolean => {
+  if (!row.certificate_number) return false
+  if (!row.status) return true
+  return row.status.toString().toLowerCase() === 'issued'
+}
 
 export type MotorCertificateRow = {
   id: number
@@ -21,6 +60,7 @@ export type MotorCertificateRow = {
   issued_date?: string | null
   expiry_date?: string | null
   is_active?: boolean
+  status?: MotorCertificateStatus | null
   customer?: {
     id?: number | null
     name?: string | null

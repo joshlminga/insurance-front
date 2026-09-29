@@ -4,13 +4,16 @@ import { MODULES } from '@/auth/module-keys'
 import {
   BuildMotorCertificateColumns,
 } from '@/app/admin/motor-certificates/columns'
+import CancelCertificateModal from '@/app/admin/motor-certificates/modals/cancel-certificate'
 import {
   DMVIC_CERT_URLS,
+  isCertificateCancellable,
   type MotorCertificateRow,
 } from '@/app/admin/motor-certificates/motor-certificates-query'
 import { ActionColumn } from '@/dev/columns'
+import { CustomDialogComponent } from '@/dev/core'
 import { CustomBaseTable, SearchTools } from '@/dev/table'
-import { useDebounce } from '@/hooks'
+import { useCustomDialogContextFactory, useDebounce } from '@/hooks'
 import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
 import type {
   SingleActionsHandler,
@@ -21,7 +24,7 @@ import type {
 import { EMETHODS, FILTEROPTIONS, ReusableReducer } from '@/utils/constatnts'
 import { extractErrorMessage } from '@/utils/helpers'
 import { ShowToast } from '@/utils/utils'
-import { Download } from 'lucide-react'
+import { Ban, Download } from 'lucide-react'
 import { useMemo, useReducer } from 'react'
 
 type IssuedTabProps = {
@@ -53,6 +56,7 @@ const previewPdfBlob = (data: Blob, label: string) => {
 export function MotorCertificatesIssuedTab({ status, title }: IssuedTabProps) {
   const { canModuleAction } = useCan()
   const canDownload = canModuleAction(MODULES.DMVIC_CERTIFICATE, 'read')
+  const canCancel = canModuleAction(MODULES.DMVIC_CERTIFICATE, 'action')
 
   const [filter, optionsDispatcher] = useReducer(
     ReusableReducer<TPaginationFilters & TFilterOptions>,
@@ -62,7 +66,14 @@ export function MotorCertificatesIssuedTab({ status, title }: IssuedTabProps) {
     debounceCallback: optionsDispatcher,
   })
 
-  const { data, isLoading, isError } = UseApiQuery<SubmitResponse>({
+  // Dialog state (open/close + which component to render), same as the Failed tab
+  const { handleDialogContextSwitch, dialogContent, dialogOpen } =
+    useCustomDialogContextFactory<{
+      row?: MotorCertificateRow
+      refetch?: () => Promise<any>
+    }>()
+
+  const { data, isLoading, isError, refetch } = UseApiQuery<SubmitResponse>({
     url: DMVIC_CERT_URLS.list,
     params: {
       status,
@@ -98,6 +109,19 @@ export function MotorCertificatesIssuedTab({ status, title }: IssuedTabProps) {
         downloadMutation.mutate({ invoice_id: row.invoice_id })
       },
     },
+    {
+      label: 'Cancel Certificate',
+      icon: Ban,
+      // Shown only to users with 'action' permission and only for issued certificates
+      conditional: (row) =>
+        canCancel && !!row.invoice_id && isCertificateCancellable(row),
+      onSelect: (row) => {
+        handleDialogContextSwitch({
+          Component: CancelCertificateModal,
+          componentProps: { row, refetch: async () => { await refetch() } },
+        })
+      },
+    },
   ]
 
   return (
@@ -120,7 +144,7 @@ export function MotorCertificatesIssuedTab({ status, title }: IssuedTabProps) {
           },
           columns: [
             ...columns,
-            ...(canDownload
+            ...(canDownload || canCancel
               ? [ActionColumn({ ActionsHandlerMapping })]
               : []),
           ],
@@ -140,6 +164,20 @@ export function MotorCertificatesIssuedTab({ status, title }: IssuedTabProps) {
           isError: isError,
         }}
       />
+
+      <CustomDialogComponent
+        {...{ handleDialogContextSwitch, dialogOpen }}
+        className="sm:max-w-fit w-[95vw] sm:w-auto p-4 sm:p-6"
+      >
+        {dialogContent?.Component && (
+          <dialogContent.Component
+            {...{
+              componentProps: dialogContent.componentProps,
+              handleDialogContextSwitch,
+            }}
+          />
+        )}
+      </CustomDialogComponent>
     </div>
   )
 }
