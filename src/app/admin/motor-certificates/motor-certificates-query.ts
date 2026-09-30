@@ -26,27 +26,28 @@ export type CancelCertificatePayload = {
 }
 
 /**
- * Lifecycle status from the API. Casing may differ (e.g. "Issued" vs "issued"),
- * so always compare with `isCertificateCancellable` instead of `===`.
+ * Policy allocation lifecycle from the API (policy_allocation_status).
+ * Compare with `isCertificateCancellable` instead of raw equality.
  */
-export type MotorCertificateStatus =
-  | 'Pending'
-  | 'Issued'
-  | 'Revoked'
-  | 'Expired'
+export type MotorCertificatePolicyAllocationStatus =
+  | 'pending'
+  | 'confirmed'
+  | 'rejected'
+  | 'reused'
+  | 'expired'
+  | 'cancelled'
   | (string & {})
 
 /**
- * A certificate can be cancelled only when DMVIC has issued a number and it
- * is not already revoked/expired. If the API omits `status`, fall back to
- * "has certificate number".
+ * A certificate can be cancelled when it has a DMVIC number and is not already
+ * cancelled. Other allocation statuses are left as-is.
  */
 export const isCertificateCancellable = (
-  row: Pick<MotorCertificateRow, 'certificate_number' | 'status'>
+  row: Pick<MotorCertificateRow, 'certificate_number' | 'policy_allocation_status'>
 ): boolean => {
   if (!row.certificate_number) return false
-  if (!row.status) return true
-  return row.status.toString().toLowerCase() === 'issued'
+  if (!row.policy_allocation_status) return true
+  return row.policy_allocation_status.toString().toLowerCase() !== 'cancelled'
 }
 
 export type MotorCertificateRow = {
@@ -60,7 +61,7 @@ export type MotorCertificateRow = {
   issued_date?: string | null
   expiry_date?: string | null
   is_active?: boolean
-  status?: MotorCertificateStatus | null
+  policy_allocation_status?: MotorCertificatePolicyAllocationStatus | null
   customer?: {
     id?: number | null
     name?: string | null

@@ -1,4 +1,5 @@
 import type { ColumnDef } from '@tanstack/table-core'
+import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { formatDate } from '@/lib/format'
 import type {
@@ -33,9 +34,22 @@ export function BuildMotorCertificateColumns(
     {
       accessorKey: 'certificate_number',
       header: () => <div>Certificate</div>,
-      cell: ({ row }) => (
-        <div>{row.original.certificate_number ?? '-'}</div>
-      ),
+      cell: ({ row }) => {
+        const status = row.original.policy_allocation_status
+          ?.toString()
+          .toLowerCase()
+        const isCancelled = status === 'cancelled'
+
+        return (
+          <div className="space-y-1">
+            <div>{row.original.certificate_number ?? '-'}</div>
+            {/* Only Cancelled needs to stand out for the user */}
+            {isCancelled ? (
+              <Badge variant="destructive">Cancelled</Badge>
+            ) : null}
+          </div>
+        )
+      },
     },
     {
       accessorKey: 'policy_number',
