@@ -127,7 +127,7 @@ describe("getDmvicValidationOverrideError", () => {
                         can_proceed: false,
                         errors: {
                             cover_start_date: [
-                                "This vehicle is already covered under an active policy. Please use cover start date 15/09/2026.",
+                                "Within the selected date range we found an active policy up to 15/09/2026. Please try different dates.",
                             ],
                         },
                     },

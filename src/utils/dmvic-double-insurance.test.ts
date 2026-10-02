@@ -43,7 +43,7 @@ describe("validateDoubleInsurancePreflight", () => {
     )
   })
 
-  it("returns blocked with suggested start on 422 overlapping covers", async () => {
+  it("returns blocked with message on 422 overlapping covers (no actionable suggested start)", async () => {
     vi.mocked(apiClient.get).mockRejectedValue({
       response: {
         status: 422,
@@ -52,12 +52,13 @@ describe("validateDoubleInsurancePreflight", () => {
           message: "The given data was invalid.",
           data: {
             clear: false,
-            suggested_cover_start_date: "2027-01-02",
+            suggested_cover_start_date: null,
+            latest_cover_expiry_date: "01/01/2027 23:59",
             covers: [{ certificate_number: "A12831355" }],
           },
           errors: {
             cover_start_date: [
-              "This vehicle is already covered under an active policy. Please use cover start date 02/01/2027.",
+              "Within the selected date range we found an active policy up to 01/01/2027. Please try different dates.",
             ],
           },
         },
@@ -71,9 +72,9 @@ describe("validateDoubleInsurancePreflight", () => {
 
     expect(result).toEqual({
       clear: false,
-      suggestedCoverStartDate: "2027-01-02",
+      suggestedCoverStartDate: null,
       message:
-        "This vehicle is already covered under an active policy. Please use cover start date 02/01/2027.",
+        "Within the selected date range we found an active policy up to 01/01/2027. Please try different dates.",
     })
   })
 

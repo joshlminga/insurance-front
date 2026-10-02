@@ -61,6 +61,11 @@ import {
     resolveMotorStoredPaymentPlan,
     type MotorPurchaseSummaryData,
 } from '@/app/customer/motor/motor-purchase-query'
+import { PolicyDetailsConfirmDialog } from '@/app/customer/motor/steppers/policy-details-confirm-dialog'
+import {
+    fetchMotorPolicyDetails,
+    type MotorPolicyDetails,
+} from '@/utils/motor-policy-details'
 
 type BoxHeaderProps = {
     title: string
@@ -87,6 +92,7 @@ const breakdownInputClass =
 export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
     goToNextStep,
     goToPrevStep,
+    goToKyc,
     defaultCustomerContact,
 }) => {
     const customerEmail = defaultCustomerContact?.email ?? readAdminMotorCustomerContact().email
@@ -94,6 +100,10 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
     const [selectedPaymentMethod, setSelectedPaymentMethod] = React.useState<string>('mpesa');
     const [purchaseId, setPurchaseId] = React.useState<string | null>(null);
     const [isPlanConfirmOpen, setIsPlanConfirmOpen] = React.useState(false);
+    const [isPolicyConfirmOpen, setIsPolicyConfirmOpen] = React.useState(false)
+    const [policyDetails, setPolicyDetails] = React.useState<MotorPolicyDetails | null>(null)
+    const [isPolicyDetailsLoading, setIsPolicyDetailsLoading] = React.useState(false)
+    const pendingPaymentDataRef = React.useRef<PaymentFormInput | null>(null)
     const lastAppliedPlanRef = React.useRef<string>('');
     const pendingPlanRef = React.useRef<string | null>(null);
     const isConfirmingPlanRef = React.useRef(false);
@@ -366,6 +376,7 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
         },
     })
 
+    // Actual payment after user confirms policy details in the dialog.
     const onSubmit = async (data: PaymentFormInput) => {
         if (usesPesapal(data)) {
             submitPesapal(data)
@@ -429,6 +440,44 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
         submitMutation.mutate(payload)
     }
 
+    // Proceed To Payment → fetch policy preview → confirm dialog (do not pay yet).
+    const handleProceedToPayment = async (data: PaymentFormInput) => {
+        if (!purchaseId) {
+            ShowToast.error('Purchase session is missing. Please refresh and try again.')
+            return
+        }
+
+        setIsPolicyDetailsLoading(true)
+        try {
+            const details = await fetchMotorPolicyDetails(purchaseId)
+            pendingPaymentDataRef.current = data
+            setPolicyDetails(details)
+            setIsPolicyConfirmOpen(true)
+        } catch (error) {
+            ShowToast.error(
+                extractErrorMessage(error) || 'Failed to load policy details. Please try again.',
+            )
+        } finally {
+            setIsPolicyDetailsLoading(false)
+        }
+    }
+
+    const confirmPolicyDetails = () => {
+        const data = pendingPaymentDataRef.current
+        setIsPolicyConfirmOpen(false)
+        pendingPaymentDataRef.current = null
+        if (data) {
+            void onSubmit(data)
+        }
+    }
+
+    const changePolicyDetails = () => {
+        setIsPolicyConfirmOpen(false)
+        pendingPaymentDataRef.current = null
+        setPolicyDetails(null)
+        goToKyc?.()
+    }
+
     const createDownloadMutation = (purchaseId: string) =>
         UseApiMutation<Blob, string>({
             url: `document/motor/invoice-all/${purchaseId}`,
@@ -473,7 +522,7 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
         <>
             <FormProvider {...form}>
                 <form
-                    onSubmit={form.handleSubmit(onSubmit, (errors) => {
+                    onSubmit={form.handleSubmit(handleProceedToPayment, (errors) => {
                         // invoice_id is hidden — surface it so Proceed does not look "dead"
                         if (errors.invoice_id?.message) {
                             ShowToast.error(String(errors.invoice_id.message))
@@ -773,11 +822,13 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
                                 ]} />
                             <Button
                                 type="submit"
-                                disabled={isInteractionBlocked}
+                                disabled={isInteractionBlocked || isPolicyDetailsLoading}
                                 className="w-full rounded-full bg-[#BF162E]/90 hover:bg-[#BF162E] sm:w-auto disabled:opacity-50"
                                 rightIcon={<ArrowRightCircle />}>
                                 {isPlanBreakdownUpdating || paymentPlanMutation.isPending
                                     ? 'Updating plan...'
+                                    : isPolicyDetailsLoading
+                                    ? 'Loading details...'
                                     : isPolling || isPesapalSubmitting || isPaystackSubmitting || isCreditSubmitting
                                     ? 'Processing...'
                                     : 'Proceed To Payment'}
@@ -786,6 +837,19 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
                     </CardFooter>
                 </form>
             </FormProvider>
+
+            <PolicyDetailsConfirmDialog
+                open={isPolicyConfirmOpen}
+                onOpenChange={(open) => {
+                    setIsPolicyConfirmOpen(open)
+                    if (!open) {
+                        pendingPaymentDataRef.current = null
+                    }
+                }}
+                details={policyDetails}
+                onConfirm={confirmPolicyDetails}
+                onChangeDetails={changePolicyDetails}
+            />
 
             <CustomDialogComponent
                 {...{ handleDialogContextSwitch, dialogOpen }}

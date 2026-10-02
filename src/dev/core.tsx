@@ -228,6 +228,7 @@ export function ReusableStepper({
     className,
     value,
     onValueChange,
+    stepExtraProps,
 }: ReusableStepperProps) {
     const [internalStep, setInternalStep] = useState(defaultStep)
     const isControlled = value !== undefined
@@ -276,6 +277,7 @@ export function ReusableStepper({
                             <StepComponent
                                 goToNextStep={() => goToStep(currentStep + 1)}
                                 goToPrevStep={() => goToStep(currentStep - 1)}
+                                {...stepExtraProps}
                             />
                         </StepperContent>
                     )
@@ -2231,10 +2233,14 @@ export const ConfirmationDialog = ({
     onOpenChange,
     title,
     description,
+    children,
+    contentSize = "sm",
+    centered = false,
     confirmButtonText = "Confirm",
     cancelButtonText = "Cancel",
     confirmButtonClassName,
     cancelButtonClassName,
+    showCloseButton = false,
     onConfirm,
     onCancel,
     isPending = false,
@@ -2242,8 +2248,25 @@ export const ConfirmationDialog = ({
 }: ConfirmationDialogProps) => {
     return (
         <AlertDialog open={open} onOpenChange={onOpenChange}>
-            <AlertDialogContent size="sm">
-                <AlertDialogHeader>
+            <AlertDialogContent
+                size={contentSize}
+                className="max-h-[min(90vh,720px)] overflow-y-auto">
+                {showCloseButton ? (
+                    <button
+                        type="button"
+                        aria-label="Close"
+                        className="absolute top-3 right-3 z-10 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-black/5 hover:text-foreground"
+                        onClick={() => onOpenChange(false)}
+                    >
+                        <X className="size-4" />
+                    </button>
+                ) : null}
+                <AlertDialogHeader
+                    className={cn(
+                        showCloseButton && "pr-8",
+                        centered &&
+                            "place-items-center text-center sm:place-items-center sm:text-center",
+                    )}>
                     {icon && <div className="mb-2 flex justify-center">{icon}</div>}
                     <AlertDialogTitle>{title}</AlertDialogTitle>
                     {description && (
@@ -2251,7 +2274,10 @@ export const ConfirmationDialog = ({
                     )}
                 </AlertDialogHeader>
 
-                <AlertDialogFooter>
+                {children ? <div className="w-full">{children}</div> : null}
+
+                <AlertDialogFooter
+                    className={cn(centered && "sm:justify-center")}>
                     <AlertDialogCancel
                         variant="ghost"
                         onClick={onCancel}

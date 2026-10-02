@@ -9,10 +9,13 @@ import MarineInvoiceTab from '@/app/admin/finance/invoices/tabs/marine'
 import TravelInvoiceTab from '@/app/admin/finance/invoices/tabs/travel'
 import MotorReceiptReportTab from '@/app/admin/finance/receipts/tabs/motor-report'
 import TravelReceiptTab from '@/app/admin/finance/receipts/tabs/travel'
+import FinanceTransactionsPerInvoiceTab from '@/app/admin/finance/transactions/tabs/per-invoice'
+import FinanceTransactionsPerPurchaseTab from '@/app/admin/finance/transactions/tabs/per-purchase'
 import {
   ECREDITTRANSACTIONS,
   EFINANCE_INVOICE_TABS,
   EFINANCE_RECEIPT_TABS,
+  EFINANCE_TRANSACTION_TABS,
   EINVOICES,
   EMOTORCERTIFICATES,
 } from "@/types/enums";
@@ -46,6 +49,20 @@ export const FinanceReceiptTabs: TTab<EFINANCE_RECEIPT_TABS>[] = [
     key: EFINANCE_RECEIPT_TABS.TRAVEL,
     Tab: TravelReceiptTab,
     title: 'Travel',
+  },
+]
+
+/** Finance ledger: Per Invoice | Per Purchase (API view=invoice|purchase) */
+export const FinanceTransactionTabs: TTab<EFINANCE_TRANSACTION_TABS>[] = [
+  {
+    key: EFINANCE_TRANSACTION_TABS.PER_INVOICE,
+    Tab: FinanceTransactionsPerInvoiceTab,
+    title: 'Per Invoice',
+  },
+  {
+    key: EFINANCE_TRANSACTION_TABS.PER_PURCHASE,
+    Tab: FinanceTransactionsPerPurchaseTab,
+    title: 'Per Purchase',
   },
 ]
 

@@ -20,13 +20,21 @@ export type TPageTitleProps = { title: string } & Partial<TClassType>;
 export interface ReusableStepperProps {
   steps: {
     title: string
-    content: React.FC<{ goToNextStep: () => void; goToPrevStep: () => void }>
+    content: React.FC<{
+      goToNextStep: () => void
+      goToPrevStep: () => void
+      goToKyc?: () => void
+    }>
   }[]
   defaultStep?: number
   className?: string
   value?: number
   onValueChange?: (value: number) => void
-  disabled?: boolean,
+  disabled?: boolean
+  /** Extra props passed into every step (e.g. goToKyc for motor payment gate). */
+  stepExtraProps?: {
+    goToKyc?: () => void
+  }
 }
 export type { LoginResponse } from '@/auth/types'
 
@@ -360,6 +368,37 @@ export interface SubmitResponse {
   CheckoutRequestID?: any
 }
 
+/**
+ * One local ledger / journal line from GET finance/transactions.
+ * Mirrors backend LedgerEntryResource fields used in the admin list.
+ * `view=invoice` → invoice_id set; `view=purchase` → purchase_id set (Payable header).
+ */
+export type FinanceLedgerEntryType = 'invoice' | 'payment' | 'gross-commission' | 'tax'
+export type FinanceLedgerEntryKind = 'payable' | 'receivable'
+
+export type FinanceLedgerEntry = {
+  id: number
+  /** Null on purchase-header Payable journals */
+  invoice_id: number | null
+  /** Set on Payable header lines; may also appear on invoice-linked rows */
+  purchase_id: number | null
+  account: string | null
+  note: string | null
+  /** Debit amount (API often sends decimal strings like "1000.00") */
+  dr: string | number
+  /** Credit amount */
+  cr: string | number
+  type: FinanceLedgerEntryType | string
+  /** Journal kind: payable / receivable (null for older payment-only rows) */
+  entry_type: FinanceLedgerEntryKind | string | null
+  is_active?: boolean
+  created_at?: string | null
+  updated_at?: string | null
+  /** Optional nested refs — not currently returned by LedgerEntryResource */
+  invoice?: { id?: number; invoice_number?: string | null } | null
+  purchase?: { id?: number; reference?: string | null } | null
+}
+
 /** NTSA-style preview returned when quote start rejects the registration number. */
 export type VehiclePreview = {
   make?: string | null
@@ -400,6 +439,11 @@ export type AddVehicleApiPayload = {
 export interface CustomerVerificationDetailsProps {
   goToNextStep?: () => void
   goToPrevStep?: () => void
+  /**
+   * Jump to KYC (not Previous). Used when user chooses Change Details
+   * on the pre-payment policy confirm dialog.
+   */
+  goToKyc?: () => void
   /** Label for the step to return to when quote session is missing (e.g. admin flow). */
   missingSessionBackLabel?: string
 }
@@ -1114,10 +1158,18 @@ export interface ConfirmationDialogProps {
   onOpenChange: (open: boolean) => void
   title: string
   description?: string
+  /** Optional body (e.g. policy detail rows) between description and footer. */
+  children?: ReactNode
+  /** Alert dialog width; use default when showing detail rows. */
+  contentSize?: 'default' | 'sm'
+  /** Center title, description, and footer actions (overrides default left/end layout). */
+  centered?: boolean
   confirmButtonText?: string
   cancelButtonText?: string
   confirmButtonClassName?: string
   cancelButtonClassName?: string
+  /** Top-right X; dismisses via onOpenChange(false) only (does not call onCancel). */
+  showCloseButton?: boolean
   onConfirm: () => void | Promise<void>
   onCancel?: () => void
   isPending?: boolean

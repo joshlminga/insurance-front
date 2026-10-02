@@ -1,13 +1,17 @@
 import { ReusableStepper } from '@/dev/core'
-import { getMotorSteps } from '@/utils/steps-config'
+import { getMotorKycStepIndex, getMotorSteps } from '@/utils/steps-config'
 import { usePurchaseStepper } from '@/hooks/use-purchase-stepper'
 import { UseAuth } from '@/stores/auth-store'
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 
 export const StepPage: React.FC = () => {
     const { isAuthenticated } = UseAuth();
     const { currentStep, setCurrentStep } = usePurchaseStepper('motor');
     const steps = getMotorSteps(isAuthenticated);
+    const kycStepIndex = useMemo(
+        () => getMotorKycStepIndex(isAuthenticated),
+        [isAuthenticated],
+    )
     const prevIsAuthenticated = useRef(isAuthenticated)
     useEffect(() => {
         if (!prevIsAuthenticated.current && isAuthenticated) {
@@ -24,6 +28,10 @@ export const StepPage: React.FC = () => {
             steps={steps}
             value={currentStep}
             onValueChange={setCurrentStep}
+            stepExtraProps={{
+                // Jump to KycInfo step (not Previous → Invoice)
+                goToKyc: () => setCurrentStep(kycStepIndex),
+            }}
         />
     )
 }

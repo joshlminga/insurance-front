@@ -14,6 +14,7 @@ import { useNavigate } from 'react-router-dom'
 import { UseAuth } from '@/stores/auth-store'
 import { resolveAdminMotorPayeeContact } from '../admin-motor-session'
 import { PURCHASE_STEPS } from '@/dev/steps'
+import { AdminMotorPaymentOptions } from '@/app/admin/quotations/motor/steppers/payment-options'
 
 const readSessionValue = (key: string) => {
     if (typeof window === 'undefined') return null
@@ -69,10 +70,18 @@ export const AdminMotorQuotationPurchasePage = () => {
         }
     }
 
-    const stepProps =
+    // KYC is step 1 — do not use goToPrevStep from Payment (that lands on Invoice).
+    const goToKyc = () => setStep(1)
+
+    const baseProps =
         current.Component === KycInfo || current.Component === SuccessPurchase
             ? { goToPrevStep, goToNextStep }
             : { goToPrevStep, goToNextStep, defaultCustomerContact }
+
+    const stepProps =
+        current.Component === AdminMotorPaymentOptions
+            ? { ...baseProps, goToKyc }
+            : baseProps
 
     return (
         <div className="space-y-6 text-sm pb-[max(5vh,4.5rem)] mb-[5vh]">

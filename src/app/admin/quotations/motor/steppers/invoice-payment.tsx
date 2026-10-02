@@ -193,12 +193,7 @@ export const AdminMotorInvoicePayment: React.FC<AdminMotorStepProps> = ({
             })
 
             if (!preflight.clear) {
-                if (preflight.suggestedCoverStartDate) {
-                    form.setValue('cover_start_date', preflight.suggestedCoverStartDate, {
-                        shouldValidate: true,
-                        shouldDirty: true,
-                    })
-                }
+                // Do not auto-fill a suggested start: DMVIC only saw covers in the checked range.
                 form.setError('cover_start_date', {
                     type: 'manual',
                     message: preflight.message,

@@ -19,7 +19,10 @@ export type DoubleInsurancePreflightClear = {
 
 export type DoubleInsurancePreflightBlocked = {
   clear: false
-  /** Suggested next start (YYYY-MM-DD) from latest overlapping cover expiry + 1 day */
+  /**
+   * Legacy field from API; always null now.
+   * Do not auto-fill cover_start_date from this — range-limited DMVIC results are not safe guidance.
+   */
   suggestedCoverStartDate: string | null
   message: string
 }
@@ -40,7 +43,7 @@ type DoubleInsuranceApiData = {
  * Keeps this DMVIC round-trip off the Type A/C validate request (PHP timeout-safe).
  *
  * - clear=true / 200 → Go (no overlapping cover, including ER0016)
- * - 422 with covers → No-Go; UI should block and show suggested start date
+ * - 422 with covers → No-Go; UI should block and ask the user to try different dates
  */
 export async function validateDoubleInsurancePreflight(
   params: DoubleInsurancePreflightParams,

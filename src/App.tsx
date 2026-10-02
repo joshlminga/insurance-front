@@ -182,6 +182,11 @@ const FinanceClaimsPage = lazy(() => import("./app/admin/finance/claims"))
 const FinanceInvoicesPage = lazy(() => import("./app/admin/finance/invoices"))
 const FinanceReceiptsPage = lazy(() => import("./app/admin/finance/receipts"))
 const FinancePaymentsPage = lazy(() => import("./app/admin/finance/payments"))
+const FinanceTransactionsPage = lazy(() =>
+  import("./app/admin/finance/transactions/page").then(m => ({
+    default: m.FinanceTransactionsPage,
+  }))
+)
 const CurrenciesAvailablePage = lazy(() =>
   import("./app/admin/currencies/available/page").then(m => ({
     default: m.CurrenciesAvailablePage,
@@ -992,6 +997,16 @@ export const router = createBrowserRouter([
               <S>
                 <AdminModulePage module={MODULES.FINANCE}>
                   <FinancePaymentsPage />
+                </AdminModulePage>
+              </S>
+            ),
+          },
+          {
+            path: "finance/transactions",
+            element: (
+              <S>
+                <AdminModulePage module={MODULES.FINANCE}>
+                  <FinanceTransactionsPage />
                 </AdminModulePage>
               </S>
             ),

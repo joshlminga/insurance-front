@@ -26,3 +26,9 @@ export enum EFINANCE_RECEIPT_TABS {
     MOTOR='motor',
     TRAVEL='travel',
 }
+
+/** Finance ledger list tabs — maps to API `view=invoice|purchase` */
+export enum EFINANCE_TRANSACTION_TABS {
+    PER_INVOICE = 'invoice',
+    PER_PURCHASE = 'purchase',
+}

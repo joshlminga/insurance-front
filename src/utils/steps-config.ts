@@ -73,6 +73,13 @@ export const getMotorSteps = (isAuthenticated: boolean) => {
     return isAuthenticated ? allSteps.slice(2) : allSteps
 }
 
+/** 1-based stepper index for KycInfo (used by Change Details on payment gate). */
+export function getMotorKycStepIndex(isAuthenticated: boolean): number {
+    const steps = getMotorSteps(isAuthenticated)
+    const index = steps.findIndex((step) => step.content === KycInfo)
+    return index >= 0 ? index + 1 : 1
+}
+
 
 export const EMARINESTEPS = [
     {

@@ -232,6 +232,11 @@ export const adminNavConfig: NavItem[] = [
         module: MODULES.REPORT_MOTOR_RECEIPT,
       },
       {
+        title: 'Transactions',
+        url: EROUTES.FINANCE_TRANSACTIONS,
+        module: MODULES.FINANCE,
+      },
+      {
         title: 'Payments',
         url: EROUTES.PAYMENTS,
         module: MODULES.FINANCE,
