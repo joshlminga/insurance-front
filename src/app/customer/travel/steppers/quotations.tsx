@@ -353,7 +353,8 @@ export const TravelQuotationsPage: React.FC<CustomerVerificationDetailsProps> = 
                     const premium = item?.calculated_premium ?? {}
                     const plan = item?.plan
                     const tripDays = premium?.trip_days
-                    const levyApplied = Boolean(item?.product?.levy_applied)
+                    // true = insurer rate already includes levies; false = show calculated duties
+                    const rateIncludesLevies = Boolean(item?.product?.levy_applied)
                     const rowClass =
                       'flex flex-row items-center justify-between gap-2'
 
@@ -446,13 +447,13 @@ export const TravelQuotationsPage: React.FC<CustomerVerificationDetailsProps> = 
                             <span className="min-w-0 text-xs text-gray-500 sm:text-sm">
                               PHCF, TL & Stamp Duty
                             </span>
-                            {levyApplied ? (
-                              <span className="shrink-0 text-xs font-medium text-gray-900 sm:text-sm">
-                                {formatAmount(premium?.total_duty)}
-                              </span>
-                            ) : (
+                            {rateIncludesLevies ? (
                               <span className="inline-flex w-fit shrink-0 items-center rounded-sm bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
                                 Incl
+                              </span>
+                            ) : (
+                              <span className="shrink-0 text-xs font-medium text-gray-900 sm:text-sm">
+                                {formatAmount(premium?.total_duty)}
                               </span>
                             )}
                           </div>
