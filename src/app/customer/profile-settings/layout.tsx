@@ -21,7 +21,7 @@ const profileLinks: ProfileLink[] = [
     },
     {
         label: 'My Claims',
-        to: `/${EPREFIX.CUSTOMER}${EROUTES.CLAIMS}`,
+        to: `/${EPREFIX.CUSTOMER}${EROUTES.MY_CLAIMS}`,
         icon: BaggageClaim,
     },
     {

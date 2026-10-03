@@ -1,180 +1,420 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/**
+ * Travel KYC — one “Customer Info & Documents” block per traveller.
+ * Prefills from TRAVEL_QUOTATION_FORM_SESSION_KEY; submits multipart to
+ * purchase/travel/{purchaseId}/kyc.
+ */
+import { CardFooter } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
+import { TravelerNationalitySelect } from '@/app/customer/travel/steppers/traveler-nationality-select'
 import {
-    Button,
-    ReuseableInput,
-    ReuseableSingleSelectNationalityInput
+  Button,
+  ReuseableInput,
 } from '@/dev/core'
 import { UseApiMutation } from '@/hooks/hooks'
 import { TravelKycSchema } from '@/types/form-schema'
-import { TravelKycFormValues } from '@/types/schema'
-import {
-    CustomerVerificationDetailsProps,
-    SubmitResponse
+import type { TravelKycFormValues } from '@/types/schema'
+import type {
+  CustomerVerificationDetailsProps,
+  SubmitResponse,
 } from '@/types/types'
-import { EMETHODS } from '@/utils/constatnts'
+import {
+  EMETHODS,
+  INVOICE_SESSION_STORAGE_KEY,
+  PURCHASE_SESSION_STORAGE_KEY,
+} from '@/utils/constatnts'
 import { extractErrorMessage } from '@/utils/helpers'
+import { TRAVEL_QUOTATION_FORM_SESSION_KEY } from '@/utils/travel-enums'
 import { invalidSelectClassName, ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { ArrowLeftCircle, ArrowRightCircle } from 'lucide-react'
+import React, { useState } from 'react'
 import {
-    ArrowLeftCircle,
-    ArrowRightCircle
-} from 'lucide-react'
-import React from 'react'
-import {
-    Controller,
-    useForm
+  Controller,
+  useFieldArray,
+  useForm,
+  type Path,
 } from 'react-hook-form'
 
-export const TravelKycDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({ goToNextStep, goToPrevStep }) => {
-    const form = useForm<TravelKycFormValues>({
-        resolver: zodResolver(TravelKycSchema),
-        defaultValues: {
-            first_name: "",
-            middle_name: "",
-            sur_name: "",
-            email: "",
-            phone_number: "",
-            date_or_birth: "",
-            nationality: "",
-            passport_number: "",
-            tax_number: "",
-            tax_certificate: undefined,
-            passport_attachment: undefined,
-        },
-    })
-    const submitMutation = UseApiMutation<SubmitResponse, TravelKycFormValues>({
-        url: '',
-        method: EMETHODS.POST,
-        mutationOptions: {
-            onSuccess: (data) => {
-                goToNextStep?.()
-                ShowToast.success(data.message || "Submitted successfully!")
-            },
-            onError: (error: any) => {
-                const message = extractErrorMessage(error)
-                ShowToast.error(message || "Submission failed!")
-            },
-        },
-    })
+type ServerFieldError = {
+  name: Path<TravelKycFormValues>
+  message: string
+}
 
-    const onSubmit = (data: TravelKycFormValues) => {
-        submitMutation.mutate(data)
+type BoxHeaderProps = {
+  title: string
+  description?: string
+}
+
+const inputClassName =
+  'w-full min-w-0 h-11 sm:h-10 rounded-[5px] border border-[#ADABAB]'
+
+const FILE_FIELDS = new Set(['passport_attachment', 'tax_certificate'])
+
+const blankKycTraveler = (): TravelKycFormValues['travelers'][number] => ({
+  first_name: '',
+  middle_name: '',
+  surname: '',
+  email: '',
+  phone: '',
+  date_of_birth: '',
+  nationality: '',
+  passport_number: '',
+  tax_number: '',
+  physical_address: '',
+  passport_attachment: undefined as unknown as File,
+  tax_certificate: undefined,
+})
+
+/** Prefill KYC travellers from the quote form saved in sessionStorage. */
+function readTravelersFromSession(): TravelKycFormValues['travelers'] {
+  if (typeof window === 'undefined') {
+    return [blankKycTraveler()]
+  }
+
+  try {
+    const raw = sessionStorage.getItem(TRAVEL_QUOTATION_FORM_SESSION_KEY)
+    if (!raw) {
+      return [blankKycTraveler()]
     }
-    return (
-        <form onSubmit={form.handleSubmit(onSubmit)} className="w-full mx-auto bg-transparent">
-            <div className='items-center justify-center border p-3 sm:p-4'>
-                <div className="w-full py-3">
-                    <h1 className="text-xl sm:text-2xl font-bold leading-none mb-4">KYC Info</h1>
-                </div>
-                <Separator className='my-4' />
-                <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5'>
-                    <ReuseableInput
-                        className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
-                        control={form.control}
-                        name="first_name"
-                        label="First Name"
-                    />
-                    <ReuseableInput
-                        className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
-                        control={form.control}
-                        name="middle_name"
-                        label="Middle Name (Optional)"
-                    />
-                    <ReuseableInput
-                        className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
-                        control={form.control}
-                        name="sur_name"
-                        label="Surname"
-                    />
-                    <ReuseableInput
-                        className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
-                        control={form.control}
-                        name="email"
-                        type='email'
-                        label="Email Address"
-                    />
-                    <ReuseableInput
-                        className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
-                        control={form.control}
-                        name="phone_number"
-                        label="Phone Number"
-                        type='tel'
-                    />
-                    <ReuseableInput
-                        className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
-                        control={form.control}
-                        type='date'
-                        name="date_or_birth"
-                        label="Date Of Birth"
-                    />
-                    <Controller
-                        control={form.control}
-                        name="nationality"
-                        render={({ field, fieldState }) => (
-                            <div data-invalid={fieldState.invalid} className={invalidSelectClassName}>
-                                {/* <ReuseableSingleSelectNationalityInput
-                                    label="Nationality"
-                                    required
-                                    value={String(field.value)}
-                                    onChange={field.onChange}
-                                /> */}
-                                {fieldState.error ? (
-                                    <p className="mt-1 text-sm text-red-500">
-                                        {fieldState.error.message}
-                                    </p>
-                                ) : null}
-                            </div>
-                        )}
-                    />
-                    <ReuseableInput
-                        className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
-                        control={form.control}
-                        name="passport_number"
-                        label="Passport Number"
-                    />
-                    <ReuseableInput
-                        className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
-                        control={form.control}
-                        name="tax_number"
-                        label="Tax Number"
-                    />
-                </div>
-                <Separator className='my-4' />
-                <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5'>
-                    <ReuseableInput
-                        className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
-                        control={form.control}
-                        type='file'
-                        name="tax_certificate"
-                        label="Attach Tax Certificate"
-                    />
-                    <ReuseableInput
-                        className="w-full h-10 rounded-[5px] border border-[#ADABAB] sm:col-span-2 lg:col-span-1"
-                        control={form.control}
-                        type='file'
-                        name="passport_attachment"
-                        label="Attach ID/Passport"
-                    />
-                </div>
-            </div>
-            <div className="w-full flex flex-col sm:flex-row justify-between gap-3 mt-3 px-0">
-                <Button
-                    type="button"
-                    className="w-full sm:w-auto rounded-full border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
-                    leftIcon={<ArrowLeftCircle />}
-                    onClick={() => goToPrevStep?.()}>
-                    Previous
-                </Button>
-                <Button
-                    type="button"
-                    className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-full hover:bg-[#C20C0C]"
-                    rightIcon={<ArrowRightCircle />}
-                    onClick={() => goToNextStep?.()}>
-                    Next
-                </Button>
-            </div>
-        </form>
+
+    const parsed = JSON.parse(raw) as {
+      travelers?: Array<Record<string, unknown>>
+    }
+    const travelers = Array.isArray(parsed?.travelers) ? parsed.travelers : []
+
+    if (travelers.length === 0) {
+      return [blankKycTraveler()]
+    }
+
+    return travelers.map((traveler) => ({
+      first_name: String(traveler?.first_name ?? ''),
+      middle_name: String(traveler?.middle_name ?? ''),
+      surname: String(traveler?.surname ?? ''),
+      email: String(traveler?.email ?? ''),
+      phone: String(traveler?.phone ?? ''),
+      date_of_birth: String(traveler?.date_of_birth ?? ''),
+      nationality: String(traveler?.nationality ?? ''),
+      passport_number: '',
+      tax_number: '',
+      physical_address: '',
+      // File inputs cannot be prefilled — user must attach passport
+      passport_attachment: undefined as unknown as File,
+      tax_certificate: undefined,
+    }))
+  } catch {
+    return [blankKycTraveler()]
+  }
+}
+
+const readSessionValue = (key: string) => {
+  if (typeof window === 'undefined') return null
+  return sessionStorage.getItem(key)
+}
+
+const formatServerErrorValue = (value: unknown): string | null => {
+  if (Array.isArray(value)) {
+    return value.filter(Boolean).join('\n')
+  }
+  if (typeof value === 'string') {
+    return value
+  }
+  return null
+}
+
+/** Map Laravel 422 `errors` keys (e.g. travelers.0.email) onto RHF paths. */
+const extractServerFieldErrors = (error: any): ServerFieldError[] => {
+  const errors = error?.response?.data?.errors
+  if (!errors || typeof errors !== 'object' || Array.isArray(errors)) {
+    return []
+  }
+
+  return Object.entries(errors)
+    .map(([name, value]) => ({
+      name: name as Path<TravelKycFormValues>,
+      message: formatServerErrorValue(value),
+    }))
+    .filter((fieldError): fieldError is ServerFieldError =>
+      Boolean(fieldError.message),
     )
+}
+
+const BoxHeader = ({ title, description }: BoxHeaderProps) => (
+  <div className="flex flex-col gap-0.5 pb-3">
+    <h2 className="text-base font-semibold sm:text-lg">{title}</h2>
+    {description ? (
+      <p className="text-xs text-muted-foreground sm:text-sm">{description}</p>
+    ) : null}
+  </div>
+)
+
+/** Build multipart FormData: travelers[i][field] matching Laravel array input. */
+function buildTravelKycFormData(data: TravelKycFormValues): FormData {
+  const formData = new FormData()
+
+  data.travelers.forEach((traveler, index) => {
+    Object.entries(traveler).forEach(([key, value]) => {
+      if (value === undefined || value === null) return
+
+      const fieldKey = `travelers[${index}][${key}]`
+
+      if (FILE_FIELDS.has(key)) {
+        if (value instanceof File) {
+          formData.append(fieldKey, value)
+        }
+        return
+      }
+
+      // Skip empty optional strings so backend treats them as absent
+      if (typeof value === 'string' && value.trim() === '') {
+        if (key === 'middle_name' || key === 'phone' || key === 'tax_number') {
+          return
+        }
+      }
+
+      formData.append(fieldKey, String(value))
+    })
+  })
+
+  return formData
+}
+
+export const TravelKycDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
+  goToNextStep,
+  goToPrevStep,
+}) => {
+  const [purchaseSessionId] = useState(() =>
+    readSessionValue(PURCHASE_SESSION_STORAGE_KEY),
+  )
+  const [defaultTravelers] = useState(() => readTravelersFromSession())
+
+  const form = useForm<TravelKycFormValues>({
+    resolver: zodResolver(TravelKycSchema),
+    defaultValues: {
+      travelers: defaultTravelers,
+    },
+  })
+
+  const { fields } = useFieldArray({
+    control: form.control,
+    name: 'travelers',
+  })
+
+  const submitMutation = UseApiMutation<SubmitResponse, FormData>({
+    url: `purchase/travel/${purchaseSessionId}/kyc`,
+    method: EMETHODS.POST,
+    config: {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    },
+    mutationOptions: {
+      onSuccess: (data) => {
+        const purchaseId = data?.data?.purchase_id ?? purchaseSessionId
+        if (purchaseId) {
+          sessionStorage.setItem(INVOICE_SESSION_STORAGE_KEY, String(purchaseId))
+        }
+        goToNextStep?.()
+        ShowToast.success(data.message || 'Submitted successfully!')
+      },
+      onError: (error: any) => {
+        const fieldErrors = extractServerFieldErrors(error)
+        fieldErrors.forEach(({ name, message }) => {
+          form.setError(name, { type: 'server', message })
+        })
+
+        const message =
+          fieldErrors.length > 0
+            ? 'Please check the highlighted fields.'
+            : extractErrorMessage(error)
+        ShowToast.error(message || 'Submission failed!')
+      },
+    },
+  })
+
+  const onSubmit = (data: TravelKycFormValues) => {
+    if (!purchaseSessionId) {
+      ShowToast.error('No active purchase session found. Please start Purchase Cover again.')
+      return
+    }
+    form.clearErrors()
+    submitMutation.mutate(buildTravelKycFormData(data))
+  }
+
+  return (
+    <form
+      onSubmit={form.handleSubmit(onSubmit)}
+      className="mx-auto w-full bg-transparent"
+    >
+      <div className="rounded-2xl border border-[#ADABAB]/50 bg-linear-to-b from-white to-neutral-50/90 p-4 shadow-sm sm:p-6">
+        <div className="w-full pb-2">
+          <h1 className="text-xl font-bold leading-tight tracking-tight sm:text-2xl">
+            KYC <span className="text-[#C20C0C]">Info</span>
+          </h1>
+          <p className="mt-2 max-w-2xl text-sm text-muted-foreground sm:text-base">
+            Complete customer details and upload documents for each traveller
+            on this cover.
+          </p>
+          <p className="mt-1 max-w-2xl text-xs text-muted-foreground sm:text-sm">
+            For children, you may use a senior traveller&apos;s email and phone
+            number where needed.
+          </p>
+        </div>
+
+        {!purchaseSessionId ? (
+          <div className="mt-4 rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            <strong>Purchase session not found.</strong> Go back to quotations
+            and click Purchase Cover again.
+          </div>
+        ) : null}
+
+        <div className="mt-5 space-y-5">
+          {fields.map((field, index) => (
+            <div
+              key={field.id}
+              className="rounded-2xl border border-[#ADABAB]/35 bg-white/95 p-3 sm:p-5"
+            >
+              <BoxHeader
+                title={`Customer Info & Documents — Traveller ${index + 1}`}
+                description="Required fields match the travel KYC checklist (passport attachment and physical address included)."
+              />
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
+                <ReuseableInput
+                  className={inputClassName}
+                  control={form.control}
+                  name={`travelers.${index}.first_name`}
+                  label="First Name"
+                  required
+                />
+                <ReuseableInput
+                  className={inputClassName}
+                  control={form.control}
+                  name={`travelers.${index}.middle_name`}
+                  label="Middle Name (Optional)"
+                />
+                <ReuseableInput
+                  className={inputClassName}
+                  control={form.control}
+                  name={`travelers.${index}.surname`}
+                  label="Surname"
+                  required
+                />
+                <ReuseableInput
+                  className={inputClassName}
+                  control={form.control}
+                  name={`travelers.${index}.email`}
+                  type="email"
+                  label="Email Address"
+                  required
+                />
+                <ReuseableInput
+                  className={inputClassName}
+                  control={form.control}
+                  name={`travelers.${index}.phone`}
+                  type="tel"
+                  label="Phone Number (Optional)"
+                />
+                <ReuseableInput
+                  className={inputClassName}
+                  control={form.control}
+                  type="date"
+                  name={`travelers.${index}.date_of_birth`}
+                  label="Date Of Birth"
+                  required
+                />
+                <Controller
+                  control={form.control}
+                  name={`travelers.${index}.nationality`}
+                  render={({ field: nationalityField, fieldState }) => (
+                    <div
+                      data-invalid={fieldState.invalid}
+                      className={invalidSelectClassName}
+                    >
+                      <TravelerNationalitySelect
+                        instanceId={`kyc-traveler-${index}`}
+                        value={nationalityField.value}
+                        onChange={nationalityField.onChange}
+                        label="Nationality"
+                        required
+                        placeholder="Select nationality..."
+                      />
+                      {fieldState.error ? (
+                        <p className="mt-1 text-sm text-red-500">
+                          {fieldState.error.message}
+                        </p>
+                      ) : null}
+                    </div>
+                  )}
+                />
+                <ReuseableInput
+                  className={inputClassName}
+                  control={form.control}
+                  name={`travelers.${index}.passport_number`}
+                  label="Passport Number"
+                  required
+                />
+                <ReuseableInput
+                  className={inputClassName}
+                  control={form.control}
+                  name={`travelers.${index}.tax_number`}
+                  label="Personal KRA Pin (Optional)"
+                  placeholder="e.g. A020828302W"
+                />
+                <ReuseableInput
+                  className={`${inputClassName} sm:col-span-2 lg:col-span-3`}
+                  control={form.control}
+                  type="textarea"
+                  name={`travelers.${index}.physical_address`}
+                  label="Physical Address"
+                  required
+                  rows={2}
+                />
+              </div>
+
+              <Separator className="my-4" />
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
+                <ReuseableInput
+                  className={inputClassName}
+                  control={form.control}
+                  type="file"
+                  name={`travelers.${index}.passport_attachment`}
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  label="Attach Passport"
+                  required
+                />
+                <ReuseableInput
+                  className={inputClassName}
+                  control={form.control}
+                  type="file"
+                  name={`travelers.${index}.tax_certificate`}
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  label="Attach KRA PIN Certificate (Optional)"
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <CardFooter className="mt-4 flex w-full flex-col gap-3 px-0 sm:flex-row sm:justify-between">
+        <Button
+          type="button"
+          className="w-full rounded-full border border-[#C20C0C] bg-transparent text-[#C20C0C] hover:bg-[#C20C0C]/10 sm:w-auto"
+          leftIcon={<ArrowLeftCircle />}
+          onClick={() => goToPrevStep?.()}
+        >
+          Previous
+        </Button>
+        <Button
+          type="submit"
+          className="w-full rounded-full bg-[#C20C0C]/90 hover:bg-[#C20C0C] sm:w-auto"
+          rightIcon={<ArrowRightCircle />}
+          loading={submitMutation.isPending}
+          disabled={!purchaseSessionId}
+        >
+          Invoice Cover Quotation
+        </Button>
+      </CardFooter>
+    </form>
+  )
 }

@@ -22,6 +22,7 @@ import {  CustomerVerificationPage } from "@/app/customer/travel/steppers/custom
 import { TravelKycDetailsPage } from "@/app/customer/travel/steppers/kyc-details";
 import OTPTravelVerificationPage from "@/app/customer/travel/steppers/otp-verification";
 import { TravelQuotationsPage } from "@/app/customer/travel/steppers/quotations";
+import { TravelSuccessPurchase } from "@/app/customer/travel/steppers/success-purchase";
 import { TravelInvoicesPage } from "@/app/customer/travel/steppers/travel-invoices";
 import { TravelPaymentOptionsPage } from "@/app/customer/travel/steppers/travel-payment-options";
 import { TravellerDetailsPage } from "@/app/customer/travel/steppers/traveller-details";
@@ -157,7 +158,7 @@ export const getTravelSteps = (isAuthenticated: boolean) => {
         {
             disabled: false,
             title: "",
-            content: SuccessPurchase,
+            content: TravelSuccessPurchase,
         },
     ]
     return isAuthenticated ? allSteps.slice(2) : allSteps

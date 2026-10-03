@@ -7,6 +7,9 @@ export const MODULES = {
   QUOTATION_TRAVEL: 'quotation-travel',
   FINANCE: 'finance-module',
 
+  // Admin claims. Must match the API RBAC module key.
+  CLAIMS: 'claims',
+
   // Purchases
   PURCHASE_MOTOR: 'purchase-motor',
   PURCHASE_MOTOR_ALTERNATIVE_KYC: 'purchase-motor-alternative-kyc',

@@ -54,7 +54,8 @@ export const EROUTES = {
   LIFE: '/life',
   PROFILE: '/profile',
   ACCOUNTSETTINGS: '/profile/account-settings',
-  CLAIMS: '/profile/my-claims',
+  /** Customer portal list. Admin claims use EROUTES.CLAIMS. */
+  MY_CLAIMS: '/profile/my-claims',
   COVERS: '/profile/my-covers',
   PAYMENTHISTORY: '/profile/payment-history',
   SINGLECOVER: '/profile/my-covers',
@@ -161,11 +162,16 @@ export const EROUTES = {
   // finance
   FINANCE:`/${EPREFIX.DASHBOARD}/${EPREFIX.FINANCE}`,
   FINANCE_PARAMETERS: `/${EPREFIX.DASHBOARD}/${EPREFIX.FINANCE}/parameters`,
-  FINANCE_CLAIMS: `/${EPREFIX.DASHBOARD}/${EPREFIX.FINANCE}/claims`,
   FINANCE_INVOICES: `/${EPREFIX.DASHBOARD}/${EPREFIX.FINANCE}/invoices`,
   FINANCE_RECEIPTS: `/${EPREFIX.DASHBOARD}/${EPREFIX.FINANCE}/receipts`,
   FINANCE_TRANSACTIONS: `/${EPREFIX.DASHBOARD}/${EPREFIX.FINANCE}/transactions`,
   PAYMENTS: `/${EPREFIX.DASHBOARD}/${EPREFIX.FINANCE}/payments`,
+
+  // Admin claims (motor). :uuid is the route pattern; use claimsDetailPath() for a real link.
+  CLAIMS: `/${EPREFIX.DASHBOARD}/claims`,
+  CLAIMS_NEW: `/${EPREFIX.DASHBOARD}/claims/new`,
+  CLAIMS_DETAIL: `/${EPREFIX.DASHBOARD}/claims/:uuid`,
+  CLAIMS_SETTINGS: `/${EPREFIX.DASHBOARD}/claims/settings`,
 
   // ATU multi-currency
   CURRENCIES_AVAILABLE: `/${EPREFIX.DASHBOARD}/currencies/available`,
@@ -174,6 +180,11 @@ export const EROUTES = {
 
   ERROR404: `/${EPREFIX.ERRORS}/errors404`
 } as const
+
+/** Link to one admin claim. EROUTES.CLAIMS_DETAIL keeps the :uuid pattern for the router. */
+export function claimsDetailPath(uuid: string): string {
+  return `/${EPREFIX.DASHBOARD}/claims/${uuid}`
+}
 
 export const SORT_ORDER = {
   Descending: 'DESC',

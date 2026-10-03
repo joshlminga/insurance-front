@@ -1780,6 +1780,24 @@ export function ReuseableSingleSelectCoveringInput<T extends FieldValues>({
     );
 }
 
+/**
+ * API selects expect data to be a list. Some endpoints wrap that list
+ * (data.handlers, data.types). Use the list itself, or the first list inside data.
+ */
+function listFromApiPayload(payload: unknown): any[] {
+    if (Array.isArray(payload)) {
+        return payload
+    }
+    if (payload && typeof payload === "object") {
+        for (const value of Object.values(payload as Record<string, unknown>)) {
+            if (Array.isArray(value)) {
+                return value
+            }
+        }
+    }
+    return []
+}
+
 export function ReusableSingleSelectApiInput({
     url,
     value,
@@ -1820,7 +1838,8 @@ export function ReusableSingleSelectApiInput({
             staleTime: 1000 * 60 * 5,
         },
     });
-    const items = data?.data ?? [];
+    // Lists sometimes arrive as data: [] and sometimes as data: { handlers: [] }.
+    const items = listFromApiPayload(data?.data);
 
     return (
         <div className={`space-y-2 ${className ?? ""}`}>
@@ -2095,8 +2114,11 @@ export const SendDocumentsViaEmail = ({
 }) => {
     const requireRecipientEmail = componentProps?.requireRecipientEmail === true
     const [isSelf, setIsSelf] = useState(false)
+    // Motor by default; travel (and others) can pass sessionStorageKey + sendUrl/documentLine.
+    const sessionStorageKey =
+        componentProps?.sessionStorageKey ?? MOTOR_QUOTE_SESSION_STORAGE_KEY
     const quoteSessionId = (() => {
-        const storedSessionId = Number(sessionStorage.getItem(MOTOR_QUOTE_SESSION_STORAGE_KEY));
+        const storedSessionId = Number(sessionStorage.getItem(sessionStorageKey));
 
         if (Number.isFinite(storedSessionId) && storedSessionId > 0) {
             return storedSessionId;
@@ -2114,8 +2136,13 @@ export const SendDocumentsViaEmail = ({
         return prefilled;
     });
 
+    const sendUrl =
+        componentProps?.sendUrl ??
+        componentProps?.documentLine ??
+        `document/motor/send-quote-via-email/${quoteSessionId}`
+
     const submitMutation = UseApiMutation<SubmitResponse, FormData>({
-        url: `document/motor/send-quote-via-email/${quoteSessionId}`,
+        url: sendUrl,
         method: EMETHODS.POST,
         mutationOptions: {
             onSuccess: (data) => {

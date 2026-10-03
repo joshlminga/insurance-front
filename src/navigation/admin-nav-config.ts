@@ -11,6 +11,7 @@ import {
   FileBadge2,
   FolderCog,
   Plane,
+  ShieldAlert,
 } from 'lucide-react'
 import { MODULES, QUOTATION_MOTOR_MODULES } from '@/auth/module-keys'
 import { EPREFIX, EROUTES } from '@/utils/enums'
@@ -217,11 +218,6 @@ export const adminNavConfig: NavItem[] = [
         module: MODULES.FINANCE,
       },
       {
-        title: 'Claims',
-        url: EROUTES.FINANCE_CLAIMS,
-        module: MODULES.FINANCE,
-      },
-      {
         title: 'Invoices',
         url: EROUTES.FINANCE_INVOICES,
         modules: [MODULES.FINANCE, MODULES.REPORT_MOTOR_INVOICE],
@@ -240,6 +236,24 @@ export const adminNavConfig: NavItem[] = [
         title: 'Payments',
         url: EROUTES.PAYMENTS,
         module: MODULES.FINANCE,
+      },
+    ],
+  },
+  {
+    title: 'Claims',
+    url: EROUTES.CLAIMS,
+    icon: ShieldAlert,
+    module: MODULES.CLAIMS,
+    items: [
+      {
+        title: 'All Claims',
+        url: EROUTES.CLAIMS,
+        module: MODULES.CLAIMS,
+      },
+      {
+        title: 'Settings',
+        url: EROUTES.CLAIMS_SETTINGS,
+        module: MODULES.CLAIMS,
       },
     ],
   },

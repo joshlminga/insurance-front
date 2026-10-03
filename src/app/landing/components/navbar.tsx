@@ -143,7 +143,7 @@ const MobileDrawer: React.FC<MobileDrawerProps> = ({
         icon: BaggageClaim,
         label: 'Claims Report',
         description: 'Your reports and statements',
-        href: `/${EPREFIX.CUSTOMER}${EROUTES.CLAIMS}`
+        href: `/${EPREFIX.CUSTOMER}${EROUTES.MY_CLAIMS}`
       },
       {
         icon: Settings,
@@ -439,7 +439,7 @@ const Navbar: React.FC<NavbarProps> = () => {
                           onClick={() => setProfileOpen(false)}
                         />
                         <ProfileMenuItem
-                          to={`/${EPREFIX.CUSTOMER}${EROUTES.CLAIMS}`}
+                          to={`/${EPREFIX.CUSTOMER}${EROUTES.MY_CLAIMS}`}
                           icon={BaggageClaim}
                           label="Claims Report"
                           onClick={() => setProfileOpen(false)}

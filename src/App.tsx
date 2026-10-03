@@ -178,7 +178,10 @@ const ReceiptReportsMotorPage = lazy(() =>
   }))
 )
 const FinanceParametersIndexPage = lazy(() => import("./app/admin/finance/parameters"))
-const FinanceClaimsPage = lazy(() => import("./app/admin/finance/claims"))
+const ClaimsListPage = lazy(() => import("./app/admin/claims/page").then(m => ({ default: m.ClaimsListPage })))
+const ClaimsNewPage = lazy(() => import("./app/admin/claims/new/page").then(m => ({ default: m.ClaimsNewPage })))
+const ClaimsDetailPage = lazy(() => import("./app/admin/claims/[uuid]/page").then(m => ({ default: m.ClaimsDetailPage })))
+const ClaimsSettingsPage = lazy(() => import("./app/admin/claims/settings/page").then(m => ({ default: m.ClaimsSettingsPage })))
 const FinanceInvoicesPage = lazy(() => import("./app/admin/finance/invoices"))
 const FinanceReceiptsPage = lazy(() => import("./app/admin/finance/receipts"))
 const FinancePaymentsPage = lazy(() => import("./app/admin/finance/payments"))
@@ -959,12 +962,41 @@ export const router = createBrowserRouter([
             ),
           },
           {
-            path: "finance/claims",
+            path: "claims",
             element: (
               <S>
-                <AdminModulePage 
-                module={MODULES.FINANCE}>
-                  <FinanceClaimsPage />
+                <AdminModulePage module={MODULES.CLAIMS}>
+                  <ClaimsListPage />
+                </AdminModulePage>
+              </S>
+            ),
+          },
+          {
+            path: "claims/new",
+            element: (
+              <S>
+                <AdminModulePage module={MODULES.CLAIMS}>
+                  <ClaimsNewPage />
+                </AdminModulePage>
+              </S>
+            ),
+          },
+          {
+            path: "claims/settings",
+            element: (
+              <S>
+                <AdminModulePage module={MODULES.CLAIMS}>
+                  <ClaimsSettingsPage />
+                </AdminModulePage>
+              </S>
+            ),
+          },
+          {
+            path: "claims/:uuid",
+            element: (
+              <S>
+                <AdminModulePage module={MODULES.CLAIMS}>
+                  <ClaimsDetailPage />
                 </AdminModulePage>
               </S>
             ),

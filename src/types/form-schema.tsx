@@ -1431,7 +1431,8 @@ export const TravelQuotationSchema = z
     }
   })
 
-export const TravelKycSchema = z.object({
+/** One traveller row for travel purchase KYC (multipart travelers[i]). */
+const TravelKycTravelerSchema = z.object({
   first_name: z
     .string()
     .min(2, "First name is required")
@@ -1443,7 +1444,7 @@ export const TravelKycSchema = z.object({
     .optional()
     .or(z.literal("")),
 
-  sur_name: z
+  surname: z
     .string()
     .min(2, "Surname is required")
     .max(50, "Surname cannot exceed 50 characters"),
@@ -1453,12 +1454,14 @@ export const TravelKycSchema = z.object({
     .email("Invalid email address")
     .max(100, "Email cannot exceed 100 characters"),
 
-  phone_number: z
+  // Optional — children may reuse a senior traveller's phone
+  phone: z
     .string()
-    .min(7, "Phone number is required")
-    .max(20, "Phone number cannot exceed 20 characters"),
+    .max(20, "Phone number cannot exceed 20 characters")
+    .optional()
+    .or(z.literal("")),
 
-  date_or_birth: z
+  date_of_birth: z
     .string()
     .min(1, "Date of birth is required"),
 
@@ -1471,20 +1474,28 @@ export const TravelKycSchema = z.object({
     .min(2, "Passport number is required")
     .max(30, "Passport number cannot exceed 30 characters"),
 
+  // Optional Personal KRA Pin
   tax_number: z
     .string()
-    .min(1, "Tax number is required")
-    .max(50, "Tax number cannot exceed 50 characters"),
+    .max(50, "Tax number cannot exceed 50 characters")
+    .optional()
+    .or(z.literal("")),
 
-  tax_certificate: z
-    .instanceof(File, {
-      message: "Tax certificate is required",
-    }),
+  physical_address: z
+    .string()
+    .min(1, "Physical address is required")
+    .max(255, "Physical address cannot exceed 255 characters"),
 
-  passport_attachment: z
-    .instanceof(File, {
-      message: "Passport or ID attachment is required",
-    }),
+  passport_attachment: requiredKycFile("Passport attachment is required"),
+
+  // Optional KRA PIN certificate
+  tax_certificate: OptionalKycFileSchema,
+})
+
+export const TravelKycSchema = z.object({
+  travelers: z
+    .array(TravelKycTravelerSchema)
+    .min(1, "At least one traveller is required"),
 })
 export const CreateDmvicStockSchema = z.object({
   organization_location_id: z.string().min(1, 'Organization location is required'),

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   convertTravelDisplayAmount,
   formatTravelDisplayAmount,
+  formatTravelExchangeRate,
   parseCurrencyRate,
   resolveDefaultTravelCurrency,
 } from './travel-display-currency'
@@ -62,6 +63,66 @@ describe('formatTravelDisplayAmount', () => {
         code: 'KES',
       }),
     ).toBe('KSh 5,040')
+  })
+})
+
+describe('formatTravelExchangeRate', () => {
+  it('shows product→KES when default display is selected', () => {
+    expect(
+      formatTravelExchangeRate({
+        exchangeRate: 130,
+        sourceCode: 'USD',
+        defaultRate: 1,
+        selectedRate: 1,
+        selectedCode: 'KES',
+      }),
+    ).toBe('1 USD = 130 KES')
+  })
+
+  it('cross-rates into another selected currency', () => {
+    expect(
+      formatTravelExchangeRate({
+        exchangeRate: 130,
+        sourceCode: 'USD',
+        defaultRate: 1,
+        selectedRate: 148,
+        selectedCode: 'EUR',
+      }),
+    ).toBe('1 USD = 0.8784 EUR')
+  })
+
+  it('shows 1:1 when selected currency matches the source', () => {
+    expect(
+      formatTravelExchangeRate({
+        exchangeRate: 130,
+        sourceCode: 'USD',
+        defaultRate: 1,
+        selectedRate: 130,
+        selectedCode: 'USD',
+      }),
+    ).toBe('1 USD = 1 USD')
+  })
+
+  it('returns em dash when rates or codes are missing', () => {
+    expect(
+      formatTravelExchangeRate({
+        exchangeRate: null,
+        sourceCode: 'USD',
+        defaultRate: 1,
+        selectedRate: 1,
+        selectedCode: 'KES',
+      }),
+    ).toBe('—')
+
+    expect(
+      formatTravelExchangeRate({
+        exchangeRate: 130,
+        sourceCode: null,
+        defaultRate: 1,
+        selectedRate: 1,
+        selectedCode: 'KES',
+      }),
+    ).toBe('—')
   })
 })
 

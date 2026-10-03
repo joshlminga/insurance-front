@@ -3,6 +3,8 @@ import { CustomerVerificationPage } from '@/app/customer/travel/steppers/custome
 import OTPTravelVerificationPage from '@/app/customer/travel/steppers/otp-verification'
 import { TravellerDetailsPage } from '@/app/customer/travel/steppers/traveller-details'
 import { TravelQuotationsPage } from '@/app/customer/travel/steppers/quotations'
+import { TravelSuccessPurchase } from '@/app/customer/travel/steppers/success-purchase'
+import { SuccessPurchase as MotorSuccessPurchase } from '@/app/customer/motor/steppers/success-purchase'
 import { getTravelSteps } from '@/utils/steps-config'
 
 describe('getTravelSteps', () => {
@@ -38,5 +40,14 @@ describe('getTravelSteps', () => {
     expect(guestSteps[3]?.content).toBe(TravelQuotationsPage)
     expect(authSteps[0]?.content).toBe(TravellerDetailsPage)
     expect(authSteps[1]?.content).toBe(TravelQuotationsPage)
+  })
+
+  it('uses travel-specific success page (not motor SuccessPurchase)', () => {
+    const guestSteps = getTravelSteps(false)
+    const authSteps = getTravelSteps(true)
+
+    expect(guestSteps[7]?.content).toBe(TravelSuccessPurchase)
+    expect(authSteps[5]?.content).toBe(TravelSuccessPurchase)
+    expect(guestSteps.some((step) => step.content === MotorSuccessPurchase)).toBe(false)
   })
 })

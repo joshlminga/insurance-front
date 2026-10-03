@@ -74,6 +74,46 @@ export function formatTravelDisplayAmount(
   return formatted
 }
 
+/**
+ * Format "1 SOURCE = X SELECTED" using the API product→default exchange factor
+ * and ATU rates for the sidebar display currency.
+ *
+ * displayRate = exchangeRate * defaultRate / selectedRate
+ */
+export function formatTravelExchangeRate(options: {
+  exchangeRate: number | string | null | undefined
+  sourceCode: string | null | undefined
+  defaultRate: number | string | null | undefined
+  selectedRate: number | string | null | undefined
+  selectedCode: string | null | undefined
+}): string {
+  const source = String(options.sourceCode ?? '').trim().toUpperCase()
+  const selected = String(options.selectedCode ?? '').trim().toUpperCase()
+  if (!source || !selected) return '—'
+
+  const exchange =
+    typeof options.exchangeRate === 'number'
+      ? options.exchangeRate
+      : parseFloat(String(options.exchangeRate ?? ''))
+  if (!Number.isFinite(exchange) || exchange <= 0) return '—'
+
+  const from = parseCurrencyRate(options.defaultRate)
+  const to = parseCurrencyRate(options.selectedRate)
+  if (from <= 0 || to <= 0) return '—'
+
+  const displayRate = (exchange * from) / to
+  if (!Number.isFinite(displayRate) || displayRate <= 0) return '—'
+
+  // Whole numbers stay clean (130); fractions keep up to 4 decimals (0.8784).
+  const formatted = Number.isInteger(displayRate)
+    ? String(displayRate)
+    : displayRate
+        .toFixed(4)
+        .replace(/\.?0+$/, '')
+
+  return `1 ${source} = ${formatted} ${selected}`
+}
+
 /** Pick default display currency from API envelope; fall back to KES. */
 export function resolveDefaultTravelCurrency(
   displayCurrency: TravelDisplayCurrency | null | undefined,
