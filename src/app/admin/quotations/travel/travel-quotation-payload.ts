@@ -14,6 +14,8 @@ export type TravelQuotationApiPayload = {
     email?: string
     phone?: string
     is_guest?: boolean
+    /** Office / quoting country taxonomy id (guest meta + session context). */
+    country_id?: string | number | null
     agency_id: string | number | null
     processed_by_organization_id: string | number | null
     referral_id: string | null
@@ -47,6 +49,8 @@ function resolveProcessedByOrganizationId(
 }
 
 function buildTripFields(data: AdminTravelQuotationFormValues) {
+    const countryId = data.country_id?.trim() || null
+
     return {
         bound: data.bound,
         country_of_departure: data.country_of_departure,
@@ -57,6 +61,7 @@ function buildTripFields(data: AdminTravelQuotationFormValues) {
         type_of_trip: data.type_of_trip,
         reason_for_travel: data.reason_for_travel,
         travelers: data.travelers,
+        country_id: countryId,
         // Travel API: Your Agency → agency_id (not Motor's processed_by_organization_id)
         agency_id: resolveAgencyId(data),
         // Travel API: On behalf → processed_by_organization_id (not Motor's agency_id)

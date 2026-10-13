@@ -194,6 +194,38 @@ export const TravelPaymentOptionsPage: React.FC<
     },
   })
 
+  // Temporary local E2E bypass — DEV + admin travel only; remove after browser E2E.
+  const showDemoMarkPaid =
+    import.meta.env.DEV && paymentStatusFlow === 'admin'
+
+  const demoMarkPaidMutation = UseApiMutation<
+    SubmitResponse,
+    { invoice_id: string | number }
+  >({
+    url: 'mpesa/demo/mark-paid',
+    method: EMETHODS.POST,
+    mutationOptions: {
+      onSuccess: (data) => {
+        ShowToast.success(data.message || 'Demo payment recorded.')
+        goToNextStep?.()
+      },
+      onError: (error: any) => {
+        const message = extractErrorMessage(error)
+        ShowToast.error(message || 'Demo mark-paid failed.')
+      },
+    },
+  })
+
+  const handleDemoMarkPaid = () => {
+    const invoiceId = form.getValues('invoice_id')
+    if (!invoiceId) {
+      ShowToast.error('Invoice is missing. Please refresh and try again.')
+      return
+    }
+    storePaymentStatusSession({ flow: paymentStatusFlow, invoiceId })
+    demoMarkPaidMutation.mutate({ invoice_id: invoiceId })
+  }
+
   const onSubmit = async (data: PaymentFormInput) => {
     if (usesPesapal(data)) {
       submitPesapal(data)
@@ -412,6 +444,23 @@ export const TravelPaymentOptionsPage: React.FC<
             </Button>
 
             <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
+              {showDemoMarkPaid ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={
+                    demoMarkPaidMutation.isPending ||
+                    isPolling ||
+                    !form.watch('invoice_id')
+                  }
+                  className="w-full border-amber-600 bg-amber-50 text-amber-800 hover:bg-amber-100 sm:w-auto"
+                  onClick={handleDemoMarkPaid}
+                >
+                  {demoMarkPaidMutation.isPending
+                    ? 'Marking paid…'
+                    : 'Demo: Mark paid (M-Pesa)'}
+                </Button>
+              ) : null}
               <ReusableDropdown
                 trigger={
                   <Button

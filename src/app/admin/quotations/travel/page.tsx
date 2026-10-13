@@ -32,7 +32,7 @@ import { TRAVEL_QUOTATION_FORM_SESSION_KEY } from '@/utils/travel-enums'
 import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowRightCircle } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
     Controller,
@@ -170,6 +170,16 @@ export const TravelQuotationPage = () => {
 
     const formCountryId = useWatch({ control: form.control, name: 'country_id' })
     const { bound, hasRouteRow, hasScheduleRow } = useTravelTripProgress(form.control)
+
+    // Profile country shows in the UI but is not written into RHF until the user
+    // touches the Country field — sync so payloads include country_id for guests.
+    useEffect(() => {
+        if (formCountryId) return
+        if (profileCountry?.id == null || profileCountry.id === '') return
+        form.setValue('country_id', String(profileCountry.id), {
+            shouldValidate: true,
+        })
+    }, [form, formCountryId, profileCountry?.id])
 
     const effectiveCountryId = (() => {
         if (formCountryId) return formCountryId
