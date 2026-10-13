@@ -6,9 +6,10 @@ const tatClass: Record<TatBadge, string> = {
   on_track: 'bg-emerald-100 text-emerald-800',
   due_soon: 'bg-amber-100 text-amber-900',
   overdue: 'bg-red-100 text-red-800',
+  closed: 'bg-gray-100 text-gray-800',
 }
 
-/** Coloured pill: on track, due soon (inside 2 days), or overdue. */
+/** Coloured pill from API tat.badge: on_track | due_soon | overdue | closed. */
 export function ClaimTatBadge({ badge }: { badge: TatBadge | null }) {
   if (!badge) return <span className="text-muted-foreground">—</span>
   return (

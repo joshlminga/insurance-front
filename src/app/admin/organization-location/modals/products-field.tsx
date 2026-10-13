@@ -120,7 +120,7 @@ export function OrganizationLocationProductsField<T extends FieldValues>({
                       <Checkbox
                         id={`${String(name)}-${index}-access-public`}
                         className="shrink-0"
-                        checked={accessField.value ?? true}
+                        checked={accessField.value ?? false}
                         onCheckedChange={(checked) =>
                           accessField.onChange(checked === true)
                         }

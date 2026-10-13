@@ -732,6 +732,17 @@ export const OrganizationLocationEditSchema = z
         "Logo must be jpeg, png, jpg, or webp"
       ),
     product: z.array(OrganizationLocationProductEditRowSchema),
+    motor_rules: z
+      .array(
+        z.object({
+          id: z.number().optional(),
+          product_id: z.string().optional().or(z.literal("")),
+          benefit_id: z.string().optional().or(z.literal("")),
+          allow_unselect: z.boolean().optional(),
+        })
+      )
+      .optional()
+      .default([]),
   })
   .superRefine((data, ctx) => {
     refineUniqueOrganizationLocationProducts(data.product, ctx)
@@ -1430,6 +1441,33 @@ export const TravelQuotationSchema = z
       })
     }
   })
+
+/**
+ * Admin Travel start form = trip/travelers + office/member fields.
+ * Travel API mapping (do not copy Motor): Your Agency → agency_id,
+ * On behalf → processed_by_organization_id.
+ */
+export const AdminTravelQuotationSchema = TravelQuotationSchema.and(
+  z.object({
+    full_name: z.string().max(100).optional().or(z.literal("")),
+    email: z
+      .string()
+      .email("Invalid email address")
+      .max(100)
+      .optional()
+      .or(z.literal("")),
+    phone: z.string().max(20).optional().or(z.literal("")),
+    user_id: z.string().optional().or(z.literal("")),
+    country_id: z.string().optional().or(z.literal("")),
+    /** Your Agency (Agent / Organization location) — Travel API agency_id */
+    agency_id: z.string().min(1, "Your agency is required"),
+    /** On behalf of (Partner / Company / Organization) — Travel API processed_by_organization_id */
+    processed_by_organization_id: z.string().optional().or(z.literal("")),
+    referral_id: z.string().max(50).optional().or(z.literal("")),
+    /** When customer is not found: checked = create account (is_guest false on submit). */
+    create_customer_account: z.boolean().optional(),
+  })
+)
 
 /** One traveller row for travel purchase KYC (multipart travelers[i]). */
 const TravelKycTravelerSchema = z.object({

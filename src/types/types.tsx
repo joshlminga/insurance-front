@@ -1140,6 +1140,12 @@ export type MotorBenefitOption = {
   name?: string | null
   label?: string | null
   reference?: string | null
+  /** Org rule forced this Optional benefit toward compulsory for the quoting org. */
+  org_mandatory?: boolean
+  /** When true, UI must not clear this benefit (insurer Inclusive/Compulsory or locked org rule). */
+  locked?: boolean
+  /** Org rule allows the user to unselect a default-selected mandatory benefit. */
+  allow_unselect?: boolean
 }
 
 export type BenefitGroup = {

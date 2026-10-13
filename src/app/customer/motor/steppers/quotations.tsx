@@ -30,7 +30,6 @@ import { QuotePreviewPage } from './qoute-preview/page'
 import { UseAuth } from '@/stores/auth-store'
 import { usePurchaseStepper } from '@/hooks/use-purchase-stepper'
 import {
-    BENEFIT_SELECT_NONE,
     EMETHODS,
     FILTEROPTIONS,
     MAX_COMPARISONS,
@@ -49,8 +48,9 @@ import {
     benefitIdsEqual,
     collectBenefitIdsFromValues,
     canPurchaseCover,
+    defaultBenefitSelectValue,
     extractErrorMessage,
-    resolveListedBenefitValue
+    resolveListedBenefitValue,
 } from '@/utils/helpers'
 import { PostComparisonPage } from './comparisons/[id]/page'
 import { QuotationFiltersPanel } from './components/quotation-filters-panel'
@@ -198,13 +198,17 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
         if (benefitGroups.length === 0) return
         if (hasInitializedBenefitFormRef.current) return
         const next: FieldValues = {}
-        for (const { group } of benefitGroups) {
-            next[benefitGroupFormKey(group)] = BENEFIT_SELECT_NONE
+        for (const { group, items } of benefitGroups) {
+            // Pre-select locked / org-mandatory / API-selected benefits
+            next[benefitGroupFormKey(group)] = defaultBenefitSelectValue(
+                items,
+                selectedBenefitIds
+            )
         }
         benefitForm.reset(next)
         hasInitializedBenefitFormRef.current = true
         skipBenefitAutoApplyRef.current = true
-    }, [benefitGroupsResetKey, benefitForm, benefitGroups])
+    }, [benefitGroupsResetKey, benefitForm, benefitGroups, selectedBenefitIds])
 
     const applyBenefitIdsFromFormValues = useCallback(
         (values: FieldValues) => {

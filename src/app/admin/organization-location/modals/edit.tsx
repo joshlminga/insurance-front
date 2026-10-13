@@ -11,21 +11,31 @@ import { SubmitResponse } from "@/types/types"
 import { EMETHODS } from "@/utils/constatnts"
 import { extractErrorMessage } from "@/utils/helpers"
 import { ShowToast } from "@/utils/utils"
+import apiClient from "@/lib/api-client"
 import { useQueryClient } from "@tanstack/react-query"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { Controller, Resolver, useForm } from "react-hook-form"
+
+import type { OrganizationLocationMotorRuleRow } from "../organization-location-motor-rules"
 
 import {
   appendProductsToFormData,
   mapApiProductsToEditRows,
+  toProductTypeValue,
 } from "../organization-location-products"
+import {
+  buildMotorRulesSyncPayload,
+  findMotorLocationProductId,
+  mapApiMotorRulesToRows,
+} from "../organization-location-motor-rules"
 import {
   getOrganizationLocationFromResponse,
   isOrganizationLocationMutationSuccess,
   refreshOrganizationLocationList,
   refreshOrganizationLocationShowCache,
 } from "../organization-location-query"
+import { OrganizationLocationMotorRulesField } from "./motor-rules-field"
 import { OrganizationLocationProductsField } from "./products-field"
 
 const getLocationId = (location: Record<string, any>) =>
@@ -62,6 +72,19 @@ export const EditOrganizationLocationModal = ({
     [location?.products]
   )
 
+  const motorLocationProductId = useMemo(
+    () => findMotorLocationProductId(location?.products),
+    [location?.products]
+  )
+
+  const motorRuleRows = useMemo(() => {
+    const motorProduct = (location?.products ?? []).find(
+      (row: { product?: string }) =>
+        toProductTypeValue(row.product ?? "") === "Motor"
+    )
+    return mapApiMotorRulesToRows(motorProduct?.motor_rules)
+  }, [location?.products])
+
   const form = useForm<OrganizationLocationEditFormValues>({
     resolver: zodResolver(
       OrganizationLocationEditSchema
@@ -71,8 +94,18 @@ export const EditOrganizationLocationModal = ({
       country_id: countryId,
       logo: undefined,
       product: productRows,
+      motor_rules: motorRuleRows,
     },
   })
+
+  const watchedProducts = form.watch("product")
+  const hasMotorProduct = useMemo(
+    () =>
+      (watchedProducts ?? []).some(
+        (row) => toProductTypeValue(String(row?.product ?? "")) === "Motor"
+      ),
+    [watchedProducts]
+  )
 
   useEffect(() => {
     form.reset({
@@ -80,10 +113,12 @@ export const EditOrganizationLocationModal = ({
       country_id: countryId,
       logo: undefined,
       product: productRows,
+      motor_rules: motorRuleRows,
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initials, countryId, productRows])
+  }, [initials, countryId, productRows, motorRuleRows])
 
+  const pendingMotorRulesRef = useRef<OrganizationLocationMotorRuleRow[]>([])
   const [removeLogo, setRemoveLogo] = useState(false)
 
   const updateMutation = UseApiMutation<SubmitResponse, FormData>({
@@ -114,6 +149,32 @@ export const EditOrganizationLocationModal = ({
           const updatedLocation = getOrganizationLocationFromResponse(response)
 
           if (updatedLocation) {
+            const nextMotorId = findMotorLocationProductId(updatedLocation?.products)
+
+            // Sync motor rules using the rules the user just submitted
+            if (nextMotorId) {
+              try {
+                await apiClient.patch(
+                  `organization-location/${locationId}/products/${nextMotorId}/motor-rules`,
+                  {
+                    rules: buildMotorRulesSyncPayload(pendingMotorRulesRef.current),
+                  }
+                )
+                await refetchShow()
+              } catch (error) {
+                ShowToast.error(extractErrorMessage(error))
+              }
+            }
+
+            const refreshedMotorProduct = (
+              (showData as any)?.data?.location?.products ??
+              updatedLocation?.products ??
+              []
+            ).find(
+              (row: { product?: string }) =>
+                toProductTypeValue(row.product ?? "") === "Motor"
+            )
+
             form.reset({
               initials: String(
                 updatedLocation?.meta?.initials ?? updatedLocation?.initials ?? ""
@@ -123,6 +184,9 @@ export const EditOrganizationLocationModal = ({
               ),
               logo: undefined,
               product: mapApiProductsToEditRows(updatedLocation?.products),
+              motor_rules: mapApiMotorRulesToRows(
+                refreshedMotorProduct?.motor_rules ?? pendingMotorRulesRef.current
+              ),
             })
             setRemoveLogo(false)
           }
@@ -160,6 +224,8 @@ export const EditOrganizationLocationModal = ({
     }
 
     appendProductsToFormData(formData, data.product ?? [])
+    pendingMotorRulesRef.current = (data.motor_rules ??
+      []) as OrganizationLocationMotorRuleRow[]
     updateMutation.mutate(formData)
   }
 
@@ -230,6 +296,14 @@ export const EditOrganizationLocationModal = ({
           control={form.control}
           name="product"
           showStatus
+        />
+
+        <OrganizationLocationMotorRulesField
+          control={form.control}
+          name="motor_rules"
+          locationId={locationId}
+          locationProductId={motorLocationProductId}
+          enabled={hasMotorProduct}
         />
 
         <div className="flex flex-col sm:flex-row justify-end gap-3 mt-2 px-0">

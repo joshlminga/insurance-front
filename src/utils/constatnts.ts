@@ -280,6 +280,17 @@ export const ADMIN_MOTOR_QUOTE_CUSTOMER_ID_KEY = "admin_motor_quote_customer_id"
 export const ADMIN_MOTOR_QUOTE_DUPLICATE_SOURCE_KEY = "admin_motor_quote_duplicate_source_id"
 export const ADMIN_MOTOR_QUOTE_DUPLICATE_PREFILL_KEY = "admin_motor_quote_duplicate_prefill"
 export const ADMIN_MOTOR_QUOTE_DUPLICATE_START_AT_KEY = "admin_motor_quote_duplicate_start_at"
+
+/** Admin travel quotation — payee / session identity (parallel to motor keys). */
+export const ADMIN_TRAVEL_CUSTOMER_EMAIL_KEY = "admin_travel_customer_email"
+export const ADMIN_TRAVEL_CUSTOMER_NAME_KEY = "admin_travel_customer_name"
+export const ADMIN_TRAVEL_CUSTOMER_PHONE_KEY = "admin_travel_customer_phone"
+export const ADMIN_TRAVEL_QUOTE_CUSTOMER_TYPE_KEY = "admin_travel_quote_customer_type"
+export const ADMIN_TRAVEL_QUOTE_IS_GUEST_KEY = "admin_travel_quote_is_guest"
+export const ADMIN_TRAVEL_QUOTE_CUSTOMER_ID_KEY = "admin_travel_quote_customer_id"
+/** Which admin product owns the current payment return (motor | travel). */
+export const ADMIN_ACTIVE_QUOTATION_PRODUCT_KEY = "admin_active_quotation_product"
+
 export const INVOICE_ID_KEY = "invoice_id"
 
 export const BENEFIT_TYPE_CONFIG = {

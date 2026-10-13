@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label'
 import { Button, ReusableSelect, ReusableSingleSelectApiInput, ReuseableInput } from '@/dev/core'
 import { UseApiMutation } from '@/hooks/hooks'
 import type { SubmitResponse } from '@/types/types'
-import { CLAIM_PRODUCT, CLAIMS_API, confirmationMessage, type ClaimDetail } from '@/utils/claims'
+import { CLAIMS_API, confirmationMessage, type ClaimDetail } from '@/utils/claims'
 import { EMETHODS } from '@/utils/constatnts'
 import { extractErrorMessage } from '@/utils/helpers'
 import { ShowToast } from '@/utils/utils'
@@ -27,8 +27,8 @@ const detailsSchema = z.object({
   handler_id: z.string().min(1, 'Choose a handler'),
   insurer_claim_number: z.string().optional(),
   claimed_amount: z.string().optional(),
-  expected_tat_days: z.string().optional(),
-  date_notified_to_insurer: z.string().optional(),
+  tat_days: z.string().optional(),
+  notified_to_insurer_date: z.string().optional(),
 })
 
 const statusSchema = z.object({
@@ -39,6 +39,7 @@ const statusSchema = z.object({
 
 type DetailsValues = z.infer<typeof detailsSchema>
 type StatusValues = z.infer<typeof statusSchema>
+type StatusPayload = StatusValues & { confirm_warnings?: boolean }
 
 /**
  * Save handler / insurer reference, move status, or re-check the policy gate.
@@ -72,8 +73,8 @@ export function ClaimActions({
     claim.handlerId,
     claim.insurer_claim_number,
     claim.claimedAmount,
-    claim.expectedTatDays,
-    claim.dateNotifiedToInsurer,
+    claim.tatDays,
+    claim.notifiedToInsurerDate,
   ])
 
   const patchClaim = UseApiMutation<SubmitResponse, DetailsValues>({
@@ -88,7 +89,7 @@ export function ClaimActions({
     },
   })
 
-  const changeStatus = UseApiMutation<SubmitResponse, StatusValues & { confirm?: boolean }>({
+  const changeStatus = UseApiMutation<SubmitResponse, StatusPayload>({
     url: CLAIMS_API.status(claim.uuid),
     method: EMETHODS.POST,
     mutationOptions: {
@@ -101,7 +102,7 @@ export function ClaimActions({
       },
       onError: (error, variables) => {
         const warning = confirmationMessage(error)
-        if (warning && !variables.confirm) {
+        if (warning && !variables.confirm_warnings) {
           setPendingStatus({
             status: variables.status,
             reason: variables.reason,
@@ -127,7 +128,7 @@ export function ClaimActions({
     },
   })
 
-  const submitStatus = (values: StatusValues, confirm = false) => {
+  const submitStatus = (values: StatusValues, confirmWarnings = false) => {
     const next = values.status.toLowerCase()
     const needsInsurerNumber = next.includes('approved') || next.includes('settled')
     const typedNumber = detailsForm.getValues('insurer_claim_number')?.trim() ?? ''
@@ -145,7 +146,7 @@ export function ClaimActions({
       status: values.status,
       reason: values.reason?.trim() || undefined,
       notify_customer: values.notify_customer,
-      confirm,
+      ...(confirmWarnings ? { confirm_warnings: true } : {}),
     })
   }
 
@@ -158,8 +159,8 @@ export function ClaimActions({
             handler_id: values.handler_id,
             insurer_claim_number: values.insurer_claim_number?.trim() || undefined,
             claimed_amount: values.claimed_amount?.trim() || undefined,
-            expected_tat_days: values.expected_tat_days?.trim() || undefined,
-            date_notified_to_insurer: values.date_notified_to_insurer?.trim() || undefined,
+            tat_days: values.tat_days?.trim() || undefined,
+            notified_to_insurer_date: values.notified_to_insurer_date?.trim() || undefined,
           })
         })}
       >
@@ -174,7 +175,6 @@ export function ClaimActions({
               onChange={field.onChange}
               label="Handler"
               required
-              queryParams={{ product: CLAIM_PRODUCT }}
               labelKey="name"
               valueKey="id"
               selectedOption={claim.handlerId ? {
@@ -200,15 +200,15 @@ export function ClaimActions({
         />
         <ReuseableInput
           control={detailsForm.control}
-          name="expected_tat_days"
-          label="Expected TAT (days)"
+          name="tat_days"
+          label="TAT (days)"
           type="number"
           min="1"
           className={claimFieldClass}
         />
         <ReuseableInput
           control={detailsForm.control}
-          name="date_notified_to_insurer"
+          name="notified_to_insurer_date"
           label="Date notified to insurer"
           type="date"
           className={claimFieldClass}
@@ -295,7 +295,7 @@ function detailsFromClaim(claim: ClaimDetail): DetailsValues {
     handler_id: claim.handlerId,
     insurer_claim_number: claim.insurer_claim_number ?? '',
     claimed_amount: claim.claimedAmount,
-    expected_tat_days: claim.expectedTatDays,
-    date_notified_to_insurer: claim.dateNotifiedToInsurer ?? '',
+    tat_days: claim.tatDays,
+    notified_to_insurer_date: claim.notifiedToInsurerDate ?? '',
   }
 }

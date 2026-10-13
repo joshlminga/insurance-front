@@ -27,7 +27,6 @@ import type { FieldValues } from 'react-hook-form'
 import { useForm } from 'react-hook-form'
 import { AdminMotorQuotePreviewPage } from './qoute-preview/page'
 import {
-    BENEFIT_SELECT_NONE,
     EMETHODS,
     FILTEROPTIONS,
     MAX_COMPARISONS,
@@ -40,12 +39,13 @@ import { formatCurrency } from '@/lib/format'
 import { serializeMotorPremiumParams } from '@/lib/motor-premium-params'
 import { ShowToast, SIDEBAR_LAYOUT_QUERY } from '@/utils/utils'
 import { 
-    benefitGroupFormKey, 
-    benefitIdsEqual, 
-    collectBenefitIdsFromValues, 
+    benefitGroupFormKey,
+    benefitIdsEqual,
+    collectBenefitIdsFromValues,
     canPurchaseCover,
-    extractErrorMessage, 
-    resolveListedBenefitValue 
+    defaultBenefitSelectValue,
+    extractErrorMessage,
+    resolveListedBenefitValue,
 } from '@/utils/helpers'
 import { AdminMotorPostComparisonPage } from './comparisons/[id]/page'
 import { QuotationFiltersPanel } from '@/app/customer/motor/steppers/components/quotation-filters-panel'
@@ -200,13 +200,17 @@ export const AdminMotorQuotationsPage: React.FC<AdminMotorStepProps> = ({
         if (benefitGroups.length === 0) return
         if (hasInitializedBenefitFormRef.current) return
         const next: FieldValues = {}
-        for (const { group } of benefitGroups) {
-            next[benefitGroupFormKey(group)] = BENEFIT_SELECT_NONE
+        for (const { group, items } of benefitGroups) {
+            // Pre-select locked / org-mandatory / API-selected benefits
+            next[benefitGroupFormKey(group)] = defaultBenefitSelectValue(
+                items,
+                selectedBenefitIds
+            )
         }
         benefitForm.reset(next)
         hasInitializedBenefitFormRef.current = true
         skipBenefitAutoApplyRef.current = true
-    }, [benefitGroupsResetKey, benefitForm, benefitGroups])
+    }, [benefitGroupsResetKey, benefitForm, benefitGroups, selectedBenefitIds])
 
     const applyBenefitIdsFromFormValues = useCallback(
         (values: FieldValues) => {

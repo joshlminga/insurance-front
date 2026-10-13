@@ -26,11 +26,28 @@ const emailSchema = z.object({
   notify_handler: z.boolean(),
   notify_insurer: z.boolean(),
   extra_email: z.string().optional(),
+  cc_email: z.string().optional(),
   subject: z.string().optional(),
   body: z.string().optional(),
+  offer_amount: z.string().optional(),
 })
 
 type EmailValues = z.infer<typeof emailSchema>
+
+type EmailSendPayload = {
+  template: string
+  to: string[]
+  cc: string[]
+  subject: string
+  body: string
+  attachment_ids: number[]
+  offer_amount?: string
+}
+
+type EmailPreviewPayload = {
+  template: string
+  offer_amount?: string
+}
 
 /**
  * Pick a template, preview the message, then send.
@@ -56,14 +73,15 @@ export function ClaimEmail({
       notify_handler: false,
       notify_insurer: false,
       extra_email: '',
+      cc_email: '',
       subject: '',
       body: '',
+      offer_amount: '',
     },
   })
 
   const templatesQuery = UseApiQuery<SubmitResponse>({
     url: CLAIMS_API.templates,
-    params: { product: 'Motor' },
   })
   const templates = normalizeTemplates(templatesQuery.data)
   const selectedType = form.watch('template')
@@ -80,7 +98,7 @@ export function ClaimEmail({
     form.setValue('template', match.type)
   }, [preferredTemplate, templates, form])
 
-  const preview = UseApiMutation<SubmitResponse, EmailValues>({
+  const preview = UseApiMutation<SubmitResponse, EmailPreviewPayload>({
     url: CLAIMS_API.emailPreview(claim.uuid),
     method: EMETHODS.POST,
     mutationOptions: {
@@ -98,8 +116,8 @@ export function ClaimEmail({
     },
   })
 
-  const send = UseApiMutation<SubmitResponse, EmailValues>({
-    url: CLAIMS_API.emailSend(claim.uuid),
+  const send = UseApiMutation<SubmitResponse, EmailSendPayload>({
+    url: CLAIMS_API.emails(claim.uuid),
     method: EMETHODS.POST,
     mutationOptions: {
       onSuccess: (response) => {
@@ -110,11 +128,19 @@ export function ClaimEmail({
     },
   })
 
-  const payload = (values: EmailValues) => ({
-    ...values,
-    recipients: values.extra_email?.trim() ? [values.extra_email.trim()] : [],
-    notify_insurer: Boolean(claim.insurerClaimsEmail) && values.notify_insurer,
-  })
+  const buildRecipients = (values: EmailValues): string[] => {
+    const to: string[] = []
+    if (values.notify_customer && claim.customerEmail) to.push(claim.customerEmail)
+    if (values.notify_handler && claim.handlerEmail) to.push(claim.handlerEmail)
+    if (values.notify_insurer && claim.insurerClaimsEmail) to.push(claim.insurerClaimsEmail)
+    if (values.extra_email?.trim()) to.push(values.extra_email.trim())
+    return [...new Set(to)]
+  }
+
+  const buildCc = (values: EmailValues): string[] => {
+    const cc = values.cc_email?.trim()
+    return cc ? [cc] : []
+  }
 
   return (
     <section className="grid gap-4 lg:grid-cols-2">
@@ -189,19 +215,56 @@ export function ClaimEmail({
           placeholder="name@example.com"
           className={claimFieldClass}
         />
+        <ReuseableInput
+          control={form.control}
+          name="cc_email"
+          label="CC"
+          placeholder="optional@example.com"
+          className={claimFieldClass}
+        />
+        {selectedType === 'settlement_offer' && (
+          <ReuseableInput
+            control={form.control}
+            name="offer_amount"
+            label="Offer amount"
+            className={claimFieldClass}
+          />
+        )}
         <div className="flex flex-wrap gap-2">
           <Button
             type="button"
             variant="outline"
             disabled={preview.isPending}
-            onClick={form.handleSubmit((values) => preview.mutate(payload(values)))}
+            onClick={form.handleSubmit((values) => preview.mutate({
+              template: values.template,
+              offer_amount: values.offer_amount?.trim() || undefined,
+            }))}
           >
             {preview.isPending ? 'Previewing…' : 'Preview'}
           </Button>
           <Button
             type="button"
             disabled={send.isPending || !form.watch('subject')}
-            onClick={form.handleSubmit((values) => send.mutate(payload(values)))}
+            onClick={form.handleSubmit((values) => {
+              const to = buildRecipients(values)
+              if (!to.length) {
+                ShowToast.error('Choose at least one recipient.')
+                return
+              }
+              if (!values.subject?.trim() || !values.body?.trim()) {
+                ShowToast.error('Preview the email first, or enter a subject and body.')
+                return
+              }
+              send.mutate({
+                template: values.template,
+                to,
+                cc: buildCc(values),
+                subject: values.subject.trim(),
+                body: values.body.trim(),
+                attachment_ids: [],
+                offer_amount: values.offer_amount?.trim() || undefined,
+              })
+            })}
           >
             {send.isPending ? 'Sending…' : 'Send'}
           </Button>

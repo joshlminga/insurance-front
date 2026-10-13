@@ -157,6 +157,21 @@ const AdminMotorQuotationFetchPage = lazy(() =>
     default: m.AdminMotorQuotationFetchPage,
   }))
 )
+const TravelQuotationPage = lazy(() =>
+  import("./app/admin/quotations/travel/page").then(m => ({
+    default: m.TravelQuotationPage,
+  }))
+)
+const AdminTravelQuotationResultsPage = lazy(() =>
+  import("./app/admin/quotations/travel/results/page").then(m => ({
+    default: m.AdminTravelQuotationResultsPage,
+  }))
+)
+const AdminTravelQuotationPurchasePage = lazy(() =>
+  import("./app/admin/quotations/travel/purchase/page").then(m => ({
+    default: m.AdminTravelQuotationPurchasePage,
+  }))
+)
 const QuotationReportsMotorPage = lazy(() =>
   import("./app/admin/reports/quotations/motor/page").then(m => ({
     default: m.QuotationReportsMotorPage,
@@ -767,6 +782,37 @@ export const router = createBrowserRouter([
                 <AdminModulePage 
                 modules={[...QUOTATION_MOTOR_MODULES]}>
                   <AdminMotorQuotationFetchPage />
+                </AdminModulePage>
+              </S>
+            ),
+          },
+          // quotations - travel (New → Results → Purchase)
+          {
+            path: "quotations/travel-quotations",
+            element: (
+              <S>
+                <AdminModulePage module={MODULES.QUOTATION_TRAVEL}>
+                  <TravelQuotationPage />
+                </AdminModulePage>
+              </S>
+            ),
+          },
+          {
+            path: "quotations/travel-quotations/results",
+            element: (
+              <S>
+                <AdminModulePage module={MODULES.QUOTATION_TRAVEL}>
+                  <AdminTravelQuotationResultsPage />
+                </AdminModulePage>
+              </S>
+            ),
+          },
+          {
+            path: "quotations/travel-quotations/purchase",
+            element: (
+              <S>
+                <AdminModulePage module={MODULES.QUOTATION_TRAVEL}>
+                  <AdminTravelQuotationPurchasePage />
                 </AdminModulePage>
               </S>
             ),

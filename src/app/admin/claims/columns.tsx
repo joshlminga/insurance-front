@@ -25,9 +25,9 @@ export const claimColumns: ColumnDef<ClaimListRow>[] = [
     cell: ({ row }) => <div>{row.original.insurer_claim_number || '—'}</div>,
   },
   {
-    accessorKey: 'registration',
+    accessorKey: 'registration_number',
     header: () => <div>Registration</div>,
-    cell: ({ row }) => <div>{row.original.registration || '—'}</div>,
+    cell: ({ row }) => <div>{row.original.registration_number || '—'}</div>,
   },
   {
     accessorKey: 'policy_number',

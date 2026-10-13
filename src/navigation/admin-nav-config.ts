@@ -97,7 +97,11 @@ export const adminNavConfig: NavItem[] = [
     title: 'Quotations',
     url: EROUTES.MOTORQUOTATIONS,
     icon: TextQuote,
-    modules: [...QUOTATION_MOTOR_MODULES, MODULES.REPORT_MOTOR_QUOTATION],
+    modules: [
+      ...QUOTATION_MOTOR_MODULES,
+      MODULES.QUOTATION_TRAVEL,
+      MODULES.REPORT_MOTOR_QUOTATION,
+    ],
     items: [
       {
         title: 'Motor',
@@ -118,6 +122,23 @@ export const adminNavConfig: NavItem[] = [
             title: 'Listed',
             url: EROUTES.REPORT_QUOTATIONS_MOTOR,
             module: MODULES.REPORT_MOTOR_QUOTATION,
+          },
+        ],
+      },
+      {
+        title: 'Travel',
+        url: EROUTES.TRAVELQUOTATIONS,
+        modules: [MODULES.QUOTATION_TRAVEL, MODULES.REPORT_MOTOR_QUOTATION],
+        items: [
+          {
+            title: 'New',
+            url: EROUTES.TRAVELQUOTATIONS,
+            module: MODULES.QUOTATION_TRAVEL,
+          },
+          {
+            title: 'Listed',
+            url: EROUTES.REPORT_QUOTATIONS_TRAVEL,
+            modules: [MODULES.QUOTATION_TRAVEL, MODULES.REPORT_MOTOR_QUOTATION],
           },
         ],
       },

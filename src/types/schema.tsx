@@ -5,6 +5,7 @@ import {
     VehicleDetailsSchema,
     AddVehicleSchema,
     AdminMotorQuotationSchema,
+    AdminTravelQuotationSchema,
     LoginSchema,
     SignUpSchema,
     KycSchema,
@@ -69,6 +70,7 @@ export type ResendOTPFormValues = z.infer<typeof ResendOtpPayloadSchema>
 export type VehicleFormValues = z.infer<typeof VehicleDetailsSchema>
 export type AddVehicleFormValues = z.infer<typeof AddVehicleSchema>
 export type AdminMotorQuotationFormValues = z.infer<typeof AdminMotorQuotationSchema>
+export type AdminTravelQuotationFormValues = z.infer<typeof AdminTravelQuotationSchema>
 export type LoginFormValues = z.infer<typeof LoginSchema>
 export type SignUpFormValues = z.infer<typeof SignUpSchema>
 export type ForgotPasswordValues = z.infer<typeof ForgotPasswordSchema>;

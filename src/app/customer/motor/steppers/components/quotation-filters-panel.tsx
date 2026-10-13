@@ -4,7 +4,11 @@ import { Label } from '@/components/ui/label'
 import { Slider } from '@/components/ui/slider'
 import type { QuotationFiltersPanelProps } from '@/types/types'
 import { BENEFIT_SELECT_NONE } from '@/utils/constatnts'
-import { benefitGroupFormKey, benefitOptionLabel } from '@/utils/helpers'
+import {
+    benefitGroupFormKey,
+    benefitOptionLabel,
+    isBenefitGroupLocked,
+} from '@/utils/helpers'
 import type { FieldValues, Path } from 'react-hook-form'
 
 export function QuotationFiltersPanel({
@@ -51,11 +55,16 @@ export function QuotationFiltersPanel({
                     <div className="grid grid-cols-1 gap-4">
                         {benefitGroups.map(({ group, items }) => {
                             const fieldName = benefitGroupFormKey(group)
+                            const groupLocked = isBenefitGroupLocked(items)
+                            // Locked groups cannot clear to "-- none --"
                             const options = [
-                                { value: BENEFIT_SELECT_NONE, label: '-- none --' },
+                                ...(groupLocked
+                                    ? []
+                                    : [{ value: BENEFIT_SELECT_NONE, label: '-- none --' }]),
                                 ...items.map((item) => ({
                                     value: String(item.id),
                                     label: benefitOptionLabel(item),
+                                    disabled: Boolean(item.locked && !item.org_mandatory),
                                 })),
                             ]
                             return (
@@ -66,8 +75,12 @@ export function QuotationFiltersPanel({
                                     label={group}
                                     placeholder={`Choose in ${group}`}
                                     options={options}
-                                    disabled={isFetching}
-                                    triggerClassName="border-[#ADABAB]"
+                                    disabled={isFetching || groupLocked}
+                                    triggerClassName={
+                                        groupLocked
+                                            ? 'border-[#ADABAB] bg-muted text-muted-foreground'
+                                            : 'border-[#ADABAB]'
+                                    }
                                 />
                             )
                         })}

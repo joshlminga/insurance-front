@@ -7,7 +7,10 @@
 import { CreditPendingBanner } from '@/app/admin/credit/components/CreditPendingBanner'
 import { CreditScheduleStatusPanel } from '@/app/admin/credit/components/CreditScheduleStatusPanel'
 import { submitMotorCreditPayment } from '@/app/admin/credit/credit-payment'
-import { storePaymentStatusSession } from '@/app/payment/payment-session'
+import {
+  storePaymentStatusSession,
+  type PaymentStatusFlow,
+} from '@/app/payment/payment-session'
 import { CardFooter } from '@/components/ui/card'
 import {
   Button,
@@ -54,9 +57,14 @@ type TravelSummaryData = {
   total_payable?: number | string
 }
 
+type TravelPaymentOptionsPageProps = CustomerVerificationDetailsProps & {
+  /** Admin travel purchase uses 'admin' so receipt returns to travel-quotations/purchase. */
+  paymentStatusFlow?: PaymentStatusFlow
+}
+
 export const TravelPaymentOptionsPage: React.FC<
-  CustomerVerificationDetailsProps
-> = ({ goToNextStep, goToPrevStep }) => {
+  TravelPaymentOptionsPageProps
+> = ({ goToNextStep, goToPrevStep, paymentStatusFlow = 'motor' }) => {
   const navigate = useNavigate()
   const [selectedPaymentMethod, setSelectedPaymentMethod] =
     React.useState<string>('mpesa')
@@ -78,7 +86,7 @@ export const TravelPaymentOptionsPage: React.FC<
     submitPesapal,
     usesPesapal,
     isPesapalSubmitting,
-  } = usePesapalPaymentFlow({ flow: 'motor', goToNextStep })
+  } = usePesapalPaymentFlow({ flow: paymentStatusFlow, goToNextStep })
 
   const {
     isPolling: isPaystackPolling,
@@ -87,7 +95,7 @@ export const TravelPaymentOptionsPage: React.FC<
     submitPaystack,
     usesPaystack,
     isPaystackSubmitting,
-  } = usePaystackPaymentFlow({ flow: 'motor' })
+  } = usePaystackPaymentFlow({ flow: paymentStatusFlow })
 
   const isPolling = isGatewayPolling || isPaystackPolling
   const pollMessage = isPaystackPolling ? paystackPollMessage : gatewayPollMessage
@@ -199,7 +207,7 @@ export const TravelPaymentOptionsPage: React.FC<
       }
       setCreditPending(null)
       setIsCreditSubmitting(true)
-      storePaymentStatusSession({ flow: 'motor', invoiceId: data.invoice_id })
+      storePaymentStatusSession({ flow: paymentStatusFlow, invoiceId: data.invoice_id })
       try {
         const result = await submitMotorCreditPayment(data.invoice_id, {
           credit_acknowledged: data.credit_acknowledged,
@@ -233,7 +241,7 @@ export const TravelPaymentOptionsPage: React.FC<
     }
 
     if (usesPaystack(data)) {
-      storePaymentStatusSession({ flow: 'motor', invoiceId: data.invoice_id })
+      storePaymentStatusSession({ flow: paymentStatusFlow, invoiceId: data.invoice_id })
       submitPaystack(data)
       return
     }
@@ -242,7 +250,7 @@ export const TravelPaymentOptionsPage: React.FC<
       goToNextStep?.()
       return
     }
-    storePaymentStatusSession({ flow: 'motor', invoiceId: data.invoice_id })
+    storePaymentStatusSession({ flow: paymentStatusFlow, invoiceId: data.invoice_id })
     const payload: MpesaPayload = {
       phone: data.phone_number ?? '',
       amount: data.amount ?? 0,

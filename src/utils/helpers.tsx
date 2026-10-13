@@ -293,14 +293,53 @@ export function collectBenefitIdsFromValues(
     groups: BenefitGroup[]
 ): number[] {
     const ids: number[] = []
-    for (const { group } of groups) {
+    for (const { group, items } of groups) {
         const key = benefitGroupFormKey(group)
         const raw = values[key]
-        if (raw == null || raw === '' || raw === BENEFIT_SELECT_NONE) continue
-        const n = Number(raw)
-        if (Number.isFinite(n)) ids.push(n)
+        if (raw != null && raw !== '' && raw !== BENEFIT_SELECT_NONE) {
+            const n = Number(raw)
+            if (Number.isFinite(n)) ids.push(n)
+        }
+
+        // Locked org-mandatory / insurer-locked benefits always stay in the request
+        for (const item of items) {
+            if (item.locked && Number.isFinite(item.id) && !ids.includes(item.id)) {
+                ids.push(item.id)
+            }
+        }
     }
     return ids
+}
+
+/** Pick the initial select value for a benefit group (locked/mandatory/default/none). */
+export function defaultBenefitSelectValue(
+    items: MotorBenefitOption[],
+    selectedIds: Set<number>
+): string {
+    const lockedSelected = items.find(
+        (item) => item.locked && (selectedIds.has(item.id) || item.org_mandatory)
+    )
+    if (lockedSelected) {
+        return String(lockedSelected.id)
+    }
+
+    const selected = items.find((item) => selectedIds.has(item.id))
+    if (selected) {
+        return String(selected.id)
+    }
+
+    const softMandatory = items.find(
+        (item) => item.org_mandatory && item.allow_unselect !== false
+    )
+    if (softMandatory) {
+        return String(softMandatory.id)
+    }
+
+    return BENEFIT_SELECT_NONE
+}
+
+export function isBenefitGroupLocked(items: MotorBenefitOption[]): boolean {
+    return items.some((item) => Boolean(item.locked && item.org_mandatory))
 }
 
 export function benefitIdsEqual(a: number[], b: number[]): boolean {

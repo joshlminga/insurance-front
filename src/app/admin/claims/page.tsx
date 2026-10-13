@@ -5,7 +5,6 @@ import { useDebounce } from '@/hooks'
 import { UseApiQuery } from '@/hooks/hooks'
 import type { SubmitResponse, TFilterOptions, TPaginationFilters } from '@/types/types'
 import {
-  CLAIM_PRODUCT,
   CLAIM_STATUS_FILTERS,
   CLAIMS_API,
   normalizeClaimRow,
@@ -43,11 +42,9 @@ export function ClaimsListPage() {
     url: CLAIMS_API.claims,
     params: {
       page: filter.page,
-      pageSize: filter.pageSize,
       per_page: filter.pageSize,
-      term: filter.term,
+      q: filter.term || undefined,
       status: status === 'all' ? undefined : status,
-      product: CLAIM_PRODUCT,
     },
   })
 

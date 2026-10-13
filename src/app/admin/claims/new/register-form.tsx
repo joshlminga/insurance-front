@@ -9,7 +9,6 @@ import type { SubmitResponse } from '@/types/types'
 import {
   addCalendarDays,
   CLAIM_NOTE_WORD_LIMIT,
-  CLAIM_PRODUCT,
   CLAIMS_API,
   countWords,
   normalizeClaimTypes,
@@ -70,15 +69,14 @@ export function ClaimRegisterForm({
 
   const typesQuery = UseApiQuery<SubmitResponse>({
     url: CLAIMS_API.types,
-    params: { product: CLAIM_PRODUCT },
   })
   const types = normalizeClaimTypes(typesQuery.data)
 
   const claimTypeId = useWatch({ control: form.control, name: 'claim_type_id' })
   const note = useWatch({ control: form.control, name: 'note' }) ?? ''
-  const tatDays = useWatch({ control: form.control, name: 'expected_tat_days' })
-  const notified = useWatch({ control: form.control, name: 'date_notified_to_organization' })
-  const lossDate = useWatch({ control: form.control, name: 'date_of_loss' })
+  const tatDays = useWatch({ control: form.control, name: 'tat_days' })
+  const notified = useWatch({ control: form.control, name: 'notified_to_organization_date' })
+  const lossDate = useWatch({ control: form.control, name: 'loss_date' })
   const documentMode = useWatch({ control: form.control, name: 'document_mode' })
   const words = countWords(note)
   const selectedType = types.find((type) => type.id === claimTypeId)
@@ -100,10 +98,10 @@ export function ClaimRegisterForm({
     const match = types.find((type) => type.id === claimTypeId)
     if (!match) return
     appliedType.current = claimTypeId
-    form.setValue('expected_tat_days', String(match.defaultTatDays), { shouldValidate: true })
+    form.setValue('tat_days', String(match.defaultTatDays), { shouldValidate: true })
   }, [claimTypeId, types, form])
 
-  const createType = UseApiMutation<SubmitResponse, { product: string; name: string; default_tat_days: number }>({
+  const createType = UseApiMutation<SubmitResponse, { name: string; default_tat_days: number }>({
     url: CLAIMS_API.types,
     method: EMETHODS.POST,
     mutationOptions: {
@@ -140,7 +138,7 @@ export function ClaimRegisterForm({
   })
 
   const onSubmit = (values: ClaimRegisterValues) => {
-    if (values.document_mode === 'have') {
+    if (values.document_mode === 'have_documents') {
       const missing = slots.filter((slot) => slot.mandatory && !slot.found && !files[slot.key])
       if (missing.length) {
         ShowToast.error(`Upload: ${missing.map((slot) => slot.label).join(', ')}`)
@@ -163,11 +161,11 @@ export function ClaimRegisterForm({
         <ReadOnlyField label="Registration" value={policy.registration} />
         <ReadOnlyField label="Policy number" value={policy.policyNumber} />
         <ReadOnlyField label="Certificate number" value={policy.certificateNumber} />
-        <ReadOnlyField label="Customer" value={policy.customerName} />
+        <ReadOnlyField label="Insured" value={policy.customerName} />
         <ReadOnlyField label="Insurer" value={policy.insurerName} />
         <ReadOnlyField label="Cover" value={policy.coverType} />
-        <ReadOnlyField label="Issued" value={policy.issuedDate} />
-        <ReadOnlyField label="Expiry" value={policy.expiryDate} />
+        <ReadOnlyField label="Cover from" value={policy.issuedDate} />
+        <ReadOnlyField label="Cover to" value={policy.expiryDate} />
       </div>
 
       <Tabs defaultValue="details">
@@ -184,6 +182,21 @@ export function ClaimRegisterForm({
             className={claimFieldClass}
             required
           />
+          <ReuseableInput
+            control={form.control}
+            name="claimant_email"
+            label="Claimant email"
+            type="email"
+            className={claimFieldClass}
+            required
+          />
+          <ReuseableInput
+            control={form.control}
+            name="claimant_phone"
+            label="Claimant phone"
+            className={claimFieldClass}
+            required
+          />
           <div>
             <Controller
               control={form.control}
@@ -195,7 +208,6 @@ export function ClaimRegisterForm({
                   onChange={field.onChange}
                   label="Reported by"
                   required
-                  queryParams={{ product: CLAIM_PRODUCT }}
                   labelKey="name"
                   valueKey="id"
                   placeholder="Select a user"
@@ -217,7 +229,6 @@ export function ClaimRegisterForm({
                   onChange={field.onChange}
                   label="Handler"
                   required
-                  queryParams={{ product: CLAIM_PRODUCT }}
                   labelKey="name"
                   valueKey="id"
                   placeholder="Select a handler"
@@ -232,7 +243,7 @@ export function ClaimRegisterForm({
             control={form.control}
             name="category"
             label="Category"
-            options={[{ value: 'General', label: 'General' }]}
+            options={[{ value: 'general', label: 'General' }]}
             disabled
           />
           <ReusableSelect
@@ -272,7 +283,6 @@ export function ClaimRegisterForm({
                 disabled={createType.isPending}
                 onClick={typeForm.handleSubmit((values) => {
                   createType.mutate({
-                    product: CLAIM_PRODUCT,
                     name: values.name.trim(),
                     default_tat_days: Number(values.default_tat_days),
                   })
@@ -286,8 +296,8 @@ export function ClaimRegisterForm({
           <div>
             <ReuseableInput
               control={form.control}
-              name="expected_tat_days"
-              label="Expected TAT (days)"
+              name="tat_days"
+              label="TAT (days)"
               type="number"
               min="1"
               className={claimFieldClass}
@@ -320,7 +330,7 @@ export function ClaimRegisterForm({
           />
           <ReuseableInput
             control={form.control}
-            name="date_of_loss"
+            name="loss_date"
             label="Date of loss"
             type="date"
             min={policy.issuedDate ?? undefined}
@@ -330,7 +340,7 @@ export function ClaimRegisterForm({
           />
           <ReuseableInput
             control={form.control}
-            name="date_notified_to_organization"
+            name="notified_to_organization_date"
             label="Date notified to organization"
             type="date"
             min={lossDate || undefined}
@@ -339,7 +349,7 @@ export function ClaimRegisterForm({
           />
           <ReuseableInput
             control={form.control}
-            name="date_notified_to_insurer"
+            name="notified_to_insurer_date"
             label="Date notified to insurer (optional)"
             type="date"
             min={notified || undefined}
@@ -369,24 +379,24 @@ export function ClaimRegisterForm({
             render={({ field }) => (
               <RadioGroup value={field.value} onValueChange={field.onChange} className="grid gap-3">
                 <Label className="flex items-center gap-2 font-normal">
-                  <RadioGroupItem value="have" />
+                  <RadioGroupItem value="have_documents" />
                   I have documents
                 </Label>
                 <Label className="flex items-center gap-2 font-normal">
-                  <RadioGroupItem value="none" />
+                  <RadioGroupItem value="no_documents" />
                   I do not have documents
                 </Label>
               </RadioGroup>
             )}
           />
 
-          {documentMode === 'none' && (
+          {documentMode === 'no_documents' && (
             <p className="text-sm text-muted-foreground">
               The claim will be saved as Document Pending so the notification date is kept.
             </p>
           )}
 
-          {documentMode === 'have' && slots.map((slot) => (
+          {documentMode === 'have_documents' && slots.map((slot) => (
             <div key={slot.key} className="grid gap-2 rounded-lg border p-4">
               <div className="flex flex-wrap items-center gap-2">
                 <p className="font-medium">{slot.label}</p>
@@ -432,17 +442,19 @@ function emptyRegisterValues(
   return {
     vehicle_id: policy.selectedVehicleId ?? '',
     claimant_name: policy.customerName ?? '',
+    claimant_email: policy.customerEmail ?? '',
+    claimant_phone: policy.customerPhone ?? '',
     reported_by_user_id: userId ? String(userId) : '',
     handler_id: '',
-    category: 'General',
+    category: 'general',
     claim_type_id: '',
-    expected_tat_days: '',
+    tat_days: '',
     claimed_amount: '',
-    date_of_loss: '',
-    date_notified_to_organization: '',
-    date_notified_to_insurer: '',
+    loss_date: '',
+    notified_to_organization_date: '',
+    notified_to_insurer_date: '',
     note: '',
-    document_mode: 'have',
+    document_mode: 'have_documents',
   }
 }
 
@@ -452,26 +464,27 @@ function buildClaimFormData(
   files: Record<string, File | null>,
 ): FormData {
   const formData = new FormData()
-  formData.append('product', CLAIM_PRODUCT)
   formData.append('certificate_id', certificateId)
   formData.append('vehicle_id', values.vehicle_id)
   formData.append('claimant_name', values.claimant_name.trim())
+  formData.append('claimant_email', values.claimant_email.trim())
+  formData.append('claimant_phone', values.claimant_phone.trim())
   formData.append('reported_by_user_id', values.reported_by_user_id)
   formData.append('handler_id', values.handler_id)
-  formData.append('category', 'General')
+  formData.append('category', 'general')
   formData.append('claim_type_id', values.claim_type_id)
-  formData.append('expected_tat_days', values.expected_tat_days)
+  formData.append('tat_days', values.tat_days)
   formData.append('claimed_amount', values.claimed_amount)
-  formData.append('date_of_loss', values.date_of_loss)
-  formData.append('date_notified_to_organization', values.date_notified_to_organization)
-  if (values.date_notified_to_insurer) {
-    formData.append('date_notified_to_insurer', values.date_notified_to_insurer)
+  formData.append('loss_date', values.loss_date)
+  formData.append('notified_to_organization_date', values.notified_to_organization_date)
+  if (values.notified_to_insurer_date) {
+    formData.append('notified_to_insurer_date', values.notified_to_insurer_date)
   }
   formData.append('note', values.note ?? '')
   formData.append('document_mode', values.document_mode)
-  if (values.document_mode === 'have') {
+  if (values.document_mode === 'have_documents') {
     Object.entries(files).forEach(([key, file]) => {
-      if (file) formData.append(`documents[${key}]`, file)
+      if (file) formData.append(`files[${key}]`, file)
     })
   }
   return formData

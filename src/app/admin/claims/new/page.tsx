@@ -4,7 +4,6 @@ import { Button, ReusableSelect, ReuseableInput } from '@/dev/core'
 import { UseApiQuery } from '@/hooks/hooks'
 import type { SubmitResponse } from '@/types/types'
 import {
-  CLAIM_PRODUCT,
   CLAIMS_API,
   normalizePolicy,
   normalizePolicyHit,
@@ -32,26 +31,29 @@ type Step = 'search' | 'form' | 'done'
 export function ClaimsNewPage() {
   const [step, setStep] = useState<Step>('search')
   const [certificateId, setCertificateId] = useState<string | null>(null)
+  const [registrationHint, setRegistrationHint] = useState<string | null>(null)
   const [created, setCreated] = useState<{ claimNumber: string; uuid: string | null } | null>(null)
-  const [query, setQuery] = useState<{ mode: PolicySearchMode; term: string } | null>(null)
+  const [query, setQuery] = useState<{ search_by: PolicySearchMode; term: string } | null>(null)
 
   const searchForm = useForm<ClaimSearchValues>({
     resolver: zodResolver(claimSearchSchema),
-    defaultValues: { mode: 'registration', term: '' },
+    defaultValues: { search_by: 'registration', term: '' },
   })
 
   const search = UseApiQuery<SubmitResponse>({
     url: CLAIMS_API.policies,
     params: {
-      mode: query?.mode,
+      search_by: query?.search_by,
       term: query?.term,
-      product: CLAIM_PRODUCT,
     },
     queryOptions: { enabled: Boolean(query?.term) },
   })
 
   const policyQuery = UseApiQuery<SubmitResponse>({
     url: CLAIMS_API.policy(certificateId ?? '0'),
+    params: {
+      registration: registrationHint || undefined,
+    },
     queryOptions: { enabled: step === 'form' && Boolean(certificateId) },
   })
 
@@ -61,10 +63,10 @@ export function ClaimsNewPage() {
   const policy = policyQuery.data ? normalizePolicy(policyQuery.data) : null
 
   const onSearch = (values: ClaimSearchValues) => {
-    const term = values.mode === 'registration'
+    const term = values.search_by === 'registration'
       ? normalizeRegistration(values.term)
       : values.term.trim()
-    setQuery({ mode: values.mode, term })
+    setQuery({ search_by: values.search_by, term })
     setStep('search')
   }
 
@@ -100,7 +102,7 @@ export function ClaimsNewPage() {
         >
           <ReusableSelect
             control={searchForm.control}
-            name="mode"
+            name="search_by"
             label="Search by"
             options={POLICY_SEARCH_MODES.map((mode) => ({ ...mode }))}
           />
@@ -134,8 +136,9 @@ export function ClaimsNewPage() {
                     <th className="px-4 py-3 font-medium">Registration</th>
                     <th className="px-4 py-3 font-medium">Policy</th>
                     <th className="px-4 py-3 font-medium">Certificate</th>
-                    <th className="px-4 py-3 font-medium">Customer</th>
+                    <th className="px-4 py-3 font-medium">Insured</th>
                     <th className="px-4 py-3 font-medium">Insurer</th>
+                    <th className="px-4 py-3 font-medium">Cover to</th>
                     <th className="px-4 py-3 font-medium" />
                   </tr>
                 </thead>
@@ -145,14 +148,16 @@ export function ClaimsNewPage() {
                       <td className="px-4 py-3">{hit.registration || '—'}</td>
                       <td className="px-4 py-3">{hit.policyNumber || '—'}</td>
                       <td className="px-4 py-3">{hit.certificateNumber || '—'}</td>
-                      <td className="px-4 py-3">{hit.customerName || '—'}</td>
+                      <td className="px-4 py-3">{hit.insuredName || '—'}</td>
                       <td className="px-4 py-3">{hit.insurerName || '—'}</td>
+                      <td className="px-4 py-3">{hit.coverTo || '—'}</td>
                       <td className="px-4 py-3 text-right">
                         <Button
                           type="button"
                           size="sm"
                           onClick={() => {
                             setCertificateId(hit.certificateId)
+                            setRegistrationHint(hit.registration)
                             setStep('form')
                           }}
                         >

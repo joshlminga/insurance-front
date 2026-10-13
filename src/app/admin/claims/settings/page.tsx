@@ -3,14 +3,13 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
-import { Button, ReusableSelect, ReuseableInput } from '@/dev/core'
+import { Button, ReuseableSelectInsurerInput, ReusableSelect, ReuseableInput } from '@/dev/core'
 import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
 import type { SubmitResponse } from '@/types/types'
 import {
-  CLAIM_PRODUCT,
   CLAIMS_API,
-  normalizeInsurers,
   normalizeRequirements,
+  normalizeSettingsInsurer,
   normalizeTemplates,
   normalizeClaimTypes,
 } from '@/utils/claims'
@@ -26,7 +25,7 @@ import { requirementSchema, templateSchema, type RequirementValues, type Templat
 
 /**
  * Claims settings: insurer inbox, the documents a claim expects, and email wording.
- * Each save is its own request. Uploads use FormData.
+ * Insurer email uses GET/PATCH claims/settings (not a separate insurers route).
  */
 export function ClaimsSettingsPage() {
   return (
@@ -57,20 +56,29 @@ export function ClaimsSettingsPage() {
 }
 
 function InsurerEmailSettings() {
-  const query = UseApiQuery<SubmitResponse>({ url: CLAIMS_API.insurers, params: { product: CLAIM_PRODUCT } })
-  const insurers = normalizeInsurers(query.data)
-  const [drafts, setDrafts] = useState<Record<string, string>>({})
+  const [insurerId, setInsurerId] = useState('')
+  const [claimsEmail, setClaimsEmail] = useState('')
+
+  const query = UseApiQuery<SubmitResponse>({
+    url: CLAIMS_API.settings,
+    params: { insurer_organization_id: insurerId || undefined },
+    queryOptions: { enabled: Boolean(insurerId) },
+  })
 
   useEffect(() => {
-    const next: Record<string, string> = {}
-    insurers.forEach((insurer) => {
-      next[insurer.organizationId] = insurer.claimsEmail
-    })
-    setDrafts(next)
-  }, [query.data])
+    if (!insurerId) {
+      setClaimsEmail('')
+      return
+    }
+    const contact = normalizeSettingsInsurer(query.data)
+    setClaimsEmail(contact?.claimsEmail ?? '')
+  }, [query.data, insurerId])
 
-  const save = UseApiMutation<SubmitResponse, { organizationId: string; claims_email: string }>({
-    url: (variables) => CLAIMS_API.insurerEmail(variables.organizationId),
+  const save = UseApiMutation<SubmitResponse, {
+    insurer_organization_id: number
+    claims_email: string
+  }>({
+    url: CLAIMS_API.settings,
     method: EMETHODS.PATCH,
     mutationOptions: {
       onSuccess: (response) => {
@@ -81,56 +89,56 @@ function InsurerEmailSettings() {
     },
   })
 
-  if (query.isPending) return <p className="text-sm text-muted-foreground">Loading insurers…</p>
-  if (query.isError) return <p className="text-sm text-red-600">{extractErrorMessage(query.error)}</p>
-  if (insurers.length === 0) return <p className="text-sm text-muted-foreground">No insurers returned for this organization.</p>
-
   return (
-    <div className="flex flex-col gap-3">
-      {insurers.map((insurer) => (
-        <form
-          key={insurer.organizationId}
-          className="grid gap-3 rounded-lg border bg-card p-4 md:grid-cols-[1fr_1fr_auto] md:items-end"
-          onSubmit={(event) => {
-            event.preventDefault()
-            save.mutate({
-              organizationId: insurer.organizationId,
-              claims_email: (drafts[insurer.organizationId] ?? '').trim(),
-            })
-          }}
-        >
-          <div>
-            <p className="text-sm font-medium">{insurer.name}</p>
-            <p className="text-xs text-muted-foreground">Used as the insurer recipient on claim emails.</p>
-          </div>
-          <div className="flex flex-col gap-1">
-            <Label htmlFor={`claims-email-${insurer.organizationId}`}>Claims email</Label>
-            <input
-              id={`claims-email-${insurer.organizationId}`}
-              type="email"
-              className={claimFieldClass}
-              value={drafts[insurer.organizationId] ?? ''}
-              onChange={(event) => {
-                const value = event.target.value
-                setDrafts((current) => ({ ...current, [insurer.organizationId]: value }))
-              }}
-            />
-          </div>
-          <Button type="submit" disabled={save.isPending}>Save</Button>
-        </form>
-      ))}
-    </div>
+    <form
+      className="grid gap-3 rounded-lg border bg-card p-4 md:grid-cols-[1fr_1fr_auto] md:items-end"
+      onSubmit={(event) => {
+        event.preventDefault()
+        if (!insurerId) {
+          ShowToast.error('Choose an insurer first.')
+          return
+        }
+        save.mutate({
+          insurer_organization_id: Number(insurerId),
+          claims_email: claimsEmail.trim(),
+        })
+      }}
+    >
+      <ReuseableSelectInsurerInput
+        value={insurerId}
+        onChange={setInsurerId}
+        label="Insurer"
+        required
+        placeholder="Select insurer..."
+      />
+      <div className="flex flex-col gap-1">
+        <Label htmlFor="claims-email">Claims email</Label>
+        <input
+          id="claims-email"
+          type="email"
+          className={claimFieldClass}
+          value={claimsEmail}
+          disabled={!insurerId || query.isFetching}
+          onChange={(event) => setClaimsEmail(event.target.value)}
+          placeholder={insurerId ? 'claims@insurer.example' : 'Select an insurer first'}
+        />
+      </div>
+      <Button type="submit" disabled={save.isPending || !insurerId}>
+        {save.isPending ? 'Saving…' : 'Save'}
+      </Button>
+      {query.isError && (
+        <p className="md:col-span-3 text-sm text-red-600">{extractErrorMessage(query.error)}</p>
+      )}
+    </form>
   )
 }
 
 function DocumentRequirementSettings() {
   const requirementsQuery = UseApiQuery<SubmitResponse>({
     url: CLAIMS_API.requirements,
-    params: { product: CLAIM_PRODUCT },
   })
   const typesQuery = UseApiQuery<SubmitResponse>({
     url: CLAIMS_API.types,
-    params: { product: CLAIM_PRODUCT },
   })
   const requirements = normalizeRequirements(requirementsQuery.data)
   const types = normalizeClaimTypes(typesQuery.data)
@@ -140,7 +148,13 @@ function DocumentRequirementSettings() {
 
   const form = useForm<RequirementValues>({
     resolver: zodResolver(requirementSchema),
-    defaultValues: { label: '', description: '', mandatory: true, allows_multiple: false, claim_type_ids: [] },
+    defaultValues: {
+      label: '',
+      description: '',
+      is_mandatory: true,
+      allows_multiple: false,
+      applicable_claim_type_ids: [],
+    },
   })
 
   const save = UseApiMutation<SubmitResponse, FormData>({
@@ -154,7 +168,13 @@ function DocumentRequirementSettings() {
         setEditingId(null)
         setTemplateFile(null)
         setExampleFile(null)
-        form.reset({ label: '', description: '', mandatory: true, allows_multiple: false, claim_type_ids: [] })
+        form.reset({
+          label: '',
+          description: '',
+          is_mandatory: true,
+          allows_multiple: false,
+          applicable_claim_type_ids: [],
+        })
         void requirementsQuery.refetch()
       },
       onError: (error) => ShowToast.error(extractErrorMessage(error)),
@@ -179,13 +199,14 @@ function DocumentRequirementSettings() {
         className="grid gap-3 rounded-lg border bg-card p-4"
         onSubmit={form.handleSubmit((values) => {
           const formData = new FormData()
-          formData.append('product', CLAIM_PRODUCT)
           formData.append('label', values.label.trim())
           formData.append('description', values.description ?? '')
-          formData.append('mandatory', values.mandatory ? '1' : '0')
+          formData.append('is_mandatory', values.is_mandatory ? '1' : '0')
           formData.append('allows_multiple', values.allows_multiple ? '1' : '0')
           if (editingId) formData.append('_method', 'PATCH')
-          values.claim_type_ids.forEach((id) => formData.append('claim_type_ids[]', id))
+          values.applicable_claim_type_ids.forEach((id) => {
+            formData.append('applicable_claim_type_ids[]', id)
+          })
           if (templateFile) formData.append('template', templateFile)
           if (exampleFile) formData.append('example', exampleFile)
           save.mutate(formData)
@@ -196,7 +217,7 @@ function DocumentRequirementSettings() {
         <ReuseableInput control={form.control} name="description" label="Description" className={claimFieldClass} />
         <Controller
           control={form.control}
-          name="mandatory"
+          name="is_mandatory"
           render={({ field }) => (
             <Label className="flex items-center gap-2 font-normal">
               <Checkbox checked={field.value} onCheckedChange={(checked) => field.onChange(Boolean(checked))} />
@@ -221,7 +242,7 @@ function DocumentRequirementSettings() {
             <Controller
               key={type.id}
               control={form.control}
-              name="claim_type_ids"
+              name="applicable_claim_type_ids"
               render={({ field }) => (
                 <Label className="flex items-center gap-2 font-normal">
                   <Checkbox
@@ -255,7 +276,13 @@ function DocumentRequirementSettings() {
               variant="outline"
               onClick={() => {
                 setEditingId(null)
-                form.reset({ label: '', description: '', mandatory: true, allows_multiple: false, claim_type_ids: [] })
+                form.reset({
+                  label: '',
+                  description: '',
+                  is_mandatory: true,
+                  allows_multiple: false,
+                  applicable_claim_type_ids: [],
+                })
               }}
             >
               Cancel edit
@@ -285,9 +312,9 @@ function DocumentRequirementSettings() {
                   form.reset({
                     label: requirement.label,
                     description: requirement.description,
-                    mandatory: requirement.mandatory,
+                    is_mandatory: requirement.mandatory,
                     allows_multiple: requirement.allowsMultiple,
-                    claim_type_ids: requirement.claimTypeIds,
+                    applicable_claim_type_ids: requirement.claimTypeIds,
                   })
                 }}
               >
@@ -313,7 +340,6 @@ function DocumentRequirementSettings() {
 function EmailTemplateSettings() {
   const query = UseApiQuery<SubmitResponse>({
     url: CLAIMS_API.templates,
-    params: { product: CLAIM_PRODUCT },
   })
   const templates = normalizeTemplates(query.data)
   const form = useForm<TemplateValues>({

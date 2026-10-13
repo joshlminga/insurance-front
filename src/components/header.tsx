@@ -8,6 +8,7 @@ import { useEffect, useState } from "react"
 import { useLocation } from "react-router-dom"
 import { BreadCrumbComponent } from "@/dev/core"
 import { MotorQuotationBreadcrumb } from "@/app/admin/quotations/motor/motor-quotation-breadcrumb"
+import { TravelQuotationBreadcrumb } from "@/app/admin/quotations/travel/travel-quotation-breadcrumb"
 import { cn } from "@/lib/utils"
 import { NotificationToggle } from "./notification"
 
@@ -44,6 +45,8 @@ export default function Header() {
         <div className="hidden min-w-0 flex-1 md:block">
           {location.pathname.includes('/quotations/motor-quotations') ? (
             <MotorQuotationBreadcrumb />
+          ) : location.pathname.includes('/quotations/travel-quotations') ? (
+            <TravelQuotationBreadcrumb />
           ) : (
             <BreadCrumbComponent />
           )}

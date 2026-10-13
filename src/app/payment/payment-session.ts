@@ -1,4 +1,5 @@
 import { EPREFIX, EROUTES } from '@/utils/enums'
+import { ADMIN_ACTIVE_QUOTATION_PRODUCT_KEY } from '@/utils/constatnts'
 import { useStepperStore } from '@/stores/stepper-store'
 import type { NavigateFunction } from 'react-router-dom'
 
@@ -7,6 +8,11 @@ import type { NavigateFunction } from 'react-router-dom'
  * Like a PHP session flag: we need it later to send the user back to the right receipt.
  */
 export type PaymentStatusFlow = 'motor' | 'marine' | 'admin'
+
+function isAdminTravelPaymentActive(): boolean {
+    if (typeof window === 'undefined') return false
+    return sessionStorage.getItem(ADMIN_ACTIVE_QUOTATION_PRODUCT_KEY) === 'travel'
+}
 
 export type PaymentMethodKey = 'mpesa' | 'credit' | 'paystack'
 
@@ -23,6 +29,11 @@ const PAYMENT_STATUS_SESSION_KEY = 'payment_status_session'
 export const ADMIN_MOTOR_PURCHASE_STEP_KEY = 'admin_motor_purchase_step'
 export const ADMIN_MOTOR_PURCHASE_PAYMENT_STEP = 3
 export const ADMIN_MOTOR_PURCHASE_SUCCESS_STEP = 4
+
+/** Admin travel purchase mini-stepper (KYC → Invoice → Payment → Success). */
+export const ADMIN_TRAVEL_PURCHASE_STEP_KEY = 'admin_travel_purchase_step'
+export const ADMIN_TRAVEL_PURCHASE_PAYMENT_STEP = 3
+export const ADMIN_TRAVEL_PURCHASE_SUCCESS_STEP = 4
 
 const MOTOR_GUEST_RECEIPT_STEP = 8
 const MOTOR_AUTH_RECEIPT_STEP = 6
@@ -94,7 +105,11 @@ export function getPaymentReturnPath(method: PaymentMethodKey): string {
 
 /** URL of the payment step the user came from (Try again). */
 export function getPaymentRetryUrl(flow?: PaymentStatusFlow): string {
-    if (flow === 'admin') return EROUTES.MOTOR_QUOTATION_PURCHASE
+    if (flow === 'admin') {
+        return isAdminTravelPaymentActive()
+            ? EROUTES.TRAVEL_QUOTATION_PURCHASE
+            : EROUTES.MOTOR_QUOTATION_PURCHASE
+    }
     if (flow === 'marine') return `/${EPREFIX.CUSTOMER}${EROUTES.MARINE}`
     return `/${EPREFIX.CUSTOMER}${EROUTES.MOTOR}`
 }
@@ -108,6 +123,14 @@ export function goToReceipt(navigate: NavigateFunction, isAuthenticated: boolean
     const flow = session?.flow ?? 'motor'
 
     if (flow === 'admin') {
+        if (isAdminTravelPaymentActive()) {
+            sessionStorage.setItem(
+                ADMIN_TRAVEL_PURCHASE_STEP_KEY,
+                String(ADMIN_TRAVEL_PURCHASE_SUCCESS_STEP),
+            )
+            navigate(EROUTES.TRAVEL_QUOTATION_PURCHASE)
+            return
+        }
         sessionStorage.setItem(
             ADMIN_MOTOR_PURCHASE_STEP_KEY,
             String(ADMIN_MOTOR_PURCHASE_SUCCESS_STEP),
@@ -131,10 +154,17 @@ export function goToPaymentRetry(navigate: NavigateFunction): void {
     const session = readPaymentStatusSession()
     const flow = session?.flow ?? 'motor'
     if (flow === 'admin') {
-        sessionStorage.setItem(
-            ADMIN_MOTOR_PURCHASE_STEP_KEY,
-            String(ADMIN_MOTOR_PURCHASE_PAYMENT_STEP),
-        )
+        if (isAdminTravelPaymentActive()) {
+            sessionStorage.setItem(
+                ADMIN_TRAVEL_PURCHASE_STEP_KEY,
+                String(ADMIN_TRAVEL_PURCHASE_PAYMENT_STEP),
+            )
+        } else {
+            sessionStorage.setItem(
+                ADMIN_MOTOR_PURCHASE_STEP_KEY,
+                String(ADMIN_MOTOR_PURCHASE_PAYMENT_STEP),
+            )
+        }
     }
     navigate(getPaymentRetryUrl(flow))
 }

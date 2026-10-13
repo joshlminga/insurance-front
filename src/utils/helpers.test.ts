@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest"
+import { BENEFIT_SELECT_NONE } from "./constatnts"
 import {
     canPurchaseCover,
+    collectBenefitIdsFromValues,
+    defaultBenefitSelectValue,
     formatAllOrRange,
     formatMotorRateAge,
     formatMotorRateTonnage,
@@ -10,6 +13,7 @@ import {
     formatWholeNumber,
     getDmvicValidationOverrideError,
     getInvalidVehicleRegistrationError,
+    isBenefitGroupLocked,
     mapMotorRateToFormValues,
     maxCoverEndDate,
     mergeSelectedOption,
@@ -359,5 +363,70 @@ describe("mapMotorRateToFormValues", () => {
         expect(values.valued_from).toBe("600000.00")
         expect(values.start_date).toBe("2026-03-01")
         expect(values.makemodel_offered).toEqual([5])
+    })
+})
+
+describe("org mandatory benefit helpers", () => {
+    it("defaultBenefitSelectValue prefers locked org-mandatory benefits", () => {
+        const value = defaultBenefitSelectValue(
+            [
+                {
+                    id: 11,
+                    name: "Excess Protector",
+                    org_mandatory: true,
+                    locked: true,
+                    allow_unselect: false,
+                },
+            ],
+            new Set()
+        )
+        expect(value).toBe("11")
+    })
+
+    it("defaultBenefitSelectValue preselects soft org-mandatory benefits", () => {
+        const value = defaultBenefitSelectValue(
+            [
+                {
+                    id: 22,
+                    name: "Road Rescue",
+                    org_mandatory: true,
+                    locked: false,
+                    allow_unselect: true,
+                },
+            ],
+            new Set()
+        )
+        expect(value).toBe("22")
+    })
+
+    it("collectBenefitIdsFromValues keeps locked benefits even when cleared", () => {
+        const ids = collectBenefitIdsFromValues(
+            { benefit_Other: BENEFIT_SELECT_NONE },
+            [
+                {
+                    group: "Other",
+                    items: [
+                        {
+                            id: 33,
+                            org_mandatory: true,
+                            locked: true,
+                            allow_unselect: false,
+                        },
+                    ],
+                },
+            ]
+        )
+        expect(ids).toEqual([33])
+    })
+
+    it("isBenefitGroupLocked detects locked org-mandatory groups", () => {
+        expect(
+            isBenefitGroupLocked([
+                { id: 1, locked: true, org_mandatory: true },
+            ])
+        ).toBe(true)
+        expect(
+            isBenefitGroupLocked([{ id: 1, locked: false, org_mandatory: true }])
+        ).toBe(false)
     })
 })

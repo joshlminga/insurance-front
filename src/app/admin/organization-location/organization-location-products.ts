@@ -28,12 +28,12 @@ export type OrganizationLocationProductEditRow = OrganizationLocationProductCrea
 
 export const DEFAULT_ORG_LOCATION_PRODUCT_CREATE_ROW: OrganizationLocationProductCreateRow = {
   product: "",
-  access_public: true,
+  access_public: false,
 }
 
 export const DEFAULT_ORG_LOCATION_PRODUCT_EDIT_ROW: OrganizationLocationProductEditRow = {
   product: "",
-  access_public: true,
+  access_public: false,
   product_status: true,
 }
 
@@ -57,7 +57,7 @@ export function mapApiProductsToEditRows(
 
   return apiProducts.map((item) => ({
     product: toProductTypeValue(item.product ?? ""),
-    access_public: item.access_public ?? true,
+    access_public: item.access_public ?? false,
     product_status: item.is_active ?? true,
   }))
 }

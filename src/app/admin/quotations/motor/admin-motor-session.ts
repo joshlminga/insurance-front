@@ -15,6 +15,7 @@ import {
     ADMIN_MOTOR_TARGET_INVOICE_AMOUNT_KEY,
     ADMIN_MOTOR_TARGET_INVOICE_ID_KEY,
     ADMIN_MOTOR_QUOTE_IS_GUEST_KEY,
+    ADMIN_ACTIVE_QUOTATION_PRODUCT_KEY,
     INVOICE_SESSION_STORAGE_KEY,
     MOTOR_QUOTE_SESSION_STORAGE_KEY,
     PURCHASE_SESSION_STORAGE_KEY,
@@ -191,6 +192,7 @@ export function persistAdminMotorPurchaseStart({
         ownership == null ? '' : String(ownership)
     )
     sessionStorage.setItem(ADMIN_MOTOR_PURCHASE_STEP_KEY, '1')
+    sessionStorage.setItem(ADMIN_ACTIVE_QUOTATION_PRODUCT_KEY, 'motor')
     sessionStorage.removeItem(INVOICE_SESSION_STORAGE_KEY)
     // Drop leftover Issue-cover / resume target invoice so Payment Options
     // does not filter summary to an invoice from a previous purchase.

@@ -12,6 +12,12 @@ import { useState } from 'react'
 
 const fileAccept = '.pdf,.jpg,.jpeg,.png,.heic,.doc,.docx'
 
+type ReviewPayload = {
+  documentId: string
+  decision: 'accepted' | 'rejected'
+  note?: string
+}
+
 /**
  * Upload a file onto a slot, ask for missing documents, or accept / reject what was uploaded.
  * Request marks the slot Requested and the API opens the document-request email.
@@ -30,7 +36,11 @@ export function ClaimDocuments({
   const [files, setFiles] = useState<Record<string, File | null>>({})
 
   const upload = UseApiMutation<SubmitResponse, FormData>({
-    url: CLAIMS_API.documents(claim.uuid),
+    url: (formData) => {
+      const documentId = String(formData.get('_expected_document_id') ?? '')
+      formData.delete('_expected_document_id')
+      return CLAIMS_API.documentUpload(claim.uuid, documentId)
+    },
     method: EMETHODS.POST,
     config: { headers: { 'Content-Type': 'multipart/form-data' } },
     mutationOptions: {
@@ -42,7 +52,9 @@ export function ClaimDocuments({
     },
   })
 
-  const requestDocs = UseApiMutation<SubmitResponse, { expected_document_ids: string[]; note?: string }>({
+  const requestDocs = UseApiMutation<SubmitResponse, {
+    items: Array<{ expected_document_id: number; note?: string }>
+  }>({
     url: CLAIMS_API.documentRequest(claim.uuid),
     method: EMETHODS.POST,
     mutationOptions: {
@@ -57,7 +69,7 @@ export function ClaimDocuments({
     },
   })
 
-  const review = UseApiMutation<SubmitResponse, { documentId: string; decision: 'accept' | 'reject'; note?: string }>({
+  const review = UseApiMutation<SubmitResponse, ReviewPayload>({
     url: (variables) => CLAIMS_API.documentReview(claim.uuid, variables.documentId),
     method: EMETHODS.POST,
     mutationOptions: {
@@ -108,8 +120,8 @@ export function ClaimDocuments({
                 const file = files[slot.id]
                 if (!file) return
                 const formData = new FormData()
-                formData.append('expected_document_id', slot.id)
-                formData.append('file', file)
+                formData.append('_expected_document_id', slot.id)
+                formData.append('files[]', file)
                 upload.mutate(formData)
               }}
             >
@@ -120,7 +132,7 @@ export function ClaimDocuments({
               size="sm"
               variant="outline"
               disabled={review.isPending}
-              onClick={() => review.mutate({ documentId: slot.id, decision: 'accept' })}
+              onClick={() => review.mutate({ documentId: slot.id, decision: 'accepted' })}
             >
               Accept
             </Button>
@@ -129,7 +141,7 @@ export function ClaimDocuments({
               size="sm"
               variant="outline"
               disabled={review.isPending}
-              onClick={() => review.mutate({ documentId: slot.id, decision: 'reject' })}
+              onClick={() => review.mutate({ documentId: slot.id, decision: 'rejected' })}
             >
               Reject
             </Button>
@@ -161,8 +173,10 @@ export function ClaimDocuments({
           type="button"
           disabled={selected.length === 0 || requestDocs.isPending}
           onClick={() => requestDocs.mutate({
-            expected_document_ids: selected,
-            note: note.trim() || undefined,
+            items: selected.map((id) => ({
+              expected_document_id: Number(id),
+              note: note.trim() || undefined,
+            })),
           })}
         >
           {requestDocs.isPending ? 'Requesting…' : 'Request selected documents'}

@@ -18,19 +18,18 @@ export const CLAIMS_API = {
   claim: (uuid: string) => `claims/${uuid}`,
   status: (uuid: string) => `claims/${uuid}/status`,
   recheck: (uuid: string) => `claims/${uuid}/recheck`,
-  documents: (uuid: string) => `claims/${uuid}/documents`,
+  documentUpload: (uuid: string, expectedDocumentId: number | string) =>
+    `claims/${uuid}/documents/${expectedDocumentId}/files`,
   documentRequest: (uuid: string) => `claims/${uuid}/documents/request`,
   documentReview: (uuid: string, documentId: number | string) =>
     `claims/${uuid}/documents/${documentId}/review`,
+  settings: 'claims/settings',
   requirements: 'claims/document-requirements',
   requirement: (id: number | string) => `claims/document-requirements/${id}`,
   templates: 'claims/email-templates',
   template: (type: string) => `claims/email-templates/${encodeURIComponent(type)}`,
-  insurers: 'claims/insurers',
-  insurerEmail: (organizationId: number | string) => `claims/insurers/${organizationId}`,
   emails: (uuid: string) => `claims/${uuid}/emails`,
   emailPreview: (uuid: string) => `claims/${uuid}/emails/preview`,
-  emailSend: (uuid: string) => `claims/${uuid}/emails/send`,
 } as const
 
 export const POLICY_SEARCH_MODES = [
@@ -42,6 +41,7 @@ export const POLICY_SEARCH_MODES = [
 
 export type PolicySearchMode = (typeof POLICY_SEARCH_MODES)[number]['value']
 
+/** Matches App\Enums\Claims\ClaimStatus exactly. */
 export const CLAIM_STATUS_FILTERS = [
   { value: 'all', label: 'All statuses' },
   { value: 'registration_hold', label: 'Registration Hold' },
@@ -49,12 +49,12 @@ export const CLAIM_STATUS_FILTERS = [
   { value: 'claim_notified', label: 'Claim Notified' },
   { value: 'submitted_to_insurer', label: 'Submitted to Insurer' },
   { value: 'approved', label: 'Approved' },
+  { value: 'declined', label: 'Declined' },
   { value: 'settled', label: 'Settled' },
-  { value: 'closed', label: 'Closed' },
-  { value: 'rejected', label: 'Rejected' },
+  { value: 'reopened', label: 'Claim Reopened' },
 ] as const
 
-export type TatBadge = 'on_track' | 'due_soon' | 'overdue'
+export type TatBadge = 'on_track' | 'due_soon' | 'overdue' | 'closed'
 export type GateStatus = 'pass' | 'warning' | 'fail' | 'unknown'
 
 export type GateBanner = {
@@ -75,7 +75,7 @@ export type ClaimListRow = {
   uuid: string
   claim_number: string
   insurer_claim_number: string | null
-  registration: string | null
+  registration_number: string | null
   policy_number: string | null
   status: string
   status_label: string
@@ -83,12 +83,17 @@ export type ClaimListRow = {
   tat_due_date: string | null
   claimant_name: string | null
   handler_name: string | null
-  date_of_loss: string | null
+  loss_date: string | null
 }
 
 export type PolicyVehicle = {
   id: string
   label: string
+  registrationNumber: string | null
+  make: string | null
+  model: string | null
+  preselected: boolean
+  certificateId: string | null
 }
 
 export type PolicyDocumentSlot = {
@@ -99,6 +104,7 @@ export type PolicyDocumentSlot = {
   hint: string | null
   downloadUrl: string | null
   claimTypeIds: string[]
+  requirementId: string | null
 }
 
 export type PolicySnapshot = {
@@ -108,6 +114,7 @@ export type PolicySnapshot = {
   certificateNumber: string | null
   customerName: string | null
   customerEmail: string | null
+  customerPhone: string | null
   insurerName: string | null
   insurerClaimsEmail: string | null
   coverType: string | null
@@ -124,9 +131,10 @@ export type PolicySearchHit = {
   registration: string | null
   policyNumber: string | null
   certificateNumber: string | null
-  customerName: string | null
+  insuredName: string | null
   insurerName: string | null
-  expiryDate: string | null
+  coverTo: string | null
+  vehicles: PolicyVehicle[]
 }
 
 export type ClaimTypeOption = {
@@ -143,6 +151,7 @@ export type ClaimDocumentSlot = {
   requestNote: string | null
   downloadUrl: string | null
   fileName: string | null
+  slotKey: string | null
 }
 
 export type ClaimHistoryItem = {
@@ -158,18 +167,20 @@ export type ClaimDetail = ClaimListRow & {
   handlerId: string
   handlerEmail: string | null
   customerEmail: string | null
+  customerPhone: string | null
   insurerClaimsEmail: string | null
   category: string
   claimTypeName: string | null
   claimedAmount: string
-  expectedTatDays: string
-  dateNotifiedToOrganization: string | null
-  dateNotifiedToInsurer: string | null
+  tatDays: string
+  notifiedToOrganizationDate: string | null
+  notifiedToInsurerDate: string | null
   note: string | null
   certificateNumber: string | null
   allowedNextStatuses: { value: string; label: string }[]
   documents: ClaimDocumentSlot[]
   history: ClaimHistoryItem[]
+  emails: ClaimEmailLog[]
   banners: GateBanner[]
 }
 
@@ -239,9 +250,9 @@ const BANNER_COPY: Record<GateBanner['key'], Record<GateStatus, string>> = {
 }
 
 const FALLBACK_SLOTS: PolicyDocumentSlot[] = [
-  { key: 'certificate', label: 'Motor certificate', mandatory: true, found: false, hint: null, downloadUrl: null, claimTypeIds: [] },
-  { key: 'id_document', label: 'National ID', mandatory: true, found: false, hint: null, downloadUrl: null, claimTypeIds: [] },
-  { key: 'logbook', label: 'Logbook', mandatory: true, found: false, hint: null, downloadUrl: null, claimTypeIds: [] },
+  { key: 'motor_certificate', label: 'Motor certificate', mandatory: true, found: false, hint: null, downloadUrl: null, claimTypeIds: [], requirementId: null },
+  { key: 'identity_card', label: 'National ID', mandatory: true, found: false, hint: null, downloadUrl: null, claimTypeIds: [], requirementId: null },
+  { key: 'vehicle_logbook', label: 'Logbook', mandatory: true, found: false, hint: null, downloadUrl: null, claimTypeIds: [], requirementId: null },
   {
     key: 'driving_licence',
     label: 'Driving licence',
@@ -250,6 +261,7 @@ const FALLBACK_SLOTS: PolicyDocumentSlot[] = [
     hint: 'Not found on policy — please upload',
     downloadUrl: null,
     claimTypeIds: [],
+    requirementId: null,
   },
 ]
 
@@ -301,7 +313,7 @@ function emailFrom(record: Record<string, unknown>, keys: string[]): string | nu
     const value = record[key]
     if (typeof value === 'string' && value.includes('@')) return value.trim()
     if (isRecord(value)) {
-      const email = pickString(value, ['email', 'claims_email'])
+      const email = pickString(value, ['email', 'claims_email', 'insurer_email'])
       if (email?.includes('@')) return email
     }
   }
@@ -354,7 +366,7 @@ export function humanizeStatus(status: string | null | undefined): string {
 
 export function isClosedStatus(status: string | null | undefined): boolean {
   const value = (status ?? '').toLowerCase()
-  return value.includes('closed') || value.includes('settled') || value.includes('reject')
+  return value === 'settled' || value === 'declined' || value.includes('closed')
 }
 
 export function isHoldStatus(status: string | null | undefined): boolean {
@@ -387,6 +399,7 @@ export function tatBadgeLabel(badge: TatBadge | string | null | undefined): stri
   if (badge === 'on_track') return 'On track'
   if (badge === 'due_soon') return 'Due soon'
   if (badge === 'overdue') return 'Overdue'
+  if (badge === 'closed') return 'Closed'
   return badge ? humanizeStatus(badge) : ''
 }
 
@@ -398,7 +411,9 @@ export function displayTatBadge(input: {
   today?: string
 }): TatBadge | null {
   const api = (input.tatBadge ?? '').trim().toLowerCase().replace(/\s+/g, '_')
-  if (api === 'on_track' || api === 'due_soon' || api === 'overdue') return api
+  if (api === 'on_track' || api === 'due_soon' || api === 'overdue' || api === 'closed') {
+    return api
+  }
   return resolveTatBadge({
     dueDate: input.tatDueDate,
     today: input.today ?? todayInNairobi(),
@@ -407,15 +422,25 @@ export function displayTatBadge(input: {
   })
 }
 
-function bannerStatus(value: unknown): GateStatus {
-  if (value === true) return 'pass'
-  if (value === false) return 'fail'
-  const text = String(value ?? '').trim().toLowerCase()
-  if (!text) return 'unknown'
-  if (['pass', 'ok', 'approved', 'paid', 'success', 'confirmed', 'true', '1'].includes(text)) return 'pass'
-  if (['warning', 'partial', 'partially_paid', 'partial_premium'].includes(text)) return 'warning'
-  if (['unknown', 'pending'].includes(text)) return 'unknown'
+function premiumBannerStatus(status: string): GateStatus {
+  if (status === 'paid') return 'pass'
+  if (status === 'partial') return 'warning'
+  if (status === 'unpaid') return 'fail'
+  return 'unknown'
+}
+
+function riskBannerStatus(passed: boolean | null, status: string): GateStatus {
+  if (passed === true) return 'pass'
+  if (passed === false) return 'fail'
+  if (status === 'active') return 'pass'
+  if (!status) return 'unknown'
   return 'fail'
+}
+
+function debitBannerStatus(status: string, passed: boolean | null): GateStatus {
+  if (status === 'approved' || passed === true) return 'pass'
+  if (status === 'not_approved' || passed === false) return 'fail'
+  return 'unknown'
 }
 
 function bannerMessage(key: GateBanner['key'], status: GateStatus, raw: string): string {
@@ -425,41 +450,67 @@ function bannerMessage(key: GateBanner['key'], status: GateStatus, raw: string):
   return raw
 }
 
-/** Three registration banners. Debit is about the certificate existing, never finance sync. */
+/**
+ * Map API `gate` (premium / risk_note / debit_note) to the three UI banners.
+ * Debit is about the certificate existing — never finance sync.
+ */
 export function readGateBanners(source: unknown): GateBanner[] {
   const record = isRecord(source) ? source : null
-  const specs: Array<{ key: GateBanner['key']; title: string; aliases: string[] }> = [
-    { key: 'premium', title: 'Premium', aliases: ['premium'] },
-    { key: 'risk_note', title: 'Risk note', aliases: ['risk_note', 'risk'] },
-    { key: 'debit', title: 'Debit note', aliases: ['debit', 'debit_note'] },
+  if (!record) {
+    return [
+      { key: 'premium', title: 'Premium', status: 'unknown', message: BANNER_COPY.premium.unknown },
+      { key: 'risk_note', title: 'Risk note', status: 'unknown', message: BANNER_COPY.risk_note.unknown },
+      { key: 'debit', title: 'Debit note', status: 'unknown', message: BANNER_COPY.debit.unknown },
+    ]
+  }
+
+  const premium = isRecord(record.premium) ? record.premium : null
+  const risk = isRecord(record.risk_note) ? record.risk_note : isRecord(record.risk) ? record.risk : null
+  const debit = isRecord(record.debit_note) ? record.debit_note : isRecord(record.debit) ? record.debit : null
+
+  const premiumStatus = premium
+    ? premiumBannerStatus((pickString(premium, ['status']) ?? '').toLowerCase())
+    : 'unknown'
+  const premiumMessage = premium
+    ? (pickString(premium, ['warning', 'reason', 'label']) ?? '')
+    : ''
+
+  const riskPassed = risk && typeof risk.passed === 'boolean' ? risk.passed : null
+  const riskStatus = risk
+    ? riskBannerStatus(riskPassed, (pickString(risk, ['status']) ?? '').toLowerCase())
+    : 'unknown'
+  const riskMessage = risk
+    ? (pickString(risk, ['reason', 'label']) ?? '')
+    : ''
+
+  const debitPassed = debit && typeof debit.passed === 'boolean' ? debit.passed : null
+  const debitStatus = debit
+    ? debitBannerStatus((pickString(debit, ['status']) ?? '').toLowerCase(), debitPassed)
+    : 'unknown'
+  const debitMessage = debit
+    ? (pickString(debit, ['reason', 'label']) ?? '')
+    : ''
+
+  return [
+    {
+      key: 'premium',
+      title: 'Premium',
+      status: premiumStatus,
+      message: bannerMessage('premium', premiumStatus, premiumMessage),
+    },
+    {
+      key: 'risk_note',
+      title: 'Risk note',
+      status: riskStatus,
+      message: bannerMessage('risk_note', riskStatus, riskMessage),
+    },
+    {
+      key: 'debit',
+      title: 'Debit note',
+      status: debitStatus,
+      message: bannerMessage('debit', debitStatus, debitMessage),
+    },
   ]
-
-  return specs.map((spec) => {
-    const raw = spec.aliases.map((alias) => record?.[alias]).find((value) => value != null)
-    if (typeof raw === 'string' || typeof raw === 'boolean') {
-      const status = bannerStatus(raw)
-      return { key: spec.key, title: spec.title, status, message: BANNER_COPY[spec.key][status] }
-    }
-    if (isRecord(raw)) {
-      const status = bannerStatus(raw.status ?? raw.result ?? raw.state)
-      const message = pickString(raw, ['message', 'detail', 'label']) ?? ''
-      return { key: spec.key, title: spec.title, status, message: bannerMessage(spec.key, status, message) }
-    }
-    return {
-      key: spec.key,
-      title: spec.title,
-      status: 'unknown',
-      message: BANNER_COPY[spec.key].unknown,
-    }
-  })
-}
-
-function bannersFromRecord(record: Record<string, unknown> | null): GateBanner[] {
-  if (!record) return readGateBanners(null)
-  const snapshot = isRecord(record.policy_snapshot) ? record.policy_snapshot : null
-  const gate = isRecord(record.gate) ? record.gate : isRecord(record.gate_result) ? record.gate_result : null
-  const source = record.banners ?? snapshot?.banners ?? gate?.banners ?? gate ?? snapshot?.gate
-  return readGateBanners(source)
 }
 
 export function readRecord(body: JsonBody | null | undefined, nestedKeys: string[]): Record<string, unknown> | null {
@@ -505,15 +556,20 @@ function readSlots(record: Record<string, unknown> | null): PolicyDocumentSlot[]
   if (!record) return []
   const raw = record.documents ?? record.document_slots ?? record.document_requirements
   if (!Array.isArray(raw)) return []
-  return raw.filter(isRecord).map((slot) => ({
-    key: pickString(slot, ['key', 'code', 'id']) ?? pickString(slot, ['label']) ?? 'document',
-    label: pickString(slot, ['label', 'name']) ?? 'Document',
-    mandatory: pickBool(slot, ['mandatory', 'is_mandatory']),
-    found: pickBool(slot, ['found', 'on_policy', 'linked']),
-    hint: pickString(slot, ['hint', 'note']),
-    downloadUrl: pickString(slot, ['download_url', 'url']),
-    claimTypeIds: idList(slot.claim_type_ids ?? slot.claim_types),
-  }))
+  return raw.filter(isRecord).map((slot) => {
+    const state = (pickString(slot, ['state']) ?? '').toLowerCase()
+    const found = state === 'linked' || pickBool(slot, ['found', 'on_policy', 'linked'])
+    return {
+      key: pickString(slot, ['key', 'slot_key', 'code']) ?? pickString(slot, ['label']) ?? 'document',
+      label: pickString(slot, ['label', 'name']) ?? 'Document',
+      mandatory: pickBool(slot, ['is_mandatory', 'mandatory']),
+      found,
+      hint: pickString(slot, ['missing_message', 'hint', 'note', 'description']),
+      downloadUrl: pickString(slot, ['download_url', 'url', 'template_url']),
+      claimTypeIds: idList(slot.applicable_claim_type_ids ?? slot.claim_type_ids ?? slot.claim_types),
+      requirementId: pickString(slot, ['requirement_id']),
+    }
+  })
 }
 
 function extrasForType(typeName: string): PolicyDocumentSlot[] {
@@ -529,6 +585,7 @@ function extrasForType(typeName: string): PolicyDocumentSlot[] {
       hint: null,
       downloadUrl: null,
       claimTypeIds: [],
+      requirementId: null,
     })
   }
   if (name === 'total loss') {
@@ -540,6 +597,7 @@ function extrasForType(typeName: string): PolicyDocumentSlot[] {
       hint: null,
       downloadUrl: null,
       claimTypeIds: [],
+      requirementId: null,
     })
   }
   slots.push({
@@ -550,6 +608,7 @@ function extrasForType(typeName: string): PolicyDocumentSlot[] {
     hint: 'Optional',
     downloadUrl: null,
     claimTypeIds: [],
+    requirementId: null,
   })
   return slots
 }
@@ -576,12 +635,20 @@ function readVehicles(record: Record<string, unknown>): PolicyVehicle[] {
   const raw = record.vehicles ?? record.vehicle
   const list = Array.isArray(raw) ? raw : raw ? [raw] : []
   return list.filter(isRecord).map((vehicle) => {
-    const id = pickString(vehicle, ['id', 'vehicle_id']) ?? ''
-    const registration = pickString(vehicle, ['registration', 'registration_number'])
+    const id = pickString(vehicle, ['vehicle_id', 'id']) ?? ''
+    const registrationNumber = pickString(vehicle, ['registration_number', 'registration'])
     const make = pickString(vehicle, ['make'])
     const model = pickString(vehicle, ['model'])
-    const label = [registration, make, model].filter(Boolean).join(' · ') || `Vehicle ${id}`
-    return { id, label }
+    const label = [registrationNumber, make, model].filter(Boolean).join(' · ') || `Vehicle ${id}`
+    return {
+      id,
+      label,
+      registrationNumber,
+      make,
+      model,
+      preselected: pickBool(vehicle, ['preselected']),
+      certificateId: pickString(vehicle, ['certificate_id']),
+    }
   }).filter((vehicle) => vehicle.id)
 }
 
@@ -589,40 +656,57 @@ export function normalizePolicyHit(raw: unknown): PolicySearchHit | null {
   if (!isRecord(raw)) return null
   const certificateId = pickString(raw, ['certificate_id', 'id'])
   if (!certificateId) return null
+  const vehicles = readVehicles(raw)
+  const preselected = vehicles.find((vehicle) => vehicle.preselected)
   return {
     certificateId,
-    registration: pickString(raw, ['registration', 'registration_number']),
+    registration: preselected?.registrationNumber
+      ?? vehicles[0]?.registrationNumber
+      ?? pickString(raw, ['registration_number', 'registration']),
     policyNumber: pickString(raw, ['policy_number']),
     certificateNumber: pickString(raw, ['certificate_number']),
-    customerName: personName(raw, ['customer_name', 'customer']),
+    insuredName: personName(raw, ['insured_name', 'customer_name', 'customer']),
     insurerName: personName(raw, ['insurer_name', 'insurer']),
-    expiryDate: dateOnly(pickString(raw, ['expiry_date'])),
+    coverTo: dateOnly(pickString(raw, ['cover_to', 'expiry_date'])),
+    vehicles,
   }
 }
 
+/** Policy detail: top-level data has gate, policy, vehicles, selected_vehicle_id, documents. */
 export function normalizePolicy(body: JsonBody | null | undefined): PolicySnapshot | null {
-  const record = readRecord(body, ['policy', 'certificate'])
-  if (!record) return null
-  const certificateId = pickString(record, ['certificate_id', 'id'])
+  const data = isRecord(body?.data) ? body.data : null
+  if (!data) return null
+
+  const policy = isRecord(data.policy) ? data.policy : data
+  const certificateId = pickString(data, ['certificate_id'])
+    ?? pickString(policy, ['certificate_id', 'id'])
   if (!certificateId) return null
-  const vehicles = readVehicles(record)
-  const selected = pickString(record, ['selected_vehicle_id', 'vehicle_id'])
+
+  const vehicles = readVehicles(data).length ? readVehicles(data) : readVehicles(policy)
+  const selected = pickString(data, ['selected_vehicle_id'])
+    ?? pickString(policy, ['vehicle_id', 'selected_vehicle_id'])
+  const gate = data.gate ?? policy.gate ?? data.gate_result
+
   return {
     certificateId,
-    registration: pickString(record, ['registration', 'registration_number']),
-    policyNumber: pickString(record, ['policy_number']),
-    certificateNumber: pickString(record, ['certificate_number']),
-    customerName: personName(record, ['customer_name', 'customer']),
-    customerEmail: emailFrom(record, ['customer_email', 'customer']),
-    insurerName: personName(record, ['insurer_name', 'insurer']),
-    insurerClaimsEmail: emailFrom(record, ['insurer_claims_email', 'claims_email', 'insurer']),
-    coverType: pickString(record, ['cover_type', 'cover']),
-    issuedDate: dateOnly(pickString(record, ['issued_date', 'start_date'])),
-    expiryDate: dateOnly(pickString(record, ['expiry_date', 'end_date'])),
+    registration: pickString(policy, ['registration_number', 'registration']),
+    policyNumber: pickString(policy, ['policy_number']),
+    certificateNumber: pickString(policy, ['certificate_number']),
+    customerName: personName(policy, ['insured_name', 'customer_name', 'customer']),
+    customerEmail: emailFrom(policy, ['insured_email', 'customer_email', 'customer'])
+      ?? pickString(policy, ['insured_email']),
+    customerPhone: pickString(policy, ['insured_phone', 'customer_phone', 'phone']),
+    insurerName: personName(policy, ['insurer_name', 'insurer']),
+    insurerClaimsEmail: emailFrom(policy, ['insurer_email', 'insurer_claims_email', 'claims_email', 'insurer']),
+    coverType: pickString(policy, ['cover_type', 'cover']),
+    issuedDate: dateOnly(pickString(policy, ['cover_from', 'issued_date', 'start_date'])),
+    expiryDate: dateOnly(pickString(policy, ['cover_to', 'expiry_date', 'end_date'])),
     vehicles,
-    selectedVehicleId: selected ?? (vehicles.length === 1 ? vehicles[0].id : null),
-    banners: bannersFromRecord(record),
-    documents: readSlots(record),
+    selectedVehicleId: selected
+      ?? vehicles.find((vehicle) => vehicle.preselected)?.id
+      ?? (vehicles.length === 1 ? vehicles[0].id : null),
+    banners: readGateBanners(gate),
+    documents: readSlots(data).length ? readSlots(data) : readSlots(policy),
   }
 }
 
@@ -644,21 +728,24 @@ export function normalizeClaimRow(raw: unknown): ClaimListRow | null {
   const uuid = pickString(raw, ['uuid'])
   if (!uuid) return null
   const handler = isRecord(raw.handler) ? raw.handler : null
+  const claimant = isRecord(raw.claimant) ? raw.claimant : null
   const status = pickString(raw, ['status']) ?? ''
   const tat = tatFrom(raw, status)
   return {
     uuid,
     claim_number: pickString(raw, ['claim_number']) ?? '—',
     insurer_claim_number: pickString(raw, ['insurer_claim_number']),
-    registration: pickString(raw, ['registration', 'registration_number']),
+    registration_number: pickString(raw, ['registration_number', 'registration']),
     policy_number: pickString(raw, ['policy_number']),
     status,
     status_label: pickString(raw, ['status_label']) ?? humanizeStatus(status),
     tat_badge: tat.badge,
     tat_due_date: tat.due,
-    claimant_name: personName(raw, ['claimant_name', 'claimant']),
+    claimant_name: claimant
+      ? pickString(claimant, ['name'])
+      : personName(raw, ['claimant_name', 'claimant']),
     handler_name: handler ? pickString(handler, ['name', 'full_name']) : pickString(raw, ['handler_name']),
-    date_of_loss: dateOnly(pickString(raw, ['date_of_loss', 'loss_date'])),
+    loss_date: dateOnly(pickString(raw, ['loss_date', 'date_of_loss'])),
   }
 }
 
@@ -678,15 +765,18 @@ function readClaimDocuments(record: Record<string, unknown>): ClaimDocumentSlot[
   if (!Array.isArray(raw)) return []
   return raw.filter(isRecord).map((slot, index) => {
     const files = Array.isArray(slot.files) ? slot.files.filter(isRecord) : []
-    const latest = files.length ? files[files.length - 1] : null
+    const current = files.find((file) => file.is_current === true) ?? (files.length ? files[files.length - 1] : null)
     return {
       id: pickString(slot, ['id']) ?? String(index),
       label: pickString(slot, ['label', 'name']) ?? 'Document',
       state: pickString(slot, ['state', 'status']) ?? 'pending',
-      mandatory: pickBool(slot, ['mandatory', 'is_mandatory']),
+      mandatory: pickBool(slot, ['is_mandatory', 'mandatory']),
       requestNote: pickString(slot, ['request_note', 'note']),
-      downloadUrl: latest ? pickString(latest, ['download_url', 'url']) : pickString(slot, ['download_url', 'url']),
-      fileName: latest ? pickString(latest, ['original_name', 'name', 'file_name']) : null,
+      downloadUrl: current
+        ? pickString(current, ['download_url', 'url'])
+        : pickString(slot, ['download_url', 'url']),
+      fileName: current ? pickString(current, ['original_name', 'name', 'file_name']) : null,
+      slotKey: pickString(slot, ['slot_key', 'key']),
     }
   })
 }
@@ -707,34 +797,67 @@ function readHistory(record: Record<string, unknown>): ClaimHistoryItem[] {
   })
 }
 
+function readEmailsFromRecord(record: Record<string, unknown>): ClaimEmailLog[] {
+  const raw = record.emails ?? record.email_logs
+  if (!Array.isArray(raw)) return []
+  return raw.filter(isRecord).map((row, index) => {
+    const to = row.to ?? row.recipients
+    const recipientText = Array.isArray(to)
+      ? to.map((item) => (typeof item === 'string' ? item : '')).filter(Boolean).join(', ')
+      : pickString(row, ['recipients', 'to']) ?? ''
+    return {
+      id: pickString(row, ['id']) ?? String(index),
+      subject: pickString(row, ['subject']) ?? '(no subject)',
+      recipients: recipientText,
+      status: pickString(row, ['status']) ?? '',
+      at: pickString(row, ['created_at', 'sent_at']),
+    }
+  })
+}
+
 export function normalizeClaimDetail(body: JsonBody | null | undefined): ClaimDetail | null {
   const record = readRecord(body, ['claim'])
   const row = normalizeClaimRow(record)
   if (!record || !row) return null
-  const snapshot = isRecord(record.policy_snapshot)
-    ? record.policy_snapshot
-    : isRecord(record.policy) ? record.policy : null
+  const snapshot = isRecord(record.policy) ? record.policy : isRecord(record.policy_snapshot) ? record.policy_snapshot : null
   const handler = isRecord(record.handler) ? record.handler : null
+  const claimant = isRecord(record.claimant) ? record.claimant : null
+  const vehicle = isRecord(record.vehicle) ? record.vehicle : null
   return {
     ...row,
-    registration: row.registration ?? pickString(snapshot, ['registration', 'registration_number']),
+    registration_number: row.registration_number
+      ?? pickString(vehicle, ['registration_number', 'registration'])
+      ?? pickString(snapshot, ['registration_number', 'registration']),
     policy_number: row.policy_number ?? pickString(snapshot, ['policy_number']),
     certificateNumber: pickString(record, ['certificate_number']) ?? pickString(snapshot, ['certificate_number']),
     handlerId: pickString(handler, ['id']) ?? pickString(record, ['handler_id']) ?? '',
-    handlerEmail: emailFrom(record, ['handler_email', 'handler']),
-    customerEmail: emailFrom(record, ['customer_email', 'customer']),
-    insurerClaimsEmail: emailFrom(record, ['insurer_claims_email', 'claims_email', 'insurer']),
-    category: pickString(record, ['category']) ?? 'General',
-    claimTypeName: personName(record, ['claim_type_name', 'claim_type']),
+    handlerEmail: handler ? pickString(handler, ['email']) : emailFrom(record, ['handler_email', 'handler']),
+    customerEmail: claimant
+      ? pickString(claimant, ['email'])
+      : emailFrom(record, ['customer_email', 'claimant_email', 'claimant']),
+    customerPhone: claimant
+      ? pickString(claimant, ['phone'])
+      : pickString(record, ['claimant_phone', 'customer_phone']),
+    insurerClaimsEmail: pickString(record, ['insurer_email'])
+      ?? emailFrom(record, ['insurer_claims_email', 'claims_email', 'insurer']),
+    category: pickString(record, ['category_label', 'category']) ?? 'General',
+    claimTypeName: personName(record, ['claim_type']) ?? pickString(
+      isRecord(record.claim_type) ? record.claim_type : null,
+      ['name'],
+    ),
     claimedAmount: pickString(record, ['claimed_amount']) ?? '',
-    expectedTatDays: pickString(record, ['expected_tat_days', 'tat_days']) ?? '',
-    dateNotifiedToOrganization: dateOnly(pickString(record, ['date_notified_to_organization', 'notified_at'])),
-    dateNotifiedToInsurer: dateOnly(pickString(record, ['date_notified_to_insurer', 'insurer_notified_at'])),
+    tatDays: pickString(record, ['tat_days']) ?? '',
+    notifiedToOrganizationDate: dateOnly(pickString(record, ['notified_to_organization_date'])),
+    notifiedToInsurerDate: dateOnly(pickString(record, ['notified_to_insurer_date'])),
     note: pickString(record, ['note']),
     allowedNextStatuses: readStatusOptions(record.allowed_next_statuses ?? record.next_statuses),
     documents: readClaimDocuments(record),
     history: readHistory(record),
-    banners: bannersFromRecord(record),
+    emails: readEmailsFromRecord(record),
+    banners: readGateBanners(record.gate ?? record.gate_result),
+    claimant_name: row.claimant_name
+      ?? (claimant ? pickString(claimant, ['name']) : null),
+    loss_date: row.loss_date ?? dateOnly(pickString(record, ['loss_date'])),
   }
 }
 
@@ -748,10 +871,11 @@ export function normalizeClaimTypes(body: JsonBody | null | undefined): ClaimTyp
 }
 
 export function readCreatedClaim(body: JsonBody | null | undefined): { claimNumber: string | null; uuid: string | null } {
-  const record = readRecord(body, ['claim'])
+  const data = isRecord(body?.data) ? body.data : null
+  const claim = data && isRecord(data.claim) ? data.claim : data
   return {
-    claimNumber: pickString(record, ['claim_number']),
-    uuid: pickString(record, ['uuid']),
+    claimNumber: pickString(data, ['claim_number']) ?? pickString(claim, ['claim_number']),
+    uuid: pickString(claim, ['uuid']),
   }
 }
 
@@ -760,12 +884,22 @@ export function readCreatedTypeId(body: JsonBody | null | undefined): string | n
   return pickString(record, ['id'])
 }
 
+/** 422 with data.requires_confirmation (+ warnings) means resubmit with confirm_warnings: true. */
 export function confirmationMessage(error: unknown): string | null {
   const response = (error as { response?: { data?: unknown } })?.response?.data
   if (!isRecord(response)) return null
   const nested = isRecord(response.data) ? response.data : null
   const flagged = response.requires_confirmation === true || nested?.requires_confirmation === true
   if (!flagged) return null
+
+  const warnings = Array.isArray(nested?.warnings)
+    ? nested.warnings.filter((item): item is string => typeof item === 'string')
+    : Array.isArray(response.warnings)
+      ? response.warnings.filter((item): item is string => typeof item === 'string')
+      : []
+
+  if (warnings.length) return warnings.join('\n')
+
   return pickString(response, ['message'])
     ?? (nested ? pickString(nested, ['message']) : null)
     ?? 'Confirm to continue with this status.'
@@ -774,7 +908,7 @@ export function confirmationMessage(error: unknown): string | null {
 export function normalizeEmailLogs(body: JsonBody | null | undefined): ClaimEmailLog[] {
   const { rows } = readPaginated<unknown>(body, ['emails', 'logs'])
   return rows.filter(isRecord).map((row, index) => {
-    const recipients = row.recipients
+    const recipients = row.to ?? row.recipients
     const recipientText = Array.isArray(recipients)
       ? recipients.map((item) => (typeof item === 'string' ? item : '')).filter(Boolean).join(', ')
       : pickString(row, ['recipients', 'to']) ?? ''
@@ -790,15 +924,18 @@ export function normalizeEmailLogs(body: JsonBody | null | undefined): ClaimEmai
 
 export function normalizeTemplates(body: JsonBody | null | undefined): ClaimEmailTemplate[] {
   const { rows } = readPaginated<unknown>(body, ['email_templates', 'templates'])
-  return rows.filter(isRecord).map((row) => ({
-    type: pickString(row, ['type', 'key', 'id']) ?? '',
-    label: pickString(row, ['label', 'name']) ?? humanizeStatus(pickString(row, ['type'])),
-    subject: pickString(row, ['subject']) ?? '',
-    body: pickString(row, ['body']) ?? '',
-    placeholders: Array.isArray(row.placeholders)
-      ? row.placeholders.filter((item): item is string => typeof item === 'string')
-      : [],
-  })).filter((row) => row.type)
+  return rows.filter(isRecord).map((row) => {
+    const type = pickString(row, ['type', 'key', 'id']) ?? ''
+    return {
+      type,
+      label: pickString(row, ['label', 'name']) ?? humanizeStatus(type),
+      subject: pickString(row, ['subject']) ?? '',
+      body: pickString(row, ['body']) ?? '',
+      placeholders: Array.isArray(row.placeholders)
+        ? row.placeholders.filter((item): item is string => typeof item === 'string')
+        : [],
+    }
+  }).filter((row) => row.type)
 }
 
 export function readEmailPreview(body: JsonBody | null | undefined): EmailPreview | null {
@@ -819,17 +956,29 @@ export function normalizeRequirements(body: JsonBody | null | undefined): ClaimD
     id: pickString(row, ['id']) ?? '',
     label: pickString(row, ['label', 'name']) ?? 'Document',
     description: pickString(row, ['description']) ?? '',
-    mandatory: pickBool(row, ['mandatory', 'is_mandatory']),
+    mandatory: pickBool(row, ['is_mandatory', 'mandatory']),
     allowsMultiple: pickBool(row, ['allows_multiple', 'multiple', 'multiple_files']),
-    claimTypeIds: idList(row.claim_type_ids ?? row.claim_types),
+    claimTypeIds: idList(row.applicable_claim_type_ids ?? row.claim_type_ids ?? row.claim_types),
   })).filter((row) => row.id)
+}
+
+export function normalizeSettingsInsurer(body: JsonBody | null | undefined): InsurerClaimsContact | null {
+  const record = readRecord(body, [])
+  if (!record) return null
+  const organizationId = pickString(record, ['insurer_organization_id'])
+  if (!organizationId) return null
+  return {
+    organizationId,
+    name: pickString(record, ['insurer_name', 'name']) ?? 'Insurer',
+    claimsEmail: pickString(record, ['claims_email', 'email']) ?? '',
+  }
 }
 
 export function normalizeInsurers(body: JsonBody | null | undefined): InsurerClaimsContact[] {
   const { rows } = readPaginated<unknown>(body, ['insurers', 'organizations'])
   return rows.filter(isRecord).map((row) => ({
-    organizationId: pickString(row, ['organization_id', 'id']) ?? '',
-    name: pickString(row, ['name', 'organization_name']) ?? 'Insurer',
+    organizationId: pickString(row, ['organization_location_id', 'organization_id', 'id']) ?? '',
+    name: pickString(row, ['organization_name', 'name']) ?? 'Insurer',
     claimsEmail: pickString(row, ['claims_email', 'email']) ?? '',
   })).filter((row) => row.organizationId)
 }

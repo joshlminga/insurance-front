@@ -1,8 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import {
   CLAIM_NOTE_WORD_LIMIT,
+  confirmationMessage,
   countWords,
+  displayTatBadge,
+  normalizeClaimRow,
+  normalizePolicy,
+  normalizePolicyHit,
   normalizeRegistration,
+  readCreatedClaim,
   readGateBanners,
   resolveTatBadge,
   todayInNairobi,
@@ -47,6 +53,13 @@ describe('resolveTatBadge', () => {
   })
 })
 
+describe('displayTatBadge', () => {
+  it('keeps the nested API tat.badge including closed', () => {
+    expect(displayTatBadge({ tatBadge: 'closed' })).toBe('closed')
+    expect(displayTatBadge({ tatBadge: 'on_track' })).toBe('on_track')
+  })
+})
+
 describe('todayInNairobi', () => {
   it('uses the Nairobi calendar date', () => {
     expect(todayInNairobi(new Date('2026-10-02T22:00:00Z'))).toBe('2026-10-03')
@@ -54,15 +67,165 @@ describe('todayInNairobi', () => {
 })
 
 describe('readGateBanners', () => {
+  it('maps premium / risk_note / debit_note from the API gate shape', () => {
+    const banners = readGateBanners({
+      premium: {
+        status: 'partial',
+        label: '1 of 2 instalments paid',
+        warning: '1 of 2 instalments paid',
+        reason: null,
+      },
+      risk_note: {
+        passed: true,
+        status: 'active',
+        label: 'Active',
+        reason: null,
+      },
+      debit_note: {
+        passed: true,
+        status: 'approved',
+        label: 'Approved',
+        reason: null,
+      },
+    })
+
+    expect(banners.find((banner) => banner.key === 'premium')?.status).toBe('warning')
+    expect(banners.find((banner) => banner.key === 'premium')?.message).toMatch(/instalments/i)
+    expect(banners.find((banner) => banner.key === 'risk_note')?.status).toBe('pass')
+    expect(banners.find((banner) => banner.key === 'debit')?.status).toBe('pass')
+  })
+
   it('keeps debit about the issued cover and drops finance sync text', () => {
     const banners = readGateBanners({
-      premium: { status: 'pass', message: 'Paid' },
-      risk_note: { status: 'warning', message: 'Expires soon' },
-      debit: { status: 'pass', message: 'sync_status is false' },
+      premium: { status: 'paid', label: 'Paid', warning: null, reason: null },
+      risk_note: { passed: false, status: 'expired', label: 'Expired', reason: 'Cover is expired' },
+      debit_note: { passed: true, status: 'approved', label: 'sync_status is false', reason: null },
     })
 
     expect(banners.find((banner) => banner.key === 'debit')?.message).toMatch(/issued/i)
     expect(banners.find((banner) => banner.key === 'debit')?.message).not.toMatch(/sync/i)
-    expect(banners.find((banner) => banner.key === 'premium')?.message).toBe('Paid')
+    expect(banners.find((banner) => banner.key === 'risk_note')?.status).toBe('fail')
+  })
+})
+
+describe('normalizePolicyHit', () => {
+  it('reads insured_name, cover_to, and vehicles[]', () => {
+    const hit = normalizePolicyHit({
+      certificate_id: 12,
+      policy_number: 'POL-1',
+      certificate_number: 'CERT-1',
+      insured_name: 'Jane Doe',
+      insurer_name: 'Acme',
+      cover_to: '2027-01-01',
+      vehicles: [
+        {
+          vehicle_id: 9,
+          registration_number: 'KDD123A',
+          make: 'Toyota',
+          model: 'Axio',
+          preselected: true,
+        },
+      ],
+    })
+
+    expect(hit?.insuredName).toBe('Jane Doe')
+    expect(hit?.coverTo).toBe('2027-01-01')
+    expect(hit?.registration).toBe('KDD123A')
+    expect(hit?.vehicles[0]?.id).toBe('9')
+  })
+})
+
+describe('normalizePolicy', () => {
+  it('reads data.gate, data.policy, data.vehicles, and data.documents', () => {
+    const policy = normalizePolicy({
+      data: {
+        certificate_id: 12,
+        gate: {
+          premium: { status: 'unpaid', label: 'Nothing paid', reason: 'Nothing has been paid' },
+          risk_note: { passed: true, status: 'active', label: 'Active', reason: null },
+          debit_note: { passed: true, status: 'approved', label: 'Approved', reason: null },
+        },
+        policy: {
+          certificate_id: 12,
+          policy_number: 'POL-1',
+          certificate_number: 'CERT-1',
+          insured_name: 'Jane Doe',
+          insured_email: 'jane@example.com',
+          insured_phone: '0712345678',
+          insurer_name: 'Acme',
+          insurer_email: 'claims@acme.test',
+          cover_from: '2026-01-01',
+          cover_to: '2027-01-01',
+          registration_number: 'KDD123A',
+        },
+        vehicles: [
+          { vehicle_id: 9, registration_number: 'KDD123A', make: 'Toyota', model: 'Axio', preselected: true },
+        ],
+        selected_vehicle_id: 9,
+        documents: [
+          {
+            key: 'identity_card',
+            label: 'National ID',
+            is_mandatory: true,
+            state: 'pending',
+            missing_message: 'Not found on policy — please upload',
+          },
+        ],
+      },
+    })
+
+    expect(policy?.customerName).toBe('Jane Doe')
+    expect(policy?.customerEmail).toBe('jane@example.com')
+    expect(policy?.expiryDate).toBe('2027-01-01')
+    expect(policy?.selectedVehicleId).toBe('9')
+    expect(policy?.banners.find((banner) => banner.key === 'premium')?.status).toBe('fail')
+    expect(policy?.documents[0]?.key).toBe('identity_card')
+    expect(policy?.documents[0]?.found).toBe(false)
+  })
+})
+
+describe('normalizeClaimRow', () => {
+  it('reads registration_number and nested tat.badge', () => {
+    const row = normalizeClaimRow({
+      uuid: 'abc',
+      claim_number: 'CLM-1',
+      registration_number: 'KDD123A',
+      policy_number: 'POL-1',
+      status: 'claim_notified',
+      status_label: 'Claim Notified / Logged',
+      tat: { due_date: '2026-10-20', days_remaining: 17, badge: 'on_track' },
+    })
+
+    expect(row?.registration_number).toBe('KDD123A')
+    expect(row?.tat_badge).toBe('on_track')
+    expect(row?.tat_due_date).toBe('2026-10-20')
+  })
+})
+
+describe('readCreatedClaim', () => {
+  it('reads data.claim_number and data.claim.uuid', () => {
+    expect(readCreatedClaim({
+      data: {
+        claim_number: 'CLM-99',
+        claim: { uuid: 'claim-uuid', claim_number: 'CLM-99' },
+      },
+    })).toEqual({ claimNumber: 'CLM-99', uuid: 'claim-uuid' })
+  })
+})
+
+describe('confirmationMessage', () => {
+  it('reads requires_confirmation and warnings for confirm_warnings resubmit', () => {
+    const message = confirmationMessage({
+      response: {
+        data: {
+          message: 'Warnings apply',
+          data: {
+            requires_confirmation: true,
+            warnings: ['Mandatory documents are still outstanding'],
+          },
+        },
+      },
+    })
+    expect(message).toMatch(/outstanding/i)
   })
 })

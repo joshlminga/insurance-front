@@ -55,6 +55,7 @@ import {
     useForm,
     useFormContext,
     useWatch,
+    type Control,
     type Path,
 } from 'react-hook-form'
 
@@ -106,7 +107,7 @@ const BOUND_ICON: Record<TravelBoundValue, LucideIcon> = {
     [TRAVEL_BOUND.Outbound]: PlaneTakeoff,
 }
 
-const blankTraveler = (): TravelQuotationFormValues['travelers'][number] => ({
+export const blankTraveler = (): TravelQuotationFormValues['travelers'][number] => ({
     first_name: '',
     middle_name: '',
     surname: '',
@@ -149,7 +150,7 @@ type AnimatedSectionProps = {
 }
 
 /** Same progressive reveal pattern as motor vehicle-details */
-function AnimatedSection({ show, children, className }: AnimatedSectionProps) {
+export function AnimatedSection({ show, children, className }: AnimatedSectionProps) {
     return (
         <div
             data-state={show ? 'open' : 'closed'}
@@ -167,7 +168,7 @@ function AnimatedSection({ show, children, className }: AnimatedSectionProps) {
 }
 
 /** Departure, Arrival, Travel As — always visible on one row */
-const TripRouteBox: React.FC = () => {
+export const TripRouteBox: React.FC = () => {
     const { control } = useFormContext<TravelQuotationFormValues>()
 
     return (
@@ -215,7 +216,7 @@ const TripRouteBox: React.FC = () => {
 }
 
 /** Dates + trip type + reason — unlocks when route row is complete */
-const TripScheduleBox: React.FC = () => {
+export const TripScheduleBox: React.FC = () => {
     const { control } = useFormContext<TravelQuotationFormValues>()
     const dateOfDeparture = useWatch({ control, name: 'date_of_departure' })
     const today = travelLocalIsoDate()
@@ -272,7 +273,7 @@ const TripScheduleBox: React.FC = () => {
 }
 
 /** Multi-traveler field array — unlocks when schedule row is complete */
-const TravelersBox: React.FC = () => {
+export const TravelersBox: React.FC = () => {
     const { control, getValues } = useFormContext<TravelQuotationFormValues>()
     const travelAs = useWatch({ control, name: 'travel_as' })
     // Only Individual is single-traveler; Family/Group/Student/Corporate can add more
@@ -421,6 +422,143 @@ const TravelersBox: React.FC = () => {
     )
 }
 
+type TravelTripProgressiveFieldsProps = {
+    bound?: TravelBoundValue | ''
+    hasRouteRow: boolean
+    hasScheduleRow: boolean
+    /** Prefix for radio input ids so customer + admin can coexist on a page. */
+    idPrefix?: string
+}
+
+/**
+ * Bound → route → schedule → travelers progressive UI.
+ * Shared by customer travel start and admin travel quotations.
+ */
+export const TravelTripProgressiveFields: React.FC<TravelTripProgressiveFieldsProps> = ({
+    bound,
+    hasRouteRow,
+    hasScheduleRow,
+    idPrefix = 'travel',
+}) => {
+    const { setValue } = useFormContext<TravelQuotationFormValues>()
+
+    const handleBoundChange = (value: string) => {
+        setValue('bound', value as TravelBoundValue, {
+            shouldValidate: true,
+            shouldDirty: true,
+        })
+    }
+
+    return (
+        <>
+            <div className="mt-5">
+                <Label className="text-base font-semibold text-foreground">Bound</Label>
+                <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
+                    Tap one option — only one bound applies.
+                </p>
+
+                <RadioGroup
+                    value={bound ?? ''}
+                    onValueChange={handleBoundChange}
+                    className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2"
+                >
+                    {TRAVEL_BOUND_OPTIONS.map((option) => {
+                        const Icon = BOUND_ICON[option.value]
+                        const inputId = `${idPrefix}-bound-${option.value}`
+                        const isSelected = bound === option.value
+                        return (
+                            <div key={option.value} className="relative">
+                                <RadioGroupItem
+                                    value={option.value}
+                                    id={inputId}
+                                    className="sr-only"
+                                />
+                                <Label
+                                    htmlFor={inputId}
+                                    className={cn(
+                                        'flex min-h-30 cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 px-3 py-5 text-center transition-all sm:gap-3',
+                                        'shadow-sm outline-none hover:border-[#C20C0C]/45 hover:bg-white',
+                                        'focus-within:ring-2 focus-within:ring-[#C20C0C]/25',
+                                        isSelected
+                                            ? 'border-[#C20C0C] bg-[#C20C0C]/[0.07] ring-2 ring-[#C20C0C]/20'
+                                            : 'border-[#E5E5E5] bg-white/90'
+                                    )}
+                                >
+                                    <span
+                                        className={cn(
+                                            'flex h-12 w-12 items-center justify-center rounded-xl border transition-colors',
+                                            isSelected
+                                                ? 'border-[#C20C0C]/40 bg-[#C20C0C]/10 text-[#C20C0C]'
+                                                : 'border-neutral-200 bg-neutral-50 text-neutral-600'
+                                        )}
+                                    >
+                                        <Icon className="h-6 w-6" strokeWidth={1.75} />
+                                    </span>
+                                    <span className="text-xs font-semibold leading-snug sm:text-sm">
+                                        {option.label}
+                                    </span>
+                                    <span className="w-full px-1 text-[11px] leading-snug text-muted-foreground whitespace-nowrap sm:text-xs">
+                                        {option.summary}
+                                    </span>
+                                </Label>
+                            </div>
+                        )
+                    })}
+                </RadioGroup>
+            </div>
+
+            <div className="mt-8 space-y-6">
+                <TripRouteBox />
+
+                <AnimatedSection show={hasRouteRow}>
+                    <TripScheduleBox />
+                </AnimatedSection>
+
+                <AnimatedSection show={hasScheduleRow}>
+                    <TravelersBox />
+                </AnimatedSection>
+            </div>
+        </>
+    )
+}
+
+/** Derive progressive unlock flags from watched trip fields. */
+export function useTravelTripProgress(control: Control<TravelQuotationFormValues>) {
+    const bound = useWatch({ control, name: 'bound' })
+    const countryOfDeparture = useWatch({ control, name: 'country_of_departure' })
+    const countryOfArrival = useWatch({ control, name: 'country_of_arrival' })
+    const travelAs = useWatch({ control, name: 'travel_as' })
+    const dateOfDeparture = useWatch({ control, name: 'date_of_departure' })
+    const dateOfReturn = useWatch({ control, name: 'date_of_return' })
+    const typeOfTrip = useWatch({ control, name: 'type_of_trip' })
+    const reasonForTravel = useWatch({ control, name: 'reason_for_travel' })
+
+    const hasBound = Boolean(bound)
+    const hasRouteRow = useMemo(
+        () =>
+            Boolean(
+                hasBound &&
+                    String(countryOfDeparture ?? '').trim() &&
+                    String(countryOfArrival ?? '').trim() &&
+                    travelAs
+            ),
+        [hasBound, countryOfDeparture, countryOfArrival, travelAs]
+    )
+    const hasScheduleRow = useMemo(
+        () =>
+            Boolean(
+                hasRouteRow &&
+                    String(dateOfDeparture ?? '').trim() &&
+                    String(dateOfReturn ?? '').trim() &&
+                    typeOfTrip &&
+                    String(reasonForTravel ?? '').trim()
+            ),
+        [hasRouteRow, dateOfDeparture, dateOfReturn, typeOfTrip, reasonForTravel]
+    )
+
+    return { bound, hasRouteRow, hasScheduleRow }
+}
+
 export const TravellerDetailsPage: React.FC<CustomerVerificationDetailsProps> = ({
     goToNextStep,
     goToPrevStep,
@@ -445,49 +583,7 @@ export const TravellerDetailsPage: React.FC<CustomerVerificationDetailsProps> = 
         },
     })
 
-    const bound = useWatch({ control: form.control, name: 'bound' })
-    const countryOfDeparture = useWatch({
-        control: form.control,
-        name: 'country_of_departure',
-    })
-    const countryOfArrival = useWatch({
-        control: form.control,
-        name: 'country_of_arrival',
-    })
-    const travelAs = useWatch({ control: form.control, name: 'travel_as' })
-    const dateOfDeparture = useWatch({
-        control: form.control,
-        name: 'date_of_departure',
-    })
-    const dateOfReturn = useWatch({ control: form.control, name: 'date_of_return' })
-    const typeOfTrip = useWatch({ control: form.control, name: 'type_of_trip' })
-    const reasonForTravel = useWatch({
-        control: form.control,
-        name: 'reason_for_travel',
-    })
-
-    const hasBound = Boolean(bound)
-    const hasRouteRow = useMemo(
-        () =>
-            Boolean(
-                hasBound &&
-                    String(countryOfDeparture ?? '').trim() &&
-                    String(countryOfArrival ?? '').trim() &&
-                    travelAs
-            ),
-        [hasBound, countryOfDeparture, countryOfArrival, travelAs]
-    )
-    const hasScheduleRow = useMemo(
-        () =>
-            Boolean(
-                hasRouteRow &&
-                    String(dateOfDeparture ?? '').trim() &&
-                    String(dateOfReturn ?? '').trim() &&
-                    typeOfTrip &&
-                    String(reasonForTravel ?? '').trim()
-            ),
-        [hasRouteRow, dateOfDeparture, dateOfReturn, typeOfTrip, reasonForTravel]
-    )
+    const { bound, hasRouteRow, hasScheduleRow } = useTravelTripProgress(form.control)
 
     const submitMutation = UseApiMutation<
         SubmitResponse & { data: TravelQuoteSessionStartData },
@@ -557,13 +653,6 @@ export const TravellerDetailsPage: React.FC<CustomerVerificationDetailsProps> = 
         })
     }
 
-    const handleBoundChange = (value: string) => {
-        form.setValue('bound', value as TravelBoundValue, {
-            shouldValidate: true,
-            shouldDirty: true,
-        })
-    }
-
     const isSubmitting = submitMutation.isPending
 
     return (
@@ -584,75 +673,12 @@ export const TravellerDetailsPage: React.FC<CustomerVerificationDetailsProps> = 
                         </p>
                     </div>
 
-                    <div className="mt-5">
-                        <Label className="text-base font-semibold text-foreground">
-                            Bound
-                        </Label>
-                        <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
-                            Tap one option — only one bound applies.
-                        </p>
-
-                        <RadioGroup
-                            value={bound ?? ''}
-                            onValueChange={handleBoundChange}
-                            className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2"
-                        >
-                            {TRAVEL_BOUND_OPTIONS.map((option) => {
-                                const Icon = BOUND_ICON[option.value]
-                                const inputId = `travel-bound-${option.value}`
-                                const isSelected = bound === option.value
-                                return (
-                                    <div key={option.value} className="relative">
-                                        <RadioGroupItem
-                                            value={option.value}
-                                            id={inputId}
-                                            className="sr-only"
-                                        />
-                                        <Label
-                                            htmlFor={inputId}
-                                            className={cn(
-                                                'flex min-h-30 cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 px-3 py-5 text-center transition-all sm:gap-3',
-                                                'shadow-sm outline-none hover:border-[#C20C0C]/45 hover:bg-white',
-                                                'focus-within:ring-2 focus-within:ring-[#C20C0C]/25',
-                                                isSelected
-                                                    ? 'border-[#C20C0C] bg-[#C20C0C]/[0.07] ring-2 ring-[#C20C0C]/20'
-                                                    : 'border-[#E5E5E5] bg-white/90'
-                                            )}
-                                        >
-                                            <span
-                                                className={cn(
-                                                    'flex h-12 w-12 items-center justify-center rounded-xl border transition-colors',
-                                                    isSelected
-                                                        ? 'border-[#C20C0C]/40 bg-[#C20C0C]/10 text-[#C20C0C]'
-                                                        : 'border-neutral-200 bg-neutral-50 text-neutral-600'
-                                                )}
-                                            >
-                                                <Icon className="h-6 w-6" strokeWidth={1.75} />
-                                            </span>
-                                            <span className="text-xs font-semibold leading-snug sm:text-sm">
-                                                {option.label}
-                                            </span>
-                                            <span className="w-full px-1 text-[11px] leading-snug text-muted-foreground whitespace-nowrap sm:text-xs">
-                                                {option.summary}
-                                            </span>
-                                        </Label>
-                                    </div>
-                                )
-                            })}
-                        </RadioGroup>
-                    </div>
-
-                    <div className="mt-8 space-y-6">
-                        <TripRouteBox />
-
-                        <AnimatedSection show={hasRouteRow}>
-                            <TripScheduleBox />
-                        </AnimatedSection>
-
-                        <AnimatedSection show={hasScheduleRow}>
-                            <TravelersBox />
-                        </AnimatedSection>
-                    </div>
+                    <TravelTripProgressiveFields
+                        bound={bound}
+                        hasRouteRow={hasRouteRow}
+                        hasScheduleRow={hasScheduleRow}
+                        idPrefix="travel"
+                    />
                 </div>
 
                 <CardFooter className="mt-4 w-full flex flex-col gap-3 px-0 sm:flex-row sm:justify-between">

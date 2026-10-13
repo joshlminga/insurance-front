@@ -6,7 +6,6 @@ import {
   CLAIMS_API,
   formatClaimAmount,
   normalizeClaimDetail,
-  normalizeEmailLogs,
 } from '@/utils/claims'
 import { EROUTES } from '@/utils/enums'
 import { extractErrorMessage } from '@/utils/helpers'
@@ -21,6 +20,7 @@ import { ClaimTimeline } from './claim-timeline'
 /**
  * One claim. useParams reads :uuid from the address bar
  * (same idea as a route parameter in Laravel).
+ * Email logs come from the claim detail payload (no separate GET emails route).
  */
 export function ClaimsDetailPage() {
   const { uuid = '' } = useParams()
@@ -30,15 +30,10 @@ export function ClaimsDetailPage() {
     url: CLAIMS_API.claim(uuid),
     queryOptions: { enabled: Boolean(uuid) },
   })
-  const emailQuery = UseApiQuery<SubmitResponse>({
-    url: CLAIMS_API.emails(uuid),
-    queryOptions: { enabled: Boolean(uuid) },
-  })
 
   // useMemo keeps the same claim object until the GET actually returns new JSON,
   // so the forms below are not wiped on every render.
   const claim = useMemo(() => normalizeClaimDetail(claimQuery.data), [claimQuery.data])
-  const logs = normalizeEmailLogs(emailQuery.data)
 
   return (
     <div className="flex flex-col gap-4">
@@ -66,15 +61,18 @@ export function ClaimsDetailPage() {
           <ClaimGateBanners banners={claim.banners} />
 
           <div className="grid gap-3 rounded-lg border bg-card p-4 md:grid-cols-3">
-            <ReadOnlyField label="Registration" value={claim.registration} />
+            <ReadOnlyField label="Registration" value={claim.registration_number} />
             <ReadOnlyField label="Policy number" value={claim.policy_number} />
             <ReadOnlyField label="Certificate number" value={claim.certificateNumber} />
             <ReadOnlyField label="Claimant" value={claim.claimant_name} />
+            <ReadOnlyField label="Claimant email" value={claim.customerEmail} />
+            <ReadOnlyField label="Handler" value={claim.handler_name} />
             <ReadOnlyField label="Category" value={claim.category} />
             <ReadOnlyField label="Claim type" value={claim.claimTypeName} />
             <ReadOnlyField label="Claimed amount" value={formatClaimAmount(claim.claimedAmount)} />
-            <ReadOnlyField label="Date of loss" value={claim.date_of_loss} />
-            <ReadOnlyField label="Notified to organization" value={claim.dateNotifiedToOrganization} />
+            <ReadOnlyField label="Date of loss" value={claim.loss_date} />
+            <ReadOnlyField label="Notified to organization" value={claim.notifiedToOrganizationDate} />
+            <ReadOnlyField label="Notified to insurer" value={claim.notifiedToInsurerDate} />
           </div>
 
           {claim.note && (
@@ -88,13 +86,13 @@ export function ClaimsDetailPage() {
           <ClaimDocuments
             claim={claim}
             onChanged={() => { void claimQuery.refetch() }}
-            onRequested={() => setEmailHint('document')}
+            onRequested={() => setEmailHint('document_request')}
           />
           <ClaimEmail
             claim={claim}
-            logs={logs}
+            logs={claim.emails}
             preferredTemplate={emailHint}
-            onSent={() => { void emailQuery.refetch() }}
+            onSent={() => { void claimQuery.refetch() }}
           />
           <ClaimTimeline history={claim.history} />
         </>
