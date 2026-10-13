@@ -1,4 +1,6 @@
-import { PageHeader } from '@/components/shared'
+import { useBypassOrgLocation } from '@/auth/use-bypass-org-location'
+import { BypassOrgLocationPicker, EmptyState, PageHeader } from '@/components/shared'
+import { Card } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -18,8 +20,10 @@ import { EROUTES } from '@/utils/enums'
 import { extractErrorMessage } from '@/utils/helpers'
 import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { Building2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
+import { CLAIMS_ORG_STORAGE_KEY } from '../claims-org'
 import { claimFieldClass } from '../claim-ui'
 import { requirementSchema, templateSchema, type RequirementValues, type TemplateValues } from '../claims-schema'
 
@@ -28,40 +32,76 @@ import { requirementSchema, templateSchema, type RequirementValues, type Templat
  * Insurer email uses GET/PATCH claims/settings (not a separate insurers route).
  */
 export function ClaimsSettingsPage() {
+  const {
+    isBypass,
+    selectedLocationId,
+    setLocationId,
+    orgContextHeaders,
+    canFetch,
+  } = useBypassOrgLocation(CLAIMS_ORG_STORAGE_KEY)
+
   return (
     <div className="flex flex-col gap-4">
       <PageHeader
         title="Claims settings"
         description="Insurer email, document requirements, and email templates for motor claims."
-        actions={[{ label: 'All claims', variant: 'outline', href: EROUTES.CLAIMS }]}
+        actions={[
+          { label: 'Motor search', variant: 'outline', href: EROUTES.CLAIMS },
+          { label: 'All claims', variant: 'outline', href: EROUTES.CLAIMS_LIST },
+        ]}
       />
-      <Tabs defaultValue="insurers">
-        <TabsList>
-          <TabsTrigger value="insurers">Insurer email</TabsTrigger>
-          <TabsTrigger value="documents">Document requirements</TabsTrigger>
-          <TabsTrigger value="templates">Email templates</TabsTrigger>
-        </TabsList>
-        <TabsContent value="insurers" className="mt-4">
-          <InsurerEmailSettings />
-        </TabsContent>
-        <TabsContent value="documents" className="mt-4">
-          <DocumentRequirementSettings />
-        </TabsContent>
-        <TabsContent value="templates" className="mt-4">
-          <EmailTemplateSettings />
-        </TabsContent>
-      </Tabs>
+
+      {isBypass ? (
+        <Card className="shadow-none p-4">
+          <BypassOrgLocationPicker
+            value={selectedLocationId}
+            onChange={setLocationId}
+            hint="Settings are scoped to the selected organization location."
+          />
+        </Card>
+      ) : null}
+
+      {!canFetch ? (
+        <EmptyState
+          icon={Building2}
+          title="Select an organization location"
+          description="Choose an organization above before editing claims settings."
+        />
+      ) : (
+        <Tabs defaultValue="insurers">
+          <TabsList>
+            <TabsTrigger value="insurers">Insurer email</TabsTrigger>
+            <TabsTrigger value="documents">Document requirements</TabsTrigger>
+            <TabsTrigger value="templates">Email templates</TabsTrigger>
+          </TabsList>
+          <TabsContent value="insurers" className="mt-4">
+            <InsurerEmailSettings orgContextHeaders={orgContextHeaders} />
+          </TabsContent>
+          <TabsContent value="documents" className="mt-4">
+            <DocumentRequirementSettings orgContextHeaders={orgContextHeaders} />
+          </TabsContent>
+          <TabsContent value="templates" className="mt-4">
+            <EmailTemplateSettings orgContextHeaders={orgContextHeaders} />
+          </TabsContent>
+        </Tabs>
+      )}
     </div>
   )
 }
 
-function InsurerEmailSettings() {
+function InsurerEmailSettings({
+  orgContextHeaders,
+}: {
+  orgContextHeaders?: Record<string, string>
+}) {
+  const orgConfig = orgContextHeaders ? { headers: orgContextHeaders } : undefined
   const [insurerId, setInsurerId] = useState('')
   const [claimsEmail, setClaimsEmail] = useState('')
 
   const query = UseApiQuery<SubmitResponse>({
     url: CLAIMS_API.settings,
     params: { insurer_organization_id: insurerId || undefined },
+    config: orgConfig,
     queryOptions: { enabled: Boolean(insurerId) },
   })
 
@@ -80,6 +120,7 @@ function InsurerEmailSettings() {
   }>({
     url: CLAIMS_API.settings,
     method: EMETHODS.PATCH,
+    config: orgConfig,
     mutationOptions: {
       onSuccess: (response) => {
         ShowToast.success(response.message || 'Claims email saved')
@@ -133,12 +174,19 @@ function InsurerEmailSettings() {
   )
 }
 
-function DocumentRequirementSettings() {
+function DocumentRequirementSettings({
+  orgContextHeaders,
+}: {
+  orgContextHeaders?: Record<string, string>
+}) {
+  const orgConfig = orgContextHeaders ? { headers: orgContextHeaders } : undefined
   const requirementsQuery = UseApiQuery<SubmitResponse>({
     url: CLAIMS_API.requirements,
+    config: orgConfig,
   })
   const typesQuery = UseApiQuery<SubmitResponse>({
     url: CLAIMS_API.types,
+    config: orgConfig,
   })
   const requirements = normalizeRequirements(requirementsQuery.data)
   const types = normalizeClaimTypes(typesQuery.data)
@@ -161,7 +209,12 @@ function DocumentRequirementSettings() {
     // POST so PHP can read the files. _method=PATCH is added when editing.
     url: editingId ? CLAIMS_API.requirement(editingId) : CLAIMS_API.requirements,
     method: EMETHODS.POST,
-    config: { headers: { 'Content-Type': 'multipart/form-data' } },
+    config: {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        ...(orgContextHeaders ?? {}),
+      },
+    },
     mutationOptions: {
       onSuccess: (response) => {
         ShowToast.success(response.message || 'Requirement saved')
@@ -184,6 +237,7 @@ function DocumentRequirementSettings() {
   const remove = UseApiMutation<SubmitResponse, { id: string }>({
     url: (variables) => CLAIMS_API.requirement(variables.id),
     method: EMETHODS.DELETE,
+    config: orgConfig,
     mutationOptions: {
       onSuccess: (response) => {
         ShowToast.success(response.message || 'Requirement removed')
@@ -337,9 +391,15 @@ function DocumentRequirementSettings() {
   )
 }
 
-function EmailTemplateSettings() {
+function EmailTemplateSettings({
+  orgContextHeaders,
+}: {
+  orgContextHeaders?: Record<string, string>
+}) {
+  const orgConfig = orgContextHeaders ? { headers: orgContextHeaders } : undefined
   const query = UseApiQuery<SubmitResponse>({
     url: CLAIMS_API.templates,
+    config: orgConfig,
   })
   const templates = normalizeTemplates(query.data)
   const form = useForm<TemplateValues>({
@@ -362,6 +422,7 @@ function EmailTemplateSettings() {
   const save = UseApiMutation<SubmitResponse, { type: string; subject: string; body: string }>({
     url: (variables) => CLAIMS_API.template(variables.type),
     method: EMETHODS.PATCH,
+    config: orgConfig,
     mutationOptions: {
       onSuccess: (response) => {
         ShowToast.success(response.message || 'Template saved')

@@ -24,10 +24,12 @@ type ReviewPayload = {
  */
 export function ClaimDocuments({
   claim,
+  orgContextHeaders,
   onChanged,
   onRequested,
 }: {
   claim: ClaimDetail
+  orgContextHeaders?: Record<string, string>
   onChanged: () => void
   onRequested: () => void
 }) {
@@ -42,7 +44,12 @@ export function ClaimDocuments({
       return CLAIMS_API.documentUpload(claim.uuid, documentId)
     },
     method: EMETHODS.POST,
-    config: { headers: { 'Content-Type': 'multipart/form-data' } },
+    config: {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        ...(orgContextHeaders ?? {}),
+      },
+    },
     mutationOptions: {
       onSuccess: (response) => {
         ShowToast.success(response.message || 'Document uploaded')
@@ -57,6 +64,7 @@ export function ClaimDocuments({
   }>({
     url: CLAIMS_API.documentRequest(claim.uuid),
     method: EMETHODS.POST,
+    config: orgContextHeaders ? { headers: orgContextHeaders } : undefined,
     mutationOptions: {
       onSuccess: (response) => {
         ShowToast.success(response.message || 'Documents requested')
@@ -72,6 +80,7 @@ export function ClaimDocuments({
   const review = UseApiMutation<SubmitResponse, ReviewPayload>({
     url: (variables) => CLAIMS_API.documentReview(claim.uuid, variables.documentId),
     method: EMETHODS.POST,
+    config: orgContextHeaders ? { headers: orgContextHeaders } : undefined,
     mutationOptions: {
       onSuccess: (response) => {
         ShowToast.success(response.message || 'Document reviewed')

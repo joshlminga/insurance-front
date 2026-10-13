@@ -32,11 +32,11 @@ export const CLAIMS_API = {
   emailPreview: (uuid: string) => `claims/${uuid}/emails/preview`,
 } as const
 
+/** Motor search modes only — email, policy number, vehicle registration. */
 export const POLICY_SEARCH_MODES = [
-  { value: 'registration', label: 'Registration' },
+  { value: 'registration', label: 'Vehicle registration' },
   { value: 'policy_number', label: 'Policy number' },
-  { value: 'certificate_number', label: 'Certificate number' },
-  { value: 'customer', label: 'Customer' },
+  { value: 'email', label: 'Customer email' },
 ] as const
 
 export type PolicySearchMode = (typeof POLICY_SEARCH_MODES)[number]['value']

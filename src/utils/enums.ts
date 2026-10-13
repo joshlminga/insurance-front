@@ -174,6 +174,7 @@ export const EROUTES = {
 
   // Admin claims (motor). :uuid is the route pattern; use claimsDetailPath() for a real link.
   CLAIMS: `/${EPREFIX.DASHBOARD}/claims`,
+  CLAIMS_LIST: `/${EPREFIX.DASHBOARD}/claims/list`,
   CLAIMS_NEW: `/${EPREFIX.DASHBOARD}/claims/new`,
   CLAIMS_DETAIL: `/${EPREFIX.DASHBOARD}/claims/:uuid`,
   CLAIMS_SETTINGS: `/${EPREFIX.DASHBOARD}/claims/settings`,

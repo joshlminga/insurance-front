@@ -47,11 +47,14 @@ type StatusPayload = StatusValues & { confirm_warnings?: boolean }
  */
 export function ClaimActions({
   claim,
+  orgContextHeaders,
   onChanged,
 }: {
   claim: ClaimDetail
+  orgContextHeaders?: Record<string, string>
   onChanged: () => void
 }) {
+  const orgConfig = orgContextHeaders ? { headers: orgContextHeaders } : undefined
   const [confirmText, setConfirmText] = useState<string | null>(null)
   const [pendingStatus, setPendingStatus] = useState<StatusValues | null>(null)
 
@@ -80,6 +83,7 @@ export function ClaimActions({
   const patchClaim = UseApiMutation<SubmitResponse, DetailsValues>({
     url: CLAIMS_API.claim(claim.uuid),
     method: EMETHODS.PATCH,
+    config: orgConfig,
     mutationOptions: {
       onSuccess: (response) => {
         ShowToast.success(response.message || 'Claim updated')
@@ -92,6 +96,7 @@ export function ClaimActions({
   const changeStatus = UseApiMutation<SubmitResponse, StatusPayload>({
     url: CLAIMS_API.status(claim.uuid),
     method: EMETHODS.POST,
+    config: orgConfig,
     mutationOptions: {
       onSuccess: (response) => {
         ShowToast.success(response.message || 'Status updated')
@@ -119,6 +124,7 @@ export function ClaimActions({
   const recheck = UseApiMutation<SubmitResponse, Record<string, never>>({
     url: CLAIMS_API.recheck(claim.uuid),
     method: EMETHODS.POST,
+    config: orgConfig,
     mutationOptions: {
       onSuccess: (response) => {
         ShowToast.success(response.message || 'Policy status re-checked')
@@ -177,6 +183,7 @@ export function ClaimActions({
               required
               labelKey="name"
               valueKey="id"
+              config={orgConfig}
               selectedOption={claim.handlerId ? {
                 value: claim.handlerId,
                 label: claim.handler_name || 'Current handler',

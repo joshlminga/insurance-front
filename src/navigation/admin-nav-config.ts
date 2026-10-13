@@ -267,7 +267,7 @@ export const adminNavConfig: NavItem[] = [
     module: MODULES.CLAIMS,
     items: [
       {
-        title: 'All Claims',
+        title: 'Motor',
         url: EROUTES.CLAIMS,
         module: MODULES.CLAIMS,
       },

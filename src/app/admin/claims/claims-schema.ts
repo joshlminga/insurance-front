@@ -4,7 +4,7 @@ import { CLAIM_NOTE_WORD_LIMIT, countWords, todayInNairobi } from '@/utils/claim
 // Same job as a Laravel Form Request: check the fields before we call the API.
 
 export const claimSearchSchema = z.object({
-  search_by: z.enum(['registration', 'policy_number', 'certificate_number', 'customer']),
+  search_by: z.enum(['registration', 'policy_number', 'email']),
   term: z.string().trim().min(2, 'Enter at least 2 characters'),
 })
 

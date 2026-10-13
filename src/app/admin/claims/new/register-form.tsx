@@ -40,13 +40,17 @@ const fileAccept = '.pdf,.jpg,.jpeg,.png,.heic,.doc,.docx'
  */
 export function ClaimRegisterForm({
   policy,
+  orgContextHeaders,
   onBack,
   onCreated,
 }: {
   policy: PolicySnapshot
+  /** Super-admin location header so create/types/handlers stay in the same org. */
+  orgContextHeaders?: Record<string, string>
   onBack: () => void
   onCreated: (result: { claimNumber: string; uuid: string | null }) => void
 }) {
+  const orgConfig = orgContextHeaders ? { headers: orgContextHeaders } : undefined
   const { user } = UseAuth()
   const [showNewType, setShowNewType] = useState(false)
   const [files, setFiles] = useState<Record<string, File | null>>({})
@@ -69,6 +73,8 @@ export function ClaimRegisterForm({
 
   const typesQuery = UseApiQuery<SubmitResponse>({
     url: CLAIMS_API.types,
+    queryKey: ['claims/types', orgContextHeaders?.['X-Organization-Location-Id'] ?? null],
+    config: orgConfig,
   })
   const types = normalizeClaimTypes(typesQuery.data)
 
@@ -104,6 +110,7 @@ export function ClaimRegisterForm({
   const createType = UseApiMutation<SubmitResponse, { name: string; default_tat_days: number }>({
     url: CLAIMS_API.types,
     method: EMETHODS.POST,
+    config: orgConfig,
     mutationOptions: {
       onSuccess: async (response) => {
         ShowToast.success(response.message || 'Claim type added')
@@ -123,7 +130,12 @@ export function ClaimRegisterForm({
   const registerClaim = UseApiMutation<SubmitResponse, FormData>({
     url: CLAIMS_API.claims,
     method: EMETHODS.POST,
-    config: { headers: { 'Content-Type': 'multipart/form-data' } },
+    config: {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        ...(orgContextHeaders ?? {}),
+      },
+    },
     mutationOptions: {
       onSuccess: (response) => {
         const created = readCreatedClaim(response)
@@ -211,6 +223,7 @@ export function ClaimRegisterForm({
                   labelKey="name"
                   valueKey="id"
                   placeholder="Select a user"
+                  config={orgConfig}
                 />
               )}
             />
@@ -232,6 +245,7 @@ export function ClaimRegisterForm({
                   labelKey="name"
                   valueKey="id"
                   placeholder="Select a handler"
+                  config={orgConfig}
                 />
               )}
             />

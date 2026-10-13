@@ -8,6 +8,7 @@ import {
   normalizePolicy,
   normalizePolicyHit,
   normalizeRegistration,
+  POLICY_SEARCH_MODES,
   readCreatedClaim,
   readGateBanners,
   resolveTatBadge,
@@ -17,6 +18,16 @@ import {
 describe('normalizeRegistration', () => {
   it('uppercases and removes spaces and dashes', () => {
     expect(normalizeRegistration(' kdd 123-a ')).toBe('KDD123A')
+  })
+})
+
+describe('POLICY_SEARCH_MODES', () => {
+  it('only offers registration, policy number, and customer email', () => {
+    expect(POLICY_SEARCH_MODES.map((mode) => mode.value)).toEqual([
+      'registration',
+      'policy_number',
+      'email',
+    ])
   })
 })
 

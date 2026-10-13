@@ -58,13 +58,16 @@ export function ClaimEmail({
   claim,
   logs,
   preferredTemplate,
+  orgContextHeaders,
   onSent,
 }: {
   claim: ClaimDetail
   logs: ClaimEmailLog[]
   preferredTemplate: string | null
+  orgContextHeaders?: Record<string, string>
   onSent: () => void
 }) {
+  const orgConfig = orgContextHeaders ? { headers: orgContextHeaders } : undefined
   const form = useForm<EmailValues>({
     resolver: zodResolver(emailSchema),
     defaultValues: {
@@ -82,6 +85,7 @@ export function ClaimEmail({
 
   const templatesQuery = UseApiQuery<SubmitResponse>({
     url: CLAIMS_API.templates,
+    config: orgConfig,
   })
   const templates = normalizeTemplates(templatesQuery.data)
   const selectedType = form.watch('template')
@@ -101,6 +105,7 @@ export function ClaimEmail({
   const preview = UseApiMutation<SubmitResponse, EmailPreviewPayload>({
     url: CLAIMS_API.emailPreview(claim.uuid),
     method: EMETHODS.POST,
+    config: orgConfig,
     mutationOptions: {
       onSuccess: (response) => {
         const next = readEmailPreview(response)
@@ -119,6 +124,7 @@ export function ClaimEmail({
   const send = UseApiMutation<SubmitResponse, EmailSendPayload>({
     url: CLAIMS_API.emails(claim.uuid),
     method: EMETHODS.POST,
+    config: orgConfig,
     mutationOptions: {
       onSuccess: (response) => {
         ShowToast.success(response.message || 'Email sent')

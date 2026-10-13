@@ -193,7 +193,8 @@ const ReceiptReportsMotorPage = lazy(() =>
   }))
 )
 const FinanceParametersIndexPage = lazy(() => import("./app/admin/finance/parameters"))
-const ClaimsListPage = lazy(() => import("./app/admin/claims/page").then(m => ({ default: m.ClaimsListPage })))
+const ClaimsMotorPage = lazy(() => import("./app/admin/claims/page").then(m => ({ default: m.ClaimsMotorPage })))
+const ClaimsListPage = lazy(() => import("./app/admin/claims/list/page").then(m => ({ default: m.ClaimsListPage })))
 const ClaimsNewPage = lazy(() => import("./app/admin/claims/new/page").then(m => ({ default: m.ClaimsNewPage })))
 const ClaimsDetailPage = lazy(() => import("./app/admin/claims/[uuid]/page").then(m => ({ default: m.ClaimsDetailPage })))
 const ClaimsSettingsPage = lazy(() => import("./app/admin/claims/settings/page").then(m => ({ default: m.ClaimsSettingsPage })))
@@ -1009,6 +1010,16 @@ export const router = createBrowserRouter([
           },
           {
             path: "claims",
+            element: (
+              <S>
+                <AdminModulePage module={MODULES.CLAIMS}>
+                  <ClaimsMotorPage />
+                </AdminModulePage>
+              </S>
+            ),
+          },
+          {
+            path: "claims/list",
             element: (
               <S>
                 <AdminModulePage module={MODULES.CLAIMS}>
