@@ -1,5 +1,11 @@
 import { z } from 'zod'
-import { CLAIM_NOTE_WORD_LIMIT, countWords, todayInNairobi } from '@/utils/claims'
+import {
+  CLAIM_NOTE_WORD_LIMIT,
+  CLAIM_NOTIFICATION_GAP_DAYS,
+  countWords,
+  earliestClaimNotificationDate,
+  todayInNairobi,
+} from '@/utils/claims'
 
 // Same job as a Laravel Form Request: check the fields before we call the API.
 
@@ -33,7 +39,7 @@ export function makeClaimRegisterSchema(bounds: {
       .refine((value) => Number(value.replace(/,/g, '')) > 0, 'Amount must be greater than 0'),
     loss_date: z.string().min(1, 'Enter the date of loss'),
     notified_to_organization_date: z.string().min(1, 'Enter the date notified to the organization'),
-    notified_to_insurer_date: z.string().optional(),
+    notified_to_insurer_date: z.string().min(1, 'Enter the date notified to the insurer'),
     note: z
       .string()
       .refine(
@@ -45,21 +51,20 @@ export function makeClaimRegisterSchema(bounds: {
     const today = todayInNairobi()
     const loss = data.loss_date
     const notified = data.notified_to_organization_date
-    const insurer = data.notified_to_insurer_date?.trim() ?? ''
+    const insurer = data.notified_to_insurer_date
+    const gapLabel = CLAIM_NOTIFICATION_GAP_DAYS === 1
+      ? '1 day'
+      : `${CLAIM_NOTIFICATION_GAP_DAYS} days`
+    const earliest = earliestClaimNotificationDate(loss, today)
 
-    const rejectFuture = (field: string, value: string) => {
-      if (value && value > today) {
-        ctx.addIssue({
-          code: 'custom',
-          message: 'Date cannot be in the future',
-          path: [field],
-        })
-      }
+    // Loss may be in the past, but not in the future.
+    if (loss && loss > today) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Date of loss cannot be in the future',
+        path: ['loss_date'],
+      })
     }
-
-    rejectFuture('loss_date', loss)
-    rejectFuture('notified_to_organization_date', notified)
-    if (insurer) rejectFuture('notified_to_insurer_date', insurer)
 
     const issued = bounds.issuedDate?.slice(0, 10)
     const expiry = bounds.expiryDate?.slice(0, 10)
@@ -77,11 +82,20 @@ export function makeClaimRegisterSchema(bounds: {
         path: ['loss_date'],
       })
     }
-    if (loss && notified && notified < loss) {
+
+    // Notification: today or later, and at least gap days after loss (future OK).
+    if (notified && notified < earliest) {
       ctx.addIssue({
         code: 'custom',
-        message: 'Notification cannot be before the date of loss',
+        message: `Must be on or after ${earliest} (today or later, and at least ${gapLabel} after the date of loss)`,
         path: ['notified_to_organization_date'],
+      })
+    }
+    if (insurer && insurer < earliest) {
+      ctx.addIssue({
+        code: 'custom',
+        message: `Must be on or after ${earliest} (today or later, and at least ${gapLabel} after the date of loss)`,
+        path: ['notified_to_insurer_date'],
       })
     }
     if (insurer && notified && insurer < notified) {

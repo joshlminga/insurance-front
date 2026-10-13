@@ -130,6 +130,8 @@ export type PolicySnapshot = {
   customerName: string | null
   customerEmail: string | null
   customerPhone: string | null
+  /** Quoting / selected company (broker) name — used on “Date notified to …” labels. */
+  organizationName: string | null
   insurerName: string | null
   insurerClaimsEmail: string | null
   coverType: string | null
@@ -140,6 +142,9 @@ export type PolicySnapshot = {
   banners: GateBanner[]
   documents: PolicyDocumentSlot[]
 }
+
+/** Matches config/claims.php dates.min_gap_days — notification must be this many days after loss. */
+export const CLAIM_NOTIFICATION_GAP_DAYS = 1
 
 export type PolicySearchHit = {
   certificateId: string
@@ -183,6 +188,8 @@ export type ClaimDetail = ClaimListRow & {
   handlerEmail: string | null
   customerEmail: string | null
   customerPhone: string | null
+  organizationName: string | null
+  insurerName: string | null
   insurerClaimsEmail: string | null
   category: string
   claimTypeName: string | null
@@ -359,6 +366,25 @@ export function addCalendarDays(isoDate: string, days: number): string | null {
   const date = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])))
   date.setUTCDate(date.getUTCDate() + days)
   return date.toISOString().slice(0, 10)
+}
+
+/**
+ * Earliest allowed org/insurer notification date:
+ * max(today, loss + CLAIM_NOTIFICATION_GAP_DAYS). Future dates are allowed.
+ */
+export function earliestClaimNotificationDate(
+  lossDate: string | null | undefined,
+  today = todayInNairobi(),
+  gapDays = CLAIM_NOTIFICATION_GAP_DAYS,
+): string {
+  if (!lossDate) {
+    return today
+  }
+  const afterLoss = addCalendarDays(lossDate, gapDays)
+  if (!afterLoss) {
+    return today
+  }
+  return afterLoss > today ? afterLoss : today
 }
 
 /** Today's date in Africa/Nairobi, as YYYY-MM-DD. */
@@ -711,6 +737,7 @@ export function normalizePolicy(body: JsonBody | null | undefined): PolicySnapsh
     customerEmail: emailFrom(policy, ['insured_email', 'customer_email', 'customer'])
       ?? pickString(policy, ['insured_email']),
     customerPhone: pickString(policy, ['insured_phone', 'customer_phone', 'phone']),
+    organizationName: personName(policy, ['organization_name', 'organization', 'broker_name']),
     insurerName: personName(policy, ['insurer_name', 'insurer']),
     insurerClaimsEmail: emailFrom(policy, ['insurer_email', 'insurer_claims_email', 'claims_email', 'insurer']),
     coverType: pickString(policy, ['cover_type', 'cover']),
@@ -853,6 +880,10 @@ export function normalizeClaimDetail(body: JsonBody | null | undefined): ClaimDe
     customerPhone: claimant
       ? pickString(claimant, ['phone'])
       : pickString(record, ['claimant_phone', 'customer_phone']),
+    organizationName: personName(record, ['organization_name'])
+      ?? personName(snapshot, ['organization_name', 'organization', 'broker_name']),
+    insurerName: personName(record, ['insurer_name', 'insurer'])
+      ?? personName(snapshot, ['insurer_name', 'insurer']),
     insurerClaimsEmail: pickString(record, ['insurer_email'])
       ?? emailFrom(record, ['insurer_claims_email', 'claims_email', 'insurer']),
     category: pickString(record, ['category_label', 'category']) ?? 'General',

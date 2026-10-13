@@ -4,6 +4,7 @@ import {
   confirmationMessage,
   countWords,
   displayTatBadge,
+  earliestClaimNotificationDate,
   formatClaimDisplayDate,
   normalizeClaimRow,
   normalizePolicy,
@@ -161,6 +162,7 @@ describe('normalizePolicy', () => {
           insured_name: 'Jane Doe',
           insured_email: 'jane@example.com',
           insured_phone: '0712345678',
+          organization_name: 'LOLC',
           insurer_name: 'Acme',
           insurer_email: 'claims@acme.test',
           cover_from: '2026-01-01',
@@ -185,11 +187,21 @@ describe('normalizePolicy', () => {
 
     expect(policy?.customerName).toBe('Jane Doe')
     expect(policy?.customerEmail).toBe('jane@example.com')
+    expect(policy?.organizationName).toBe('LOLC')
+    expect(policy?.insurerName).toBe('Acme')
     expect(policy?.expiryDate).toBe('2027-01-01')
     expect(policy?.selectedVehicleId).toBe('9')
     expect(policy?.banners.find((banner) => banner.key === 'premium')?.status).toBe('fail')
     expect(policy?.documents[0]?.key).toBe('identity_card')
     expect(policy?.documents[0]?.found).toBe(false)
+  })
+})
+
+describe('earliestClaimNotificationDate', () => {
+  it('is at least 1 day after loss, and never before today', () => {
+    expect(earliestClaimNotificationDate('2026-10-01', '2026-10-03')).toBe('2026-10-03')
+    expect(earliestClaimNotificationDate('2026-10-02', '2026-10-03')).toBe('2026-10-03')
+    expect(earliestClaimNotificationDate('2026-10-03', '2026-10-03')).toBe('2026-10-04')
   })
 })
 

@@ -16,11 +16,13 @@ import {
   CLAIM_NOTE_WORD_LIMIT,
   CLAIMS_API,
   countWords,
+  earliestClaimNotificationDate,
   formatClaimDisplayDate,
   normalizeClaimTypes,
   readCreatedClaim,
   readCreatedTypeId,
   slotsForClaimType,
+  todayInNairobi,
   type PolicySnapshot,
 } from '@/utils/claims'
 import { EMETHODS } from '@/utils/constatnts'
@@ -79,6 +81,8 @@ export function ClaimRegisterForm({
   const orgConfig = orgContextHeaders ? { headers: orgContextHeaders } : undefined
   const { user } = UseAuth()
   const [showNewType, setShowNewType] = useState(false)
+  /** Step 2 opens in a popup after claim details pass validation. */
+  const [docsOpen, setDocsOpen] = useState(false)
   const [files, setFiles] = useState<Record<string, File | null>>({})
   const appliedType = useRef<string | null>(null)
 
@@ -116,11 +120,21 @@ export function ClaimRegisterForm({
   const duePreview = notified && /^\d+$/.test(tatDays || '')
     ? addCalendarDays(notified, Number(tatDays))
     : null
+  const today = todayInNairobi()
+  const noticeMin = earliestClaimNotificationDate(lossDate || null, today)
+  const lossMax = (() => {
+    const expiry = policy.expiryDate?.slice(0, 10)
+    if (expiry && expiry < today) return expiry
+    return today
+  })()
+  const organizationLabel = policy.organizationName?.trim() || 'organization'
+  const insurerLabel = policy.insurerName?.trim() || 'insurer'
 
   useEffect(() => {
     appliedType.current = null
     form.reset(emptyRegisterValues(policy, user?.id))
     setFiles({})
+    setDocsOpen(false)
     // Only when the cover (or the signed-in user) changes — not on every keystroke.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [policy.certificateId, user?.id])
@@ -186,6 +200,29 @@ export function ClaimRegisterForm({
     registerClaim.mutate(buildClaimFormData(values, policy.certificateId, files))
   }
 
+  /** Validate claim details first, then open the documents step popup. */
+  const continueToDocuments = async () => {
+    const ok = await form.trigger([
+      'vehicle_id',
+      'claimant_name',
+      'claimant_email',
+      'claimant_phone',
+      'reported_by_user_id',
+      'handler_id',
+      'category',
+      'claim_type_id',
+      'tat_days',
+      'claimed_amount',
+      'loss_date',
+      'notified_to_organization_date',
+      'notified_to_insurer_date',
+      'note',
+    ])
+    if (ok) {
+      setDocsOpen(true)
+    }
+  }
+
   const vehicleOptions = policy.vehicles.map((vehicle) => ({
     value: vehicle.id,
     label: vehicle.label,
@@ -207,35 +244,37 @@ export function ClaimRegisterForm({
   }, [tatDays])
 
   return (
-    <form className="flex flex-col gap-5" onSubmit={form.handleSubmit(onSubmit)} noValidate>
-      <ClaimGateBanners banners={policy.banners} />
+    <>
+      <form className="flex flex-col gap-5" onSubmit={(event) => event.preventDefault()} noValidate>
+        <ClaimGateBanners banners={policy.banners} />
 
-      {/* Read-only cover snapshot — three tiles per row on desktop */}
-      <ClaimSurface>
-        <h2 className="mb-4 text-base font-semibold">Policy snapshot</h2>
-        <ClaimGrid>
-          <ReadOnlyField label="Registration" value={policy.registration} />
-          <ReadOnlyField label="Policy number" value={policy.policyNumber} />
-          <ReadOnlyField label="Certificate number" value={policy.certificateNumber} />
+        {/* Read-only cover snapshot — three tiles per row on desktop */}
+        <ClaimSurface>
+          <h2 className="mb-4 text-base font-semibold">Policy snapshot</h2>
+          <ClaimGrid>
+            <ReadOnlyField label="Registration" value={policy.registration} />
+            <ReadOnlyField label="Policy number" value={policy.policyNumber} />
+            <ReadOnlyField label="Certificate number" value={policy.certificateNumber} />
           <ReadOnlyField label="Insured" value={policy.customerName} />
+          <ReadOnlyField label="Organization" value={policy.organizationName} />
           <ReadOnlyField label="Insurer" value={policy.insurerName} />
           <ReadOnlyField label="Cover" value={policy.coverType} />
-          <ReadOnlyField label="Cover from" value={formatClaimDisplayDate(policy.issuedDate)} />
-          <ReadOnlyField label="Cover to" value={formatClaimDisplayDate(policy.expiryDate)} />
-        </ClaimGrid>
-      </ClaimSurface>
+            <ReadOnlyField label="Cover from" value={formatClaimDisplayDate(policy.issuedDate)} />
+            <ReadOnlyField label="Cover to" value={formatClaimDisplayDate(policy.expiryDate)} />
+          </ClaimGrid>
+        </ClaimSurface>
 
-      {/* Claim details stay on the main form — no hidden tab */}
-      <div className="flex flex-col gap-4">
-        <div className="flex items-baseline gap-3">
-          <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-foreground text-xs font-semibold text-background">
-            1
-          </span>
-          <div>
-            <h2 className="text-base font-semibold">Claim details</h2>
-            <p className="text-sm text-muted-foreground">Parties, classification, and loss dates.</p>
+        {/* Step 1 — claim details on the main form */}
+        <div className="flex flex-col gap-4">
+          <div className="flex items-baseline gap-3">
+            <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-foreground text-xs font-semibold text-background">
+              1
+            </span>
+            <div>
+              <h2 className="text-base font-semibold">Claim details</h2>
+              <p className="text-sm text-muted-foreground">Parties, classification, and loss dates.</p>
+            </div>
           </div>
-        </div>
 
           {/* Parties: two rows of 4/4/4 */}
           <ClaimSurface>
@@ -407,7 +446,7 @@ export function ClaimRegisterForm({
                     label="Date of loss"
                     type="date"
                     min={policy.issuedDate ?? undefined}
-                    max={policy.expiryDate ?? undefined}
+                    max={lossMax}
                     className={claimFieldClass}
                     required
                   />
@@ -416,9 +455,9 @@ export function ClaimRegisterForm({
                   <ReuseableInput
                     control={form.control}
                     name="notified_to_organization_date"
-                    label="Date notified to organization"
+                    label={`Date notified to ${organizationLabel}`}
                     type="date"
-                    min={lossDate || undefined}
+                    min={noticeMin}
                     className={claimFieldClass}
                     required
                   />
@@ -427,10 +466,11 @@ export function ClaimRegisterForm({
                   <ReuseableInput
                     control={form.control}
                     name="notified_to_insurer_date"
-                    label="Date notified to insurer (optional)"
+                    label={`Date notified to ${insurerLabel}`}
                     type="date"
-                    min={notified || undefined}
+                    min={notified && notified > noticeMin ? notified : noticeMin}
                     className={claimFieldClass}
+                    required
                   />
                 </div>
               </div>
@@ -451,98 +491,119 @@ export function ClaimRegisterForm({
               </div>
             </div>
           </ClaimSurface>
-      </div>
-
-      {/* Step 2 — documents stay visible under the form, with clear click-to-upload */}
-      <div className="flex flex-col gap-4">
-        <div className="flex items-baseline gap-3">
-          <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-foreground text-xs font-semibold text-background">
-            2
-          </span>
-          <div>
-            <h2 className="text-base font-semibold">Documents</h2>
-            <p className="text-sm text-muted-foreground">
-              Choose whether you have files, then click each upload box.
-            </p>
-          </div>
         </div>
 
-        <Controller
-          control={form.control}
-          name="document_mode"
-          render={({ field }) => (
-            <ClaimGrid className="md:grid-cols-2 xl:grid-cols-2">
-              <button
-                type="button"
-                onClick={() => field.onChange('have_documents')}
-                className={cn(
-                  'rounded-2xl border p-5 text-left transition-colors',
-                  field.value === 'have_documents'
-                    ? 'border-foreground/20 bg-card shadow-sm ring-1 ring-foreground/10'
-                    : 'border-border/50 bg-muted/30 hover:bg-muted/50',
-                )}
-              >
-                <p className="font-semibold">I have documents</p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Show upload boxes for this claim type.
-                </p>
-              </button>
-              <button
-                type="button"
-                onClick={() => field.onChange('no_documents')}
-                className={cn(
-                  'rounded-2xl border p-5 text-left transition-colors',
-                  field.value === 'no_documents'
-                    ? 'border-foreground/20 bg-card shadow-sm ring-1 ring-foreground/10'
-                    : 'border-border/50 bg-muted/30 hover:bg-muted/50',
-                )}
-              >
-                <p className="font-semibold">I do not have documents</p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Saves as Document Pending so the notification date is kept.
-                </p>
-              </button>
-            </ClaimGrid>
-          )}
-        />
+        {/* Step 1 actions — documents open in the next-step popup */}
+        <div className="flex flex-wrap gap-2">
+          <Button type="button" variant="outline" className="rounded-xl" onClick={onBack}>
+            Back to Search
+          </Button>
+          <Button type="button" className="rounded-xl" onClick={() => void continueToDocuments()}>
+            Continue to documents
+          </Button>
+        </div>
+      </form>
 
-        {documentMode === 'no_documents' && (
-          <ClaimSurface padding="sm" className="bg-muted/40">
-            <p className="text-sm text-muted-foreground">
-              No uploads needed now. The claim will be saved as Document Pending.
+      {/* Step 2 — documents popup */}
+      <Dialog open={docsOpen} onOpenChange={setDocsOpen}>
+        <DialogContent className="flex max-h-[90vh] flex-col gap-0 overflow-hidden bg-white p-0 sm:max-w-3xl">
+          <DialogHeader className="border-b border-border/60 bg-white px-6 py-4">
+            <DialogTitle className="flex items-center gap-3">
+              <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-foreground text-xs font-semibold text-background">
+                2
+              </span>
+              Documents
+            </DialogTitle>
+            <p className="pl-10 text-sm text-muted-foreground">
+              Choose whether you have files, then click each upload box.
             </p>
-          </ClaimSurface>
-        )}
+          </DialogHeader>
 
-        {documentMode === 'have_documents' && (
-          <ClaimGrid>
-            {slots.map((slot) => (
-              <ClaimUploadSlot
-                key={slot.key}
-                label={slot.label}
-                mandatory={slot.mandatory}
-                found={slot.found}
-                hint={slot.hint}
-                downloadUrl={slot.downloadUrl}
-                file={files[slot.key] ?? null}
-                onFileChange={(file) => {
-                  setFiles((current) => ({ ...current, [slot.key]: file }))
-                }}
+          <div className="flex flex-col gap-5 overflow-y-auto bg-white px-6 py-5">
+            {/* Mode switch sits on an explicit white panel */}
+            <div className="rounded-2xl border border-border/60 bg-white p-4 shadow-sm">
+              <p className="mb-3 text-sm font-medium text-foreground">Do you have documents?</p>
+              <Controller
+                control={form.control}
+                name="document_mode"
+                render={({ field }) => (
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <button
+                      type="button"
+                      onClick={() => field.onChange('have_documents')}
+                      className={cn(
+                        'rounded-xl border bg-white p-4 text-left transition-colors',
+                        field.value === 'have_documents'
+                          ? 'border-foreground/30 ring-2 ring-foreground/10'
+                          : 'border-border hover:border-foreground/20',
+                      )}
+                    >
+                      <p className="font-semibold">I have documents</p>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        Show upload boxes for this claim type.
+                      </p>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => field.onChange('no_documents')}
+                      className={cn(
+                        'rounded-xl border bg-white p-4 text-left transition-colors',
+                        field.value === 'no_documents'
+                          ? 'border-foreground/30 ring-2 ring-foreground/10'
+                          : 'border-border hover:border-foreground/20',
+                      )}
+                    >
+                      <p className="font-semibold">I do not have documents</p>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        Saves as Document Pending so the notification date is kept.
+                      </p>
+                    </button>
+                  </div>
+                )}
               />
-            ))}
-          </ClaimGrid>
-        )}
-      </div>
+            </div>
 
-      {/* Bottom actions — normal flow, not sticky */}
-      <div className="flex flex-wrap gap-2">
-        <Button type="button" variant="outline" className="rounded-xl" onClick={onBack}>
-          Back to Search
-        </Button>
-        <Button type="submit" className="rounded-xl" disabled={registerClaim.isPending}>
-          {registerClaim.isPending ? 'Saving…' : 'Register claim'}
-        </Button>
-      </div>
+            {documentMode === 'no_documents' && (
+              <div className="rounded-xl border border-border/60 bg-white px-4 py-3 text-sm text-muted-foreground">
+                No uploads needed now. The claim will be saved as Document Pending.
+              </div>
+            )}
+
+            {documentMode === 'have_documents' && (
+              <ClaimGrid>
+                {slots.map((slot) => (
+                  <ClaimUploadSlot
+                    key={slot.key}
+                    label={slot.label}
+                    mandatory={slot.mandatory}
+                    found={slot.found}
+                    hint={slot.hint}
+                    downloadUrl={slot.downloadUrl}
+                    file={files[slot.key] ?? null}
+                    onFileChange={(file) => {
+                      setFiles((current) => ({ ...current, [slot.key]: file }))
+                    }}
+                  />
+                ))}
+              </ClaimGrid>
+            )}
+          </div>
+
+          <div className="flex flex-wrap justify-end gap-2 border-t border-border/60 bg-white px-6 py-4">
+            <Button type="button" variant="outline" className="rounded-xl" onClick={() => setDocsOpen(false)}>
+              Back to details
+            </Button>
+            <Button
+              type="button"
+              className="rounded-xl"
+              disabled={registerClaim.isPending}
+              onClick={form.handleSubmit(onSubmit)}
+            >
+              {registerClaim.isPending ? 'Saving…' : 'Register claim'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Add claim type popup — keeps the main page clean */}
       <Dialog open={showNewType} onOpenChange={setShowNewType}>
@@ -587,7 +648,7 @@ export function ClaimRegisterForm({
           </div>
         </DialogContent>
       </Dialog>
-    </form>
+    </>
   )
 }
 
@@ -716,9 +777,7 @@ function buildClaimFormData(
   formData.append('claimed_amount', values.claimed_amount)
   formData.append('loss_date', values.loss_date)
   formData.append('notified_to_organization_date', values.notified_to_organization_date)
-  if (values.notified_to_insurer_date) {
-    formData.append('notified_to_insurer_date', values.notified_to_insurer_date)
-  }
+  formData.append('notified_to_insurer_date', values.notified_to_insurer_date)
   formData.append('note', values.note ?? '')
   formData.append('document_mode', values.document_mode)
   if (values.document_mode === 'have_documents') {

@@ -19,7 +19,12 @@ import { Label } from '@/components/ui/label'
 import { Button, ReusableSelect, ReusableSingleSelectApiInput, ReuseableInput } from '@/dev/core'
 import { UseApiMutation } from '@/hooks/hooks'
 import type { SubmitResponse } from '@/types/types'
-import { CLAIMS_API, confirmationMessage, type ClaimDetail } from '@/utils/claims'
+import {
+  CLAIMS_API,
+  confirmationMessage,
+  earliestClaimNotificationDate,
+  type ClaimDetail,
+} from '@/utils/claims'
 import { EMETHODS } from '@/utils/constatnts'
 import { extractErrorMessage } from '@/utils/helpers'
 import { ShowToast } from '@/utils/utils'
@@ -29,13 +34,33 @@ import { Controller, useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { ClaimSurface, claimFieldClass } from '../claim-ui'
 
-const detailsSchema = z.object({
-  handler_id: z.string().min(1, 'Choose a handler'),
-  insurer_claim_number: z.string().optional(),
-  claimed_amount: z.string().optional(),
-  tat_days: z.string().optional(),
-  notified_to_insurer_date: z.string().optional(),
-})
+function makeDetailsSchema(lossDate: string | null, orgNotified: string | null) {
+  return z.object({
+    handler_id: z.string().min(1, 'Choose a handler'),
+    insurer_claim_number: z.string().optional(),
+    claimed_amount: z.string().optional(),
+    tat_days: z.string().optional(),
+    notified_to_insurer_date: z.string().optional(),
+  }).superRefine((data, ctx) => {
+    const insurer = data.notified_to_insurer_date?.trim() ?? ''
+    if (!insurer) return
+    const earliest = earliestClaimNotificationDate(lossDate)
+    if (insurer < earliest) {
+      ctx.addIssue({
+        code: 'custom',
+        message: `Must be on or after ${earliest} (today or later, and at least 1 day after the date of loss)`,
+        path: ['notified_to_insurer_date'],
+      })
+    }
+    if (orgNotified && insurer < orgNotified) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Cannot be before the organization was notified',
+        path: ['notified_to_insurer_date'],
+      })
+    }
+  })
+}
 
 const statusSchema = z.object({
   status: z.string().min(1, 'Choose the next status'),
@@ -43,7 +68,7 @@ const statusSchema = z.object({
   notify_customer: z.boolean(),
 })
 
-type DetailsValues = z.infer<typeof detailsSchema>
+type DetailsValues = z.infer<ReturnType<typeof makeDetailsSchema>>
 type StatusValues = z.infer<typeof statusSchema>
 type StatusPayload = StatusValues & { confirm_warnings?: boolean }
 
@@ -66,6 +91,11 @@ export function ClaimActions({
   const [dialog, setDialog] = useState<ActionDialog>(null)
   const [confirmText, setConfirmText] = useState<string | null>(null)
   const [pendingStatus, setPendingStatus] = useState<StatusValues | null>(null)
+  const detailsSchema = makeDetailsSchema(claim.loss_date, claim.notifiedToOrganizationDate)
+  const earliestNotice = earliestClaimNotificationDate(claim.loss_date)
+  const orgNotified = claim.notifiedToOrganizationDate
+  const insurerNoticeMin = orgNotified && orgNotified > earliestNotice ? orgNotified : earliestNotice
+  const insurerLabel = claim.insurerName?.trim() || 'insurer'
 
   const detailsForm = useForm<DetailsValues>({
     resolver: zodResolver(detailsSchema),
@@ -262,8 +292,9 @@ export function ClaimActions({
             <ReuseableInput
               control={detailsForm.control}
               name="notified_to_insurer_date"
-              label="Date notified to insurer"
+              label={`Date notified to ${insurerLabel}`}
               type="date"
+              min={insurerNoticeMin}
               className={claimFieldClass}
             />
             <div className="flex justify-end gap-2 pt-2">
