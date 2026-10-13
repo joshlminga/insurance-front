@@ -1,16 +1,17 @@
 import { humanizeStatus, type ClaimHistoryItem } from '@/utils/claims'
+import { ClaimSurface } from '../claim-ui'
 
 /** Append-only status history. Newest row is whatever order the API returned. */
 export function ClaimTimeline({ history }: { history: ClaimHistoryItem[] }) {
   return (
-    <section className="flex flex-col gap-3 rounded-lg border bg-card p-4">
-      <h2 className="text-lg font-semibold">Status timeline</h2>
+    <ClaimSurface className="flex break-inside-avoid flex-col gap-3">
+      <h2 className="text-base font-semibold">Status timeline</h2>
       {history.length === 0 && (
         <p className="text-sm text-muted-foreground">No status changes yet.</p>
       )}
       <ol className="flex flex-col gap-3">
         {history.map((item) => (
-          <li key={item.id} className="border-l-2 border-primary pl-3">
+          <li key={item.id} className="rounded-xl border border-border/40 bg-muted/20 px-3 py-2">
             <p className="font-medium">
               {item.fromStatus ? `${humanizeStatus(item.fromStatus)} → ` : ''}
               {humanizeStatus(item.toStatus)}
@@ -22,6 +23,6 @@ export function ClaimTimeline({ history }: { history: ClaimHistoryItem[] }) {
           </li>
         ))}
       </ol>
-    </section>
+    </ClaimSurface>
   )
 }

@@ -18,7 +18,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect, useRef } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { z } from 'zod'
-import { claimFieldClass } from '../claim-ui'
+import { ClaimSurface, claimFieldClass } from '../claim-ui'
 
 const emailSchema = z.object({
   template: z.string().min(1, 'Choose a template'),
@@ -149,9 +149,11 @@ export function ClaimEmail({
   }
 
   return (
-    <section className="grid gap-4 lg:grid-cols-2">
-      <form className="grid content-start gap-3 rounded-lg border bg-card p-4">
-        <h2 className="text-lg font-semibold">Email</h2>
+    <div className="grid gap-4 lg:grid-cols-2">
+      {/* Email composer stays as a card — subject/body inputs are necessary */}
+      <ClaimSurface className="grid content-start gap-3 break-inside-avoid">
+        <form className="grid content-start gap-3" onSubmit={(event) => event.preventDefault()}>
+        <h2 className="text-base font-semibold">Email</h2>
         <ReusableSelect
           control={form.control}
           name="template"
@@ -278,21 +280,22 @@ export function ClaimEmail({
         <ReuseableInput control={form.control} name="subject" label="Subject" className={claimFieldClass} />
         <div className="flex flex-col gap-1">
           <Label htmlFor="email-body">Body</Label>
-          <Textarea id="email-body" rows={8} {...form.register('body')} />
+          <Textarea id="email-body" rows={8} className="rounded-xl" {...form.register('body')} />
         </div>
-      </form>
+        </form>
+      </ClaimSurface>
 
-      <div className="flex flex-col gap-3 rounded-lg border bg-card p-4">
-        <h2 className="text-lg font-semibold">Sent emails</h2>
+      <ClaimSurface className="flex break-inside-avoid flex-col gap-3">
+        <h2 className="text-base font-semibold">Sent emails</h2>
         {logs.length === 0 && <p className="text-sm text-muted-foreground">No emails sent yet.</p>}
         {logs.map((log) => (
-          <div key={log.id} className="border-b pb-3 last:border-b-0">
+          <div key={log.id} className="rounded-xl border border-border/40 bg-muted/20 px-3 py-2">
             <p className="font-medium">{log.subject}</p>
             <p className="text-sm text-muted-foreground">{log.recipients || '—'}</p>
             <p className="text-xs text-muted-foreground">{[log.status, log.at].filter(Boolean).join(' · ')}</p>
           </div>
         ))}
-      </div>
-    </section>
+      </ClaimSurface>
+    </div>
   )
 }

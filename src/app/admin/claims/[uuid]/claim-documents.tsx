@@ -1,3 +1,9 @@
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { Button } from '@/dev/core'
 import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -9,6 +15,7 @@ import { EMETHODS } from '@/utils/constatnts'
 import { extractErrorMessage } from '@/utils/helpers'
 import { ShowToast } from '@/utils/utils'
 import { useState } from 'react'
+import { ClaimGrid, ClaimSurface } from '../claim-ui'
 
 const fileAccept = '.pdf,.jpg,.jpeg,.png,.heic,.doc,.docx'
 
@@ -19,8 +26,8 @@ type ReviewPayload = {
 }
 
 /**
- * Upload a file onto a slot, ask for missing documents, or accept / reject what was uploaded.
- * Request marks the slot Requested and the API opens the document-request email.
+ * Document slots as cards. Request / reject notes open in small dialogs
+ * so the main page does not grow a long form.
  */
 export function ClaimDocuments({
   claim,
@@ -36,6 +43,9 @@ export function ClaimDocuments({
   const [note, setNote] = useState('')
   const [selected, setSelected] = useState<string[]>([])
   const [files, setFiles] = useState<Record<string, File | null>>({})
+  const [requestOpen, setRequestOpen] = useState(false)
+  const [rejectTarget, setRejectTarget] = useState<string | null>(null)
+  const [rejectNote, setRejectNote] = useState('')
 
   const upload = UseApiMutation<SubmitResponse, FormData>({
     url: (formData) => {
@@ -70,6 +80,7 @@ export function ClaimDocuments({
         ShowToast.success(response.message || 'Documents requested')
         setSelected([])
         setNote('')
+        setRequestOpen(false)
         onChanged()
         onRequested()
       },
@@ -84,6 +95,8 @@ export function ClaimDocuments({
     mutationOptions: {
       onSuccess: (response) => {
         ShowToast.success(response.message || 'Document reviewed')
+        setRejectTarget(null)
+        setRejectNote('')
         onChanged()
       },
       onError: (error) => ShowToast.error(extractErrorMessage(error)),
@@ -91,26 +104,41 @@ export function ClaimDocuments({
   })
 
   return (
-    <section className="flex flex-col gap-4 rounded-lg border bg-card p-4">
-      <h2 className="text-lg font-semibold">Documents</h2>
+    <ClaimSurface className="flex flex-col gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 className="text-base font-semibold">Documents</h2>
+        <Button
+          type="button"
+          variant="outline"
+          className="rounded-xl"
+          disabled={selected.length === 0}
+          onClick={() => setRequestOpen(true)}
+        >
+          Request selected ({selected.length})
+        </Button>
+      </div>
+
       {claim.documents.length === 0 && (
         <p className="text-sm text-muted-foreground">No document slots on this claim yet.</p>
       )}
-      {claim.documents.map((slot) => (
-        <div key={slot.id} className="grid gap-2 rounded-lg border p-4">
-          <div className="flex flex-wrap items-center gap-2">
-            <p className="font-medium">{slot.label}</p>
-            <span className="text-xs text-muted-foreground">{humanizeStatus(slot.state)}</span>
-            {slot.mandatory && <span className="text-xs text-red-600">Required</span>}
-          </div>
-          {slot.requestNote && <p className="text-sm text-muted-foreground">{slot.requestNote}</p>}
-          {slot.fileName && <p className="text-sm">{slot.fileName}</p>}
-          {slot.downloadUrl && (
-            <a className="text-sm text-primary underline" href={slot.downloadUrl} target="_blank" rel="noreferrer">
-              Download
-            </a>
-          )}
-          <div className="flex flex-wrap items-center gap-2">
+
+      <ClaimGrid>
+        {claim.documents.map((slot) => (
+          <ClaimSurface key={slot.id} padding="sm" className="flex break-inside-avoid flex-col gap-3 bg-background/60">
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="font-medium">{slot.label}</p>
+              <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+                {humanizeStatus(slot.state)}
+              </span>
+              {slot.mandatory && <span className="text-xs font-semibold text-red-600">Required</span>}
+            </div>
+            {slot.requestNote && <p className="text-sm text-muted-foreground">{slot.requestNote}</p>}
+            {slot.fileName && <p className="text-sm">{slot.fileName}</p>}
+            {slot.downloadUrl && (
+              <a className="text-sm text-primary underline" href={slot.downloadUrl} target="_blank" rel="noreferrer">
+                Download
+              </a>
+            )}
             <input
               type="file"
               accept={fileAccept}
@@ -120,77 +148,136 @@ export function ClaimDocuments({
                 setFiles((current) => ({ ...current, [slot.id]: file }))
               }}
             />
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              disabled={!files[slot.id] || upload.isPending}
-              onClick={() => {
-                const file = files[slot.id]
-                if (!file) return
-                const formData = new FormData()
-                formData.append('_expected_document_id', slot.id)
-                formData.append('files[]', file)
-                upload.mutate(formData)
-              }}
-            >
-              Upload
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              disabled={review.isPending}
-              onClick={() => review.mutate({ documentId: slot.id, decision: 'accepted' })}
-            >
-              Accept
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              disabled={review.isPending}
-              onClick={() => review.mutate({ documentId: slot.id, decision: 'rejected' })}
-            >
-              Reject
-            </Button>
-            <Label className="flex items-center gap-2 font-normal">
-              <Checkbox
-                checked={selected.includes(slot.id)}
-                onCheckedChange={(checked) => {
-                  setSelected((current) => (
-                    checked ? [...current, slot.id] : current.filter((id) => id !== slot.id)
-                  ))
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="rounded-lg"
+                disabled={!files[slot.id] || upload.isPending}
+                onClick={() => {
+                  const file = files[slot.id]
+                  if (!file) return
+                  const formData = new FormData()
+                  formData.append('_expected_document_id', slot.id)
+                  formData.append('files[]', file)
+                  upload.mutate(formData)
                 }}
-              />
-              Request
-            </Label>
-          </div>
-        </div>
-      ))}
+              >
+                Upload
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="rounded-lg"
+                disabled={review.isPending}
+                onClick={() => review.mutate({ documentId: slot.id, decision: 'accepted' })}
+              >
+                Accept
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="rounded-lg"
+                disabled={review.isPending}
+                onClick={() => {
+                  setRejectTarget(slot.id)
+                  setRejectNote('')
+                }}
+              >
+                Reject
+              </Button>
+              <Label className="flex items-center gap-2 font-normal">
+                <Checkbox
+                  checked={selected.includes(slot.id)}
+                  onCheckedChange={(checked) => {
+                    setSelected((current) => (
+                      checked ? [...current, slot.id] : current.filter((id) => id !== slot.id)
+                    ))
+                  }}
+                />
+                Request
+              </Label>
+            </div>
+          </ClaimSurface>
+        ))}
+      </ClaimGrid>
 
-      <div className="grid gap-2">
-        <Label htmlFor="request-note">Request note</Label>
-        <Textarea
-          id="request-note"
-          rows={3}
-          value={note}
-          onChange={(event) => setNote(event.target.value)}
-          placeholder="What should the customer send?"
-        />
-        <Button
-          type="button"
-          disabled={selected.length === 0 || requestDocs.isPending}
-          onClick={() => requestDocs.mutate({
-            items: selected.map((id) => ({
-              expected_document_id: Number(id),
-              note: note.trim() || undefined,
-            })),
-          })}
-        >
-          {requestDocs.isPending ? 'Requesting…' : 'Request selected documents'}
-        </Button>
-      </div>
-    </section>
+      {/* Request note dialog — only when clerk picked slots */}
+      <Dialog open={requestOpen} onOpenChange={setRequestOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Request documents</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-3 py-2">
+            <Label htmlFor="request-note">Request note</Label>
+            <Textarea
+              id="request-note"
+              rows={3}
+              value={note}
+              onChange={(event) => setNote(event.target.value)}
+              placeholder="What should the customer send?"
+            />
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => setRequestOpen(false)}>
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                disabled={selected.length === 0 || requestDocs.isPending}
+                onClick={() => requestDocs.mutate({
+                  items: selected.map((id) => ({
+                    expected_document_id: Number(id),
+                    note: note.trim() || undefined,
+                  })),
+                })}
+              >
+                {requestDocs.isPending ? 'Requesting…' : 'Send request'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Optional reject note */}
+      <Dialog open={rejectTarget != null} onOpenChange={(open) => { if (!open) setRejectTarget(null) }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Reject document</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-3 py-2">
+            <Label htmlFor="reject-note">Note (optional)</Label>
+            <Textarea
+              id="reject-note"
+              rows={3}
+              value={rejectNote}
+              onChange={(event) => setRejectNote(event.target.value)}
+              placeholder="Why is this file rejected?"
+            />
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => setRejectTarget(null)}>
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                disabled={!rejectTarget || review.isPending}
+                onClick={() => {
+                  if (!rejectTarget) return
+                  review.mutate({
+                    documentId: rejectTarget,
+                    decision: 'rejected',
+                    note: rejectNote.trim() || undefined,
+                  })
+                }}
+              >
+                {review.isPending ? 'Saving…' : 'Reject'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </ClaimSurface>
   )
 }

@@ -1,8 +1,7 @@
 import { useBypassOrgLocation } from '@/auth/use-bypass-org-location'
 import { BypassOrgLocationPicker, EmptyState, PageHeader } from '@/components/shared'
 import { buttonVariants } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { Button, ReusableSelect, ReuseableInput } from '@/dev/core'
+import { Button, ReuseableInput } from '@/dev/core'
 import { UseApiQuery } from '@/hooks/hooks'
 import type { SubmitResponse } from '@/types/types'
 import {
@@ -21,6 +20,14 @@ import { Building2, List } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link } from 'react-router-dom'
+import {
+  ClaimGrid,
+  ClaimSearchHero,
+  ClaimStatTile,
+  ClaimSurface,
+  claimFieldClass,
+  claimsPageClass,
+} from './claim-ui'
 import { CLAIMS_ORG_STORAGE_KEY } from './claims-org'
 import { claimSearchSchema, type ClaimSearchValues } from './claims-schema'
 import { ClaimRegisterForm } from './new/register-form'
@@ -50,6 +57,8 @@ export function ClaimsMotorPage() {
     resolver: zodResolver(claimSearchSchema),
     defaultValues: { search_by: 'registration', term: '' },
   })
+
+  const searchBy = searchForm.watch('search_by')
 
   const search = UseApiQuery<SubmitResponse>({
     url: CLAIMS_API.policies,
@@ -94,7 +103,7 @@ export function ClaimsMotorPage() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className={claimsPageClass}>
       <PageHeader
         title="Motor claims"
         description="Search by customer email, policy number, or vehicle registration, then register the claim."
@@ -109,13 +118,13 @@ export function ClaimsMotorPage() {
       />
 
       {isBypass ? (
-        <Card className="shadow-none p-4">
+        <ClaimSurface padding="sm">
           <BypassOrgLocationPicker
             value={selectedLocationId}
             onChange={setLocationId}
             hint="Search and registration are scoped to the selected organization location."
           />
-        </Card>
+        </ClaimSurface>
       ) : null}
 
       {!canFetch ? (
@@ -127,10 +136,12 @@ export function ClaimsMotorPage() {
       ) : (
         <>
           {step === 'done' && created && (
-            <div className="rounded-lg border bg-card p-6">
+            <ClaimSurface rounded="3xl" padding="lg" className="text-center sm:text-left">
               <p className="text-sm text-muted-foreground">Claim registered</p>
-              <p className="mt-1 text-2xl font-semibold text-primary">{created.claimNumber}</p>
-              <div className="mt-4 flex gap-2">
+              <p className="mt-2 text-3xl font-semibold tracking-tight text-foreground">
+                {created.claimNumber}
+              </p>
+              <div className="mt-6 flex flex-wrap justify-center gap-2 sm:justify-start">
                 {created.uuid && (
                   <Link className={buttonVariants()} to={claimsDetailPath(created.uuid)}>
                     Open claim
@@ -153,90 +164,90 @@ export function ClaimsMotorPage() {
                   View all claims
                 </Link>
               </div>
-            </div>
+            </ClaimSurface>
           )}
 
           {step === 'search' && (
-            <form
-              className="grid gap-4 rounded-lg border bg-card p-4 md:grid-cols-[16rem_1fr_auto] md:items-end"
+            <ClaimSearchHero
+              modes={POLICY_SEARCH_MODES}
+              mode={searchBy}
+              onModeChange={(value) => {
+                searchForm.setValue('search_by', value as PolicySearchMode, { shouldValidate: true })
+              }}
               onSubmit={searchForm.handleSubmit(onSearch)}
             >
-              <ReusableSelect
-                control={searchForm.control}
-                name="search_by"
-                label="Search by"
-                options={POLICY_SEARCH_MODES.map((mode) => ({ ...mode }))}
-              />
-              <ReuseableInput
-                control={searchForm.control}
-                name="term"
-                label="Search"
-                placeholder="Customer email, policy number, or vehicle registration"
-                className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
-                required
-              />
-              <Button type="submit" disabled={search.isFetching}>
+              <div className="min-w-0 flex-1">
+                <ReuseableInput
+                  control={searchForm.control}
+                  name="term"
+                  label="Search"
+                  placeholder="Customer email, policy number, or vehicle registration"
+                  className={claimFieldClass}
+                  required
+                />
+              </div>
+              <Button type="submit" className="h-10 shrink-0 rounded-xl px-6" disabled={search.isFetching}>
                 {search.isFetching ? 'Searching…' : 'Search'}
               </Button>
-            </form>
+            </ClaimSearchHero>
           )}
 
           {step === 'search' && query && (
-            <div className="rounded-lg border bg-card">
+            <div className="flex flex-col gap-4">
               {search.isError && (
-                <p className="p-4 text-sm text-red-600">{extractErrorMessage(search.error)}</p>
+                <ClaimSurface padding="sm">
+                  <p className="text-sm text-red-600">{extractErrorMessage(search.error)}</p>
+                </ClaimSurface>
               )}
               {!search.isFetching && !search.isError && hits.length === 0 && (
-                <p className="p-4 text-sm text-muted-foreground">No issued cover matched that search.</p>
+                <ClaimSurface padding="sm">
+                  <p className="text-sm text-muted-foreground">No issued cover matched that search.</p>
+                </ClaimSurface>
               )}
               {hits.length > 0 && (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead className="border-b text-left text-muted-foreground">
-                      <tr>
-                        <th className="px-4 py-3 font-medium">Registration</th>
-                        <th className="px-4 py-3 font-medium">Policy</th>
-                        <th className="px-4 py-3 font-medium">Certificate</th>
-                        <th className="px-4 py-3 font-medium">Insured</th>
-                        <th className="px-4 py-3 font-medium">Insurer</th>
-                        <th className="px-4 py-3 font-medium">Cover to</th>
-                        <th className="px-4 py-3 font-medium" />
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {hits.map((hit) => (
-                        <tr key={hit.certificateId} className="border-b last:border-b-0">
-                          <td className="px-4 py-3">{hit.registration || '—'}</td>
-                          <td className="px-4 py-3">{hit.policyNumber || '—'}</td>
-                          <td className="px-4 py-3">{hit.certificateNumber || '—'}</td>
-                          <td className="px-4 py-3">{hit.insuredName || '—'}</td>
-                          <td className="px-4 py-3">{hit.insurerName || '—'}</td>
-                          <td className="px-4 py-3">{hit.coverTo || '—'}</td>
-                          <td className="px-4 py-3 text-right">
-                            <Button
-                              type="button"
-                              size="sm"
-                              onClick={() => {
-                                setCertificateId(hit.certificateId)
-                                setRegistrationHint(hit.registration)
-                                setStep('form')
-                              }}
-                            >
-                              Register
-                            </Button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                <ClaimGrid>
+                  {hits.map((hit) => (
+                    <ClaimSurface key={hit.certificateId} className="flex h-full flex-col gap-4">
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                            Registration
+                          </p>
+                          <p className="mt-1 text-lg font-semibold">{hit.registration || '—'}</p>
+                        </div>
+                        <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-800">
+                          Issued
+                        </span>
+                      </div>
+                      <ClaimGrid className="gap-2 md:grid-cols-2 xl:grid-cols-2">
+                        <ClaimStatTile label="Policy" value={hit.policyNumber} />
+                        <ClaimStatTile label="Insured" value={hit.insuredName} />
+                        <ClaimStatTile label="Insurer" value={hit.insurerName} />
+                        <ClaimStatTile label="Cover to" value={hit.coverTo} />
+                      </ClaimGrid>
+                      <Button
+                        type="button"
+                        className="mt-auto w-full rounded-xl"
+                        onClick={() => {
+                          setCertificateId(hit.certificateId)
+                          setRegistrationHint(hit.registration)
+                          setStep('form')
+                        }}
+                      >
+                        Register
+                      </Button>
+                    </ClaimSurface>
+                  ))}
+                </ClaimGrid>
               )}
             </div>
           )}
 
           {step === 'form' && (
             <div className="flex flex-col gap-4">
-              {policyQuery.isPending && <p className="text-sm text-muted-foreground">Loading cover…</p>}
+              {policyQuery.isPending && (
+                <p className="text-sm text-muted-foreground">Loading cover…</p>
+              )}
               {policyQuery.isError && (
                 <p className="text-sm text-red-600">{extractErrorMessage(policyQuery.error)}</p>
               )}

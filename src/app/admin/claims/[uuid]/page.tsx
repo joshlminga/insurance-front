@@ -1,7 +1,5 @@
 import { useBypassOrgLocation } from '@/auth/use-bypass-org-location'
 import { BypassOrgLocationPicker, EmptyState, PageHeader } from '@/components/shared'
-import { Badge } from '@/components/ui/badge'
-import { Card } from '@/components/ui/card'
 import { UseApiQuery } from '@/hooks/hooks'
 import type { SubmitResponse } from '@/types/types'
 import {
@@ -15,7 +13,14 @@ import { Building2 } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { CLAIMS_ORG_STORAGE_KEY } from '../claims-org'
-import { ClaimGateBanners, ClaimTatBadge, ReadOnlyField } from '../claim-ui'
+import {
+  ClaimGateBanners,
+  ClaimGrid,
+  ClaimStatTile,
+  ClaimSurface,
+  ClaimTatBadge,
+  claimsPageClass,
+} from '../claim-ui'
 import { ClaimActions } from './claim-actions'
 import { ClaimDocuments } from './claim-documents'
 import { ClaimEmail } from './claim-email'
@@ -47,7 +52,7 @@ export function ClaimsDetailPage() {
   const claim = useMemo(() => normalizeClaimDetail(claimQuery.data), [claimQuery.data])
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className={claimsPageClass}>
       <PageHeader
         title={claim?.claim_number || 'Claim'}
         description="Update the handler, documents, status, and emails for this claim."
@@ -58,13 +63,13 @@ export function ClaimsDetailPage() {
       />
 
       {isBypass ? (
-        <Card className="shadow-none p-4">
+        <ClaimSurface padding="sm">
           <BypassOrgLocationPicker
             value={selectedLocationId}
             onChange={setLocationId}
             hint="Claim actions are scoped to the selected organization location."
           />
-        </Card>
+        </ClaimSurface>
       ) : null}
 
       {!canFetch ? (
@@ -82,49 +87,73 @@ export function ClaimsDetailPage() {
 
           {claim && (
             <>
-              <div className="flex flex-wrap items-center gap-2">
-                <Badge className="rounded-lg bg-gray-100 font-semibold text-gray-800">{claim.status_label}</Badge>
-                <ClaimTatBadge badge={claim.tat_badge} />
-                {claim.tat_due_date && (
-                  <span className="text-sm text-muted-foreground">Due {claim.tat_due_date}</span>
-                )}
-              </div>
+              {/* Header card: claim number, status, TAT */}
+              <ClaimSurface rounded="3xl" padding="lg">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Claim</p>
+                    <h2 className="mt-1 text-2xl font-semibold tracking-tight">{claim.claim_number}</h2>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="rounded-full bg-muted px-3 py-1 text-sm font-semibold">
+                      {claim.status_label}
+                    </span>
+                    <ClaimTatBadge badge={claim.tat_badge} />
+                    {claim.tat_due_date && (
+                      <span className="text-sm text-muted-foreground">Due {claim.tat_due_date}</span>
+                    )}
+                  </div>
+                </div>
+              </ClaimSurface>
 
               <ClaimGateBanners banners={claim.banners} />
-
-              <div className="grid gap-3 rounded-lg border bg-card p-4 md:grid-cols-3">
-                <ReadOnlyField label="Registration" value={claim.registration_number} />
-                <ReadOnlyField label="Policy number" value={claim.policy_number} />
-                <ReadOnlyField label="Certificate number" value={claim.certificateNumber} />
-                <ReadOnlyField label="Claimant" value={claim.claimant_name} />
-                <ReadOnlyField label="Claimant email" value={claim.customerEmail} />
-                <ReadOnlyField label="Handler" value={claim.handler_name} />
-                <ReadOnlyField label="Category" value={claim.category} />
-                <ReadOnlyField label="Claim type" value={claim.claimTypeName} />
-                <ReadOnlyField label="Claimed amount" value={formatClaimAmount(claim.claimedAmount)} />
-                <ReadOnlyField label="Date of loss" value={claim.loss_date} />
-                <ReadOnlyField label="Notified to organization" value={claim.notifiedToOrganizationDate} />
-                <ReadOnlyField label="Notified to insurer" value={claim.notifiedToInsurerDate} />
-              </div>
-
-              {claim.note && (
-                <div className="rounded-lg border bg-card p-4">
-                  <h2 className="text-lg font-semibold">Note</h2>
-                  <p className="mt-2 whitespace-pre-wrap text-sm">{claim.note}</p>
-                </div>
-              )}
 
               <ClaimActions
                 claim={claim}
                 orgContextHeaders={orgContextHeaders}
                 onChanged={() => { void claimQuery.refetch() }}
               />
-              <ClaimDocuments
-                claim={claim}
-                orgContextHeaders={orgContextHeaders}
-                onChanged={() => { void claimQuery.refetch() }}
-                onRequested={() => setEmailHint('document_request')}
-              />
+
+              {/* Masonry body: summary / docs / timeline pack by height */}
+              <ClaimGrid masonry>
+                <ClaimSurface className="mb-4 break-inside-avoid">
+                  <h2 className="mb-4 text-base font-semibold">Summary</h2>
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    <ClaimStatTile label="Registration" value={claim.registration_number} />
+                    <ClaimStatTile label="Policy number" value={claim.policy_number} />
+                    <ClaimStatTile label="Certificate" value={claim.certificateNumber} />
+                    <ClaimStatTile label="Claimant" value={claim.claimant_name} />
+                    <ClaimStatTile label="Claimant email" value={claim.customerEmail} />
+                    <ClaimStatTile label="Handler" value={claim.handler_name} />
+                    <ClaimStatTile label="Category" value={claim.category} />
+                    <ClaimStatTile label="Claim type" value={claim.claimTypeName} />
+                    <ClaimStatTile label="Claimed amount" value={formatClaimAmount(claim.claimedAmount)} />
+                    <ClaimStatTile label="Date of loss" value={claim.loss_date} />
+                    <ClaimStatTile label="Notified to organization" value={claim.notifiedToOrganizationDate} />
+                    <ClaimStatTile label="Notified to insurer" value={claim.notifiedToInsurerDate} />
+                  </div>
+                  {claim.note && (
+                    <div className="mt-4 rounded-2xl border border-border/40 bg-muted/20 px-4 py-3">
+                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Note</p>
+                      <p className="mt-1 whitespace-pre-wrap text-sm">{claim.note}</p>
+                    </div>
+                  )}
+                </ClaimSurface>
+
+                <div className="mb-4 break-inside-avoid">
+                  <ClaimDocuments
+                    claim={claim}
+                    orgContextHeaders={orgContextHeaders}
+                    onChanged={() => { void claimQuery.refetch() }}
+                    onRequested={() => setEmailHint('document_request')}
+                  />
+                </div>
+
+                <div className="mb-4 break-inside-avoid">
+                  <ClaimTimeline history={claim.history} />
+                </div>
+              </ClaimGrid>
+
               <ClaimEmail
                 claim={claim}
                 logs={claim.emails}
@@ -132,7 +161,6 @@ export function ClaimsDetailPage() {
                 orgContextHeaders={orgContextHeaders}
                 onSent={() => { void claimQuery.refetch() }}
               />
-              <ClaimTimeline history={claim.history} />
             </>
           )}
         </>
