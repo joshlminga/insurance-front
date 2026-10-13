@@ -4,11 +4,11 @@ import {
   confirmationMessage,
   countWords,
   displayTatBadge,
+  formatClaimDisplayDate,
   normalizeClaimRow,
   normalizePolicy,
   normalizePolicyHit,
   normalizeRegistration,
-  POLICY_SEARCH_MODES,
   readCreatedClaim,
   readGateBanners,
   resolveTatBadge,
@@ -21,13 +21,11 @@ describe('normalizeRegistration', () => {
   })
 })
 
-describe('POLICY_SEARCH_MODES', () => {
-  it('only offers registration, policy number, and customer email', () => {
-    expect(POLICY_SEARCH_MODES.map((mode) => mode.value)).toEqual([
-      'registration',
-      'policy_number',
-      'email',
-    ])
+describe('formatClaimDisplayDate', () => {
+  it('formats ISO dates as DD/Month Name/YYYY', () => {
+    expect(formatClaimDisplayDate('2026-10-13')).toBe('13/October/2026')
+    expect(formatClaimDisplayDate('2026-01-03T00:00:00Z')).toBe('03/January/2026')
+    expect(formatClaimDisplayDate(null)).toBe('—')
   })
 })
 

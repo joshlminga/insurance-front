@@ -5,11 +5,10 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
 import { Button, ReusableSelect, ReusableSingleSelectApiInput, ReuseableInput } from '@/dev/core'
 import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
+import { cn } from '@/lib/utils'
 import { UseAuth } from '@/stores/auth-store'
 import type { SubmitResponse } from '@/types/types'
 import {
@@ -17,6 +16,7 @@ import {
   CLAIM_NOTE_WORD_LIMIT,
   CLAIMS_API,
   countWords,
+  formatClaimDisplayDate,
   normalizeClaimTypes,
   readCreatedClaim,
   readCreatedTypeId,
@@ -27,7 +27,8 @@ import { EMETHODS } from '@/utils/constatnts'
 import { extractErrorMessage } from '@/utils/helpers'
 import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { CheckCircle2, FileUp, Upload } from 'lucide-react'
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import {
   ClaimGateBanners,
@@ -44,6 +45,19 @@ import {
 } from '../claims-schema'
 
 const fileAccept = '.pdf,.jpg,.jpeg,.png,.heic,.doc,.docx'
+
+/** Shared 12-col row: three fields at 4/4/4 on desktop. */
+const row344 = 'grid gap-4 md:grid-cols-12'
+
+/** One third of a 12-col row. */
+const col4 = 'min-w-0 md:col-span-4'
+
+/**
+ * Common TAT choices shown as "14 days" instead of a bare number.
+ * Staff can still pick another value if the type default is not in the list —
+ * we merge the current tat_days into the options.
+ */
+const TAT_DAY_OPTIONS = [7, 14, 21, 30] as const
 
 /**
  * Step 2 of register. react-hook-form holds the fields (like $_POST).
@@ -177,6 +191,21 @@ export function ClaimRegisterForm({
     label: vehicle.label,
   }))
 
+  // TAT select shows "14 days" labels; include the current value if it is not in the list.
+  const tatSelectOptions = useMemo(() => {
+    const days = new Set<number>([...TAT_DAY_OPTIONS])
+    const current = Number(tatDays)
+    if (Number.isFinite(current) && current >= 1) {
+      days.add(current)
+    }
+    return [...days]
+      .sort((a, b) => a - b)
+      .map((day) => ({
+        value: String(day),
+        label: day === 1 ? '1 day' : `${day} days`,
+      }))
+  }, [tatDays])
+
   return (
     <form className="flex flex-col gap-5" onSubmit={form.handleSubmit(onSubmit)} noValidate>
       <ClaimGateBanners banners={policy.banners} />
@@ -191,104 +220,121 @@ export function ClaimRegisterForm({
           <ReadOnlyField label="Insured" value={policy.customerName} />
           <ReadOnlyField label="Insurer" value={policy.insurerName} />
           <ReadOnlyField label="Cover" value={policy.coverType} />
-          <ReadOnlyField label="Cover from" value={policy.issuedDate} />
-          <ReadOnlyField label="Cover to" value={policy.expiryDate} />
+          <ReadOnlyField label="Cover from" value={formatClaimDisplayDate(policy.issuedDate)} />
+          <ReadOnlyField label="Cover to" value={formatClaimDisplayDate(policy.expiryDate)} />
         </ClaimGrid>
       </ClaimSurface>
 
-      <Tabs defaultValue="details" className="flex flex-col gap-4">
-        <TabsList className="w-fit rounded-full bg-muted/60 p-1">
-          <TabsTrigger value="details" className="rounded-full">Claim Details</TabsTrigger>
-          <TabsTrigger value="documents" className="rounded-full">Documents</TabsTrigger>
-        </TabsList>
+      {/* Claim details stay on the main form — no hidden tab */}
+      <div className="flex flex-col gap-4">
+        <div className="flex items-baseline gap-3">
+          <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-foreground text-xs font-semibold text-background">
+            1
+          </span>
+          <div>
+            <h2 className="text-base font-semibold">Claim details</h2>
+            <p className="text-sm text-muted-foreground">Parties, classification, and loss dates.</p>
+          </div>
+        </div>
 
-        <TabsContent value="details" className="mt-0 flex flex-col gap-4">
-          {/* Parties: who is claiming and who handles it */}
+          {/* Parties: two rows of 4/4/4 */}
           <ClaimSurface>
             <h2 className="mb-4 text-base font-semibold">Parties</h2>
-            <div className="grid gap-4 md:grid-cols-2">
-              <ReuseableInput
-                control={form.control}
-                name="claimant_name"
-                label="Claimant"
-                className={claimFieldClass}
-                required
-              />
-              <ReuseableInput
-                control={form.control}
-                name="claimant_email"
-                label="Claimant email"
-                type="email"
-                className={claimFieldClass}
-                required
-              />
-              <ReuseableInput
-                control={form.control}
-                name="claimant_phone"
-                label="Claimant phone"
-                className={claimFieldClass}
-                required
-              />
-              <div>
-                <Controller
-                  control={form.control}
-                  name="reported_by_user_id"
-                  render={({ field }) => (
-                    <ReusableSingleSelectApiInput
-                      url={CLAIMS_API.handlers}
-                      value={field.value}
-                      onChange={field.onChange}
-                      label="Reported by"
-                      required
-                      labelKey="name"
-                      valueKey="id"
-                      placeholder="Select a user"
-                      config={orgConfig}
-                    />
-                  )}
-                />
-                {form.formState.errors.reported_by_user_id && (
-                  <p className="mt-1 text-sm text-red-500">{form.formState.errors.reported_by_user_id.message}</p>
-                )}
+            <div className="flex flex-col gap-4">
+              <div className={row344}>
+                <div className={col4}>
+                  <ReuseableInput
+                    control={form.control}
+                    name="claimant_name"
+                    label="Claimant"
+                    className={claimFieldClass}
+                    required
+                  />
+                </div>
+                <div className={col4}>
+                  <ReuseableInput
+                    control={form.control}
+                    name="claimant_email"
+                    label="Claimant email"
+                    type="email"
+                    className={claimFieldClass}
+                    required
+                  />
+                </div>
+                <div className={col4}>
+                  <ReuseableInput
+                    control={form.control}
+                    name="claimant_phone"
+                    label="Claimant phone"
+                    className={claimFieldClass}
+                    required
+                  />
+                </div>
               </div>
-              <div>
-                <Controller
-                  control={form.control}
-                  name="handler_id"
-                  render={({ field }) => (
-                    <ReusableSingleSelectApiInput
-                      url={CLAIMS_API.handlers}
-                      value={field.value}
-                      onChange={field.onChange}
-                      label="Handler"
-                      required
-                      labelKey="name"
-                      valueKey="id"
-                      placeholder="Select a handler"
-                      config={orgConfig}
-                    />
+              <div className={row344}>
+                <div className={col4}>
+                  <Controller
+                    control={form.control}
+                    name="reported_by_user_id"
+                    render={({ field }) => (
+                      <ReusableSingleSelectApiInput
+                        url={CLAIMS_API.handlers}
+                        value={field.value}
+                        onChange={field.onChange}
+                        label="Reported by"
+                        required
+                        labelKey="name"
+                        valueKey="id"
+                        placeholder="Select a user"
+                        config={orgConfig}
+                      />
+                    )}
+                  />
+                  {form.formState.errors.reported_by_user_id && (
+                    <p className="mt-1 text-sm text-red-500">{form.formState.errors.reported_by_user_id.message}</p>
                   )}
-                />
-                {form.formState.errors.handler_id && (
-                  <p className="mt-1 text-sm text-red-500">{form.formState.errors.handler_id.message}</p>
-                )}
+                </div>
+                <div className={col4}>
+                  <Controller
+                    control={form.control}
+                    name="handler_id"
+                    render={({ field }) => (
+                      <ReusableSingleSelectApiInput
+                        url={CLAIMS_API.handlers}
+                        value={field.value}
+                        onChange={field.onChange}
+                        label="Handler"
+                        required
+                        labelKey="name"
+                        valueKey="id"
+                        placeholder="Select a handler"
+                        config={orgConfig}
+                      />
+                    )}
+                  />
+                  {form.formState.errors.handler_id && (
+                    <p className="mt-1 text-sm text-red-500">{form.formState.errors.handler_id.message}</p>
+                  )}
+                </div>
               </div>
             </div>
           </ClaimSurface>
 
-          {/* Classification: type, TAT, category, vehicle, amount */}
+          {/* Classification: two rows of 4/4/4; TAT shows "14 days" */}
           <ClaimSurface>
             <h2 className="mb-4 text-base font-semibold">Classification</h2>
-            <div className="grid gap-4 md:grid-cols-2">
-              <ReusableSelect
-                control={form.control}
-                name="category"
-                label="Category"
-                options={[{ value: 'general', label: 'General' }]}
-                disabled
-              />
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
-                <div className="min-w-0 flex-1">
+            <div className="flex flex-col gap-4">
+              <div className={row344}>
+                <div className={col4}>
+                  <ReusableSelect
+                    control={form.control}
+                    name="category"
+                    label="Category"
+                    options={[{ value: 'general', label: 'General' }]}
+                    disabled
+                  />
+                </div>
+                <div className={col4}>
                   <ReusableSelect
                     control={form.control}
                     name="claim_type_id"
@@ -297,86 +343,98 @@ export function ClaimRegisterForm({
                     options={types.map((type) => ({ value: type.id, label: type.name }))}
                     required
                   />
+                  <button
+                    type="button"
+                    className="mt-1.5 text-sm font-medium text-primary underline-offset-2 hover:underline"
+                    onClick={() => setShowNewType(true)}
+                  >
+                    Add new claim type
+                  </button>
                 </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="shrink-0 rounded-xl"
-                  onClick={() => setShowNewType(true)}
-                >
-                  Add new claim type
-                </Button>
+                <div className={col4}>
+                  <ReusableSelect
+                    control={form.control}
+                    name="tat_days"
+                    label="Expected TAT"
+                    placeholder="Select turnaround"
+                    options={tatSelectOptions}
+                    required
+                  />
+                  {duePreview && (
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Expected by {formatClaimDisplayDate(duePreview)}.
+                    </p>
+                  )}
+                </div>
               </div>
-              <div>
-                <ReuseableInput
-                  control={form.control}
-                  name="tat_days"
-                  label="TAT (days)"
-                  type="number"
-                  min="1"
-                  className={claimFieldClass}
-                  required
-                />
-                {duePreview && (
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Expected by {duePreview}. The server stores the real due date.
-                  </p>
-                )}
+              <div className={row344}>
+                <div className={col4}>
+                  <ReusableSelect
+                    control={form.control}
+                    name="vehicle_id"
+                    label="Vehicle"
+                    placeholder="Select a vehicle"
+                    options={vehicleOptions}
+                    disabled={vehicleOptions.length <= 1}
+                    required
+                  />
+                </div>
+                <div className={col4}>
+                  <ReuseableInput
+                    control={form.control}
+                    name="claimed_amount"
+                    label="Claimed amount"
+                    thousandsSeparator
+                    min="0"
+                    step="0.01"
+                    className={claimFieldClass}
+                    required
+                  />
+                </div>
               </div>
-              <ReuseableInput
-                control={form.control}
-                name="claimed_amount"
-                label="Claimed amount"
-                type="number"
-                min="0"
-                step="0.01"
-                className={claimFieldClass}
-                required
-              />
-              <ReusableSelect
-                control={form.control}
-                name="vehicle_id"
-                label="Vehicle"
-                placeholder="Select a vehicle"
-                options={vehicleOptions}
-                disabled={vehicleOptions.length <= 1}
-                required
-              />
             </div>
           </ClaimSurface>
 
-          {/* Loss & dates + note */}
+          {/* Loss & dates: one 4/4/4 row for dates, then full-width note */}
           <ClaimSurface>
             <h2 className="mb-4 text-base font-semibold">Loss & dates</h2>
-            <div className="grid gap-4 md:grid-cols-2">
-              <ReuseableInput
-                control={form.control}
-                name="loss_date"
-                label="Date of loss"
-                type="date"
-                min={policy.issuedDate ?? undefined}
-                max={policy.expiryDate ?? undefined}
-                className={claimFieldClass}
-                required
-              />
-              <ReuseableInput
-                control={form.control}
-                name="notified_to_organization_date"
-                label="Date notified to organization"
-                type="date"
-                min={lossDate || undefined}
-                className={claimFieldClass}
-                required
-              />
-              <ReuseableInput
-                control={form.control}
-                name="notified_to_insurer_date"
-                label="Date notified to insurer (optional)"
-                type="date"
-                min={notified || undefined}
-                className={claimFieldClass}
-              />
-              <div className="flex flex-col gap-1 md:col-span-2">
+            <div className="flex flex-col gap-4">
+              <div className={row344}>
+                <div className={col4}>
+                  <ReuseableInput
+                    control={form.control}
+                    name="loss_date"
+                    label="Date of loss"
+                    type="date"
+                    min={policy.issuedDate ?? undefined}
+                    max={policy.expiryDate ?? undefined}
+                    className={claimFieldClass}
+                    required
+                  />
+                </div>
+                <div className={col4}>
+                  <ReuseableInput
+                    control={form.control}
+                    name="notified_to_organization_date"
+                    label="Date notified to organization"
+                    type="date"
+                    min={lossDate || undefined}
+                    className={claimFieldClass}
+                    required
+                  />
+                </div>
+                <div className={col4}>
+                  <ReuseableInput
+                    control={form.control}
+                    name="notified_to_insurer_date"
+                    label="Date notified to insurer (optional)"
+                    type="date"
+                    min={notified || undefined}
+                    className={claimFieldClass}
+                  />
+                </div>
+              </div>
+              <div className="flex flex-col gap-1">
                 <Label htmlFor="claim-note">Note</Label>
                 <Textarea
                   id="claim-note"
@@ -393,93 +451,91 @@ export function ClaimRegisterForm({
               </div>
             </div>
           </ClaimSurface>
-        </TabsContent>
+      </div>
 
-        <TabsContent value="documents" className="mt-0 flex flex-col gap-4">
-          <Controller
-            control={form.control}
-            name="document_mode"
-            render={({ field }) => (
-              <ClaimGrid className="md:grid-cols-2 xl:grid-cols-2">
-                {/* Choice cards — like radio buttons, but bigger */}
-                <button
-                  type="button"
-                  onClick={() => field.onChange('have_documents')}
-                  className={`rounded-2xl border p-5 text-left transition-colors ${
-                    field.value === 'have_documents'
-                      ? 'border-foreground/20 bg-card shadow-sm ring-1 ring-foreground/10'
-                      : 'border-border/50 bg-muted/30 hover:bg-muted/50'
-                  }`}
-                >
-                  <RadioGroup value={field.value} onValueChange={field.onChange} className="sr-only">
-                    <RadioGroupItem value="have_documents" />
-                  </RadioGroup>
-                  <p className="font-semibold">I have documents</p>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Upload the files required for this claim type.
-                  </p>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => field.onChange('no_documents')}
-                  className={`rounded-2xl border p-5 text-left transition-colors ${
-                    field.value === 'no_documents'
-                      ? 'border-foreground/20 bg-card shadow-sm ring-1 ring-foreground/10'
-                      : 'border-border/50 bg-muted/30 hover:bg-muted/50'
-                  }`}
-                >
-                  <p className="font-semibold">I do not have documents</p>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Saves as Document Pending so the notification date is kept.
-                  </p>
-                </button>
-              </ClaimGrid>
-            )}
-          />
-
-          {documentMode === 'no_documents' && (
+      {/* Step 2 — documents stay visible under the form, with clear click-to-upload */}
+      <div className="flex flex-col gap-4">
+        <div className="flex items-baseline gap-3">
+          <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-foreground text-xs font-semibold text-background">
+            2
+          </span>
+          <div>
+            <h2 className="text-base font-semibold">Documents</h2>
             <p className="text-sm text-muted-foreground">
-              The claim will be saved as Document Pending so the notification date is kept.
+              Choose whether you have files, then click each upload box.
             </p>
-          )}
+          </div>
+        </div>
 
-          {documentMode === 'have_documents' && (
-            <ClaimGrid>
-              {slots.map((slot) => (
-                <ClaimSurface key={slot.key} padding="sm" className="flex flex-col gap-3">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <p className="font-medium">{slot.label}</p>
-                    {slot.mandatory && <span className="text-xs font-semibold text-red-600">Required</span>}
-                    {slot.found && (
-                      <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-800">
-                        On policy
-                      </span>
-                    )}
-                  </div>
-                  {slot.hint && <p className="text-sm text-muted-foreground">{slot.hint}</p>}
-                  {slot.downloadUrl && (
-                    <a className="text-sm text-primary underline" href={slot.downloadUrl} target="_blank" rel="noreferrer">
-                      Open file already on the cover
-                    </a>
-                  )}
-                  <input
-                    type="file"
-                    accept={fileAccept}
-                    className="text-sm"
-                    onChange={(event) => {
-                      const file = event.target.files?.[0] ?? null
-                      setFiles((current) => ({ ...current, [slot.key]: file }))
-                    }}
-                  />
-                </ClaimSurface>
-              ))}
+        <Controller
+          control={form.control}
+          name="document_mode"
+          render={({ field }) => (
+            <ClaimGrid className="md:grid-cols-2 xl:grid-cols-2">
+              <button
+                type="button"
+                onClick={() => field.onChange('have_documents')}
+                className={cn(
+                  'rounded-2xl border p-5 text-left transition-colors',
+                  field.value === 'have_documents'
+                    ? 'border-foreground/20 bg-card shadow-sm ring-1 ring-foreground/10'
+                    : 'border-border/50 bg-muted/30 hover:bg-muted/50',
+                )}
+              >
+                <p className="font-semibold">I have documents</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Show upload boxes for this claim type.
+                </p>
+              </button>
+              <button
+                type="button"
+                onClick={() => field.onChange('no_documents')}
+                className={cn(
+                  'rounded-2xl border p-5 text-left transition-colors',
+                  field.value === 'no_documents'
+                    ? 'border-foreground/20 bg-card shadow-sm ring-1 ring-foreground/10'
+                    : 'border-border/50 bg-muted/30 hover:bg-muted/50',
+                )}
+              >
+                <p className="font-semibold">I do not have documents</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Saves as Document Pending so the notification date is kept.
+                </p>
+              </button>
             </ClaimGrid>
           )}
-        </TabsContent>
-      </Tabs>
+        />
 
-      {/* Bottom action bar — stays visible while scrolling long forms */}
-      <div className="sticky bottom-0 z-10 -mx-1 flex flex-wrap gap-2 rounded-2xl border border-border/40 bg-card/95 p-4 shadow-sm backdrop-blur">
+        {documentMode === 'no_documents' && (
+          <ClaimSurface padding="sm" className="bg-muted/40">
+            <p className="text-sm text-muted-foreground">
+              No uploads needed now. The claim will be saved as Document Pending.
+            </p>
+          </ClaimSurface>
+        )}
+
+        {documentMode === 'have_documents' && (
+          <ClaimGrid>
+            {slots.map((slot) => (
+              <ClaimUploadSlot
+                key={slot.key}
+                label={slot.label}
+                mandatory={slot.mandatory}
+                found={slot.found}
+                hint={slot.hint}
+                downloadUrl={slot.downloadUrl}
+                file={files[slot.key] ?? null}
+                onFileChange={(file) => {
+                  setFiles((current) => ({ ...current, [slot.key]: file }))
+                }}
+              />
+            ))}
+          </ClaimGrid>
+        )}
+      </div>
+
+      {/* Bottom actions — normal flow, not sticky */}
+      <div className="flex flex-wrap gap-2">
         <Button type="button" variant="outline" className="rounded-xl" onClick={onBack}>
           Back to Search
         </Button>
@@ -532,6 +588,89 @@ export function ClaimRegisterForm({
         </DialogContent>
       </Dialog>
     </form>
+  )
+}
+
+/**
+ * Big clickable upload box so staff do not hunt for a tiny file input.
+ * The real <input type="file"> stays hidden; the label opens it.
+ */
+function ClaimUploadSlot({
+  label,
+  mandatory,
+  found,
+  hint,
+  downloadUrl,
+  file,
+  onFileChange,
+}: {
+  label: string
+  mandatory: boolean
+  found: boolean
+  hint?: string | null
+  downloadUrl?: string | null
+  file: File | null
+  onFileChange: (file: File | null) => void
+}) {
+  const inputId = useId()
+  const selected = Boolean(file)
+
+  return (
+    <ClaimSurface padding="sm" className="flex flex-col gap-3">
+      <div className="flex flex-wrap items-center gap-2">
+        <p className="font-medium">{label}</p>
+        {mandatory && <span className="text-xs font-semibold text-red-600">Required</span>}
+        {found && (
+          <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-800">
+            On policy
+          </span>
+        )}
+      </div>
+      {hint && <p className="text-sm text-muted-foreground">{hint}</p>}
+      {downloadUrl && (
+        <a className="text-sm text-primary underline" href={downloadUrl} target="_blank" rel="noreferrer">
+          Open file already on the cover
+        </a>
+      )}
+
+      <input
+        id={inputId}
+        type="file"
+        accept={fileAccept}
+        className="sr-only"
+        onChange={(event) => {
+          onFileChange(event.target.files?.[0] ?? null)
+        }}
+      />
+
+      <label
+        htmlFor={inputId}
+        className={cn(
+          'flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed px-4 py-8 text-center transition-colors',
+          selected
+            ? 'border-emerald-300 bg-emerald-50/70 text-emerald-950'
+            : 'border-border bg-muted/30 text-foreground hover:border-foreground/30 hover:bg-muted/50',
+        )}
+      >
+        {selected ? (
+          <CheckCircle2 className="size-7 shrink-0 text-emerald-700" aria-hidden />
+        ) : (
+          <Upload className="size-7 shrink-0 text-muted-foreground" aria-hidden />
+        )}
+        <span className="text-sm font-semibold">
+          {selected ? 'Click to replace file' : 'Click to upload'}
+        </span>
+        <span className="max-w-full truncate text-xs text-muted-foreground">
+          {selected ? file!.name : 'PDF, JPG, PNG, HEIC, DOC, DOCX · max 10 MB'}
+        </span>
+        {!selected && (
+          <span className="mt-1 inline-flex items-center gap-1.5 rounded-lg bg-background px-3 py-1.5 text-xs font-medium shadow-sm">
+            <FileUp className="size-3.5" aria-hidden />
+            Choose file
+          </span>
+        )}
+      </label>
+    </ClaimSurface>
   )
 }
 

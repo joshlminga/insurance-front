@@ -32,14 +32,29 @@ export const CLAIMS_API = {
   emailPreview: (uuid: string) => `claims/${uuid}/emails/preview`,
 } as const
 
-/** Motor search modes only — email, policy number, vehicle registration. */
-export const POLICY_SEARCH_MODES = [
-  { value: 'registration', label: 'Vehicle registration' },
-  { value: 'policy_number', label: 'Policy number' },
-  { value: 'email', label: 'Customer email' },
+/** API always uses search_by=any (registration OR policy OR email). */
+export const POLICY_SEARCH_ANY = 'any' as const
+
+const MONTH_NAMES = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
 ] as const
 
-export type PolicySearchMode = (typeof POLICY_SEARCH_MODES)[number]['value']
+/**
+ * Display dates as DD/Month Name/YYYY (e.g. 13/October/2026).
+ * Keeps ISO (YYYY-MM-DD) for form validation; call this only when showing to staff.
+ */
+export function formatClaimDisplayDate(value: string | null | undefined): string {
+  if (!value) return '—'
+  const iso = value.slice(0, 10)
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso)
+  if (!match) return value
+  const year = match[1]
+  const monthIndex = Number(match[2]) - 1
+  const day = match[3]
+  if (monthIndex < 0 || monthIndex > 11) return value
+  return `${day}/${MONTH_NAMES[monthIndex]}/${year}`
+}
 
 /** Matches App\Enums\Claims\ClaimStatus exactly. */
 export const CLAIM_STATUS_FILTERS = [

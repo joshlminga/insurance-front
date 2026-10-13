@@ -247,7 +247,7 @@ export function ClaimActions({
               control={detailsForm.control}
               name="claimed_amount"
               label="Claimed amount"
-              type="number"
+              thousandsSeparator
               step="0.01"
               className={claimFieldClass}
             />

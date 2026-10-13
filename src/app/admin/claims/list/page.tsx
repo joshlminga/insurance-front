@@ -9,6 +9,7 @@ import type { SubmitResponse, TFilterOptions, TPaginationFilters } from '@/types
 import {
   CLAIM_STATUS_FILTERS,
   CLAIMS_API,
+  formatClaimDisplayDate,
   normalizeClaimRow,
   readPaginated,
 } from '@/utils/claims'
@@ -185,8 +186,8 @@ export function ClaimsListPage() {
                     <div className="grid gap-2 sm:grid-cols-2">
                       <ClaimStatTile label="Registration" value={claim.registration_number} />
                       <ClaimStatTile label="Policy" value={claim.policy_number} />
-                      <ClaimStatTile label="Loss date" value={claim.loss_date} />
-                      <ClaimStatTile label="Due" value={claim.tat_due_date} />
+                      <ClaimStatTile label="Loss date" value={formatClaimDisplayDate(claim.loss_date)} />
+                      <ClaimStatTile label="Due" value={formatClaimDisplayDate(claim.tat_due_date)} />
                     </div>
                   </ClaimSurface>
                 </Link>

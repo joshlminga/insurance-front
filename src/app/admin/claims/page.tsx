@@ -6,12 +6,10 @@ import { UseApiQuery } from '@/hooks/hooks'
 import type { SubmitResponse } from '@/types/types'
 import {
   CLAIMS_API,
+  formatClaimDisplayDate,
   normalizePolicy,
   normalizePolicyHit,
-  normalizeRegistration,
   readPaginated,
-  POLICY_SEARCH_MODES,
-  type PolicySearchMode,
 } from '@/utils/claims'
 import { EROUTES, claimsDetailPath } from '@/utils/enums'
 import { extractErrorMessage } from '@/utils/helpers'
@@ -51,24 +49,22 @@ export function ClaimsMotorPage() {
   const [certificateId, setCertificateId] = useState<string | null>(null)
   const [registrationHint, setRegistrationHint] = useState<string | null>(null)
   const [created, setCreated] = useState<{ claimNumber: string; uuid: string | null } | null>(null)
-  const [query, setQuery] = useState<{ search_by: PolicySearchMode; term: string } | null>(null)
+  const [query, setQuery] = useState<string | null>(null)
 
   const searchForm = useForm<ClaimSearchValues>({
     resolver: zodResolver(claimSearchSchema),
-    defaultValues: { search_by: 'registration', term: '' },
+    defaultValues: { term: '' },
   })
-
-  const searchBy = searchForm.watch('search_by')
 
   const search = UseApiQuery<SubmitResponse>({
     url: CLAIMS_API.policies,
     queryKey: ['claims/policies', query, selectedLocationId || null],
     params: {
-      search_by: query?.search_by,
-      term: query?.term,
+      search_by: 'any',
+      term: query ?? undefined,
     },
     config: orgContextHeaders ? { headers: orgContextHeaders } : undefined,
-    queryOptions: { enabled: canFetch && Boolean(query?.term) },
+    queryOptions: { enabled: canFetch && Boolean(query) },
   })
 
   const policyQuery = UseApiQuery<SubmitResponse>({
@@ -91,14 +87,8 @@ export function ClaimsMotorPage() {
       return
     }
 
-    let term = values.term.trim()
-    if (values.search_by === 'registration') {
-      term = normalizeRegistration(term)
-    } else if (values.search_by === 'email') {
-      term = term.toLowerCase()
-    }
-
-    setQuery({ search_by: values.search_by, term })
+    // Always search_by=any — registration, policy number, or email in one box.
+    setQuery(values.term.trim())
     setStep('search')
   }
 
@@ -106,7 +96,7 @@ export function ClaimsMotorPage() {
     <div className={claimsPageClass}>
       <PageHeader
         title="Motor claims"
-        description="Search by customer email, policy number, or vehicle registration, then register the claim."
+        description="Type an email, policy number, or registration — no need to choose a search type."
         actions={[
           {
             icon: List,
@@ -155,7 +145,7 @@ export function ClaimsMotorPage() {
                     setCertificateId(null)
                     setQuery(null)
                     setStep('search')
-                    searchForm.reset({ search_by: 'registration', term: '' })
+                    searchForm.reset({ term: '' })
                   }}
                 >
                   Register another
@@ -168,27 +158,26 @@ export function ClaimsMotorPage() {
           )}
 
           {step === 'search' && (
-            <ClaimSearchHero
-              modes={POLICY_SEARCH_MODES}
-              mode={searchBy}
-              onModeChange={(value) => {
-                searchForm.setValue('search_by', value as PolicySearchMode, { shouldValidate: true })
-              }}
-              onSubmit={searchForm.handleSubmit(onSearch)}
-            >
-              <div className="min-w-0 flex-1">
+            <ClaimSearchHero onSubmit={searchForm.handleSubmit(onSearch)}>
+              <div className="min-w-0 md:col-span-8">
                 <ReuseableInput
                   control={searchForm.control}
                   name="term"
-                  label="Search"
-                  placeholder="Customer email, policy number, or vehicle registration"
+                  label="Find Client, Policy or Vehicle"
+                  placeholder="Enter Email, Policy Number or Vehicle Registration Number"
                   className={claimFieldClass}
                   required
                 />
               </div>
-              <Button type="submit" className="h-10 shrink-0 rounded-xl px-6" disabled={search.isFetching}>
-                {search.isFetching ? 'Searching…' : 'Search'}
-              </Button>
+              <div className="md:col-span-4">
+                <Button
+                  type="submit"
+                  className="h-10 w-full rounded-xl"
+                  disabled={search.isFetching}
+                >
+                  {search.isFetching ? 'Searching…' : 'Search'}
+                </Button>
+              </div>
             </ClaimSearchHero>
           )}
 
@@ -223,7 +212,7 @@ export function ClaimsMotorPage() {
                         <ClaimStatTile label="Policy" value={hit.policyNumber} />
                         <ClaimStatTile label="Insured" value={hit.insuredName} />
                         <ClaimStatTile label="Insurer" value={hit.insurerName} />
-                        <ClaimStatTile label="Cover to" value={hit.coverTo} />
+                        <ClaimStatTile label="Cover to" value={formatClaimDisplayDate(hit.coverTo)} />
                       </ClaimGrid>
                       <Button
                         type="button"

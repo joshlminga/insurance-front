@@ -132,53 +132,26 @@ export function ClaimStatTile({
   )
 }
 
-type SearchModeOption = { value: string; label: string }
-
 /**
- * Wide search hero: mode chips (like radio tabs) + whatever inputs you pass as children.
- * Parent still owns the form submit / react-hook-form — this is only layout.
+ * Search shell on a 12-column row: ~8 cols for the field, ~4 for the button.
+ * No mode tabs — the API always searches registration, policy, and email together.
  */
 export function ClaimSearchHero({
-  modes,
-  mode,
-  onModeChange,
   children,
   onSubmit,
   className,
 }: {
-  modes: readonly SearchModeOption[]
-  mode: string
-  onModeChange: (value: string) => void
   children: ReactNode
   onSubmit?: (event: FormEvent<HTMLFormElement>) => void
   className?: string
 }) {
   return (
-    <ClaimSurface rounded="3xl" padding="lg" className={cn('bg-card', className)}>
-      <form className="flex flex-col gap-5" onSubmit={onSubmit}>
-        <div className="flex flex-wrap gap-2">
-          {modes.map((option) => {
-            const active = option.value === mode
-            return (
-              <button
-                key={option.value}
-                type="button"
-                onClick={() => onModeChange(option.value)}
-                className={cn(
-                  'rounded-full border px-4 py-2 text-sm font-medium transition-colors',
-                  active
-                    ? 'border-foreground/15 bg-foreground text-background shadow-sm'
-                    : 'border-border/60 bg-muted/40 text-muted-foreground hover:bg-muted',
-                )}
-              >
-                {option.label}
-              </button>
-            )
-          })}
-        </div>
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-          {children}
-        </div>
+    <ClaimSurface rounded="3xl" padding="md" className={cn('bg-card', className)}>
+      <form
+        className="grid grid-cols-1 items-end gap-3 md:grid-cols-12"
+        onSubmit={onSubmit}
+      >
+        {children}
       </form>
     </ClaimSurface>
   )
