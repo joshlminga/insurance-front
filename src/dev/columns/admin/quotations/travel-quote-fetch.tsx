@@ -36,11 +36,6 @@ export const TravelQuoteFetchColumns: ColumnDef<TravelQuoteFetchListRow>[] = [
     cell: ({ row }) => <div className="font-medium">{row.original.quote_code ?? '-'}</div>,
   },
   {
-    accessorKey: 'id',
-    header: () => <div>ID</div>,
-    cell: ({ row }) => <div>{row.original.id}</div>,
-  },
-  {
     accessorKey: 'status',
     header: () => <div>Status</div>,
     cell: ({ row }) => (
@@ -112,18 +107,5 @@ export const TravelQuoteFetchColumns: ColumnDef<TravelQuoteFetchListRow>[] = [
     id: 'agency',
     header: () => <div>Agency</div>,
     cell: ({ row }) => <div>{row.original.agency?.name ?? '-'}</div>,
-  },
-  {
-    accessorKey: 'started_at',
-    header: () => <div>Started</div>,
-    cell: ({ row }) => {
-      const value = row.original.started_at
-      if (!value) return <div>-</div>
-      try {
-        return <div>{new Date(value).toLocaleString()}</div>
-      } catch {
-        return <div>{value}</div>
-      }
-    },
   },
 ]

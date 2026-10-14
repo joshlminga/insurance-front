@@ -33,7 +33,7 @@ import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowRightCircle } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import {
     Controller,
     FormProvider,
@@ -122,6 +122,7 @@ function isCreateAccountAgencyMissing(data: AdminTravelQuotationFormValues): boo
 
 export const TravelQuotationPage = () => {
     const navigate = useNavigate()
+    const location = useLocation()
     const { user } = UseAuth()
     const { canModuleAction } = useCan()
     const canTravelOverride = canModuleAction(MODULES.QUOTATION_TRAVEL, 'override')

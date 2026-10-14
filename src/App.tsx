@@ -177,6 +177,7 @@ const AdminTravelQuotationFetchPage = lazy(() =>
     default: m.AdminTravelQuotationFetchPage,
   }))
 )
+
 const QuotationReportsMotorPage = lazy(() =>
   import("./app/admin/reports/quotations/motor/page").then(m => ({
     default: m.QuotationReportsMotorPage,
