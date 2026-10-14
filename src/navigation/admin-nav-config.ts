@@ -136,6 +136,11 @@ export const adminNavConfig: NavItem[] = [
             module: MODULES.QUOTATION_TRAVEL,
           },
           {
+            title: 'Find',
+            url: EROUTES.TRAVEL_QUOTATION_FETCH,
+            module: MODULES.QUOTATION_TRAVEL,
+          },
+          {
             title: 'Listed',
             url: EROUTES.REPORT_QUOTATIONS_TRAVEL,
             modules: [MODULES.QUOTATION_TRAVEL, MODULES.REPORT_MOTOR_QUOTATION],

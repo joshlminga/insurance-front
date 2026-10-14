@@ -126,8 +126,9 @@ export const EROUTES = {
   MOTOR_QUOTATION_DUPLICATE: `/${EPREFIX.DASHBOARD}/${EPREFIX.QUOTATIONS}/motor-quotations/duplicate`,
   MOTOR_QUOTATION_PURCHASE: `/${EPREFIX.DASHBOARD}/${EPREFIX.QUOTATIONS}/motor-quotations/purchase`,
 
-  // Travel quotations (admin office process — New → Results → Purchase)
+  // Travel quotations (admin office process — New → Find → Listed / Results → Purchase)
   TRAVELQUOTATIONS: `/${EPREFIX.DASHBOARD}/${EPREFIX.QUOTATIONS}/travel-quotations`,
+  TRAVEL_QUOTATION_FETCH: `/${EPREFIX.DASHBOARD}/${EPREFIX.QUOTATIONS}/travel-quotations/fetch`,
   TRAVEL_QUOTATION_RESULTS: `/${EPREFIX.DASHBOARD}/${EPREFIX.QUOTATIONS}/travel-quotations/results`,
   TRAVEL_QUOTATION_PURCHASE: `/${EPREFIX.DASHBOARD}/${EPREFIX.QUOTATIONS}/travel-quotations/purchase`,
 

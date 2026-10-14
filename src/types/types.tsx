@@ -222,6 +222,82 @@ export type MotorQuoteLastEndedStage =
 
 export type MotorQuoteDuplicateStartAt = 'quote' | 'rates' | 'kyc' | 'payment'
 
+/** Travel Find/Listed stages (no motor certificate stage). */
+export type TravelQuoteLastEndedStage = 'quote' | 'rates' | 'kyc' | 'payment'
+
+export type TravelQuoteFetchListRow = {
+  id: number
+  quote_code?: string
+  status?: string
+  current_step?: number
+  last_completed_step?: number | null
+  last_ended_stage?: TravelQuoteLastEndedStage
+  started_at?: string | null
+  last_activity_at?: string | null
+  created_at?: string | null
+  customer?: {
+    id?: number
+    type?: string
+    name?: string | null
+    email?: string | null
+    phone?: string | null
+  } | null
+  agency?: {
+    organization_id?: number
+    organization_location_id?: number
+    name?: string
+  } | null
+  location?: { id?: number; name?: string } | null
+  trip?: {
+    bound?: string | null
+    country_of_departure_name?: string | null
+    country_of_arrival_name?: string | null
+    date_of_departure?: string | null
+    date_of_return?: string | null
+    travel_as?: string | null
+    type_of_trip?: string | null
+    traveler_count?: number
+    traveler_names?: string[]
+  }
+}
+
+export type TravelQuoteFetchDetail = {
+  session?: {
+    id: number
+    quote_code?: string
+    status?: string
+    last_ended_stage?: TravelQuoteLastEndedStage
+    customer_type?: MotorQuoteSessionCustomerType
+    customer_id?: number | null
+  }
+  last_ended_stage?: TravelQuoteLastEndedStage
+  customer?: TravelQuoteFetchListRow['customer'] & {
+    first_name?: string | null
+    last_name?: string | null
+  }
+  agency?: TravelQuoteFetchListRow['agency']
+  processed_by_organization?: TravelQuoteFetchListRow['agency']
+  trip?: TravelQuoteFetchListRow['trip'] & {
+    country_of_departure?: number | null
+    country_of_arrival?: number | null
+    total_trip_days?: number | null
+    reason_for_travel?: number | null
+    travelers?: Array<Record<string, unknown>>
+  }
+  selected_offer?: {
+    purchase_id?: number
+    product_id?: number
+    rate_id?: number
+    product_name?: string
+    insurer_name?: string
+    premium?: Record<string, unknown>
+  } | null
+  kyc?: Record<string, unknown>
+  invoice_meta?: Record<string, unknown>
+  invoices?: Array<Record<string, unknown>>
+  meta?: Record<string, unknown>
+}
+
 export type MotorQuoteFetchListRow = {
   id: number
   quote_code?: string

@@ -18,8 +18,7 @@ import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import type { AdminTravelStepProps } from '../admin-step-props'
 import { readAdminTravelCustomerContact } from '../admin-travel-session'
-
-const getTodayDateString = () => new Date().toISOString().split('T')[0]
+import { readTravelDepartureDateFromSession } from '@/app/customer/travel/steppers/travel-quotation-session'
 
 const readSessionValue = (key: string) => {
   if (typeof window === 'undefined') return null
@@ -35,7 +34,8 @@ export const AdminTravelInvoicePayment: React.FC<AdminTravelStepProps> = ({
   const [purchaseSessionId] = useState(() =>
     readSessionValue(INVOICE_SESSION_STORAGE_KEY),
   )
-  const todayMinDate = getTodayDateString()
+  // Cover starts on trip departure — locked from quotation session
+  const [departureDate] = useState(() => readTravelDepartureDateFromSession())
 
   const form = useForm<InvoicePaymentFormValues>({
     resolver: zodResolver(InvoicePaymentSchema),
@@ -43,7 +43,7 @@ export const AdminTravelInvoicePayment: React.FC<AdminTravelStepProps> = ({
       name: contact.name ?? '',
       email: contact.email ?? '',
       phone: contact.phone ?? '',
-      cover_start_date: '',
+      cover_start_date: departureDate,
       payment_plan: 'Full',
     },
   })
@@ -120,7 +120,7 @@ export const AdminTravelInvoicePayment: React.FC<AdminTravelStepProps> = ({
             label="Cover Start Date"
             type="date"
             required
-            min={todayMinDate}
+            disabled={Boolean(departureDate)}
           />
         </div>
       </div>

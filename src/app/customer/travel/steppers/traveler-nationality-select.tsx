@@ -48,6 +48,7 @@ type NationalityOption = {
  * Nationality select for duplicated traveler rows.
  * Debounced search hits the API with `term` (backend filters by name).
  * Each row has its own queryKey via instanceId so searches do not clash.
+ * Prefill: when `value` is set but not in the list, resolve label by id.
  */
 export function TravelerNationalitySelect({
   value = '',
@@ -84,6 +85,13 @@ export function TravelerNationalitySelect({
     }
   }, [open])
 
+  // Clear cached label when the form value is cleared
+  useEffect(() => {
+    if (!value) {
+      setSelectedOption(null)
+    }
+  }, [value])
+
   const params = useMemo(
     () => ({
       direction: 'asc' as const,
@@ -104,6 +112,42 @@ export function TravelerNationalitySelect({
       placeholderData: (previous) => previous,
     },
   })
+
+  // Prefill / disabled: resolve name by taxonomy id when value is not in the list yet
+  const needsIdResolve =
+    Boolean(value) &&
+    (!selectedOption || selectedOption.value !== value)
+
+  const { data: resolvedById } = UseApiQuery<SubmitResponse>({
+    url: 'taxonomies/general/nationalities',
+    queryKey: ['traveler-nationality-by-id', instanceId, value],
+    params: {
+      id: value,
+      per_page: 1,
+      is_active: true,
+    },
+    queryOptions: {
+      enabled: needsIdResolve,
+      staleTime: 1000 * 60 * 5,
+    },
+  })
+
+  useEffect(() => {
+    if (!value || !needsIdResolve) {
+      return
+    }
+
+    const items = (resolvedById?.data ?? []) as NationalityItem[]
+    const match = items.find((item) => String(item.id ?? '') === value)
+    if (!match?.name) {
+      return
+    }
+
+    setSelectedOption({
+      value: String(match.id),
+      label: String(match.name),
+    })
+  }, [resolvedById?.data, value, needsIdResolve])
 
   const options = useMemo(() => {
     const items = (data?.data ?? []) as NationalityItem[]

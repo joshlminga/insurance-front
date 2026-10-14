@@ -172,6 +172,11 @@ const AdminTravelQuotationPurchasePage = lazy(() =>
     default: m.AdminTravelQuotationPurchasePage,
   }))
 )
+const AdminTravelQuotationFetchPage = lazy(() =>
+  import("./app/admin/quotations/travel/fetch/page").then(m => ({
+    default: m.AdminTravelQuotationFetchPage,
+  }))
+)
 const QuotationReportsMotorPage = lazy(() =>
   import("./app/admin/reports/quotations/motor/page").then(m => ({
     default: m.QuotationReportsMotorPage,
@@ -814,6 +819,16 @@ export const router = createBrowserRouter([
               <S>
                 <AdminModulePage module={MODULES.QUOTATION_TRAVEL}>
                   <AdminTravelQuotationPurchasePage />
+                </AdminModulePage>
+              </S>
+            ),
+          },
+          {
+            path: "quotations/travel-quotations/fetch",
+            element: (
+              <S>
+                <AdminModulePage module={MODULES.QUOTATION_TRAVEL}>
+                  <AdminTravelQuotationFetchPage />
                 </AdminModulePage>
               </S>
             ),

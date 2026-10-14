@@ -17,6 +17,8 @@ import {
 } from '@/utils/travel-enums'
 import type {
     MotorQuoteSessionCustomerType,
+    TravelQuoteFetchDetail,
+    TravelQuoteLastEndedStage,
     TravelQuoteSessionStartData,
 } from '@/types/types'
 import { isSelfCoverLookup } from '@/app/admin/quotations/motor/customer-lookup-utils'
@@ -143,6 +145,104 @@ export function persistAdminTravelPurchaseStart(purchaseId: string | number): vo
     sessionStorage.setItem(ADMIN_TRAVEL_PURCHASE_STEP_KEY, '1')
     sessionStorage.setItem(ADMIN_ACTIVE_QUOTATION_PRODUCT_KEY, 'travel')
     sessionStorage.removeItem(INVOICE_SESSION_STORAGE_KEY)
+}
+
+/**
+ * Resume an existing travel quote from Find/Listed detail.
+ * Restores quote session id, customer contact, trip form snapshot, and purchase step.
+ */
+export function persistAdminTravelResumeFromDetail(detail: TravelQuoteFetchDetail): {
+    stage: TravelQuoteLastEndedStage
+    purchaseStep: number | null
+} {
+    const sessionId = detail.session?.id
+    if (!sessionId) {
+        return { stage: 'quote', purchaseStep: null }
+    }
+
+    persistAdminTravelQuoteSession({
+        id: sessionId,
+        quote_code: detail.session?.quote_code,
+        customer_type: detail.session?.customer_type,
+        customer_id: detail.session?.customer_id ?? null,
+        is_guest: detail.customer?.type === 'guest',
+    })
+
+    const customerName =
+        detail.customer?.name ||
+        [detail.customer?.first_name, detail.customer?.last_name].filter(Boolean).join(' ')
+    persistAdminTravelCustomerContact({
+        name: customerName || undefined,
+        email: detail.customer?.email || undefined,
+        phone: detail.customer?.phone || undefined,
+    })
+
+    // KYC / invoice forms read trip + travelers from this session key
+    const trip = detail.trip
+    const meta = detail.meta ?? {}
+    try {
+        sessionStorage.setItem(
+            TRAVEL_QUOTATION_FORM_SESSION_KEY,
+            JSON.stringify({
+                bound: trip?.bound ?? meta.bound ?? '',
+                country_of_departure: String(
+                    trip?.country_of_departure ?? meta.country_of_departure ?? ''
+                ),
+                country_of_arrival: String(
+                    trip?.country_of_arrival ?? meta.country_of_arrival ?? ''
+                ),
+                travel_as: trip?.travel_as ?? meta.travel_as ?? '',
+                date_of_departure: trip?.date_of_departure ?? meta.date_of_departure ?? '',
+                date_of_return: trip?.date_of_return ?? meta.date_of_return ?? '',
+                type_of_trip: trip?.type_of_trip ?? meta.type_of_trip ?? '',
+                reason_for_travel: String(
+                    trip?.reason_for_travel ?? meta.reason_for_travel ?? ''
+                ),
+                travelers: trip?.travelers ?? [],
+            })
+        )
+    } catch {
+        // Ignore quota errors; resume still works for purchase steps
+    }
+
+    const stage = (detail.last_ended_stage ??
+        detail.session?.last_ended_stage ??
+        'quote') as TravelQuoteLastEndedStage
+    const purchaseId = detail.selected_offer?.purchase_id
+    const firstInvoiceId =
+        Array.isArray(detail.invoices) && detail.invoices[0]
+            ? (detail.invoices[0] as { id?: number }).id
+            : undefined
+
+    if (
+        purchaseId != null &&
+        (stage === 'kyc' || stage === 'payment' || stage === 'rates')
+    ) {
+        sessionStorage.setItem(PURCHASE_SESSION_STORAGE_KEY, String(purchaseId))
+    }
+
+    if (stage === 'rates' || stage === 'kyc') {
+        sessionStorage.setItem(ADMIN_TRAVEL_PURCHASE_STEP_KEY, '1')
+        sessionStorage.removeItem(INVOICE_SESSION_STORAGE_KEY)
+        return { stage, purchaseStep: 1 }
+    }
+
+    if (stage === 'payment') {
+        sessionStorage.setItem(ADMIN_TRAVEL_PURCHASE_STEP_KEY, '3')
+        if (purchaseId != null) {
+            sessionStorage.setItem(INVOICE_SESSION_STORAGE_KEY, String(purchaseId))
+        }
+        if (firstInvoiceId != null) {
+            // Kept for parity with motor resume; travel payment may ignore this key
+            sessionStorage.setItem('admin_travel_target_invoice_id', String(firstInvoiceId))
+        }
+        return { stage, purchaseStep: 3 }
+    }
+
+    sessionStorage.removeItem(PURCHASE_SESSION_STORAGE_KEY)
+    sessionStorage.removeItem(INVOICE_SESSION_STORAGE_KEY)
+    sessionStorage.removeItem(ADMIN_TRAVEL_PURCHASE_STEP_KEY)
+    return { stage, purchaseStep: null }
 }
 
 /** Clear active admin travel quote / purchase session keys. */

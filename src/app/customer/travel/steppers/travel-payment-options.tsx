@@ -53,8 +53,20 @@ type TravelSummaryData = {
       total_amount?: number | string
     }>
   }
+  /** Settlement currency after FX (KES) — payment is never in product USD/EUR/etc. */
+  currency?: string | null
+  currency_symbol?: string | null
   total_premium?: number | string
   total_payable?: number | string
+  cover?: {
+    premium?: {
+      currency?: string | null
+      currency_symbol?: string | null
+      source_currency_code?: string | null
+      source_basic_premium?: number | string | null
+      exchange_rate?: number | string | null
+    }
+  }
 }
 
 type TravelPaymentOptionsPageProps = CustomerVerificationDetailsProps & {
@@ -148,6 +160,35 @@ export const TravelPaymentOptionsPage: React.FC<
     payableItem?.total_amount ??
     summary?.total_payable ??
     summary?.total_premium
+
+  // Always show settlement currency (KES/KSh) — amount is already converted from any product currency.
+  const settlementSymbol = (() => {
+    const raw =
+      summary?.currency_symbol ??
+      summary?.cover?.premium?.currency_symbol ??
+      summary?.currency ??
+      summary?.cover?.premium?.currency ??
+      'KSh'
+    const trimmed = String(raw).trim()
+    if (!trimmed) return 'KSh'
+    const upper = trimmed.toUpperCase()
+    if (upper === 'KES' || upper === 'KSH') return 'KSh'
+    return trimmed
+  })()
+
+  const sourceCurrency = String(
+    summary?.cover?.premium?.source_currency_code ?? '',
+  ).trim()
+  const sourceBasic = summary?.cover?.premium?.source_basic_premium
+  const exchangeRate = summary?.cover?.premium?.exchange_rate
+  const showFxHint =
+    sourceCurrency !== '' &&
+    sourceCurrency.toUpperCase() !== 'KES' &&
+    sourceCurrency.toUpperCase() !== 'KSH' &&
+    sourceBasic != null &&
+    sourceBasic !== '' &&
+    exchangeRate != null &&
+    exchangeRate !== ''
 
   React.useEffect(() => {
     if (!summary) return
@@ -332,10 +373,19 @@ export const TravelPaymentOptionsPage: React.FC<
                     <p className="text-sm font-medium text-black">Full payment</p>
                   </div>
                   <div className="rounded-[5px] border border-[#ADABAB] bg-white px-3 py-2.5">
-                    <p className="text-xs text-muted-foreground">Amount due</p>
-                    <p className="text-sm font-medium text-black">
-                      {formattedAmount}
+                    <p className="text-xs text-muted-foreground">
+                      Amount due (settlement currency)
                     </p>
+                    <p className="text-sm font-medium text-black">
+                      {settlementSymbol} {formattedAmount}
+                    </p>
+                    {showFxHint ? (
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Converted from {sourceCurrency}{' '}
+                        {Number(sourceBasic).toLocaleString()} (rate{' '}
+                        {Number(exchangeRate).toLocaleString()})
+                      </p>
+                    ) : null}
                   </div>
                 </div>
               </div>

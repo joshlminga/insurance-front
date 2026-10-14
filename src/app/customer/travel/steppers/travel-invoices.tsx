@@ -16,13 +16,12 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowLeftCircle, ArrowRightCircle } from 'lucide-react'
 import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { readTravelDepartureDateFromSession } from '@/app/customer/travel/steppers/travel-quotation-session'
 
 type BoxHeaderProps = {
   title: string
   description?: string
 }
-
-const getTodayDateString = () => new Date().toISOString().split('T')[0]
 
 const readSessionValue = (key: string) => {
   if (typeof window === 'undefined') return null
@@ -45,7 +44,8 @@ export const TravelInvoicesPage: React.FC<CustomerVerificationDetailsProps> = ({
   const [purchaseSessionId] = useState(() =>
     readSessionValue(INVOICE_SESSION_STORAGE_KEY),
   )
-  const todayMinDate = getTodayDateString()
+  // Cover starts on trip departure — locked from quotation session
+  const [departureDate] = useState(() => readTravelDepartureDateFromSession())
 
   const form = useForm<InvoicePaymentFormValues>({
     resolver: zodResolver(InvoicePaymentSchema),
@@ -53,7 +53,7 @@ export const TravelInvoicesPage: React.FC<CustomerVerificationDetailsProps> = ({
       name: '',
       email: '',
       phone: '',
-      cover_start_date: '',
+      cover_start_date: departureDate,
       // Travel only supports full payment
       payment_plan: 'Full',
     },
@@ -154,7 +154,7 @@ export const TravelInvoicesPage: React.FC<CustomerVerificationDetailsProps> = ({
                 label="Cover Start Date"
                 placeholder="DD/MM/YYYY"
                 required
-                min={todayMinDate}
+                disabled={Boolean(departureDate)}
               />
             </div>
 

@@ -324,26 +324,34 @@ export const TravelKycDetailsPage: React.FC<CustomerVerificationDetailsProps> = 
                 <Controller
                   control={form.control}
                   name={`travelers.${index}.nationality`}
-                  render={({ field: nationalityField, fieldState }) => (
-                    <div
-                      data-invalid={fieldState.invalid}
-                      className={invalidSelectClassName}
-                    >
-                      <TravelerNationalitySelect
-                        instanceId={`kyc-traveler-${index}`}
-                        value={nationalityField.value}
-                        onChange={nationalityField.onChange}
-                        label="Nationality"
-                        required
-                        placeholder="Select nationality..."
-                      />
-                      {fieldState.error ? (
-                        <p className="mt-1 text-sm text-red-500">
-                          {fieldState.error.message}
-                        </p>
-                      ) : null}
-                    </div>
-                  )}
+                  render={({ field: nationalityField, fieldState }) => {
+                    // Lock nationality when quotation already provided it
+                    const nationalityLocked = Boolean(
+                      defaultTravelers[index]?.nationality,
+                    )
+
+                    return (
+                      <div
+                        data-invalid={fieldState.invalid}
+                        className={invalidSelectClassName}
+                      >
+                        <TravelerNationalitySelect
+                          instanceId={`kyc-traveler-${index}`}
+                          value={nationalityField.value}
+                          onChange={nationalityField.onChange}
+                          label="Nationality"
+                          required
+                          disabled={nationalityLocked}
+                          placeholder="Select nationality..."
+                        />
+                        {fieldState.error ? (
+                          <p className="mt-1 text-sm text-red-500">
+                            {fieldState.error.message}
+                          </p>
+                        ) : null}
+                      </div>
+                    )
+                  }}
                 />
                 <ReuseableInput
                   className={inputClassName}
