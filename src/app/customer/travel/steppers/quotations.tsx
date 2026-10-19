@@ -313,10 +313,26 @@ function resolvePriceBounds(raw: unknown): { min: number; max: number } {
   return { min, max: Math.max(maxRaw, min) }
 }
 
-export const TravelQuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
+/** Optional share props (admin Results passes these so email requires/prefills customer contact). */
+type TravelQuotationsShareProps = {
+  requireRecipientEmail?: boolean
+  defaultEmail?: string
+  defaultCustomerContact?: {
+    email?: string
+    name?: string
+    phone?: string
+  }
+}
+
+export const TravelQuotationsPage: React.FC<
+  CustomerVerificationDetailsProps & TravelQuotationsShareProps
+> = ({
   goToNextStep,
   goToPrevStep,
   missingSessionBackLabel = 'Traveller Details',
+  requireRecipientEmail,
+  defaultEmail,
+  defaultCustomerContact,
 }) => {
   const [quoteSessionId, setQuoteSessionId] = useState<number | null>(null)
   const [filterSheetOpen, setFilterSheetOpen] = useState(false)
@@ -336,6 +352,16 @@ export const TravelQuotationsPage: React.FC<CustomerVerificationDetailsProps> = 
     typeof window !== 'undefined'
       ? window.matchMedia(SIDEBAR_LAYOUT_QUERY).matches
       : true,
+  )
+
+  // Admin Results spreads these into comparison Share → Email.
+  const shareDialogProps = useMemo(
+    () => ({
+      requireRecipientEmail,
+      defaultEmail,
+      defaultCustomerContact,
+    }),
+    [requireRecipientEmail, defaultEmail, defaultCustomerContact],
   )
 
   const { handleDialogContextSwitch, dialogContent, dialogOpen } =
@@ -504,6 +530,7 @@ export const TravelQuotationsPage: React.FC<CustomerVerificationDetailsProps> = 
             data: responseData,
             onDownload: () => onComparison(true),
             products: selectedQuotes,
+            ...shareDialogProps,
           },
           Component: PostComparisonPage,
         })

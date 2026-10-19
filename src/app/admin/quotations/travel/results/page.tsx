@@ -8,8 +8,8 @@ import {
     persistAdminTravelPurchaseStart,
     resolveAdminTravelPayeeContact,
 } from '../admin-travel-session'
+import { buildAdminTravelShareDialogProps } from '../admin-step-props'
 import { PURCHASE_SESSION_STORAGE_KEY } from '@/utils/constatnts'
-import { useEffect } from 'react'
 
 /**
  * Admin travel Results — reuses customer premium list.
@@ -22,11 +22,11 @@ export const AdminTravelQuotationResultsPage = () => {
         () => resolveAdminTravelPayeeContact(user),
         [user]
     )
-
-    // If purchase id was set by TravelQuotationsPage, seed admin purchase step
-    useEffect(() => {
-        void defaultCustomerContact
-    }, [defaultCustomerContact])
+    // Require + prefill customer email when sharing comparison from Results.
+    const shareDialogProps = useMemo(
+        () => buildAdminTravelShareDialogProps(defaultCustomerContact),
+        [defaultCustomerContact]
+    )
 
     const goToPurchase = () => {
         const purchaseId = sessionStorage.getItem(PURCHASE_SESSION_STORAGE_KEY)?.trim()
@@ -48,6 +48,7 @@ export const AdminTravelQuotationResultsPage = () => {
                 goToPrevStep={() => navigate(EROUTES.TRAVELQUOTATIONS)}
                 goToNextStep={goToPurchase}
                 missingSessionBackLabel="Travel Quotations"
+                {...shareDialogProps}
             />
         </div>
     )

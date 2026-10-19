@@ -13,6 +13,7 @@ import type {
     MotorUserCoverDetail,
     MotorUserCoverInvoice,
     SubmitResponse,
+    TravelUserCoverDetail,
     TFilterOptions,
     TPaginationFilters
 } from '@/types/types'
@@ -24,9 +25,14 @@ import {
 import { ShowToast } from '@/utils/utils'
 import { ArrowLeft, FileText, ReceiptText, Shield } from 'lucide-react'
 import { useReducer, type ReactNode } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { COVER_STATUS_DISPLAY, FILTEROPTIONS, ReusableReducer } from '@/utils/constatnts'
+import {
+    COVER_PRODUCT_PARAM,
+    COVER_PRODUCTS,
+    resolveCoverProduct,
+} from '@/utils/customer-covers'
 
 const coversListPath = `/${EPREFIX.CUSTOMER}${EROUTES.COVERS}`
 
@@ -189,8 +195,105 @@ const SectionCard = ({ title, titleAccent, children, }: {
     </div>
 )
 
+/** Detail sections for a Travel cover (trip, travellers, invoices). No certificate/download step yet. */
+const TravelCoverSections = ({ cover }: { cover: TravelUserCoverDetail }) => {
+    const trip = cover.trip
+    const invoices = cover.invoices ?? []
+    const travelers = cover.travelers ?? []
+
+    return (
+        <div className="mt-5 space-y-5">
+            <SectionCard title="Policy &" titleAccent="Parties">
+                <CompactInfoGrid
+                    items={[
+                        { label: 'Product', value: cover.product },
+                        { label: 'Plan', value: cover.plan },
+                        { label: 'Insurer', value: cover.provider?.name },
+                        { label: 'Plan Name', value: cover.provider?.product_name },
+                    ]}
+                />
+            </SectionCard>
+
+            <SectionCard title="Trip">
+                <CompactInfoGrid
+                    items={[
+                        { label: 'From', value: trip?.departure_country?.name },
+                        { label: 'Destination', value: trip?.destination?.name },
+                        { label: 'Departure', value: formatDate(trip?.departure_date ?? '') },
+                        { label: 'Return', value: formatDate(trip?.return_date ?? '') },
+                        { label: 'Trip Days', value: trip?.total_trip_days },
+                        { label: 'Trip Type', value: trip?.type_of_trip },
+                        { label: 'Travel As', value: trip?.travel_as },
+                        { label: 'Travellers', value: trip?.travelers_count },
+                    ]}
+                />
+                {travelers.length > 0 ? (
+                    <div className="mt-4 border-t border-[#ADABAB]/35 pt-4">
+                        <p className="mb-2 text-sm font-semibold text-[#C20C0C]">Travellers</p>
+                        <CompactInfoGrid
+                            items={travelers.map((traveler, index) => ({
+                                label: `Traveller ${index + 1}`,
+                                value: [traveler.first_name, traveler.middle_name, traveler.surname]
+                                    .filter(Boolean)
+                                    .join(' '),
+                            }))}
+                        />
+                    </div>
+                ) : null}
+            </SectionCard>
+
+            <SectionCard title="Premium &" titleAccent="Dates">
+                <CompactInfoGrid
+                    items={[
+                        { label: 'Total Premium', value: money(cover.total_premium, cover.currency) },
+                        { label: 'Cover Start', value: formatDate(cover.cover_dates?.start_date ?? '') },
+                        { label: 'Cover End', value: formatDate(cover.cover_dates?.end_date ?? '') },
+                    ]}
+                />
+            </SectionCard>
+
+            <SectionCard title="Invoices">
+                {invoices.length === 0 ? (
+                    <p className="text-sm text-[#71717A]">No invoices for this cover.</p>
+                ) : (
+                    <div className="overflow-x-auto">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Invoice #</TableHead>
+                                    <TableHead>Amount</TableHead>
+                                    <TableHead>Payment</TableHead>
+                                    <TableHead>Due Date</TableHead>
+                                    <TableHead>Cover Status</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {invoices.map((invoice) => (
+                                    <TableRow key={invoice.id}>
+                                        <TableCell className="font-medium">{invoice.invoice_number}</TableCell>
+                                        <TableCell>{formatCurrency(invoice.installment_amount)}</TableCell>
+                                        <TableCell>{invoice.payment_status}</TableCell>
+                                        <TableCell>{formatDate(invoice.due_date)}</TableCell>
+                                        <TableCell>
+                                            <CoverStatusBadge status={invoice.cover_status} />
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </div>
+                )}
+            </SectionCard>
+        </div>
+    )
+}
+
 export const SingleCoverPage = () => {
     const { id } = useParams<{ id: string }>()
+    // ?product=travel (set by the My Covers list) chooses which report API to call.
+    const [searchParams] = useSearchParams()
+    const product = resolveCoverProduct(searchParams.get(COVER_PRODUCT_PARAM))
+    const listPath = `${coversListPath}?${COVER_PRODUCT_PARAM}=${product}`
     const [filter] = useReducer(
         ReusableReducer<TPaginationFilters & TFilterOptions>,
         { ...FILTEROPTIONS, page: 1, pageSize: 15 }
@@ -199,7 +302,7 @@ export const SingleCoverPage = () => {
     //     debounceCallback: optionsDispatcher,
     // });
     const { data, isLoading, isError } = UseApiQuery<SubmitResponse>({
-        url: `reports/motor/user/covers/${id}`,
+        url: COVER_PRODUCTS[product].detailUrl(id ?? ''),
         params: {
             page: filter?.page,
             pageSize: filter.pageSize,
@@ -210,7 +313,7 @@ export const SingleCoverPage = () => {
             retry: 3,
         },
     })
-    const cover = data?.data as MotorUserCoverDetail | undefined
+    const cover = data?.data as (MotorUserCoverDetail & TravelUserCoverDetail) | undefined
     const vehicle = cover?.vehicle
     const coverDates = cover?.cover_dates
     const benefits = cover?.benefits ?? []
@@ -273,7 +376,7 @@ export const SingleCoverPage = () => {
             <section className="rounded-xl border border-[#EAEAEA] bg-white p-5 sm:p-8">
                 <p className="text-sm text-destructive">Missing cover id.</p>
                 <Link
-                    to={coversListPath}
+                    to={listPath}
                     className="mt-4 inline-flex items-center text-sm font-medium text-[#BF162E] hover:underline"
                 >
                     <ArrowLeft className="mr-1 h-4 w-4" />
@@ -288,7 +391,7 @@ export const SingleCoverPage = () => {
             <div className="rounded-xl border border-[#EAEAEA] bg-white p-5 sm:p-8">
                 <div className="mb-5 w-full pb-2">
                     <Link
-                        to={coversListPath}
+                        to={listPath}
                         className="mb-3 inline-flex items-center text-sm font-medium text-[#71717A] hover:text-[#C20C0C]"
                     >
                         <ArrowLeft className="mr-1 h-4 w-4" />
@@ -310,6 +413,8 @@ export const SingleCoverPage = () => {
                     <p className="text-sm text-destructive">
                         Unable to load cover details. Please try again later.
                     </p>
+                ) : product === 'travel' ? (
+                    <TravelCoverSections cover={cover as TravelUserCoverDetail} />
                 ) : (
                     <div className="mt-5 space-y-5">
                         <SectionCard title="Policy &" titleAccent="Parties">

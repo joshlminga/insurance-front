@@ -9,7 +9,7 @@ import {
     INVOICE_SESSION_STORAGE_KEY,
     PAYMENTPLANS,
 } from '@/utils/constatnts'
-import { EPAYMENTTABS } from '@/utils/steps-config'
+import { customerPaymentTabs } from '@/utils/steps-config'
 import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowLeftCircle, ArrowRightCircle } from 'lucide-react'
@@ -191,7 +191,7 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
                         showSelector={true}
                         value={selectedPaymentMethod}
                         onValueChange={handlePaymentMethodChange}
-                        items={EPAYMENTTABS}
+                        items={customerPaymentTabs()}
                     />
                 </div>
 

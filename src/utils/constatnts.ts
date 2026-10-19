@@ -379,6 +379,12 @@ export const COVER_STATUS_DISPLAY: Record<string, any> = {
     className:
       "border border-red-200 bg-red-50 text-red-700 hover:bg-red-50",
   },
+  // Travel covers have no certificate step: a paid invoice means the cover is live.
+  active: {
+    label: "Active",
+    className:
+      "border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-50",
+  },
 };
 
 

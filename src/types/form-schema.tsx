@@ -1512,12 +1512,19 @@ const TravelKycTravelerSchema = z.object({
     .min(2, "Passport number is required")
     .max(30, "Passport number cannot exceed 30 characters"),
 
-  // Optional Personal KRA Pin
-  tax_number: z
+  // Mandatory next of kin (per traveller)
+  next_of_kin_name: z
     .string()
-    .max(50, "Tax number cannot exceed 50 characters")
-    .optional()
-    .or(z.literal("")),
+    .min(2, "Next of kin name is required")
+    .max(191, "Next of kin name cannot exceed 191 characters"),
+
+  next_of_kin_phone: z
+    .string()
+    .min(1, "Next of kin phone is required")
+    .max(50, "Next of kin phone cannot exceed 50 characters"),
+
+  // Mandatory Personal KRA PIN (same format rule as Motor KYC)
+  tax_number: KraPinSchema,
 
   physical_address: z
     .string()
@@ -1526,8 +1533,8 @@ const TravelKycTravelerSchema = z.object({
 
   passport_attachment: requiredKycFile("Passport attachment is required"),
 
-  // Optional KRA PIN certificate
-  tax_certificate: OptionalKycFileSchema,
+  // Mandatory KRA PIN certificate
+  tax_certificate: requiredKycFile("KRA PIN certificate is required"),
 })
 
 export const TravelKycSchema = z.object({

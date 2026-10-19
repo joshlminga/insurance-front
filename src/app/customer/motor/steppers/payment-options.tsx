@@ -30,7 +30,7 @@ import {
     PAYMENTPLANS,
     PURCHASE_SESSION_STORAGE_KEY
 } from '@/utils/constatnts'
-import { EPAYMENTTABS } from '@/utils/steps-config'
+import { customerPaymentTabs } from '@/utils/steps-config'
 import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowLeftCircle, ArrowRightCircle, Eye, Mail, Share2 } from 'lucide-react'
@@ -595,7 +595,7 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({
                             showSelector={true}
                             value={selectedPaymentMethod}
                             onValueChange={handlePaymentMethodChange}
-                            items={EPAYMENTTABS}
+                            items={customerPaymentTabs()}
                         />
                     </div>
 

@@ -32,6 +32,17 @@ export const CLAIMS_API = {
   emailPreview: (uuid: string) => `claims/${uuid}/emails/preview`,
 } as const
 
+/**
+ * Customer (My Claims) endpoints. Same JSON shapes as the admin ones, but the API only
+ * returns covers and claims that belong to the signed-in customer.
+ */
+export const CUSTOMER_CLAIMS_API = {
+  policies: 'claims/me/policies',
+  policy: (certificateId: number | string) => `claims/me/policies/${certificateId}`,
+  claims: 'claims/me',
+  claim: (uuid: string) => `claims/me/${uuid}`,
+} as const
+
 /** API always uses search_by=any (registration OR policy OR email). */
 export const POLICY_SEARCH_ANY = 'any' as const
 

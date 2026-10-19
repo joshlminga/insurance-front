@@ -1401,6 +1401,73 @@ export interface MotorUserCoverDetail {
   invoices: MotorUserCoverInvoice[]
 }
 
+/** Products shown on customer My Covers (drives list + detail API path). */
+export type CustomerCoverProduct = 'motor' | 'travel'
+
+/** One row of reports/travel/user/covers */
+export interface TravelUserCoverRow {
+  id: number
+  purchase_id: number
+  product: string
+  invoice_number: string
+  status: string
+  cover_status: 'waiting_payment' | 'active'
+  installment_amount: string | number
+  currency?: string
+  quotation_code?: string
+  provider?: { name?: string; product_name?: string } | null
+  trip?: {
+    destination?: { name: string } | null
+    departure_country?: { name: string } | null
+    departure_date?: string | null
+    return_date?: string | null
+    travelers_count?: number
+  } | null
+}
+
+export interface TravelUserCoverInvoice {
+  id: number
+  purchase_id: number
+  invoice_number: string
+  cover_status: string
+  installment_amount: number | string
+  payment_status: string
+  status: string
+  due_date: string
+  is_overdue: boolean
+}
+
+/** Single travel cover from reports/travel/user/covers/{purchase_id} */
+export interface TravelUserCoverDetail {
+  purchase_id: number
+  quote_code: string
+  purchase_status: string
+  product: string
+  currency: string
+  provider: { name?: string; product_name?: string } | null
+  plan?: string | null
+  trip: {
+    destination?: { name: string } | null
+    departure_country?: { name: string } | null
+    departure_date?: string | null
+    return_date?: string | null
+    total_trip_days?: number | null
+    type_of_trip?: string | null
+    travel_as?: string | null
+    travelers_count?: number
+  } | null
+  travelers: {
+    first_name?: string | null
+    middle_name?: string | null
+    surname?: string | null
+    date_of_birth?: string | null
+    is_principal?: boolean | null
+  }[]
+  total_premium: number | null
+  cover_dates: { start_date?: string | null; end_date?: string | null }
+  invoices: TravelUserCoverInvoice[]
+}
+
 export interface ReusablePopoverProps {
   trigger: React.ReactNode;
   children: React.ReactNode;

@@ -2,6 +2,7 @@
 /**
  * Travel comparison preview dialog.
  * Card layout: logo → product name → Days / Basic / Levies / Total.
+ * Footer: Share (Email / WhatsApp) + Download — same pattern as motor comparison.
  */
 import {
   Card,
@@ -10,10 +11,19 @@ import {
   CardHeader,
 } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
-import { Button, EmptyState } from '@/dev/core'
+import {
+  Button,
+  CustomDialogComponent,
+  EmptyState,
+  ReusableDropdown,
+  SendDocumentsViaEmail,
+} from '@/dev/core'
+import { useCustomDialogContextFactory } from '@/hooks'
 import { cn } from '@/lib/utils'
 import type { premiumPreview } from '@/types/types'
-import { ArrowDown } from 'lucide-react'
+import { TRAVEL_QUOTE_SESSION_STORAGE_KEY } from '@/utils/travel-enums'
+import { ShowToast } from '@/utils/utils'
+import { ArrowDown, Forward, Mail, Share2 } from 'lucide-react'
 import React from 'react'
 
 export const PostComparisonPage: React.FC<premiumPreview> = ({
@@ -29,6 +39,32 @@ export const PostComparisonPage: React.FC<premiumPreview> = ({
         : comparisonCount === 3
           ? 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3'
           : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
+
+  // Nested Share → Email dialog (parent quotations page already owns the outer dialog).
+  const { handleDialogContextSwitch, dialogContent, dialogOpen } =
+    useCustomDialogContextFactory<{
+      refetch?: () => Promise<any>
+      data?: any
+      requireRecipientEmail?: boolean
+      defaultEmail?: string
+      sessionStorageKey?: string
+      sendUrl?: string
+    }>()
+
+  const quoteSessionId = (() => {
+    const storedSessionId = Number(
+      sessionStorage.getItem(TRAVEL_QUOTE_SESSION_STORAGE_KEY),
+    )
+    if (Number.isFinite(storedSessionId) && storedSessionId > 0) {
+      return storedSessionId
+    }
+    return null
+  })()
+
+  const emailComponentData = {
+    quote_type: 'comparison' as const,
+    products: componentProps?.products ?? [],
+  }
 
   return (
     <div className="space-y-6">
@@ -116,6 +152,52 @@ export const PostComparisonPage: React.FC<premiumPreview> = ({
       )}
 
       <CardFooter className="flex flex-col gap-3 px-0 sm:flex-row sm:justify-end">
+        <ReusableDropdown
+          trigger={
+            <Button
+              variant="outline"
+              className="w-full border-[#C20C0C] bg-[#FFF] hover:bg-[#C20C0C] hover:text-white focus-visible:ring-[#C20C0C]/30 sm:w-auto"
+              leftIcon={<Forward />}
+            >
+              Share
+            </Button>
+          }
+          items={[
+            {
+              label: 'Email',
+              icon: <Mail className="h-4 w-4" />,
+              onClick: () => {
+                const list = emailComponentData.products
+                if (!Array.isArray(list) || list.length < 2) {
+                  ShowToast.error(
+                    'Comparison products are missing. Generate the comparison again.',
+                  )
+                  return
+                }
+                if (!quoteSessionId) {
+                  ShowToast.error('No active quote session found.')
+                  return
+                }
+                handleDialogContextSwitch({
+                  componentProps: {
+                    data: emailComponentData,
+                    sessionStorageKey: TRAVEL_QUOTE_SESSION_STORAGE_KEY,
+                    sendUrl: `document/travel/send-quote-via-email/${quoteSessionId}`,
+                    requireRecipientEmail: componentProps?.requireRecipientEmail,
+                    defaultEmail:
+                      componentProps?.defaultEmail ??
+                      componentProps?.defaultCustomerContact?.email,
+                  },
+                  Component: SendDocumentsViaEmail,
+                })
+              },
+            },
+            {
+              label: 'WhatsApp',
+              icon: <Share2 className="h-4 w-4" />,
+            },
+          ]}
+        />
         <Button
           type="button"
           className="w-full bg-[#C20C0C] hover:bg-[#C20C0C]/70 sm:w-auto"
@@ -125,6 +207,20 @@ export const PostComparisonPage: React.FC<premiumPreview> = ({
           Download Comparison
         </Button>
       </CardFooter>
+
+      <CustomDialogComponent
+        {...{ handleDialogContextSwitch, dialogOpen }}
+        className="w-[95vw] p-4 sm:w-auto sm:max-w-fit sm:p-6"
+      >
+        {dialogContent?.Component && (
+          <dialogContent.Component
+            {...{
+              componentProps: dialogContent.componentProps,
+              handleDialogContextSwitch,
+            }}
+          />
+        )}
+      </CustomDialogComponent>
     </div>
   )
 }

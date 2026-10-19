@@ -19,7 +19,7 @@ import {
   } from "@/types/types"
 import { FILTEROPTIONS, ReusableReducer } from "@/utils/constatnts"
 import { EROUTES } from "@/utils/enums"
-import { useReducer } from "react"
+import { useEffect, useReducer } from "react"
 import { useNavigate } from "react-router-dom"
 
 import {
@@ -29,7 +29,9 @@ import {
 
 const OrganizationMembersPage = () => {
   const navigate = useNavigate()
-  const { locationOptions } = useAbilities()
+  const { locationOptions, isBypass } = useAbilities()
+  // Only non-bypass users with exactly one scoped location skip the org picker
+  const skipOrgPicker = !isBypass && locationOptions.length === 1
 
   const [filter, optionsDispatcher] = useReducer(
     ReusableReducer<TPaginationFilters & TFilterOptions>,
@@ -40,6 +42,13 @@ const OrganizationMembersPage = () => {
     debounceCallback: optionsDispatcher,
   })
 
+  // Single scoped non-bypass location → skip picker (replace so Back does not loop)
+  useEffect(() => {
+    if (!skipOrgPicker) return
+    const locationId = locationOptions[0]?.locationId
+    if (!locationId) return
+    navigate(`${EROUTES.ORGANIZATION_MEMBERS}/${locationId}`, { replace: true })
+  }, [skipOrgPicker, locationOptions, navigate])
 
   const { data, isLoading, isError } = UseApiQuery<SubmitResponse>({
     url: "organization-location",
@@ -49,7 +58,7 @@ const OrganizationMembersPage = () => {
       term: filter.term,
     },
     queryOptions: {
-      enabled: locationOptions.length !== 1,
+      enabled: !skipOrgPicker,
     },
   })
 
@@ -65,7 +74,7 @@ const OrganizationMembersPage = () => {
     },
   ]
   const tableData = extractOrgLocationsFromResponse(data)
-  if (locationOptions.length === 1) {
+  if (skipOrgPicker) {
     return (
       <div className="flex h-64 items-center justify-center text-sm text-muted-foreground">
         Loading organizations...

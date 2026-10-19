@@ -2,6 +2,8 @@
 // import { StatsCard, StatsGrid } from '@/components/shared';
 import { ActionColumn } from '@/dev/columns';
 import { MyCoversColumns } from '@/dev/columns/customer/motor/my-covers';
+import { TravelCoversColumns } from '@/dev/columns/customer/travel/my-covers';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CustomBaseTable, SearchTools } from '@/dev/table';
 import { useDebounce } from '@/hooks';
 import { UseApiQuery } from '@/hooks/hooks';
@@ -15,13 +17,22 @@ import {
     FILTEROPTIONS,
     ReusableReducer
 } from '@/utils/constatnts';
+import {
+    COVER_PRODUCT_PARAM,
+    COVER_PRODUCTS,
+    resolveCoverProduct,
+} from '@/utils/customer-covers';
 import { EPREFIX, EROUTES } from '@/utils/enums';
 import { Eye } from 'lucide-react';
 import { useReducer } from 'react'
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 export const CustomerCoversPage = () => {
     const navigate = useNavigate();
+    // Selected product lives in the URL (?product=travel) so the detail page's
+    // "Back" link and a page refresh keep the same tab.
+    const [searchParams, setSearchParams] = useSearchParams();
+    const product = resolveCoverProduct(searchParams.get(COVER_PRODUCT_PARAM));
     const [filter, optionsDispatcher] = useReducer(
         ReusableReducer<TPaginationFilters & TFilterOptions>,
         { ...FILTEROPTIONS, page: 1, pageSize: 10 }
@@ -31,7 +42,7 @@ export const CustomerCoversPage = () => {
     });
 
     const { data, isLoading } = UseApiQuery<SubmitResponse>({
-        url: 'reports/motor/user/covers',
+        url: COVER_PRODUCTS[product].listUrl,
         params: {
             page: filter.page,
             pageSize: filter.pageSize,
@@ -48,7 +59,10 @@ export const CustomerCoversPage = () => {
             onSelect: (row) => {
                 const purchaseId = row?.purchase_id ?? row?.id
                 if (!purchaseId) return
-                navigate(`/${EPREFIX.CUSTOMER}${EROUTES.SINGLECOVER}/${purchaseId}`)
+                // Detail page reads ?product= to pick the motor or travel report API.
+                navigate(
+                    `/${EPREFIX.CUSTOMER}${EROUTES.SINGLECOVER}/${purchaseId}?${COVER_PRODUCT_PARAM}=${product}`
+                )
             }
         },
     ];
@@ -89,6 +103,24 @@ export const CustomerCoversPage = () => {
                         </StatsGrid>
                     </div> */}
 
+                    <Tabs
+                        value={product}
+                        onValueChange={(value) => {
+                            setSearchParams({ [COVER_PRODUCT_PARAM]: value });
+                            // Each product has its own pagination, so start from page 1.
+                            optionsDispatcher({ payload: { page: 1 }, type: 'page' });
+                        }}
+                        className="mb-4"
+                    >
+                        <TabsList>
+                            {Object.entries(COVER_PRODUCTS).map(([key, { label }]) => (
+                                <TabsTrigger key={key} value={key}>
+                                    {label}
+                                </TabsTrigger>
+                            ))}
+                        </TabsList>
+                    </Tabs>
+
                     <div className='w-full'>
                         <CustomBaseTable
                             {...{
@@ -107,7 +139,7 @@ export const CustomerCoversPage = () => {
                                     includeFilter: true,
                                 },
                                 columns: [
-                                    ...MyCoversColumns,
+                                    ...(product === 'travel' ? TravelCoversColumns : MyCoversColumns),
                                     ActionColumn({
                                         ActionsHandlerMapping,
                                         layout: 'horizontal'
@@ -116,7 +148,7 @@ export const CustomerCoversPage = () => {
                                 OtherTools: SearchTools,
                                 data: data?.data ?? [],
                                 pageCount: data?.pagination?.last_page ?? 1,
-                                title: 'Covers',
+                                title: `${COVER_PRODUCTS[product].label} Covers`,
                                 showPagination: true,
                                 setPageSize: (pageSize) =>
                                     optionsDispatcher({

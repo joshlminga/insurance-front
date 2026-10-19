@@ -61,9 +61,11 @@ const blankKycTraveler = (): TravelKycFormValues['travelers'][number] => ({
   nationality: '',
   passport_number: '',
   tax_number: '',
+  next_of_kin_name: '',
+  next_of_kin_phone: '',
   physical_address: '',
   passport_attachment: undefined as unknown as File,
-  tax_certificate: undefined,
+  tax_certificate: undefined as unknown as File,
 })
 
 /** Prefill KYC travellers from the quote form saved in sessionStorage. */
@@ -97,10 +99,12 @@ function readTravelersFromSession(): TravelKycFormValues['travelers'] {
       nationality: String(traveler?.nationality ?? ''),
       passport_number: '',
       tax_number: '',
+      next_of_kin_name: '',
+      next_of_kin_phone: '',
       physical_address: '',
-      // File inputs cannot be prefilled — user must attach passport
+      // File inputs cannot be prefilled — user must attach passport + KRA certificate
       passport_attachment: undefined as unknown as File,
-      tax_certificate: undefined,
+      tax_certificate: undefined as unknown as File,
     }))
   } catch {
     return [blankKycTraveler()]
@@ -167,7 +171,7 @@ function buildTravelKycFormData(data: TravelKycFormValues): FormData {
 
       // Skip empty optional strings so backend treats them as absent
       if (typeof value === 'string' && value.trim() === '') {
-        if (key === 'middle_name' || key === 'phone' || key === 'tax_number') {
+        if (key === 'middle_name' || key === 'phone') {
           return
         }
       }
@@ -274,7 +278,7 @@ export const TravelKycDetailsPage: React.FC<CustomerVerificationDetailsProps> = 
             >
               <BoxHeader
                 title={`Customer Info & Documents — Traveller ${index + 1}`}
-                description="Required fields match the travel KYC checklist (passport attachment and physical address included)."
+                description="Required fields match the travel KYC checklist (passport, KRA PIN + certificate, next of kin and physical address included)."
               />
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
@@ -364,8 +368,24 @@ export const TravelKycDetailsPage: React.FC<CustomerVerificationDetailsProps> = 
                   className={inputClassName}
                   control={form.control}
                   name={`travelers.${index}.tax_number`}
-                  label="Personal KRA Pin (Optional)"
+                  label="Personal KRA Pin"
                   placeholder="e.g. A020828302W"
+                  required
+                />
+                <ReuseableInput
+                  className={inputClassName}
+                  control={form.control}
+                  name={`travelers.${index}.next_of_kin_name`}
+                  label="Next of Kin Name"
+                  required
+                />
+                <ReuseableInput
+                  className={inputClassName}
+                  control={form.control}
+                  type="tel"
+                  name={`travelers.${index}.next_of_kin_phone`}
+                  label="Next of Kin Phone"
+                  required
                 />
                 <ReuseableInput
                   className={`${inputClassName} sm:col-span-2 lg:col-span-3`}
@@ -396,7 +416,8 @@ export const TravelKycDetailsPage: React.FC<CustomerVerificationDetailsProps> = 
                   type="file"
                   name={`travelers.${index}.tax_certificate`}
                   accept=".pdf,.jpg,.jpeg,.png"
-                  label="Attach KRA PIN Certificate (Optional)"
+                  label="Attach KRA PIN Certificate"
+                  required
                 />
               </div>
             </div>

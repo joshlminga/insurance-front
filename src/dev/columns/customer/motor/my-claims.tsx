@@ -1,53 +1,52 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ColumnDef } from "@tanstack/table-core";
+import { formatClaimDisplayDate } from "@/utils/claims";
 
+/**
+ * Columns for the customer "My Claims" table.
+ * Each `accessorKey` is a key on the row returned by GET claims/me
+ * (think of it like `$claim->claim_number` in a Blade table).
+ */
 export const MyClaimsColumns: ColumnDef<any>[] = [
     {
-        accessorKey: "cover_type",
-        header: () => <div>Cover Type</div>,
-        cell: ({ row }) => {
-            const cover_type: string = row.getValue("cover_type");
-            return <div>{cover_type}</div>;
-        },
+        accessorKey: "claim_number",
+        header: () => <div>Claim No.</div>,
+        cell: ({ row }) => <div className="font-medium">{row.getValue("claim_number")}</div>,
     },
     {
-        accessorKey: "cover_type",
-        header: () => <div>Agency Incident</div>,
-        cell: ({ row }) => {
-            const cover_type: string = row.getValue("cover_type");
-            return <div>{cover_type}</div>;
-        },
+        accessorKey: "registration_number",
+        header: () => <div>Vehicle</div>,
+        cell: ({ row }) => <div>{row.getValue("registration_number") ?? "—"}</div>,
     },
     {
-        accessorKey: "cover_type",
-        header: () => <div>Claim Date</div>,
-        cell: ({ row }) => {
-            const cover_type: string = row.getValue("cover_type");
-            return <div>{cover_type}</div>;
-        },
+        accessorKey: "claim_type",
+        header: () => <div>Claim Type</div>,
+        cell: ({ row }) => <div>{row.getValue("claim_type") ?? "—"}</div>,
     },
     {
-        accessorKey: "cover_type",
-        header: () => <div>Report Date</div>,
-        cell: ({ row }) => {
-            const cover_type: string = row.getValue("cover_type");
-            return <div>{cover_type}</div>;
-        },
+        accessorKey: "loss_date",
+        header: () => <div>Date of Loss</div>,
+        cell: ({ row }) => <div>{formatClaimDisplayDate(row.getValue("loss_date"))}</div>,
     },
     {
-        accessorKey: "cover_type",
+        accessorKey: "reported_date",
+        header: () => <div>Reported</div>,
+        cell: ({ row }) => <div>{formatClaimDisplayDate(row.getValue("reported_date"))}</div>,
+    },
+    {
+        accessorKey: "documents_shared",
         header: () => <div>Documents Shared</div>,
-        cell: ({ row }) => {
-            const cover_type: string = row.getValue("cover_type");
-            return <div>{cover_type}</div>;
-        },
+        cell: ({ row }) => (
+            <div>
+                {row.original.documents_shared ?? 0} / {row.original.documents_total ?? 0}
+            </div>
+        ),
     },
-      {
-        accessorKey: "cover_type",
+    {
+        accessorKey: "customer_status_label",
         header: () => <div>Claim Status</div>,
-        cell: ({ row }) => {
-            const cover_type: string = row.getValue("cover_type");
-            return <div>{cover_type}</div>;
-        },
-    }
+        cell: ({ row }) => (
+            <div className="font-medium">{row.getValue("customer_status_label") ?? "—"}</div>
+        ),
+    },
 ];

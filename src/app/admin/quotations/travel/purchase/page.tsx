@@ -89,7 +89,13 @@ export const AdminTravelQuotationPurchasePage = () => {
 
     const stepProps =
         current.Component === TravelPaymentOptionsPage
-            ? { ...baseProps, goToKyc, paymentStatusFlow: 'admin' as const }
+            ? {
+                  ...baseProps,
+                  goToKyc,
+                  paymentStatusFlow: 'admin' as const,
+                  // Admins may pay by Credit; customer travel payment hides it
+                  includeCreditPayment: true,
+              }
             : baseProps
 
     return (

@@ -204,3 +204,10 @@ export const EPAYMENTTABS = [
         component: CashTabPage,
     },
 ]
+/**
+ * Customer-facing payment tabs: everything in EPAYMENTTABS except "credit".
+ * Credit is admin-only (admin Motor payment + admin Travel purchase use full EPAYMENTTABS).
+ * Like array_filter() in PHP — returns a new array without the credit entry.
+ */
+export const customerPaymentTabs = () =>
+    EPAYMENTTABS.filter((tab) => tab.value !== "credit")

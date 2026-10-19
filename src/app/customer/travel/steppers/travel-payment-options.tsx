@@ -37,7 +37,7 @@ import {
 } from '@/utils/constatnts'
 import { EROUTES } from '@/utils/enums'
 import { extractErrorMessage } from '@/utils/helpers'
-import { EPAYMENTTABS } from '@/utils/steps-config'
+import { customerPaymentTabs, EPAYMENTTABS } from '@/utils/steps-config'
 import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowLeftCircle, ArrowRightCircle, Eye, Mail, Share2 } from 'lucide-react'
@@ -72,11 +72,18 @@ type TravelSummaryData = {
 type TravelPaymentOptionsPageProps = CustomerVerificationDetailsProps & {
   /** Admin travel purchase uses 'admin' so receipt returns to travel-quotations/purchase. */
   paymentStatusFlow?: PaymentStatusFlow
+  /** Show the Credit tab. Only the admin travel purchase passes true; customers never see it. */
+  includeCreditPayment?: boolean
 }
 
 export const TravelPaymentOptionsPage: React.FC<
   TravelPaymentOptionsPageProps
-> = ({ goToNextStep, goToPrevStep, paymentStatusFlow = 'motor' }) => {
+> = ({
+  goToNextStep,
+  goToPrevStep,
+  paymentStatusFlow = 'motor',
+  includeCreditPayment = false,
+}) => {
   const navigate = useNavigate()
   const [selectedPaymentMethod, setSelectedPaymentMethod] =
     React.useState<string>('mpesa')
@@ -404,7 +411,7 @@ export const TravelPaymentOptionsPage: React.FC<
               showSelector={true}
               value={selectedPaymentMethod}
               onValueChange={handlePaymentMethodChange}
-              items={EPAYMENTTABS}
+              items={includeCreditPayment ? EPAYMENTTABS : customerPaymentTabs()}
             />
           </div>
 
