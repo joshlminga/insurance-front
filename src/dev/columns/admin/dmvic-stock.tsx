@@ -1,4 +1,3 @@
-
 import { Badge } from '@/components/ui/badge'
 import { DmvicBrokerStockRow } from '@/types/types'
 import { dmvicCertificateTypeLabel } from '@/utils/constatnts'
@@ -7,15 +6,16 @@ import { ColumnDef } from '@tanstack/table-core'
 export const DmvicStockColumns: ColumnDef<DmvicBrokerStockRow>[] = [
   {
     id: 'organization_name',
+    // Still labelled "Organization" — shows the insurer office (insurer_location).
     header: () => <div>Organization</div>,
     cell: ({ row }) => (
-      <div>{row.original.organization_location?.organization_name ?? '-'}</div>
+      <div>{row.original.insurer_location?.organization_name ?? '-'}</div>
     ),
   },
   {
     id: 'location',
     header: () => <div>Location</div>,
-    cell: ({ row }) => <div>{row.original.organization_location?.location?.name ?? '-'}</div>,
+    cell: ({ row }) => <div>{row.original.insurer_location?.location?.name ?? '-'}</div>,
   },
   {
     accessorKey: 'product_type',

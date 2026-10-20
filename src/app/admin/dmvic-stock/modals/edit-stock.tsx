@@ -19,6 +19,13 @@ import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Controller, useForm } from 'react-hook-form'
 
+function resolveInsurerLocationId(stock?: DmvicBrokerStockRow): string {
+  const fromField = stock?.insurer_location_id
+  const fromNested = stock?.insurer_location?.organization_location_id
+  const value = fromField ?? fromNested
+  return value != null ? String(value) : ''
+}
+
 export function EditDmvicStockModal({
   handleDialogContextSwitch,
   componentProps,
@@ -27,24 +34,28 @@ export function EditDmvicStockModal({
   componentProps?: {
     refetch?: () => Promise<any>
     data?: DmvicBrokerStockRow
+    /** Broker org header from the page picker (X-Organization-Location-Id). */
+    orgContextHeaders?: Record<string, string>
   }
 }) {
   const stock = componentProps?.data
+  const orgContextHeaders = componentProps?.orgContextHeaders
+
   const form = useForm<EditDmvicStockFormValues>({
     resolver: zodResolver(EditDmvicStockSchema),
     defaultValues: {
-      organization_location_id: String(componentProps?.data?.organization_location_id ?? ''),
-      product_type: componentProps?.data?.product_type ?? 'Motor',
-      type_of_certificate: componentProps?.data?.type_of_certificate ?? '',
+      insurer_location_id: resolveInsurerLocationId(stock),
+      product_type: stock?.product_type ?? 'Motor',
+      type_of_certificate: stock?.type_of_certificate ?? '',
     },
   })
-
 
   const submitMutation = UseApiMutation<
     SubmitResponse,
     Record<string, unknown> & { id: number }>({
       url: ({ id }) => `dmvic/stocks/${id}`,
       method: EMETHODS.PATCH,
+      config: orgContextHeaders ? { headers: orgContextHeaders } : undefined,
       mutationOptions: {
         onSuccess: (data) => {
           ShowToast.success(data.message || 'DMVIC stock updated successfully')
@@ -61,9 +72,10 @@ export function EditDmvicStockModal({
     if (!stock?.id) {
       return
     }
+    // Broker org is NOT in the body — API takes it from X-Organization-Location-Id.
     submitMutation.mutate({
       id: stock.id,
-      organization_location_id: Number(data.organization_location_id),
+      insurer_location_id: Number(data.insurer_location_id),
       product_type: data.product_type,
       type_of_certificate: data.type_of_certificate,
     })
@@ -82,7 +94,7 @@ export function EditDmvicStockModal({
       <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
         <Controller
           control={form.control}
-          name="organization_location_id"
+          name="insurer_location_id"
           render={({ field }) => (
             <ReuseableSelectInsurerInput
               label="Insurer Organization Location"

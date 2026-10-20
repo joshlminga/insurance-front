@@ -7,10 +7,10 @@ import {
 } from '@/dev/core'
 import { UseApiMutation } from '@/hooks/hooks'
 import { CreateDmvicStockSchema } from '@/types/form-schema'
-import type { 
-  CreateDmvicStockFormInput, 
-  CreateDmvicStockFormValues 
- } from '@/types/schema'
+import type {
+  CreateDmvicStockFormInput,
+  CreateDmvicStockFormValues
+} from '@/types/schema'
 import type { SubmitResponse } from '@/types/types'
 import {
   DMVIC_CERTIFICATE_TYPES,
@@ -26,8 +26,13 @@ export function CreateDmvicStockModal({
   componentProps,
 }: {
   handleDialogContextSwitch: (context?: any) => void
-  componentProps?: { refetch?: () => Promise<any> }
+  componentProps?: {
+    refetch?: () => Promise<any>
+    /** Broker org header from the page picker (X-Organization-Location-Id). */
+    orgContextHeaders?: Record<string, string>
+  }
 }) {
+  const orgContextHeaders = componentProps?.orgContextHeaders
 
   const form = useForm<
     CreateDmvicStockFormInput,
@@ -36,7 +41,7 @@ export function CreateDmvicStockModal({
   >({
     resolver: zodResolver(CreateDmvicStockSchema),
     defaultValues: {
-      organization_location_id: '',
+      insurer_location_id: '',
       product_type: '',
       type_of_certificate: '',
       stock: undefined,
@@ -46,6 +51,7 @@ export function CreateDmvicStockModal({
   const submitMutation = UseApiMutation<SubmitResponse, Record<string, unknown>>({
     url: 'dmvic/stocks',
     method: EMETHODS.POST,
+    config: orgContextHeaders ? { headers: orgContextHeaders } : undefined,
     mutationOptions: {
       onSuccess: (data) => {
         ShowToast.success(data.message || 'DMVIC stock created successfully')
@@ -60,8 +66,9 @@ export function CreateDmvicStockModal({
   })
 
   const onSubmit = (data: CreateDmvicStockFormValues) => {
+    // Broker org is NOT in the body — API takes it from X-Organization-Location-Id.
     submitMutation.mutate({
-      organization_location_id: Number(data.organization_location_id),
+      insurer_location_id: Number(data.insurer_location_id),
       product_type: data.product_type,
       type_of_certificate: data.type_of_certificate,
       stock: data.stock,
@@ -81,7 +88,7 @@ export function CreateDmvicStockModal({
       <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
         <Controller
           control={form.control}
-          name="organization_location_id"
+          name="insurer_location_id"
           render={({ field }) => (
             <ReuseableSelectInsurerInput
               label="Insurer Organization Location"

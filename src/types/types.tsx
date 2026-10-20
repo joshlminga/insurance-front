@@ -1567,8 +1567,12 @@ export type DmvicOrganizationLocation = {
 }
 export type DmvicBrokerStockRow = {
   id: number
+  /** Broker office that owns this stock (from request org context). */
   organization_location_id: number
   organization_location?: DmvicOrganizationLocation | null
+  /** Insurer office used for certificate / product matching. */
+  insurer_location_id: number
+  insurer_location?: DmvicOrganizationLocation | null
   product_type?: string | null
   type_of_certificate?: string | null
   stock?: number | null

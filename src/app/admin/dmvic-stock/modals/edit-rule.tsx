@@ -21,9 +21,12 @@ export function EditDmvicPolicyNumberRuleModal({
   componentProps?: {
     refetch?: () => Promise<any>
     data?: DmvicPolicyNumberRuleRow
+    /** Broker org header from the page picker (X-Organization-Location-Id). */
+    orgContextHeaders?: Record<string, string>
   }
 }) {
   const rule = componentProps?.data
+  const orgContextHeaders = componentProps?.orgContextHeaders
   const locked = rule ? dmvicRuleHasAllocations(rule) : false
   const form = useForm<EditDmvicPolicyNumberRuleFormInput,
     unknown,
@@ -47,6 +50,7 @@ export function EditDmvicPolicyNumberRuleModal({
     Record<string, unknown> & { id: number }>({
       url: ({ id }) => `dmvic/policy-number-rules/${id}`,
       method: EMETHODS.PATCH,
+      config: orgContextHeaders ? { headers: orgContextHeaders } : undefined,
       mutationOptions: {
         onSuccess: (data) => {
           ShowToast.success(data.message || 'Policy number rule updated successfully')

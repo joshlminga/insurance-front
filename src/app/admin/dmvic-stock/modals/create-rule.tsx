@@ -24,8 +24,12 @@ export function CreateDmvicPolicyNumberRuleModal({
   componentProps?: {
     refetch?: () => Promise<any>
     stockId?: number
+    /** Broker org header from the page picker (X-Organization-Location-Id). */
+    orgContextHeaders?: Record<string, string>
   }
 }) {
+  const orgContextHeaders = componentProps?.orgContextHeaders
+
   const form = useForm<
     CreateDmvicPolicyNumberRuleFormInput,
     unknown,
@@ -47,6 +51,7 @@ export function CreateDmvicPolicyNumberRuleModal({
   const submitMutation = UseApiMutation<SubmitResponse, Record<string, unknown>>({
     url: 'dmvic/policy-number-rules',
     method: EMETHODS.POST,
+    config: orgContextHeaders ? { headers: orgContextHeaders } : undefined,
     mutationOptions: {
       onSuccess: (data) => {
         ShowToast.success(data.message || 'Policy number rule created successfully')

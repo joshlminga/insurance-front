@@ -1580,7 +1580,8 @@ export const TravelKycSchema = z.object({
     .min(1, "At least one traveller is required"),
 })
 export const CreateDmvicStockSchema = z.object({
-  organization_location_id: z.string().min(1, 'Organization location is required'),
+  // Insurer office (API field insurer_location_id). Broker org comes from X-Organization-Location-Id.
+  insurer_location_id: z.string().min(1, 'Insurer organization location is required'),
   product_type: z.string().min(1, 'Product type is required'),
   type_of_certificate: z.string().min(1, 'Certificate type is required'),
   stock: z.coerce.number().int().min(2, 'Stock must be at least 2'),
