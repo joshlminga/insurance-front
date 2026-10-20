@@ -40,6 +40,7 @@ export function ClaimsDetailPage() {
     setLocationId,
     orgContextHeaders,
     canFetch,
+    allowedLocationIds,
   } = useBypassOrgLocation(CLAIMS_ORG_STORAGE_KEY)
 
   const claimQuery = UseApiQuery<SubmitResponse>({
@@ -67,6 +68,7 @@ export function ClaimsDetailPage() {
           <BypassOrgLocationPicker
             value={selectedLocationId}
             onChange={setLocationId}
+            allowedLocationIds={allowedLocationIds}
             hint="Claim actions are scoped to the selected organization location."
           />
         </ClaimSurface>

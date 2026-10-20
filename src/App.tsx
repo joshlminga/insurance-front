@@ -111,6 +111,11 @@ const VehicleUsePage = lazy(() => import("./app/admin/product/motor/vehicle-use/
 const MotorAddonBenefitsPage = lazy(() => import("./app/admin/product/motor/motor-addon-benefits/page").then(m => ({ default: m.MotorAddonBenefitsPage })))
 const MotorDetailedBenefitPage = lazy(() => import("./app/admin/product/motor/motor-detailed-benefit/page").then(m => ({ default: m.MotorDetailedBenefitPage })))
 const MotorProductRatesPage = lazy(() => import("./app/admin/product/motor/motor-rates/page").then(m => ({ default: m.MotorProductRatesPage })))
+const MotorRateBenefitsAdminPage = lazy(() =>
+  import("./app/admin/product/motor/motor-rate-benefits/page").then(m => ({
+    default: m.MotorRateBenefitsPage,
+  }))
+)
 const TravelProductsPage = lazy(() =>
   import("./app/admin/product/travel/products/page").then(m => ({
     default: m.TravelProductsPage,
@@ -121,19 +126,24 @@ const TravelCoveragePage = lazy(() =>
     default: m.TravelCoveragePage,
   }))
 )
-const TravelBoundPage = lazy(() =>
-  import("./app/admin/product/travel/bound/page").then(m => ({
-    default: m.TravelBoundPage,
+const TravelProductRatesPage = lazy(() =>
+  import("./app/admin/product/travel/rates/page").then(m => ({
+    default: m.TravelProductRatesPage,
   }))
 )
-const TravelTripTypePage = lazy(() =>
-  import("./app/admin/product/travel/trip-type/page").then(m => ({
-    default: m.TravelTripTypePage,
+const TravelBenefitSectionPage = lazy(() =>
+  import("./app/admin/product/travel/benefit-section/page").then(m => ({
+    default: m.TravelBenefitSectionPage,
   }))
 )
-const TravelPlanTypePage = lazy(() =>
-  import("./app/admin/product/travel/plan-type/page").then(m => ({
-    default: m.TravelPlanTypePage,
+const TravelBenefitCommonPage = lazy(() =>
+  import("./app/admin/product/travel/benefit-common/page").then(m => ({
+    default: m.TravelBenefitCommonPage,
+  }))
+)
+const TravelProductBenefitsPage = lazy(() =>
+  import("./app/admin/product/travel/benefits/page").then(m => ({
+    default: m.TravelProductBenefitsPage,
   }))
 )
 const MotorQuotationPage = lazy(() => import("./app/admin/quotations/motor/page").then(m => ({ default: m.MotorQuotationPage })))
@@ -901,6 +911,16 @@ export const router = createBrowserRouter([
             ),
           },
           {
+            path: "products/motor-rate-benefits/:rateId",
+            element: (
+              <S>
+                <AdminModulePage module={MODULES.PRODUCT_MOTOR}>
+                  <MotorRateBenefitsAdminPage />
+                </AdminModulePage>
+              </S>
+            ),
+          },
+          {
             path: "products/motor/cover-types",
             element: (
               <S>
@@ -984,26 +1004,34 @@ export const router = createBrowserRouter([
             ),
           },
           {
-            path: "products/travel/bound",
+            path: "products/travel/benefit-section",
             element: (
               <S>
-                <TravelBoundPage />
+                <TravelBenefitSectionPage />
               </S>
             ),
           },
           {
-            path: "products/travel/trip-type",
+            path: "products/travel/benefit-common",
             element: (
               <S>
-                <TravelTripTypePage />
+                <TravelBenefitCommonPage />
               </S>
             ),
           },
           {
-            path: "products/travel/plan-type",
+            path: "products/travel-rates/:productId",
             element: (
               <S>
-                <TravelPlanTypePage />
+                <TravelProductRatesPage />
+              </S>
+            ),
+          },
+          {
+            path: "products/travel-benefits/:productId",
+            element: (
+              <S>
+                <TravelProductBenefitsPage />
               </S>
             ),
           },

@@ -1,6 +1,9 @@
 import axios from 'axios'
-import { isBypassUser } from '@/auth/can'
 import { AUTH_STORAGE_KEY, ORG_LOCATION_HEADER } from '@/auth/constants'
+import {
+  isPlatformSuperAdmin,
+  uniqueScopedLocationIds,
+} from '@/auth/org-context'
 import type { Abilities } from '@/auth/types'
 import { buildRequestContextHeaders } from '@/lib/request-context-headers'
 import { getAccessToken } from '@/auth/access-token'
@@ -71,9 +74,15 @@ apiClient.interceptors.request.use(
 
                 const locationId = parsed.organizationLocationId
                 const abilities = parsed.abilities
-                const isBypass = isBypassUser(abilities)
+                // Super admin: pages send X-Organization-Location-Id explicitly.
+                // Public general (no role scopes): no org header.
+                // Scoped staff (including is_general org admins): send session location.
+                const hasScopes = uniqueScopedLocationIds(abilities).length > 0
+                const skipHeader =
+                    isPlatformSuperAdmin(abilities) ||
+                    (Boolean(abilities?.is_general) && !hasScopes)
 
-                if (!isBypass && locationId != null) {
+                if (!skipHeader && locationId != null) {
                     config.headers[ORG_LOCATION_HEADER] = String(locationId)
                 }
             } catch (error) {

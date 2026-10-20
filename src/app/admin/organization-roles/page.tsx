@@ -1,4 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { useAbilities } from "@/auth/useAbilities"
+import {
+  isPlatformSuperAdmin,
+  uniqueScopedLocationIds,
+} from "@/auth/org-context"
 import { PageHeader } from "@/components/shared"
 import { ActionColumn } from "@/dev/columns"
 import { OrganizationRolesOrgsColumns } from "@/dev/columns/admin/organization-roles-orgs"
@@ -8,13 +13,20 @@ import { UseApiQuery } from "@/hooks/hooks"
 import { SingleActionsHandler, SubmitResponse, TFilterOptions, TPaginationFilters } from "@/types/types"
 import { FILTEROPTIONS, ReusableReducer } from "@/utils/constatnts"
 import { EROUTES } from "@/utils/enums"
-import { useReducer } from "react"
+import { useEffect, useMemo, useReducer } from "react"
 import { useNavigate } from "react-router-dom"
 
 import { extractOrgLocationsFromResponse, getOrgLocationId } from "./role-utils"
 
 const OrganizationRolesPage = () => {
   const navigate = useNavigate()
+  const { abilities, locationOptions } = useAbilities()
+  const scopedLocationIds = useMemo(
+    () => uniqueScopedLocationIds(abilities),
+    [abilities],
+  )
+  const skipOrgPicker =
+    !isPlatformSuperAdmin(abilities) && scopedLocationIds.length === 1
 
   const [filter, optionsDispatcher] = useReducer(
     ReusableReducer<TPaginationFilters & TFilterOptions>,
@@ -25,6 +37,13 @@ const OrganizationRolesPage = () => {
     debounceCallback: optionsDispatcher,
   })
 
+  useEffect(() => {
+    if (!skipOrgPicker) return
+    const locationId = scopedLocationIds[0] ?? locationOptions[0]?.locationId
+    if (!locationId) return
+    navigate(`${EROUTES.ORGANIZATION_ROLES}/${locationId}`, { replace: true })
+  }, [skipOrgPicker, scopedLocationIds, locationOptions, navigate])
+
   const { data, isLoading, isError } = UseApiQuery<SubmitResponse>({
     url: "organization-location",
     params: {
@@ -33,7 +52,7 @@ const OrganizationRolesPage = () => {
       term: filter.term,
     },
     queryOptions: {
-      enabled: true,
+      enabled: !skipOrgPicker,
     },
   })
 
@@ -49,7 +68,22 @@ const OrganizationRolesPage = () => {
     },
   ]
 
-  const tableData = extractOrgLocationsFromResponse(data)
+  const rawTableData = extractOrgLocationsFromResponse(data)
+  const tableData =
+    !isPlatformSuperAdmin(abilities) && scopedLocationIds.length > 0
+      ? rawTableData.filter((row: any) => {
+          const id = Number(getOrgLocationId(row))
+          return scopedLocationIds.includes(id)
+        })
+      : rawTableData
+
+  if (skipOrgPicker) {
+    return (
+      <div className="flex h-64 items-center justify-center text-sm text-muted-foreground">
+        Loading organizations...
+      </div>
+    )
+  }
 
   return (
     <div>

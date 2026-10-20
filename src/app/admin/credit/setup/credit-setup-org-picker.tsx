@@ -12,16 +12,19 @@ type CreditSetupOrgPickerProps = {
   value: string
   onChange: (value: string) => void
   className?: string
+  /** null = all (super admin); otherwise only the user's scoped locations */
+  allowedLocationIds?: number[] | null
 }
 
 /**
- * Lets super admins choose which organization location credit setup applies to.
- * Loads locations filtered to Company / Organization / Partner only.
+ * Lets super admins / multi-location staff choose which organization location
+ * credit setup applies to. Loads locations filtered to Company / Organization / Partner.
  */
 export function CreditSetupOrgPicker({
   value,
   onChange,
   className,
+  allowedLocationIds,
 }: CreditSetupOrgPickerProps) {
   return (
     <BypassOrgLocationPicker
@@ -29,6 +32,7 @@ export function CreditSetupOrgPicker({
       onChange={onChange}
       className={className}
       organizationTypes={[...CREDIT_SETUP_ORGANIZATION_TYPES]}
+      allowedLocationIds={allowedLocationIds}
       hint="Pool settings and user allocations apply to the selected location only."
     />
   )

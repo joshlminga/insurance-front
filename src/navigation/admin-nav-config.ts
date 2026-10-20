@@ -20,6 +20,11 @@ export type NavSubItem = {
   title: string
   /** Leaf links require a url; group nodes may omit it and use the first child url */
   url?: string
+  /**
+   * Extra path prefixes that keep this item active/open
+   * (e.g. travel-rates / travel-benefits outside /travel/).
+   */
+  matchPrefixes?: string[]
   /** Case 2: sub-item visible only when user has this module */
   module?: string
   /** Case 2 (any): sub-item visible when user has any of these modules */
@@ -35,6 +40,11 @@ export type NavItem = {
   url: string
   icon?: LucideIcon
   isActive?: boolean
+  /**
+   * Extra path prefixes that keep this item active/open
+   * (e.g. travel-rates / travel-benefits outside /travel/).
+   */
+  matchPrefixes?: string[]
   /** Case 1 (single): parent visible when user has this module */
   module?: string
   /** Case 1 (any): parent visible when user has any of these modules */
@@ -164,13 +174,18 @@ export const adminNavConfig: NavItem[] = [
   },
   {
     title: 'Motor',
-    url: `${EROUTES.DASHBOARD}/${EPREFIX.PRODUCTS}`,
+    // Use /products/motor — NOT /products — so Travel routes do not open Motor.
+    url: EROUTES.PRODUCTS,
     icon: LayoutDashboard,
     module: MODULES.PRODUCT_MOTOR,
+    matchPrefixes: [
+      `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor-rates`,
+      `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor-rate-benefits`,
+    ],
     items: [
       {
         title: 'Motor Products',
-        url: `${EROUTES.DASHBOARD}/${EPREFIX.PRODUCTS}/motor`,
+        url: EROUTES.PRODUCTS,
         module: MODULES.PRODUCT_MOTOR,
       },
       {
@@ -209,6 +224,11 @@ export const adminNavConfig: NavItem[] = [
     title: 'Travel',
     url: EROUTES.TRAVEL_PRODUCTS,
     icon: Plane,
+    // Rates/benefits live at travel-rates / travel-benefits (not under /travel/).
+    matchPrefixes: [
+      `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/travel-rates`,
+      `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/travel-benefits`,
+    ],
     items: [
       {
         title: 'Products',
@@ -219,16 +239,12 @@ export const adminNavConfig: NavItem[] = [
         url: EROUTES.TRAVEL_COVERAGE,
       },
       {
-        title: 'Bound',
-        url: EROUTES.TRAVEL_BOUND,
+        title: 'Section',
+        url: EROUTES.TRAVEL_BENEFIT_SECTION,
       },
       {
-        title: 'Trip Type',
-        url: EROUTES.TRAVEL_TRIP_TYPE,
-      },
-      {
-        title: 'Plan Type',
-        url: EROUTES.TRAVEL_PLAN_TYPE,
+        title: 'Common',
+        url: EROUTES.TRAVEL_BENEFIT_COMMON,
       },
     ],
   },

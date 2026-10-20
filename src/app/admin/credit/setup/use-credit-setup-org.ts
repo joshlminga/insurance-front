@@ -4,9 +4,8 @@ import { useBypassOrgLocation } from '@/auth/use-bypass-org-location'
 export const CREDIT_SETUP_ORG_STORAGE_KEY = 'credit-setup-organization-location-id'
 
 /**
- * Super admins / is_general users have no org in session.
- * This hook keeps a per-page credit-setup location choice and builds the
- * same X-Organization-Location-Id header org finance users get from auth.
+ * Super admins / multi-location staff pick a location for credit setup.
+ * Single-location staff use their scoped location automatically.
  */
 export function useCreditSetupOrg() {
   const {
@@ -15,6 +14,7 @@ export function useCreditSetupOrg() {
     setLocationId,
     orgContextHeaders,
     canFetch,
+    allowedLocationIds,
   } = useBypassOrgLocation(CREDIT_SETUP_ORG_STORAGE_KEY)
 
   return {
@@ -23,5 +23,6 @@ export function useCreditSetupOrg() {
     setLocationId,
     orgContextHeaders,
     canFetchCreditSetup: canFetch,
+    allowedLocationIds,
   }
 }

@@ -1,25 +1,29 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useAbilities } from "@/auth/useAbilities"
+import {
+  isPlatformSuperAdmin,
+  uniqueScopedLocationIds,
+} from "@/auth/org-context"
 import { PageHeader } from "@/components/shared"
 import { ActionColumn } from "@/dev/columns"
-import { 
-  OrganizationRolesOrgsColumns 
+import {
+  OrganizationRolesOrgsColumns
 } from "@/dev/columns/admin/organization-roles-orgs"
-import { 
-  CustomBaseTable, 
-  SearchTools 
+import {
+  CustomBaseTable,
+  SearchTools
 } from "@/dev/table"
 import { useDebounce } from "@/hooks"
 import { UseApiQuery } from "@/hooks/hooks"
-import { 
-  SingleActionsHandler, 
-  SubmitResponse, 
+import {
+  SingleActionsHandler,
+  SubmitResponse,
   TFilterOptions,
-   TPaginationFilters 
+   TPaginationFilters
   } from "@/types/types"
 import { FILTEROPTIONS, ReusableReducer } from "@/utils/constatnts"
 import { EROUTES } from "@/utils/enums"
-import { useEffect, useReducer } from "react"
+import { useEffect, useMemo, useReducer } from "react"
 import { useNavigate } from "react-router-dom"
 
 import {
@@ -29,9 +33,14 @@ import {
 
 const OrganizationMembersPage = () => {
   const navigate = useNavigate()
-  const { locationOptions, isBypass } = useAbilities()
-  // Only non-bypass users with exactly one scoped location skip the org picker
-  const skipOrgPicker = !isBypass && locationOptions.length === 1
+  const { abilities, locationOptions } = useAbilities()
+  const scopedLocationIds = useMemo(
+    () => uniqueScopedLocationIds(abilities),
+    [abilities],
+  )
+  // One unique scoped location → skip the org list (super admin always sees the list)
+  const skipOrgPicker =
+    !isPlatformSuperAdmin(abilities) && scopedLocationIds.length === 1
 
   const [filter, optionsDispatcher] = useReducer(
     ReusableReducer<TPaginationFilters & TFilterOptions>,
@@ -42,13 +51,13 @@ const OrganizationMembersPage = () => {
     debounceCallback: optionsDispatcher,
   })
 
-  // Single scoped non-bypass location → skip picker (replace so Back does not loop)
+  // Single scoped location → skip picker (replace so Back does not loop)
   useEffect(() => {
     if (!skipOrgPicker) return
-    const locationId = locationOptions[0]?.locationId
+    const locationId = scopedLocationIds[0] ?? locationOptions[0]?.locationId
     if (!locationId) return
     navigate(`${EROUTES.ORGANIZATION_MEMBERS}/${locationId}`, { replace: true })
-  }, [skipOrgPicker, locationOptions, navigate])
+  }, [skipOrgPicker, scopedLocationIds, locationOptions, navigate])
 
   const { data, isLoading, isError } = UseApiQuery<SubmitResponse>({
     url: "organization-location",
@@ -73,7 +82,17 @@ const OrganizationMembersPage = () => {
       conditional: (rowData) => !!(getOrgLocationId(rowData)),
     },
   ]
-  const tableData = extractOrgLocationsFromResponse(data)
+
+  const rawTableData = extractOrgLocationsFromResponse(data)
+  // Multi-location staff: only show organizations they belong to
+  const tableData =
+    !isPlatformSuperAdmin(abilities) && scopedLocationIds.length > 0
+      ? rawTableData.filter((row: any) => {
+          const id = Number(getOrgLocationId(row))
+          return scopedLocationIds.includes(id)
+        })
+      : rawTableData
+
   if (skipOrgPicker) {
     return (
       <div className="flex h-64 items-center justify-center text-sm text-muted-foreground">

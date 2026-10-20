@@ -127,3 +127,65 @@ export const MotorProductsColumns: ColumnDef<any>[] = [
         },
     },
 ];
+
+export const TravelProductsColumns: ColumnDef<any>[] = [
+    {
+        id: "insurer",
+        header: () => <div>Insurer</div>,
+        cell: ({ row }) => {
+            const insurerName = row.original?.organization?.name ?? "N/A";
+            return <div>{insurerName}</div>;
+        },
+    },
+    {
+        accessorKey: "name",
+        header: () => <div>Name</div>,
+        cell: ({ row }) => {
+            const name: string = row.getValue("name");
+            return <div>{name}</div>;
+        },
+    },
+    {
+        accessorKey: "for_public",
+        header: () => <div>Public / Private</div>,
+        cell: ({ row }) => {
+            const isPublic: boolean = row.getValue("for_public");
+            return (
+                <Badge
+                    className={`rounded-lg font-semibold ${isPublic ? "bg-gray-200 text-gray-800" : "bg-cyan-200 text-cyan-800"
+                        }`}>
+                    {isPublic ? "Public" : "Private"}
+                </Badge>
+            );
+        },
+    },
+    {
+        accessorKey: "has_rules",
+        header: () => <div>Has Rules</div>,
+        cell: ({ row }) => {
+            // Missing has_rules (older API payload) means the product has no rule row.
+            const hasRules = row.getValue("has_rules") === true;
+            return (
+                <Badge
+                    className={`rounded-lg font-semibold ${hasRules ? "bg-blue-100 text-blue-800" : "bg-gray-200 text-gray-800"
+                        }`}>
+                    {hasRules ? "Yes" : "No"}
+                </Badge>
+            );
+        },
+    },
+    {
+        accessorKey: "is_active",
+        header: () => <div>Status</div>,
+        cell: ({ row }) => {
+            const isActive: boolean = row.getValue("is_active");
+            return (
+                <Badge
+                    className={`rounded-lg font-semibold ${isActive ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                        }`}>
+                    {isActive ? "Active" : "Inactive"}
+                </Badge>
+            );
+        },
+    },
+];

@@ -4,6 +4,8 @@
  * - App\Enums\Ace\TravelBound
  * - App\Enums\Ace\TravelPlan (Travel As)
  * - App\Enums\Ace\TravelTrip
+ * - App\Enums\Ace\Travel\TravelBenefitType
+ * - App\Enums\Ace\Travel\TravelBenefitShowIn
  */
 
 export const TRAVEL_BOUND = {
@@ -68,6 +70,92 @@ export const TRAVEL_TRIP_OPTIONS: Array<{
   { value: TRAVEL_TRIP.Multi, label: 'Multi' },
   { value: TRAVEL_TRIP.Annual, label: 'Annual' },
 ]
+
+/** Mirrors App\Enums\Ace\TravelCharged */
+export const TRAVEL_CHARGED = {
+  Once: 'Once',
+  Daily: 'Daily',
+} as const
+
+export type TravelChargedValue = (typeof TRAVEL_CHARGED)[keyof typeof TRAVEL_CHARGED]
+
+export const TRAVEL_CHARGED_OPTIONS: Array<{
+  value: TravelChargedValue
+  label: string
+}> = [
+  { value: TRAVEL_CHARGED.Once, label: 'Once' },
+  { value: TRAVEL_CHARGED.Daily, label: 'Daily' },
+]
+
+/** Mirrors App\Enums\Ace\TravelBillingFormat */
+export const TRAVEL_BILLING = {
+  PerPerson: 'Per Person',
+  PerFamilyGroup: 'Per Family/Group',
+} as const
+
+export type TravelBillingValue = (typeof TRAVEL_BILLING)[keyof typeof TRAVEL_BILLING]
+
+export const TRAVEL_BILLING_OPTIONS: Array<{
+  value: TravelBillingValue
+  label: string
+}> = [
+  { value: TRAVEL_BILLING.PerPerson, label: 'Per Person' },
+  { value: TRAVEL_BILLING.PerFamilyGroup, label: 'Per Family/Group' },
+]
+
+/**
+ * Common benefit taxonomy type — mirrors TravelBenefitType.
+ * API field: `type` (only benefittravel_benefit today).
+ */
+export const TRAVEL_BENEFIT_TYPE = {
+  Benefits: 'benefittravel_benefit',
+} as const
+
+export type TravelBenefitTypeValue =
+  (typeof TRAVEL_BENEFIT_TYPE)[keyof typeof TRAVEL_BENEFIT_TYPE]
+
+export const TRAVEL_BENEFIT_TYPE_OPTIONS: Array<{
+  value: TravelBenefitTypeValue
+  label: string
+}> = [{ value: TRAVEL_BENEFIT_TYPE.Benefits, label: 'Benefits' }]
+
+/**
+ * Where a common benefit appears — mirrors TravelBenefitShowIn.
+ * API field: `group` (all / comparison / single).
+ */
+export const TRAVEL_BENEFIT_SHOW_IN = {
+  All: 'all',
+  Comparison: 'comparison',
+  Single: 'single',
+} as const
+
+export type TravelBenefitShowInValue =
+  (typeof TRAVEL_BENEFIT_SHOW_IN)[keyof typeof TRAVEL_BENEFIT_SHOW_IN]
+
+export const TRAVEL_BENEFIT_SHOW_IN_OPTIONS: Array<{
+  value: TravelBenefitShowInValue
+  label: string
+}> = [
+  { value: TRAVEL_BENEFIT_SHOW_IN.All, label: 'All' },
+  { value: TRAVEL_BENEFIT_SHOW_IN.Comparison, label: 'Comparison' },
+  { value: TRAVEL_BENEFIT_SHOW_IN.Single, label: 'Single' },
+]
+
+/** Human label for a Show In / group value (table cells, etc.). */
+export const travelBenefitShowInLabel = (
+  group: string | null | undefined
+): string => {
+  const match = TRAVEL_BENEFIT_SHOW_IN_OPTIONS.find((o) => o.value === group)
+  return match?.label ?? (group?.trim() || '—')
+}
+
+/** Human label for a Benefit Type value. */
+export const travelBenefitTypeLabel = (
+  type: string | null | undefined
+): string => {
+  const match = TRAVEL_BENEFIT_TYPE_OPTIONS.find((o) => o.value === type)
+  return match?.label ?? (type?.trim() || '—')
+}
 
 /** sessionStorage key for the progressive travel quotation form payload */
 export const TRAVEL_QUOTATION_FORM_SESSION_KEY = 'travel_quotation_form'

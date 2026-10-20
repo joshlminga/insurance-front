@@ -11,17 +11,18 @@ import { EMETHODS, FILTEROPTIONS, ReusableReducer } from '@/utils/constatnts';
 // import { ShowToast } from '@/utils/utils';
 import { Plus } from 'lucide-react';
 import { useReducer } from 'react'
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { AddMotorProductRatesPage } from './modals/add-rates';
 import { MotorRateColumns } from '@/dev/columns/admin/motor-rates';
 import { ShowToast } from '@/utils/utils';
 import { extractErrorMessage } from '@/utils/helpers';
 import { EditMotorProductRatesPage } from './modals/edit-rates';
 import { MotorRateBenefitsPage } from './modals/rate-benefits';
-import { MotorRateExcessBenefitsPage } from './modals/excess-benefits';
+import { EPREFIX } from '@/utils/enums';
 
 export const MotorProductRatesPage = () => {
     const { slung } = useParams();
+    const navigate = useNavigate();
     const [filter, optionsDispatcher] = useReducer(
         ReusableReducer<TPaginationFilters & TFilterOptions>,
         { ...FILTEROPTIONS, page: 1, pageSize: 15 }
@@ -148,12 +149,17 @@ export const MotorProductRatesPage = () => {
             },
         },
         {
-            label: 'Excess Benefits',
+            label: 'View Benefits',
             onSelect: (data) => {
-                handleDialogContextSwitch({
-                    componentProps: { data, refetch },
-                    Component: MotorRateExcessBenefitsPage,
-                })
+                // Full page like Travel View Benefits (rate-scoped rate-details).
+                navigate(
+                    `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor-rate-benefits/${data?.id}`,
+                    {
+                        state: {
+                            productName: data?.product?.name ?? undefined,
+                        },
+                    }
+                )
             },
         },
     ];

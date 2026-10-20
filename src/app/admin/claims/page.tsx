@@ -43,6 +43,7 @@ export function ClaimsMotorPage() {
     setLocationId,
     orgContextHeaders,
     canFetch,
+    allowedLocationIds,
   } = useBypassOrgLocation(CLAIMS_ORG_STORAGE_KEY)
 
   const [step, setStep] = useState<Step>('search')
@@ -112,6 +113,7 @@ export function ClaimsMotorPage() {
           <BypassOrgLocationPicker
             value={selectedLocationId}
             onChange={setLocationId}
+            allowedLocationIds={allowedLocationIds}
             hint="Search and registration are scoped to the selected organization location."
           />
         </ClaimSurface>

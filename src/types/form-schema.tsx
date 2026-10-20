@@ -807,6 +807,40 @@ export const CreateVehicleClassesSchema = z.object({
     .max(1000, "Description is too long"),
 })
 
+/**
+ * Travel Coverage form. Multi-selects keep taxonomy ids as strings;
+ * buildTravelCoveragePayload() turns them into number[] for the API.
+ */
+export const TravelCoverageSchema = z
+  .object({
+    name: z
+      .string()
+      .trim()
+      .min(2, "Coverage name must be at least 2 characters")
+      .max(255, "Coverage name is too long"),
+    description: z
+      .string()
+      .max(255, "Description is too long")
+      .optional()
+      .or(z.literal("")),
+    continents: z
+      .array(z.string().min(1))
+      .min(1, "Select at least one continent"),
+    included_countries: z.array(z.string()).default([]),
+    exclude_countries: z.array(z.string()).default([]),
+  })
+  .superRefine((data, ctx) => {
+    const included = new Set(data.included_countries)
+    const overlap = data.exclude_countries.filter((id) => included.has(id))
+    if (overlap.length > 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Exclude countries cannot overlap with included countries",
+        path: ["exclude_countries"],
+      })
+    }
+  })
+
 export const CreateVehicleUsesSchema = z.object({
   name: z
     .string()
@@ -980,12 +1014,15 @@ export const CreateMotorRateBenefitsSchema = z
   });
 
 export const CreateMotorRateExcessBenefitsSchema = z.object({
-  detail_benefit_id: z.string().min(1, "Detailed Benefit is required"),
-  detail_type: z.string().optional().or(z.literal("")),
+  detail_benefit_id: z.string().min(1, "Common benefit is required"),
+  detail_type: z.enum(["Benefit", "Excess", "Both"], {
+    error: "Detail type is required",
+  }),
+  // API: key required, value optional
+  key: z.string().trim().min(1, "Key is required"),
   value: z.string().optional().or(z.literal("")),
-  key: z.string().optional().or(z.literal("")),
-  detail_highlight: z.string().optional().or(z.literal("")),
-  product_rate_id: z.string().optional()
+  detail_highlight: z.enum(["true", "false"]).optional().or(z.literal("")),
+  product_rate_id: z.string().optional(),
 })
 
 export const CreateProductSchema = z.object({
@@ -1708,4 +1745,227 @@ export const MulticurrencySettingsSchema = z.object({
     .int('Round precision must be a whole number')
     .min(0, 'Round precision must be 0–10')
     .max(10, 'Round precision must be 0–10'),
+})
+
+/**
+ * Yes/No answers are stored as the strings "true" and "false".
+ * ReusableSelect only keeps option values as strings.
+ * buildTravelProductPayload() turns them into real booleans for the API.
+ */
+const travelYesNo = z.enum(["true", "false"], {
+  error: "Select Yes or No",
+})
+
+export const TravelProductSchema = z
+  .object({
+    organization_location_id: z.string().min(1, "Insurer is required"),
+    name: z
+      .string()
+      .trim()
+      .min(2, "Product name must be at least 2 characters")
+      .max(255, "Product name is too long"),
+    officename: z
+      .string()
+      .trim()
+      .max(255, "Office name is too long")
+      .optional()
+      .or(z.literal("")),
+    levy_applied: travelYesNo,
+    for_public: travelYesNo,
+    currency: z.string().optional().or(z.literal("")),
+    start_date: z.string().optional().or(z.literal("")),
+    expiry_date: z.string().optional().or(z.literal("")),
+    // Optional rows for organizations that can see a private product. Empty means none.
+    organization_location_ids: z.array(
+      z.object({
+        organization_location_id: z.string(),
+      })
+    ),
+    coverages: z
+      .array(
+        z.object({
+          coverage_id: z.string().min(1, "Coverage is required"),
+          // Mirrors App\Enums\Ace\TravelBound (Inbound | Outbound)
+          bound_type: z.enum(["Inbound", "Outbound"], {
+            error: "Bound is required",
+          }),
+        })
+      )
+      .min(1, "Add at least one coverage"),
+    has_rules: travelYesNo,
+    quotation_api: travelYesNo,
+    policy_api: travelYesNo,
+    payment_api: travelYesNo,
+    certificate_api: travelYesNo,
+  })
+  .superRefine((data, ctx) => {
+    if (data.start_date && data.expiry_date && data.expiry_date < data.start_date) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Expiry date must be after or equal to start date",
+        path: ["expiry_date"],
+      })
+    }
+  })
+
+/**
+ * One day-band row inside a travel rate group.
+ * Optional id is kept on edit so the API can update that rate instead of creating a new one.
+ */
+const TravelRateRowSchema = z.object({
+  id: z.string().optional().or(z.literal("")),
+  min_days: z.string().optional().or(z.literal("")),
+  max_days: z.string().optional().or(z.literal("")),
+  trip: z.enum(["Single", "Multi", "Annual"], {
+    error: "Trip type is required",
+  }),
+  premium: z.string().optional().or(z.literal("")),
+  minimum: z.string().optional().or(z.literal("")),
+  loading: z
+    .string()
+    .max(10, "Loading is too long")
+    .optional()
+    .or(z.literal("")),
+  description: z
+    .string()
+    .max(255, "Description is too long")
+    .optional()
+    .or(z.literal("")),
+  is_active: travelYesNo,
+})
+
+/**
+ * Travel rate group form: group fields + at least one nested rate row.
+ * Numbers stay as strings in the form; buildTravelRateGroupPayload() converts them.
+ */
+export const TravelRateGroupSchema = z
+  .object({
+    plan: z.enum(["Individual", "Family", "Group", "Student", "Corporate"], {
+      error: "Plan is required",
+    }),
+    charged: z.enum(["Once", "Daily"], {
+      error: "Charged is required",
+    }),
+    billing: z.enum(["Per Person", "Per Family/Group"], {
+      error: "Billing is required",
+    }),
+    min_age: z.string().optional().or(z.literal("")),
+    max_age: z.string().optional().or(z.literal("")),
+    min_member: z.string().optional().or(z.literal("")),
+    max_member: z.string().optional().or(z.literal("")),
+    start_date: z.string().optional().or(z.literal("")),
+    expiry_date: z.string().optional().or(z.literal("")),
+    is_maintenance: travelYesNo,
+    rates: z.array(TravelRateRowSchema).min(1, "Add at least one rate band"),
+  })
+  .superRefine((data, ctx) => {
+    if (data.start_date && data.expiry_date && data.expiry_date < data.start_date) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Expiry date must be after or equal to start date",
+        path: ["expiry_date"],
+      })
+    }
+    const minAge = data.min_age ? Number(data.min_age) : null
+    const maxAge = data.max_age ? Number(data.max_age) : null
+    if (minAge !== null && maxAge !== null && maxAge < minAge) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Max age must be greater than or equal to min age",
+        path: ["max_age"],
+      })
+    }
+    const minMember = data.min_member ? Number(data.min_member) : null
+    const maxMember = data.max_member ? Number(data.max_member) : null
+    if (minMember !== null && maxMember !== null && maxMember < minMember) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Max members must be greater than or equal to min members",
+        path: ["max_member"],
+      })
+    }
+    data.rates.forEach((row, index) => {
+      const minDays = row.min_days ? Number(row.min_days) : null
+      const maxDays = row.max_days ? Number(row.max_days) : null
+      if (minDays !== null && maxDays !== null && maxDays < minDays) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Max days must be greater than or equal to min days",
+          path: ["rates", index, "max_days"],
+        })
+      }
+    })
+  })
+
+/**
+ * Travel Benefit Section (taxonomy type benefittravel_section).
+ * API accepts name only.
+ */
+export const TravelBenefitSectionSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(2, "Section name must be at least 2 characters")
+    .max(255, "Section name is too long"),
+})
+
+/**
+ * Travel Common Benefits catalog form.
+ * UI labels → API: Benefit Type→type, Show In→group, Short Title→name, Full Benefit Title→title.
+ */
+export const TravelBenefitCommonSchema = z.object({
+  type: z.string().min(1, "Benefit type is required"),
+  group: z.string().min(1, "Show In is required"),
+  name: z
+    .string()
+    .trim()
+    .min(1, "Short title is required")
+    .max(255, "Short title is too long"),
+  title: z
+    .string()
+    .max(255, "Full benefit title is too long")
+    .optional()
+    .or(z.literal("")),
+})
+
+/**
+ * One product-scoped travel benefit row (edit + each create row).
+ * product_travel_ids is forced from the route — not a form field.
+ * Benefit and excess are each optional, but at least one must be filled.
+ */
+export const TravelBenefitRowSchema = z
+  .object({
+    common_id: z.string().min(1, "Common benefit is required"),
+    section_id: z.string().min(1, "Section is required"),
+    name: z
+      .string()
+      .max(255, "Name is too long")
+      .optional()
+      .or(z.literal("")),
+    benefit: z.string().optional().or(z.literal("")),
+    excess: z.string().optional().or(z.literal("")),
+  })
+  .superRefine((data, ctx) => {
+    const hasBenefit = Boolean(data.benefit?.trim())
+    const hasExcess = Boolean(data.excess?.trim())
+    if (!hasBenefit && !hasExcess) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Provide benefit text or excess (at least one)",
+        path: ["benefit"],
+      })
+    }
+  })
+
+/** Edit form = one benefit row. */
+export const TravelBenefitSchema = TravelBenefitRowSchema
+
+/**
+ * Create form: one or more rows share one group_number on the API.
+ * product_travel_ids is injected from the route productId.
+ */
+export const TravelBenefitCreateSchema = z.object({
+  benefits: z
+    .array(TravelBenefitRowSchema)
+    .min(1, "Add at least one benefit row"),
 })

@@ -41,6 +41,7 @@ export function ClaimsListPage() {
     setLocationId,
     orgContextHeaders,
     canFetch,
+    allowedLocationIds,
   } = useBypassOrgLocation(CLAIMS_ORG_STORAGE_KEY)
 
   const [filter, optionsDispatcher] = useReducer(
@@ -102,6 +103,7 @@ export function ClaimsListPage() {
           <BypassOrgLocationPicker
             value={selectedLocationId}
             onChange={setLocationId}
+            allowedLocationIds={allowedLocationIds}
             hint="Claims are scoped to the selected organization location."
           />
         </ClaimSurface>

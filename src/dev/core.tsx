@@ -785,9 +785,14 @@ export const CustomDialogComponent = <T = TKeyValueStringType,>({
                     className ?? ""
                 )}>
                 <DialogTitle className="sr-only">{title ?? "Dialog"}</DialogTitle>
+                {/*
+                  min-h-0 (not h-full): let the dialog hug content up to max-h,
+                  then scroll. h-full was stretching short forms and leaving a
+                  tall empty gap under the last fields (e.g. travel product rules).
+                */}
                 <div
                     {...{
-                        className: `relative w-full flex-1 h-full overflow-y-auto py-5! px-5`,
+                        className: `relative w-full min-h-0 flex-1 overflow-y-auto py-5! px-5`,
                     }}>
                     {children}
                 </div>

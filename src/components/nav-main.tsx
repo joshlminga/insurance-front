@@ -3,6 +3,11 @@
 import { ChevronRight } from "lucide-react"
 import { Link, useLocation } from "react-router-dom"
 import type { NavItem, NavSubItem } from "@/navigation/admin-nav-config"
+import {
+  isNavItemActive,
+  isPathActive,
+  isSubItemActive,
+} from "@/navigation/nav-path-active"
 
 import {
   Collapsible,
@@ -18,21 +23,6 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
-
-function isPathActive(pathname: string, url?: string): boolean {
-  if (!url) return false
-  return pathname === url || pathname.startsWith(`${url}/`)
-}
-
-function isSubItemActive(pathname: string, subItem: NavSubItem): boolean {
-  if (isPathActive(pathname, subItem.url)) return true
-  return subItem.items?.some((child) => isSubItemActive(pathname, child)) ?? false
-}
-
-function isNavItemActive(pathname: string, item: NavItem): boolean {
-  if (isPathActive(pathname, item.url)) return true
-  return item.items?.some((subItem) => isSubItemActive(pathname, subItem)) ?? false
-}
 
 function NavSubMenu({
   items,
@@ -55,7 +45,7 @@ function NavSubMenu({
               <SidebarMenuSubButton
                 asChild
                 size={depth > 0 ? "sm" : "md"}
-                isActive={pathname === subItem.url}>
+                isActive={isPathActive(pathname, subItem.url, subItem.matchPrefixes)}>
                 <Link to={subItem.url ?? "#"}>
                   <span>{subItem.title}</span>
                 </Link>

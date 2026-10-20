@@ -48,6 +48,7 @@ export function ClaimsSettingsPage() {
     setLocationId,
     orgContextHeaders,
     canFetch,
+    allowedLocationIds,
   } = useBypassOrgLocation(CLAIMS_ORG_STORAGE_KEY)
 
   return (
@@ -66,6 +67,7 @@ export function ClaimsSettingsPage() {
           <BypassOrgLocationPicker
             value={selectedLocationId}
             onChange={setLocationId}
+            allowedLocationIds={allowedLocationIds}
             hint="Settings are scoped to the selected organization location."
           />
         </ClaimSurface>

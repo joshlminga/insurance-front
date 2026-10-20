@@ -29,6 +29,12 @@ import {
     AccountAvatarSchema,
     CreateCoveringSchema,
     CreateVehicleClassesSchema,
+    TravelCoverageSchema,
+    TravelRateGroupSchema,
+    TravelBenefitSectionSchema,
+    TravelBenefitCommonSchema,
+    TravelBenefitSchema,
+    TravelBenefitCreateSchema,
     CreateVehicleUsesSchema,
     CreateMotorAddonBenefitsSchema,
     CreateMotorDetailedBenefitsSchema,
@@ -62,6 +68,7 @@ import {
     CreateCurrencySchema,
     EditCurrencySchema,
     MulticurrencySettingsSchema,
+    TravelProductSchema,
 } from "./form-schema";
 
 export type CustomerFormValues = z.infer<typeof CustomerDetailsSchema>
@@ -112,6 +119,12 @@ export type OrganizationLocationEditFormValues = z.infer<typeof OrganizationLoca
 export type CreateCoverTypeFormValues = z.infer<typeof CreateCoverTypeSchema>
 export type MotorCreateCoveringFormValues = z.infer<typeof CreateCoveringSchema>
 export type CreateVehicleClassesFormValues = z.infer<typeof CreateVehicleClassesSchema>
+export type TravelCoverageFormValues = z.infer<typeof TravelCoverageSchema>
+export type TravelRateGroupFormValues = z.infer<typeof TravelRateGroupSchema>
+export type TravelBenefitSectionFormValues = z.infer<typeof TravelBenefitSectionSchema>
+export type TravelBenefitCommonFormValues = z.infer<typeof TravelBenefitCommonSchema>
+export type TravelBenefitFormValues = z.infer<typeof TravelBenefitSchema>
+export type TravelBenefitCreateFormValues = z.infer<typeof TravelBenefitCreateSchema>
 export type CreateVehicleUsesFormValues = z.infer<typeof CreateVehicleUsesSchema>
 export type CreateMotorAddonBenefitsFormValues = z.infer<typeof CreateMotorAddonBenefitsSchema>
 export type CreateMotorDetailedBenefitsFormValues = z.infer<typeof CreateMotorDetailedBenefitsSchema>
@@ -162,3 +175,4 @@ export type EditDmvicPolicyNumberRuleFormValues = z.output<typeof EditDmvicPolic
 export type CreateCurrencyFormValues = z.infer<typeof CreateCurrencySchema>
 export type EditCurrencyFormValues = z.infer<typeof EditCurrencySchema>
 export type MulticurrencySettingsFormValues = z.infer<typeof MulticurrencySettingsSchema>
+export type TravelProductFormValues = z.infer<typeof TravelProductSchema>

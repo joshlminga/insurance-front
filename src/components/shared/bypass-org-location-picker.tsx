@@ -19,6 +19,11 @@ type BypassOrgLocationPickerProps = {
   className?: string
   /** Optional organization_type filter (e.g. Company / Partner). Omit to list all active locations. */
   organizationTypes?: string[]
+  /**
+   * When set, only these organization_location_id values appear.
+   * null / omit = no filter (super admin sees every location).
+   */
+  allowedLocationIds?: number[] | null
   /** Helper text under the select */
   hint?: string
 }
@@ -37,7 +42,7 @@ function formatLocationLabel(location: OrganizationLocationOption): string {
 }
 
 /**
- * Lets Super Admin / is_general users choose which organization location
+ * Lets Super Admin / multi-location staff choose which organization location
  * an org-scoped screen applies to (sent as X-Organization-Location-Id).
  */
 export function BypassOrgLocationPicker({
@@ -45,6 +50,7 @@ export function BypassOrgLocationPicker({
   onChange,
   className,
   organizationTypes,
+  allowedLocationIds,
   hint = 'Reports and lists apply to the selected organization location only.',
 }: BypassOrgLocationPickerProps) {
   const params = useMemo(() => {
@@ -68,7 +74,17 @@ export function BypassOrgLocationPicker({
     queryOptions: { enabled: true },
   })
 
-  const locations = (data?.data ?? []) as OrganizationLocationOption[]
+  const locations = useMemo(() => {
+    const rows = (data?.data ?? []) as OrganizationLocationOption[]
+    if (allowedLocationIds == null) {
+      return rows
+    }
+    const allowed = new Set(allowedLocationIds.map(String))
+    return rows.filter((location) =>
+      allowed.has(String(location.organization_location_id ?? '')),
+    )
+  }, [data?.data, allowedLocationIds])
+
   const selectValue = value && value !== '' ? value : undefined
 
   return (

@@ -14,6 +14,7 @@ import { useSessionTimeoutStore } from '@/stores/session-timeout-store'
 import { queryClient } from '@/utils/providers'
 import { EPREFIX, EROUTES } from '@/utils/enums'
 import type { Abilities, AuthSessionPayload } from '@/auth/types'
+import { singleScopedLocationId } from '@/auth/org-context'
 import {
   getRequestContext,
   setRequestContextValue,
@@ -216,12 +217,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (isTabSignedOut()) return
     const expiresAt = Date.now() + payload.expires_in * 1000
     suppressAuthPersist = false
+    // Org staff with exactly one branch: pin session location so axios sends the header.
+    const singleLocationId = singleScopedLocationId(payload.abilities)
     set({
       user: payload.user,
       token: payload.access_token,
       isGeneral: payload.is_general,
       abilities: payload.abilities,
       expiresAt,
+      ...(singleLocationId != null
+        ? { organizationLocationId: singleLocationId }
+        : {}),
     })
     persistAuthState()
     scheduleTokenRefresh(expiresAt, async () => {
@@ -237,7 +243,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   setAbilities: (abilities: Abilities) => {
-    set({ abilities })
+    const singleLocationId = singleScopedLocationId(abilities)
+    set({
+      abilities,
+      ...(singleLocationId != null
+        ? { organizationLocationId: singleLocationId }
+        : {}),
+    })
   },
 
   setOrganizationLocationId: async (id: number | null) => {

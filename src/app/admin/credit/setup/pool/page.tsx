@@ -26,6 +26,7 @@ export function CreditSetupPoolPage() {
     setLocationId,
     orgContextHeaders,
     canFetchCreditSetup,
+    allowedLocationIds,
   } = useCreditSetupOrg()
 
   const { data: poolQuery, refetch: PoolQueryRefetch } = UseApiQuery<SubmitResponse>({
@@ -111,6 +112,7 @@ export function CreditSetupPoolPage() {
           <CreditSetupOrgPicker
             value={selectedLocationId}
             onChange={setLocationId}
+            allowedLocationIds={allowedLocationIds}
           />
         </Card>
       ) : null}

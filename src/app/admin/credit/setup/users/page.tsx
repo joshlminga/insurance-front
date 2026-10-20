@@ -39,6 +39,7 @@ export function CreditSetupUsersPage() {
     setLocationId,
     orgContextHeaders,
     canFetchCreditSetup,
+    allowedLocationIds,
   } = useCreditSetupOrg()
 
   const [filter, optionsDispatcher] = useReducer(
@@ -126,6 +127,7 @@ export function CreditSetupUsersPage() {
           <CreditSetupOrgPicker
             value={selectedLocationId}
             onChange={setLocationId}
+            allowedLocationIds={allowedLocationIds}
           />
         </Card>
       ) : null}

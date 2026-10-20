@@ -22,6 +22,7 @@ const MotorReceiptReportTab = () => {
     setLocationId,
     orgContextHeaders,
     canFetch,
+    allowedLocationIds,
   } = useBypassOrgLocation(FINANCE_REPORTS_ORG_STORAGE_KEY)
 
   const [filter, optionsDispatcher] = useReducer(
@@ -75,6 +76,7 @@ const MotorReceiptReportTab = () => {
           <BypassOrgLocationPicker
             value={selectedLocationId}
             onChange={setLocationId}
+            allowedLocationIds={allowedLocationIds}
             hint="Receipt list is scoped to the selected organization location."
           />
         </Card>
