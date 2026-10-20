@@ -41,8 +41,10 @@ import type { PaymentFormInput } from '@/types/schema'
 import { extractErrorMessage } from '@/utils/helpers'
 import { cn } from '@/lib/utils'
 import { useCustomDialogContextFactory } from '@/hooks'
+import { useActionWaitHold } from '@/hooks/use-action-wait-hold'
 import { usePesapalPaymentFlow } from '@/hooks/use-pesapal-payment-flow'
 import { usePaystackPaymentFlow } from '@/hooks/use-paystack-payment-flow'
+import { getPaymentActionWaitDetail } from '@/lib/action-wait'
 import { submitMotorCreditPayment } from '@/app/admin/credit/credit-payment'
 import { CreditPendingBanner } from '@/app/admin/credit/components/CreditPendingBanner'
 import { CreditScheduleStatusPanel } from '@/app/admin/credit/components/CreditScheduleStatusPanel'
@@ -91,7 +93,6 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({
     const {
         pollMode,
         isPolling: isGatewayPolling,
-        pollMessage: gatewayPollMessage,
         stopPolling: stopGatewayPolling,
         startMpesaPolling,
         submitPesapal,
@@ -101,7 +102,6 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({
 
     const {
         isPolling: isPaystackPolling,
-        pollMessage: paystackPollMessage,
         stopPolling: stopPaystackPolling,
         submitPaystack,
         usesPaystack,
@@ -109,8 +109,15 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({
     } = usePaystackPaymentFlow({ flow: 'motor' })
 
     const isPolling = isGatewayPolling || isPaystackPolling
-    const pollMessage = isPaystackPolling ? paystackPollMessage : gatewayPollMessage
     const stopPolling = isPaystackPolling ? stopPaystackPolling : stopGatewayPolling
+
+    useActionWaitHold('customer-motor-payment-poll', isPolling, {
+        detail: getPaymentActionWaitDetail({
+            isPaystack: isPaystackPolling,
+            pollMode,
+        }),
+        onCancel: stopPolling,
+    })
 
     React.useEffect(() => {
         const storedPurchaseKey =
@@ -615,28 +622,6 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({
                         onCancel={cancelPlanChange}
                         isPending={paymentPlanMutation.isPending}
                     />
-
-                    {isPolling && (
-                        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-                            <div className="bg-white rounded-2xl p-8 flex flex-col items-center gap-4 shadow-xl max-w-sm mx-4">
-                                <div className="w-12 h-12 border-4 border-[#0CC258] border-t-transparent rounded-full animate-spin" />
-                                <p className="text-center font-medium text-gray-700">{pollMessage}</p>
-                                <p className="text-center text-sm text-gray-500">
-                                    {isPaystackPolling
-                                        ? 'Complete payment in the Paystack window if it is still open.'
-                                        : pollMode === 'pesapal'
-                                        ? 'Complete payment on the Pesapal page if it is still open.'
-                                        : 'Please enter your PIN on the M-Pesa prompt on your phone.'}
-                                </p>
-                                <button
-                                    type="button"
-                                    onClick={stopPolling}
-                                    className="text-sm text-red-500 underline mt-2">
-                                    Cancel
-                                </button>
-                            </div>
-                        </div>
-                    )}
 
                     {creditPending ? (
                         <div className="px-2 sm:px-4 space-y-4">

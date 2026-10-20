@@ -90,6 +90,9 @@ function AlertDialogFooter({
       data-slot="alert-dialog-footer"
       className={cn(
         "flex flex-col-reverse gap-2 group-data-[size=sm]/alert-dialog-content:grid group-data-[size=sm]/alert-dialog-content:grid-cols-2 sm:flex-row sm:justify-end",
+        // One action only: center it (sm size otherwise uses a 2-col grid).
+        "has-[>:only-child]:justify-center sm:has-[>:only-child]:justify-center",
+        "group-data-[size=sm]/alert-dialog-content:has-[>:only-child]:grid-cols-1 group-data-[size=sm]/alert-dialog-content:has-[>:only-child]:justify-items-center",
         className
       )}
       {...props}

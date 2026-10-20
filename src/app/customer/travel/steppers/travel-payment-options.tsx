@@ -21,8 +21,10 @@ import {
 } from '@/dev/core'
 import { useCustomDialogContextFactory } from '@/hooks'
 import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
+import { useActionWaitHold } from '@/hooks/use-action-wait-hold'
 import { usePaystackPaymentFlow } from '@/hooks/use-paystack-payment-flow'
 import { usePesapalPaymentFlow } from '@/hooks/use-pesapal-payment-flow'
+import { getPaymentActionWaitDetail } from '@/lib/action-wait'
 import { PaymentDetailsSchema } from '@/types/form-schema'
 import type { PaymentFormInput } from '@/types/schema'
 import type {
@@ -99,7 +101,6 @@ export const TravelPaymentOptionsPage: React.FC<
   const {
     pollMode,
     isPolling: isGatewayPolling,
-    pollMessage: gatewayPollMessage,
     stopPolling: stopGatewayPolling,
     startMpesaPolling,
     submitPesapal,
@@ -109,7 +110,6 @@ export const TravelPaymentOptionsPage: React.FC<
 
   const {
     isPolling: isPaystackPolling,
-    pollMessage: paystackPollMessage,
     stopPolling: stopPaystackPolling,
     submitPaystack,
     usesPaystack,
@@ -117,8 +117,15 @@ export const TravelPaymentOptionsPage: React.FC<
   } = usePaystackPaymentFlow({ flow: paymentStatusFlow })
 
   const isPolling = isGatewayPolling || isPaystackPolling
-  const pollMessage = isPaystackPolling ? paystackPollMessage : gatewayPollMessage
   const stopPolling = isPaystackPolling ? stopPaystackPolling : stopGatewayPolling
+
+  useActionWaitHold('travel-payment-poll', isPolling, {
+    detail: getPaymentActionWaitDetail({
+      isPaystack: isPaystackPolling,
+      pollMode,
+    }),
+    onCancel: stopPolling,
+  })
 
   React.useEffect(() => {
     const storedPurchaseKey =
@@ -414,31 +421,6 @@ export const TravelPaymentOptionsPage: React.FC<
               items={includeCreditPayment ? EPAYMENTTABS : customerPaymentTabs()}
             />
           </div>
-
-          {isPolling && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-              <div className="mx-4 flex max-w-sm flex-col items-center gap-4 rounded-2xl bg-white p-8 shadow-xl">
-                <div className="h-12 w-12 animate-spin rounded-full border-4 border-[#0CC258] border-t-transparent" />
-                <p className="text-center font-medium text-gray-700">
-                  {pollMessage}
-                </p>
-                <p className="text-center text-sm text-gray-500">
-                  {isPaystackPolling
-                    ? 'Complete payment in the Paystack window if it is still open.'
-                    : pollMode === 'pesapal'
-                      ? 'Complete payment on the Pesapal page if it is still open.'
-                      : 'Please enter your PIN on the M-Pesa prompt on your phone.'}
-                </p>
-                <button
-                  type="button"
-                  onClick={stopPolling}
-                  className="mt-2 text-sm text-red-500 underline"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          )}
 
           {creditPending ? (
             <div className="space-y-4 px-2 sm:px-4">

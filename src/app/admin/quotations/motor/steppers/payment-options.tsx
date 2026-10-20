@@ -37,8 +37,10 @@ import type { PaymentFormInput } from '@/types/schema'
 import { extractErrorMessage } from '@/utils/helpers'
 import { cn } from '@/lib/utils'
 import { useCustomDialogContextFactory } from '@/hooks'
+import { useActionWaitHold } from '@/hooks/use-action-wait-hold'
 import { usePesapalPaymentFlow } from '@/hooks/use-pesapal-payment-flow'
 import { usePaystackPaymentFlow } from '@/hooks/use-paystack-payment-flow'
+import { getPaymentActionWaitDetail } from '@/lib/action-wait'
 import { submitMotorCreditPayment } from '@/app/admin/credit/credit-payment'
 import { CreditPendingBanner } from '@/app/admin/credit/components/CreditPendingBanner'
 import { getPaymentStatusPath, storePaymentStatusSession } from '@/app/payment/payment-session'
@@ -124,7 +126,6 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
     const {
         pollMode,
         isPolling: isGatewayPolling,
-        pollMessage: gatewayPollMessage,
         stopPolling: stopGatewayPolling,
         startMpesaPolling,
         submitPesapal,
@@ -134,7 +135,6 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
 
     const {
         isPolling: isPaystackPolling,
-        pollMessage: paystackPollMessage,
         stopPolling: stopPaystackPolling,
         submitPaystack,
         usesPaystack,
@@ -142,8 +142,15 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
     } = usePaystackPaymentFlow({ flow: 'admin' })
 
     const isPolling = isGatewayPolling || isPaystackPolling
-    const pollMessage = isPaystackPolling ? paystackPollMessage : gatewayPollMessage
     const stopPolling = isPaystackPolling ? stopPaystackPolling : stopGatewayPolling
+
+    useActionWaitHold('admin-motor-payment-poll', isPolling, {
+        detail: getPaymentActionWaitDetail({
+            isPaystack: isPaystackPolling,
+            pollMode,
+        }),
+        onCancel: stopPolling,
+    })
 
     React.useEffect(() => {
         const storedPurchaseKey =
@@ -296,6 +303,14 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
             },
         },
     })
+
+    useActionWaitHold(
+        'admin-motor-plan-update',
+        isPlanBreakdownUpdating || paymentPlanMutation.isPending,
+        {
+            detail: 'Please wait while we recalculate the installment breakdown.',
+        },
+    )
 
     const isInteractionBlocked =
         isPlanBreakdownUpdating
@@ -726,42 +741,6 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
                         onCancel={cancelPlanChange}
                         isPending={paymentPlanMutation.isPending || isPlanBreakdownUpdating}
                     />
-
-                    {(isPlanBreakdownUpdating || paymentPlanMutation.isPending) && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-                            <div className="mx-4 flex max-w-sm flex-col items-center gap-4 rounded-2xl border border-black/20 bg-white p-8 shadow-xl">
-                                <div className="h-12 w-12 animate-spin rounded-full border-4 border-[#BF162E] border-t-transparent" />
-                                <p className="text-center font-medium text-black/80">
-                                    Updating payment plan…
-                                </p>
-                                <p className="text-center text-sm text-black/60">
-                                    Please wait while we recalculate the installment breakdown.
-                                </p>
-                            </div>
-                        </div>
-                    )}
-
-                    {isPolling && (
-                        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-                            <div className="bg-white rounded-2xl p-8 flex flex-col items-center gap-4 shadow-xl max-w-sm mx-4 border border-black/20">
-                                <div className="w-12 h-12 border-4 border-[#BF162E] border-t-transparent rounded-full animate-spin" />
-                                <p className="text-center font-medium text-black/80">{pollMessage}</p>
-                                <p className="text-center text-sm text-black/60">
-                                    {isPaystackPolling
-                                        ? 'Complete payment in the Paystack window if it is still open.'
-                                        : pollMode === 'pesapal'
-                                        ? 'Complete payment on the Pesapal page if it is still open.'
-                                        : 'Please enter your PIN on the M-Pesa prompt on your phone.'}
-                                </p>
-                                <button
-                                    type="button"
-                                    onClick={stopPolling}
-                                    className="text-sm text-[#BF162E] underline mt-2">
-                                    Cancel
-                                </button>
-                            </div>
-                        </div>
-                    )}
 
                     {creditPending ? (
                         <div className="mt-4 px-1">

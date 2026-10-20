@@ -4,6 +4,7 @@ import { RouterProvider } from 'react-router-dom'
 import './index.css'
 import { QueryProvider } from './utils/providers.tsx'
 import { router } from './App.tsx'
+import { ActionWaitOverlay } from './components/shared/action-wait-overlay'
 import { SessionTimeoutDialog } from './components/session-timeout-dialog'
 import { initAuthStore } from './stores/auth-store'
 import { initThemeStore } from './stores/theme-store'
@@ -40,6 +41,7 @@ createRoot(document.getElementById('root')!).render(
     <QueryProvider>
       <RouterProvider router={router} />
       <SessionTimeoutDialog />
+      <ActionWaitOverlay />
       {/* <ChatFloatingButton /> */}
     </QueryProvider>
   </StrictMode>,

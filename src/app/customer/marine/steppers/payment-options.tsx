@@ -2,7 +2,9 @@
 import { CardFooter } from '@/components/ui/card'
 import { Button, ReusableSelect, ReuseableInput, ReuseableRadioChoiceGroup } from '@/dev/core'
 import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
+import { useActionWaitHold } from '@/hooks/use-action-wait-hold'
 import { usePesapalPaymentFlow } from '@/hooks/use-pesapal-payment-flow'
+import { getPaymentActionWaitDetail } from '@/lib/action-wait'
 import type { CustomerVerificationDetailsProps, MpesaPayload, SubmitResponse } from '@/types/types'
 import {
     EMETHODS,
@@ -30,13 +32,17 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
     const {
         pollMode,
         isPolling,
-        pollMessage,
         stopPolling,
         startMpesaPolling,
         submitPesapal,
         usesPesapal,
         isPesapalSubmitting,
     } = usePesapalPaymentFlow({ flow: 'marine', goToNextStep })
+
+    useActionWaitHold('marine-payment-poll', isPolling, {
+        detail: getPaymentActionWaitDetail({ pollMode }),
+        onCancel: stopPolling,
+    })
 
     React.useEffect(() => {
         const storedPurchaseKey = String(sessionStorage.getItem(INVOICE_SESSION_STORAGE_KEY))
@@ -194,26 +200,6 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({ goT
                         items={customerPaymentTabs()}
                     />
                 </div>
-
-                {isPolling && (
-                    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-                        <div className="bg-white rounded-2xl p-8 flex flex-col items-center gap-4 shadow-xl max-w-sm mx-4">
-                            <div className="w-12 h-12 border-4 border-[#0CC258] border-t-transparent rounded-full animate-spin" />
-                            <p className="text-center font-medium text-gray-700">{pollMessage}</p>
-                            <p className="text-center text-sm text-gray-500">
-                                {pollMode === 'pesapal'
-                                    ? 'Complete payment on the Pesapal page if it is still open.'
-                                    : 'Please enter your PIN on the M-Pesa prompt on your phone.'}
-                            </p>
-                            <button
-                                type="button"
-                                onClick={stopPolling}
-                                className="text-sm text-red-500 underline mt-2">
-                                Cancel
-                            </button>
-                        </div>
-                    </div>
-                )}
 
                 <CardFooter className="w-full flex flex-col sm:flex-row justify-between gap-3 mt-3 px-2 sm:px-0">
                     <Button

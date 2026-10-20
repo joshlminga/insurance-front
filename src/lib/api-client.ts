@@ -1,14 +1,23 @@
-import axios from 'axios'
+import axios, { type InternalAxiosRequestConfig } from 'axios'
 import { AUTH_STORAGE_KEY, ORG_LOCATION_HEADER } from '@/auth/constants'
 import {
   isPlatformSuperAdmin,
   uniqueScopedLocationIds,
 } from '@/auth/org-context'
 import type { Abilities } from '@/auth/types'
+import {
+  beginActionWait,
+  endActionWait,
+  shouldTrackActionWait,
+} from '@/lib/action-wait'
 import { buildRequestContextHeaders } from '@/lib/request-context-headers'
 import { getAccessToken } from '@/auth/access-token'
 import { emitSessionExpired } from '@/stores/session-timeout-store'
 import { EPREFIX, EROUTES } from '@/utils/enums'
+
+type ActionWaitRequestConfig = InternalAxiosRequestConfig & {
+  __actionWaitTracked?: boolean
+}
 
 const API_BASE_URL = import.meta.env.VITE_DEBUG ==='true'
     ? import.meta.env.VITE_LOCAL_URL
@@ -48,10 +57,16 @@ const apiClient = axios.create({
 
 apiClient.interceptors.request.use(
     (config) => {
-        const requestUrl = String(config.url ?? '')
+        const trackedConfig = config as ActionWaitRequestConfig
+        const requestUrl = String(trackedConfig.url ?? '')
         // Login must not send the old JWT — the API would treat it as an expired session.
         const isLoginRequest = requestUrl.includes('auth/login')
         const isOrgRequest = requestUrl.includes('auth/org')
+
+        if (shouldTrackActionWait(trackedConfig.method, trackedConfig.url)) {
+            trackedConfig.__actionWaitTracked = true
+            beginActionWait()
+        }
 
         const authStorage = localStorage.getItem(AUTH_STORAGE_KEY)
         const storedToken = (() => {
@@ -65,7 +80,7 @@ apiClient.interceptors.request.use(
         const liveToken = getAccessToken(storedToken)
 
         if (liveToken && !isLoginRequest && !isOrgRequest) {
-            config.headers.Authorization = `Bearer ${liveToken}`
+            trackedConfig.headers.Authorization = `Bearer ${liveToken}`
         }
 
         if (authStorage) {
@@ -83,7 +98,7 @@ apiClient.interceptors.request.use(
                     (Boolean(abilities?.is_general) && !hasScopes)
 
                 if (!skipHeader && locationId != null) {
-                    config.headers[ORG_LOCATION_HEADER] = String(locationId)
+                    trackedConfig.headers[ORG_LOCATION_HEADER] = String(locationId)
                 }
             } catch (error) {
                 console.error('Error parsing auth-storage:', error)
@@ -91,9 +106,9 @@ apiClient.interceptors.request.use(
         }
 
         // Attach dynamic headers from localStorage (e.g. X-Location-Code: KE)
-        Object.assign(config.headers, buildRequestContextHeaders())
+        Object.assign(trackedConfig.headers, buildRequestContextHeaders())
 
-        return config
+        return trackedConfig
     },
     (error) => {
         return Promise.reject(error)
@@ -101,8 +116,19 @@ apiClient.interceptors.request.use(
 )
 
 apiClient.interceptors.response.use(
-    (response) => response,
+    (response) => {
+        const trackedConfig = response.config as ActionWaitRequestConfig
+        if (trackedConfig.__actionWaitTracked) {
+            endActionWait()
+        }
+        return response
+    },
     (error) => {
+        const trackedConfig = error?.config as ActionWaitRequestConfig | undefined
+        if (trackedConfig?.__actionWaitTracked) {
+            endActionWait()
+        }
+
         const status = error?.response?.status
         const requestUrl = error?.config?.url ?? ''
         const url = typeof requestUrl === 'string' ? requestUrl : ''

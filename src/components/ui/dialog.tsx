@@ -104,6 +104,8 @@ function DialogFooter({
       data-slot="dialog-footer"
       className={cn(
         "flex flex-col-reverse gap-2 sm:flex-row sm:justify-end",
+        // One action only: center it instead of pushing to the end.
+        "has-[>:only-child]:justify-center sm:has-[>:only-child]:justify-center",
         className
       )}
       {...props}
