@@ -203,7 +203,7 @@ export function CurrenciesConfigurationPage() {
                 type="submit"
                 disabled={fieldsDisabled}
                 loading={saveMutation.isPending}
-                className="gap-2"
+                className="gap-2 min-w-44 px-8"
               >
                 <CheckSquare className="size-4" />
                 Save Settings

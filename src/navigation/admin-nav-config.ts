@@ -31,6 +31,11 @@ export type NavSubItem = {
   modules?: string[]
   /** Extra permission (e.g. finance-control.mine) - hidden when user lacks it */
   permission?: string
+  /**
+   * Only the platform super_admin role may see this item.
+   * is_general does not count — that flag bypasses can()/hasModule() elsewhere.
+   */
+  requireSuperAdmin?: boolean
   /** Nested sub-menu items (level 3+) */
   items?: NavSubItem[]
 }
@@ -49,6 +54,11 @@ export type NavItem = {
   module?: string
   /** Case 1 (any): parent visible when user has any of these modules */
   modules?: string[]
+  /**
+   * Only the platform super_admin role may see this item.
+   * is_general does not count — that flag bypasses can()/hasModule() elsewhere.
+   */
+  requireSuperAdmin?: boolean
   items?: NavSubItem[]
 }
 
@@ -304,16 +314,19 @@ export const adminNavConfig: NavItem[] = [
     url: EROUTES.ORGANIZATION,
     icon: UserCog,
     modules: [MODULES.ORGANIZATION, MODULES.ORGANIZATION_LOCATION],
+    requireSuperAdmin: true,
     items: [
       {
         title: 'Manage',
         url: EROUTES.ORGANIZATION,
         module: MODULES.ORGANIZATION,
+        requireSuperAdmin: true,
       },
       {
         title: 'Location',
         url: EROUTES.ORGANIZATION_LOCATION,
         module: MODULES.ORGANIZATION_LOCATION,
+        requireSuperAdmin: true,
       },
     ],
   },
@@ -390,9 +403,10 @@ export const adminNavConfig: NavItem[] = [
     url: EROUTES.GLOBAL_ROLES,
     icon: ShieldCheck,
     modules: [MODULES.RBAC],
+    requireSuperAdmin: true,
     items: [
-      { title: 'General', url: EROUTES.GLOBAL_ROLES, module: MODULES.RBAC },
-      { title: 'System', url: EROUTES.SYSTEM_ROLES, module: MODULES.RBAC },
+      { title: 'General', url: EROUTES.GLOBAL_ROLES, module: MODULES.RBAC, requireSuperAdmin: true },
+      { title: 'System', url: EROUTES.SYSTEM_ROLES, module: MODULES.RBAC, requireSuperAdmin: true },
     ],
   },
   {
@@ -412,6 +426,8 @@ export const adminNavConfig: NavItem[] = [
     title: 'Currencies',
     url: EROUTES.CURRENCIES_AVAILABLE,
     icon: Coins,
+    // Entire ATU Currencies group is platform super_admin only.
+    requireSuperAdmin: true,
     modules: [
       MODULES.ATU_MULTICURRENCY_CURRENCY,
       MODULES.ATU_MULTICURRENCY_LOG,
@@ -422,16 +438,19 @@ export const adminNavConfig: NavItem[] = [
         title: 'Available',
         url: EROUTES.CURRENCIES_AVAILABLE,
         module: MODULES.ATU_MULTICURRENCY_CURRENCY,
+        requireSuperAdmin: true,
       },
       {
         title: 'Activity Logs',
         url: EROUTES.CURRENCIES_ACTIVITY_LOGS,
         module: MODULES.ATU_MULTICURRENCY_LOG,
+        requireSuperAdmin: true,
       },
       {
         title: 'Configuration',
         url: EROUTES.CURRENCIES_CONFIGURATION,
         module: MODULES.ATU_MULTICURRENCY_SETTINGS,
+        requireSuperAdmin: true,
       },
     ],
   },
@@ -439,12 +458,15 @@ export const adminNavConfig: NavItem[] = [
     title: 'Settings',
     url: EROUTES.SETTINGS,
     icon: Settings,
-    modules: [MODULES.SETTINGS_RBAC, MODULES.RBAC],
+    // settings-rbac only. rbac.menu must not open Settings.
+    modules: [MODULES.SETTINGS_RBAC],
+    requireSuperAdmin: true,
   },
   {
     title: 'Users',
     url: EROUTES.USERS,
     icon: Users,
     module: MODULES.USER,
+    requireSuperAdmin: true,
   },
 ]

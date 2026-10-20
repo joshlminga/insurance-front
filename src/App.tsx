@@ -1154,7 +1154,7 @@ export const router = createBrowserRouter([
             path: "currencies/available",
             element: (
               <S>
-                <AdminModulePage module={MODULES.ATU_MULTICURRENCY_CURRENCY}>
+                <AdminModulePage module={MODULES.ATU_MULTICURRENCY_CURRENCY} requireSuperAdmin>
                   <CurrenciesAvailablePage />
                 </AdminModulePage>
               </S>
@@ -1164,7 +1164,7 @@ export const router = createBrowserRouter([
             path: "currencies/activity-logs",
             element: (
               <S>
-                <AdminModulePage module={MODULES.ATU_MULTICURRENCY_LOG}>
+                <AdminModulePage module={MODULES.ATU_MULTICURRENCY_LOG} requireSuperAdmin>
                   <CurrenciesActivityLogsPage />
                 </AdminModulePage>
               </S>
@@ -1174,7 +1174,7 @@ export const router = createBrowserRouter([
             path: "currencies/configuration",
             element: (
               <S>
-                <AdminModulePage module={MODULES.ATU_MULTICURRENCY_SETTINGS}>
+                <AdminModulePage module={MODULES.ATU_MULTICURRENCY_SETTINGS} requireSuperAdmin>
                   <CurrenciesConfigurationPage />
                 </AdminModulePage>
               </S>
@@ -1187,7 +1187,8 @@ export const router = createBrowserRouter([
             element: (
               <S>
                 <AdminModulePage 
-                module={MODULES.ORGANIZATION}>
+                module={MODULES.ORGANIZATION}
+                requireSuperAdmin>
                   <OrganizationsPage />
                 </AdminModulePage>
               </S>
@@ -1198,7 +1199,8 @@ export const router = createBrowserRouter([
             element: (
               <S>
                 <AdminModulePage 
-                module={MODULES.ORGANIZATION_LOCATION}>
+                module={MODULES.ORGANIZATION_LOCATION}
+                requireSuperAdmin>
                   <OrganizationLocationsPage />
                 </AdminModulePage>
               </S>
@@ -1255,7 +1257,8 @@ export const router = createBrowserRouter([
             element: (
               <S>
                 <AdminModulePage 
-                module={MODULES.RBAC}>
+                module={MODULES.RBAC}
+                requireSuperAdmin>
                   <GlobalRolesPage />
                 </AdminModulePage>
               </S>
@@ -1266,7 +1269,8 @@ export const router = createBrowserRouter([
             element: (
               <S>
                 <AdminModulePage 
-                module={MODULES.RBAC}>
+                module={MODULES.RBAC}
+                requireSuperAdmin>
                   <SystemRolesPage />
                 </AdminModulePage>
               </S>
@@ -1278,7 +1282,8 @@ export const router = createBrowserRouter([
             element: (
               <S>
                 <AdminModulePage 
-                module={MODULES.USER}>
+                module={MODULES.USER}
+                requireSuperAdmin>
                   <UsersPage />
                 </AdminModulePage>
               </S>
@@ -1290,7 +1295,8 @@ export const router = createBrowserRouter([
             element: (
               <S>
                 <AdminModulePage 
-                modules={[MODULES.SETTINGS_RBAC, MODULES.RBAC]}>
+                modules={[MODULES.SETTINGS_RBAC]}
+                requireSuperAdmin>
                   <SettingsPage />
                 </AdminModulePage>
               </S>

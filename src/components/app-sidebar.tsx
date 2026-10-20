@@ -8,6 +8,7 @@ import {
   SidebarHeader,
   SidebarRail,
 } from '@/components/ui/sidebar'
+import { isPlatformSuperAdmin } from '@/auth/org-context'
 import { useCan } from '@/auth/useCan'
 import { useModules } from '@/auth/useModules'
 import { adminNavConfig } from '@/navigation/admin-nav-config'
@@ -20,11 +21,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const abilities = useAuthStore((s) => s.abilities)
   const { hasModule } = useModules()
   const { can, canModuleMenu } = useCan()
+  // Role name super_admin only. Do not use isBypassUser — that also matches is_general.
+  const platformSuperAdmin = isPlatformSuperAdmin(abilities)
 
   // Re-filter when abilities change (not just function identity)
   const visibleNav = useMemo(
-    () => filterNavItems(adminNavConfig, hasModule, canModuleMenu, can),
-    [abilities, hasModule, canModuleMenu, can],
+    () => filterNavItems(adminNavConfig, hasModule, canModuleMenu, can, platformSuperAdmin),
+    [abilities, hasModule, canModuleMenu, can, platformSuperAdmin],
   )
 
   return (

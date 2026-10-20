@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { isPlatformSuperAdmin } from "@/auth/org-context"
 import { DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Button, ReusableCheckboxGrid } from "@/dev/core"
 import { UseApiMutation, UseApiQuery } from "@/hooks/hooks"
+import { useAuthStore } from "@/stores/auth-store"
 import type { RbacPermission } from "@/types/rbac-roles"
 import { SubmitResponse } from "@/types/types"
 import { EMETHODS } from "@/utils/constatnts"
@@ -48,6 +50,9 @@ export const AssignPermissionsModal = ({
   const rolesBasePath = componentProps?.rolesBasePath ?? "roles"
   const organizationLocationId = componentProps?.organizationLocationId
   const isScopedRole = rolesBasePath === "roles"
+  const abilities = useAuthStore((s) => s.abilities)
+  // super_admin role name only. Parent-locked roles stay read-only via API is_editable.
+  const platformSuperAdmin = isPlatformSuperAdmin(abilities)
 
   const { data: roleListData, isLoading: isLoadingRole, refetch: refetchRole } =
     UseApiQuery<SubmitResponse>({
@@ -157,6 +162,9 @@ export const AssignPermissionsModal = ({
 
   const togglePermission = (permissionId: number, checked: boolean) => {
     if (isReadOnly) return
+    const permission = accumulatedPermissions.find((item) => item.id === permissionId)
+    // Checkbox is disabled for these; ignore a toggle if one still fires.
+    if (permission?.super_admin && !platformSuperAdmin) return
     setSelectedPermissionIds((current) => {
       if (checked) {
         return current.includes(permissionId) ? current : [...current, permissionId]
@@ -226,15 +234,21 @@ export const AssignPermissionsModal = ({
                 <ReusableCheckboxGrid
                   name={`permissions-${moduleKey}`}
                   columns={2}
-                  options={modulePermissions.map((permission) => ({
-                    id: String(permission.id),
-                    name: permission.description || permission.name,
-                    checked: selectedPermissionIds.includes(permission.id),
-                    disabled: isReadOnly,
-                    onChange: isReadOnly
-                      ? undefined
-                      : (checked) => togglePermission(permission.id, checked),
-                  }))}
+                  options={modulePermissions.map((permission) => {
+                    // super_admin on the permission row means only a platform super admin may tick it.
+                    const lockedToSuperAdmin = Boolean(permission.super_admin) && !platformSuperAdmin
+                    const checkboxLocked = isReadOnly || lockedToSuperAdmin
+
+                    return {
+                      id: String(permission.id),
+                      name: permission.description || permission.name,
+                      checked: selectedPermissionIds.includes(permission.id),
+                      disabled: checkboxLocked,
+                      onChange: checkboxLocked
+                        ? undefined
+                        : (checked) => togglePermission(permission.id, checked),
+                    }
+                  })}
                 />
               </div>
             ))}

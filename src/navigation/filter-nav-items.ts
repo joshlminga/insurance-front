@@ -17,11 +17,18 @@ function hasAnyModuleWithMenu(
 }
 
 function isNavItemVisible(
-  item: { module?: string; modules?: string[]; permission?: string },
+  item: { module?: string; modules?: string[]; permission?: string; requireSuperAdmin?: boolean },
   hasModule: (key: string) => boolean,
   canMenu: (moduleKey: string) => boolean,
   can?: (permission: string) => boolean,
+  isPlatformSuperAdmin = false,
 ): boolean {
+  // Checked before can()/hasModule(). Those helpers return true for is_general,
+  // and is_general is not a platform super admin.
+  if (item.requireSuperAdmin && !isPlatformSuperAdmin) {
+    return false
+  }
+
   // Module + .menu gate first (same as before)
   if (item.modules?.length) {
     if (!hasAnyModuleWithMenu(item.modules, hasModule, canMenu)) return false
@@ -42,18 +49,25 @@ function filterNavSubItems(
   hasModule: (key: string) => boolean,
   canMenu: (moduleKey: string) => boolean,
   can?: (permission: string) => boolean,
+  isPlatformSuperAdmin = false,
 ): NavSubItem[] {
   return items
     .map((sub) => {
       if (sub.items?.length) {
-        const visibleChildren = filterNavSubItems(sub.items, hasModule, canMenu, can)
+        const visibleChildren = filterNavSubItems(
+          sub.items,
+          hasModule,
+          canMenu,
+          can,
+          isPlatformSuperAdmin,
+        )
         if (visibleChildren.length === 0) return null
-        if (!isNavItemVisible(sub, hasModule, canMenu, can)) return null
+        if (!isNavItemVisible(sub, hasModule, canMenu, can, isPlatformSuperAdmin)) return null
         return { ...sub, items: visibleChildren }
       }
 
       if (!sub.url) return null
-      if (!isNavItemVisible(sub, hasModule, canMenu, can)) return null
+      if (!isNavItemVisible(sub, hasModule, canMenu, can, isPlatformSuperAdmin)) return null
 
       return sub
     })
@@ -64,6 +78,7 @@ function filterNavSubItems(
  * Filter sidebar nav by RBAC modules and `.menu` permissions.
  * - Sub-items: hidden when module(s) / menu permission missing or url is empty
  * - Sub-items with `permission`: also require that exact permission
+ * - Items with `requireSuperAdmin`: hidden unless isPlatformSuperAdmin is true
  * - Nested sub-items: filtered recursively; group nodes hidden when no visible children remain
  * - Parent with children: hidden when no visible children remain (case 1)
  * - Parent modules / module: checked before showing parent
@@ -73,20 +88,27 @@ export function filterNavItems(
   hasModule: (key: string) => boolean,
   canMenu: (moduleKey: string) => boolean,
   can?: (permission: string) => boolean,
+  isPlatformSuperAdmin = false,
 ): NavItem[] {
   return items
     .map((item) => {
       if (item.items?.length) {
-        const visibleChildren = filterNavSubItems(item.items, hasModule, canMenu, can)
+        const visibleChildren = filterNavSubItems(
+          item.items,
+          hasModule,
+          canMenu,
+          can,
+          isPlatformSuperAdmin,
+        )
 
         if (visibleChildren.length === 0) return null
 
-        if (!isNavItemVisible(item, hasModule, canMenu, can)) return null
+        if (!isNavItemVisible(item, hasModule, canMenu, can, isPlatformSuperAdmin)) return null
 
         return { ...item, items: visibleChildren }
       }
 
-      if (!isNavItemVisible(item, hasModule, canMenu, can)) return null
+      if (!isNavItemVisible(item, hasModule, canMenu, can, isPlatformSuperAdmin)) return null
 
       return item
     })
