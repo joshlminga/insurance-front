@@ -722,6 +722,7 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({
                     }
                 }}
                 details={policyDetails}
+                certificateEmail={summaryData?.invoice?.email}
                 onConfirm={confirmPolicyDetails}
                 onChangeDetails={changePolicyDetails}
             />

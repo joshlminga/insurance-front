@@ -8,6 +8,8 @@ type PolicyDetailsConfirmDialogProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
   details: MotorPolicyDetails | null
+  /** Payee email from the invoice/payment step — where the certificate will be sent. */
+  certificateEmail?: string | null
   onConfirm: () => void
   onChangeDetails: () => void
   isPending?: boolean
@@ -25,10 +27,14 @@ export function PolicyDetailsConfirmDialog({
   open,
   onOpenChange,
   details,
+  certificateEmail,
   onConfirm,
   onChangeDetails,
   isPending = false,
 }: PolicyDetailsConfirmDialogProps) {
+  const emailedTo =
+    typeof certificateEmail === 'string' ? certificateEmail.trim() : ''
+
   return (
     <ConfirmationDialog
       open={open}
@@ -58,6 +64,12 @@ export function PolicyDetailsConfirmDialog({
               </dd>
             </div>
           ))}
+          <div className="grid grid-cols-1 gap-0.5 sm:grid-cols-[9.5rem_1fr] sm:gap-3">
+            <dt className="text-muted-foreground">Certificate Emailed to:</dt>
+            <dd className="font-medium text-foreground break-words">
+              {emailedTo || '—'}
+            </dd>
+          </div>
         </dl>
       ) : null}
     </ConfirmationDialog>

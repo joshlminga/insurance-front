@@ -847,6 +847,7 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
                     }
                 }}
                 details={policyDetails}
+                certificateEmail={summaryData?.invoice?.email}
                 onConfirm={confirmPolicyDetails}
                 onChangeDetails={changePolicyDetails}
             />
