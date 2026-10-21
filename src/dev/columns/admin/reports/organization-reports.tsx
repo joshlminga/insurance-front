@@ -18,7 +18,19 @@ export const OrganizationCustomerReportColumns: ColumnDef<any>[] = [
   {
     accessorKey: 'name',
     header: () => <div>Name</div>,
-    cell: ({ row }) => <div className="font-medium">{row.original.name ?? '-'}</div>,
+    cell: ({ row }) => (
+      <div className="space-y-1">
+        <div className="font-medium">{row.original.name ?? '-'}</div>
+        {row.original.is_admin_also ? (
+          <Badge
+            variant="outline"
+            className="rounded-full border-sky-500 text-sky-700"
+          >
+            Also admin
+          </Badge>
+        ) : null}
+      </div>
+    ),
   },
   {
     accessorKey: 'email',

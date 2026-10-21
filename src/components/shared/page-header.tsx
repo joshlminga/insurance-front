@@ -8,6 +8,8 @@ interface PageHeaderAction {
   href?: string
   onClick?: () => void
   variant?: "default" | "outline" | "secondary" | "ghost"
+  disabled?: boolean
+  className?: string
 }
 
 interface PageHeaderProps {
@@ -49,6 +51,8 @@ export function PageHeader({ title, description, actions, children }: PageHeader
                   <Button
                     key={index}
                     variant={action.variant || "default"}
+                    className={action.className}
+                    disabled={action.disabled}
                     asChild>
                     <Link to={action.href}>{buttonContent}</Link>
                   </Button>
@@ -58,6 +62,8 @@ export function PageHeader({ title, description, actions, children }: PageHeader
                 <Button
                   key={index}
                   variant={action.variant || "default"}
+                  className={action.className}
+                  disabled={action.disabled}
                   onClick={action.onClick}>
                   {buttonContent}
                 </Button>

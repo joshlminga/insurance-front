@@ -109,63 +109,6 @@ export const adminNavConfig: NavItem[] = [
   //   module: MODULES.ACCOUNT,
   // },
   {
-    title: 'Reports',
-    url: EROUTES.REPORT_CUSTOMERS,
-    icon: BarChart3,
-    modules: [
-      MODULES.REPORT_CUSTOMER,
-      MODULES.REPORT_ORG_MOTOR_VEHICLE,
-      MODULES.REPORT_ORG_MOTOR_QUOTATION,
-      MODULES.REPORT_ORG_MOTOR_CERTIFICATE,
-      MODULES.REPORT_ORG_TRAVEL_QUOTATION,
-    ],
-    items: [
-      {
-        title: 'Customers',
-        url: EROUTES.REPORT_CUSTOMERS,
-        module: MODULES.REPORT_CUSTOMER,
-      },
-      {
-        title: 'Motor',
-        url: EROUTES.REPORT_ORG_MOTOR_VEHICLES,
-        modules: [
-          MODULES.REPORT_ORG_MOTOR_VEHICLE,
-          MODULES.REPORT_ORG_MOTOR_QUOTATION,
-          MODULES.REPORT_ORG_MOTOR_CERTIFICATE,
-        ],
-        items: [
-          {
-            title: 'Vehicles',
-            url: EROUTES.REPORT_ORG_MOTOR_VEHICLES,
-            module: MODULES.REPORT_ORG_MOTOR_VEHICLE,
-          },
-          {
-            title: 'Quotations',
-            url: EROUTES.REPORT_ORG_MOTOR_QUOTATIONS,
-            module: MODULES.REPORT_ORG_MOTOR_QUOTATION,
-          },
-          {
-            title: 'Policies / Certificates',
-            url: EROUTES.REPORT_ORG_MOTOR_CERTIFICATES,
-            module: MODULES.REPORT_ORG_MOTOR_CERTIFICATE,
-          },
-        ],
-      },
-      {
-        title: 'Travel',
-        url: EROUTES.REPORT_ORG_TRAVEL_QUOTATIONS,
-        module: MODULES.REPORT_ORG_TRAVEL_QUOTATION,
-        items: [
-          {
-            title: 'Quotations',
-            url: EROUTES.REPORT_ORG_TRAVEL_QUOTATIONS,
-            module: MODULES.REPORT_ORG_TRAVEL_QUOTATION,
-          },
-        ],
-      },
-    ],
-  },
-  {
     title: 'Quotations',
     url: EROUTES.MOTORQUOTATIONS,
     icon: TextQuote,
@@ -307,6 +250,63 @@ export const adminNavConfig: NavItem[] = [
       {
         title: 'Common',
         url: EROUTES.TRAVEL_BENEFIT_COMMON,
+      },
+    ],
+  },
+  {
+    title: 'Reports',
+    url: EROUTES.REPORT_CUSTOMERS,
+    icon: BarChart3,
+    modules: [
+      MODULES.REPORT_CUSTOMER,
+      MODULES.REPORT_ORG_MOTOR_VEHICLE,
+      MODULES.REPORT_ORG_MOTOR_QUOTATION,
+      MODULES.REPORT_ORG_MOTOR_CERTIFICATE,
+      MODULES.REPORT_ORG_TRAVEL_QUOTATION,
+    ],
+    items: [
+      {
+        title: 'Customers',
+        url: EROUTES.REPORT_CUSTOMERS,
+        module: MODULES.REPORT_CUSTOMER,
+      },
+      {
+        title: 'Motor',
+        url: EROUTES.REPORT_ORG_MOTOR_VEHICLES,
+        modules: [
+          MODULES.REPORT_ORG_MOTOR_VEHICLE,
+          MODULES.REPORT_ORG_MOTOR_QUOTATION,
+          MODULES.REPORT_ORG_MOTOR_CERTIFICATE,
+        ],
+        items: [
+          {
+            title: 'Vehicles',
+            url: EROUTES.REPORT_ORG_MOTOR_VEHICLES,
+            module: MODULES.REPORT_ORG_MOTOR_VEHICLE,
+          },
+          {
+            title: 'Quotations',
+            url: EROUTES.REPORT_ORG_MOTOR_QUOTATIONS,
+            module: MODULES.REPORT_ORG_MOTOR_QUOTATION,
+          },
+          {
+            title: 'Policies / Certificates',
+            url: EROUTES.REPORT_ORG_MOTOR_CERTIFICATES,
+            module: MODULES.REPORT_ORG_MOTOR_CERTIFICATE,
+          },
+        ],
+      },
+      {
+        title: 'Travel',
+        url: EROUTES.REPORT_ORG_TRAVEL_QUOTATIONS,
+        module: MODULES.REPORT_ORG_TRAVEL_QUOTATION,
+        items: [
+          {
+            title: 'Quotations',
+            url: EROUTES.REPORT_ORG_TRAVEL_QUOTATIONS,
+            module: MODULES.REPORT_ORG_TRAVEL_QUOTATION,
+          },
+        ],
       },
     ],
   },

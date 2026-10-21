@@ -4,7 +4,6 @@ import { useOrganizationReportExport } from '@/app/admin/reports/use-organizatio
 import { useCan } from '@/auth/useCan'
 import { useBypassOrgLocation } from '@/auth/use-bypass-org-location'
 import { BypassOrgLocationPicker, EmptyState, PageHeader } from '@/components/shared'
-import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -105,27 +104,31 @@ export function OrganizationReportPage({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <PageHeader title={title} description={description} />
-        {canExport && (
-          <Button
-            type="button"
-            variant="outline"
-            disabled={!canFetch || isExporting}
-            onClick={() =>
-              void exportReport({
-                url: exportUrl,
-                filename: exportFilename,
-                params: listParams,
-                headers: orgContextHeaders,
-              })
-            }
-          >
-            <Download className="mr-2 h-4 w-4" />
-            {isExporting ? 'Exporting…' : 'Export Excel'}
-          </Button>
-        )}
-      </div>
+      <PageHeader
+        title={title}
+        description={description}
+        actions={
+          canExport
+            ? [
+                {
+                  label: isExporting ? 'Exporting…' : 'Export to Excel',
+                  icon: Download,
+                  variant: 'outline',
+                  disabled: !canFetch || isExporting,
+                  className:
+                    'border-black text-black hover:bg-black hover:text-white',
+                  onClick: () =>
+                    void exportReport({
+                      url: exportUrl,
+                      filename: exportFilename,
+                      params: listParams,
+                      headers: orgContextHeaders,
+                    }),
+                },
+              ]
+            : undefined
+        }
+      />
 
       {isBypass ? (
         <Card className="shadow-none p-4">
