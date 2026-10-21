@@ -12,6 +12,7 @@ import {
   FolderCog,
   Plane,
   ShieldAlert,
+  BarChart3,
 } from 'lucide-react'
 import { MODULES, QUOTATION_MOTOR_MODULES } from '@/auth/module-keys'
 import { EPREFIX, EROUTES } from '@/utils/enums'
@@ -107,12 +108,63 @@ export const adminNavConfig: NavItem[] = [
   //   icon: ArrowLeftRight,
   //   module: MODULES.ACCOUNT,
   // },
-  // {
-  //   title: 'Insights',
-  //   url: EROUTES.REPORTS,
-  //   icon: BarChart3,
-  //   module: MODULES.RBAC,
-  // },
+  {
+    title: 'Reports',
+    url: EROUTES.REPORT_CUSTOMERS,
+    icon: BarChart3,
+    modules: [
+      MODULES.REPORT_CUSTOMER,
+      MODULES.REPORT_ORG_MOTOR_VEHICLE,
+      MODULES.REPORT_ORG_MOTOR_QUOTATION,
+      MODULES.REPORT_ORG_MOTOR_CERTIFICATE,
+      MODULES.REPORT_ORG_TRAVEL_QUOTATION,
+    ],
+    items: [
+      {
+        title: 'Customers',
+        url: EROUTES.REPORT_CUSTOMERS,
+        module: MODULES.REPORT_CUSTOMER,
+      },
+      {
+        title: 'Motor',
+        url: EROUTES.REPORT_ORG_MOTOR_VEHICLES,
+        modules: [
+          MODULES.REPORT_ORG_MOTOR_VEHICLE,
+          MODULES.REPORT_ORG_MOTOR_QUOTATION,
+          MODULES.REPORT_ORG_MOTOR_CERTIFICATE,
+        ],
+        items: [
+          {
+            title: 'Vehicles',
+            url: EROUTES.REPORT_ORG_MOTOR_VEHICLES,
+            module: MODULES.REPORT_ORG_MOTOR_VEHICLE,
+          },
+          {
+            title: 'Quotations',
+            url: EROUTES.REPORT_ORG_MOTOR_QUOTATIONS,
+            module: MODULES.REPORT_ORG_MOTOR_QUOTATION,
+          },
+          {
+            title: 'Policies / Certificates',
+            url: EROUTES.REPORT_ORG_MOTOR_CERTIFICATES,
+            module: MODULES.REPORT_ORG_MOTOR_CERTIFICATE,
+          },
+        ],
+      },
+      {
+        title: 'Travel',
+        url: EROUTES.REPORT_ORG_TRAVEL_QUOTATIONS,
+        module: MODULES.REPORT_ORG_TRAVEL_QUOTATION,
+        items: [
+          {
+            title: 'Quotations',
+            url: EROUTES.REPORT_ORG_TRAVEL_QUOTATIONS,
+            module: MODULES.REPORT_ORG_TRAVEL_QUOTATION,
+          },
+        ],
+      },
+    ],
+  },
   {
     title: 'Quotations',
     url: EROUTES.MOTORQUOTATIONS,

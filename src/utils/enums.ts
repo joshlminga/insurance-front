@@ -108,6 +108,11 @@ export const EROUTES = {
 
   // Reports
   REPORTS: `/${EPREFIX.DASHBOARD}/reports`,
+  REPORT_CUSTOMERS: `/${EPREFIX.DASHBOARD}/reports/customers`,
+  REPORT_ORG_MOTOR_VEHICLES: `/${EPREFIX.DASHBOARD}/reports/motor/vehicles`,
+  REPORT_ORG_MOTOR_QUOTATIONS: `/${EPREFIX.DASHBOARD}/reports/motor/quotations`,
+  REPORT_ORG_MOTOR_CERTIFICATES: `/${EPREFIX.DASHBOARD}/reports/motor/certificates`,
+  REPORT_ORG_TRAVEL_QUOTATIONS: `/${EPREFIX.DASHBOARD}/reports/travel/quotations`,
 
   // Staff
   STAFF: `/${EPREFIX.DASHBOARD}/staff`,

@@ -44,6 +44,13 @@ export const MODULES = {
   REPORT_MOTOR_RECEIPT: 'report-motor-receipt',
   REPORT_MOTOR_COVER: 'report-motor-cover',
 
+  // Organization-scoped admin reports
+  REPORT_CUSTOMER: 'report-customer',
+  REPORT_ORG_MOTOR_VEHICLE: 'report-org-motor-vehicle',
+  REPORT_ORG_MOTOR_QUOTATION: 'report-org-motor-quotation',
+  REPORT_ORG_MOTOR_CERTIFICATE: 'report-org-motor-certificate',
+  REPORT_ORG_TRAVEL_QUOTATION: 'report-org-travel-quotation',
+
   // DMVIC / motor certificates
   DMVIC_CERTIFICATE: 'dmvic-certificate',
   DMVIC_STOCK: 'dmvic-stock',

@@ -188,6 +188,31 @@ const AdminTravelQuotationFetchPage = lazy(() =>
   }))
 )
 
+const OrganizationCustomersReportPage = lazy(() =>
+  import("./app/admin/reports/customers/page").then(m => ({
+    default: m.OrganizationCustomersReportPage,
+  }))
+)
+const OrganizationMotorVehiclesReportPage = lazy(() =>
+  import("./app/admin/reports/motor/vehicles/page").then(m => ({
+    default: m.OrganizationMotorVehiclesReportPage,
+  }))
+)
+const OrganizationMotorQuotationsReportPage = lazy(() =>
+  import("./app/admin/reports/motor/quotations/page").then(m => ({
+    default: m.OrganizationMotorQuotationsReportPage,
+  }))
+)
+const OrganizationMotorCertificatesReportPage = lazy(() =>
+  import("./app/admin/reports/motor/certificates/page").then(m => ({
+    default: m.OrganizationMotorCertificatesReportPage,
+  }))
+)
+const OrganizationTravelQuotationsReportPage = lazy(() =>
+  import("./app/admin/reports/travel/quotations/page").then(m => ({
+    default: m.OrganizationTravelQuotationsReportPage,
+  }))
+)
 const QuotationReportsMotorPage = lazy(() =>
   import("./app/admin/reports/quotations/motor/page").then(m => ({
     default: m.QuotationReportsMotorPage,
@@ -840,6 +865,56 @@ export const router = createBrowserRouter([
               <S>
                 <AdminModulePage module={MODULES.QUOTATION_TRAVEL}>
                   <AdminTravelQuotationFetchPage />
+                </AdminModulePage>
+              </S>
+            ),
+          },
+          {
+            path: "reports/customers",
+            element: (
+              <S>
+                <AdminModulePage module={MODULES.REPORT_CUSTOMER}>
+                  <OrganizationCustomersReportPage />
+                </AdminModulePage>
+              </S>
+            ),
+          },
+          {
+            path: "reports/motor/vehicles",
+            element: (
+              <S>
+                <AdminModulePage module={MODULES.REPORT_ORG_MOTOR_VEHICLE}>
+                  <OrganizationMotorVehiclesReportPage />
+                </AdminModulePage>
+              </S>
+            ),
+          },
+          {
+            path: "reports/motor/quotations",
+            element: (
+              <S>
+                <AdminModulePage module={MODULES.REPORT_ORG_MOTOR_QUOTATION}>
+                  <OrganizationMotorQuotationsReportPage />
+                </AdminModulePage>
+              </S>
+            ),
+          },
+          {
+            path: "reports/motor/certificates",
+            element: (
+              <S>
+                <AdminModulePage module={MODULES.REPORT_ORG_MOTOR_CERTIFICATE}>
+                  <OrganizationMotorCertificatesReportPage />
+                </AdminModulePage>
+              </S>
+            ),
+          },
+          {
+            path: "reports/travel/quotations",
+            element: (
+              <S>
+                <AdminModulePage module={MODULES.REPORT_ORG_TRAVEL_QUOTATION}>
+                  <OrganizationTravelQuotationsReportPage />
                 </AdminModulePage>
               </S>
             ),
