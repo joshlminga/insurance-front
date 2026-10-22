@@ -3,7 +3,6 @@ import { useBypassOrgLocation } from '@/auth/use-bypass-org-location'
 import { useCan } from '@/auth/useCan'
 import { MODULES } from '@/auth/module-keys'
 import {
-  BypassOrgLocationPicker,
   EmptyState,
   PageHeader,
 } from '@/components/shared'
@@ -44,6 +43,7 @@ import {
   ReusableReducer
 } from '@/utils/constatnts'
 import { extractErrorMessage } from '@/utils/helpers'
+import { EROUTES } from '@/utils/enums'
 import { formatDmvicOrganizationLocation, ShowToast } from '@/utils/utils'
 import { Building2, Plus } from 'lucide-react'
 import { useParams } from 'react-router-dom'
@@ -54,7 +54,8 @@ import { EditDmvicPolicyNumberRuleModal } from '../modals/edit-rule'
 
 /**
  * One stock’s policy-number rules.
- * Same broker org picker as the list page (shared localStorage key).
+ * Broker org is the one stored on Policy Numbers (same localStorage key) and is
+ * sent as X-Organization-Location-Id. This page does not show another picker.
  */
 export function DmvicStockDetailPage() {
   const [filter, optionsDispatcher] = useReducer(
@@ -71,12 +72,9 @@ export function DmvicStockDetailPage() {
   const canAction = canModuleAction(MODULES.DMVIC_STOCK, 'action')
 
   const {
-    isBypass,
     selectedLocationId,
-    setLocationId,
     orgContextHeaders,
     canFetch,
-    allowedLocationIds,
   } = useBypassOrgLocation(DMVIC_STOCK_ORG_STORAGE_KEY)
 
   const { handleDialogContextSwitch, dialogContent, dialogOpen } =
@@ -111,10 +109,11 @@ export function DmvicStockDetailPage() {
   })
 
   const { data: rulesResponse, isLoading: rulesLoading, refetch: refetchRules, isError: isErrorRules } = UseApiQuery<SubmitResponse>({
-    url: 'dmvic/stocks',
-    queryKey: ['dmvic/stocks', 'rules', stockId, filter, selectedLocationId || null],
+    url: 'dmvic/policy-number-rules',
+    queryKey: ['dmvic/policy-number-rules', stockId, filter, selectedLocationId || null],
     params: {
       dmvic_stock_id: stockId,
+      page: filter.page,
       per_page: filter?.pageSize,
       sort_by: 'id',
       direction: 'desc',
@@ -196,22 +195,15 @@ export function DmvicStockDetailPage() {
         }
       />
 
-      {isBypass ? (
-        <Card className="shadow-none p-6">
-          <BypassOrgLocationPicker
-            value={selectedLocationId}
-            onChange={setLocationId}
-            allowedLocationIds={allowedLocationIds}
-            hint="Stock detail and rules are scoped to the selected broker organization."
-          />
-        </Card>
-      ) : null}
-
       {!canFetch ? (
         <EmptyState
           icon={Building2}
           title="Select an organization location"
-          description="Choose a broker organization above before opening this stock."
+          description="Choose a broker organization on Policy Numbers before opening this stock."
+          action={{
+            label: 'Back to Policy Numbers',
+            href: EROUTES.DMVIC_STOCK,
+          }}
         />
       ) : (
         <>

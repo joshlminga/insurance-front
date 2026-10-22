@@ -53,6 +53,7 @@ function YesNoRadio({
   name:
     | "for_public"
     | "levy_applied"
+    | "is_external"
     | "has_rules"
     | "quotation_api"
     | "policy_api"
@@ -117,6 +118,13 @@ export const TravelProductFormFields = ({
   // When it is No, those inputs stay in the form but are not shown, and the
   // submit helper sends has_rules: false plus all four API flags as false.
   const productHasRules = form.watch("has_rules") === "true"
+
+  // External cover is a Yes/No flag, stored like the other radios ("true" / "false").
+  // Yes means the insurer prices this product outside Acensure, so we do not ask
+  // for coverage pairs here. The Coverages block stays in the form state but is
+  // hidden, and the submit helper leaves those pairs out of the request.
+  // Rates and benefits stay on their own screens.
+  const isExternalCover = form.watch("is_external") === "true"
 
   const targetListError = form.formState.errors.organization_location_ids?.message
     ?? form.formState.errors.organization_location_ids?.root?.message
@@ -257,12 +265,17 @@ export const TravelProductFormFields = ({
           name="currency"
           render={({ field }) => (
             <ReusableSingleSelectApiInput
-              url="atu/multicurrency/currencies"
+              url="atu/multicurrency/currencies/options"
               queryParams={listQuery}
+              searchParam="search"
               value={field.value}
               onChange={field.onChange}
               valueKey="id"
-              labelKey="code"
+              formatLabel={(item) => {
+                const code = String(item?.code ?? "").trim()
+                const name = String(item?.name ?? "").trim()
+                return name ? `${code} - ${name}` : code
+              }}
               label="Currency"
               placeholder="Select currency..."
               searchPlaceholder="Search currency..."
@@ -287,6 +300,13 @@ export const TravelProductFormFields = ({
         />
       </div>
 
+      <YesNoRadio
+        control={form.control}
+        name="is_external"
+        label="External cover"
+      />
+
+      {!isExternalCover ? (
       <div className={addonSectionCardClass}>
         <p className="text-sm font-medium">
           Coverages
@@ -364,6 +384,7 @@ export const TravelProductFormFields = ({
           <p className="text-sm text-red-500">{coverageListError}</p>
         ) : null}
       </div>
+      ) : null}
 
       <YesNoRadio
         control={form.control}

@@ -1065,7 +1065,7 @@ function getByPath(item: any, path: string) {
     return path.split(".").reduce((acc, key) => acc?.[key], item);
 }
 
-const SearchableCommandSelect = ({
+export const SearchableCommandSelect = ({
     value,
     onChange,
     options,
@@ -1459,6 +1459,15 @@ export function ReuseableSingleSelectOrganizationInput<T extends FieldValues>({
     )
 }
 
+function insurerLocationLabel(insurer: {
+    organization_name?: string
+    country?: { name?: string }
+}): string {
+    const name = insurer.organization_name ?? "Unknown organization"
+    const country = insurer.country?.name
+    return country ? `${name} - ${country}` : name
+}
+
 export const ReuseableSelectInsurerInput = <T extends FieldValues>({
     value,
     onChange,
@@ -1467,12 +1476,32 @@ export const ReuseableSelectInsurerInput = <T extends FieldValues>({
     required = false,
     disabled = false,
     className,
-
+    selectedOption,
 }: ReuseableSingleSelectCountriesInputProps<T>) => {
-    const { data, isLoading } = UseApiQuery<SubmitResponse>({
-        url: `organization-location?organization_type=${EORGANIZATIONTYPES.INSURER}`,
-        params: { direction: "asc" },
-        queryOptions: { enabled: true },
+    // Wait until typing pauses, then search organization-location with `term`.
+    const [search, setSearch] = useState("");
+    const [debouncedSearch, setDebouncedSearch] = useState("");
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearch(search);
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [search]);
+
+    const { data, isLoading, isFetching } = UseApiQuery<SubmitResponse>({
+        url: "organization-location",
+        params: {
+            organization_type: EORGANIZATIONTYPES.INSURER,
+            direction: "asc",
+            per_page: 100,
+            term: debouncedSearch || undefined,
+        },
+        queryOptions: {
+            enabled: true,
+            placeholderData: (previousData) => previousData,
+            staleTime: 1000 * 60 * 5,
+        },
     })
     const insurers = data?.data ?? [];
     return (
@@ -1483,28 +1512,37 @@ export const ReuseableSelectInsurerInput = <T extends FieldValues>({
                     {required && <span className="text-destructive ml-1">*</span>}
                 </Label>
             )}
-            <Select
-                value={value}
-                onValueChange={onChange}
-                disabled={disabled || isLoading}>
-                <SelectTrigger className="w-full h-10 rounded-[5px] border border-[#ADABAB]">
-                    <SelectValue
-                        placeholder={isLoading ? "Loading users..." : placeholder}
+            {/* Clear empties the field so a blank or wrong insurer can be chosen again. Save still requires a value. */}
+            <div className="flex items-center gap-2">
+                <div className="min-w-0 flex-1">
+                    <SearchableCommandSelect
+                        value={value}
+                        onChange={onChange}
+                        options={insurers.map((insurer: any) => ({
+                            value: String(insurer?.organization_location_id),
+                            label: insurerLocationLabel(insurer),
+                        }))}
+                        placeholder={placeholder}
+                        searchPlaceholder="Search insurer..."
+                        emptyMessage="No insurers found"
+                        disabled={disabled}
+                        isLoading={isLoading}
+                        isFetching={isFetching}
+                        onSearchChange={setSearch}
+                        selectedOption={selectedOption}
                     />
-                </SelectTrigger>
-                <SelectContent>
-                    {insurers.map((insurer: any) => (
-                        <SelectItem key={insurer?.organization_location_id} value={String(insurer?.organization_location_id)}>
-                            {insurer?.organization_name} - {insurer?.country?.name}
-                        </SelectItem>
-                    ))}
-                    {!isLoading && insurers.length === 0 && (
-                        <div className="px-3 py-2 text-sm text-muted-foreground">
-                            No insurers found
-                        </div>
-                    )}
-                </SelectContent>
-            </Select>
+                </div>
+                {value ? (
+                    <ShadButton
+                        type="button"
+                        variant="outline"
+                        className="h-10 shrink-0 rounded-[5px] border-[#ADABAB] px-3 font-normal"
+                        onClick={() => onChange("")}
+                    >
+                        Clear
+                    </ShadButton>
+                ) : null}
+            </div>
         </div>
     )
 }
@@ -1816,6 +1854,8 @@ export function ReusableSingleSelectApiInput({
     config,
     labelKey = "name",
     valueKey = "id",
+    searchParam = "term",
+    formatLabel,
     searchPlaceholder = "Search...",
     emptyMessage = "No results found",
     selectedOption,
@@ -1834,7 +1874,7 @@ export function ReusableSingleSelectApiInput({
         params: {
             direction: "asc",
             is_active: true,
-            term: debouncedSearch || undefined,
+            [searchParam]: debouncedSearch || undefined,
             ...queryParams,
         },
         config,
@@ -1861,7 +1901,9 @@ export function ReusableSingleSelectApiInput({
                 onChange={onChange}
                 options={items.map((item: any) => ({
                     value: String(getByPath(item, valueKey) ?? ""),
-                    label: String(getByPath(item, labelKey) ?? ""),
+                    label: formatLabel
+                        ? formatLabel(item)
+                        : String(getByPath(item, labelKey) ?? ""),
                 }))}
                 placeholder={placeholder}
                 searchPlaceholder={searchPlaceholder}
@@ -2363,8 +2405,14 @@ export const SendInvoiceViaEmail = ({
         return prefilled;
     });
 
+    // Motor by default; Travel Finance passes endpointUrl for InvoiceEmail route
+    const invoiceEmailUrl =
+        typeof componentProps?.endpointUrl === 'string' && componentProps.endpointUrl.trim() !== ''
+            ? componentProps.endpointUrl.trim()
+            : 'document/motor/send-invoice-via-email'
+
     const submitMutation = UseApiMutation<SubmitResponse, FormData>({
-        url: `document/motor/send-invoice-via-email`,
+        url: invoiceEmailUrl,
         method: EMETHODS.POST,
         mutationOptions: {
             onSuccess: (data) => {

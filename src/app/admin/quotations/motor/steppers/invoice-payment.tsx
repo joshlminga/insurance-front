@@ -23,6 +23,7 @@ import { validateDoubleInsurancePreflight } from '@/utils/dmvic-double-insurance
 import {
     extractErrorMessage,
     getDmvicValidationOverrideError,
+    isDmvicPolicyExhaustedError,
     maxCoverEndDate,
 } from '@/utils/helpers'
 import { ShowToast } from '@/utils/utils'
@@ -151,6 +152,16 @@ export const AdminMotorInvoicePayment: React.FC<AdminMotorStepProps> = ({
                 setOverrideDialogOpen(false)
                 const message = extractErrorMessage(error);
                 ShowToast.error(message || "Submission failed!")
+
+                // Policy sequence exhausted: toast above + highlight Policy Number so admin can enter one
+                if (isDmvicPolicyExhaustedError(error)) {
+                    form.setError("policy_number", {
+                        type: "manual",
+                        message:
+                            message
+                            || "System has exhausted Policy number, kindly enter manually",
+                    })
+                }
             },
         },
     })

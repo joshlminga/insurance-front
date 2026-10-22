@@ -43,7 +43,7 @@ describe("action wait delay", () => {
     vi.useRealTimers()
   })
 
-  it("stays hidden before 5 seconds and shows after", () => {
+  it("stays hidden before 2 seconds and shows after", () => {
     beginActionWait()
     expect(getActionWaitSnapshot().visible).toBe(false)
 
@@ -55,9 +55,9 @@ describe("action wait delay", () => {
     expect(getActionWaitSnapshot().pending).toBe(1)
   })
 
-  it("never shows when the action ends before 5 seconds", () => {
+  it("never shows when the action ends before 2 seconds", () => {
     beginActionWait()
-    vi.advanceTimersByTime(4000)
+    vi.advanceTimersByTime(ACTION_WAIT_DELAY_MS - 1)
     endActionWait()
     vi.advanceTimersByTime(ACTION_WAIT_DELAY_MS)
     expect(getActionWaitSnapshot().visible).toBe(false)
@@ -75,9 +75,9 @@ describe("action wait delay", () => {
 
   it("does not restart the delay when a second action starts while waiting", () => {
     beginActionWait()
-    vi.advanceTimersByTime(3000)
+    vi.advanceTimersByTime(ACTION_WAIT_DELAY_MS - 1)
     beginActionWait()
-    vi.advanceTimersByTime(2000)
+    vi.advanceTimersByTime(1)
     expect(getActionWaitSnapshot().visible).toBe(true)
     expect(getActionWaitSnapshot().pending).toBe(2)
   })

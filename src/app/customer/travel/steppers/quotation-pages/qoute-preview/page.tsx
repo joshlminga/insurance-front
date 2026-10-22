@@ -22,6 +22,10 @@ import type { SubmitResponse } from '@/types/types'
 import { EMETHODS, PURCHASE_SESSION_STORAGE_KEY } from '@/utils/constatnts'
 import { extractErrorMessage } from '@/utils/helpers'
 import { TRAVEL_QUOTE_SESSION_STORAGE_KEY } from '@/utils/travel-enums'
+import {
+  clearAdminTravelDuplicatePrefill,
+  readAdminTravelDuplicateSourceId,
+} from '@/app/admin/quotations/travel/admin-travel-session'
 import { ShowToast } from '@/utils/utils'
 import {
   Download,
@@ -124,6 +128,7 @@ export const TravelQuotePreviewPage = ({
           return
         }
         sessionStorage.setItem(PURCHASE_SESSION_STORAGE_KEY, String(purchaseId))
+        clearAdminTravelDuplicatePrefill()
         // Close the quote preview dialog (parent CustomDialog).
         closeParentDialog?.({})
         goToNextStep?.()
@@ -145,7 +150,11 @@ export const TravelQuotePreviewPage = ({
       ShowToast.error('Missing product or rate for this offer.')
       return
     }
-    submitPurchaseMutation.mutate(payload)
+    const quoteDuplicate = readAdminTravelDuplicateSourceId()
+    submitPurchaseMutation.mutate({
+      ...payload,
+      ...(quoteDuplicate ? { quote_duplicate: quoteDuplicate } : {}),
+    })
   }
 
   const { handleDialogContextSwitch, dialogContent, dialogOpen } =

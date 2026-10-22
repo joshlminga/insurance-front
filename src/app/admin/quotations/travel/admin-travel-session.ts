@@ -7,6 +7,9 @@ import {
     ADMIN_TRAVEL_CUSTOMER_PHONE_KEY,
     ADMIN_TRAVEL_QUOTE_CUSTOMER_ID_KEY,
     ADMIN_TRAVEL_QUOTE_CUSTOMER_TYPE_KEY,
+    ADMIN_TRAVEL_QUOTE_DUPLICATE_PREFILL_KEY,
+    ADMIN_TRAVEL_QUOTE_DUPLICATE_SOURCE_KEY,
+    ADMIN_TRAVEL_QUOTE_DUPLICATE_START_AT_KEY,
     ADMIN_TRAVEL_QUOTE_IS_GUEST_KEY,
     INVOICE_SESSION_STORAGE_KEY,
     PURCHASE_SESSION_STORAGE_KEY,
@@ -17,6 +20,8 @@ import {
 } from '@/utils/travel-enums'
 import type {
     MotorQuoteSessionCustomerType,
+    TravelQuoteDuplicatePayload,
+    TravelQuoteDuplicateStartAt,
     TravelQuoteFetchDetail,
     TravelQuoteLastEndedStage,
     TravelQuoteSessionStartData,
@@ -148,6 +153,49 @@ export function persistAdminTravelPurchaseStart(purchaseId: string | number): vo
 }
 
 /**
+ * Issue Cover from Finance travel invoices.
+ * Lands on Payment (3) when invoice meta exists, Invoice (2) when KYC exists but invoice meta missing,
+ * otherwise KYC (1). Seeds purchase + invoice session keys like payment resume.
+ */
+export function persistAdminTravelIssueCoverFromInvoice(input: {
+    purchaseId: string | number
+    invoiceId?: string | number | null
+    hasKycMeta?: boolean
+    hasInvoiceMeta?: boolean
+}): { purchaseStep: 1 | 2 | 3 } {
+    if (typeof window === 'undefined') {
+        return { purchaseStep: 1 }
+    }
+
+    const purchaseId = String(input.purchaseId)
+    sessionStorage.setItem(PURCHASE_SESSION_STORAGE_KEY, purchaseId)
+    sessionStorage.setItem(ADMIN_ACTIVE_QUOTATION_PRODUCT_KEY, 'travel')
+
+    // Prefer payment when an invoice already exists (usual finance case)
+    let purchaseStep: 1 | 2 | 3 = 3
+    if (!input.hasKycMeta) {
+        purchaseStep = 1
+    } else if (!input.hasInvoiceMeta) {
+        purchaseStep = 2
+    }
+
+    sessionStorage.setItem(ADMIN_TRAVEL_PURCHASE_STEP_KEY, String(purchaseStep))
+
+    if (purchaseStep === 3) {
+        // Same as persistAdminTravelResumeFromDetail payment stage
+        sessionStorage.setItem(INVOICE_SESSION_STORAGE_KEY, purchaseId)
+        if (input.invoiceId != null && String(input.invoiceId).trim() !== '') {
+            sessionStorage.setItem('admin_travel_target_invoice_id', String(input.invoiceId))
+        }
+    } else {
+        sessionStorage.removeItem(INVOICE_SESSION_STORAGE_KEY)
+        sessionStorage.removeItem('admin_travel_target_invoice_id')
+    }
+
+    return { purchaseStep }
+}
+
+/**
  * Resume an existing travel quote from Find/Listed detail.
  * Restores quote session id, customer contact, trip form snapshot, and purchase step.
  */
@@ -245,8 +293,77 @@ export function persistAdminTravelResumeFromDetail(detail: TravelQuoteFetchDetai
     return { stage, purchaseStep: null }
 }
 
+/** Remember the duplicate payload so the existing travel form can prefill after navigation. */
+export function persistAdminTravelDuplicatePrefill(payload: TravelQuoteDuplicatePayload): void {
+    if (typeof window === 'undefined') return
+    sessionStorage.setItem(
+        ADMIN_TRAVEL_QUOTE_DUPLICATE_SOURCE_KEY,
+        String(payload.source_quote_session_id)
+    )
+    sessionStorage.setItem(ADMIN_TRAVEL_QUOTE_DUPLICATE_START_AT_KEY, payload.start_at)
+    sessionStorage.setItem(ADMIN_TRAVEL_QUOTE_DUPLICATE_PREFILL_KEY, JSON.stringify(payload))
+}
+
+export function readAdminTravelDuplicatePrefill(): TravelQuoteDuplicatePayload | null {
+    if (typeof window === 'undefined') return null
+    const raw = sessionStorage.getItem(ADMIN_TRAVEL_QUOTE_DUPLICATE_PREFILL_KEY)
+    if (!raw) return null
+    try {
+        return JSON.parse(raw) as TravelQuoteDuplicatePayload
+    } catch {
+        return null
+    }
+}
+
+/** Source session id kept until purchase so rates-stage duplicates can send quote_duplicate. */
+export function readAdminTravelDuplicateSourceId(): number | null {
+    const raw = readKey(ADMIN_TRAVEL_QUOTE_DUPLICATE_SOURCE_KEY)
+    const id = Number(raw)
+    return Number.isFinite(id) && id > 0 ? id : null
+}
+
+export function readAdminTravelDuplicateStartAt(): TravelQuoteDuplicateStartAt | null {
+    const raw = readKey(ADMIN_TRAVEL_QUOTE_DUPLICATE_START_AT_KEY)
+    if (raw === 'quote' || raw === 'rates' || raw === 'kyc' || raw === 'payment') {
+        return raw
+    }
+    return null
+}
+
+export function clearAdminTravelDuplicatePrefill(): void {
+    if (typeof window === 'undefined') return
+    sessionStorage.removeItem(ADMIN_TRAVEL_QUOTE_DUPLICATE_PREFILL_KEY)
+    sessionStorage.removeItem(ADMIN_TRAVEL_QUOTE_DUPLICATE_SOURCE_KEY)
+    sessionStorage.removeItem(ADMIN_TRAVEL_QUOTE_DUPLICATE_START_AT_KEY)
+}
+
+/**
+ * Trip snapshot KYC reads from sessionStorage.
+ * Rates / KYC duplicates never open the start form, so we save this ourselves.
+ */
+export function persistAdminTravelTripSnapshot(snapshot: {
+    bound?: string
+    country_of_departure?: string
+    country_of_arrival?: string
+    travel_as?: string
+    date_of_departure?: string
+    date_of_return?: string
+    type_of_trip?: string
+    reason_for_travel?: string
+    travelers?: Array<Record<string, unknown>>
+}): void {
+    if (typeof window === 'undefined') return
+    try {
+        sessionStorage.setItem(TRAVEL_QUOTATION_FORM_SESSION_KEY, JSON.stringify(snapshot))
+    } catch {
+        // KYC can still be typed by hand if the browser storage is full
+    }
+}
+
 /** Clear active admin travel quote / purchase session keys. */
-export function clearAdminTravelActiveSession(): void {
+export function clearAdminTravelActiveSession(options?: {
+    clearDuplicatePrefill?: boolean
+}): void {
     if (typeof window === 'undefined') return
 
     sessionStorage.removeItem(TRAVEL_QUOTE_SESSION_STORAGE_KEY)
@@ -263,5 +380,9 @@ export function clearAdminTravelActiveSession(): void {
 
     if (readKey(ADMIN_ACTIVE_QUOTATION_PRODUCT_KEY) === 'travel') {
         sessionStorage.removeItem(ADMIN_ACTIVE_QUOTATION_PRODUCT_KEY)
+    }
+
+    if (options?.clearDuplicatePrefill) {
+        clearAdminTravelDuplicatePrefill()
     }
 }

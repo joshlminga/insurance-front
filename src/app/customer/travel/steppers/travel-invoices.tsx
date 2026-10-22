@@ -146,16 +146,18 @@ export const TravelInvoicesPage: React.FC<CustomerVerificationDetailsProps> = ({
                 placeholder="07XXXXXXXX"
                 required
               />
-              <ReuseableInput
-                className="h-10 w-full rounded-[5px] border border-[#ADABAB]"
-                control={form.control}
-                type="date"
-                name="cover_start_date"
-                label="Cover Start Date"
-                placeholder="DD/MM/YYYY"
-                required
-                disabled={Boolean(departureDate)}
-              />
+              <div className="rounded-[5px] border-2 border-[#C20C0C] p-2">
+                <ReuseableInput
+                  className="h-10 w-full rounded-[5px] border border-[#ADABAB]"
+                  control={form.control}
+                  type="date"
+                  name="cover_start_date"
+                  label="Cover Start Date"
+                  placeholder="DD/MM/YYYY"
+                  required
+                  disabled={Boolean(departureDate)}
+                />
+              </div>
             </div>
 
             <div className="mt-4 rounded-[5px] border border-[#ADABAB] bg-neutral-50 px-3 py-2.5 sm:max-w-xs">

@@ -2,7 +2,6 @@
 import {
   Button,
   ReusableSelect,
-  ReuseableInput,
   ReuseableSelectInsurerInput,
 } from '@/dev/core'
 import { UseApiMutation } from '@/hooks/hooks'
@@ -44,7 +43,6 @@ export function CreateDmvicStockModal({
       insurer_location_id: '',
       product_type: '',
       type_of_certificate: '',
-      stock: undefined,
     },
   })
 
@@ -67,11 +65,11 @@ export function CreateDmvicStockModal({
 
   const onSubmit = (data: CreateDmvicStockFormValues) => {
     // Broker org is NOT in the body — API takes it from X-Organization-Location-Id.
+    // Stock is not sent. The API sets the starting count.
     submitMutation.mutate({
       insurer_location_id: Number(data.insurer_location_id),
       product_type: data.product_type,
       type_of_certificate: data.type_of_certificate,
-      stock: data.stock,
     })
   }
 
@@ -111,14 +109,6 @@ export function CreateDmvicStockModal({
           name="type_of_certificate"
           label="Certificate Type"
           options={[...DMVIC_CERTIFICATE_TYPES]}
-        />
-
-        <ReuseableInput
-          control={form.control}
-          name="stock"
-          type="number"
-          label="Initial stock count (min 2)"
-          className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
         />
 
         <div className="flex justify-end gap-3 pt-2">

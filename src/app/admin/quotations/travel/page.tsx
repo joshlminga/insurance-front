@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import { MODULES } from '@/auth/module-keys'
 import { useCan } from '@/auth/useCan'
 import { PageHeader } from '@/components/shared'
@@ -32,8 +31,8 @@ import { TRAVEL_QUOTATION_FORM_SESSION_KEY } from '@/utils/travel-enums'
 import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowRightCircle } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
     Controller,
     FormProvider,
@@ -56,10 +55,14 @@ import { OfficeCountrySelect } from '@/app/admin/quotations/motor/office-country
 import { TravelCustomerDetailsSection } from './customer-details-section'
 import { buildTravelQuotationPayload } from './travel-quotation-payload'
 import {
+    clearAdminTravelDuplicatePrefill,
     contactFromUser,
     persistAdminTravelCustomerContact,
     persistAdminTravelQuoteSession,
+    readAdminTravelDuplicatePrefill,
+    readAdminTravelDuplicateStartAt,
 } from './admin-travel-session'
+import { travelFormValuesFromDuplicate } from './travel-duplicate-form'
 
 type ProfileCountry = {
     id?: number | string
@@ -122,7 +125,6 @@ function isCreateAccountAgencyMissing(data: AdminTravelQuotationFormValues): boo
 
 export const TravelQuotationPage = () => {
     const navigate = useNavigate()
-    const location = useLocation()
     const { user } = UseAuth()
     const { canModuleAction } = useCan()
     const canTravelOverride = canModuleAction(MODULES.QUOTATION_TRAVEL, 'override')
@@ -130,6 +132,12 @@ export const TravelQuotationPage = () => {
     const [showSelfCoverSubmitWarning, setShowSelfCoverSubmitWarning] = useState(false)
     const [pendingSubmitData, setPendingSubmitData] =
         useState<AdminTravelQuotationFormValues | null>(null)
+    const appliedDuplicateRef = useRef(false)
+    // Quote-stage duplicate keeps its payload in sessionStorage until submit.
+    // Reading it here avoids a second form page and a setState inside the prefill effect.
+    const duplicateReview =
+        readAdminTravelDuplicateStartAt() === 'quote' &&
+        Boolean(readAdminTravelDuplicatePrefill()?.start_quote)
 
     const { data: adminProfileData, isLoading: isAdminProfileLoading } =
         UseApiQuery<SubmitResponse>({
@@ -169,6 +177,40 @@ export const TravelQuotationPage = () => {
         },
     })
 
+    // Quote-stage duplicate stores the payload in sessionStorage, then opens this page.
+    // Wait for the office country when the copy has none, so we only reset the form once.
+    useEffect(() => {
+        if (appliedDuplicateRef.current) return
+        if (readAdminTravelDuplicateStartAt() !== 'quote') return
+
+        const duplicate = readAdminTravelDuplicatePrefill()
+        if (!duplicate?.start_quote) return
+
+        const quoteCountry = duplicate.start_quote.country_id
+        const quoteHasCountry = quoteCountry != null && String(quoteCountry) !== ''
+        if (!quoteHasCountry && isAdminProfileLoading) return
+
+        appliedDuplicateRef.current = true
+        const values = travelFormValuesFromDuplicate(
+            duplicate,
+            profileCountry?.id != null ? String(profileCountry.id) : ''
+        )
+        form.reset(values)
+        // reset() does not run validation, and the submit button stays disabled until the form is valid
+        void form.trigger()
+
+        const fullName = values.full_name?.trim()
+        if (values.email || fullName || values.phone) {
+            persistAdminTravelCustomerContact({
+                name: fullName || undefined,
+                email: values.email?.trim() || undefined,
+                phone: values.phone?.trim() || undefined,
+            })
+        }
+
+        ShowToast.success('Duplicate quote fields loaded - review and submit to start')
+    }, [form, isAdminProfileLoading, profileCountry?.id])
+
     const formCountryId = useWatch({ control: form.control, name: 'country_id' })
     const { bound, hasRouteRow, hasScheduleRow } = useTravelTripProgress(form.control)
 
@@ -177,6 +219,11 @@ export const TravelQuotationPage = () => {
     useEffect(() => {
         if (formCountryId) return
         if (profileCountry?.id == null || profileCountry.id === '') return
+        // A quote-stage copy already chose a country. Do not replace it with the office country.
+        if (readAdminTravelDuplicateStartAt() === 'quote') {
+            const copiedCountry = readAdminTravelDuplicatePrefill()?.start_quote?.country_id
+            if (copiedCountry != null && String(copiedCountry) !== '') return
+        }
         form.setValue('country_id', String(profileCountry.id), {
             shouldValidate: true,
         })
@@ -220,7 +267,7 @@ export const TravelQuotationPage = () => {
 
     const submitMutation = UseApiMutation<
         SubmitResponse & { data: TravelQuoteSessionStartData },
-        ReturnType<typeof buildTravelQuotationPayload>
+        ReturnType<typeof buildTravelQuotationPayload> & { quote_duplicate?: number }
     >({
         url: 'quotation/travel',
         method: EMETHODS.POST,
@@ -238,6 +285,8 @@ export const TravelQuotationPage = () => {
                     ...session,
                     id: quoteSessionId,
                 })
+                // The new session already carries quote_duplicate. Drop the review copy.
+                clearAdminTravelDuplicatePrefill()
                 ShowToast.success(
                     response?.message || 'Travel quotation started successfully.'
                 )
@@ -299,8 +348,27 @@ export const TravelQuotationPage = () => {
             return
         }
 
-        const payload = buildTravelQuotationPayload({ data, dialCode })
-        submitMutation.mutate(payload)
+        // Only a quote-stage review sends quote_duplicate. A normal start must not
+        // reuse a source id left behind by a rates duplicate.
+        const duplicate = readAdminTravelDuplicatePrefill()
+        const sourceId =
+            duplicate?.start_at === 'quote' && Number(duplicate.source_quote_session_id) > 0
+                ? Number(duplicate.source_quote_session_id)
+                : null
+
+        if (!sourceId) {
+            clearAdminTravelDuplicatePrefill()
+        }
+
+        const payload = buildTravelQuotationPayload({
+            // Duplicate never creates a member account — guest unless user_id is already set
+            data: sourceId ? { ...data, create_customer_account: false } : data,
+            dialCode,
+        })
+        submitMutation.mutate({
+            ...payload,
+            ...(sourceId ? { quote_duplicate: sourceId } : {}),
+        })
     }
 
     const onSubmit = (data: AdminTravelQuotationFormValues) => {
@@ -330,8 +398,12 @@ export const TravelQuotationPage = () => {
         <div className="space-y-6 text-sm pb-[max(5vh,4.5rem)] mb-[5vh]">
             <div className="[&_h1]:text-lg [&_h1]:leading-7 [&_p]:text-sm [&_p]:leading-5">
                 <PageHeader
-                    title="Travel Quotations"
-                    description="Start a travel quotation for a member or guest traveler."
+                    title={duplicateReview ? 'Duplicate travel quotation' : 'Travel Quotations'}
+                    description={
+                        duplicateReview
+                            ? 'Review the copied customer and trip, then start a new quotation. The original quote is left as it is.'
+                            : 'Start a travel quotation for a member or guest traveler.'
+                    }
                 />
             </div>
 
@@ -477,7 +549,7 @@ export const TravelQuotationPage = () => {
                                     !form.formState.isValid || submitMutation.isPending
                                 }
                             >
-                                Start Quotation
+                                {duplicateReview ? 'Start duplicated quotation' : 'Start Quotation'}
                             </Button>
                         </div>
                     </div>

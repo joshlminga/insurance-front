@@ -1,17 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { SearchableCommandSelect } from '@/dev/core'
 import { UseApiQuery } from '@/hooks/hooks'
 import { serializeOrganizationLocationParams } from '@/lib/organization-location-params'
 import type { SubmitResponse } from '@/types/types'
-import { Loader2 } from 'lucide-react'
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 type BypassOrgLocationPickerProps = {
   value: string
@@ -44,6 +36,9 @@ function formatLocationLabel(location: OrganizationLocationOption): string {
 /**
  * Lets Super Admin / multi-location staff choose which organization location
  * an org-scoped screen applies to (sent as X-Organization-Location-Id).
+ *
+ * Typing searches active locations (`term` on organization-location).
+ * The chosen name stays on the closed field even when that row is not in the current page.
  */
 export function BypassOrgLocationPicker({
   value,
@@ -53,11 +48,34 @@ export function BypassOrgLocationPicker({
   allowedLocationIds,
   hint = 'Reports and lists apply to the selected organization location only.',
 }: BypassOrgLocationPickerProps) {
+  // The API call waits until typing pauses, so each keystroke does not hit the server.
+  const [search, setSearch] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+  // Remembered label for the id already chosen.
+  const [selectedOption, setSelectedOption] = useState<{ value: string; label: string }>()
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search)
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [search])
+
   const params = useMemo(() => {
-    const base = {
-      direction: 'asc' as const,
+    const base: {
+      direction: 'asc'
+      is_active: boolean
+      per_page: number
+      term?: string
+      organization_type?: string[]
+    } = {
+      direction: 'asc',
       is_active: true,
       per_page: 100,
+    }
+
+    if (debouncedSearch) {
+      base.term = debouncedSearch
     }
 
     if (organizationTypes && organizationTypes.length > 0) {
@@ -65,13 +83,16 @@ export function BypassOrgLocationPicker({
     }
 
     return base
-  }, [organizationTypes])
+  }, [organizationTypes, debouncedSearch])
 
-  const { data, isLoading } = UseApiQuery<SubmitResponse>({
+  const { data, isLoading, isFetching } = UseApiQuery<SubmitResponse>({
     url: 'organization-location',
     params,
     config: { paramsSerializer: serializeOrganizationLocationParams },
-    queryOptions: { enabled: true },
+    queryOptions: {
+      enabled: true,
+      placeholderData: (previousData) => previousData,
+    },
   })
 
   const locations = useMemo(() => {
@@ -85,7 +106,50 @@ export function BypassOrgLocationPicker({
     )
   }, [data?.data, allowedLocationIds])
 
-  const selectValue = value && value !== '' ? value : undefined
+  const valueInList = Boolean(value) && locations.some(
+    (location) => String(location.organization_location_id ?? '') === value,
+  )
+
+  // Load the chosen row by id when it is not in the current page (past the first 100, or filtered by search).
+  const { data: pinnedResponse } = UseApiQuery<SubmitResponse>({
+    url: 'organization-location',
+    params: {
+      direction: 'asc' as const,
+      is_active: true,
+      per_page: 1,
+      organization_location_id: value,
+    },
+    config: { paramsSerializer: serializeOrganizationLocationParams },
+    queryOptions: {
+      enabled: Boolean(value) && !isLoading && !valueInList && selectedOption?.value !== value,
+      staleTime: 1000 * 60 * 5,
+    },
+  })
+
+  useEffect(() => {
+    if (!value) {
+      setSelectedOption(undefined)
+      return
+    }
+
+    const fromPage = locations.find(
+      (location) => String(location.organization_location_id ?? '') === value,
+    )
+    const pinnedRows = (pinnedResponse?.data ?? []) as OrganizationLocationOption[]
+    const pinned = pinnedRows.find(
+      (location) => String(location.organization_location_id ?? '') === value,
+    )
+    const source = fromPage ?? pinned
+    if (!source) {
+      return
+    }
+
+    if (allowedLocationIds != null && !allowedLocationIds.map(String).includes(value)) {
+      return
+    }
+
+    setSelectedOption({ value, label: formatLocationLabel(source) })
+  }, [locations, value, pinnedResponse, allowedLocationIds])
 
   return (
     <div className={`space-y-2 ${className ?? ''}`}>
@@ -93,40 +157,21 @@ export function BypassOrgLocationPicker({
         Organization location
         <span className="text-destructive ml-1">*</span>
       </Label>
-      <Select
-        value={selectValue}
-        onValueChange={onChange}
-        disabled={isLoading}
-      >
-        <SelectTrigger className="w-full h-10 rounded-[5px] border border-[#ADABAB]">
-          <SelectValue
-            placeholder={
-              isLoading ? 'Loading organizations...' : 'Select organization location...'
-            }
-          />
-        </SelectTrigger>
-        <SelectContent>
-          {isLoading && (
-            <div className="px-3 py-2 text-sm text-muted-foreground flex items-center gap-2">
-              <Loader2 className="h-3 w-3 animate-spin" />
-              Loading...
-            </div>
-          )}
-          {locations.map((location) => (
-            <SelectItem
-              key={location.organization_location_id}
-              value={String(location.organization_location_id)}
-            >
-              {formatLocationLabel(location)}
-            </SelectItem>
-          ))}
-          {!isLoading && locations.length === 0 && (
-            <div className="px-3 py-2 text-sm text-muted-foreground">
-              No organization locations found
-            </div>
-          )}
-        </SelectContent>
-      </Select>
+      <SearchableCommandSelect
+        value={value || undefined}
+        onChange={onChange}
+        options={locations.map((location) => ({
+          value: String(location.organization_location_id),
+          label: formatLocationLabel(location),
+        }))}
+        placeholder="Select organization location..."
+        searchPlaceholder="Search organization..."
+        emptyMessage="No organization locations found"
+        isLoading={isLoading}
+        isFetching={isFetching}
+        onSearchChange={setSearch}
+        selectedOption={selectedOption}
+      />
       {hint ? (
         <p className="text-xs text-muted-foreground">{hint}</p>
       ) : null}

@@ -10,9 +10,13 @@ export type TravelProductPayload = {
   currency: number | null
   start_date: string | null
   expiry_date: string | null
+  is_external: boolean
   organization_location_ids: number[]
-  /** bound_type mirrors App\Enums\Ace\TravelBound (Inbound | Outbound) */
-  coverages: Array<{ coverage_id: number; bound_type: TravelBoundValue }>
+  /**
+   * Omitted when is_external is true. The insurer fills coverage later.
+   * bound_type mirrors App\Enums\Ace\TravelBound (Inbound | Outbound)
+   */
+  coverages?: Array<{ coverage_id: number; bound_type: TravelBoundValue }>
   has_rules: boolean
   quotation_api: boolean
   policy_api: boolean
@@ -66,6 +70,7 @@ export const emptyTravelProductFormValues = (): TravelProductFormValues => ({
   currency: "",
   start_date: "",
   expiry_date: "",
+  is_external: "false",
   // No target rows by default. Private products may stay with none.
   organization_location_ids: [],
   coverages: [emptyCoverage()],
@@ -122,6 +127,7 @@ export const mapTravelProductToFormValues = (
         : "",
     start_date: toDateInputValue(product.start_date),
     expiry_date: toDateInputValue(product.expiry_date),
+    is_external: toYesNo(product.is_external),
     organization_location_ids: targetRows,
     coverages: coverageRows.length ? coverageRows : [emptyCoverage()],
     has_rules: toYesNo(product.has_rules),
@@ -187,12 +193,14 @@ export const getTravelProductSelectLabels = (
  * If "Does Product Have Rules?" is No, the four API questions are hidden.
  * We still send those four flags as false so the API can clear saved rules.
  * A public product does not send target organizations.
+ * An external cover does not send coverage pairs.
  */
 export const buildTravelProductPayload = (
   values: TravelProductFormValues
 ): TravelProductPayload => {
   const hasRules = yesNoToBoolean(values.has_rules)
   const isPublic = yesNoToBoolean(values.for_public)
+  const isExternal = yesNoToBoolean(values.is_external)
   const currencyId = Number(values.currency)
 
   const targetIds = values.organization_location_ids
@@ -210,11 +218,16 @@ export const buildTravelProductPayload = (
     currency: Number.isInteger(currencyId) && currencyId > 0 ? currencyId : null,
     start_date: values.start_date ? values.start_date : null,
     expiry_date: values.expiry_date ? values.expiry_date : null,
+    is_external: isExternal,
     organization_location_ids: isPublic ? [] : [...new Set(targetIds)],
-    coverages: values.coverages.map((row) => ({
-      coverage_id: Number(row.coverage_id),
-      bound_type: row.bound_type,
-    })),
+    ...(isExternal
+      ? {}
+      : {
+          coverages: values.coverages.map((row) => ({
+            coverage_id: Number(row.coverage_id),
+            bound_type: row.bound_type,
+          })),
+        }),
     has_rules: hasRules,
     quotation_api: hasRules ? yesNoToBoolean(values.quotation_api) : false,
     policy_api: hasRules ? yesNoToBoolean(values.policy_api) : false,

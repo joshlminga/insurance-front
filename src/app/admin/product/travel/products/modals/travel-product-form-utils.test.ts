@@ -35,6 +35,7 @@ describe("buildTravelProductPayload", () => {
       for_public: false,
       currency: 3,
       organization_location_ids: [22],
+      is_external: false,
       coverages: [{ coverage_id: 5, bound_type: "Outbound" }],
       has_rules: true,
       quotation_api: true,
@@ -99,6 +100,19 @@ describe("buildTravelProductPayload", () => {
     expect(payload.for_public).toBe(false)
     expect(payload.organization_location_ids).toEqual([])
   })
+
+  it("does not send coverage pairs when the cover is external", () => {
+    const payload = buildTravelProductPayload(
+      TravelProductSchema.parse({
+        ...validForm,
+        is_external: "true",
+        coverages: [],
+      })
+    )
+
+    expect(payload.is_external).toBe(true)
+    expect(payload.coverages).toBeUndefined()
+  })
 })
 
 describe("TravelProductSchema", () => {
@@ -109,6 +123,16 @@ describe("TravelProductSchema", () => {
         coverages: [],
       })
     ).toThrow()
+  })
+
+  it("allows an external cover with no coverages", () => {
+    expect(() =>
+      TravelProductSchema.parse({
+        ...validForm,
+        is_external: "true",
+        coverages: [],
+      })
+    ).not.toThrow()
   })
 
   it("allows a private product with no target organizations", () => {
@@ -147,6 +171,7 @@ describe("mapTravelProductToFormValues", () => {
     expect(values.policy_api).toBe("false")
     expect(values.payment_api).toBe("false")
     expect(values.certificate_api).toBe("false")
+    expect(values.is_external).toBe("false")
     expect(values.currency).toBe("3")
     expect(values.start_date).toBe("2026-01-01")
     expect(values.coverages).toEqual([{ coverage_id: "5", bound_type: "Inbound" }])

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Badge } from '@/components/ui/badge'
-import type { DmvicPolicyNumberRuleRow } from '@/app/admin/dmvic-stock/dmvic-stock-query'
+import type { DmvicPolicyNumberRuleRow } from '@/types/types'
 import { ColumnDef } from '@tanstack/table-core'
 
 export const DmvicPolicyNumberRuleColumns: ColumnDef<DmvicPolicyNumberRuleRow>[] = [

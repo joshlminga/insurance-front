@@ -1,224 +1,78 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { PageHeader } from '@/components/shared';
-import { ActionColumn } from '@/dev/columns';
-import { CustomDialogComponent } from '@/dev/core';
-import { CustomBaseTable, SearchTools } from '@/dev/table';
-import { useCustomDialogContextFactory, useDebounce } from '@/hooks';
-import { UseApiQuery } from '@/hooks/hooks';
-import { SingleActionsHandler, SubmitResponse, TFilterOptions, TPaginationFilters } from '@/types/types';
-import { FILTEROPTIONS, ReusableReducer } from '@/utils/constatnts';
-import { Plus } from 'lucide-react';
+/**
+ * Finance > Payments
+ * Lists successful charges from M-Pesa, Paystack, Pesapal, PayPal, and Credit.
+ */
+import { PageHeader } from '@/components/shared'
+import { FinancePaymentColumns } from '@/dev/columns/admin/finance/payments'
+import { CustomBaseTable, SearchTools } from '@/dev/table'
+import { useDebounce } from '@/hooks'
+import { UseApiQuery } from '@/hooks/hooks'
+import type {
+  SubmitResponse,
+  TFilterOptions,
+  TPaginationFilters,
+} from '@/types/types'
+import { FILTEROPTIONS, ReusableReducer } from '@/utils/constatnts'
 import { useReducer } from 'react'
 
 const PaymentsPage = () => {
- const [filter, optionsDispatcher] = useReducer(
-        ReusableReducer<TPaginationFilters & TFilterOptions>,
-        { ...FILTEROPTIONS, page: 1, pageSize: 10 }
-    );
-    const optionsDispatcherDebounce = useDebounce({
-        debounceCallback: optionsDispatcher,
-    });
+  const [filter, optionsDispatcher] = useReducer(
+    ReusableReducer<TPaginationFilters & TFilterOptions>,
+    { ...FILTEROPTIONS, page: 1, pageSize: 10 }
+  )
+  const optionsDispatcherDebounce = useDebounce({
+    debounceCallback: optionsDispatcher,
+  })
 
-    const { handleDialogContextSwitch, dialogContent, dialogOpen } =
-        useCustomDialogContextFactory<{
-            refetch?: () => Promise<any>;
-            data?: any;
-        }>();
+  const listParams = {
+    page: filter.page,
+    per_page: filter.pageSize,
+    term: filter.term,
+  }
 
-    const { isLoading, refetch } = UseApiQuery<SubmitResponse>({
-        url: '',
-        params: {
-            page: filter.page,
-            pageSize: filter.pageSize,
-            term: filter.term,
-        },
-        queryOptions: {
-            enabled: true,
-        },
-    })
+  const { data, isLoading, isError } = UseApiQuery<SubmitResponse>({
+    url: 'finance/payments',
+    queryKey: ['finance/payments', listParams],
+    params: listParams,
+    queryOptions: { enabled: true },
+  })
 
-    //   const deleteOrganizationMutation = UseApiMutation<SubmitResponse, { id: number | string }>({
-    //     url: ({ id }) => `organization/${id}`,
-    //     method: EMETHODS.DELETE,
-    //     mutationOptions: {
-    //       onSuccess: (response) => {
-    //         ShowToast.success(response?.message || 'Organization deleted successfully')
-    //         refetch()
-    //       },
-    //       onError: (error) => {
-    //         ShowToast.error(extractErrorMessage(error))
-    //       },
-    //     },
-    //   })
+  return (
+    <div>
+      <PageHeader
+        title="Payments"
+        description="Successful premium payments across M-Pesa, Paystack, Pesapal, PayPal, and Credit."
+      />
 
-    //   const toggleOrganizationStatusMutation = UseApiMutation<SubmitResponse, { id: number | string, is_active: boolean }>({
-    //     url: ({ id }) => `organization/${id}/status`,
-    //     method: EMETHODS.PATCH,
-    //     mutationOptions: {
-    //       onSuccess: (response) => {
-    //         ShowToast.success(response?.message || 'Organization status updated successfully')
-    //         refetch()
-    //       },
-    //       onError: (error) => {
-    //         ShowToast.error(extractErrorMessage(error))
-    //       },
-    //     },
-    //   })
-
-    const ActionsHandlerMapping: SingleActionsHandler<any>[] = [
-        // {
-        //   label: 'View',
-        //   onSelect: (data) => {
-        //     handleDialogContextSwitch({
-        //       componentProps: { data, refetch },
-        //       Component: ViewOrganizationModal,
-        //     })
-        //   }
-        // },
-        // {
-        //   label: 'Edit',
-        //   onSelect: (data) => {
-        //     handleDialogContextSwitch({
-        //       componentProps: { data, refetch },
-        //       Component: EditOrganizationModal,
-        //     })
-        //   },
-        // },
-        // {
-        //   label: 'Delete',
-        //   onSelect: (data) => {
-        //     const id = data?.organization_id
-        //     if (!id) return
-        //     setDeleteTarget({
-        //       id,
-        //       label: data?.organization_name ?? 'this organization',
-        //     })
-        //   },
-        //   conditional: (data) => Boolean(data?.organization_id),
-        // },
-        // {
-        //   label: 'Deactivate',
-        //   onSelect: (data) => {
-        //     toggleOrganizationStatusMutation.mutate({
-        //       is_active: false,
-        //       id: data?.organization_id,
-        //     })
-        //   },
-        //   conditional: (data) => Boolean(data?.organization_id) && Boolean(data?.is_active),
-        // },
-        // {
-        //   label: 'Activate',
-        //   onSelect: (data) => {
-        //     toggleOrganizationStatusMutation.mutate({
-        //       is_active: true,
-        //       id: data?.organization_id,
-        //     })
-        //   },
-        //   conditional: (data) => Boolean(data?.organization_id) && !Boolean(data?.is_active),
-        // },
-    ];
-
-    return (
-        <div>
-            <PageHeader
-                title="Payments"
-                description="Manage Payments On Premiums"
-                actions={[
-                    {
-                        icon: Plus,
-                        label: 'Add Invoice',
-                        variant: 'default',
-                        onClick: () => {
-                            handleDialogContextSwitch({
-                                componentProps: { refetch },
-                                // Component: '',
-                            })
-                        },
-                    },
-                ]}
-            />
-
-            <div className='w-full'>
-                <CustomBaseTable
-                    {...{
-                        onPageChange: (page) =>
-                            optionsDispatcher({
-                                payload: { page },
-                                type: 'page',
-                            }),
-                        OtherToolsProps: {
-                            onChange: (data: any) =>
-                                optionsDispatcherDebounce({
-                                    payload: { term: data },
-                                    type: 'term',
-                                }),
-                            placeholder: 'Search',
-                            includeFilter: true,
-                        },
-                        columns: [
-                            //   ...OrganizationsColumns,
-                            ActionColumn({ ActionsHandlerMapping }),
-                        ],
-                        OtherTools: SearchTools,
-                        data: [],
-                        pageCount: filter.page,
-                        title: 'Payments',
-                        showPagination: true,
-                        setPageSize: (pageSize) =>
-                            optionsDispatcher({
-                                payload: { pageSize },
-                                type: 'pageSize',
-                            }),
-                        pageSize: filter?.pageSize,
-                        page: filter?.page,
-                        isLoading: isLoading,
-                    }}
-                />
-            </div>
-            <CustomDialogComponent
-                {...{ handleDialogContextSwitch, dialogOpen }}
-                className='sm:max-w-fit w-[95vw] sm:w-auto p-4 sm:p-6'>
-                {dialogContent?.Component && (
-                    <dialogContent.Component
-                        {...{
-                            componentProps: dialogContent.componentProps,
-                            handleDialogContextSwitch,
-                        }}
-                    />
-                )}
-            </CustomDialogComponent>
-
-            {/* <AlertDialog
-        open={deleteTarget !== null}
-        onOpenChange={(open) => {
-          if (!open) setDeleteTarget(null)
-        }}>
-
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete organization?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. You are about to delete &quot;
-              {deleteTarget?.label}&quot;. Are you sure?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              className={buttonVariants({ variant: 'destructive' })}
-              disabled={deleteOrganizationMutation.isPending}
-              onClick={() => {
-                if (!deleteTarget) return
-                deleteOrganizationMutation.mutate({ id: deleteTarget.id })
-              }}>
-              {deleteOrganizationMutation.isPending ? 'Deleting…' : 'Delete'}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog> */}
-
-        </div>
+      <div className="w-full">
+        <CustomBaseTable
+          onPageChange={(page) =>
+            optionsDispatcher({ payload: { page }, type: 'page' })
+          }
+          OtherToolsProps={{
+            onChange: (term: string) =>
+              optionsDispatcherDebounce({ payload: { term }, type: 'term' }),
+            placeholder: 'Search invoice, quote, or reference…',
+            includeFilter: true,
+          }}
+          columns={[...FinancePaymentColumns]}
+          OtherTools={SearchTools}
+          data={data?.data ?? []}
+          pageCount={data?.pagination?.last_page ?? filter.page}
+          title="Payments"
+          showPagination
+          setPageSize={(pageSize) =>
+            optionsDispatcher({ payload: { pageSize }, type: 'pageSize' })
+          }
+          pageSize={data?.pagination?.per_page ?? filter.pageSize}
+          page={data?.pagination?.current_page ?? filter.page}
+          isLoading={isLoading}
+          isError={isError}
+        />
+      </div>
+    </div>
   )
 }
 
-export default PaymentsPage;
+export default PaymentsPage

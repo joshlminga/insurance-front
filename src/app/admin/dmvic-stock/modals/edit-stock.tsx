@@ -15,7 +15,7 @@ import {
 } from '@/utils/constatnts'
 import { EMETHODS } from '@/utils/constatnts'
 import { extractErrorMessage } from '@/utils/helpers'
-import { ShowToast } from '@/utils/utils'
+import { formatDmvicOrganizationLocation, ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Controller, useForm } from 'react-hook-form'
 
@@ -40,11 +40,20 @@ export function EditDmvicStockModal({
 }) {
   const stock = componentProps?.data
   const orgContextHeaders = componentProps?.orgContextHeaders
+  const insurerLocationId = resolveInsurerLocationId(stock)
+  // Keep the saved insurer visible even when it is not in the first search page.
+  const insurerSelectedOption =
+    insurerLocationId && stock?.insurer_location
+      ? {
+          value: insurerLocationId,
+          label: formatDmvicOrganizationLocation(stock.insurer_location),
+        }
+      : undefined
 
   const form = useForm<EditDmvicStockFormValues>({
     resolver: zodResolver(EditDmvicStockSchema),
     defaultValues: {
-      insurer_location_id: resolveInsurerLocationId(stock),
+      insurer_location_id: insurerLocationId,
       product_type: stock?.product_type ?? 'Motor',
       type_of_certificate: stock?.type_of_certificate ?? '',
     },
@@ -101,6 +110,7 @@ export function EditDmvicStockModal({
               required
               value={field.value}
               onChange={field.onChange}
+              selectedOption={insurerSelectedOption}
             />
           )}
         />

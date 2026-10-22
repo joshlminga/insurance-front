@@ -13,6 +13,7 @@ import {
     formatWholeNumber,
     getDmvicValidationOverrideError,
     getInvalidVehicleRegistrationError,
+    isDmvicPolicyExhaustedError,
     isBenefitGroupLocked,
     mapMotorRateToFormValues,
     maxCoverEndDate,
@@ -174,6 +175,63 @@ describe("getDmvicValidationOverrideError", () => {
                 },
             }),
         ).toBeNull()
+    })
+})
+
+describe("isDmvicPolicyExhaustedError", () => {
+    it("detects code on response.code", () => {
+        expect(
+            isDmvicPolicyExhaustedError({
+                response: {
+                    status: 422,
+                    data: { code: "dmvic_policy_exhausted", message: "enter manually" },
+                },
+            }),
+        ).toBe(true)
+    })
+
+    it("detects code on response.error", () => {
+        expect(
+            isDmvicPolicyExhaustedError({
+                response: {
+                    status: 422,
+                    data: { error: "dmvic_policy_exhausted" },
+                },
+            }),
+        ).toBe(true)
+    })
+
+    it("detects 422 message hint without a code", () => {
+        expect(
+            isDmvicPolicyExhaustedError({
+                response: {
+                    status: 422,
+                    data: {
+                        message:
+                            "System has exhausted Policy number, kindly enter manually",
+                    },
+                },
+            }),
+        ).toBe(true)
+    })
+
+    it("ignores stock exhaustion 422", () => {
+        expect(
+            isDmvicPolicyExhaustedError({
+                response: {
+                    status: 422,
+                    data: {
+                        message:
+                            "System has exhausted assigned certificate stock, Kindly try after 30 minutes",
+                    },
+                },
+            }),
+        ).toBe(false)
+    })
+
+    it("returns false when response is missing", () => {
+        expect(isDmvicPolicyExhaustedError({})).toBe(false)
+        expect(isDmvicPolicyExhaustedError(null)).toBe(false)
     })
 })
 

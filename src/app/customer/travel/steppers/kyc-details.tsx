@@ -372,53 +372,68 @@ export const TravelKycDetailsPage: React.FC<CustomerVerificationDetailsProps> = 
                   placeholder="e.g. A020828302W"
                   required
                 />
-                <ReuseableInput
-                  className={inputClassName}
-                  control={form.control}
-                  name={`travelers.${index}.next_of_kin_name`}
-                  label="Next of Kin Name"
-                  required
-                />
-                <ReuseableInput
-                  className={inputClassName}
-                  control={form.control}
-                  type="tel"
-                  name={`travelers.${index}.next_of_kin_phone`}
-                  label="Next of Kin Phone"
-                  required
-                />
-                <ReuseableInput
-                  className={`${inputClassName} sm:col-span-2 lg:col-span-3`}
-                  control={form.control}
-                  type="textarea"
-                  name={`travelers.${index}.physical_address`}
-                  label="Physical Address"
-                  required
-                  rows={2}
-                />
+              </div>
+
+              {/* One row: address is half (6/12), each upload is a quarter (3/12). */}
+              <div className="mt-4 grid grid-cols-1 gap-4 sm:mt-5 lg:grid-cols-12 lg:gap-5">
+                <div className="min-w-0 lg:col-span-6">
+                  <ReuseableInput
+                    className={inputClassName}
+                    control={form.control}
+                    type="textarea"
+                    name={`travelers.${index}.physical_address`}
+                    label="Physical Address"
+                    required
+                    rows={2}
+                  />
+                </div>
+                <div className="min-w-0 lg:col-span-3">
+                  <ReuseableInput
+                    className={inputClassName}
+                    control={form.control}
+                    type="file"
+                    name={`travelers.${index}.passport_attachment`}
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    label="Attach Passport"
+                    required
+                  />
+                </div>
+                <div className="min-w-0 lg:col-span-3">
+                  <ReuseableInput
+                    className={inputClassName}
+                    control={form.control}
+                    type="file"
+                    name={`travelers.${index}.tax_certificate`}
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    label="Attach KRA PIN Certificate"
+                    required
+                  />
+                </div>
               </div>
 
               <Separator className="my-4" />
 
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
-                <ReuseableInput
-                  className={inputClassName}
-                  control={form.control}
-                  type="file"
-                  name={`travelers.${index}.passport_attachment`}
-                  accept=".pdf,.jpg,.jpeg,.png"
-                  label="Attach Passport"
-                  required
-                />
-                <ReuseableInput
-                  className={inputClassName}
-                  control={form.control}
-                  type="file"
-                  name={`travelers.${index}.tax_certificate`}
-                  accept=".pdf,.jpg,.jpeg,.png"
-                  label="Attach KRA PIN Certificate"
-                  required
-                />
+              <div>
+                <h3 className="mb-3 text-sm font-semibold sm:text-base">
+                  Next of Kin
+                </h3>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
+                  <ReuseableInput
+                    className={inputClassName}
+                    control={form.control}
+                    name={`travelers.${index}.next_of_kin_name`}
+                    label="Next of Kin Name"
+                    required
+                  />
+                  <ReuseableInput
+                    className={inputClassName}
+                    control={form.control}
+                    type="tel"
+                    name={`travelers.${index}.next_of_kin_phone`}
+                    label="Next of Kin Phone"
+                    required
+                  />
+                </div>
               </div>
             </div>
           ))}

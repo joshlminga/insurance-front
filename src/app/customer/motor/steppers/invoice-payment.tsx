@@ -92,6 +92,7 @@ export const InvoicePayment: React.FC<CustomerVerificationDetailsProps> = ({ goT
                     await refreshMotorPurchaseSummary(queryClient, purchaseSessionId)
                 }
                 goToNextStep?.()
+                // Includes optional soft message when policy is deferred (cover after payment once restored)
                 ShowToast.success(data.message || "Submitted successfully!")
             },
             onError: (error: any) => {
@@ -102,6 +103,7 @@ export const InvoicePayment: React.FC<CustomerVerificationDetailsProps> = ({ goT
                     return
                 }
                 setOverrideDialogOpen(false)
+                // Stock exhausted (and other 422s): API message is toasted here
                 const message = extractErrorMessage(error);
                 ShowToast.error(message || "Submission failed!")
             },

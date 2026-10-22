@@ -49,6 +49,10 @@ import {
   type TravelDisplayCurrency,
 } from '@/utils/travel-display-currency'
 import { TRAVEL_QUOTE_SESSION_STORAGE_KEY } from '@/utils/travel-enums'
+import {
+  clearAdminTravelDuplicatePrefill,
+  readAdminTravelDuplicateSourceId,
+} from '@/app/admin/quotations/travel/admin-travel-session'
 import { ShowToast, SIDEBAR_LAYOUT_QUERY } from '@/utils/utils'
 import { ArrowLeftCircle, ArrowRightCircle, ListFilter, X } from 'lucide-react'
 import React, {
@@ -492,6 +496,8 @@ export const TravelQuotationsPage: React.FC<
           return
         }
         sessionStorage.setItem(PURCHASE_SESSION_STORAGE_KEY, String(purchaseId))
+        // Rates-stage duplicate kept the source id until this cover was chosen.
+        clearAdminTravelDuplicatePrefill()
         goToNextStep?.()
         ShowToast.success(responseData?.message ?? 'Purchase started')
       },
@@ -513,9 +519,12 @@ export const TravelQuotationsPage: React.FC<
       return
     }
     setPurchasingRateId(rateId)
+    // Admin duplicate stores the source session id. Customer quotes never set that key.
+    const quoteDuplicate = readAdminTravelDuplicateSourceId()
     submitPurchaseMutation.mutate({
       product_id: productId,
       rate_id: rateId,
+      ...(quoteDuplicate ? { quote_duplicate: quoteDuplicate } : {}),
     })
   }
 

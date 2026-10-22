@@ -3,7 +3,7 @@
  * only after ACTION_WAIT_DELAY_MS if work is still running.
  */
 
-export const ACTION_WAIT_DELAY_MS = 5000
+export const ACTION_WAIT_DELAY_MS = 2000
 
 export type ActionWaitHoldOptions = {
   /** Extra line under "Please wait..." (e.g. M-Pesa PIN hint). */
@@ -44,7 +44,7 @@ function clearShowTimer(): void {
 }
 
 function scheduleShow(): void {
-  // Already showing or already waiting — do not restart the 5s window.
+  // Already showing or already waiting — do not restart the 2s window.
   if (visible || showTimer != null) {
     return
   }

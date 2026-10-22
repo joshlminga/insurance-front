@@ -74,6 +74,50 @@ export function getDmvicValidationOverrideError(
   }
 }
 
+/**
+ * Admin invoice submit: policy sequence exhausted → enter policy_number manually.
+ * Backend may send code `dmvic_policy_exhausted` on `code` / `error`, or only the 422 message.
+ */
+const DMVIC_POLICY_EXHAUSTED_CODE = "dmvic_policy_exhausted"
+const DMVIC_POLICY_EXHAUSTED_MESSAGE_HINT = "exhausted policy number"
+
+export function isDmvicPolicyExhaustedError(error: unknown): boolean {
+  const axiosError = error as { response?: { status?: number; data?: any } } | undefined
+  const status = axiosError?.response?.status
+  const data = axiosError?.response?.data
+  if (!data) {
+    return false
+  }
+
+  // Flexible: code may live on `code`, `error`, or nested strings
+  const candidates: unknown[] = [data.code, data.error]
+  if (typeof data.errors === "string") {
+    candidates.push(data.errors)
+  }
+  if (data.errors && typeof data.errors === "object" && !Array.isArray(data.errors)) {
+    candidates.push(...Object.values(data.errors).flat())
+  }
+  if (typeof data.message === "string") {
+    candidates.push(data.message)
+  }
+
+  const hasCode = candidates.some(
+    (value) =>
+      typeof value === "string"
+      && value.toLowerCase().includes(DMVIC_POLICY_EXHAUSTED_CODE),
+  )
+  if (hasCode) {
+    return true
+  }
+
+  // Fallback: 422 + known admin copy (no dedicated code yet)
+  if (status !== 422) {
+    return false
+  }
+  const message = extractErrorMessage(error).toLowerCase()
+  return message.includes(DMVIC_POLICY_EXHAUSTED_MESSAGE_HINT)
+}
+
 export function getInvalidVehicleRegistrationError(
   error: unknown
 ): InvalidVehicleRegistrationError | null {

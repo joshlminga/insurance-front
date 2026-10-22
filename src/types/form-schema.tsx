@@ -1581,12 +1581,13 @@ export const TravelKycSchema = z.object({
 })
 export const CreateDmvicStockSchema = z.object({
   // Insurer office (API field insurer_location_id). Broker org comes from X-Organization-Location-Id.
+  // Stock is not typed here. The API sets the starting count.
   insurer_location_id: z.string().min(1, 'Insurer organization location is required'),
   product_type: z.string().min(1, 'Product type is required'),
   type_of_certificate: z.string().min(1, 'Certificate type is required'),
-  stock: z.coerce.number().int().min(2, 'Stock must be at least 2'),
 })
-export const EditDmvicStockSchema = CreateDmvicStockSchema.omit({ stock: true })
+// Edit uses the same fields. Remaining stock is not part of this form.
+export const EditDmvicStockSchema = CreateDmvicStockSchema
 const dmvicPolicyNumberRuleBase = z.object({
   template: z
     .string()
@@ -1776,23 +1777,24 @@ export const TravelProductSchema = z
     currency: z.string().optional().or(z.literal("")),
     start_date: z.string().optional().or(z.literal("")),
     expiry_date: z.string().optional().or(z.literal("")),
+    // "true" means the insurer prices this cover outside Acensure.
+    is_external: travelYesNo,
     // Optional rows for organizations that can see a private product. Empty means none.
     organization_location_ids: z.array(
       z.object({
         organization_location_id: z.string(),
       })
     ),
-    coverages: z
-      .array(
-        z.object({
-          coverage_id: z.string().min(1, "Coverage is required"),
-          // Mirrors App\Enums\Ace\TravelBound (Inbound | Outbound)
-          bound_type: z.enum(["Inbound", "Outbound"], {
-            error: "Bound is required",
-          }),
-        })
-      )
-      .min(1, "Add at least one coverage"),
+    // Required only when is_external is "false". An external cover can leave these blank.
+    coverages: z.array(
+      z.object({
+        coverage_id: z.string(),
+        // Mirrors App\Enums\Ace\TravelBound (Inbound | Outbound)
+        bound_type: z.enum(["Inbound", "Outbound"], {
+          error: "Bound is required",
+        }),
+      })
+    ),
     has_rules: travelYesNo,
     quotation_api: travelYesNo,
     policy_api: travelYesNo,
@@ -1807,6 +1809,28 @@ export const TravelProductSchema = z
         path: ["expiry_date"],
       })
     }
+
+    if (data.is_external === "true") {
+      return
+    }
+
+    if (data.coverages.length < 1) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Add at least one coverage",
+        path: ["coverages"],
+      })
+    }
+
+    data.coverages.forEach((row, index) => {
+      if (row.coverage_id.trim() === "") {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Coverage is required",
+          path: ["coverages", index, "coverage_id"],
+        })
+      }
+    })
   })
 
 /**

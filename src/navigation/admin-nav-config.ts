@@ -129,6 +129,11 @@ export const adminNavConfig: NavItem[] = [
             modules: [...QUOTATION_MOTOR_MODULES],
           },
           {
+            title: 'Double',
+            url: EROUTES.MOTOR_QUOTATION_DOUBLE,
+            modules: [...QUOTATION_MOTOR_MODULES],
+          },
+          {
             title: 'Find',
             url: EROUTES.MOTOR_QUOTATION_FETCH,
             modules: [...QUOTATION_MOTOR_MODULES],

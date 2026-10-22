@@ -5,16 +5,15 @@ import { EFINANCE_TRANSACTION_TABS } from '@/types/enums'
 
 /**
  * Finance → Transactions
- * Two views of the local ledger (`transactions` table):
- * - Per Invoice → API view=invoice
- * - Per Purchase → API view=purchase (Payable header lines)
+ * - Per Invoice → searchable invoices; Preview / Print = that invoice's DR/CR lines
+ * - Per Purchase → searchable by quote code; Preview / Print = funds rolled up by account
  */
 export function FinanceTransactionsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
         title="Transactions"
-        description="Ledger lines by invoice or by purchase (Payable journals)."
+        description="Search invoices or purchases, then Preview or Print the DR/CR ledger summary."
       />
 
       <div className="w-full">

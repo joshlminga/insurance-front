@@ -1,6 +1,9 @@
 /**
- * Travel payment success — download Embassy Letter immediately,
- * Policy Schedule after a 5-minute client wait (API also returns 422 if early).
+ * Travel payment success — same page for the customer and the admin purchase stepper.
+ * Documents, in order:
+ * 1. Receipt — ready immediately after payment
+ * 2. Embassy Letter — ready immediately
+ * 3. Policy Schedule — waits about 5 minutes (API also returns 422 if early)
  *
  * Reads purchase id from PURCHASE_SESSION_STORAGE_KEY (same as the rest of travel purchase).
  */
@@ -30,6 +33,7 @@ import {
   CircleCheckBig,
   FileText,
   Headphones,
+  Receipt,
   ScrollText,
   Shield,
   TrendingUp,
@@ -140,6 +144,25 @@ export const TravelSuccessPurchase: React.FC<CustomerVerificationDetailsProps> =
     ShowToast.error(message || 'Download failed!')
   }
 
+  // Receipt download. POST document/travel/receipt/{purchase} (not the motor receipt).
+  // The API returns the PDF as a blob, same as the embassy letter. If the invoice
+  // is not paid yet, the API sends an error and showDocError turns it into a toast.
+  const receiptMutation = UseApiMutation<Blob, void>({
+    url: purchaseSessionId
+      ? `document/travel/receipt/${purchaseSessionId}`
+      : 'document/travel/receipt/0',
+    method: EMETHODS.POST,
+    config: {
+      responseType: 'blob',
+    },
+    mutationOptions: {
+      onSuccess: (data) => openPdfPreview(data, 'Receipt'),
+      onError: (error: unknown) => {
+        void showDocError(error)
+      },
+    },
+  })
+
   const embassyMutation = UseApiMutation<Blob, void>({
     url: purchaseSessionId
       ? `document/travel/embassy-letter/${purchaseSessionId}`
@@ -172,6 +195,14 @@ export const TravelSuccessPurchase: React.FC<CustomerVerificationDetailsProps> =
     },
   })
 
+  const downloadReceipt = () => {
+    if (!purchaseSessionId) {
+      ShowToast.error('No purchase found.')
+      return
+    }
+    receiptMutation.mutate()
+  }
+
   const downloadEmbassyLetter = () => {
     if (!purchaseSessionId) {
       ShowToast.error('No purchase found.')
@@ -203,7 +234,7 @@ export const TravelSuccessPurchase: React.FC<CustomerVerificationDetailsProps> =
             Payment <span className="text-[#C20C0C]">Success</span>
           </h1>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground sm:text-base">
-            Your travel cover payment is complete. Download your embassy letter now.
+            Your travel cover payment is complete. Download your receipt and embassy letter now.
             Your policy schedule will be ready in about 5 minutes.
           </p>
         </div>
@@ -224,9 +255,26 @@ export const TravelSuccessPurchase: React.FC<CustomerVerificationDetailsProps> =
           <div className="rounded-2xl border border-[#ADABAB]/35 bg-white/95 p-3 sm:p-5">
             <BoxHeader
               title="Your Documents"
-              description="Download your embassy letter now. Policy schedule unlocks shortly after payment."
+              description="Receipt and embassy letter are ready now. Policy schedule unlocks shortly after payment."
             />
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 sm:gap-5">
+              <div className="flex flex-col items-center rounded-xl border border-[#ADABAB]/40 bg-neutral-50/80 px-4 py-6 text-center">
+                <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full border border-[#ADABAB]/50 bg-white">
+                  <Receipt className="h-6 w-6 text-[#C20C0C]" />
+                </div>
+                <h3 className="text-base font-semibold">Receipt</h3>
+                <p className="mb-4 text-xs text-muted-foreground sm:text-sm">
+                  Ready to download
+                </p>
+                <Button
+                  className={primaryButtonClassName}
+                  onClick={downloadReceipt}
+                  loading={receiptMutation.isPending}
+                  disabled={!purchaseSessionId}
+                >
+                  Download Receipt
+                </Button>
+              </div>
               <div className="flex flex-col items-center rounded-xl border border-[#ADABAB]/40 bg-neutral-50/80 px-4 py-6 text-center">
                 <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full border border-[#ADABAB]/50 bg-white">
                   <FileText className="h-6 w-6 text-[#C20C0C]" />

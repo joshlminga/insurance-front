@@ -122,17 +122,30 @@ function buildMotorSegments(pathname: string): BreadcrumbSegment[] {
 
   const currentStage = resolveMotorStage(pathname)
 
+  const isFind = pathname.includes('/fetch')
+  const isDouble = pathname.includes('/double')
+
   segments.push({
     href: `${base}/quotations/motor-quotations`,
     title: STAGE_LABEL.quote,
     stage: 'quote',
-    isLast: currentStage === 'quote' && !pathname.includes('/fetch'),
+    isLast: currentStage === 'quote' && !isFind && !isDouble,
   })
 
-  if (pathname.includes('/fetch')) {
+  if (isFind) {
     segments.push({
       href: EROUTES.MOTOR_QUOTATION_FETCH,
       title: 'Find',
+      isLast: true,
+    })
+    return segments
+  }
+
+  // Double is a lookup screen, same as Find — not a step in the quote wizard.
+  if (isDouble) {
+    segments.push({
+      href: EROUTES.MOTOR_QUOTATION_DOUBLE,
+      title: 'Double',
       isLast: true,
     })
     return segments

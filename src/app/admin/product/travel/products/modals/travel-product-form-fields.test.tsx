@@ -97,4 +97,18 @@ describe("TravelProductFormFields rules questions", () => {
 
     expect(screen.queryByText("Target Organizations")).not.toBeInTheDocument()
   })
+
+  it("hides coverages when the cover is external", async () => {
+    render(<TravelProductFormHarness />)
+
+    expect(screen.getByText("Coverages", { exact: false })).toBeInTheDocument()
+
+    await chooseYesNo("External cover", "Yes")
+
+    expect(screen.queryByText("Coverages", { exact: false })).not.toBeInTheDocument()
+
+    await chooseYesNo("External cover", "No")
+
+    expect(screen.getByText("Coverages", { exact: false })).toBeInTheDocument()
+  })
 })

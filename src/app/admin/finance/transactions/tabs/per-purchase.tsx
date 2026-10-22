@@ -1,6 +1,9 @@
 import FinanceLedgerListTab from '@/app/admin/finance/transactions/tabs/ledger-list'
 
-/** Tab: ledger lines tied to a purchase header (Payable journal). */
+/**
+ * Per Purchase tab: searchable by quotation code.
+ * Preview shows purchase funds rolled up by account; Print is in Preview and actions.
+ */
 export default function FinanceTransactionsPerPurchaseTab() {
   return (
     <FinanceLedgerListTab

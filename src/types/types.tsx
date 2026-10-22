@@ -232,6 +232,8 @@ export type TravelQuoteFetchListRow = {
   current_step?: number
   last_completed_step?: number | null
   last_ended_stage?: TravelQuoteLastEndedStage
+  /** True when API allows cancel (unpaid + cancelable status). */
+  can_cancel?: boolean
   started_at?: string | null
   last_activity_at?: string | null
   created_at?: string | null
@@ -258,6 +260,50 @@ export type TravelQuoteFetchListRow = {
     type_of_trip?: string | null
     traveler_count?: number
     traveler_names?: string[]
+  }
+}
+
+/** Where a duplicated travel quote should continue. Payment still opens on KYC. */
+export type TravelQuoteDuplicateStartAt = 'quote' | 'rates' | 'kyc' | 'payment'
+
+/**
+ * POST quotation/travel/fetch/{session}/duplicate `data`.
+ * `start_quote` is the trip + customer body for POST quotation/travel.
+ * Duplicate does not create a session; the admin UI starts a new quote from this payload.
+ */
+export type TravelQuoteDuplicatePayload = {
+  source_quote_session_id: number
+  start_at: TravelQuoteDuplicateStartAt
+  last_ended_stage?: TravelQuoteLastEndedStage
+  start_quote: {
+    user_id?: number | null
+    country_id?: number | null
+    first_name?: string | null
+    last_name?: string | null
+    email?: string | null
+    phone?: string | null
+    is_guest?: boolean
+    agency_id?: number | null
+    processed_by_organization_id?: number | null
+    referral_id?: string | null
+    bound?: string | null
+    country_of_departure?: number | string | null
+    country_of_arrival?: number | string | null
+    travel_as?: string | null
+    date_of_departure?: string | null
+    date_of_return?: string | null
+    type_of_trip?: string | null
+    reason_for_travel?: number | string | null
+    travelers?: Array<Record<string, unknown>>
+  }
+  rates?: {
+    product_id?: number | null
+    rate_id?: number | null
+  }
+  kyc?: Record<string, unknown>
+  payment?: {
+    invoice_meta?: Record<string, unknown>
+    invoices?: Array<Record<string, unknown>>
   }
 }
 
@@ -445,34 +491,79 @@ export interface SubmitResponse {
 }
 
 /**
- * One local ledger / journal line from GET finance/transactions.
- * Mirrors backend LedgerEntryResource fields used in the admin list.
- * `view=invoice` → invoice_id set; `view=purchase` → purchase_id set (Payable header).
+ * One local ledger / journal line from GET finance/transactions (Preview).
+ * Mirrors backend LedgerEntryResource. List tabs return invoice/purchase summaries instead.
  */
 export type FinanceLedgerEntryType = 'invoice' | 'payment' | 'gross-commission' | 'tax'
 export type FinanceLedgerEntryKind = 'payable' | 'receivable'
 
 export type FinanceLedgerEntry = {
-  id: number
-  /** Null on purchase-header Payable journals */
-  invoice_id: number | null
+  /** Missing on purchase preview aggregated (synthetic) rows */
+  id?: number
+  /** Null on purchase-header Payable journals and aggregated purchase funds */
+  invoice_id?: number | null
   /** Set on Payable header lines; may also appear on invoice-linked rows */
-  purchase_id: number | null
+  purchase_id?: number | null
   account: string | null
-  note: string | null
+  note?: string | null
   /** Debit amount (API often sends decimal strings like "1000.00") */
   dr: string | number
   /** Credit amount */
   cr: string | number
   type: FinanceLedgerEntryType | string
   /** Journal kind: payable / receivable (null for older payment-only rows) */
-  entry_type: FinanceLedgerEntryKind | string | null
+  entry_type?: FinanceLedgerEntryKind | string | null
   is_active?: boolean
   created_at?: string | null
   updated_at?: string | null
-  /** Optional nested refs — not currently returned by LedgerEntryResource */
+  /** Nested when eager-loaded on preview */
   invoice?: { id?: number; invoice_number?: string | null } | null
-  purchase?: { id?: number; reference?: string | null } | null
+  purchase?: {
+    id?: number
+    quote_code?: string | null
+    reference?: string | null
+  } | null
+}
+
+/** Main table row — Per Invoice tab (GET view=invoice without invoice_id). */
+export type FinanceTransactionInvoiceRow = {
+  id: number
+  invoice_id: number
+  invoice_number: string | null
+  purchase_id: number | null
+  quote_code: string | null
+  status?: string | null
+  installment_amount?: string | number | null
+  ledger_lines_count?: number
+  created_at?: string | null
+}
+
+/** Main table row — Per Purchase tab (GET view=purchase without purchase_id/quote_code). */
+export type FinanceTransactionPurchaseRow = {
+  id: number
+  purchase_id: number
+  quote_code: string | null
+  product?: string | null
+  status?: string | null
+  invoices_count?: number
+  payable_lines_count?: number
+  created_at?: string | null
+}
+
+/** Grouped purchase Preview payload (GET view=purchase&purchase_id|quote_code). */
+export type FinancePurchaseTransactionPreview = {
+  purchase_id: number | null
+  quote_code: string | null
+  /** Purchase-header payable journals, summed by account. */
+  payable_lines: FinanceLedgerEntry[]
+  /** Invoice-linked journals under the purchase, summed by account (e.g. Bank 500+600+400 → 1500). */
+  aggregated_lines: FinanceLedgerEntry[]
+  /** Light invoice list only — no per-invoice DR/CR (use Per Invoice preview for that). */
+  invoices: Array<{
+    invoice_id: number
+    invoice_number: string | null
+    status?: string | null
+  }>
 }
 
 /** NTSA-style preview returned when quote start rejects the registration number. */
@@ -907,6 +998,10 @@ export type ReusableSingleSelectApiInputProps = {
   config?: AxiosRequestConfig;
   labelKey?: string;
   valueKey?: string;
+  /** Query name for the typed search. Most lists use `term`. The currency catalog uses `search`. */
+  searchParam?: string;
+  /** Build the option text from the whole row, for example "KES - Kenyan Shilling". */
+  formatLabel?: (item: any) => string;
   searchPlaceholder?: string;
   emptyMessage?: string;
   selectedOption?: { value: string; label: string };

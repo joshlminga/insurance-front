@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import {
   ADMIN_ACTIVE_QUOTATION_PRODUCT_KEY,
   ADMIN_TRAVEL_CUSTOMER_EMAIL_KEY,
+  INVOICE_SESSION_STORAGE_KEY,
   PURCHASE_SESSION_STORAGE_KEY,
 } from '@/utils/constatnts'
 import {
@@ -10,7 +11,10 @@ import {
 } from '@/utils/travel-enums'
 import { ADMIN_TRAVEL_PURCHASE_STEP_KEY } from '@/app/payment/payment-session'
 import type { TravelQuoteFetchDetail } from '@/types/types'
-import { persistAdminTravelResumeFromDetail } from './admin-travel-session'
+import {
+  persistAdminTravelIssueCoverFromInvoice,
+  persistAdminTravelResumeFromDetail,
+} from './admin-travel-session'
 
 describe('persistAdminTravelResumeFromDetail', () => {
   beforeEach(() => {
@@ -92,5 +96,50 @@ describe('persistAdminTravelResumeFromDetail', () => {
     expect(result).toEqual({ stage: 'payment', purchaseStep: 3 })
     expect(sessionStorage.getItem(PURCHASE_SESSION_STORAGE_KEY)).toBe('500')
     expect(sessionStorage.getItem(ADMIN_TRAVEL_PURCHASE_STEP_KEY)).toBe('3')
+  })
+})
+
+describe('persistAdminTravelIssueCoverFromInvoice', () => {
+  beforeEach(() => {
+    sessionStorage.clear()
+  })
+
+  it('lands on payment step when invoice meta exists', () => {
+    const result = persistAdminTravelIssueCoverFromInvoice({
+      purchaseId: 501,
+      invoiceId: 901,
+      hasKycMeta: true,
+      hasInvoiceMeta: true,
+    })
+
+    expect(result).toEqual({ purchaseStep: 3 })
+    expect(sessionStorage.getItem(PURCHASE_SESSION_STORAGE_KEY)).toBe('501')
+    expect(sessionStorage.getItem(INVOICE_SESSION_STORAGE_KEY)).toBe('501')
+    expect(sessionStorage.getItem(ADMIN_TRAVEL_PURCHASE_STEP_KEY)).toBe('3')
+    expect(sessionStorage.getItem(ADMIN_ACTIVE_QUOTATION_PRODUCT_KEY)).toBe('travel')
+    expect(sessionStorage.getItem('admin_travel_target_invoice_id')).toBe('901')
+  })
+
+  it('lands on invoice step when KYC exists but invoice meta is missing', () => {
+    const result = persistAdminTravelIssueCoverFromInvoice({
+      purchaseId: 502,
+      hasKycMeta: true,
+      hasInvoiceMeta: false,
+    })
+
+    expect(result).toEqual({ purchaseStep: 2 })
+    expect(sessionStorage.getItem(ADMIN_TRAVEL_PURCHASE_STEP_KEY)).toBe('2')
+    expect(sessionStorage.getItem(INVOICE_SESSION_STORAGE_KEY)).toBeNull()
+  })
+
+  it('lands on KYC when KYC meta is missing', () => {
+    const result = persistAdminTravelIssueCoverFromInvoice({
+      purchaseId: 503,
+      hasKycMeta: false,
+      hasInvoiceMeta: false,
+    })
+
+    expect(result).toEqual({ purchaseStep: 1 })
+    expect(sessionStorage.getItem(ADMIN_TRAVEL_PURCHASE_STEP_KEY)).toBe('1')
   })
 })

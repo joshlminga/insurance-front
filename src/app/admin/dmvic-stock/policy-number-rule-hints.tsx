@@ -12,7 +12,10 @@ export function PolicyNumberRuleFormatHints() {
           <code className="text-xs">HQ/0809/YYYY/01/05XXX</code>
         </li>
         <li>
-          <strong>YYYY</strong> - current 4-digit year; <strong>MM</strong> - current 2-digit month
+          <strong>YYYY</strong> - current 4-digit year (for example 2026).{' '}
+          <strong>YY</strong> - current 2-digit year (for example 26). The server replaces YYYY
+          first, then YY, so a template with YYYY does not turn into 2626.{' '}
+          <strong>MM</strong> - current 2-digit month
         </li>
         <li>
           <strong>Sequence placeholder</strong> - substring in the template for the running number
