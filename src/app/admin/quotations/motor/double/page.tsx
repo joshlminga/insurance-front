@@ -1,8 +1,13 @@
+import {
+  DMVIC_CERT_URLS,
+  type MotorCertificateLocalMatch,
+} from '@/app/admin/motor-certificates/motor-certificates-query'
 import { PageHeader } from '@/components/shared'
 import { Button } from '@/dev/core'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useActionWaitHold } from '@/hooks/use-action-wait-hold'
+import apiClient from '@/lib/api-client'
 import {
   lookupDoubleInsurance,
   type DoubleInsuranceLookupResult,
@@ -11,11 +16,44 @@ import { extractErrorMessage } from '@/utils/helpers'
 import { ShowToast } from '@/utils/utils'
 import { useState, type FormEvent } from 'react'
 import { motorInputClassName } from '../motor-field-styles'
-import { DoubleInsuranceCoversTable } from './double-insurance-covers-table'
+import {
+  DoubleInsuranceCoversTable,
+  type LocalCertificateMatch,
+} from './double-insurance-covers-table'
 import { formatDoubleResultDate } from './format-double-result-date'
 
 function showValue(value: string): string {
   return value.trim() === '' ? '-' : value
+}
+
+/** Ask our API which DMVIC cert numbers we issued locally (invoice + policy). */
+async function resolveLocalCertificateMatches(
+  certificateNumbers: string[],
+): Promise<Record<string, LocalCertificateMatch>> {
+  const unique = [...new Set(certificateNumbers.map((n) => n.trim()).filter(Boolean))]
+  if (unique.length === 0) {
+    return {}
+  }
+
+  const response = await apiClient.post<{
+    success?: boolean
+    data?: MotorCertificateLocalMatch[]
+  }>(DMVIC_CERT_URLS.resolveByNumbers, {
+    certificate_numbers: unique,
+  })
+
+  const map: Record<string, LocalCertificateMatch> = {}
+  for (const row of response.data?.data ?? []) {
+    const number = String(row.certificate_number ?? '').trim()
+    if (number === '' || !row.invoice_id) {
+      continue
+    }
+    map[number] = {
+      invoiceId: Number(row.invoice_id),
+      policyNumber: String(row.policy_number ?? '').trim(),
+    }
+  }
+  return map
 }
 
 export const AdminMotorQuotationDoublePage = () => {
@@ -24,6 +62,9 @@ export const AdminMotorQuotationDoublePage = () => {
   const [endDate, setEndDate] = useState('')
   const [isLookingUp, setIsLookingUp] = useState(false)
   const [result, setResult] = useState<DoubleInsuranceLookupResult | null>(null)
+  const [localMatches, setLocalMatches] = useState<
+    Record<string, LocalCertificateMatch>
+  >({})
 
   // GET calls do not auto-arm the shared overlay — hold it while DMVIC is checking.
   useActionWaitHold('admin-motor-double-insurance-lookup', isLookingUp, {
@@ -57,8 +98,25 @@ export const AdminMotorQuotationDoublePage = () => {
         coverEndDate,
       })
       setResult(next)
+
+      // Counter-check which covers we issued locally (Policy Number + download).
+      if (next.covers.length > 0) {
+        try {
+          const matches = await resolveLocalCertificateMatches(
+            next.covers.map((c) => c.certificateNumber),
+          )
+          setLocalMatches(matches)
+        } catch {
+          // Still show DMVIC rows; Policy Number stays "-" and download stays grey.
+          setLocalMatches({})
+          ShowToast.error('Could not check local certificates for download.')
+        }
+      } else {
+        setLocalMatches({})
+      }
     } catch (error) {
       setResult(null)
+      setLocalMatches({})
       ShowToast.error(extractErrorMessage(error) || 'Double insurance lookup failed.')
     } finally {
       setIsLookingUp(false)
@@ -154,7 +212,10 @@ export const AdminMotorQuotationDoublePage = () => {
           </div>
 
           {result.covers.length > 0 ? (
-            <DoubleInsuranceCoversTable covers={result.covers} />
+            <DoubleInsuranceCoversTable
+              covers={result.covers}
+              localMatches={localMatches}
+            />
           ) : result.clear ? (
             <p className="text-sm text-muted-foreground">
               No overlapping cover was found for these dates.

@@ -1,6 +1,8 @@
 export const DMVIC_CERT_URLS = {
   list: 'dmvic/motor/certificates',
   failed: 'dmvic/motor/certificates/failed',
+  /** POST body: { certificate_numbers: string[] } → local invoice_id + policy_number matches */
+  resolveByNumbers: 'dmvic/motor/certificates/resolve-by-numbers',
   download: (invoiceId: number | string) =>
     `dmvic/motor/certificates/${invoiceId}`,
   retry: (invoiceId: number | string) =>
@@ -12,6 +14,13 @@ export const DMVIC_CERT_URLS = {
   cancel: (invoiceId: number | string) =>
     `dmvic/motor/certificates/${invoiceId}/cancel`,
 } as const
+
+/** One local match from POST resolve-by-numbers (issued by us). */
+export type MotorCertificateLocalMatch = {
+  certificate_number: string
+  invoice_id: number
+  policy_number: string | null
+}
 
 /** One option from GET cancel-reasons (keys match the DMVIC config casing). */
 export type CancelReasonOption = {
