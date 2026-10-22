@@ -34,6 +34,14 @@ export type MotorDashboardSummary = {
   total_premium: string
   /** Distinct vehicle plates quoted in the period */
   total_quotations: number
+  /** Certificates with a certificate number (all time) */
+  issued_certificates: number
+  /** In-force confirmed/reused certificates (all time) */
+  active_certificates: number
+  /** Cancelled certificates (all time) */
+  cancelled_certificates: number
+  /** Paid invoices with DMVIC issuance failure and no certificate */
+  failed_certificates: number
 }
 
 export type MotorDashboardListSection<T> = {

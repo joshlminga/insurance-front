@@ -12,6 +12,8 @@ export const OrganizationMotorVehiclesReportPage = () => (
     moduleKey={MODULES.REPORT_ORG_MOTOR_VEHICLE}
     columns={OrganizationMotorVehicleReportColumns}
     searchPlaceholder="Search registration, chassis, make, model…"
+    showSummary
+    showAgentFilter
   />
 )
 

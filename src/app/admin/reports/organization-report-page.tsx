@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ORGANIZATION_REPORTS_ORG_STORAGE_KEY } from '@/app/admin/reports/organization-reports-org'
+import { OrganizationReportSummaryBoxes } from '@/app/admin/reports/organization-report-summary'
 import { useOrganizationReportExport } from '@/app/admin/reports/use-organization-report-export'
 import { useCan } from '@/auth/useCan'
 import { useBypassOrgLocation } from '@/auth/use-bypass-org-location'
@@ -7,6 +8,7 @@ import { BypassOrgLocationPicker, EmptyState, PageHeader } from '@/components/sh
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { ReusableSingleSelectApiInput } from '@/dev/core'
 import { CustomBaseTable, SearchTools } from '@/dev/table'
 import { useDebounce } from '@/hooks'
 import { UseApiQuery } from '@/hooks/hooks'
@@ -35,6 +37,10 @@ type OrganizationReportPageProps = {
   columns: ColumnDef<any>[]
   extraFilters?: ExtraFilterField[]
   searchPlaceholder?: string
+  /** Show Overall / Success / Active / Failed boxes from API summary */
+  showSummary?: boolean
+  /** Show searchable By Agent filter when the user has module.aggregate */
+  showAgentFilter?: boolean
 }
 
 /**
@@ -51,9 +57,14 @@ export function OrganizationReportPage({
   columns,
   extraFilters = [],
   searchPlaceholder = 'Search…',
+  showSummary = false,
+  showAgentFilter = false,
 }: OrganizationReportPageProps) {
   const { canModuleAction } = useCan()
   const canExport = canModuleAction(moduleKey, 'export')
+  // Only users with aggregate can search other agents; others are forced to themselves on the API
+  const canAggregate = canModuleAction(moduleKey, 'aggregate')
+  const showAgentPicker = showAgentFilter && canAggregate
   const { exportReport, isExporting } = useOrganizationReportExport()
 
   const {
@@ -84,7 +95,19 @@ export function OrganizationReportPage({
       date_to: (filter as any).date_to || undefined,
     }
 
+    // Agent filter only when the user can see organization-wide totals
+    if (showAgentPicker) {
+      const agentId = (filter as any).agent_id
+      if (agentId !== undefined && agentId !== null && String(agentId).trim() !== '') {
+        params.agent_id = String(agentId).trim()
+      }
+    }
+
     for (const field of extraFilters) {
+      // agent_id is handled by the searchable picker above
+      if (field.key === 'agent_id') {
+        continue
+      }
       const value = (filter as any)[field.key]
       if (value !== undefined && value !== null && String(value).trim() !== '') {
         params[field.key] = String(value).trim()
@@ -92,7 +115,7 @@ export function OrganizationReportPage({
     }
 
     return params
-  }, [filter, extraFilters])
+  }, [filter, extraFilters, showAgentPicker])
 
   const { data, isLoading, isError } = UseApiQuery<SubmitResponse>({
     url: listUrl,
@@ -149,6 +172,13 @@ export function OrganizationReportPage({
         />
       ) : (
         <>
+          {showSummary ? (
+            <OrganizationReportSummaryBoxes
+              summary={data?.summary}
+              isLoading={isLoading && !data?.summary}
+            />
+          ) : null}
+
           <Card className="p-4">
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <div className="space-y-1.5">
@@ -179,23 +209,51 @@ export function OrganizationReportPage({
                   }
                 />
               </div>
-              {extraFilters.map((field) => (
-                <div key={field.key} className="space-y-1.5">
-                  <Label htmlFor={field.key}>{field.label}</Label>
-                  <Input
-                    id={field.key}
-                    type={field.type ?? 'text'}
-                    placeholder={field.placeholder}
-                    value={(filter as any)[field.key] ?? ''}
-                    onChange={(e) =>
+              {showAgentPicker ? (
+                <div className="space-y-1.5" data-testid="report-agent-filter">
+                  <ReusableSingleSelectApiInput
+                    url="reports/motor/agents"
+                    label="By Agent"
+                    placeholder="All agents"
+                    searchPlaceholder="Search agent…"
+                    value={(filter as any).agent_id ? String((filter as any).agent_id) : ''}
+                    onChange={(value) =>
                       optionsDispatcher({
                         type: 'UPDATE',
-                        payload: { [field.key]: e.target.value, page: 1 },
+                        payload: {
+                          agent_id: value ? String(value) : '',
+                          page: 1,
+                        },
                       })
                     }
+                    config={orgContextHeaders ? { headers: orgContextHeaders } : undefined}
+                    labelKey="name"
+                    valueKey="id"
                   />
                 </div>
-              ))}
+              ) : null}
+              {extraFilters.map((field) => {
+                if (field.key === 'agent_id') {
+                  return null
+                }
+                return (
+                  <div key={field.key} className="space-y-1.5">
+                    <Label htmlFor={field.key}>{field.label}</Label>
+                    <Input
+                      id={field.key}
+                      type={field.type ?? 'text'}
+                      placeholder={field.placeholder}
+                      value={(filter as any)[field.key] ?? ''}
+                      onChange={(e) =>
+                        optionsDispatcher({
+                          type: 'UPDATE',
+                          payload: { [field.key]: e.target.value, page: 1 },
+                        })
+                      }
+                    />
+                  </div>
+                )
+              })}
             </div>
           </Card>
 

@@ -12,6 +12,8 @@ export const OrganizationMotorCertificatesReportPage = () => (
     moduleKey={MODULES.REPORT_ORG_MOTOR_CERTIFICATE}
     columns={OrganizationCertificateReportColumns}
     searchPlaceholder="Search certificate, policy, registration…"
+    showSummary
+    showAgentFilter
     extraFilters={[
       { key: 'policy_number', label: 'Policy number' },
       { key: 'certificate_number', label: 'Certificate number' },

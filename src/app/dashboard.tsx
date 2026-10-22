@@ -150,6 +150,34 @@ export default function DashboardPage() {
         />
       </StatsGrid>
 
+      {/* Certificate status row (all-time, current branch) */}
+      <StatsGrid columns={4}>
+        <StatsCard
+          title="Issued Certificates"
+          value={displayCount(summary?.issued_certificates)}
+          description="Certificates with a number"
+          icon={ShieldCheck}
+        />
+        <StatsCard
+          title="Active Certificate"
+          value={displayCount(summary?.active_certificates)}
+          description="In-force confirmed policies"
+          icon={ShieldCheck}
+        />
+        <StatsCard
+          title="Cancelled"
+          value={displayCount(summary?.cancelled_certificates)}
+          description="Cancelled certificates"
+          icon={FileText}
+        />
+        <StatsCard
+          title="Failed"
+          value={displayCount(summary?.failed_certificates)}
+          description="DMVIC issuance failed"
+          icon={AlertTriangle}
+        />
+      </StatsGrid>
+
       {/* Period summary row */}
       <div className="grid gap-4 md:grid-cols-3">
         <Card className="py-4 shadow-none">

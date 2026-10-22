@@ -475,6 +475,20 @@ export type MotorQuoteDuplicatePayload = {
   }
 }
 
+/** Summary boxes on organization motor reports (sibling of data + pagination) */
+export type OrganizationReportSummary = {
+  label: string
+  scope: 'organization' | 'user' | string
+  can_filter_agent: boolean
+  agent_id?: number | null
+  overall: number
+  success: number
+  active: number
+  failed: number
+  /** Policies / certificates report only */
+  cancelled?: number
+}
+
 export interface SubmitResponse {
   message: string,
   success: string | boolean,
@@ -487,6 +501,7 @@ export interface SubmitResponse {
     last_page: number,
     current_page: number
   }
+  summary?: OrganizationReportSummary
   CheckoutRequestID?: any
 }
 
