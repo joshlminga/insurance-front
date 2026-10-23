@@ -199,9 +199,9 @@ export function DmvicStockDetailPage() {
         <EmptyState
           icon={Building2}
           title="Select an organization location"
-          description="Choose a broker organization on Policy Numbers before opening this stock."
+          description="Choose a broker organization on Stock list before opening this stock."
           action={{
-            label: 'Back to Policy Numbers',
+            label: 'Back to Stock list',
             href: EROUTES.DMVIC_STOCK,
           }}
         />

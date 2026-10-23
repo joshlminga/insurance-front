@@ -34,7 +34,7 @@ function NavSubMenu({
   depth?: number
 }) {
   return (
-    <SidebarMenuSub className={depth > 0 ? "mx-0 border-l-0 px-0" : undefined}>
+    <SidebarMenuSub className={depth > 0 ? "mx-0 px-0 pl-3.5 border-l" : undefined}>
       {items.map((subItem) => {
         const hasChildren = Boolean(subItem.items?.length)
         const isActive = isSubItemActive(pathname, subItem)

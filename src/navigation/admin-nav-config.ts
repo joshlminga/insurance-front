@@ -467,14 +467,19 @@ export const adminNavConfig: NavItem[] = [
     ],
   },
   {
-    title: 'DMVIC Setup',
+    title: 'DMVIC Stock',
     url: EROUTES.DMVIC_STOCK,
     icon: FolderCog,
     module: MODULES.DMVIC_STOCK,
     items: [
       {
-        title: 'Policy Numbers',
+        title: 'Stock list',
         url: EROUTES.DMVIC_STOCK,
+        module: MODULES.DMVIC_STOCK,
+      },
+      {
+        title: 'Policies',
+        url: EROUTES.DMVIC_STOCK_POLICY_NUMBERS,
         module: MODULES.DMVIC_STOCK,
       },
     ],

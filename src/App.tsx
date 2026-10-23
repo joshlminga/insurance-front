@@ -95,6 +95,11 @@ const CreditWalletPage = lazy(() => import("./app/admin/credit/wallet/page").the
 const CreditTransactionsPage = lazy(() => import("./app/admin/credit/transactions/page").then(m => ({ default: m.CreditTransactionsPage })))
 const MotorCertificatesPage = lazy(() => import("./app/admin/motor-certificates/page").then(m => ({ default: m.MotorCertificatesPage })))
 const DmvicStockPage = lazy(() => import("./app/admin/dmvic-stock/page").then(m => ({ default: m.DmvicStockPage })))
+const DmvicStockPolicyNumbersPage = lazy(() =>
+  import("./app/admin/dmvic-stock/policy-numbers/page").then(m => ({
+    default: m.DmvicStockPolicyNumbersPage,
+  })),
+)
 const DmvicStockDetailPage = lazy(() => import("./app/admin/dmvic-stock/[id]/page").then(m => ({ default: m.DmvicStockDetailPage })))
 const CreditApprovalsPage = lazy(() => import("./app/admin/credit/approvals/page").then(m => ({ default: m.CreditApprovalsPage })))
 const CreditPendingPage = lazy(() => import("./app/admin/credit/pending/page").then(m => ({ default: m.CreditPendingPage })))
@@ -1444,6 +1449,18 @@ export const router = createBrowserRouter([
                 <AdminModulePage 
                 module={MODULES.DMVIC_STOCK}>
                   <DmvicStockPage />
+                </AdminModulePage>
+              </S>
+            ),
+          },
+          {
+            // Must be registered before dmvic-stock/:id so "policy-numbers" is not captured as an id.
+            path: "dmvic-stock/policy-numbers",
+            element: (
+              <S>
+                <AdminModulePage
+                module={MODULES.DMVIC_STOCK}>
+                  <DmvicStockPolicyNumbersPage />
                 </AdminModulePage>
               </S>
             ),

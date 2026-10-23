@@ -32,3 +32,9 @@ export enum EFINANCE_TRANSACTION_TABS {
     PER_INVOICE = 'invoice',
     PER_PURCHASE = 'purchase',
 }
+
+/** DMVIC Policies tabs — maps to API `stock_status=in_stock|out_of_stock` */
+export enum EDMVIC_POLICIES_TABS {
+    IN_STOCK = 'in_stock',
+    OUT_OF_STOCK = 'out_of_stock',
+}

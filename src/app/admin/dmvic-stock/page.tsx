@@ -32,17 +32,22 @@ import {
 import { extractErrorMessage } from '@/utils/helpers'
 import { EROUTES } from '@/utils/enums'
 import { ShowToast } from '@/utils/utils'
-import { Building2, Plus } from 'lucide-react'
-import { useReducer } from 'react'
+import { Building2, Plus, RefreshCw } from 'lucide-react'
+import { useEffect, useReducer, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { DMVIC_STOCK_ORG_STORAGE_KEY } from './dmvic-stock-org'
 import { CreateDmvicStockModal } from './modals/create-stock'
 import { EditDmvicStockModal } from './modals/edit-stock'
 
+/** How long Sync stays disabled after a successful queue (seconds). */
+const SYNC_COOLDOWN_MS = 120_000
+
 /**
- * DMVIC Policy Numbers list.
+ * DMVIC Stock list — inventory, sync, create/edit.
  * Broker org is chosen via the header picker (X-Organization-Location-Id).
  * Insurer office is chosen only on create/edit forms (insurer_location_id).
+ * Jump to policy-number rules from a row via "View rules".
+ * After Sync succeeds, the button stays disabled for 120 seconds (no status polling).
  */
 export function DmvicStockPage() {
   const navigate = useNavigate()
@@ -79,6 +84,10 @@ export function DmvicStockPage() {
       orgContextHeaders?: Record<string, string>
     }>()
 
+  // Local cooldown so Sync cannot be clicked again for 120s after a successful submit.
+  const [orgSyncCooldown, setOrgSyncCooldown] = useState(false)
+  const [entrySyncCooldownIds, setEntrySyncCooldownIds] = useState<number[]>([])
+
   const { data, isLoading, refetch, isError } = UseApiQuery<SubmitResponse>({
     url: 'dmvic/stocks',
     queryKey: ['dmvic/stocks', filter, selectedLocationId || null],
@@ -92,6 +101,18 @@ export function DmvicStockPage() {
     // Wait until a broker org is selected (super admin / multi-location).
     queryOptions: { enabled: canFetch },
   })
+
+  // Clear org cooldown after 120s, then refresh the stock table once.
+  useEffect(() => {
+    if (!orgSyncCooldown) {
+      return
+    }
+    const timer = window.setTimeout(() => {
+      setOrgSyncCooldown(false)
+      void refetch()
+    }, SYNC_COOLDOWN_MS)
+    return () => window.clearTimeout(timer)
+  }, [orgSyncCooldown, refetch])
 
   const deleteMutation = UseApiMutation<SubmitResponse, { id: number | string }>({
     url: ({ id }) => `dmvic/stocks/${id}`,
@@ -125,6 +146,26 @@ export function DmvicStockPage() {
       },
     })
 
+  // Starts one background job that syncs every insurer member id for this broker org.
+  // After success, hold the button for 120 seconds (email confirms when the job finishes).
+  const syncMutation = UseApiMutation<SubmitResponse, Record<string, never>>({
+    url: 'dmvic/stocks/sync',
+    method: EMETHODS.POST,
+    config: orgContextHeaders ? { headers: orgContextHeaders } : undefined,
+    mutationOptions: {
+      onSuccess: (response) => {
+        ShowToast.success(
+          response?.message ||
+            'DMVIC stock sync has started for this organization. You will be emailed when it finishes.',
+        )
+        setOrgSyncCooldown(true)
+      },
+      onError: (error: any) => {
+        ShowToast.error(extractErrorMessage(error))
+      },
+    },
+  })
+
   const openCreateModal = () => {
     handleDialogContextSwitch({
       componentProps: { refetch, orgContextHeaders },
@@ -132,11 +173,93 @@ export function DmvicStockPage() {
     })
   }
 
+  const syncBusy = syncMutation.isPending || orgSyncCooldown
+
+  // Build header actions: Sync (queues refresh) + Add Stock when allowed.
+  const pageHeaderActions = [
+    ...(canAction && canFetch
+      ? [
+          {
+            icon: RefreshCw,
+            label: syncBusy ? 'Syncing…' : 'Sync stock',
+            variant: 'outline' as const,
+            // Red outline so Sync stands out from Add Stock.
+            className:
+              'border-destructive text-destructive hover:bg-destructive/10 hover:text-destructive',
+            disabled: syncBusy,
+            onClick: () => {
+              if (syncBusy) {
+                return
+              }
+              syncMutation.mutate({})
+            },
+          },
+        ]
+      : []),
+    ...(canCreate && canFetch
+      ? [
+          {
+            icon: Plus,
+            label: 'Add Stock',
+            variant: 'default' as const,
+            onClick: openCreateModal,
+          },
+        ]
+      : []),
+  ]
+
+  // Sync one insurer office only (uses that row's stock entry id).
+  const syncEntryMutation = UseApiMutation<
+    SubmitResponse,
+    { id: number | string }
+  >({
+    url: ({ id }) => `dmvic/stocks/${id}/sync`,
+    method: EMETHODS.POST,
+    config: orgContextHeaders ? { headers: orgContextHeaders } : undefined,
+    mutationOptions: {
+      onSuccess: (response, variables) => {
+        ShowToast.success(
+          response?.message ||
+            'DMVIC stock sync has started for this insurer. You will be emailed when it finishes.',
+        )
+        const entryId = Number(variables.id)
+        setEntrySyncCooldownIds((prev) =>
+          prev.includes(entryId) ? prev : [...prev, entryId],
+        )
+        window.setTimeout(() => {
+          setEntrySyncCooldownIds((prev) => prev.filter((id) => id !== entryId))
+          void refetch()
+        }, SYNC_COOLDOWN_MS)
+      },
+      onError: (error: any) => {
+        ShowToast.error(extractErrorMessage(error))
+      },
+    },
+  })
+
+  const isEntryOnCooldown = (row: DmvicBrokerStockRow): boolean => {
+    if (orgSyncCooldown) {
+      return true
+    }
+    return entrySyncCooldownIds.includes(Number(row.id))
+  }
+
   const ActionsHandlerMapping: SingleActionsHandler<DmvicBrokerStockRow>[] = [
     {
       label: 'View rules',
       onSelect: (row) => navigate(`${EROUTES.DMVIC_STOCK}/${row.id}`),
       conditional: () => canRead,
+    },
+    {
+      label: 'Sync',
+      onSelect: (row) => {
+        if (isEntryOnCooldown(row) || syncEntryMutation.isPending) {
+          return
+        }
+        syncEntryMutation.mutate({ id: row.id })
+      },
+      // Hide row Sync while org cooldown or this row's 120s hold is active.
+      conditional: (row) => canAction && !isEntryOnCooldown(row) && !syncEntryMutation.isPending,
     },
     {
       label: 'Edit',
@@ -168,20 +291,9 @@ export function DmvicStockPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Policy Numbers"
-        description="Manage certificate inventory per insurer office and configure policy-number rules."
-        actions={
-          canCreate && canFetch
-            ? [
-              {
-                icon: Plus,
-                label: 'Add Stock',
-                variant: 'default' as const,
-                onClick: openCreateModal,
-              },
-            ]
-            : undefined
-        }
+        title="Stock list"
+        description="Manage certificate inventory per insurer office. Open a row to jump to its policy-number rules."
+        actions={pageHeaderActions.length > 0 ? pageHeaderActions : undefined}
       />
 
       {isBypass ? (
@@ -221,12 +333,14 @@ export function DmvicStockPage() {
               },
               columns: [
                 ...DmvicStockColumns,
-                ActionColumn({ ActionsHandlerMapping }),
+                ActionColumn({
+                  ActionsHandlerMapping,
+                }),
               ],
               OtherTools: SearchTools,
               data: data?.data ?? [],
               pageCount: data?.pagination?.last_page ?? 1,
-              title: 'Policy Numbers',
+              title: 'Stock list',
               showPagination: true,
               setPageSize: (pageSize) =>
                 optionsDispatcher({

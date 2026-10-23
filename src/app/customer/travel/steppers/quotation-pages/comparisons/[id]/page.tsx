@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Travel comparison preview dialog.
- * Card layout: logo → product name → Days / Basic / Levies / Total.
+ * Card layout: logo → product name → Days / Basic / Levies / Stamp Duty / Total.
  * Footer: Share (Email / WhatsApp) + Download — same pattern as motor comparison.
  */
 import {
@@ -90,11 +90,12 @@ export const PostComparisonPage: React.FC<premiumPreview> = ({
               breakdown['Trip Days'] ??
               '—'
             const basicPremium = breakdown['Basic Premium'] ?? '—'
-            // Combined levies total from API; fall back if older payloads lack Levies.
+            // Levies = PHCF + Training Levy (stamp duty is shown separately).
             const levies =
               breakdown['Levies'] ??
               breakdown['PHCF, TL & Stamp Duty'] ??
               '—'
+            const stampDuty = breakdown['Stamp Duty'] ?? '—'
             const totalPremium =
               breakdown['Gross Premium'] ??
               breakdown['Total Premium'] ??
@@ -136,6 +137,9 @@ export const PostComparisonPage: React.FC<premiumPreview> = ({
 
                     <span className="text-muted-foreground">Levies</span>
                     <span className="text-right font-medium">{levies}</span>
+
+                    <span className="text-muted-foreground">Stamp Duty</span>
+                    <span className="text-right font-medium">{stampDuty}</span>
                   </div>
 
                   <Separator />

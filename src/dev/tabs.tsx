@@ -11,8 +11,11 @@ import MotorReceiptReportTab from '@/app/admin/finance/receipts/tabs/motor-repor
 import TravelReceiptTab from '@/app/admin/finance/receipts/tabs/travel'
 import FinanceTransactionsPerInvoiceTab from '@/app/admin/finance/transactions/tabs/per-invoice'
 import FinanceTransactionsPerPurchaseTab from '@/app/admin/finance/transactions/tabs/per-purchase'
+import DmvicPoliciesInStockTab from '@/app/admin/dmvic-stock/policy-numbers/tabs/in-stock'
+import DmvicPoliciesOutOfStockTab from '@/app/admin/dmvic-stock/policy-numbers/tabs/out-of-stock'
 import {
   ECREDITTRANSACTIONS,
+  EDMVIC_POLICIES_TABS,
   EFINANCE_INVOICE_TABS,
   EFINANCE_RECEIPT_TABS,
   EFINANCE_TRANSACTION_TABS,
@@ -63,6 +66,20 @@ export const FinanceTransactionTabs: TTab<EFINANCE_TRANSACTION_TABS>[] = [
     key: EFINANCE_TRANSACTION_TABS.PER_PURCHASE,
     Tab: FinanceTransactionsPerPurchaseTab,
     title: 'Per Purchase',
+  },
+]
+
+/** DMVIC Policies: In Stock | Out of Stock (API stock_status=in_stock|out_of_stock) */
+export const DmvicPoliciesTabs: TTab<EDMVIC_POLICIES_TABS>[] = [
+  {
+    key: EDMVIC_POLICIES_TABS.IN_STOCK,
+    Tab: DmvicPoliciesInStockTab,
+    title: 'In Stock',
+  },
+  {
+    key: EDMVIC_POLICIES_TABS.OUT_OF_STOCK,
+    Tab: DmvicPoliciesOutOfStockTab,
+    title: 'Out of Stock',
   },
 ]
 

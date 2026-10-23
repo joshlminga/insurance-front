@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Travel single-quote preview dialog (motor-style).
- * Shows logo → product name → Days / Basic / Levies / Total,
+ * Shows logo → product name → Days / Basic / PHCF / Training Levy / Stamp Duty / Total,
  * then Download (PDF blob), Share → Email, and Purchase Cover.
  */
 import {
@@ -168,8 +168,20 @@ export const TravelQuotePreviewPage = ({
 
   const tripDays = premium?.trip_days
   const basicPremium = Number(premium?.basic_premium ?? 0)
-  const totalDuty = Number(premium?.total_duty ?? 0)
+  const phcf = Number(premium?.phcf ?? 0)
+  const trainingLevy = Number(premium?.training_levy ?? 0)
+  const stampDuty = Number(premium?.stamp_duty ?? 0)
   const totalPremium = Number(premium?.total_premium ?? 0)
+
+  // Single-insurer preview lists each levy separately (PDF already does this).
+  const levyCell = (amount: number) =>
+    rateIncludesLevies ? (
+      <span className="inline-flex w-fit items-center rounded-sm bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
+        Incl
+      </span>
+    ) : (
+      formatCurrency(amount)
+    )
 
   return (
     <>
@@ -206,15 +218,17 @@ export const TravelQuotePreviewPage = ({
                 {formatCurrency(basicPremium)}
               </span>
 
-              <span>Levies</span>
+              <span>PHCF</span>
+              <span className="text-right font-medium">{levyCell(phcf)}</span>
+
+              <span>Training Levy</span>
               <span className="text-right font-medium">
-                {rateIncludesLevies ? (
-                  <span className="inline-flex w-fit items-center rounded-sm bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
-                    Incl
-                  </span>
-                ) : (
-                  formatCurrency(totalDuty)
-                )}
+                {levyCell(trainingLevy)}
+              </span>
+
+              <span>Stamp Duty</span>
+              <span className="text-right font-medium">
+                {levyCell(stampDuty)}
               </span>
             </div>
             <div className="grid grid-cols-2 text-sm font-semibold">
