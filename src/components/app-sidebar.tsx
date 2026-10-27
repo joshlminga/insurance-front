@@ -26,7 +26,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   // Re-filter when abilities change (not just function identity)
   const visibleNav = useMemo(
-    () => filterNavItems(adminNavConfig, hasModule, canModuleMenu, can, platformSuperAdmin),
+    () =>
+      filterNavItems(
+        adminNavConfig,
+        hasModule,
+        canModuleMenu,
+        can,
+        platformSuperAdmin,
+        abilities?.context?.products,
+      ),
     [abilities, hasModule, canModuleMenu, can, platformSuperAdmin],
   )
 

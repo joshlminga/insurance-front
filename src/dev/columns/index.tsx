@@ -96,7 +96,8 @@ export const CopyCell = ({ value }: { value: string }) => {
         }
     };
     return (
-        <div className="flex items-center gap-2 group">
+        // select-text overrides parent table select-none so users can highlight-copy
+        <div className="flex items-center gap-2 group select-text">
             <span className="font-mono">{value}</span>
             <button
                 onClick={handleCopy}

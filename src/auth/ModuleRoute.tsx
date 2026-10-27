@@ -3,6 +3,7 @@ import { Navigate } from 'react-router-dom'
 import { UseAuth, useAuthStore } from '@/stores/auth-store'
 import { EROUTES } from '@/utils/enums'
 import { isPlatformSuperAdmin } from './org-context'
+import { hasOrgProductLineAccess } from '@/navigation/quotation-product-line-nav'
 import { useCan } from './useCan'
 import { useModules } from './useModules'
 
@@ -13,6 +14,8 @@ interface ModuleRouteProps {
   modules?: string[]
   /** Optional finer permission e.g. quotation-motor.read */
   permission?: string
+  /** When set, require this product line on abilities.context.products (when context exists). */
+  productLine?: string
   /**
    * Direct URL still redirects unless the user has the super_admin role.
    * is_general is not enough, even though it bypasses module checks.
@@ -30,6 +33,7 @@ export function ModuleRoute({
   module,
   modules,
   permission,
+  productLine,
   requireSuperAdmin = false,
   children,
   redirectTo = EROUTES.DASHBOARD,
@@ -63,6 +67,13 @@ export function ModuleRoute({
   }
 
   if (permission && !can(permission)) {
+    return <Navigate to={redirectTo} replace />
+  }
+
+  if (
+    productLine &&
+    !hasOrgProductLineAccess(productLine, abilities?.context?.products)
+  ) {
     return <Navigate to={redirectTo} replace />
   }
 

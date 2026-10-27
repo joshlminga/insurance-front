@@ -746,8 +746,9 @@ export const router = createBrowserRouter([
             path: "quotations/motor-quotations",
             element: (
               <S>
-                <AdminModulePage 
-                modules={[...QUOTATION_MOTOR_MODULES]}>
+                <AdminModulePage
+                modules={[...QUOTATION_MOTOR_MODULES]}
+                productLine="Motor">
                   <MotorQuotationPage />
                 </AdminModulePage>
               </S>
@@ -757,8 +758,9 @@ export const router = createBrowserRouter([
             path: "quotations/motor-quotations/duplicate",
             element: (
               <S>
-                <AdminModulePage 
-                modules={[...QUOTATION_MOTOR_MODULES]}>
+                <AdminModulePage
+                modules={[...QUOTATION_MOTOR_MODULES]}
+                productLine="Motor">
                   <AdminMotorDuplicateQuotationPage />
                 </AdminModulePage>
               </S>
@@ -768,8 +770,9 @@ export const router = createBrowserRouter([
             path: "quotations/motor-quotations/results",
             element: (
               <S>
-                <AdminModulePage 
-                modules={[...QUOTATION_MOTOR_MODULES]}>
+                <AdminModulePage
+                modules={[...QUOTATION_MOTOR_MODULES]}
+                productLine="Motor">
                   <AdminMotorQuotationResultsPage />
                 </AdminModulePage>
               </S>
@@ -779,8 +782,9 @@ export const router = createBrowserRouter([
             path: "quotations/motor-quotations/purchase",
             element: (
               <S>
-                <AdminModulePage 
-                modules={[...QUOTATION_MOTOR_MODULES]}>
+                <AdminModulePage
+                modules={[...QUOTATION_MOTOR_MODULES]}
+                productLine="Motor">
                   <AdminMotorQuotationPurchasePage />
                 </AdminModulePage>
               </S>
@@ -831,8 +835,9 @@ export const router = createBrowserRouter([
             path: "quotations/motor-quotations/fetch",
             element: (
               <S>
-                <AdminModulePage 
-                modules={[...QUOTATION_MOTOR_MODULES]}>
+                <AdminModulePage
+                modules={[...QUOTATION_MOTOR_MODULES]}
+                productLine="Motor">
                   <AdminMotorQuotationFetchPage />
                 </AdminModulePage>
               </S>
@@ -843,7 +848,8 @@ export const router = createBrowserRouter([
             element: (
               <S>
                 <AdminModulePage
-                modules={[...QUOTATION_MOTOR_MODULES]}>
+                modules={[...QUOTATION_MOTOR_MODULES]}
+                productLine="Motor">
                   <AdminMotorQuotationDoublePage />
                 </AdminModulePage>
               </S>
@@ -854,7 +860,7 @@ export const router = createBrowserRouter([
             path: "quotations/travel-quotations",
             element: (
               <S>
-                <AdminModulePage module={MODULES.QUOTATION_TRAVEL}>
+                <AdminModulePage module={MODULES.QUOTATION_TRAVEL} productLine="Travel">
                   <TravelQuotationPage />
                 </AdminModulePage>
               </S>
@@ -864,7 +870,7 @@ export const router = createBrowserRouter([
             path: "quotations/travel-quotations/results",
             element: (
               <S>
-                <AdminModulePage module={MODULES.QUOTATION_TRAVEL}>
+                <AdminModulePage module={MODULES.QUOTATION_TRAVEL} productLine="Travel">
                   <AdminTravelQuotationResultsPage />
                 </AdminModulePage>
               </S>
@@ -874,7 +880,7 @@ export const router = createBrowserRouter([
             path: "quotations/travel-quotations/purchase",
             element: (
               <S>
-                <AdminModulePage module={MODULES.QUOTATION_TRAVEL}>
+                <AdminModulePage module={MODULES.QUOTATION_TRAVEL} productLine="Travel">
                   <AdminTravelQuotationPurchasePage />
                 </AdminModulePage>
               </S>
@@ -884,7 +890,7 @@ export const router = createBrowserRouter([
             path: "quotations/travel-quotations/fetch",
             element: (
               <S>
-                <AdminModulePage module={MODULES.QUOTATION_TRAVEL}>
+                <AdminModulePage module={MODULES.QUOTATION_TRAVEL} productLine="Travel">
                   <AdminTravelQuotationFetchPage />
                 </AdminModulePage>
               </S>

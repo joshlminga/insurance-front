@@ -28,6 +28,8 @@ export interface AbilityContext {
   role: string | null
   role_id: number | null
   permissions: string[]
+  /** Active ProductType values for this org location, e.g. ["Motor", "Travel"] */
+  products?: string[]
 }
 
 export interface Abilities {

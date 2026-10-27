@@ -6,11 +6,16 @@
  * The lookup helper and form do not depend on this component.
  */
 import { DMVIC_CERT_URLS } from '@/app/admin/motor-certificates/motor-certificates-query'
+import { ValidateCertificateDialog } from '@/app/admin/quotations/motor/double/validate-certificate-dialog'
 import { DataTable, type Column } from '@/components/shared/data-table'
 import { Button } from '@/components/ui/button'
 import { useActionWaitHold } from '@/hooks/use-action-wait-hold'
 import { UseApiMutation } from '@/hooks/hooks'
 import type { DoubleInsuranceCover } from '@/utils/dmvic-double-insurance'
+import {
+  validateInsuranceCertificate,
+  type ValidateInsuranceResult,
+} from '@/utils/dmvic-validate-insurance'
 import { EMETHODS } from '@/utils/constatnts'
 import { extractErrorMessage } from '@/utils/helpers'
 import { ShowToast } from '@/utils/utils'
@@ -64,10 +69,20 @@ export function DoubleInsuranceCoversTable({
   localMatches,
 }: DoubleInsuranceCoversTableProps) {
   const [isDownloading, setIsDownloading] = useState(false)
+  const [isVerifying, setIsVerifying] = useState(false)
+  const [verifyOpen, setVerifyOpen] = useState(false)
+  const [verifyResult, setVerifyResult] = useState<ValidateInsuranceResult | null>(
+    null,
+  )
 
   // GET download does not auto-arm Please wait — hold while the PDF streams.
   useActionWaitHold('admin-motor-double-certificate-download', isDownloading, {
     detail: 'Downloading certificate.',
+  })
+
+  // Verify is also a GET — hold Please wait while DMVIC validates.
+  useActionWaitHold('admin-motor-double-certificate-verify', isVerifying, {
+    detail: 'Verifying certificate with DMVIC.',
   })
 
   const downloadMutation = UseApiMutation<Blob, { invoice_id: number }>({
@@ -100,6 +115,40 @@ export function DoubleInsuranceCoversTable({
       }),
     [covers, localMatches],
   )
+
+  /**
+   * Verify only when we have a local invoice match (same gate as download).
+   * Needs cert + registration; chassis is optional.
+   */
+  const onVerify = async (row: CoverRow) => {
+    const certificateNumber = row.certificateNumber.trim()
+    const vehicleRegistrationNumber = row.vehicleRegistrationNumber.trim()
+    const canVerifyLocal =
+      row.invoiceId != null &&
+      row.invoiceId > 0 &&
+      certificateNumber !== '' &&
+      vehicleRegistrationNumber !== ''
+    if (!canVerifyLocal) {
+      return
+    }
+
+    setIsVerifying(true)
+    try {
+      const result = await validateInsuranceCertificate({
+        certificateNumber,
+        vehicleRegistrationNumber,
+        chassisNumber: row.chassisNumber,
+      })
+      setVerifyResult(result)
+      setVerifyOpen(true)
+    } catch (error: unknown) {
+      ShowToast.error(
+        extractErrorMessage(error) || 'Certificate verification failed.',
+      )
+    } finally {
+      setIsVerifying(false)
+    }
+  }
 
   const columns: Column<CoverRow>[] = useMemo(
     () => [
@@ -135,52 +184,93 @@ export function DoubleInsuranceCoversTable({
         render: (value) => showValue(String(value ?? '')),
       },
       {
-        // Column header "Certificate" — download only (not another cert number)
+        // Column header "Certificate" — download + Verify (DMVIC check)
         key: 'invoiceId',
         label: 'Certificate',
         render: (_value, row) => {
+          // No local cover in our system → disable download and verify together
           const canDownload = row.invoiceId != null && row.invoiceId > 0
+          const canVerify =
+            canDownload &&
+            row.certificateNumber.trim() !== '' &&
+            row.vehicleRegistrationNumber.trim() !== ''
+
           return (
-            <Button
-              type="button"
-              size="sm"
-              disabled={!canDownload || isDownloading}
-              className={
-                canDownload
-                  ? 'bg-black text-white hover:bg-black/90 hover:text-white'
-                  : 'bg-muted text-muted-foreground opacity-60'
-              }
-              onClick={() => {
-                if (!canDownload || row.invoiceId == null) {
-                  return
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                type="button"
+                size="sm"
+                disabled={!canDownload || isDownloading || isVerifying}
+                className={
+                  canDownload
+                    ? 'bg-black text-white hover:bg-black/90 hover:text-white'
+                    : 'bg-muted text-muted-foreground opacity-60'
                 }
-                downloadMutation.mutate({ invoice_id: row.invoiceId })
-              }}
-            >
-              click to download
-            </Button>
+                onClick={() => {
+                  if (!canDownload || row.invoiceId == null) {
+                    return
+                  }
+                  downloadMutation.mutate({ invoice_id: row.invoiceId })
+                }}
+              >
+                click to download
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                disabled={!canVerify || isVerifying || isDownloading}
+                title={
+                  !canDownload
+                    ? 'Verify is only available for covers found in our system'
+                    : undefined
+                }
+                className={
+                  canVerify
+                    ? 'bg-[#C20C0C] text-white hover:bg-[#C20C0C]/90 hover:text-white'
+                    : 'bg-muted text-muted-foreground opacity-60'
+                }
+                onClick={() => {
+                  void onVerify(row)
+                }}
+              >
+                Verify
+              </Button>
+            </div>
           )
         },
       },
     ],
-    [downloadMutation, isDownloading],
+    [downloadMutation, isDownloading, isVerifying],
   )
 
   return (
-    <DataTable
-      data={rows}
-      columns={columns}
-      searchable
-      searchPlaceholder="Search certificates…"
-      searchKeys={[
-        'certificateNumber',
-        'policyNumber',
-        'coverExpiryDate',
-        'insuranceName',
-        'chassisNumber',
-      ]}
-      pageSize={10}
-      emptyMessage="No matching covers."
-    />
+    <>
+      <DataTable
+        data={rows}
+        columns={columns}
+        searchable
+        searchPlaceholder="Search certificates…"
+        searchKeys={[
+          'certificateNumber',
+          'policyNumber',
+          'coverExpiryDate',
+          'insuranceName',
+          'chassisNumber',
+        ]}
+        pageSize={10}
+        emptyMessage="No matching covers."
+      />
+
+      <ValidateCertificateDialog
+        open={verifyOpen}
+        onOpenChange={(open) => {
+          setVerifyOpen(open)
+          if (!open) {
+            setVerifyResult(null)
+          }
+        }}
+        result={verifyResult}
+      />
+    </>
   )
 }

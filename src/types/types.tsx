@@ -560,6 +560,8 @@ export type FinanceTransactionPurchaseRow = {
   quote_code: string | null
   product?: string | null
   status?: string | null
+  total_premium?: string | number | null
+  currency?: string | null
   invoices_count?: number
   payable_lines_count?: number
   created_at?: string | null
@@ -569,6 +571,8 @@ export type FinanceTransactionPurchaseRow = {
 export type FinancePurchaseTransactionPreview = {
   purchase_id: number | null
   quote_code: string | null
+  total_premium?: string | number | null
+  currency?: string | null
   /** Purchase-header payable journals, summed by account. */
   payable_lines: FinanceLedgerEntry[]
   /** Invoice-linked journals under the purchase, summed by account (e.g. Bank 500+600+400 → 1500). */

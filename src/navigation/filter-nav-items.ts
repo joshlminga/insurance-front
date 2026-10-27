@@ -1,4 +1,8 @@
 import type { NavItem, NavSubItem } from './admin-nav-config'
+import {
+  hasOrgProductLineAccess,
+  requiredProductLineForNavItem,
+} from './quotation-product-line-nav'
 
 function hasModuleWithMenu(
   key: string,
@@ -22,6 +26,7 @@ function isNavItemVisible(
   canMenu: (moduleKey: string) => boolean,
   can?: (permission: string) => boolean,
   isPlatformSuperAdmin = false,
+  contextProducts?: string[],
 ): boolean {
   // Checked before can()/hasModule(). Those helpers return true for is_general,
   // and is_general is not a platform super admin.
@@ -41,6 +46,11 @@ function isNavItemVisible(
     return false
   }
 
+  const productLine = requiredProductLineForNavItem(item)
+  if (productLine !== null && !hasOrgProductLineAccess(productLine, contextProducts)) {
+    return false
+  }
+
   return true
 }
 
@@ -50,6 +60,7 @@ function filterNavSubItems(
   canMenu: (moduleKey: string) => boolean,
   can?: (permission: string) => boolean,
   isPlatformSuperAdmin = false,
+  contextProducts?: string[],
 ): NavSubItem[] {
   return items
     .map((sub) => {
@@ -60,14 +71,19 @@ function filterNavSubItems(
           canMenu,
           can,
           isPlatformSuperAdmin,
+          contextProducts,
         )
         if (visibleChildren.length === 0) return null
-        if (!isNavItemVisible(sub, hasModule, canMenu, can, isPlatformSuperAdmin)) return null
+        if (!isNavItemVisible(sub, hasModule, canMenu, can, isPlatformSuperAdmin, contextProducts)) {
+          return null
+        }
         return { ...sub, items: visibleChildren }
       }
 
       if (!sub.url) return null
-      if (!isNavItemVisible(sub, hasModule, canMenu, can, isPlatformSuperAdmin)) return null
+      if (!isNavItemVisible(sub, hasModule, canMenu, can, isPlatformSuperAdmin, contextProducts)) {
+        return null
+      }
 
       return sub
     })
@@ -89,6 +105,7 @@ export function filterNavItems(
   canMenu: (moduleKey: string) => boolean,
   can?: (permission: string) => boolean,
   isPlatformSuperAdmin = false,
+  contextProducts?: string[],
 ): NavItem[] {
   return items
     .map((item) => {
@@ -99,16 +116,21 @@ export function filterNavItems(
           canMenu,
           can,
           isPlatformSuperAdmin,
+          contextProducts,
         )
 
         if (visibleChildren.length === 0) return null
 
-        if (!isNavItemVisible(item, hasModule, canMenu, can, isPlatformSuperAdmin)) return null
+        if (!isNavItemVisible(item, hasModule, canMenu, can, isPlatformSuperAdmin, contextProducts)) {
+          return null
+        }
 
         return { ...item, items: visibleChildren }
       }
 
-      if (!isNavItemVisible(item, hasModule, canMenu, can, isPlatformSuperAdmin)) return null
+      if (!isNavItemVisible(item, hasModule, canMenu, can, isPlatformSuperAdmin, contextProducts)) {
+        return null
+      }
 
       return item
     })

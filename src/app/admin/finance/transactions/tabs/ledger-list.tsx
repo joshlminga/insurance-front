@@ -111,12 +111,12 @@ export function FinanceLedgerListTab({ view, title }: LedgerListTabProps) {
 
   const printPurchase = (row: FinanceTransactionPurchaseRow) => {
     const id = row.purchase_id ?? row.id
+    // Subtitle is filled from the API preview (includes total premium) in fetchAndPrintLedgerSummary
     void fetchAndPrintLedgerSummary({
       mode: 'purchase',
       purchase_id: id,
       quote_code: row.quote_code,
       title: `Purchase ID ${id}`,
-      subtitle: `Quotation: ${row.quote_code?.trim() || '—'}`,
     })
   }
 

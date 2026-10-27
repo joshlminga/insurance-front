@@ -1,6 +1,7 @@
 import type { ColumnDef } from '@tanstack/table-core'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
+import { CopyCell } from '@/dev/columns'
 import { formatDate } from '@/lib/format'
 import type {
   FailedMotorCertificateRow,
@@ -11,6 +12,15 @@ type IssuedColumnsOptions = {
   showDownload?: boolean
 }
 
+/** Show CopyCell when there is a real value; otherwise a plain dash. */
+function copyOrDash(value: string | null | undefined) {
+  const trimmed = value?.trim() ?? ''
+  if (trimmed === '') {
+    return <div>-</div>
+  }
+  return <CopyCell value={trimmed} />
+}
+
 export function BuildMotorCertificateColumns(
   _options: IssuedColumnsOptions = {}
 ): ColumnDef<MotorCertificateRow>[] {
@@ -18,18 +28,21 @@ export function BuildMotorCertificateColumns(
     {
       accessorKey: 'invoice_number',
       header: () => <div>Invoice</div>,
-      cell: ({ row }) => (
-        <div className="text-sm font-medium">
-          {row.original.invoice_number ?? `#${row.original.invoice_id}`}
-        </div>
-      ),
+      cell: ({ row }) => {
+        const value =
+          row.original.invoice_number?.trim() ||
+          `#${row.original.invoice_id}`
+        return (
+          <div className="text-sm font-medium">
+            <CopyCell value={value} />
+          </div>
+        )
+      },
     },
     {
       accessorKey: 'registration_number',
       header: () => <div>Registration</div>,
-      cell: ({ row }) => (
-        <div>{row.original.registration_number ?? '-'}</div>
-      ),
+      cell: ({ row }) => copyOrDash(row.original.registration_number),
     },
     {
       accessorKey: 'certificate_number',
@@ -39,10 +52,15 @@ export function BuildMotorCertificateColumns(
           ?.toString()
           .toLowerCase()
         const isCancelled = status === 'cancelled'
+        const certNumber = row.original.certificate_number?.trim() ?? ''
 
         return (
           <div className="space-y-1">
-            <div>{row.original.certificate_number ?? '-'}</div>
+            {certNumber !== '' ? (
+              <CopyCell value={certNumber} />
+            ) : (
+              <div>-</div>
+            )}
             {/* Only Cancelled needs to stand out for the user */}
             {isCancelled ? (
               <Badge variant="destructive">Cancelled</Badge>
@@ -54,7 +72,7 @@ export function BuildMotorCertificateColumns(
     {
       accessorKey: 'policy_number',
       header: () => <div>Policy</div>,
-      cell: ({ row }) => <div>{row.original.policy_number ?? '-'}</div>,
+      cell: ({ row }) => copyOrDash(row.original.policy_number),
     },
     {
       accessorKey: 'customer',
@@ -142,18 +160,21 @@ export function BuildFailedMotorCertificateColumns(
     {
       accessorKey: 'invoice_number',
       header: () => <div>Invoice</div>,
-      cell: ({ row }) => (
-        <div className="text-sm font-medium">
-          {row.original.invoice_number ?? `#${row.original.invoice_id}`}
-        </div>
-      ),
+      cell: ({ row }) => {
+        const value =
+          row.original.invoice_number?.trim() ||
+          `#${row.original.invoice_id}`
+        return (
+          <div className="text-sm font-medium">
+            <CopyCell value={value} />
+          </div>
+        )
+      },
     },
     {
       accessorKey: 'registration_number',
       header: () => <div>Registration</div>,
-      cell: ({ row }) => (
-        <div>{row.original.registration_number ?? '-'}</div>
-      ),
+      cell: ({ row }) => copyOrDash(row.original.registration_number),
     },
     {
       accessorKey: 'customer',

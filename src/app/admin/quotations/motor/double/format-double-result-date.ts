@@ -1,4 +1,4 @@
-/** Month names for DD-OCT-YYYY display in Double search results. */
+/** Month names for DD-Mon-YYYY / DD/Mon/YYYY display. */
 const MONTHS = [
   'JAN',
   'FEB',
@@ -14,22 +14,31 @@ const MONTHS = [
   'DEC',
 ] as const
 
-function toDisplay(day: number, monthIndex: number, year: number): string {
-  return `${String(day).padStart(2, '0')}-${MONTHS[monthIndex]}-${year}`
+type DateSeparator = '-' | '/'
+
+function toDisplay(
+  day: number,
+  monthIndex: number,
+  year: number,
+  separator: DateSeparator,
+): string {
+  return `${String(day).padStart(2, '0')}${separator}${MONTHS[monthIndex]}${separator}${year}`
 }
 
 /**
- * Format a date for Double results as DD-OCT-YYYY (month as uppercase name).
- * Accepts HTML date values (YYYY-MM-DD) and DMVIC expiry strings (DD/MM/YYYY …).
+ * Parse common API / form date strings into day, monthIndex (0–11), year.
+ * Returns null when the value cannot be parsed.
  */
-export function formatDoubleResultDate(value?: string | null): string {
+function parseDateParts(
+  value?: string | null,
+): { day: number; monthIndex: number; year: number } | null {
   if (value == null) {
-    return '-'
+    return null
   }
 
   const raw = value.trim()
   if (raw === '') {
-    return '-'
+    return null
   }
 
   // Form / API search window: YYYY-MM-DD (optionally with time)
@@ -39,20 +48,44 @@ export function formatDoubleResultDate(value?: string | null): string {
     const month = Number(iso[2])
     const day = Number(iso[3])
     if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
-      return toDisplay(day, month - 1, year)
+      return { day, monthIndex: month - 1, year }
     }
   }
 
-  // DMVIC CoverEndDate style: DD/MM/YYYY or DD/MM/YYYY HH:mm
+  // DMVIC style: DD/MM/YYYY or DD/MM/YYYY HH:mm
   const dmy = /^(\d{1,2})\/(\d{1,2})\/(\d{4})/.exec(raw)
   if (dmy) {
     const day = Number(dmy[1])
     const month = Number(dmy[2])
     const year = Number(dmy[3])
     if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
-      return toDisplay(day, month - 1, year)
+      return { day, monthIndex: month - 1, year }
     }
   }
 
-  return '-'
+  return null
+}
+
+/**
+ * Format a date for Double results as DD-OCT-YYYY (month as uppercase name).
+ * Accepts HTML date values (YYYY-MM-DD) and DMVIC expiry strings (DD/MM/YYYY …).
+ */
+export function formatDoubleResultDate(value?: string | null): string {
+  const parts = parseDateParts(value)
+  if (!parts) {
+    return '-'
+  }
+  return toDisplay(parts.day, parts.monthIndex, parts.year, '-')
+}
+
+/**
+ * Same parsing as Double results, but with / separators: DD/OCT/YYYY.
+ * Used on the Validate Certificate dialog (Valid From / Valid Till).
+ */
+export function formatValidateCertificateDate(value?: string | null): string {
+  const parts = parseDateParts(value)
+  if (!parts) {
+    return '-'
+  }
+  return toDisplay(parts.day, parts.monthIndex, parts.year, '/')
 }

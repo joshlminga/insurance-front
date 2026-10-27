@@ -13,7 +13,7 @@ import { CustomBaseTable, SearchTools } from '@/dev/table'
 import { useDebounce } from '@/hooks'
 import { UseApiQuery } from '@/hooks/hooks'
 import type { SubmitResponse, TFilterOptions, TPaginationFilters } from '@/types/types'
-import { FILTEROPTIONS, ReusableReducer } from '@/utils/constatnts'
+import { EORGANIZATIONTYPES, FILTEROPTIONS, ReusableReducer } from '@/utils/constatnts'
 import type { ColumnDef } from '@tanstack/table-core'
 import { Building2, Download } from 'lucide-react'
 import { useMemo, useReducer } from 'react'
@@ -41,6 +41,11 @@ type OrganizationReportPageProps = {
   showSummary?: boolean
   /** Show searchable By Agent filter when the user has module.aggregate */
   showAgentFilter?: boolean
+  /**
+   * Show searchable insurer dropdown (organization id).
+   * Empty selection = all insurers. Sends filter.insurer_id to list/export.
+   */
+  showInsurerFilter?: boolean
 }
 
 /**
@@ -59,6 +64,7 @@ export function OrganizationReportPage({
   searchPlaceholder = 'Search…',
   showSummary = false,
   showAgentFilter = false,
+  showInsurerFilter = false,
 }: OrganizationReportPageProps) {
   const { canModuleAction } = useCan()
   const canExport = canModuleAction(moduleKey, 'export')
@@ -103,9 +109,17 @@ export function OrganizationReportPage({
       }
     }
 
+    // Insurer dropdown sends organization id (empty = all insurers)
+    if (showInsurerFilter) {
+      const insurerId = (filter as any).insurer_id
+      if (insurerId !== undefined && insurerId !== null && String(insurerId).trim() !== '') {
+        params.insurer_id = String(insurerId).trim()
+      }
+    }
+
     for (const field of extraFilters) {
-      // agent_id is handled by the searchable picker above
-      if (field.key === 'agent_id') {
+      // agent_id / insurer_id are handled by the searchable pickers above
+      if (field.key === 'agent_id' || field.key === 'insurer_id') {
         continue
       }
       const value = (filter as any)[field.key]
@@ -115,7 +129,7 @@ export function OrganizationReportPage({
     }
 
     return params
-  }, [filter, extraFilters, showAgentPicker])
+  }, [filter, extraFilters, showAgentPicker, showInsurerFilter])
 
   const { data, isLoading, isError } = UseApiQuery<SubmitResponse>({
     url: listUrl,
@@ -232,8 +246,53 @@ export function OrganizationReportPage({
                   />
                 </div>
               ) : null}
+              {showInsurerFilter ? (
+                <div className="space-y-1.5" data-testid="report-insurer-filter">
+                  <ReusableSingleSelectApiInput
+                    url="organization-location"
+                    queryParams={{ organization_type: EORGANIZATIONTYPES.INSURER }}
+                    label="Insurer"
+                    placeholder="All insurers"
+                    searchPlaceholder="Search insurer…"
+                    emptyMessage="No insurers found"
+                    // valueKey = organization id (API FiltersReportInsurer expects that)
+                    valueKey="organization_id"
+                    labelKey="organization_name"
+                    value={
+                      (filter as any).insurer_id
+                        ? String((filter as any).insurer_id)
+                        : ''
+                    }
+                    onChange={(value) =>
+                      optionsDispatcher({
+                        type: 'UPDATE',
+                        payload: {
+                          // Empty string = all insurers (clearable)
+                          insurer_id: value ? String(value) : '',
+                          page: 1,
+                        },
+                      })
+                    }
+                  />
+                  {/* Clear selection so the user can go back to “all insurers” */}
+                  {(filter as any).insurer_id ? (
+                    <button
+                      type="button"
+                      className="text-xs text-muted-foreground underline-offset-2 hover:underline"
+                      onClick={() =>
+                        optionsDispatcher({
+                          type: 'UPDATE',
+                          payload: { insurer_id: '', page: 1 },
+                        })
+                      }
+                    >
+                      Clear insurer
+                    </button>
+                  ) : null}
+                </div>
+              ) : null}
               {extraFilters.map((field) => {
-                if (field.key === 'agent_id') {
+                if (field.key === 'agent_id' || field.key === 'insurer_id') {
                   return null
                 }
                 return (

@@ -21,6 +21,7 @@ import {
 } from '@/dev/columns/admin/finance/transactions'
 import { CustomBaseTable } from '@/dev/table'
 import { UseApiQuery } from '@/hooks/hooks'
+import { formatNumber, parseMoneyString } from '@/lib/format'
 import type {
   FinanceLedgerEntry,
   FinancePurchaseTransactionPreview,
@@ -131,6 +132,14 @@ export function FinanceLedgerPreviewDialog({
   const displayQuote =
     purchasePreview?.quote_code?.trim() || quoteCodeFromRow || null
 
+  // Format purchase total premium for the preview header / print subtitle
+  const premiumAmount = parseMoneyString(purchasePreview?.total_premium)
+  const premiumCurrency = purchasePreview?.currency?.trim() || null
+  const premiumLabel =
+    mode === 'purchase' && premiumAmount
+      ? `Total premium: ${formatNumber(premiumAmount, 2)}${premiumCurrency ? ` ${premiumCurrency}` : ''}`
+      : null
+
   const heading =
     mode === 'purchase'
       ? `Purchase ID ${displayPurchaseId ?? '—'}`
@@ -138,7 +147,12 @@ export function FinanceLedgerPreviewDialog({
 
   const subtitle =
     mode === 'purchase'
-      ? `Quotation: ${displayQuote ?? '—'}`
+      ? [
+          `Quotation: ${displayQuote ?? '—'}`,
+          premiumLabel,
+        ]
+          .filter(Boolean)
+          .join(' · ')
       : 'DR and CR lines for this invoice only.'
 
   const isLoading =

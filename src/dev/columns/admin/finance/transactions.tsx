@@ -209,6 +209,11 @@ export const FinanceTransactionPurchaseColumns: ColumnDef<FinanceTransactionPurc
       ),
     },
     {
+      accessorKey: 'total_premium',
+      header: () => <div>Total Premium</div>,
+      cell: ({ row }) => FormatLedgerAmount(row.original.total_premium),
+    },
+    {
       accessorKey: 'invoices_count',
       header: () => <div>Invoices</div>,
       cell: ({ row }) => (

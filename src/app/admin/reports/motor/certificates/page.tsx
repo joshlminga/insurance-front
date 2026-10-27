@@ -14,11 +14,12 @@ export const OrganizationMotorCertificatesReportPage = () => (
     searchPlaceholder="Search certificate, policy, registration…"
     showSummary
     showAgentFilter
+    // Dropdown of insurers (org id) instead of a raw Insurer ID number box
+    showInsurerFilter
     extraFilters={[
       { key: 'policy_number', label: 'Policy number' },
       { key: 'certificate_number', label: 'Certificate number' },
       { key: 'registration_number', label: 'Registration number' },
-      { key: 'insurer_id', label: 'Insurer ID', type: 'number' },
     ]}
   />
 )

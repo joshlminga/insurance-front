@@ -5,6 +5,7 @@ interface AdminModulePageProps {
   module?: string
   modules?: string[]
   permission?: string
+  productLine?: string
   /** Passed through to ModuleRoute. Redirects unless the role is super_admin. */
   requireSuperAdmin?: boolean
   children: ReactNode
@@ -18,6 +19,7 @@ export function AdminModulePage({
   module,
   modules,
   permission,
+  productLine,
   requireSuperAdmin,
   children,
 }: AdminModulePageProps) {
@@ -26,6 +28,7 @@ export function AdminModulePage({
       module={module}
       modules={modules}
       permission={permission}
+      productLine={productLine}
       requireSuperAdmin={requireSuperAdmin}
     >
       {children}

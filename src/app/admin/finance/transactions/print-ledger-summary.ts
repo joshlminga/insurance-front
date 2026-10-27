@@ -9,6 +9,7 @@ import {
   FINANCE_TRANSACTIONS_URL,
 } from '@/app/admin/finance/transactions/finance-transactions-query'
 import apiClient from '@/lib/api-client'
+import { formatNumber, parseMoneyString } from '@/lib/format'
 import type {
   FinanceLedgerEntry,
   FinancePurchaseTransactionPreview,
@@ -164,9 +165,22 @@ export async function fetchAndPrintLedgerSummary(input: {
     const quote =
       preview?.quote_code?.trim() || input.quote_code?.trim() || '—'
 
+    const premiumAmount = parseMoneyString(preview?.total_premium)
+    const premiumCurrency = preview?.currency?.trim() || null
+    const premiumLabel = premiumAmount
+      ? `Total premium: ${formatNumber(premiumAmount, 2)}${premiumCurrency ? ` ${premiumCurrency}` : ''}`
+      : null
+
+    const purchaseSubtitle = [
+      `Quotation: ${quote}`,
+      premiumLabel,
+    ]
+      .filter(Boolean)
+      .join(' · ')
+
     printLedgerSummary({
       title: input.title,
-      subtitle: input.subtitle ?? `Quotation: ${quote}`,
+      subtitle: input.subtitle ?? purchaseSubtitle,
       rows,
       footerNote: invoiceLabels ? `Invoices: ${invoiceLabels}` : undefined,
     })
