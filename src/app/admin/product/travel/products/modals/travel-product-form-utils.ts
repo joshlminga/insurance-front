@@ -22,6 +22,7 @@ export type TravelProductPayload = {
   policy_api: boolean
   payment_api: boolean
   certificate_api: boolean
+  custom_rules: Array<{ key: string; value: string }>
 }
 
 export type TravelProductSelectLabels = {
@@ -79,6 +80,7 @@ export const emptyTravelProductFormValues = (): TravelProductFormValues => ({
   policy_api: "false",
   payment_api: "false",
   certificate_api: "false",
+  custom_rules: [],
 })
 
 export const mapTravelProductToFormValues = (
@@ -135,6 +137,19 @@ export const mapTravelProductToFormValues = (
     policy_api: toYesNo(product.policy_api),
     payment_api: toYesNo(product.payment_api),
     certificate_api: toYesNo(product.certificate_api),
+    custom_rules: Array.isArray(product.custom_rules)
+      ? product.custom_rules
+          .map((item) => {
+            const row = item as Record<string, unknown>
+            const key = row.key != null ? String(row.key).trim() : ""
+            if (key === "") return null
+            return {
+              key,
+              value: row.value != null ? String(row.value) : "",
+            }
+          })
+          .filter((row): row is { key: string; value: string } => row !== null)
+      : [],
   }
 }
 
@@ -191,7 +206,8 @@ export const getTravelProductSelectLabels = (
  * and PATCH /products/travel/{id}.
  *
  * If "Does Product Have Rules?" is No, the four API questions are hidden.
- * We still send those four flags as false so the API can clear saved rules.
+ * We still send those four flags as false so the API can clear saved rules,
+ * and custom_rules as [] so free-form rows are cleared too.
  * A public product does not send target organizations.
  * An external cover does not send coverage pairs.
  */
@@ -208,6 +224,16 @@ export const buildTravelProductPayload = (
     .filter((id) => Number.isInteger(id) && id > 0)
 
   const officename = values.officename?.trim() ?? ""
+
+  // Skip blank-key rows; empty list clears custom rules when has_rules is No.
+  const customRules = hasRules
+    ? values.custom_rules
+        .map((row) => ({
+          key: row.key.trim(),
+          value: row.value.trim(),
+        }))
+        .filter((row) => row.key !== "")
+    : []
 
   return {
     organization_location_id: Number(values.organization_location_id),
@@ -233,5 +259,6 @@ export const buildTravelProductPayload = (
     policy_api: hasRules ? yesNoToBoolean(values.policy_api) : false,
     payment_api: hasRules ? yesNoToBoolean(values.payment_api) : false,
     certificate_api: hasRules ? yesNoToBoolean(values.certificate_api) : false,
+    custom_rules: customRules,
   }
 }

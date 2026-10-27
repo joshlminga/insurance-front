@@ -73,18 +73,33 @@ describe("TravelProductFormFields rules questions", () => {
     for (const label of apiQuestionLabels) {
       expect(screen.queryByText(label)).not.toBeInTheDocument()
     }
+    expect(screen.queryByText("Custom rules")).not.toBeInTheDocument()
 
     await chooseYesNo("Does Product Have Rules?", "Yes")
 
     for (const label of apiQuestionLabels) {
       expect(screen.getByText(label)).toBeInTheDocument()
     }
+    expect(screen.getByText("Custom rules")).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "+ Add rule" })).toBeInTheDocument()
 
     await chooseYesNo("Does Product Have Rules?", "No")
 
     for (const label of apiQuestionLabels) {
       expect(screen.queryByText(label)).not.toBeInTheDocument()
     }
+    expect(screen.queryByText("Custom rules")).not.toBeInTheDocument()
+  })
+
+  it("lets the user add a custom key/value rule row", async () => {
+    const user = userEvent.setup()
+    render(<TravelProductFormHarness />)
+
+    await chooseYesNo("Does Product Have Rules?", "Yes")
+    await user.click(screen.getByRole("button", { name: "+ Add rule" }))
+
+    expect(screen.getByPlaceholderText("e.g. partner_code")).toBeInTheDocument()
+    expect(screen.getByPlaceholderText("e.g. ABC123")).toBeInTheDocument()
   })
 
   it("hides target organizations when the product is public", async () => {

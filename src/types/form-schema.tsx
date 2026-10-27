@@ -1758,6 +1758,14 @@ const travelYesNo = z.enum(["true", "false"], {
   error: "Select Yes or No",
 })
 
+/** Reserved keys stored as Yes/No API flags — not allowed in free-form custom_rules. */
+const TRAVEL_API_RULE_KEYS = [
+  "quotation_api",
+  "policy_api",
+  "payment_api",
+  "certificate_api",
+] as const
+
 export const TravelProductSchema = z
   .object({
     organization_location_id: z.string().min(1, "Insurer is required"),
@@ -1800,6 +1808,13 @@ export const TravelProductSchema = z
     policy_api: travelYesNo,
     payment_api: travelYesNo,
     certificate_api: travelYesNo,
+    // Extra free-form key/value rows saved to product_travel_rules.
+    custom_rules: z.array(
+      z.object({
+        key: z.string(),
+        value: z.string(),
+      })
+    ),
   })
   .superRefine((data, ctx) => {
     if (data.start_date && data.expiry_date && data.expiry_date < data.start_date) {
@@ -1809,6 +1824,42 @@ export const TravelProductSchema = z
         path: ["expiry_date"],
       })
     }
+
+    const seenKeys = new Set<string>()
+    data.custom_rules.forEach((row, index) => {
+      const key = row.key.trim()
+      if (key === "") {
+        // Blank rows are skipped on submit; only validate if value was filled.
+        if (row.value.trim() !== "") {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Key is required",
+            path: ["custom_rules", index, "key"],
+          })
+        }
+        return
+      }
+
+      if (
+        (TRAVEL_API_RULE_KEYS as readonly string[]).includes(key)
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "This key is reserved for the API Yes/No flags",
+          path: ["custom_rules", index, "key"],
+        })
+      }
+
+      const keyLower = key.toLowerCase()
+      if (seenKeys.has(keyLower)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Key must be unique",
+          path: ["custom_rules", index, "key"],
+        })
+      }
+      seenKeys.add(keyLower)
+    })
 
     if (data.is_external === "true") {
       return

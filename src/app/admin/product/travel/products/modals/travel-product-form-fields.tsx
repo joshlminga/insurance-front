@@ -110,6 +110,16 @@ export const TravelProductFormFields = ({
       name: "organization_location_ids",
     })
 
+  // Free-form key/value rows under the four API Yes/No flags.
+  const {
+    fields: customRuleFields,
+    append: appendCustomRule,
+    remove: removeCustomRule,
+  } = useFieldArray({
+    control: form.control,
+    name: "custom_rules",
+  })
+
   // for_public "true" means everyone can see the product (public).
   // "false" means private: we optionally ask which organizations can see it.
   const isPublicProduct = form.watch("for_public") === "true"
@@ -118,6 +128,10 @@ export const TravelProductFormFields = ({
   // When it is No, those inputs stay in the form but are not shown, and the
   // submit helper sends has_rules: false plus all four API flags as false.
   const productHasRules = form.watch("has_rules") === "true"
+
+  const customRulesListError =
+    form.formState.errors.custom_rules?.message
+    ?? form.formState.errors.custom_rules?.root?.message
 
   // External cover is a Yes/No flag, stored like the other radios ("true" / "false").
   // Yes means the insurer prices this product outside Acensure, so we do not ask
@@ -421,6 +435,70 @@ export const TravelProductFormFields = ({
               name="certificate_api"
               label="Certificate API"
             />
+          </div>
+
+          {/* Extra free-form key/value pairs saved to product_travel_rules. */}
+          <div className="space-y-3 border-t border-[#ADABAB] pt-3">
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <p className="text-sm font-medium">Custom rules</p>
+                <p className="text-xs text-muted-foreground">
+                  Optional key and value text pairs for this product.
+                </p>
+              </div>
+              {customRuleFields.length === 0 ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className={addActionButtonClass}
+                  onClick={() => appendCustomRule({ key: "", value: "" })}>
+                  + Add rule
+                </Button>
+              ) : null}
+            </div>
+
+            {customRuleFields.map((item, index) => (
+              <div key={item.id} className="flex items-end gap-2">
+                <div className="min-w-0 flex-1">
+                  <ReuseableInput
+                    control={form.control}
+                    name={`custom_rules.${index}.key`}
+                    label={index === 0 ? "Key" : `Key ${index + 1}`}
+                    placeholder="e.g. partner_code"
+                    className={inputClass}
+                  />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <ReuseableInput
+                    control={form.control}
+                    name={`custom_rules.${index}.value`}
+                    label={index === 0 ? "Value" : `Value ${index + 1}`}
+                    placeholder="e.g. ABC123"
+                    className={inputClass}
+                  />
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className={addRowButtonClass}
+                  onClick={() => appendCustomRule({ key: "", value: "" })}>
+                  +
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className={removeRowButtonClass}
+                  onClick={() => removeCustomRule(index)}>
+                  -
+                </Button>
+              </div>
+            ))}
+            {customRulesListError ? (
+              <p className="text-sm text-red-500">{customRulesListError}</p>
+            ) : null}
           </div>
         </div>
       ) : null}

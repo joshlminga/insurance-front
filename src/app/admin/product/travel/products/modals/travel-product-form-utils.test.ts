@@ -23,6 +23,7 @@ const validForm = {
   policy_api: "false" as const,
   payment_api: "false" as const,
   certificate_api: "true" as const,
+  custom_rules: [{ key: "partner_code", value: "ABC123" }],
 }
 
 describe("buildTravelProductPayload", () => {
@@ -42,6 +43,7 @@ describe("buildTravelProductPayload", () => {
       policy_api: false,
       payment_api: false,
       certificate_api: true,
+      custom_rules: [{ key: "partner_code", value: "ABC123" }],
     })
   })
 
@@ -60,6 +62,21 @@ describe("buildTravelProductPayload", () => {
     expect(payload.policy_api).toBe(false)
     expect(payload.payment_api).toBe(false)
     expect(payload.certificate_api).toBe(false)
+    expect(payload.custom_rules).toEqual([])
+  })
+
+  it("skips blank-key custom rule rows on submit", () => {
+    const payload = buildTravelProductPayload(
+      TravelProductSchema.parse({
+        ...validForm,
+        custom_rules: [
+          { key: "partner_code", value: "ABC123" },
+          { key: "", value: "" },
+        ],
+      })
+    )
+
+    expect(payload.custom_rules).toEqual([{ key: "partner_code", value: "ABC123" }])
   })
 
   it("does not send target organizations for a public product", () => {
@@ -144,6 +161,27 @@ describe("TravelProductSchema", () => {
       })
     ).not.toThrow()
   })
+
+  it("rejects reserved API keys in custom_rules", () => {
+    expect(() =>
+      TravelProductSchema.parse({
+        ...validForm,
+        custom_rules: [{ key: "quotation_api", value: "nope" }],
+      })
+    ).toThrow()
+  })
+
+  it("rejects duplicate custom rule keys", () => {
+    expect(() =>
+      TravelProductSchema.parse({
+        ...validForm,
+        custom_rules: [
+          { key: "partner_code", value: "A" },
+          { key: "partner_code", value: "B" },
+        ],
+      })
+    ).toThrow()
+  })
 })
 
 describe("mapTravelProductToFormValues", () => {
@@ -164,6 +202,7 @@ describe("mapTravelProductToFormValues", () => {
       has_rules: true,
       quotation_api: true,
       policy_api: false,
+      custom_rules: [{ key: "partner_code", value: "ABC123" }],
     })
 
     expect(values.has_rules).toBe("true")
@@ -171,6 +210,7 @@ describe("mapTravelProductToFormValues", () => {
     expect(values.policy_api).toBe("false")
     expect(values.payment_api).toBe("false")
     expect(values.certificate_api).toBe("false")
+    expect(values.custom_rules).toEqual([{ key: "partner_code", value: "ABC123" }])
     expect(values.is_external).toBe("false")
     expect(values.currency).toBe("3")
     expect(values.start_date).toBe("2026-01-01")

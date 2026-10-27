@@ -32,6 +32,11 @@ export const ViewTravelProductModal = ({ handleDialogContextSwitch, componentPro
   const coverages: any[] = Array.isArray(product?.coverages) ? product.coverages : []
   const hasRules = product?.has_rules === true || product?.has_rules === "true"
   const isPublic = product?.for_public === true || product?.for_public === "true"
+  const customRules: Array<{ key?: string; value?: string | null }> = Array.isArray(
+    product?.custom_rules
+  )
+    ? product.custom_rules
+    : []
 
   return (
     <div className="w-full min-w-[600px] max-w-[760px] max-h-[85vh] overflow-y-auto p-6 space-y-6">
@@ -118,6 +123,25 @@ export const ViewTravelProductModal = ({ handleDialogContextSwitch, componentPro
               <DetailItem label="Certificate API" value={yesNoLabel(product?.certificate_api)} />
             ) : null}
           </DetailGrid>
+
+          {hasRules ? (
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-muted-foreground">Custom rules</p>
+              {customRules.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No custom rules set.</p>
+              ) : (
+                <DetailGrid columns={2}>
+                  {customRules.map((rule, index) => (
+                    <DetailItem
+                      key={`${rule?.key ?? "rule"}-${index}`}
+                      label={rule?.key ?? "Key"}
+                      value={rule?.value != null && rule.value !== "" ? String(rule.value) : "—"}
+                    />
+                  ))}
+                </DetailGrid>
+              )}
+            </div>
+          ) : null}
 
           {!isPublic ? (
             <div className="space-y-2">
