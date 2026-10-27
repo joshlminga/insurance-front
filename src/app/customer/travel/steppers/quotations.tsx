@@ -979,6 +979,8 @@ export const TravelQuotationsPage: React.FC<
                                 !quoteSessionId ||
                                 productId == null ||
                                 rateId == null ||
+                                item?.is_external === true ||
+                                item?.allow_purchase === false ||
                                 (submitPurchaseMutation.isPending &&
                                   purchasingRateId !== rateId)
                               }
