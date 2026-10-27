@@ -10,14 +10,13 @@ import { CustomerDetailsSchema } from '@/types/form-schema'
 import { CustomerFormValues } from '@/types/schema'
 import { CustomerVerificationDetailsProps, SubmitResponse } from '@/types/types'
 import { EMETHODS } from '@/utils/constatnts'
-import { EPREFIX, EROUTES } from '@/utils/enums'
-import { extractErrorMessage } from '@/utils/helpers'
+import { extractErrorMessage, extractServerFieldErrors } from '@/utils/helpers'
 import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowLeftCircle, ArrowRightCircle, CircleCheck, ShieldCheck } from 'lucide-react'
 import { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { Link, useNavigate } from 'react-router-dom'
+import { useForm, type Path } from 'react-hook-form'
+import { Link } from 'react-router-dom'
 
 const inputClassName = "w-full min-w-0 h-11 sm:h-10 rounded-[5px] border border-[#ADABAB]"
 
@@ -28,7 +27,6 @@ export const CustomerVerificationPage = ({
     const [isPolicy, setIsPolicy] = useState(false)
     const [showPolicyState, setShowPolicyState] = useState(false)
     const { setGuest } = UseAuth()
-    const navigate = useNavigate()
 
     const form = useForm<CustomerFormValues>({
         resolver: zodResolver(CustomerDetailsSchema),
@@ -50,15 +48,36 @@ export const CustomerVerificationPage = ({
                 ShowToast.success(data.message || "Submitted successfully!")
             },
             onError: (error: any) => {
-                const status = error?.response?.status
-                if (status === 409) {
-                    setTimeout(() => {
-                        ShowToast.info("Account already exists. Redirecting to login...")
-                    }, 2000)
-                    navigate(`/${EPREFIX.AUTH}${EROUTES.SIGNIN}`)
+                form.clearErrors()
+                const fieldErrors = extractServerFieldErrors(error)
+                fieldErrors.forEach(({ name, message }) => {
+                    form.setError(name as Path<CustomerFormValues>, {
+                        type: "server",
+                        message,
+                    })
+                })
+
+                // Guest EMAIL_EXISTS returns message only (no errors bag)
+                if (
+                    fieldErrors.length === 0 &&
+                    error?.response?.status === 409
+                ) {
+                    const apiMessage =
+                        (typeof error?.response?.data?.message === "string" &&
+                            error.response.data.message) ||
+                        "An account with this email already exists."
+                    form.setError("email", {
+                        type: "server",
+                        message: apiMessage,
+                    })
+                    ShowToast.error("Please check the highlighted fields.")
                     return
                 }
-                const message = extractErrorMessage(error)
+
+                const message =
+                    fieldErrors.length > 0
+                        ? "Please check the highlighted fields."
+                        : extractErrorMessage(error)
                 ShowToast.error(message || "Submission failed!")
             },
         },

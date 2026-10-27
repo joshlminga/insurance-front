@@ -6,7 +6,7 @@ import {
   FieldGroup,
 } from "@/components/ui/field"
 
-import { useForm } from "react-hook-form";
+import { useForm, type Path } from "react-hook-form";
 import { UseApiMutation } from "@/hooks/hooks";
 import { ShowToast } from "@/utils/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,7 +15,7 @@ import { Button, ReuseableInput } from "@/dev/core";
 import { EPREFIX, EROUTES } from "@/utils/enums";
 import { SignUpSchema } from "@/types/form-schema";
 import { type SignUpFormValues } from "@/types/schema";
-import { extractErrorMessage } from "@/utils/helpers";
+import { extractErrorMessage, extractServerFieldErrors } from "@/utils/helpers";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
@@ -63,7 +63,33 @@ export function SignupForm({
         navigate(`/${EPREFIX.AUTH}${EROUTES.VERIFY_EMAIL}`)
       },
       onError: (error: any) => {
-        const message = extractErrorMessage(error);
+        form.clearErrors()
+        const fieldErrors = extractServerFieldErrors(error)
+        fieldErrors.forEach(({ name, message }) => {
+          form.setError(name as Path<SignUpFormValues>, {
+            type: "server",
+            message,
+          })
+        })
+
+        // Guest EMAIL_EXISTS returns message only (no errors bag)
+        if (fieldErrors.length === 0 && error?.response?.status === 409) {
+          const apiMessage =
+            (typeof error?.response?.data?.message === "string" &&
+              error.response.data.message) ||
+            "An account with this email already exists."
+          form.setError("email", {
+            type: "server",
+            message: apiMessage,
+          })
+          ShowToast.error("Please check the highlighted fields.")
+          return
+        }
+
+        const message =
+          fieldErrors.length > 0
+            ? "Please check the highlighted fields."
+            : extractErrorMessage(error)
         ShowToast.error(message || "Signup failed!")
       }
     }

@@ -40,6 +40,28 @@ export const extractErrorMessage = (error: any): string => {
 };
 
 /**
+ * Pull field-level messages from API validation / conflict responses
+ * so forms can highlight the matching inputs.
+ */
+export function extractServerFieldErrors(
+  error: unknown
+): Array<{ name: string; message: string }> {
+  const err = error as {
+    response?: { data?: { errors?: Record<string, string[] | string> } }
+  }
+  const errors = err?.response?.data?.errors
+  if (!errors || typeof errors !== "object") {
+    return []
+  }
+
+  return Object.entries(errors).flatMap(([name, messages]) => {
+    const message = Array.isArray(messages) ? messages[0] : messages
+    if (!message) return []
+    return [{ name, message: String(message) }]
+  })
+}
+
+/**
  * DMVIC cover validation may return can_proceed + errors.dmvic.
  * When can_proceed is true the user may confirm and continue regardless
  * (ER007 cover gap). ER005 active cover is a normal field error, not this dialog.
