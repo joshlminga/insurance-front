@@ -55,6 +55,8 @@ export const DataTable = ({
     isError,
     table,
     page = 1,
+    // TEMP: Travel Products debug — remove with showRowIds usages
+    showRowIds = false,
 }: { table: TableType<any> } & Pick<
     TTableReusableComponent,
     | 'title'
@@ -67,6 +69,7 @@ export const DataTable = ({
     | 'isLoading'
     | 'onClick'
     | 'isError'
+    | 'showRowIds'
 > &
     Required<Pick<TTableReusableComponent, 'page'>>) => {
     return (
@@ -155,7 +158,10 @@ export const DataTable = ({
                                             className="w-14 px-2 font-medium text-gray-500"
                                             align="left"
                                         >
-                                            {(page - 1) * pageSize + index + 1}
+                                            {/* TEMP: showRowIds shows actual DB id in # column */}
+                                            {showRowIds
+                                                ? (row.original?.id ?? (page - 1) * pageSize + index + 1)
+                                                : (page - 1) * pageSize + index + 1}
                                         </TableCell>
 
                                         {row.getVisibleCells().map((cell, index) => (
@@ -232,6 +238,8 @@ export const CustomBaseTable = <T,>({
     page = 1,
     data,
     title,
+    // TEMP: Travel Products debug — remove later
+    showRowIds = false,
 
     // table expansion
     expanded,
@@ -278,6 +286,7 @@ export const CustomBaseTable = <T,>({
                     onClick,
                     table,
                     page,
+                    showRowIds,
                 }}
             />
         </div>

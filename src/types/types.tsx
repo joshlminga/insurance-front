@@ -863,6 +863,8 @@ export type TTableReusableComponent<T = any> = {
   isError?: boolean;
   page?: number;
   data: T[];
+  /** TEMP: when true, # column shows row.original.id instead of the page serial number */
+  showRowIds?: boolean;
   /** When set, renders a full-width sub-row below the matching row (modules-tab style) */
   expandedRowId?: string | number | null;
   getRowId?: (row: T) => string | number | null | undefined;

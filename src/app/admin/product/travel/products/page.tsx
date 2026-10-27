@@ -182,6 +182,8 @@ export const TravelProductsPage = () => {
                         pageCount: data?.data?.pagination?.last_page ?? 1,
                         title: 'Travel Products',
                         showPagination: true,
+                        // TEMP: show real product IDs in # column — remove later
+                        showRowIds: true,
                         setPageSize: (pageSize) =>
                             optionsDispatcher({
                                 payload: { pageSize },
