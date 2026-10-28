@@ -1,6 +1,6 @@
 /**
- * DMVIC ValidateInsurance — check a certificate against registration / chassis.
- * Used by Motor → Double → Verify (row cert + plate; chassis optional when present).
+ * DMVIC ValidateInsurance — certificate + (registration OR chassis).
+ * Used by Motor → Double → Verify from the cover row.
  * Missing API keys map to empty strings so the dialog can show "-".
  */
 import apiClient from '@/lib/api-client'
@@ -9,9 +9,9 @@ import apiClient from '@/lib/api-client'
 export const DMVIC_VALIDATE_INSURANCE_URL = 'dmvic/validate/insurance'
 
 export type ValidateInsuranceParams = {
-  vehicleRegistrationNumber: string
   certificateNumber: string
-  /** Optional — sent when the cover row has a chassis. */
+  /** At least one of registration or chassis is required. */
+  vehicleRegistrationNumber?: string | null
   chassisNumber?: string | null
 }
 
@@ -59,19 +59,19 @@ function mapResult(data: ValidateInsuranceApiData | undefined): ValidateInsuranc
 }
 
 /**
- * GET dmvic/validate/insurance with registration, certificate, and chassis
- * (when present). Throws on network / 4xx so the caller can toast.
+ * GET dmvic/validate/insurance with certificate + registration and/or chassis.
+ * Throws on network / 4xx so the caller can toast.
  */
 export async function validateInsuranceCertificate(
   params: ValidateInsuranceParams,
 ): Promise<ValidateInsuranceResult> {
-  const registration = params.vehicleRegistrationNumber.trim()
+  const registration = params.vehicleRegistrationNumber?.trim() || ''
   const certificateNumber = params.certificateNumber.trim()
   const chassis = params.chassisNumber?.trim() || ''
 
-  if (registration === '' || certificateNumber === '') {
+  if (certificateNumber === '' || (registration === '' && chassis === '')) {
     throw new Error(
-      'Vehicle registration and certificate number are required to verify.',
+      'Certificate number and vehicle registration or chassis are required to verify.',
     )
   }
 
@@ -81,8 +81,8 @@ export async function validateInsuranceCertificate(
     data?: ValidateInsuranceApiData
   }>(DMVIC_VALIDATE_INSURANCE_URL, {
     params: {
-      vehicle_registration_number: registration,
       certificate_number: certificateNumber,
+      ...(registration !== '' ? { vehicle_registration_number: registration } : {}),
       ...(chassis !== '' ? { chassis_number: chassis } : {}),
     },
   })

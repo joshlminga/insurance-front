@@ -16,7 +16,7 @@ describe('validateInsuranceCertificate', () => {
     vi.clearAllMocks()
   })
 
-  it('maps snake_case success data and sends chassis when present', async () => {
+  it('maps snake_case success data and sends registration + chassis when present', async () => {
     vi.mocked(apiClient.get).mockResolvedValue({
       data: {
         success: true,
@@ -50,14 +50,14 @@ describe('validateInsuranceCertificate', () => {
 
     expect(apiClient.get).toHaveBeenCalledWith(DMVIC_VALIDATE_INSURANCE_URL, {
       params: {
-        vehicle_registration_number: 'KDY184S',
         certificate_number: 'A12831355',
+        vehicle_registration_number: 'KDY184S',
         chassis_number: 'CHS123',
       },
     })
   })
 
-  it('omits chassis when blank and throws when registration/cert missing', async () => {
+  it('sends registration only when chassis is blank', async () => {
     vi.mocked(apiClient.get).mockResolvedValue({
       data: {
         success: true,
@@ -76,17 +76,50 @@ describe('validateInsuranceCertificate', () => {
 
     expect(apiClient.get).toHaveBeenCalledWith(DMVIC_VALIDATE_INSURANCE_URL, {
       params: {
-        vehicle_registration_number: 'KAA111A',
         certificate_number: 'A1',
+        vehicle_registration_number: 'KAA111A',
+      },
+    })
+  })
+
+  it('sends chassis only when registration is blank', async () => {
+    vi.mocked(apiClient.get).mockResolvedValue({
+      data: {
+        success: true,
+        data: {
+          certificate_number: 'A1',
+          chassis_number: 'CHS999',
+        },
       },
     })
 
+    await validateInsuranceCertificate({
+      certificateNumber: 'A1',
+      chassisNumber: 'CHS999',
+    })
+
+    expect(apiClient.get).toHaveBeenCalledWith(DMVIC_VALIDATE_INSURANCE_URL, {
+      params: {
+        certificate_number: 'A1',
+        chassis_number: 'CHS999',
+      },
+    })
+  })
+
+  it('throws when certificate or both vehicle ids are missing', async () => {
     await expect(
       validateInsuranceCertificate({
         vehicleRegistrationNumber: '',
         certificateNumber: 'A1',
       }),
-    ).rejects.toThrow(/registration and certificate/i)
+    ).rejects.toThrow(/registration or chassis/i)
+
+    await expect(
+      validateInsuranceCertificate({
+        vehicleRegistrationNumber: 'KAA111A',
+        certificateNumber: '',
+      }),
+    ).rejects.toThrow(/required to verify/i)
   })
 
   it('maps missing API keys to empty strings', async () => {
@@ -95,7 +128,6 @@ describe('validateInsuranceCertificate', () => {
         success: true,
         data: {
           certificate_number: 'A12831355',
-          // other fields intentionally omitted
         },
       },
     })

@@ -117,13 +117,17 @@ export function DoubleInsuranceCoversTable({
   )
 
   /**
-   * Verify uses the double-insurance row to call ValidateInsurance
-   * (cert + registration required; chassis optional). Not gated on local invoice.
+   * Verify uses the double-insurance row to call ValidateInsurance.
+   * Needs cert + (registration OR chassis). Not gated on local invoice.
    */
   const onVerify = async (row: CoverRow) => {
     const certificateNumber = row.certificateNumber.trim()
     const vehicleRegistrationNumber = row.vehicleRegistrationNumber.trim()
-    if (certificateNumber === '' || vehicleRegistrationNumber === '') {
+    const chassisNumber = row.chassisNumber.trim()
+    if (
+      certificateNumber === '' ||
+      (vehicleRegistrationNumber === '' && chassisNumber === '')
+    ) {
       return
     }
 
@@ -131,8 +135,9 @@ export function DoubleInsuranceCoversTable({
     try {
       const result = await validateInsuranceCertificate({
         certificateNumber,
-        vehicleRegistrationNumber,
-        chassisNumber: row.chassisNumber,
+        vehicleRegistrationNumber:
+          vehicleRegistrationNumber !== '' ? vehicleRegistrationNumber : null,
+        chassisNumber: chassisNumber !== '' ? chassisNumber : null,
       })
       setVerifyResult(result)
       setVerifyOpen(true)
@@ -189,11 +194,12 @@ export function DoubleInsuranceCoversTable({
         key: 'invoiceId',
         label: 'Certificate',
         render: (_value, row) => {
-          // Download needs a local invoice; Verify only needs row cert + plate.
+          // Download needs a local invoice; Verify needs cert + (plate OR chassis).
           const canDownload = row.invoiceId != null && row.invoiceId > 0
           const canVerify =
             row.certificateNumber.trim() !== '' &&
-            row.vehicleRegistrationNumber.trim() !== ''
+            (row.vehicleRegistrationNumber.trim() !== '' ||
+              row.chassisNumber.trim() !== '')
 
           return (
             <div className="flex flex-wrap items-center gap-2">
