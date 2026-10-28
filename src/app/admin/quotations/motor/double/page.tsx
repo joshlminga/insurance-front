@@ -160,40 +160,69 @@ export const AdminMotorQuotationDoublePage = () => {
               <div className="min-w-0 space-y-1.5">
                 <Label
                   htmlFor="vehicle_registration"
-                  className="font-semibold text-black"
+                  className={cn(
+                    'font-semibold',
+                    registrationDisabled ? 'text-muted-foreground' : 'text-black',
+                  )}
                 >
                   Vehicle registration
                 </Label>
-                <Input
-                  id="vehicle_registration"
+                {/* Wrapper keeps hover/title working — disabled inputs ignore pointer events. */}
+                <div
                   className={cn(
-                    motorInputClassName,
-                    registrationDisabled && 'cursor-not-allowed opacity-60',
+                    registrationDisabled && 'cursor-not-allowed',
                   )}
-                  value={registration}
-                  onChange={(event) => setRegistration(event.target.value)}
-                  autoComplete="off"
-                  disabled={registrationDisabled}
-                />
+                  title={registrationDisabled ? 'Disabled' : undefined}
+                >
+                  <Input
+                    id="vehicle_registration"
+                    className={cn(
+                      motorInputClassName,
+                      registrationFilled &&
+                        !registrationDisabled &&
+                        'border-black border-2 focus-visible:border-black',
+                      registrationDisabled &&
+                        'pointer-events-none bg-muted text-muted-foreground disabled:bg-muted disabled:opacity-100',
+                    )}
+                    value={registration}
+                    onChange={(event) => setRegistration(event.target.value)}
+                    autoComplete="off"
+                    disabled={registrationDisabled}
+                    aria-disabled={registrationDisabled}
+                  />
+                </div>
               </div>
               <div className="min-w-0 space-y-1.5">
                 <Label
                   htmlFor="chassis_number"
-                  className="font-semibold text-black"
+                  className={cn(
+                    'font-semibold',
+                    chassisDisabled ? 'text-muted-foreground' : 'text-black',
+                  )}
                 >
                   Chassis number
                 </Label>
-                <Input
-                  id="chassis_number"
-                  className={cn(
-                    motorInputClassName,
-                    chassisDisabled && 'cursor-not-allowed opacity-60',
-                  )}
-                  value={chassis}
-                  onChange={(event) => setChassis(event.target.value)}
-                  autoComplete="off"
-                  disabled={chassisDisabled}
-                />
+                <div
+                  className={cn(chassisDisabled && 'cursor-not-allowed')}
+                  title={chassisDisabled ? 'Disabled' : undefined}
+                >
+                  <Input
+                    id="chassis_number"
+                    className={cn(
+                      motorInputClassName,
+                      chassisFilled &&
+                        !chassisDisabled &&
+                        'border-black border-2 focus-visible:border-black',
+                      chassisDisabled &&
+                        'pointer-events-none bg-muted text-muted-foreground disabled:bg-muted disabled:opacity-100',
+                    )}
+                    value={chassis}
+                    onChange={(event) => setChassis(event.target.value)}
+                    autoComplete="off"
+                    disabled={chassisDisabled}
+                    aria-disabled={chassisDisabled}
+                  />
+                </div>
               </div>
             </div>
             <p className="text-xs text-[#C20C0C]/90">
