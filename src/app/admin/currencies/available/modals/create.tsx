@@ -59,7 +59,8 @@ export function CreateCurrencyModal({
 
   const onSubmit = (data: CreateCurrencyFormValues) => {
     const payload: Record<string, unknown> = {
-      rate: data.rate,
+      // Keep decimals — do not round to an integer
+      rate: Number(data.rate),
       // UI: "1" = Auto (API-managed), "0" = Manual
       is_auto: data.is_auto === "1",
     }
@@ -87,7 +88,7 @@ export function CreateCurrencyModal({
         </p>
       </div>
 
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form noValidate onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-1">
             <ReuseableInput
@@ -131,11 +132,13 @@ export function CreateCurrencyModal({
             name="rate"
             label="Conversion Rate"
             type="number"
+            step="any"
+            min={0.00000001}
             required
-            placeholder="1"
+            placeholder="1.00000000"
           />
           <p className="text-xs text-muted-foreground">
-            Conversion rate against default currency. Example: 1 XXX = 1 default
+            Conversion rate against default currency (decimals allowed). Example: 1 USD = 129.75 KES
           </p>
         </div>
 
@@ -172,6 +175,8 @@ export function CreateCurrencyModal({
             name="fee"
             label="Additional Fee"
             type="number"
+            step="any"
+            min={0}
             placeholder=""
           />
           <p className="text-xs text-muted-foreground">

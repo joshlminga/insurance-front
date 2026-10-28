@@ -100,7 +100,7 @@ export function EditCurrencyModal({
         </p>
       </div>
 
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form noValidate onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-1">
             <ReuseableInput
@@ -143,14 +143,16 @@ export function EditCurrencyModal({
             name="rate"
             label="Conversion Rate"
             type="number"
+            step="any"
+            min={0.00000001}
             required
             disabled={isDefault}
-            placeholder="1"
+            placeholder="1.00000000"
           />
           <p className="text-xs text-muted-foreground">
             {isDefault
               ? "Default currency rate is fixed at 1."
-              : "Conversion rate against default currency."}
+              : "Conversion rate against default currency (decimals allowed)."}
           </p>
         </div>
 
@@ -184,6 +186,8 @@ export function EditCurrencyModal({
             name="fee"
             label="Additional Fee"
             type="number"
+            step="any"
+            min={0}
           />
         </div>
 
