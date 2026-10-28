@@ -173,6 +173,12 @@ export function DoubleInsuranceCoversTable({
         render: (value) => showValue(String(value ?? '')),
       },
       {
+        key: 'vehicleRegistrationNumber',
+        label: 'Vehicle registration',
+        sortable: true,
+        render: (value) => showValue(String(value ?? '')),
+      },
+      {
         key: 'chassisNumber',
         label: 'Chassis number',
         sortable: true,
@@ -244,6 +250,7 @@ export function DoubleInsuranceCoversTable({
           'policyNumber',
           'coverExpiryDate',
           'insuranceName',
+          'vehicleRegistrationNumber',
           'chassisNumber',
         ]}
         pageSize={10}

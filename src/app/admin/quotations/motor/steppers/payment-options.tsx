@@ -786,6 +786,7 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
                                                     data: purchaseId,
                                                     requireRecipientEmail: true,
                                                     defaultEmail: customerEmail,
+                                                    endpointUrl: 'document/motor/send-invoice-via-email',
                                                 },
                                                 Component: SendInvoiceViaEmail,
                                             })

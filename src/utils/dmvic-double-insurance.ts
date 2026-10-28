@@ -45,12 +45,15 @@ export type DoubleInsuranceLookupParams = {
   coverStartDate: string
   /** Cover end as YYYY-MM-DD */
   coverEndDate: string
-  vehicleRegistrationNumber: string
+  /** At least one of registration or chassis is required */
+  vehicleRegistrationNumber?: string | null
+  chassisNumber?: string | null
 }
 
 /** What the admin Double page renders after a lookup. */
 export type DoubleInsuranceLookupResult = {
   registration: string
+  chassis: string
   startDate: string
   endDate: string
   clear: boolean
@@ -95,6 +98,34 @@ function mapCovers(covers: unknown): DoubleInsuranceCover[] {
     return []
   }
   return covers.map(mapCover)
+}
+
+/**
+ * When the user searched by only registration or only chassis, fill the missing
+ * summary field from the first DMVIC cover that has it (RegistrationNumber / ChassisNumber).
+ */
+function fillMissingVehicleIdsFromCovers(
+  searched: { registration: string; chassis: string },
+  covers: DoubleInsuranceCover[],
+): { registration: string; chassis: string } {
+  let registration = searched.registration
+  let chassis = searched.chassis
+
+  if (registration === '') {
+    const fromCover = covers.find((c) => c.vehicleRegistrationNumber.trim() !== '')
+    if (fromCover) {
+      registration = fromCover.vehicleRegistrationNumber.trim()
+    }
+  }
+
+  if (chassis === '') {
+    const fromCover = covers.find((c) => c.chassisNumber.trim() !== '')
+    if (fromCover) {
+      chassis = fromCover.chassisNumber.trim()
+    }
+  }
+
+  return { registration, chassis }
 }
 
 /**
@@ -193,7 +224,7 @@ export async function validateDoubleInsurancePreflight(
 
 /**
  * Same double-insurance GET as the payment preflight, but return the cover rows.
- * Registration is required. Chassis is not sent from the Double screen.
+ * Registration or chassis (at least one) is required.
  *
  * - 200 with clear=true and no covers → clear
  * - 422 with clear=false and covers → overlapping covers (not an error)
@@ -202,16 +233,20 @@ export async function validateDoubleInsurancePreflight(
 export async function lookupDoubleInsurance(
   params: DoubleInsuranceLookupParams,
 ): Promise<DoubleInsuranceLookupResult> {
-  const registration = params.vehicleRegistrationNumber.trim()
+  const registration = params.vehicleRegistrationNumber?.trim() || ''
+  const chassis = params.chassisNumber?.trim() || ''
   const startDate = params.coverStartDate.trim()
   const endDate = params.coverEndDate.trim()
 
-  if (registration === '') {
-    throw new Error('Vehicle registration is required for double insurance lookup.')
+  if (registration === '' && chassis === '') {
+    throw new Error(
+      'Vehicle registration or chassis number is required for double insurance lookup.',
+    )
   }
 
   const searched = {
     registration,
+    chassis,
     startDate,
     endDate,
   }
@@ -225,7 +260,10 @@ export async function lookupDoubleInsurance(
       params: {
         policystartdate: startDate,
         policyenddate: endDate,
-        vehicle_registration_number: registration,
+        ...(registration !== ''
+          ? { vehicle_registration_number: registration }
+          : {}),
+        ...(chassis !== '' ? { chassis_number: chassis } : {}),
       },
     })
 
@@ -237,7 +275,12 @@ export async function lookupDoubleInsurance(
     }
 
     if (covers.length > 0) {
-      return { ...searched, clear: false, covers }
+      return {
+        ...searched,
+        ...fillMissingVehicleIdsFromCovers(searched, covers),
+        clear: false,
+        covers,
+      }
     }
 
     return { ...searched, clear: true, covers: [] }
@@ -258,10 +301,12 @@ export async function lookupDoubleInsurance(
 
     // Overlap is a 422 with the cover list, not a failed request.
     if (status === 422 && apiData?.clear === false && Array.isArray(apiData.covers)) {
+      const covers = mapCovers(apiData.covers)
       return {
         ...searched,
+        ...fillMissingVehicleIdsFromCovers(searched, covers),
         clear: false,
-        covers: mapCovers(apiData.covers),
+        covers,
       }
     }
 

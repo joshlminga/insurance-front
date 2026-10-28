@@ -669,7 +669,10 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({
                                         icon: <Mail className="w-4 h-4" />,
                                         onClick: () => {
                                             handleDialogContextSwitch({
-                                                componentProps: { data: purchaseId },
+                                                componentProps: {
+                                                    data: purchaseId,
+                                                    endpointUrl: 'document/motor/send-invoice-via-email',
+                                                },
                                                 Component: SendInvoiceViaEmail,
                                             })
                                         }

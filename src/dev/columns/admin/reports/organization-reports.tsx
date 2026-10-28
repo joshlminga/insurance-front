@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Badge } from '@/components/ui/badge'
+import { CopyCell } from '@/dev/columns'
 import { ColumnDef } from '@tanstack/table-core'
 
 const CrossOrgBadge = ({ flagged }: { flagged?: boolean }) => {
@@ -12,6 +13,15 @@ const CrossOrgBadge = ({ flagged }: { flagged?: boolean }) => {
       Other org
     </Badge>
   )
+}
+
+/** Show CopyCell when there is a real value; otherwise a plain dash. */
+function copyOrDash(value: string | null | undefined) {
+  const trimmed = value?.trim() ?? ''
+  if (trimmed === '') {
+    return <div>-</div>
+  }
+  return <CopyCell value={trimmed} />
 }
 
 export const OrganizationCustomerReportColumns: ColumnDef<any>[] = [
@@ -59,9 +69,12 @@ export const OrganizationMotorVehicleReportColumns: ColumnDef<any>[] = [
   {
     accessorKey: 'registration_number',
     header: () => <div>Registration</div>,
-    cell: ({ row }) => (
-      <div className="font-medium">{row.original.registration_number ?? '-'}</div>
-    ),
+    cell: ({ row }) => copyOrDash(row.original.registration_number),
+  },
+  {
+    accessorKey: 'chassis_number',
+    header: () => <div>Chassis</div>,
+    cell: ({ row }) => copyOrDash(row.original.chassis_number),
   },
   {
     accessorKey: 'make',
@@ -87,11 +100,6 @@ export const OrganizationMotorVehicleReportColumns: ColumnDef<any>[] = [
     accessorKey: 'year',
     header: () => <div>Year</div>,
     cell: ({ row }) => <div>{row.original.year ?? '-'}</div>,
-  },
-  {
-    accessorKey: 'chassis_number',
-    header: () => <div>Chassis</div>,
-    cell: ({ row }) => <div>{row.original.chassis_number ?? '-'}</div>,
   },
 ]
 

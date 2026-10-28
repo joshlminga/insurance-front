@@ -46,6 +46,7 @@ const AccountSettingsPage = lazy(() => import("./app/customer/profile-settings/s
 const CustomerClaimsPage = lazy(() => import("./app/customer/profile-settings/claims").then(m => ({ default: m.CustomerClaimsPage })))
 const CustomerCoversPage = lazy(() => import("./app/customer/profile-settings/covers").then(m => ({ default: m.CustomerCoversPage })))
 const CustomerPaymentHistoryPage = lazy(() => import("./app/customer/profile-settings/payment-history").then(m => ({ default: m.PaymentHistoryPage })))
+const CustomerQuotationsPage = lazy(() => import("./app/customer/profile-settings/quotations").then(m => ({ default: m.CustomerQuotationsPage })))
 const CustomerSingleCustomerCoversPage = lazy(() => import("./app/customer/profile-settings/[id]/cover[id]").then(m => ({ default: m.SingleCoverPage })))
 
 // travel
@@ -362,6 +363,10 @@ export const router = createBrowserRouter([
           {
             path: "payment-history",
             element: <S><CustomerPaymentHistoryPage /></S>,
+          },
+          {
+            path: "my-quotations",
+            element: <S><CustomerQuotationsPage /></S>,
           },
           {
             path: "my-claims",

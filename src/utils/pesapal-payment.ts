@@ -5,7 +5,7 @@ export const PESAPAL_RETURN_URL_KEY = 'pesapal_return_url'
 export const PESAPAL_PAYMENT_RESULT_KEY = 'pesapal_payment_result'
 export const PESAPAL_POLL_PENDING_KEY = 'pesapal_poll_pending'
 
-export type PesapalReturnFlow = 'motor' | 'marine' | 'admin'
+export type PesapalReturnFlow = 'motor' | 'marine' | 'travel' | 'admin'
 
 export type PesapalPaymentResult = 'completed' | 'failed'
 
@@ -17,6 +17,9 @@ export function getPesapalReturnUrl(flow: PesapalReturnFlow): string {
     }
     if (flow === 'marine') {
         return `/${EPREFIX.CUSTOMER}${EROUTES.MARINE}`
+    }
+    if (flow === 'travel') {
+        return `/${EPREFIX.CUSTOMER}${EROUTES.TRAVEL}`
     }
     return `/${EPREFIX.CUSTOMER}${EROUTES.MOTOR}`
 }

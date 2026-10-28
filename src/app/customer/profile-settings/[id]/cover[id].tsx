@@ -14,20 +14,22 @@ import type {
     MotorUserCoverInvoice,
     SubmitResponse,
     TravelUserCoverDetail,
+    TravelUserCoverInvoice,
     TFilterOptions,
     TPaginationFilters
 } from '@/types/types'
 import { EPREFIX, EROUTES } from '@/utils/enums'
 import { formatCurrency, formatDate, installmentText } from '@/utils/helpers'
 import {
+    useDocumentDownload,
     useMotorDocumentDownload,
 } from '@/utils/motor-document-download'
 import { ShowToast } from '@/utils/utils'
-import { ArrowLeft, FileText, ReceiptText, Shield } from 'lucide-react'
+import { ArrowLeft, FileText, ReceiptText, ScrollText, Shield } from 'lucide-react'
 import { useReducer, type ReactNode } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { cn } from '@/lib/utils'
-import { COVER_STATUS_DISPLAY, FILTEROPTIONS, ReusableReducer } from '@/utils/constatnts'
+import { COVER_STATUS_DISPLAY, EMETHODS, FILTEROPTIONS, ReusableReducer } from '@/utils/constatnts'
 import {
     COVER_PRODUCT_PARAM,
     COVER_PRODUCTS,
@@ -195,11 +197,104 @@ const SectionCard = ({ title, titleAccent, children, }: {
     </div>
 )
 
-/** Detail sections for a Travel cover (trip, travellers, invoices). No certificate/download step yet. */
+/** Travel invoice row actions: invoice always; receipt / policy / embassy when paid. */
+const TravelInvoiceDownloadActions = ({
+    invoice,
+    purchaseId,
+}: {
+    invoice: TravelUserCoverInvoice
+    purchaseId: number
+}) => {
+    const invoiceId = invoice?.id ? String(invoice.id) : ''
+    const invoiceMutation = useMotorDocumentDownload(
+        (id) => `document/travel/invoice/${id}`,
+        'Invoice'
+    )
+    const receiptMutation = useDocumentDownload({
+        url: () => `document/travel/receipt/${purchaseId}`,
+        label: 'Receipt',
+        method: EMETHODS.POST,
+    })
+    const embassyMutation = useDocumentDownload({
+        url: () => `document/travel/embassy-letter/${purchaseId}`,
+        label: 'Embassy Letter',
+        method: EMETHODS.POST,
+    })
+    const scheduleMutation = useDocumentDownload({
+        url: () => `document/travel/policy-schedule/${purchaseId}`,
+        label: 'Policy Schedule',
+        method: EMETHODS.POST,
+    })
+
+    const paid =
+        invoice.payment_status?.toLowerCase() === 'paid' ||
+        invoice.status?.toLowerCase() === 'paid'
+
+    return (
+        <div className="flex flex-wrap gap-2">
+            <Button
+                type="button"
+                size="sm"
+                className={blackDocButtonClass}
+                leftIcon={<FileText className="h-3.5 w-3.5" />}
+                loading={invoiceMutation.isPending}
+                disabled={!invoiceId}
+                onClick={() => {
+                    if (!invoiceId) {
+                        ShowToast.error('No invoice found for Invoice.')
+                        return
+                    }
+                    invoiceMutation.mutate(invoiceId)
+                }}
+            >
+                View Invoice
+            </Button>
+            {paid ? (
+                <>
+                    <Button
+                        type="button"
+                        size="sm"
+                        className={blackDocButtonClass}
+                        leftIcon={<ReceiptText className="h-3.5 w-3.5" />}
+                        loading={receiptMutation.isPending}
+                        onClick={() =>
+                            receiptMutation.mutate({ target_invoice_id: Number(invoiceId) })
+                        }
+                    >
+                        View Receipt
+                    </Button>
+                    <Button
+                        type="button"
+                        size="sm"
+                        className={redDocButtonClass}
+                        leftIcon={<Shield className="h-3.5 w-3.5" />}
+                        loading={embassyMutation.isPending}
+                        onClick={() => embassyMutation.mutate()}
+                    >
+                        Embassy Letter
+                    </Button>
+                    <Button
+                        type="button"
+                        size="sm"
+                        className={redDocButtonClass}
+                        leftIcon={<ScrollText className="h-3.5 w-3.5" />}
+                        loading={scheduleMutation.isPending}
+                        onClick={() => scheduleMutation.mutate()}
+                    >
+                        Policy Schedule
+                    </Button>
+                </>
+            ) : null}
+        </div>
+    )
+}
+
+/** Detail sections for a Travel cover (trip, travellers, invoices + downloads). */
 const TravelCoverSections = ({ cover }: { cover: TravelUserCoverDetail }) => {
     const trip = cover.trip
     const invoices = cover.invoices ?? []
     const travelers = cover.travelers ?? []
+    const purchaseId = cover.purchase_id
 
     return (
         <div className="mt-5 space-y-5">
@@ -265,6 +360,7 @@ const TravelCoverSections = ({ cover }: { cover: TravelUserCoverDetail }) => {
                                     <TableHead>Payment</TableHead>
                                     <TableHead>Due Date</TableHead>
                                     <TableHead>Cover Status</TableHead>
+                                    <TableHead>Documents</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -276,6 +372,12 @@ const TravelCoverSections = ({ cover }: { cover: TravelUserCoverDetail }) => {
                                         <TableCell>{formatDate(invoice.due_date)}</TableCell>
                                         <TableCell>
                                             <CoverStatusBadge status={invoice.cover_status} />
+                                        </TableCell>
+                                        <TableCell>
+                                            <TravelInvoiceDownloadActions
+                                                invoice={invoice}
+                                                purchaseId={purchaseId}
+                                            />
                                         </TableCell>
                                     </TableRow>
                                 ))}

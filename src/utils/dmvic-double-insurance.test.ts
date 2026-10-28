@@ -117,6 +117,7 @@ describe("lookupDoubleInsurance", () => {
 
     expect(result).toEqual({
       registration: "KDY184S",
+      chassis: "",
       startDate: "2026-09-15",
       endDate: "2027-09-14",
       clear: true,
@@ -129,6 +130,52 @@ describe("lookupDoubleInsurance", () => {
         vehicle_registration_number: "KDY184S",
       },
     })
+  })
+
+  it("sends chassis_number when looking up by chassis only", async () => {
+    vi.mocked(apiClient.get).mockResolvedValue({
+      data: {
+        success: true,
+        message: "No overlapping cover found for the selected dates.",
+        data: {
+          clear: true,
+          covers: [],
+        },
+      },
+    })
+
+    const result = await lookupDoubleInsurance({
+      coverStartDate: "2026-09-15",
+      coverEndDate: "2027-09-14",
+      chassisNumber: " LA350S0150096 ",
+    })
+
+    expect(result).toEqual({
+      registration: "",
+      chassis: "LA350S0150096",
+      startDate: "2026-09-15",
+      endDate: "2027-09-14",
+      clear: true,
+      covers: [],
+    })
+    expect(apiClient.get).toHaveBeenCalledWith("dmvic/validate/double-insurance", {
+      params: {
+        policystartdate: "2026-09-15",
+        policyenddate: "2027-09-14",
+        chassis_number: "LA350S0150096",
+      },
+    })
+  })
+
+  it("throws when registration and chassis are both missing", async () => {
+    await expect(
+      lookupDoubleInsurance({
+        coverStartDate: "2026-09-15",
+        coverEndDate: "2027-09-14",
+      }),
+    ).rejects.toThrow(/registration or chassis/i)
+
+    expect(apiClient.get).not.toHaveBeenCalled()
   })
 
   it("returns cover rows when DMVIC responds 422 for an overlap", async () => {
@@ -161,6 +208,9 @@ describe("lookupDoubleInsurance", () => {
     })
 
     expect(result.clear).toBe(false)
+    // Missing chassis in the search is filled from the DMVIC cover row.
+    expect(result.registration).toBe("KDY184S")
+    expect(result.chassis).toBe("CHASSIS1")
     expect(result.covers).toEqual([
       {
         certificateNumber: "A12831355",
@@ -170,6 +220,41 @@ describe("lookupDoubleInsurance", () => {
         vehicleRegistrationNumber: "KDY184S",
       },
     ])
+  })
+
+  it("fills missing registration from covers when searching by chassis only", async () => {
+    vi.mocked(apiClient.get).mockRejectedValue({
+      response: {
+        status: 422,
+        data: {
+          success: false,
+          message: "The given data was invalid.",
+          data: {
+            clear: false,
+            covers: [
+              {
+                certificate_number: "A12831355",
+                cover_expiry_date: "01/01/2027 23:59",
+                insurance_name: "Example Insurer",
+                chassis_number: "LA350S0150096",
+                vehicle_registration_number: "KDY184S",
+              },
+            ],
+          },
+        },
+      },
+    })
+
+    const result = await lookupDoubleInsurance({
+      coverStartDate: "2026-09-15",
+      coverEndDate: "2027-09-14",
+      chassisNumber: "LA350S0150096",
+    })
+
+    expect(result.clear).toBe(false)
+    expect(result.registration).toBe("KDY184S")
+    expect(result.chassis).toBe("LA350S0150096")
+    expect(result.covers[0]?.vehicleRegistrationNumber).toBe("KDY184S")
   })
 
   it("throws when the failure is not an overlapping cover", async () => {

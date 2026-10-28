@@ -39,6 +39,7 @@ import {
 } from '@/utils/constatnts'
 import { EROUTES } from '@/utils/enums'
 import { extractErrorMessage } from '@/utils/helpers'
+import { useMotorDocumentDownload } from '@/utils/motor-document-download'
 import { customerPaymentTabs, EPAYMENTTABS } from '@/utils/steps-config'
 import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -83,7 +84,7 @@ export const TravelPaymentOptionsPage: React.FC<
 > = ({
   goToNextStep,
   goToPrevStep,
-  paymentStatusFlow = 'motor',
+  paymentStatusFlow = 'travel',
   includeCreditPayment = false,
 }) => {
   const navigate = useNavigate()
@@ -97,7 +98,6 @@ export const TravelPaymentOptionsPage: React.FC<
   } | null>(null)
   const [isCreditSubmitting, setIsCreditSubmitting] = React.useState(false)
 
-  // Gateways still use motor return routes until travel-specific return URLs exist.
   const {
     pollMode,
     isPolling: isGatewayPolling,
@@ -314,41 +314,11 @@ export const TravelPaymentOptionsPage: React.FC<
     submitMutation.mutate(payload)
   }
 
-  const InvoiceViewMutation = UseApiMutation<Blob, string>({
-    url: `document/motor/invoice-all/${purchaseId}`,
-    method: EMETHODS.GET,
-    config: {
-      responseType: 'blob',
-    },
-    mutationOptions: {
-      onSuccess: (data) => {
-        const blob = new Blob([data], { type: 'application/pdf' })
-        const url = window.URL.createObjectURL(blob)
-        const width = 1000
-        const height = 900
-        const left = window.screen.width / 2 - width / 2
-        const top = window.screen.height / 2 - height / 2
-
-        const previewWindow = window.open(
-          url,
-          'DocumentPreview',
-          `width=${width},height=${height},top=${top},left=${left},resizable=yes,scrollbars=yes`,
-        )
-        if (previewWindow) {
-          previewWindow.focus()
-        } else {
-          ShowToast.error(
-            'Pop-up blocked! Please allow pop-ups to preview the document.',
-          )
-        }
-        ShowToast.success('Invoice preview opened')
-      },
-      onError: (error: unknown) => {
-        const message = extractErrorMessage(error)
-        ShowToast.error(message || 'Download failed!')
-      },
-    },
-  })
+  // Travel invoice PDF is per-invoice (not motor invoice-all by purchase).
+  const InvoiceViewMutation = useMotorDocumentDownload(
+    (id) => `document/travel/invoice/${id}`,
+    'Invoice',
+  )
 
   const { handleDialogContextSwitch, dialogContent, dialogOpen } =
     useCustomDialogContextFactory<{
@@ -470,7 +440,11 @@ export const TravelPaymentOptionsPage: React.FC<
                     icon: <Mail className="h-4 w-4" />,
                     onClick: () => {
                       handleDialogContextSwitch({
-                        componentProps: { data: purchaseId },
+                        componentProps: {
+                          data: purchaseId,
+                          // Must use travel InvoiceEmail route — motor PDF builder crashes on Travel purchases
+                          endpointUrl: 'document/travel/send-invoice-via-email',
+                        },
                         Component: SendInvoiceViaEmail,
                       })
                     },
@@ -479,7 +453,14 @@ export const TravelPaymentOptionsPage: React.FC<
                     label: 'View Online',
                     icon: <Eye className="h-4 w-4" />,
                     onClick: () => {
-                      InvoiceViewMutation.mutate(String(purchaseId))
+                      const invoiceId =
+                        form.getValues('invoice_id') ||
+                        (payableItem?.id != null ? String(payableItem.id) : '')
+                      if (!invoiceId) {
+                        ShowToast.error('Invoice is missing. Please refresh and try again.')
+                        return
+                      }
+                      InvoiceViewMutation.mutate(String(invoiceId))
                     },
                   },
                 ]}

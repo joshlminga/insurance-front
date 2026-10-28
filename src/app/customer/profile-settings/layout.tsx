@@ -2,7 +2,7 @@ import { Footer } from '@/app/landing/components/footer'
 import Navbar from '@/app/landing/components/navbar'
 import { cn } from '@/lib/utils'
 import { EPREFIX, EROUTES } from '@/utils/enums'
-import { BaggageClaim, Settings, Umbrella, Wallet } from 'lucide-react'
+import { BaggageClaim, FileText, Settings, Umbrella, Wallet } from 'lucide-react'
 import { NavLink, Outlet } from 'react-router-dom'
 
 type ProfileLink = {
@@ -18,6 +18,11 @@ const profileLinks: ProfileLink[] = [
         to: `/${EPREFIX.CUSTOMER}${EROUTES.COVERS}`,
         icon: Umbrella,
         matchNested: true,
+    },
+    {
+        label: 'My Quotations',
+        to: `/${EPREFIX.CUSTOMER}${EROUTES.MY_QUOTATIONS}`,
+        icon: FileText,
     },
     {
         label: 'My Claims',

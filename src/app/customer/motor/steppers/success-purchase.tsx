@@ -1,13 +1,13 @@
 
 import { CardFooter } from '@/components/ui/card'
 import { Button } from '@/dev/core'
-import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
+import { UseApiQuery } from '@/hooks/hooks'
 import type {
     CustomerVerificationDetailsProps,
     SubmitResponse
 } from '@/types/types'
-import { EMETHODS, INVOICE_SESSION_STORAGE_KEY } from '@/utils/constatnts'
-import { extractErrorMessage } from '@/utils/helpers'
+import { INVOICE_SESSION_STORAGE_KEY } from '@/utils/constatnts'
+import { useMotorDocumentDownload } from '@/utils/motor-document-download'
 import { ShowToast } from '@/utils/utils'
 import {
     ArrowLeftCircle,
@@ -67,43 +67,15 @@ export const SuccessPurchase: React.FC<CustomerVerificationDetailsProps> = ({
     const firstItem = SummaryData?.data?.invoice_breakdown?.items?.[0]
     const invoiceId = firstItem?.id
 
-    const createDownloadMutation = (docType: string) =>
-        UseApiMutation<Blob, string>({
-            url: (id) => `document/motor/${docType}/${id}`,
-            method: EMETHODS.GET,
-            config: {
-                responseType: 'blob',
-            },
-            mutationOptions: {
-                onSuccess: (data) => {
-                    const blob = new Blob([data], { type: 'application/pdf' })
-                    const url = window.URL.createObjectURL(blob)
-                    const width = 1000
-                    const height = 900
-                    const left = (window.screen.width / 2) - (width / 2)
-                    const top = (window.screen.height / 2) - (height / 2)
-
-                    const previewWindow = window.open(
-                        url,
-                        'DocumentPreview',
-                        `width=${width},height=${height},top=${top},left=${left},resizable=yes,scrollbars=yes`
-                    )
-                    if (previewWindow) {
-                        previewWindow.focus()
-                    } else {
-                        ShowToast.error('Pop-up blocked! Please allow pop-ups to preview the document.')
-                    }
-                    ShowToast.success(`${docType.charAt(0).toUpperCase() + docType.slice(1)} preview opened`)
-                },
-                onError: (error: unknown) => {
-                    const message = extractErrorMessage(error)
-                    ShowToast.error(message || 'Download failed!')
-                },
-            },
-        })
-
-    const receiptMutation = createDownloadMutation('receipt')
-    const certificateMutation = createDownloadMutation('certificate')
+    const receiptMutation = useMotorDocumentDownload(
+        (id) => `document/motor/receipt/${id}`,
+        'Receipt'
+    )
+    // Certificate lives under DMVIC, not document/motor/certificate.
+    const certificateMutation = useMotorDocumentDownload(
+        (id) => `dmvic/motor/certificates/${id}`,
+        'Certificate'
+    )
 
     const downloadDocument = (type: 'receipt' | 'certificate') => {
         if (!invoiceId) {
@@ -150,19 +122,19 @@ export const SuccessPurchase: React.FC<CustomerVerificationDetailsProps> = ({
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
                             <div className="flex flex-col items-center rounded-xl border border-[#ADABAB]/40 bg-neutral-50/80 px-4 py-6 text-center">
                                 <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full border border-[#ADABAB]/50 bg-white">
-                                    <FileText className="h-6 w-6 text-[#C20C0C]" />
+                                    <Shield className="h-6 w-6 text-[#C20C0C]" />
                                 </div>
                                 <h3 className="text-base font-semibold">Certificate</h3>
                                 <p className="mb-4 text-xs text-muted-foreground sm:text-sm">
-                                    It takes 5 minutes for Certificate to be issued by AKI
+                                    It takes about 5 minutes for AKI to issue the certificate
                                 </p>
-                                {/* <Button
+                                <Button
                                     className={primaryButtonClassName}
                                     onClick={() => downloadDocument('certificate')}
                                     loading={certificateMutation.isPending}
                                 >
-                                    View Certificate Process
-                                </Button> */}
+                                    Download Certificate
+                                </Button>
                             </div>
                             <div className="flex flex-col items-center rounded-xl border border-[#ADABAB]/40 bg-neutral-50/80 px-4 py-6 text-center">
                                 <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full border border-[#ADABAB]/50 bg-white">

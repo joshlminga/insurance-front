@@ -57,6 +57,7 @@ export const EROUTES = {
   /** Customer portal list. Admin claims use EROUTES.CLAIMS. */
   MY_CLAIMS: '/profile/my-claims',
   COVERS: '/profile/my-covers',
+  MY_QUOTATIONS: '/profile/my-quotations',
   PAYMENTHISTORY: '/profile/payment-history',
   SINGLECOVER: '/profile/my-covers',
 

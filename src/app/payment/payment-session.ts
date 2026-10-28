@@ -7,7 +7,7 @@ import type { NavigateFunction } from 'react-router-dom'
  * Which purchase flow started this payment.
  * Like a PHP session flag: we need it later to send the user back to the right receipt.
  */
-export type PaymentStatusFlow = 'motor' | 'marine' | 'admin'
+export type PaymentStatusFlow = 'motor' | 'marine' | 'travel' | 'admin'
 
 function isAdminTravelPaymentActive(): boolean {
     if (typeof window === 'undefined') return false
@@ -38,6 +38,8 @@ export const ADMIN_TRAVEL_PURCHASE_SUCCESS_STEP = 4
 const MOTOR_GUEST_RECEIPT_STEP = 8
 const MOTOR_AUTH_RECEIPT_STEP = 6
 const MARINE_RECEIPT_STEP = 8
+const TRAVEL_GUEST_RECEIPT_STEP = 8
+const TRAVEL_AUTH_RECEIPT_STEP = 6
 
 export function storePaymentStatusSession(payload: PaymentStatusSession): void {
     sessionStorage.setItem(PAYMENT_STATUS_SESSION_KEY, JSON.stringify(payload))
@@ -48,7 +50,12 @@ export function readPaymentStatusSession(): PaymentStatusSession | null {
     if (!raw) return null
     try {
         const parsed = JSON.parse(raw) as PaymentStatusSession
-        if (parsed?.flow === 'motor' || parsed?.flow === 'marine' || parsed?.flow === 'admin') {
+        if (
+            parsed?.flow === 'motor' ||
+            parsed?.flow === 'marine' ||
+            parsed?.flow === 'travel' ||
+            parsed?.flow === 'admin'
+        ) {
             return parsed
         }
         return null
@@ -111,6 +118,7 @@ export function getPaymentRetryUrl(flow?: PaymentStatusFlow): string {
             : EROUTES.MOTOR_QUOTATION_PURCHASE
     }
     if (flow === 'marine') return `/${EPREFIX.CUSTOMER}${EROUTES.MARINE}`
+    if (flow === 'travel') return `/${EPREFIX.CUSTOMER}${EROUTES.TRAVEL}`
     return `/${EPREFIX.CUSTOMER}${EROUTES.MOTOR}`
 }
 
@@ -142,6 +150,15 @@ export function goToReceipt(navigate: NavigateFunction, isAuthenticated: boolean
     if (flow === 'marine') {
         useStepperStore.getState().setStep('marine', MARINE_RECEIPT_STEP)
         navigate(`/${EPREFIX.CUSTOMER}${EROUTES.MARINE}`)
+        return
+    }
+
+    if (flow === 'travel') {
+        const receiptStep = isAuthenticated
+            ? TRAVEL_AUTH_RECEIPT_STEP
+            : TRAVEL_GUEST_RECEIPT_STEP
+        useStepperStore.getState().setStep('travel', receiptStep)
+        navigate(`/${EPREFIX.CUSTOMER}${EROUTES.TRAVEL}`)
         return
     }
 
