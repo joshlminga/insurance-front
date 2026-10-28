@@ -32,6 +32,7 @@ import {
     TravelCoverageSchema,
     TravelRateGroupSchema,
     TravelBenefitSectionSchema,
+    TravelReasonSchema,
     TravelBenefitCommonSchema,
     TravelBenefitSchema,
     TravelBenefitCreateSchema,
@@ -122,6 +123,7 @@ export type CreateVehicleClassesFormValues = z.infer<typeof CreateVehicleClasses
 export type TravelCoverageFormValues = z.infer<typeof TravelCoverageSchema>
 export type TravelRateGroupFormValues = z.infer<typeof TravelRateGroupSchema>
 export type TravelBenefitSectionFormValues = z.infer<typeof TravelBenefitSectionSchema>
+export type TravelReasonFormValues = z.infer<typeof TravelReasonSchema>
 export type TravelBenefitCommonFormValues = z.infer<typeof TravelBenefitCommonSchema>
 export type TravelBenefitFormValues = z.infer<typeof TravelBenefitSchema>
 export type TravelBenefitCreateFormValues = z.infer<typeof TravelBenefitCreateSchema>

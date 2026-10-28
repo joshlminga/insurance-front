@@ -8,15 +8,25 @@ import { BypassOrgLocationPicker, EmptyState, PageHeader } from '@/components/sh
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { ReusableSingleSelectApiInput } from '@/dev/core'
+import { ActionColumn } from '@/dev/columns'
+import { CustomDialogComponent, ReusableSingleSelectApiInput } from '@/dev/core'
 import { CustomBaseTable, SearchTools } from '@/dev/table'
-import { useDebounce } from '@/hooks'
+import { useCustomDialogContextFactory, useDebounce } from '@/hooks'
 import { UseApiQuery } from '@/hooks/hooks'
-import type { SubmitResponse, TFilterOptions, TPaginationFilters } from '@/types/types'
+import apiClient from '@/lib/api-client'
+import type {
+  SingleActionsHandler,
+  SubmitResponse,
+  TDialogComponentProps,
+  TFilterOptions,
+  TPaginationFilters,
+} from '@/types/types'
 import { EORGANIZATIONTYPES, FILTEROPTIONS, ReusableReducer } from '@/utils/constatnts'
+import { extractErrorMessage } from '@/utils/helpers'
+import { ShowToast } from '@/utils/utils'
 import type { ColumnDef } from '@tanstack/table-core'
-import { Building2, Download } from 'lucide-react'
-import { useMemo, useReducer } from 'react'
+import { Building2, Download, Eye } from 'lucide-react'
+import { useMemo, useReducer, type ComponentType } from 'react'
 
 type ExtraFilterField = {
   key: string
@@ -46,6 +56,14 @@ type OrganizationReportPageProps = {
    * Empty selection = all insurers. Sends filter.insurer_id to list/export.
    */
   showInsurerFilter?: boolean
+  /**
+   * Optional row preview: build a GET URL from the list row
+   * (e.g. reports/motor/quotations/${row.id}). When set with DetailDialog,
+   * adds a View action that opens the dialog with the fetched payload.
+   */
+  detailUrl?: (row: any) => string
+  /** Dialog component — same shape as listed quotation fetch dialogs */
+  DetailDialog?: ComponentType<TDialogComponentProps<{ data?: any }>>
 }
 
 /**
@@ -65,6 +83,8 @@ export function OrganizationReportPage({
   showSummary = false,
   showAgentFilter = false,
   showInsurerFilter = false,
+  detailUrl,
+  DetailDialog,
 }: OrganizationReportPageProps) {
   const { canModuleAction } = useCan()
   const canExport = canModuleAction(moduleKey, 'export')
@@ -89,6 +109,13 @@ export function OrganizationReportPage({
   const optionsDispatcherDebounce = useDebounce({
     debounceCallback: optionsDispatcher,
   })
+
+  // Same dialog factory as listed quotation reports (View opens full quote detail)
+  const { handleDialogContextSwitch, dialogContent, dialogOpen } =
+    useCustomDialogContextFactory<{ data?: any }>()
+
+  // Only wire View when both a detail URL builder and dialog component are provided
+  const canOpenDetail = Boolean(detailUrl && DetailDialog)
 
   const listParams = useMemo(() => {
     const params: Record<string, string | number | undefined> = {
@@ -138,6 +165,46 @@ export function OrganizationReportPage({
     config: orgContextHeaders ? { headers: orgContextHeaders } : undefined,
     queryOptions: { enabled: canFetch },
   })
+
+  // Fetch full quote (or other) detail via report-scoped show endpoint, then open dialog
+  const openDetail = async (row: any) => {
+    if (!detailUrl || !DetailDialog) {
+      return
+    }
+    try {
+      const response = await apiClient.get<SubmitResponse>(detailUrl(row), {
+        headers: orgContextHeaders,
+      })
+      handleDialogContextSwitch({
+        componentProps: {
+          data: {
+            ...(response.data?.data as Record<string, unknown>),
+            // Keep list row id on the payload (matches listed motor fetch dialog)
+            id: row.id,
+          },
+        },
+        Component: DetailDialog,
+      })
+    } catch (error) {
+      ShowToast.error(extractErrorMessage(error) || 'Failed to load details')
+    }
+  }
+
+  // Append View action when preview is enabled (same pattern as listed quotation reports)
+  const detailActions: SingleActionsHandler<any>[] = canOpenDetail
+    ? [
+        {
+          label: 'View',
+          icon: Eye,
+          onSelect: (row) => {
+            void openDetail(row)
+          },
+        },
+      ]
+    : []
+  const tableColumns = canOpenDetail
+    ? [...columns, ActionColumn({ ActionsHandlerMapping: detailActions })]
+    : columns
 
   return (
     <div className="space-y-4">
@@ -326,7 +393,7 @@ export function OrganizationReportPage({
               placeholder: searchPlaceholder,
               includeFilter: true,
             }}
-            columns={columns}
+            columns={tableColumns}
             OtherTools={SearchTools}
             data={data?.data ?? []}
             pageCount={data?.pagination?.last_page ?? filter.page}
@@ -342,6 +409,22 @@ export function OrganizationReportPage({
           />
         </>
       )}
+
+      {/* Preview dialog — same shell as listed quotation reports */}
+      {canOpenDetail ? (
+        <CustomDialogComponent
+          handleDialogContextSwitch={handleDialogContextSwitch}
+          dialogOpen={dialogOpen}
+          className="sm:max-w-3xl w-[95vw] p-4 sm:p-6"
+        >
+          {dialogContent?.Component && (
+            <dialogContent.Component
+              componentProps={dialogContent.componentProps}
+              handleDialogContextSwitch={handleDialogContextSwitch}
+            />
+          )}
+        </CustomDialogComponent>
+      ) : null}
     </div>
   )
 }

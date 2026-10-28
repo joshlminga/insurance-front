@@ -88,4 +88,31 @@ describe('validateInsuranceCertificate', () => {
       }),
     ).rejects.toThrow(/registration and certificate/i)
   })
+
+  it('maps missing API keys to empty strings', async () => {
+    vi.mocked(apiClient.get).mockResolvedValue({
+      data: {
+        success: true,
+        data: {
+          certificate_number: 'A12831355',
+          // other fields intentionally omitted
+        },
+      },
+    })
+
+    const result = await validateInsuranceCertificate({
+      vehicleRegistrationNumber: 'KDY184S',
+      certificateNumber: 'A12831355',
+    })
+
+    expect(result).toEqual({
+      certificateNumber: 'A12831355',
+      insurancePolicyNumber: '',
+      validFrom: '',
+      validTill: '',
+      registrationNumber: '',
+      insuredBy: '',
+      chassisNumber: '',
+    })
+  })
 })

@@ -1,6 +1,7 @@
 /**
  * DMVIC ValidateInsurance — check a certificate against registration / chassis.
- * Used by Motor → Double → Verify (UI only enables Verify when a local invoice match exists).
+ * Used by Motor → Double → Verify (row cert + plate; chassis optional when present).
+ * Missing API keys map to empty strings so the dialog can show "-".
  */
 import apiClient from '@/lib/api-client'
 

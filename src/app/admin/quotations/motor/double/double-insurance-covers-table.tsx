@@ -117,18 +117,13 @@ export function DoubleInsuranceCoversTable({
   )
 
   /**
-   * Verify only when we have a local invoice match (same gate as download).
-   * Needs cert + registration; chassis is optional.
+   * Verify uses the double-insurance row to call ValidateInsurance
+   * (cert + registration required; chassis optional). Not gated on local invoice.
    */
   const onVerify = async (row: CoverRow) => {
     const certificateNumber = row.certificateNumber.trim()
     const vehicleRegistrationNumber = row.vehicleRegistrationNumber.trim()
-    const canVerifyLocal =
-      row.invoiceId != null &&
-      row.invoiceId > 0 &&
-      certificateNumber !== '' &&
-      vehicleRegistrationNumber !== ''
-    if (!canVerifyLocal) {
+    if (certificateNumber === '' || vehicleRegistrationNumber === '') {
       return
     }
 
@@ -188,10 +183,9 @@ export function DoubleInsuranceCoversTable({
         key: 'invoiceId',
         label: 'Certificate',
         render: (_value, row) => {
-          // No local cover in our system → disable download and verify together
+          // Download needs a local invoice; Verify only needs row cert + plate.
           const canDownload = row.invoiceId != null && row.invoiceId > 0
           const canVerify =
-            canDownload &&
             row.certificateNumber.trim() !== '' &&
             row.vehicleRegistrationNumber.trim() !== ''
 
@@ -219,11 +213,6 @@ export function DoubleInsuranceCoversTable({
                 type="button"
                 size="sm"
                 disabled={!canVerify || isVerifying || isDownloading}
-                title={
-                  !canDownload
-                    ? 'Verify is only available for covers found in our system'
-                    : undefined
-                }
                 className={
                   canVerify
                     ? 'bg-[#C20C0C] text-white hover:bg-[#C20C0C]/90 hover:text-white'

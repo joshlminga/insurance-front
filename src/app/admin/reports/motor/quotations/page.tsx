@@ -1,4 +1,5 @@
 import { OrganizationReportPage } from '@/app/admin/reports/organization-report-page'
+import { MotorQuoteFetchDetailDialog } from '@/app/admin/quotations/motor/fetch/detail-dialog'
 import { MODULES } from '@/auth/module-keys'
 import { OrganizationQuotationReportColumns } from '@/dev/columns/admin/reports/organization-reports'
 
@@ -14,6 +15,9 @@ export const OrganizationMotorQuotationsReportPage = () => (
     searchPlaceholder="Search quote code, customer, registration…"
     showSummary
     showAgentFilter
+    // Report-scoped show (not quotation/motor/fetch) so report-only users can preview
+    detailUrl={(row) => `reports/motor/quotations/${row.id}`}
+    DetailDialog={MotorQuoteFetchDetailDialog}
     extraFilters={[
       { key: 'quote_code', label: 'Quote code', placeholder: 'Q-…' },
       { key: 'processed_by_id', label: 'Processed by ID', type: 'number' },

@@ -146,6 +146,11 @@ const TravelBenefitCommonPage = lazy(() =>
     default: m.TravelBenefitCommonPage,
   }))
 )
+const TravelReasonPage = lazy(() =>
+  import("./app/admin/product/travel/reason/page").then(m => ({
+    default: m.TravelReasonPage,
+  }))
+)
 const TravelProductBenefitsPage = lazy(() =>
   import("./app/admin/product/travel/benefits/page").then(m => ({
     default: m.TravelProductBenefitsPage,
@@ -1118,6 +1123,14 @@ export const router = createBrowserRouter([
             element: (
               <S>
                 <TravelBenefitCommonPage />
+              </S>
+            ),
+          },
+          {
+            path: "products/travel/reason",
+            element: (
+              <S>
+                <TravelReasonPage />
               </S>
             ),
           },

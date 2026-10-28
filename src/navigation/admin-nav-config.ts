@@ -256,6 +256,10 @@ export const adminNavConfig: NavItem[] = [
         title: 'Common',
         url: EROUTES.TRAVEL_BENEFIT_COMMON,
       },
+      {
+        title: 'Reason',
+        url: EROUTES.TRAVEL_REASON,
+      },
     ],
   },
   {

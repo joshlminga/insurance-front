@@ -95,6 +95,7 @@ export const OrganizationMotorVehicleReportColumns: ColumnDef<any>[] = [
   },
 ]
 
+/** Shared quotation report columns (motor + travel). Motor rows may include vehicle. */
 export const OrganizationQuotationReportColumns: ColumnDef<any>[] = [
   {
     accessorKey: 'quote_code',
@@ -102,6 +103,12 @@ export const OrganizationQuotationReportColumns: ColumnDef<any>[] = [
     cell: ({ row }) => (
       <div className="space-y-1">
         <div className="font-medium">{row.original.quote_code ?? '-'}</div>
+        {/* Motor list rows already include vehicle — show reg under the quote code */}
+        {row.original.vehicle?.registration_number ? (
+          <div className="text-xs text-muted-foreground">
+            {row.original.vehicle.registration_number}
+          </div>
+        ) : null}
         <CrossOrgBadge flagged={row.original.processed_by_other_organization} />
       </div>
     ),

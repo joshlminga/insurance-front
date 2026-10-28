@@ -1,4 +1,5 @@
 import { OrganizationReportPage } from '@/app/admin/reports/organization-report-page'
+import { TravelQuoteFetchDetailDialog } from '@/app/admin/quotations/travel/fetch/detail-dialog'
 import { MODULES } from '@/auth/module-keys'
 import { OrganizationQuotationReportColumns } from '@/dev/columns/admin/reports/organization-reports'
 
@@ -12,6 +13,9 @@ export const OrganizationTravelQuotationsReportPage = () => (
     moduleKey={MODULES.REPORT_ORG_TRAVEL_QUOTATION}
     columns={OrganizationQuotationReportColumns}
     searchPlaceholder="Search quote code, customer…"
+    // Report-scoped show (not quotation/travel/fetch) so report-only users can preview
+    detailUrl={(row) => `reports/travel/quotations/${row.id}`}
+    DetailDialog={TravelQuoteFetchDetailDialog}
     extraFilters={[
       { key: 'quote_code', label: 'Quote code', placeholder: 'Q-…' },
       { key: 'agent_id', label: 'Agent ID', type: 'number' },

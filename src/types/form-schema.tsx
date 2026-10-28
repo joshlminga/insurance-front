@@ -1986,6 +1986,18 @@ export const TravelBenefitSectionSchema = z.object({
 })
 
 /**
+ * Travel Reason / travel plan (taxonomy type travelplan).
+ * Used as “Reason for Travel” on quotes. API accepts name only.
+ */
+export const TravelReasonSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(2, "Reason name must be at least 2 characters")
+    .max(255, "Reason name is too long"),
+})
+
+/**
  * Travel Common Benefits catalog form.
  * UI labels → API: Benefit Type→type, Show In→group, Short Title→name, Full Benefit Title→title.
  */
