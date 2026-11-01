@@ -71,6 +71,7 @@ export const EROUTES = {
 
   // dashbaord
   DASHBOARD: `/${EPREFIX.DASHBOARD}`,
+  SURE: `/${EPREFIX.DASHBOARD}/sure`,
   // Members
   MEMBERS: `/${EPREFIX.DASHBOARD}/members`,
   MEMBERS_NEW: `/${EPREFIX.DASHBOARD}/members/new`,

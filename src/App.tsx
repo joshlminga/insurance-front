@@ -67,6 +67,7 @@ const OtpVerificationAuthForm = lazy(() => import("./auth/components/otp-verific
 
 // Admin / Dashboard pages
 const DashboardPage = lazy(() => import("./app/dashboard"))
+const SurePage = lazy(() => import("./app/admin/sure/page"))
 const MembersPage = lazy(() => import("./app/members/page"))
 const MemberDetailPage = lazy(() => import("./app/members/[id]/page"))
 const MemberNewPage = lazy(() => import("./app/members/new/page"))
@@ -595,6 +596,14 @@ export const router = createBrowserRouter([
           {
             index: true,
             element: <S><DashboardPage /></S>,
+          },
+          {
+            path: "sure",
+            element: (
+              <S>
+                <SurePage />
+              </S>
+            ),
           },
           // Members / Policyholders
           {

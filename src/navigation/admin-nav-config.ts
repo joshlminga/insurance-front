@@ -13,6 +13,7 @@ import {
   Plane,
   ShieldAlert,
   BarChart3,
+  MessageSquare,
 } from 'lucide-react'
 import { MODULES, QUOTATION_MOTOR_MODULES } from '@/auth/module-keys'
 import { EPREFIX, EROUTES } from '@/utils/enums'
@@ -70,6 +71,11 @@ export const adminNavConfig: NavItem[] = [
     url: EROUTES.DASHBOARD,
     icon: LayoutDashboard,
     isActive: true,
+  },
+  {
+    title: 'Sure (beta)',
+    url: EROUTES.SURE,
+    icon: MessageSquare,
   },
   // {
   //   title: 'Policyholders',
