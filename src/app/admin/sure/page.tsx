@@ -6,6 +6,8 @@ import {
   Paperclip,
   PlusCircle,
   Search,
+  ThumbsDown,
+  ThumbsUp,
   X,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -29,6 +31,8 @@ type ChatMessage = {
   role: ChatRole
   text: string
   attachments?: string[]
+  /** Local UI feedback on assistant replies */
+  feedback?: 'up' | 'down' | null
 }
 
 /** Shape ready for a future conversations API */
@@ -47,15 +51,15 @@ function buildEcho(text: string, attachmentNames: string[]): string {
   const parts: string[] = []
 
   if (quoted) {
-    parts.push(`Sure: I received “${quoted}”.`)
+    parts.push(`Got it — you asked about “${quoted}”.`)
   } else {
-    parts.push('Sure: I received your message.')
+    parts.push('Got it — I received your message.')
   }
 
   if (attachmentNames.length === 1) {
-    parts.push(`Attached file: ${attachmentNames[0]}.`)
+    parts.push(`I can see the attached file: ${attachmentNames[0]}.`)
   } else if (attachmentNames.length > 1) {
-    parts.push(`Attached files: ${attachmentNames.join(', ')}.`)
+    parts.push(`I can see the attached files: ${attachmentNames.join(', ')}.`)
   }
 
   parts.push('This is a beta stub reply — real insurance answers will land here soon.')
@@ -363,11 +367,25 @@ export default function SurePage() {
           id: makeId(),
           role: 'assistant',
           text: buildEcho(text, attachmentNames),
+          feedback: null,
         },
       ])
       setIsReplying(false)
       echoTimerRef.current = null
     }, 600)
+  }
+
+  function setMessageFeedback(messageId: string, value: 'up' | 'down') {
+    setMessages((prev) =>
+      prev.map((message) => {
+        if (message.id !== messageId || message.role !== 'assistant') {
+          return message
+        }
+        // Toggle off if the same feedback is clicked again
+        const next = message.feedback === value ? null : value
+        return { ...message, feedback: next }
+      })
+    )
   }
 
   return (
@@ -431,44 +449,66 @@ export default function SurePage() {
           </div>
 
           <div className="relative z-10 flex-1 overflow-y-auto px-2 py-6">
-            <div className="mx-auto flex max-w-3xl flex-col gap-4">
-              {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={cn(
-                    'flex',
-                    message.role === 'user' ? 'justify-end' : 'justify-start'
-                  )}
-                >
-                  <div
-                    className={cn(
-                      'max-w-[85%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed',
-                      message.role === 'user'
-                        ? 'bg-[#C20C0C] text-white'
-                        : 'border border-border bg-muted text-foreground'
-                    )}
-                  >
-                    <p className="whitespace-pre-wrap">{message.text}</p>
-                    {message.attachments?.length ? (
-                      <ul className="mt-2 space-y-1 border-t border-white/20 pt-2 text-xs opacity-90 dark:border-white/15">
-                        {message.attachments.map((name) => (
-                          <li key={name} className="flex items-center gap-1.5">
-                            <Paperclip className="size-3 shrink-0" />
-                            <span className="truncate">{name}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : null}
+            <div className="mx-auto flex max-w-3xl flex-col gap-5">
+              {messages.map((message) =>
+                message.role === 'user' ? (
+                  <div key={message.id} className="flex justify-end">
+                    <div className="max-w-[85%] rounded-2xl bg-[#C20C0C] px-3.5 py-2.5 text-sm leading-relaxed text-white">
+                      <p className="whitespace-pre-wrap">{message.text}</p>
+                      {message.attachments?.length ? (
+                        <ul className="mt-2 space-y-1 border-t border-white/20 pt-2 text-xs opacity-90">
+                          {message.attachments.map((name) => (
+                            <li key={name} className="flex items-center gap-1.5">
+                              <Paperclip className="size-3 shrink-0" />
+                              <span className="truncate">{name}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ) : (
+                  <div key={message.id} className="flex max-w-[95%] flex-col gap-2">
+                    {/* Plain page background — no reply bubble */}
+                    <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">
+                      {message.text}
+                    </p>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setMessageFeedback(message.id, 'up')}
+                        className={cn(
+                          'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs transition',
+                          message.feedback === 'up'
+                            ? 'border-[#C20C0C] bg-[#C20C0C]/10 text-[#C20C0C]'
+                            : 'border-border text-muted-foreground hover:bg-muted hover:text-foreground'
+                        )}
+                        aria-pressed={message.feedback === 'up'}
+                      >
+                        <ThumbsUp className="size-3.5" />
+                        I liked response
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setMessageFeedback(message.id, 'down')}
+                        className={cn(
+                          'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs transition',
+                          message.feedback === 'down'
+                            ? 'border-[#C20C0C] bg-[#C20C0C]/10 text-[#C20C0C]'
+                            : 'border-border text-muted-foreground hover:bg-muted hover:text-foreground'
+                        )}
+                        aria-pressed={message.feedback === 'down'}
+                      >
+                        <ThumbsDown className="size-3.5" />
+                        Need Improvement
+                      </button>
+                    </div>
+                  </div>
+                )
+              )}
 
               {isReplying && (
-                <div className="flex justify-start">
-                  <div className="rounded-2xl border border-border bg-muted px-3.5 py-2.5 text-sm text-muted-foreground">
-                    Sure is thinking…
-                  </div>
-                </div>
+                <p className="text-sm text-muted-foreground">Thinking…</p>
               )}
               <div ref={bottomRef} />
             </div>
