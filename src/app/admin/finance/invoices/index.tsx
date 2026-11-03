@@ -18,8 +18,9 @@ const InvoicesPage = () => {
   const canViewMotorReports =
     hasModule(MODULES.REPORT_MOTOR_INVOICE) &&
     canModuleMenu(MODULES.REPORT_MOTOR_INVOICE)
+  // invoice.menu unlocks the finance invoices screen (not the old finance-module key)
   const canViewFinanceInvoices =
-    hasModule(MODULES.FINANCE) && canModuleMenu(MODULES.FINANCE)
+    hasModule(MODULES.INVOICE) && canModuleMenu(MODULES.INVOICE)
   const canViewComingSoonTabs = canViewMotorReports || canViewFinanceInvoices
 
   const visibleTabs = useMemo(() => {

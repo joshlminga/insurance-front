@@ -5,7 +5,10 @@ export const MODULES = {
   QUOTATION_MOTOR_ALTERNATIVE: 'quotation-motor-alternative',
   QUOTATION_MARINE: 'quotation-marine',
   QUOTATION_TRAVEL: 'quotation-travel',
-  FINANCE: 'finance-module',
+
+  // Finance screens (API catalog — not the old phantom finance-module key)
+  FINANCE_PARAMETER: 'finance-parameter',
+  INVOICE: 'invoice',
 
   // Admin claims. Must match the API RBAC module key.
   CLAIMS: 'claims',
@@ -19,8 +22,14 @@ export const MODULES = {
   ORGANIZATION_LOCATION: 'organization-location',
   ORGANIZATION_LOCATION_USER: 'organization-location-user',
 
-  // Products
+  // Products + motor taxonomy screens
   PRODUCT_MOTOR: 'product-motor',
+  MOTOR_COVER_TYPE: 'motor-cover-type',
+  MOTOR_COVER_COVERING: 'motor-cover-covering',
+  MOTOR_VEHICLE_CLASS: 'motor-vehicle-class',
+  MOTOR_VEHICLE_USE: 'motor-vehicle-use',
+  MOTOR_ADDON_BENEFIT: 'motor-addon-benefit',
+  MOTOR_DETAIL_BENEFIT: 'motor-detail-benefit',
 
   // Users & access control
   USER: 'user',

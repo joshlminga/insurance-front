@@ -7,7 +7,8 @@ import { ECREDITTRANSACTIONS } from "@/types/enums"
 
 export function CreditTransactionsPage() {
   const { canModuleAction } = useCan()
-  const canListAll = canModuleAction(MODULES.FINANCE_CONTROL, "list")
+  // All-transactions tab hits finance-control.transactions on the API
+  const canListAll = canModuleAction(MODULES.FINANCE_CONTROL, "transactions")
 
   return (
     <div className="space-y-6">

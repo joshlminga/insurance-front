@@ -6,17 +6,25 @@ export function buildPermissionSet(permissions: string[]): Set<string> {
   return new Set(permissions)
 }
 
-/** Platform admin or general user - bypass all permission checks */
+/**
+ * Bypass all permission checks only for:
+ * - platform super_admin
+ * - public general users with no org role scopes
+ *
+ * Org staff can still have is_general=true incorrectly; if they have role scopes,
+ * enforce role permissions (same idea as ResolveOrganizationContextMiddleware).
+ */
 export function isBypassUser(abilities: Abilities | null | undefined): boolean {
   if (!abilities) return false
-  if (abilities.is_general) return true
-  return abilities.roles.includes(SUPER_ADMIN_ROLE)
+  if (abilities.roles.includes(SUPER_ADMIN_ROLE)) return true
+  if (abilities.is_general && (abilities.scopes?.length ?? 0) === 0) return true
+  return false
 }
 
 /**
  * Check a single permission - mirrors API AutoPermissionMiddleware bypass order:
- * 1. is_general → allow
- * 2. super_admin role → allow
+ * 1. super_admin → allow
+ * 2. public is_general (no role scopes) → allow
  * 3. permission in active set → allow
  */
 export function can(

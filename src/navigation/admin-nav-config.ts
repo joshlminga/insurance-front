@@ -60,6 +60,8 @@ export type NavItem = {
   module?: string
   /** Case 1 (any): parent visible when user has any of these modules */
   modules?: string[]
+  /** Extra permission - hidden when user lacks it */
+  permission?: string
   /**
    * Org location product line required for this item (Motor, Travel, Marine).
    * Prefer this over inferring from modules when modules mix lines or are missing.
@@ -136,22 +138,26 @@ export const adminNavConfig: NavItem[] = [
           {
             title: 'New',
             url: EROUTES.MOTORQUOTATIONS,
-            modules: [...QUOTATION_MOTOR_MODULES],
+            module: MODULES.QUOTATION_MOTOR,
+            permission: 'quotation-motor.advance',
           },
           {
             title: 'Double',
             url: EROUTES.MOTOR_QUOTATION_DOUBLE,
-            modules: [...QUOTATION_MOTOR_MODULES],
+            module: MODULES.QUOTATION_MOTOR_ALTERNATIVE,
+            permission: 'quotation-motor-alternative.advance',
           },
           {
             title: 'Find',
             url: EROUTES.MOTOR_QUOTATION_FETCH,
-            modules: [...QUOTATION_MOTOR_MODULES],
+            module: MODULES.QUOTATION_MOTOR,
+            permission: 'quotation-motor.read',
           },
           {
             title: 'Listed',
             url: EROUTES.REPORT_QUOTATIONS_MOTOR,
             module: MODULES.REPORT_MOTOR_QUOTATION,
+            permission: 'report-motor-quotation.menu',
           },
         ],
       },
@@ -187,11 +193,13 @@ export const adminNavConfig: NavItem[] = [
     url: EROUTES.MOTOR_CERTIFICATES,
     icon: FileBadge2,
     module: MODULES.DMVIC_CERTIFICATE,
+    permission: 'dmvic-certificate.menu',
     items: [
       {
         title: 'Motor',
         url: EROUTES.MOTOR_CERTIFICATES,
         module: MODULES.DMVIC_CERTIFICATE,
+        permission: 'dmvic-certificate.menu',
       },
     ],
   },
@@ -200,7 +208,15 @@ export const adminNavConfig: NavItem[] = [
     // Use /products/motor — NOT /products — so Travel routes do not open Motor.
     url: EROUTES.PRODUCTS,
     icon: LayoutDashboard,
-    module: MODULES.PRODUCT_MOTOR,
+    modules: [
+      MODULES.PRODUCT_MOTOR,
+      MODULES.MOTOR_COVER_TYPE,
+      MODULES.MOTOR_COVER_COVERING,
+      MODULES.MOTOR_VEHICLE_CLASS,
+      MODULES.MOTOR_VEHICLE_USE,
+      MODULES.MOTOR_ADDON_BENEFIT,
+      MODULES.MOTOR_DETAIL_BENEFIT,
+    ],
     matchPrefixes: [
       `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor-rates`,
       `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor-rate-benefits`,
@@ -210,36 +226,43 @@ export const adminNavConfig: NavItem[] = [
         title: 'Motor Products',
         url: EROUTES.PRODUCTS,
         module: MODULES.PRODUCT_MOTOR,
+        permission: 'product-motor.menu',
       },
       {
         title: 'Cover Types',
         url: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/cover-types`,
-        module: MODULES.PRODUCT_MOTOR,
+        module: MODULES.MOTOR_COVER_TYPE,
+        permission: 'motor-cover-type.menu',
       },
       {
         title: 'Motor Covering',
         url: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/covering`,
-        module: MODULES.PRODUCT_MOTOR,
+        module: MODULES.MOTOR_COVER_COVERING,
+        permission: 'motor-cover-covering.menu',
       },
       {
         title: 'Vehicle Classes',
         url: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/vehicle-classes`,
-        module: MODULES.PRODUCT_MOTOR,
+        module: MODULES.MOTOR_VEHICLE_CLASS,
+        permission: 'motor-vehicle-class.menu',
       },
       {
         title: 'Vehicle Use',
         url: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/vehicle-use`,
-        module: MODULES.PRODUCT_MOTOR,
+        module: MODULES.MOTOR_VEHICLE_USE,
+        permission: 'motor-vehicle-use.menu',
       },
       {
         title: 'Addon Benefits',
         url: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/add-on-benefits`,
-        module: MODULES.PRODUCT_MOTOR,
+        module: MODULES.MOTOR_ADDON_BENEFIT,
+        permission: 'motor-addon-benefit.menu',
       },
       {
         title: 'Detailed Benefits',
         url: `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/motor/detailed-benefits`,
-        module: MODULES.PRODUCT_MOTOR,
+        module: MODULES.MOTOR_DETAIL_BENEFIT,
+        permission: 'motor-detail-benefit.menu',
       },
     ],
   },
@@ -293,6 +316,7 @@ export const adminNavConfig: NavItem[] = [
         title: 'Customers',
         url: EROUTES.REPORT_CUSTOMERS,
         module: MODULES.REPORT_CUSTOMER,
+        permission: 'report-customer.menu',
       },
       {
         title: 'Motor',
@@ -307,16 +331,19 @@ export const adminNavConfig: NavItem[] = [
             title: 'Vehicles',
             url: EROUTES.REPORT_ORG_MOTOR_VEHICLES,
             module: MODULES.REPORT_ORG_MOTOR_VEHICLE,
+            permission: 'report-org-motor-vehicle.menu',
           },
           {
             title: 'Quotations',
             url: EROUTES.REPORT_ORG_MOTOR_QUOTATIONS,
             module: MODULES.REPORT_ORG_MOTOR_QUOTATION,
+            permission: 'report-org-motor-quotation.menu',
           },
           {
             title: 'Policies / Certificates',
             url: EROUTES.REPORT_ORG_MOTOR_CERTIFICATES,
             module: MODULES.REPORT_ORG_MOTOR_CERTIFICATE,
+            permission: 'report-org-motor-certificate.menu',
           },
         ],
       },
@@ -329,6 +356,7 @@ export const adminNavConfig: NavItem[] = [
             title: 'Quotations',
             url: EROUTES.REPORT_ORG_TRAVEL_QUOTATIONS,
             module: MODULES.REPORT_ORG_TRAVEL_QUOTATION,
+            permission: 'report-org-travel-quotation.menu',
           },
         ],
       },
@@ -338,32 +366,42 @@ export const adminNavConfig: NavItem[] = [
     title: 'Finance',
     url: EROUTES.FINANCE_PARAMETERS,
     icon: Banknote,
-    modules: [MODULES.FINANCE, MODULES.REPORT_MOTOR_INVOICE, MODULES.REPORT_MOTOR_RECEIPT],
+    modules: [
+      MODULES.FINANCE_PARAMETER,
+      MODULES.INVOICE,
+      MODULES.REPORT_MOTOR_INVOICE,
+      MODULES.REPORT_MOTOR_RECEIPT,
+    ],
     items: [
       {
         title: 'Parameters',
         url: EROUTES.FINANCE_PARAMETERS,
-        module: MODULES.FINANCE,
+        module: MODULES.FINANCE_PARAMETER,
+        permission: 'finance-parameter.menu',
       },
       {
         title: 'Invoices',
         url: EROUTES.FINANCE_INVOICES,
-        modules: [MODULES.FINANCE, MODULES.REPORT_MOTOR_INVOICE],
+        modules: [MODULES.INVOICE, MODULES.REPORT_MOTOR_INVOICE],
+        permission: 'invoice.menu',
       },
       {
         title: 'Receipts',
         url: EROUTES.FINANCE_RECEIPTS,
         module: MODULES.REPORT_MOTOR_RECEIPT,
+        permission: 'report-motor-receipt.menu',
       },
       {
         title: 'Transactions',
         url: EROUTES.FINANCE_TRANSACTIONS,
-        module: MODULES.FINANCE,
+        module: MODULES.INVOICE,
+        permission: 'invoice.transactions',
       },
       {
         title: 'Payments',
         url: EROUTES.PAYMENTS,
-        module: MODULES.FINANCE,
+        module: MODULES.INVOICE,
+        permission: 'invoice.payments',
       },
     ],
   },
@@ -372,16 +410,19 @@ export const adminNavConfig: NavItem[] = [
     url: EROUTES.CLAIMS,
     icon: ShieldAlert,
     module: MODULES.CLAIMS,
+    permission: 'claims.menu',
     items: [
       {
         title: 'Motor',
         url: EROUTES.CLAIMS,
         module: MODULES.CLAIMS,
+        permission: 'claims.list',
       },
       {
         title: 'Settings',
         url: EROUTES.CLAIMS_SETTINGS,
         module: MODULES.CLAIMS,
+        permission: 'claims.settings',
       },
     ],
   },
@@ -411,12 +452,14 @@ export const adminNavConfig: NavItem[] = [
     url: EROUTES.ORGANIZATION_MEMBERS,
     icon: Users,
     module: MODULES.ORGANIZATION_LOCATION_USER,
+    permission: 'organization-location-user.menu',
   },
   {
     title: 'Organization Credit',
     url: EROUTES.CREDIT_WALLET,
     icon: Coins,
     module: MODULES.FINANCE_CONTROL,
+    permission: 'finance-control.menu',
     items: [
       {
         title: 'My Wallet',
@@ -428,7 +471,7 @@ export const adminNavConfig: NavItem[] = [
         title: 'Transactions',
         url: EROUTES.CREDIT_TRANSACTIONS,
         module: MODULES.FINANCE_CONTROL,
-        // Visible with finance-control.menu only (no finer route permission)
+        permission: 'finance-control.transactions',
       },
       {
         title: 'Recharge Credit',
@@ -473,6 +516,7 @@ export const adminNavConfig: NavItem[] = [
     url: EROUTES.ORGANIZATION_ROLES,
     icon: ShieldCheck,
     module: MODULES.ROLE,
+    permission: 'role.menu',
   },
   {
     title: 'System Roles',
@@ -490,16 +534,19 @@ export const adminNavConfig: NavItem[] = [
     url: EROUTES.DMVIC_STOCK,
     icon: FolderCog,
     module: MODULES.DMVIC_STOCK,
+    permission: 'dmvic-stock.menu',
     items: [
       {
         title: 'Stock list',
         url: EROUTES.DMVIC_STOCK,
         module: MODULES.DMVIC_STOCK,
+        permission: 'dmvic-stock.list',
       },
       {
         title: 'Policies',
         url: EROUTES.DMVIC_STOCK_POLICY_NUMBERS,
         module: MODULES.DMVIC_STOCK,
+        permission: 'dmvic-stock.policies',
       },
     ],
   },

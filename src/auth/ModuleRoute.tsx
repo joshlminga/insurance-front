@@ -4,8 +4,8 @@ import { UseAuth, useAuthStore } from '@/stores/auth-store'
 import { EROUTES } from '@/utils/enums'
 import { isPlatformSuperAdmin } from './org-context'
 import { hasOrgProductLineAccess } from '@/navigation/quotation-product-line-nav'
+import { hasModuleRouteAccess } from './module-route-access'
 import { useCan } from './useCan'
-import { useModules } from './useModules'
 
 interface ModuleRouteProps {
   /** Single RBAC module key required to view this route */
@@ -14,6 +14,8 @@ interface ModuleRouteProps {
   modules?: string[]
   /** Optional finer permission e.g. quotation-motor.read */
   permission?: string
+  /** Optional any-of finer permissions (e.g. transactions OR recharge on a shared URL) */
+  permissions?: string[]
   /** When set, require this product line on abilities.context.products (when context exists). */
   productLine?: string
   /**
@@ -26,13 +28,15 @@ interface ModuleRouteProps {
 }
 
 /**
- * Route guard for direct URL access (case 3) - like Laravel middleware on a route group.
- * Redirects to dashboard when the user lacks the required module or permission.
+ * Route guard for direct URL access - like Laravel middleware on a route group.
+ * Requires `{module}.menu` (same as the sidebar), plus any finer permission.
+ * Redirects to dashboard when the user lacks access.
  */
 export function ModuleRoute({
   module,
   modules,
   permission,
+  permissions,
   productLine,
   requireSuperAdmin = false,
   children,
@@ -40,14 +44,14 @@ export function ModuleRoute({
 }: ModuleRouteProps) {
   const { isLoading } = UseAuth()
   const abilities = useAuthStore((s) => s.abilities)
-  const { hasModule, hasAnyModule } = useModules()
-  const { can } = useCan()
+  const { can, canModuleMenu } = useCan()
 
   // No module/modules means RBAC module check is skipped (product-line-only routes).
-  const hasModuleAccess = module
-    ? hasModule(module)
+  const skipModuleCheck = !module && !modules?.length
+  const hasMenuAccess = module
+    ? canModuleMenu(module)
     : modules?.length
-      ? hasAnyModule(modules)
+      ? modules.some((key) => canModuleMenu(key))
       : true
 
   if (isLoading) {
@@ -63,11 +67,15 @@ export function ModuleRoute({
     return <Navigate to={redirectTo} replace />
   }
 
-  if (!hasModuleAccess) {
-    return <Navigate to={redirectTo} replace />
-  }
-
-  if (permission && !can(permission)) {
+  if (
+    !hasModuleRouteAccess({
+      skipModuleCheck,
+      hasMenuAccess,
+      permission,
+      permissions,
+      can,
+    })
+  ) {
     return <Navigate to={redirectTo} replace />
   }
 
