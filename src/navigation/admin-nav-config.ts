@@ -33,6 +33,11 @@ export type NavSubItem = {
   /** Extra permission (e.g. finance-control.mine) - hidden when user lacks it */
   permission?: string
   /**
+   * Org location product line required for this item (Motor, Travel, Marine).
+   * Prefer this over inferring from modules when modules mix lines or are missing.
+   */
+  productLine?: string
+  /**
    * Only the platform super_admin role may see this item.
    * is_general does not count — that flag bypasses can()/hasModule() elsewhere.
    */
@@ -55,6 +60,11 @@ export type NavItem = {
   module?: string
   /** Case 1 (any): parent visible when user has any of these modules */
   modules?: string[]
+  /**
+   * Org location product line required for this item (Motor, Travel, Marine).
+   * Prefer this over inferring from modules when modules mix lines or are missing.
+   */
+  productLine?: string
   /**
    * Only the platform super_admin role may see this item.
    * is_general does not count — that flag bypasses can()/hasModule() elsewhere.
@@ -149,6 +159,8 @@ export const adminNavConfig: NavItem[] = [
         title: 'Travel',
         url: EROUTES.TRAVELQUOTATIONS,
         modules: [MODULES.QUOTATION_TRAVEL, MODULES.REPORT_MOTOR_QUOTATION],
+        // Mixed modules would skip product inference — keep Travel line explicit.
+        productLine: 'Travel',
         items: [
           {
             title: 'New',
@@ -164,6 +176,7 @@ export const adminNavConfig: NavItem[] = [
             title: 'Listed',
             url: EROUTES.REPORT_QUOTATIONS_TRAVEL,
             modules: [MODULES.QUOTATION_TRAVEL, MODULES.REPORT_MOTOR_QUOTATION],
+            productLine: 'Travel',
           },
         ],
       },
@@ -234,6 +247,8 @@ export const adminNavConfig: NavItem[] = [
     title: 'Travel',
     url: EROUTES.TRAVEL_PRODUCTS,
     icon: Plane,
+    // No module keys on this catalog — gate by org location product line.
+    productLine: 'Travel',
     // Rates/benefits live at travel-rates / travel-benefits (not under /travel/).
     matchPrefixes: [
       `/${EPREFIX.DASHBOARD}/${EPREFIX.PRODUCTS}/travel-rates`,

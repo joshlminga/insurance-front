@@ -359,6 +359,7 @@ export function collectBenefitIdsFromValues(
     groups: BenefitGroup[]
 ): number[] {
     const ids: number[] = []
+    const forcedLocked: number[] = []
     for (const { group, items } of groups) {
         const key = benefitGroupFormKey(group)
         const raw = values[key]
@@ -371,9 +372,13 @@ export function collectBenefitIdsFromValues(
         for (const item of items) {
             if (item.locked && Number.isFinite(item.id) && !ids.includes(item.id)) {
                 ids.push(item.id)
+                forcedLocked.push(item.id)
             }
         }
     }
+    // #region agent log
+    fetch('http://127.0.0.1:7410/ingest/d44f0587-d252-4b9d-983a-196162e430ad',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'6d317e'},body:JSON.stringify({sessionId:'6d317e',runId:'pre-fix',hypothesisId:'H2-H3',location:'helpers.tsx:collectBenefitIdsFromValues',message:'Frontend collected benefit ids',data:{ids,forcedLocked,lockedItems:groups.flatMap(g=>g.items.filter(i=>i.locked).map(i=>({id:i.id,name:i.name,org_mandatory:i.org_mandatory,allow_unselect:i.allow_unselect})))},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
     return ids
 }
 

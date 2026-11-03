@@ -26,6 +26,8 @@ import { FILTEROPTIONS, ReusableReducer } from "@/utils/constatnts"
 import { EMETHODS } from "@/utils/constatnts"
 import { extractErrorMessage } from "@/utils/helpers"
 import { ShowToast } from "@/utils/utils"
+import { isPlatformSuperAdmin } from "@/auth/org-context"
+import { useAuthStore } from "@/stores/auth-store"
 import { Plus } from "lucide-react"
 import { useReducer, useState } from "react"
 
@@ -35,9 +37,10 @@ import EditRoleModal from "../organization-roles/modals/edit"
 import ViewRoleModal from "../organization-roles/modals/view"
 import {
   extractRolesFromResponse,
+  canChangeRole,
   getRoleId,
   getRoleIsActive,
-  getRoleIsEditable,
+  isProtectedSuperAdminRole,
 } from "../organization-roles/role-utils"
 
 export const RolesListPage = ({
@@ -46,6 +49,11 @@ export const RolesListPage = ({
   description,
   tableTitle,
 }: RolesListPageProps) => {
+  const platformSuperAdmin = isPlatformSuperAdmin(useAuthStore((state) => state.abilities))
+  const roleCanChange = (rowData: Record<string, any>) =>
+    canChangeRole(rowData, platformSuperAdmin)
+  const roleIsViewOnly = (rowData: Record<string, any>) =>
+    isProtectedSuperAdminRole(rowData)
   const [expandedRoleId, setExpandedRoleId] = useState<string | number | null>(null)
 
   const [deleteTarget, setDeleteTarget] = useState<{
@@ -137,7 +145,7 @@ export const RolesListPage = ({
         })
       },
       conditional: (rowData) =>
-        Boolean(getRoleId(rowData)) && getRoleIsEditable(rowData),
+        Boolean(getRoleId(rowData)) && roleCanChange(rowData) && !roleIsViewOnly(rowData),
     },
     {
       label: "Permission",
@@ -152,7 +160,7 @@ export const RolesListPage = ({
         })
       },
       conditional: (rowData) =>
-        Boolean(getRoleId(rowData)) && getRoleIsEditable(rowData),
+        Boolean(getRoleId(rowData)) && roleCanChange(rowData) && !roleIsViewOnly(rowData),
     },
     {
       label: "View Permissions",
@@ -168,7 +176,7 @@ export const RolesListPage = ({
         })
       },
       conditional: (rowData) =>
-        Boolean(getRoleId(rowData)) && !getRoleIsEditable(rowData),
+        Boolean(getRoleId(rowData)) && (!roleCanChange(rowData) || roleIsViewOnly(rowData)),
     },
     {
       label: "Delete",
@@ -181,7 +189,9 @@ export const RolesListPage = ({
         })
       },
       conditional: (rowData) =>
-        Boolean(getRoleId(rowData)) && getRoleIsEditable(rowData),
+        Boolean(getRoleId(rowData)) &&
+        roleCanChange(rowData) &&
+        !isProtectedSuperAdminRole(rowData),
     },
     {
       label: "Deactivate",
@@ -193,7 +203,8 @@ export const RolesListPage = ({
       conditional: (rowData) =>
         Boolean(getRoleId(rowData)) &&
         Boolean(getRoleIsActive(rowData)) &&
-        getRoleIsEditable(rowData),
+        roleCanChange(rowData) &&
+        !roleIsViewOnly(rowData),
     },
     {
       label: "Activate",
@@ -205,7 +216,8 @@ export const RolesListPage = ({
       conditional: (rowData) =>
         Boolean(getRoleId(rowData)) &&
         !Boolean(getRoleIsActive(rowData)) &&
-        getRoleIsEditable(rowData),
+        roleCanChange(rowData) &&
+        !roleIsViewOnly(rowData),
     },
   ]
 

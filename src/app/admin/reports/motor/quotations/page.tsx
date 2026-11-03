@@ -6,7 +6,7 @@ import { OrganizationQuotationReportColumns } from '@/dev/columns/admin/reports/
 export const OrganizationMotorQuotationsReportPage = () => (
   <OrganizationReportPage
     title="Motor quotations report"
-    description="Organization motor quotations and purchases. Rows processed by another organization are highlighted."
+    description="Organization motor quotations and purchases. A row shows the other organization's name when the quote belongs to them. Agency is used when set; otherwise the organization that processed it."
     listUrl="reports/motor/quotations"
     exportUrl="reports/motor/quotations/export"
     exportFilename="motor-quotation-report.xlsx"

@@ -21,7 +21,13 @@ function hasAnyModuleWithMenu(
 }
 
 function isNavItemVisible(
-  item: { module?: string; modules?: string[]; permission?: string; requireSuperAdmin?: boolean },
+  item: {
+    module?: string
+    modules?: string[]
+    permission?: string
+    productLine?: string
+    requireSuperAdmin?: boolean
+  },
   hasModule: (key: string) => boolean,
   canMenu: (moduleKey: string) => boolean,
   can?: (permission: string) => boolean,

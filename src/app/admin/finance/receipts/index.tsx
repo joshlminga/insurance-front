@@ -4,6 +4,8 @@ import { useModules } from '@/auth/useModules'
 import { MODULES } from '@/auth/module-keys'
 import { ReusableTabComponent } from '@/dev/core'
 import { FinanceReceiptTabs } from '@/dev/tabs'
+import { hasOrgProductLineAccess } from '@/navigation/quotation-product-line-nav'
+import { useAuthStore } from '@/stores/auth-store'
 import { EFINANCE_RECEIPT_TABS } from '@/types/enums'
 import type { TTab } from '@/types/types'
 import { useMemo } from 'react'
@@ -11,6 +13,7 @@ import { useMemo } from 'react'
 const ReceiptsPage = () => {
   const { hasModule } = useModules()
   const { canModuleMenu } = useCan()
+  const contextProducts = useAuthStore((s) => s.abilities?.context?.products)
 
   // Same pattern as Finance Invoices: only show tabs the user can access
   const canViewMotorReports =
@@ -19,12 +22,22 @@ const ReceiptsPage = () => {
 
   const visibleTabs = useMemo(() => {
     return FinanceReceiptTabs.filter((tab) => {
-      if (tab.key === EFINANCE_RECEIPT_TABS.MOTOR) return canViewMotorReports
-      // Travel coming soon — show when motor access exists
-      if (tab.key === EFINANCE_RECEIPT_TABS.TRAVEL) return canViewMotorReports
+      if (tab.key === EFINANCE_RECEIPT_TABS.MOTOR) {
+        return (
+          canViewMotorReports &&
+          hasOrgProductLineAccess('Motor', contextProducts)
+        )
+      }
+      // Travel coming soon — show when motor access exists and Travel product is enabled
+      if (tab.key === EFINANCE_RECEIPT_TABS.TRAVEL) {
+        return (
+          canViewMotorReports &&
+          hasOrgProductLineAccess('Travel', contextProducts)
+        )
+      }
       return false
     }) as TTab<EFINANCE_RECEIPT_TABS>[]
-  }, [canViewMotorReports])
+  }, [canViewMotorReports, contextProducts])
 
   const defaultTab = visibleTabs[0]?.key ?? EFINANCE_RECEIPT_TABS.MOTOR
 

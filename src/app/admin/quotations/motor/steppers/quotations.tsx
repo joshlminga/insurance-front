@@ -207,6 +207,9 @@ export const AdminMotorQuotationsPage: React.FC<AdminMotorStepProps> = ({
                 selectedBenefitIds
             )
         }
+        // #region agent log
+        fetch('http://127.0.0.1:7410/ingest/d44f0587-d252-4b9d-983a-196162e430ad',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'6d317e'},body:JSON.stringify({sessionId:'6d317e',runId:'pre-fix',hypothesisId:'H2-H3',location:'admin/quotations.tsx:initBenefits',message:'Benefit form default selection',data:{formDefaults:next,selectedBenefitIds:[...selectedBenefitIds],lockedAvailable:benefitGroups.flatMap(g=>g.items.filter(i=>i.locked).map(i=>({id:i.id,name:i.name,group:g.group,org_mandatory:i.org_mandatory,allow_unselect:i.allow_unselect})))},timestamp:Date.now()})}).catch(()=>{});
+        // #endregion
         benefitForm.reset(next)
         hasInitializedBenefitFormRef.current = true
         skipBenefitAutoApplyRef.current = true

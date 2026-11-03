@@ -19,6 +19,7 @@ import {
   extractRolesFromResponse,
   getRoleId,
   getRoleIsEditable,
+  getRoleIsGeneral,
   getRoleLabel,
   groupPermissionsByModule,
   mergePermissionsById,
@@ -77,8 +78,10 @@ export const AssignPermissionsModal = ({
     return payload ?? role
   }, [roleListData, role, isScopedRole])
 
+  const roleIsGeneral = getRoleIsGeneral(resolvedRole ?? role)
   const isReadOnly =
-    componentProps?.readOnly ?? !getRoleIsEditable(resolvedRole ?? role)
+    (roleIsGeneral && !platformSuperAdmin) ||
+    (componentProps?.readOnly ?? !getRoleIsEditable(resolvedRole ?? role))
 
   const roleModules = normalizeModuleKeys(
     Array.isArray(resolvedRole?.modules) ? resolvedRole.modules : []

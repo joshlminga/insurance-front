@@ -1,10 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { isPlatformSuperAdmin } from "@/auth/org-context"
 import { 
   DialogTitle, 
   DialogDescription 
 } from "@/components/ui/dialog"
 import { Button, ReuseableInput } from "@/dev/core"
 import { UseApiMutation, UseApiQuery } from "@/hooks/hooks"
+import { useAuthStore } from "@/stores/auth-store"
 import { RoleEditSchema } from "@/types/form-schema"
 import { ROLE_AUTHORITY_DEFAULT } from "@/types/rbac-roles"
 import { RoleEditFormValues } from "@/types/schema"
@@ -15,7 +17,8 @@ import { ShowToast } from "@/utils/utils"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useEffect, useMemo } from "react"
 import { Controller, useForm } from "react-hook-form"
-import { getRoleId, normalizeModuleKeys } from "../role-utils"
+import { z } from "zod"
+import { getRoleId, getRoleIsGeneral, normalizeModuleKeys } from "../role-utils"
 import { RoleModulesField } from "./modules-field"
 
 export const EditRoleModal = ({
@@ -34,6 +37,7 @@ export const EditRoleModal = ({
   const roleId = getRoleId(componentProps?.data ?? {})
   const rolesBasePath = componentProps?.rolesBasePath ?? "roles"
   const isScopedRole = rolesBasePath === "roles"
+  const platformSuperAdmin = isPlatformSuperAdmin(useAuthStore((state) => state.abilities))
 
   const { data: showData, isLoading } = UseApiQuery<SubmitResponse>({
     url: `${rolesBasePath}/${roleId}`,
@@ -46,9 +50,21 @@ export const EditRoleModal = ({
     () => (showData as any)?.data?.role ?? (showData as any)?.data ?? componentProps?.data ?? {},
     [showData, componentProps?.data]
   )
+  const lockedToSuperAdmin = getRoleIsGeneral(role) && !platformSuperAdmin
+
+  // Location roles need an organization. General and system roles do not have one.
+  const editSchema = useMemo(
+    () =>
+      isScopedRole
+        ? RoleEditSchema
+        : RoleEditSchema.extend({
+            org_id: z.string().optional().or(z.literal("")),
+          }),
+    [isScopedRole]
+  )
 
   const form = useForm<RoleEditFormValues>({
-    resolver: zodResolver(RoleEditSchema),
+    resolver: zodResolver(editSchema),
     defaultValues: {
       name: "",
       description: "",
@@ -60,9 +76,7 @@ export const EditRoleModal = ({
   useEffect(() => {
     const rawModules = Array.isArray(role?.modules) ? role.modules : []
     form.reset({
-      name: String(
-        isScopedRole ? (role?.display_name ?? "") : (role?.name ?? "")
-      ),
+      name: String(role?.display_name ?? role?.name ?? ""),
       description: String(role?.description ?? ""),
       modules: normalizeModuleKeys(rawModules),
       org_id: String(role?.org_id ?? componentProps?.orgId ?? ""),
@@ -94,14 +108,13 @@ export const EditRoleModal = ({
   })
 
   const onSubmit = (data: RoleEditFormValues) => {
+    if (lockedToSuperAdmin) return
     if (!roleId) {
       ShowToast.error("Unable to update role: missing role id")
       return
     }
 
-    const roleNamePayload = isScopedRole
-      ? { display_name: data.name }
-      : { name: data.name }
+    const roleNamePayload = { display_name: data.name }
 
     const payload: Record<string, unknown> = {
       ...roleNamePayload,
@@ -165,6 +178,14 @@ export const EditRoleModal = ({
           {form.formState.errors.modules && (
             <p className="text-sm text-destructive">{form.formState.errors.modules.message}</p>
           )}
+          {form.formState.errors.org_id && (
+            <p className="text-sm text-destructive">{form.formState.errors.org_id.message}</p>
+          )}
+          {lockedToSuperAdmin && (
+            <p className="text-sm text-muted-foreground">
+              Only a super admin can change a general role.
+            </p>
+          )}
 
           <div className="flex flex-col sm:flex-row justify-end gap-3 mt-2 px-0">
             <Button
@@ -175,14 +196,16 @@ export const EditRoleModal = ({
               Cancel
             </Button>
 
-            <Button
-              type="submit"
-              className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-sm hover:bg-[#C20C0C]"
-              disabled={updateMutation.isPending}
-              loading={updateMutation.isPending}
-            >
-              Save Changes
-            </Button>
+            {!lockedToSuperAdmin && (
+              <Button
+                type="submit"
+                className="w-full sm:w-auto bg-[#C20C0C]/80 rounded-sm hover:bg-[#C20C0C]"
+                disabled={updateMutation.isPending}
+                loading={updateMutation.isPending}
+              >
+                Save Changes
+              </Button>
+            )}
           </div>
         </form>
       )}

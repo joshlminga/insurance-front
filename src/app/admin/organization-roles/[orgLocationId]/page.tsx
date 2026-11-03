@@ -28,16 +28,19 @@ import { EMETHODS } from "@/utils/constatnts"
 import { EROUTES } from "@/utils/enums"
 import { extractErrorMessage } from "@/utils/helpers"
 import { ShowToast } from "@/utils/utils"
+import { isPlatformSuperAdmin } from "@/auth/org-context"
+import { useAuthStore } from "@/stores/auth-store"
 import { ArrowLeft, Plus } from "lucide-react"
 import { useMemo, useReducer, useState } from "react"
 import { Link, useParams } from "react-router-dom"
 
 import {
+  canChangeRole,
   extractRolesFromResponse,
   getRoleId,
   getRoleIsActive,
-  getRoleIsEditable,
   getRoleLabel,
+  isProtectedSuperAdminRole,
 } from "../role-utils"
 import AssignPermissionsModal from "../modals/assign-permissions"
 import CreateRoleModal from "../modals/create"
@@ -46,6 +49,9 @@ import ViewRoleModal from "../modals/view"
 
 const OrganizationRolesDetailPage = () => {
   const { orgLocationId } = useParams<{ orgLocationId: string }>()
+  const platformSuperAdmin = isPlatformSuperAdmin(useAuthStore((state) => state.abilities))
+  const roleCanChange = (rowData: Record<string, any>) =>
+    canChangeRole(rowData, platformSuperAdmin)
 
   const [expandedRoleId, setExpandedRoleId] = useState<string | number | null>(null)
 
@@ -166,7 +172,7 @@ const OrganizationRolesDetailPage = () => {
         })
       },
       conditional: (rowData) =>
-        Boolean(getRoleId(rowData)) && getRoleIsEditable(rowData),
+        Boolean(getRoleId(rowData)) && roleCanChange(rowData),
     },
     {
       label: "Permission",
@@ -176,7 +182,7 @@ const OrganizationRolesDetailPage = () => {
             data: rowData,
             organizationLocationId: orgLocationId,
             refetch,
-            readOnly: !getRoleIsEditable(rowData),
+            readOnly: !roleCanChange(rowData),
           },
           Component: AssignPermissionsModal,
         })
@@ -194,7 +200,9 @@ const OrganizationRolesDetailPage = () => {
         })
       },
       conditional: (rowData) =>
-        Boolean(getRoleId(rowData)) && getRoleIsEditable(rowData),
+        Boolean(getRoleId(rowData)) &&
+        roleCanChange(rowData) &&
+        !isProtectedSuperAdminRole(rowData),
     },
     {
       label: "Deactivate",
@@ -205,7 +213,7 @@ const OrganizationRolesDetailPage = () => {
       },
       conditional: (rowData) =>
         Boolean(getRoleId(rowData)) &&
-        getRoleIsEditable(rowData) &&
+        roleCanChange(rowData) &&
         Boolean(getRoleIsActive(rowData)),
     },
     {
@@ -217,7 +225,7 @@ const OrganizationRolesDetailPage = () => {
       },
       conditional: (rowData) =>
         Boolean(getRoleId(rowData)) &&
-        getRoleIsEditable(rowData) &&
+        roleCanChange(rowData) &&
         !Boolean(getRoleIsActive(rowData)),
     },
   ]

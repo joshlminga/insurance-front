@@ -43,11 +43,12 @@ export function ModuleRoute({
   const { hasModule, hasAnyModule } = useModules()
   const { can } = useCan()
 
+  // No module/modules means RBAC module check is skipped (product-line-only routes).
   const hasModuleAccess = module
     ? hasModule(module)
     : modules?.length
       ? hasAnyModule(modules)
-      : false
+      : true
 
   if (isLoading) {
     return (
