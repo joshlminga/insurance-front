@@ -197,6 +197,21 @@ export const MotorQuoteFetchDetailDialog = ({ componentProps }: Props) => {
             </div>
           )}
         </div>
+        {detail.issue_reason ? (
+          <div className="rounded-md border p-3 space-y-1 sm:col-span-2">
+            <div className="font-medium">Policy Clarification</div>
+            <div>
+              <span className="text-muted-foreground">Reason to Issue 1 Month: </span>
+              {detail.issue_reason.reason_label}
+            </div>
+            {detail.issue_reason.other_reason ? (
+              <div>
+                <span className="text-muted-foreground">Other reasons: </span>
+                {detail.issue_reason.other_reason}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
       </section>
 
       {/* KYC - view-only field/value table */}

@@ -28,7 +28,8 @@ import {
     INSTALLMENT_FIELDS_VISIBLE,
     INVOICE_SESSION_STORAGE_KEY,
     PAYMENTPLANS,
-    PURCHASE_SESSION_STORAGE_KEY
+    PURCHASE_SESSION_STORAGE_KEY,
+    WHATSAPP_SHARE_ENABLED,
 } from '@/utils/constatnts'
 import { customerPaymentTabs } from '@/utils/steps-config'
 import { ShowToast } from '@/utils/utils'
@@ -660,10 +661,12 @@ export const PaymentOptions: React.FC<CustomerVerificationDetailsProps> = ({
                                     </Button>
                                 }
                                 items={[
-                                    {
-                                        label: "WhatsApp",
-                                        icon: <Share2 className="w-4 h-4" />,
-                                    },
+                                    ...(WHATSAPP_SHARE_ENABLED
+                                        ? [{
+                                            label: "WhatsApp",
+                                            icon: <Share2 className="w-4 h-4" />,
+                                        }]
+                                        : []),
                                     {
                                         label: "Email",
                                         icon: <Mail className="w-4 h-4" />,

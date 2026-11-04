@@ -12,7 +12,12 @@ import { CustomBaseTable, SearchTools } from '@/dev/table'
 import { useCustomDialogContextFactory, useDebounce } from '@/hooks'
 import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
 import type { SingleActionsHandler, SubmitResponse, TFilterOptions, TPaginationFilters } from '@/types/types'
-import { EMETHODS, FILTEROPTIONS, ReusableReducer } from '@/utils/constatnts'
+import {
+  EMETHODS,
+  FILTEROPTIONS,
+  ReusableReducer,
+  WHATSAPP_SHARE_ENABLED,
+} from '@/utils/constatnts'
 import { EROUTES } from '@/utils/enums'
 import { extractErrorMessage } from '@/utils/helpers'
 import { useMotorDocumentDownload } from '@/utils/motor-document-download'
@@ -159,12 +164,14 @@ const MotorInvoiceReportTab = () => {
         })
       },
     },
-    {
-      label: 'WhatsApp',
-      onSelect: () => {
-        ShowToast.info('WhatsApp sharing coming soon')
-      },
-    },
+    ...(WHATSAPP_SHARE_ENABLED
+      ? [{
+          label: 'WhatsApp',
+          onSelect: () => {
+            ShowToast.info('WhatsApp sharing coming soon')
+          },
+        }]
+      : []),
     {
       label: 'Issue cover',
       onSelect: (row) => {

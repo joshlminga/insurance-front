@@ -24,7 +24,8 @@ import {
     INSTALLMENT_FIELDS_VISIBLE,
     INVOICE_SESSION_STORAGE_KEY,
     PAYMENTPLANS,
-    PURCHASE_SESSION_STORAGE_KEY
+    PURCHASE_SESSION_STORAGE_KEY,
+    WHATSAPP_SHARE_ENABLED,
 } from '@/utils/constatnts'
 import { EPAYMENTTABS } from '@/utils/steps-config'
 import { ShowToast } from '@/utils/utils'
@@ -86,7 +87,7 @@ const BoxHeader = ({ title, description }: BoxHeaderProps) => (
 )
 
 const compactFieldClass =
-    'w-full h-9.5 rounded-[4px] border border-black/30 bg-white text-sm text-black'
+    'w-full h-9.5 rounded-[4px] border border-[#BF162E] bg-white text-sm text-black'
 
 const breakdownInputClass =
     'w-full h-9.5 rounded-[4px] border border-[#ADABAB] bg-neutral-50 text-sm text-black shadow-none disabled:opacity-100 disabled:cursor-default disabled:bg-neutral-50'
@@ -773,10 +774,12 @@ export const AdminMotorPaymentOptions: React.FC<AdminMotorStepProps> = ({
                                     </Button>
                                 }
                                 items={[
-                                    {
-                                        label: "WhatsApp",
-                                        icon: <Share2 className="w-4 h-4" />,
-                                    },
+                                    ...(WHATSAPP_SHARE_ENABLED
+                                        ? [{
+                                            label: "WhatsApp",
+                                            icon: <Share2 className="w-4 h-4" />,
+                                        }]
+                                        : []),
                                     {
                                         label: "Email",
                                         icon: <Mail className="w-4 h-4" />,

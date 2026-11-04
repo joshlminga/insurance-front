@@ -23,7 +23,8 @@ import { premiumPreview, SubmitResponse } from "@/types/types";
 import {
     EMETHODS,
     MOTOR_QUOTE_SESSION_STORAGE_KEY,
-    PURCHASE_SESSION_STORAGE_KEY
+    PURCHASE_SESSION_STORAGE_KEY,
+    WHATSAPP_SHARE_ENABLED,
 } from "@/utils/constatnts";
 import { extractErrorMessage, canPurchaseCover } from "@/utils/helpers";
 import { UseAuth } from "@/stores/auth-store";
@@ -269,10 +270,12 @@ export const PostComparisonPage: React.FC<premiumPreview> = ({
                                 })
                             }
                         },
-                        {
-                            label: "WhatsApp",
-                            icon: <Share2 className="w-4 h-4" />,
-                        },
+                        ...(WHATSAPP_SHARE_ENABLED
+                            ? [{
+                                label: "WhatsApp",
+                                icon: <Share2 className="w-4 h-4" />,
+                            }]
+                            : []),
                     ]}
                 />
                 <Button

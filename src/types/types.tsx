@@ -431,6 +431,12 @@ export type MotorQuoteFetchDetail = {
   certificates?: Array<Record<string, unknown>>
   selected_benefit_ids?: number[]
   meta?: Record<string, unknown>
+  /** Present when a short-cover issue reason was saved for this quote */
+  issue_reason?: {
+    reason: string
+    reason_label: string
+    other_reason?: string | null
+  } | null
 }
 
 export type MotorQuoteDuplicatePayload = {

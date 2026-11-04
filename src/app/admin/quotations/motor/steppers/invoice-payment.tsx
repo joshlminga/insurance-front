@@ -389,35 +389,6 @@ export const AdminMotorInvoicePayment: React.FC<AdminMotorStepProps> = ({
                                 A custom cover end date defers DMVIC certificate issuance until cover is issued manually. Max cover is 12 months from the start date.
                             </p>
 
-                            {/* Short cover: admin must pick why this is a 1-month issue */}
-                            {showShortCoverReason ? (
-                                <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                    <ReusableSelect
-                                        control={form.control}
-                                        name="issue_reason"
-                                        label="Reason to Issue 1 Month"
-                                        placeholder="Select a reason"
-                                        required
-                                        options={MOTOR_ISSUE_REASON_OPTIONS.map((option) => ({
-                                            value: option.value,
-                                            label: option.label,
-                                        }))}
-                                    />
-                                    {issueReason === 'other' ? (
-                                        <ReuseableInput
-                                            className="w-full min-h-20 rounded-[5px] border border-[#ADABAB]"
-                                            control={form.control}
-                                            name="other_reason"
-                                            label="Other reasons"
-                                            type="textarea"
-                                            rows={3}
-                                            placeholder="Describe the reason"
-                                            required
-                                        />
-                                    ) : null}
-                                </div>
-                            ) : null}
-
                             <div className="mt-4 flex items-start gap-2">
                                 <Controller
                                     control={form.control}
@@ -445,6 +416,39 @@ export const AdminMotorInvoicePayment: React.FC<AdminMotorStepProps> = ({
                                 </label>
                             </div>
                         </div>
+
+                        {/* Short cover: admin must pick why this is a 1-month issue */}
+                        {showShortCoverReason ? (
+                            <div className="rounded-2xl border border-[#ADABAB]/35 bg-white/95 p-3 sm:p-5">
+                                <BoxHeader
+                                    title="Policy Clarification"
+                                    description="Tell us why this cover is being issued for one month."
+                                />
+                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 sm:gap-5">
+                                    <ReusableSelect
+                                        control={form.control}
+                                        name="issue_reason"
+                                        label="Reason to Issue 1 Month"
+                                        placeholder="Select a reason"
+                                        required
+                                        options={MOTOR_ISSUE_REASON_OPTIONS.map((option) => ({
+                                            value: option.value,
+                                            label: option.label,
+                                        }))}
+                                    />
+                                    {issueReason === 'other' ? (
+                                        <ReuseableInput
+                                            className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
+                                            control={form.control}
+                                            name="other_reason"
+                                            label="Other reasons"
+                                            placeholder="Describe the reason"
+                                            required
+                                        />
+                                    ) : null}
+                                </div>
+                            </div>
+                        ) : null}
                     </div>
                 </div>
                 <CardFooter className="mt-4 w-full flex flex-col gap-3 px-0 sm:flex-row sm:items-center sm:justify-between">

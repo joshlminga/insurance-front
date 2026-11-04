@@ -269,6 +269,15 @@ export const BANK_PAYMENT_DETAILS_URL = "purchase/motor/bank-payment-details"
 
 /** Flip to true to show Pesapal as a card / settlement payment option */
 export const PESAPAL_PAYMENT_ENABLED = false
+
+/** Flip to true to show Cash as a payment option */
+export const CASH_PAYMENT_ENABLED = false
+
+/** Flip to true to show Lipa na M-Pesa paybill Option 2 */
+export const LIPA_NA_MPESA_ENABLED = false
+
+/** Flip to true when WhatsApp sharing is ready */
+export const WHATSAPP_SHARE_ENABLED = false
 export const VEHICLE_DETAILS_SESSION_STORAGE_KEY = "vehicle_info_session"
 export const VEHICLE_OWNERSHIP_SESSION_STORAGE_KEY = "vehicle_ownership_session"
 export const ADMIN_MOTOR_CUSTOMER_EMAIL_KEY = "admin_motor_customer_email"

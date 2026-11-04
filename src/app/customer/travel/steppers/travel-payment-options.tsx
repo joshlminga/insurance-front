@@ -36,6 +36,7 @@ import {
   EMETHODS,
   INVOICE_SESSION_STORAGE_KEY,
   PURCHASE_SESSION_STORAGE_KEY,
+  WHATSAPP_SHARE_ENABLED,
 } from '@/utils/constatnts'
 import { EROUTES } from '@/utils/enums'
 import { extractErrorMessage } from '@/utils/helpers'
@@ -431,10 +432,12 @@ export const TravelPaymentOptionsPage: React.FC<
                   </Button>
                 }
                 items={[
-                  {
-                    label: 'WhatsApp',
-                    icon: <Share2 className="h-4 w-4" />,
-                  },
+                  ...(WHATSAPP_SHARE_ENABLED
+                    ? [{
+                        label: 'WhatsApp',
+                        icon: <Share2 className="h-4 w-4" />,
+                      }]
+                    : []),
                   {
                     label: 'Email',
                     icon: <Mail className="h-4 w-4" />,

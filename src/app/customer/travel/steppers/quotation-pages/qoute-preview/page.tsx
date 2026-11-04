@@ -19,7 +19,11 @@ import { useCustomDialogContextFactory } from '@/hooks'
 import { UseApiMutation } from '@/hooks/hooks'
 import { formatCurrency } from '@/lib/format'
 import type { SubmitResponse } from '@/types/types'
-import { EMETHODS, PURCHASE_SESSION_STORAGE_KEY } from '@/utils/constatnts'
+import {
+  EMETHODS,
+  PURCHASE_SESSION_STORAGE_KEY,
+  WHATSAPP_SHARE_ENABLED,
+} from '@/utils/constatnts'
 import { extractErrorMessage } from '@/utils/helpers'
 import { TRAVEL_QUOTE_SESSION_STORAGE_KEY } from '@/utils/travel-enums'
 import {
@@ -278,10 +282,12 @@ export const TravelQuotePreviewPage = ({
                   })
                 },
               },
-              {
-                label: 'WhatsApp',
-                icon: <Share2 className="h-4 w-4" />,
-              },
+              ...(WHATSAPP_SHARE_ENABLED
+                ? [{
+                    label: 'WhatsApp',
+                    icon: <Share2 className="h-4 w-4" />,
+                  }]
+                : []),
             ]}
           />
         </div>

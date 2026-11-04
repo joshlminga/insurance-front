@@ -177,6 +177,25 @@ export const OrganizationQuotationReportColumns: ColumnDef<any>[] = [
       <div>{row.original.is_successful_purchase ? 'Yes' : 'No'}</div>
     ),
   },
+  {
+    id: 'issue_reason',
+    header: () => <div>Issue Reason</div>,
+    cell: ({ row }) => {
+      const label = row.original.issue_reason_label
+      const other = row.original.other_reason
+      if (!label) {
+        return <div>-</div>
+      }
+      return (
+        <div className="space-y-0.5">
+          <div>{label}</div>
+          {other ? (
+            <div className="text-xs text-muted-foreground">{other}</div>
+          ) : null}
+        </div>
+      )
+    },
+  },
 ]
 
 export const OrganizationCertificateReportColumns: ColumnDef<any>[] = [
