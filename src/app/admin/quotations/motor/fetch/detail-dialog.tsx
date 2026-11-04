@@ -147,10 +147,15 @@ export const MotorQuoteFetchDetailDialog = ({ componentProps }: Props) => {
           <div className="text-muted-foreground">{customer?.phone ?? '-'}</div>
         </div>
         <div className="rounded-md border p-3 space-y-1">
-          <div className="font-medium">Agency / location</div>
-          <div>{detail.agency?.name ?? '-'}</div>
-          <div className="text-muted-foreground">
+          {/* Motor mapping: Your Agency = processed_by_organization, On behalf = agency */}
+          <div className="font-medium">Agency</div>
+          <div>
+            <span className="text-muted-foreground">Your Agency: </span>
             {detail.processed_by_organization?.name ?? '-'}
+          </div>
+          <div>
+            <span className="text-muted-foreground">On behalf of: </span>
+            {detail.agency?.name ?? '-'}
           </div>
         </div>
         <div className="rounded-md border p-3 space-y-1">
@@ -163,8 +168,29 @@ export const MotorQuoteFetchDetailDialog = ({ componentProps }: Props) => {
         </div>
         <div className="rounded-md border p-3 space-y-1">
           <div className="font-medium">Cover</div>
-          <div>{String(cover?.cover_type ?? cover?.covertype_id ?? '-')}</div>
-          <div className="text-muted-foreground">{String(cover?.ownership ?? '')}</div>
+          {/* Cover type = Comprehensive / Third Party, etc. */}
+          <div>
+            {String(cover?.cover_type ?? cover?.covertype_id ?? '-')}
+          </div>
+          {/* Vehicle use comes from API field used_for */}
+          {cover?.used_for ? (
+            <div className="text-muted-foreground">
+              Vehicle use: {String(cover.used_for)}
+            </div>
+          ) : null}
+          {cover?.covering ? (
+            <div className="text-muted-foreground">
+              Covering: {String(cover.covering)}
+            </div>
+          ) : null}
+          {cover?.vehicle_class ? (
+            <div className="text-muted-foreground">
+              Vehicle class: {String(cover.vehicle_class)}
+            </div>
+          ) : null}
+          {cover?.ownership ? (
+            <div className="text-muted-foreground">{String(cover.ownership)}</div>
+          ) : null}
           {detail.selected_cover && (
             <div className="text-muted-foreground">
               {detail.selected_cover.product_name ?? 'Product'} · rate {detail.selected_cover.rate_id}

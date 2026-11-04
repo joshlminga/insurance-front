@@ -4,12 +4,13 @@ import { DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Button, ReusableCheckboxGrid } from "@/dev/core"
 import { UseApiMutation, UseApiQuery } from "@/hooks/hooks"
 import { useAuthStore } from "@/stores/auth-store"
+import type { RbacModulesCatalogData } from "@/types/rbac-modules"
 import type { RbacPermission } from "@/types/rbac-roles"
 import { SubmitResponse } from "@/types/types"
 import { EMETHODS } from "@/utils/constatnts"
 import { extractErrorMessage } from "@/utils/helpers"
 import { ShowToast } from "@/utils/utils"
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import {
   buildRolePermissionsParams,
@@ -31,6 +32,17 @@ type PermissionsPagination = {
   last_page?: number
   per_page?: number
   total?: number
+}
+
+type RbacModulesCatalogResponse = Omit<SubmitResponse, "data"> & {
+  data: RbacModulesCatalogData
+}
+
+/** Human label for a module key; prefer catalog label, else spaced key. */
+const formatModuleLabel = (moduleKey: string, catalogLabels: Map<string, string>) => {
+  const fromCatalog = catalogLabels.get(moduleKey)
+  if (fromCatalog) return fromCatalog
+  return moduleKey.replace(/-/g, " ")
 }
 
 export const AssignPermissionsModal = ({
@@ -55,6 +67,9 @@ export const AssignPermissionsModal = ({
   // super_admin role name only. Parent-locked roles stay read-only via API is_editable.
   const platformSuperAdmin = isPlatformSuperAdmin(abilities)
 
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null)
+  const loadMoreSentinelRef = useRef<HTMLDivElement | null>(null)
+
   const { data: roleListData, isLoading: isLoadingRole, refetch: refetchRole } =
     UseApiQuery<SubmitResponse>({
       url: isScopedRole ? "roles" : `${rolesBasePath}/${roleId}`,
@@ -68,6 +83,14 @@ export const AssignPermissionsModal = ({
         enabled: Boolean(roleId) && (isScopedRole ? Boolean(organizationLocationId) : true),
       },
     })
+
+  // Same catalog as role module picker — used for friendly module card titles.
+  const { data: modulesCatalogData } = UseApiQuery<RbacModulesCatalogResponse>({
+    url: "rbac-modules/catalog",
+    queryOptions: {
+      staleTime: 5 * 60 * 1000,
+    },
+  })
 
   const resolvedRole = useMemo(() => {
     if (isScopedRole) {
@@ -87,6 +110,15 @@ export const AssignPermissionsModal = ({
     Array.isArray(resolvedRole?.modules) ? resolvedRole.modules : []
   )
   const modulesCsv = roleModules.join(",")
+
+  const moduleLabelByKey = useMemo(() => {
+    const map = new Map<string, string>()
+    const list = modulesCatalogData?.data?.modules ?? []
+    list.forEach((module) => {
+      if (module.key) map.set(module.key, module.label || module.key)
+    })
+    return map
+  }, [modulesCatalogData?.data?.modules])
 
   const [page, setPage] = useState(1)
   const [accumulatedPermissions, setAccumulatedPermissions] = useState<RbacPermission[]>([])
@@ -186,16 +218,36 @@ export const AssignPermissionsModal = ({
     saveMutation.mutate({ permission_ids: selectedPermissionIds })
   }
 
-  const handleLoadMore = () => {
-    setPage((currentPage) => currentPage + 1)
-  }
-
   const isInitialLoading = isLoadingRole || (isLoadingPermissions && page === 1)
   const isLoadingMore = isLoadingPermissions && page > 1
   const hasMore =
     pagination != null &&
     (pagination.current_page ?? page) < (pagination.last_page ?? 1)
   const totalCount = pagination?.total ?? accumulatedPermissions.length
+
+  const handleLoadMore = useCallback(() => {
+    if (!hasMore || isLoadingPermissions) return
+    setPage((currentPage) => currentPage + 1)
+  }, [hasMore, isLoadingPermissions])
+
+  // Async pagination: when the list sentinel enters view, fetch the next page.
+  useEffect(() => {
+    const scrollRoot = scrollContainerRef.current
+    const sentinel = loadMoreSentinelRef.current
+    if (!scrollRoot || !sentinel) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          handleLoadMore()
+        }
+      },
+      { root: scrollRoot, rootMargin: "80px", threshold: 0 }
+    )
+
+    observer.observe(sentinel)
+    return () => observer.disconnect()
+  }, [handleLoadMore, permissionGroups.length, hasMore])
 
   return (
     <div className="w-full min-w-[600px] max-w-[900px] p-6 space-y-6">
@@ -230,47 +282,64 @@ export const AssignPermissionsModal = ({
             Showing {accumulatedPermissions.length} of {totalCount} permissions
           </p>
 
-          <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-2">
+          <div
+            ref={scrollContainerRef}
+            className="space-y-4 max-h-[60vh] overflow-y-auto pr-2"
+          >
+            {/* Each card is one permission group (module). */}
             {permissionGroups.map(([moduleKey, modulePermissions]) => (
-              <div key={moduleKey} className="space-y-3">
-                <h3 className="text-sm font-semibold capitalize">{moduleKey}</h3>
-                <ReusableCheckboxGrid
-                  name={`permissions-${moduleKey}`}
-                  columns={2}
-                  options={modulePermissions.map((permission) => {
-                    // super_admin on the permission row means only a platform super admin may tick it.
-                    const lockedToSuperAdmin = Boolean(permission.super_admin) && !platformSuperAdmin
-                    const checkboxLocked = isReadOnly || lockedToSuperAdmin
+              <div
+                key={moduleKey}
+                className="rounded-md border border-[#ADABAB] overflow-hidden"
+              >
+                <div className="flex items-center justify-between gap-3 px-4 py-2.5 bg-muted/40 border-b border-[#ADABAB]">
+                  <h3 className="text-sm font-semibold capitalize">
+                    {formatModuleLabel(moduleKey, moduleLabelByKey)}
+                  </h3>
+                  <span className="text-xs text-muted-foreground shrink-0">
+                    {modulePermissions.length}{" "}
+                    {modulePermissions.length === 1 ? "permission" : "permissions"}
+                  </span>
+                </div>
+                <div className="px-4 py-3">
+                  <ReusableCheckboxGrid
+                    name={`permissions-${moduleKey}`}
+                    columns={2}
+                    options={modulePermissions.map((permission) => {
+                      // super_admin on the permission row means only a platform super admin may tick it.
+                      const lockedToSuperAdmin = Boolean(permission.super_admin) && !platformSuperAdmin
+                      const checkboxLocked = isReadOnly || lockedToSuperAdmin
 
-                    return {
-                      id: String(permission.id),
-                      name: permission.description || permission.name,
-                      checked: selectedPermissionIds.includes(permission.id),
-                      disabled: checkboxLocked,
-                      onChange: checkboxLocked
-                        ? undefined
-                        : (checked) => togglePermission(permission.id, checked),
-                    }
-                  })}
-                />
+                      return {
+                        id: String(permission.id),
+                        name: permission.description || permission.name,
+                        checked: selectedPermissionIds.includes(permission.id),
+                        disabled: checkboxLocked,
+                        onChange: checkboxLocked
+                          ? undefined
+                          : (checked) => togglePermission(permission.id, checked),
+                      }
+                    })}
+                  />
+                </div>
               </div>
             ))}
-          </div>
 
-          {hasMore && (
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full rounded-full"
-              disabled={isLoadingMore}
-              loading={isLoadingMore}
-              onClick={handleLoadMore}
+            {/* Sentinel at the end of the scroll list — triggers the next page. */}
+            <div
+              ref={loadMoreSentinelRef}
+              className="flex items-center justify-center py-2 text-sm text-muted-foreground"
+              aria-hidden={!hasMore && !isLoadingMore}
             >
               {isLoadingMore
                 ? "Loading more..."
-                : `Load more (${accumulatedPermissions.length} of ${totalCount})`}
-            </Button>
-          )}
+                : hasMore
+                  ? "Scroll for more"
+                  : accumulatedPermissions.length > 0
+                    ? "All permissions loaded"
+                    : null}
+            </div>
+          </div>
         </div>
       )}
 

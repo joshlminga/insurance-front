@@ -52,6 +52,11 @@ type OrganizationReportPageProps = {
   /** Show searchable By Agent filter when the user has module.aggregate */
   showAgentFilter?: boolean
   /**
+   * Show searchable Processed by member filter when the user has module.aggregate.
+   * Empty selection = all members. Sends processed_by_id to list/export.
+   */
+  showProcessedByFilter?: boolean
+  /**
    * Show searchable insurer dropdown (organization id).
    * Empty selection = all insurers. Sends filter.insurer_id to list/export.
    */
@@ -82,15 +87,17 @@ export function OrganizationReportPage({
   searchPlaceholder = 'Search…',
   showSummary = false,
   showAgentFilter = false,
+  showProcessedByFilter = false,
   showInsurerFilter = false,
   detailUrl,
   DetailDialog,
 }: OrganizationReportPageProps) {
   const { canModuleAction } = useCan()
   const canExport = canModuleAction(moduleKey, 'export')
-  // Only users with aggregate can search other agents; others are forced to themselves on the API
+  // Only users with aggregate can search other agents/members; others are forced to themselves on the API
   const canAggregate = canModuleAction(moduleKey, 'aggregate')
   const showAgentPicker = showAgentFilter && canAggregate
+  const showProcessedByPicker = showProcessedByFilter && canAggregate
   const { exportReport, isExporting } = useOrganizationReportExport()
 
   const {
@@ -136,6 +143,18 @@ export function OrganizationReportPage({
       }
     }
 
+    // Processed-by member filter (same aggregate gate as By Agent)
+    if (showProcessedByPicker) {
+      const processedById = (filter as any).processed_by_id
+      if (
+        processedById !== undefined &&
+        processedById !== null &&
+        String(processedById).trim() !== ''
+      ) {
+        params.processed_by_id = String(processedById).trim()
+      }
+    }
+
     // Insurer dropdown sends organization id (empty = all insurers)
     if (showInsurerFilter) {
       const insurerId = (filter as any).insurer_id
@@ -145,8 +164,11 @@ export function OrganizationReportPage({
     }
 
     for (const field of extraFilters) {
-      // agent_id / insurer_id are handled by the searchable pickers above
+      // Keys owned by searchable pickers (travel still uses a raw processed_by_id input)
       if (field.key === 'agent_id' || field.key === 'insurer_id') {
+        continue
+      }
+      if (field.key === 'processed_by_id' && showProcessedByPicker) {
         continue
       }
       const value = (filter as any)[field.key]
@@ -156,7 +178,7 @@ export function OrganizationReportPage({
     }
 
     return params
-  }, [filter, extraFilters, showAgentPicker, showInsurerFilter])
+  }, [filter, extraFilters, showAgentPicker, showProcessedByPicker, showInsurerFilter])
 
   const { data, isLoading, isError } = UseApiQuery<SubmitResponse>({
     url: listUrl,
@@ -313,6 +335,33 @@ export function OrganizationReportPage({
                   />
                 </div>
               ) : null}
+              {showProcessedByPicker ? (
+                <div className="space-y-1.5" data-testid="report-processed-by-filter">
+                  <ReusableSingleSelectApiInput
+                    url="reports/motor/agents"
+                    label="Processed by"
+                    placeholder="All members"
+                    searchPlaceholder="Search member…"
+                    value={
+                      (filter as any).processed_by_id
+                        ? String((filter as any).processed_by_id)
+                        : ''
+                    }
+                    onChange={(value) =>
+                      optionsDispatcher({
+                        type: 'UPDATE',
+                        payload: {
+                          processed_by_id: value ? String(value) : '',
+                          page: 1,
+                        },
+                      })
+                    }
+                    config={orgContextHeaders ? { headers: orgContextHeaders } : undefined}
+                    labelKey="name"
+                    valueKey="id"
+                  />
+                </div>
+              ) : null}
               {showInsurerFilter ? (
                 <div className="space-y-1.5" data-testid="report-insurer-filter">
                   <ReusableSingleSelectApiInput
@@ -359,7 +408,11 @@ export function OrganizationReportPage({
                 </div>
               ) : null}
               {extraFilters.map((field) => {
+                // Skip keys owned by searchable pickers (travel keeps raw processed_by_id)
                 if (field.key === 'agent_id' || field.key === 'insurer_id') {
+                  return null
+                }
+                if (field.key === 'processed_by_id' && showProcessedByPicker) {
                   return null
                 }
                 return (

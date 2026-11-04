@@ -244,7 +244,14 @@ export type TravelQuoteFetchListRow = {
     email?: string | null
     phone?: string | null
   } | null
+  /** Primary owner: agency_id, else processor, else country default */
   agency?: {
+    organization_id?: number
+    organization_location_id?: number
+    name?: string
+  } | null
+  /** Only set when processor differs from primary agency */
+  processed_by_organization?: {
     organization_id?: number
     organization_location_id?: number
     name?: string
@@ -363,7 +370,14 @@ export type MotorQuoteFetchListRow = {
     email?: string | null
     phone?: string | null
   } | null
+  /** Primary owner: agency_id, else processor, else country default */
   agency?: {
+    organization_id?: number
+    organization_location_id?: number
+    name?: string
+  } | null
+  /** Only set when processor differs from primary agency */
+  processed_by_organization?: {
     organization_id?: number
     organization_location_id?: number
     name?: string

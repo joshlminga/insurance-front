@@ -154,16 +154,16 @@ export const adminNavConfig: NavItem[] = [
             permission: 'quotation-motor.read',
           },
           {
-            title: 'Reminders',
-            url: EROUTES.MOTOR_QUOTATION_REMINDERS,
-            module: MODULES.QUOTATION_MOTOR,
-            permission: 'quotation-motor.read',
-          },
-          {
             title: 'Listed',
             url: EROUTES.REPORT_QUOTATIONS_MOTOR,
             module: MODULES.REPORT_MOTOR_QUOTATION,
             permission: 'report-motor-quotation.menu',
+          },
+          {
+            title: 'Reminders',
+            url: EROUTES.MOTOR_QUOTATION_REMINDERS,
+            module: MODULES.QUOTATION_MOTOR,
+            permission: 'quotation-motor.read',
           },
         ],
       },

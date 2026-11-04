@@ -15,12 +15,13 @@ export const OrganizationMotorQuotationsReportPage = () => (
     searchPlaceholder="Search quote code, customer, registration…"
     showSummary
     showAgentFilter
+    // Member list for who processed the quote (requires module.aggregate)
+    showProcessedByFilter
     // Report-scoped show (not quotation/motor/fetch) so report-only users can preview
     detailUrl={(row) => `reports/motor/quotations/${row.id}`}
     DetailDialog={MotorQuoteFetchDetailDialog}
     extraFilters={[
       { key: 'quote_code', label: 'Quote code', placeholder: 'Q-…' },
-      { key: 'processed_by_id', label: 'Processed by ID', type: 'number' },
       { key: 'referral_code', label: 'Referral code', placeholder: 'REF-…' },
       { key: 'insurer_id', label: 'Insurer ID', type: 'number' },
     ]}
