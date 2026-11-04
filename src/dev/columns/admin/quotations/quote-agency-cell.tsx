@@ -19,7 +19,7 @@ export function QuoteAgencyCell({
     <div className="space-y-0.5">
       <div>{agencyName?.trim() || '-'}</div>
       {processedByName?.trim() ? (
-        <div className="text-xs text-muted-foreground">
+        <div className="text-xs text-[#C20C0C]">
           processed by {processedByName.trim()}
         </div>
       ) : null}
