@@ -43,13 +43,13 @@ export function RoleModulesField({
   }, [data?.data?.modules])
 
   return (
-    <div className="space-y-2 w-full">
+      <div className="w-full min-w-0 space-y-2">
       <Label>
         {label}
         {required && <span className="text-red-500 ml-1">*</span>}
       </Label>
       <MultiSelect values={value ?? []} onValuesChange={(vals) => onChange(vals)}>
-        <MultiSelectTrigger className="w-full h-10 rounded-[5px] border border-[#ADABAB]">
+        <MultiSelectTrigger className="w-full rounded-[5px] border border-[#ADABAB]">
           <MultiSelectValue placeholder={isLoading ? "Loading modules..." : "Select modules..."} />
         </MultiSelectTrigger>
         <MultiSelectContent>

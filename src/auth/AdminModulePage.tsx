@@ -5,6 +5,8 @@ interface AdminModulePageProps {
   module?: string
   modules?: string[]
   permission?: string
+  /** Any-of permissions for shared URLs (e.g. credit transactions + recharge) */
+  permissions?: string[]
   productLine?: string
   /** Passed through to ModuleRoute. Redirects unless the role is super_admin. */
   requireSuperAdmin?: boolean
@@ -19,6 +21,7 @@ export function AdminModulePage({
   module,
   modules,
   permission,
+  permissions,
   productLine,
   requireSuperAdmin,
   children,
@@ -28,6 +31,7 @@ export function AdminModulePage({
       module={module}
       modules={modules}
       permission={permission}
+      permissions={permissions}
       productLine={productLine}
       requireSuperAdmin={requireSuperAdmin}
     >

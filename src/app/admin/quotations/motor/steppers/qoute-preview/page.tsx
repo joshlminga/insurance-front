@@ -29,6 +29,7 @@ import {
     BENEFIT_TYPE_CONFIG,
     EMETHODS,
     MOTOR_QUOTE_SESSION_STORAGE_KEY,
+    WHATSAPP_SHARE_ENABLED,
 } from "@/utils/constatnts";
 import { persistAdminMotorPurchaseStart, readAdminMotorDuplicateSourceId, clearAdminMotorDuplicatePrefill } from "../../admin-motor-session";
 import { ShowToast } from "@/utils/utils";
@@ -228,10 +229,12 @@ export const AdminMotorQuotePreviewPage: React.FC<premiumPreview> = ({
                                     })
                                 }
                             },
-                            {
-                                label: "WhatsApp",
-                                icon: <Share2 className="w-4 h-4" />,
-                            },
+                            ...(WHATSAPP_SHARE_ENABLED
+                                ? [{
+                                    label: "WhatsApp",
+                                    icon: <Share2 className="w-4 h-4" />,
+                                }]
+                                : []),
                         ]}
                     />
                 </div>

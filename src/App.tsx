@@ -87,7 +87,7 @@ const AccountProfilePage = lazy(() => import("./app/admin/account-profile/page")
 const OrganizationsPage = lazy(() => import("./app/admin/organizations/page"))
 const OrganizationLocationsPage = lazy(() => import("./app/admin/organization-location/page"))
 const OrganizationRolesPage = lazy(() => import("./app/admin/organization-roles/page"))
-const OrganizationRolesDetailPage = lazy(() => import("./app/admin/organization-roles/[orgLocationId]/page"))
+const OrganizationRolesDetailPage = lazy(() => import("./app/admin/organization-roles/[orgLocationSlug]/page"))
 const OrganizationMembersPage = lazy(() => import("./app/admin/organization-members/page"))
 const OrganizationMembersDetailPage = lazy(() => import("./app/admin/organization-members/[orgLocationId]/page"))
 const GlobalRolesPage = lazy(() => import("./app/admin/system-roles/global/page"))
@@ -100,6 +100,11 @@ const DmvicStockPage = lazy(() => import("./app/admin/dmvic-stock/page").then(m 
 const DmvicStockPolicyNumbersPage = lazy(() =>
   import("./app/admin/dmvic-stock/policy-numbers/page").then(m => ({
     default: m.DmvicStockPolicyNumbersPage,
+  })),
+)
+const DmvicStockSettingsPage = lazy(() =>
+  import("./app/admin/dmvic-stock/settings/page").then(m => ({
+    default: m.DmvicStockSettingsPage,
   })),
 )
 const DmvicStockDetailPage = lazy(() => import("./app/admin/dmvic-stock/[id]/page").then(m => ({ default: m.DmvicStockDetailPage })))
@@ -177,6 +182,11 @@ const AdminMotorQuotationPurchasePage = lazy(() =>
 const AdminMotorQuotationFetchPage = lazy(() =>
   import("./app/admin/quotations/motor/fetch/page").then(m => ({
     default: m.AdminMotorQuotationFetchPage,
+  }))
+)
+const AdminMotorRemindersPage = lazy(() =>
+  import("./app/admin/quotations/motor/reminders/page").then(m => ({
+    default: m.AdminMotorRemindersPage,
   }))
 )
 const AdminMotorQuotationDoublePage = lazy(() =>
@@ -766,7 +776,8 @@ export const router = createBrowserRouter([
             element: (
               <S>
                 <AdminModulePage
-                modules={[...QUOTATION_MOTOR_MODULES]}
+                module={MODULES.QUOTATION_MOTOR}
+                permission="quotation-motor.advance"
                 productLine="Motor">
                   <MotorQuotationPage />
                 </AdminModulePage>
@@ -778,7 +789,8 @@ export const router = createBrowserRouter([
             element: (
               <S>
                 <AdminModulePage
-                modules={[...QUOTATION_MOTOR_MODULES]}
+                module={MODULES.QUOTATION_MOTOR}
+                permission="quotation-motor.advance"
                 productLine="Motor">
                   <AdminMotorDuplicateQuotationPage />
                 </AdminModulePage>
@@ -790,7 +802,8 @@ export const router = createBrowserRouter([
             element: (
               <S>
                 <AdminModulePage
-                modules={[...QUOTATION_MOTOR_MODULES]}
+                module={MODULES.QUOTATION_MOTOR}
+                permission="quotation-motor.advance"
                 productLine="Motor">
                   <AdminMotorQuotationResultsPage />
                 </AdminModulePage>
@@ -802,7 +815,7 @@ export const router = createBrowserRouter([
             element: (
               <S>
                 <AdminModulePage
-                modules={[...QUOTATION_MOTOR_MODULES]}
+                modules={[...QUOTATION_MOTOR_MODULES, ...PURCHASE_MOTOR_MODULES]}
                 productLine="Motor">
                   <AdminMotorQuotationPurchasePage />
                 </AdminModulePage>
@@ -855,9 +868,23 @@ export const router = createBrowserRouter([
             element: (
               <S>
                 <AdminModulePage
-                modules={[...QUOTATION_MOTOR_MODULES]}
+                module={MODULES.QUOTATION_MOTOR}
+                permission="quotation-motor.read"
                 productLine="Motor">
                   <AdminMotorQuotationFetchPage />
+                </AdminModulePage>
+              </S>
+            ),
+          },
+          {
+            path: "quotations/motor-quotations/reminders",
+            element: (
+              <S>
+                <AdminModulePage
+                module={MODULES.QUOTATION_MOTOR}
+                permission="quotation-motor.read"
+                productLine="Motor">
+                  <AdminMotorRemindersPage />
                 </AdminModulePage>
               </S>
             ),
@@ -867,7 +894,8 @@ export const router = createBrowserRouter([
             element: (
               <S>
                 <AdminModulePage
-                modules={[...QUOTATION_MOTOR_MODULES]}
+                module={MODULES.QUOTATION_MOTOR_ALTERNATIVE}
+                permission="quotation-motor-alternative.advance"
                 productLine="Motor">
                   <AdminMotorQuotationDoublePage />
                 </AdminModulePage>
@@ -919,7 +947,9 @@ export const router = createBrowserRouter([
             path: "reports/customers",
             element: (
               <S>
-                <AdminModulePage module={MODULES.REPORT_CUSTOMER}>
+                <AdminModulePage
+                  module={MODULES.REPORT_CUSTOMER}
+                  permission="report-customer.menu">
                   <OrganizationCustomersReportPage />
                 </AdminModulePage>
               </S>
@@ -929,7 +959,10 @@ export const router = createBrowserRouter([
             path: "reports/motor/vehicles",
             element: (
               <S>
-                <AdminModulePage module={MODULES.REPORT_ORG_MOTOR_VEHICLE}>
+                <AdminModulePage
+                  module={MODULES.REPORT_ORG_MOTOR_VEHICLE}
+                  permission="report-org-motor-vehicle.menu"
+                  productLine="Motor">
                   <OrganizationMotorVehiclesReportPage />
                 </AdminModulePage>
               </S>
@@ -939,7 +972,10 @@ export const router = createBrowserRouter([
             path: "reports/motor/quotations",
             element: (
               <S>
-                <AdminModulePage module={MODULES.REPORT_ORG_MOTOR_QUOTATION}>
+                <AdminModulePage
+                  module={MODULES.REPORT_ORG_MOTOR_QUOTATION}
+                  permission="report-org-motor-quotation.menu"
+                  productLine="Motor">
                   <OrganizationMotorQuotationsReportPage />
                 </AdminModulePage>
               </S>
@@ -949,7 +985,10 @@ export const router = createBrowserRouter([
             path: "reports/motor/certificates",
             element: (
               <S>
-                <AdminModulePage module={MODULES.REPORT_ORG_MOTOR_CERTIFICATE}>
+                <AdminModulePage
+                  module={MODULES.REPORT_ORG_MOTOR_CERTIFICATE}
+                  permission="report-org-motor-certificate.menu"
+                  productLine="Motor">
                   <OrganizationMotorCertificatesReportPage />
                 </AdminModulePage>
               </S>
@@ -959,7 +998,10 @@ export const router = createBrowserRouter([
             path: "reports/travel/quotations",
             element: (
               <S>
-                <AdminModulePage module={MODULES.REPORT_ORG_TRAVEL_QUOTATION}>
+                <AdminModulePage
+                  module={MODULES.REPORT_ORG_TRAVEL_QUOTATION}
+                  permission="report-org-travel-quotation.menu"
+                  productLine="Travel">
                   <OrganizationTravelQuotationsReportPage />
                 </AdminModulePage>
               </S>
@@ -969,7 +1011,10 @@ export const router = createBrowserRouter([
             path: "reports/quotations/motor",
             element: (
               <S>
-                <AdminModulePage module={MODULES.REPORT_MOTOR_QUOTATION}>
+                <AdminModulePage
+                  module={MODULES.REPORT_MOTOR_QUOTATION}
+                  permission="report-motor-quotation.menu"
+                  productLine="Motor">
                   <QuotationReportsMotorPage />
                 </AdminModulePage>
               </S>
@@ -980,7 +1025,8 @@ export const router = createBrowserRouter([
             element: (
               <S>
                 <AdminModulePage
-                  modules={[MODULES.QUOTATION_TRAVEL, MODULES.REPORT_MOTOR_QUOTATION]}>
+                  modules={[MODULES.QUOTATION_TRAVEL, MODULES.REPORT_MOTOR_QUOTATION]}
+                  productLine="Travel">
                   <QuotationReportsTravelPage />
                 </AdminModulePage>
               </S>
@@ -990,8 +1036,9 @@ export const router = createBrowserRouter([
             path: "reports/invoices/motor",
             element: (
               <S>
-                <AdminModulePage 
-                module={MODULES.REPORT_MOTOR_INVOICE}>
+                <AdminModulePage
+                  module={MODULES.REPORT_MOTOR_INVOICE}
+                  productLine="Motor">
                   <InvoiceReportsMotorPage />
                 </AdminModulePage>
               </S>
@@ -1001,8 +1048,9 @@ export const router = createBrowserRouter([
             path: "reports/receipts/motor",
             element: (
               <S>
-                <AdminModulePage 
-                module={MODULES.REPORT_MOTOR_RECEIPT}>
+                <AdminModulePage
+                  module={MODULES.REPORT_MOTOR_RECEIPT}
+                  productLine="Motor">
                   <ReceiptReportsMotorPage />
                 </AdminModulePage>
               </S>
@@ -1013,8 +1061,10 @@ export const router = createBrowserRouter([
             path: "products/motor",
             element: (
               <S>
-                <AdminModulePage 
-                module={MODULES.PRODUCT_MOTOR}>
+                <AdminModulePage
+                  module={MODULES.PRODUCT_MOTOR}
+                  permission="product-motor.menu"
+                  productLine="Motor">
                   <MotorProductPage />
                 </AdminModulePage>
               </S>
@@ -1024,8 +1074,10 @@ export const router = createBrowserRouter([
             path: "products/motor-rates/:slung",
             element: (
               <S>
-                <AdminModulePage 
-                module={MODULES.PRODUCT_MOTOR}>
+                <AdminModulePage
+                  module={MODULES.PRODUCT_MOTOR}
+                  permission="product-motor.menu"
+                  productLine="Motor">
                   <MotorProductRatesPage />
                 </AdminModulePage>
               </S>
@@ -1035,7 +1087,10 @@ export const router = createBrowserRouter([
             path: "products/motor-rate-benefits/:rateId",
             element: (
               <S>
-                <AdminModulePage module={MODULES.PRODUCT_MOTOR}>
+                <AdminModulePage
+                  module={MODULES.PRODUCT_MOTOR}
+                  permission="product-motor.menu"
+                  productLine="Motor">
                   <MotorRateBenefitsAdminPage />
                 </AdminModulePage>
               </S>
@@ -1045,8 +1100,10 @@ export const router = createBrowserRouter([
             path: "products/motor/cover-types",
             element: (
               <S>
-                <AdminModulePage 
-                module={MODULES.PRODUCT_MOTOR}>
+                <AdminModulePage
+                  module={MODULES.MOTOR_COVER_TYPE}
+                  permission="motor-cover-type.menu"
+                  productLine="Motor">
                   <MotorCoverTypePage />
                 </AdminModulePage>
               </S>
@@ -1056,8 +1113,10 @@ export const router = createBrowserRouter([
             path: "products/motor/covering",
             element: (
               <S>
-                <AdminModulePage 
-                module={MODULES.PRODUCT_MOTOR}>
+                <AdminModulePage
+                  module={MODULES.MOTOR_COVER_COVERING}
+                  permission="motor-cover-covering.menu"
+                  productLine="Motor">
                   <MotorCoveringPage />
                 </AdminModulePage>
               </S>
@@ -1067,8 +1126,10 @@ export const router = createBrowserRouter([
             path: "products/motor/vehicle-classes",
             element: (
               <S>
-                <AdminModulePage 
-                module={MODULES.PRODUCT_MOTOR}>
+                <AdminModulePage
+                  module={MODULES.MOTOR_VEHICLE_CLASS}
+                  permission="motor-vehicle-class.menu"
+                  productLine="Motor">
                   <VehicleClassesPage />
                 </AdminModulePage>
               </S>
@@ -1078,8 +1139,10 @@ export const router = createBrowserRouter([
             path: "products/motor/vehicle-use",
             element: (
               <S>
-                <AdminModulePage 
-                module={MODULES.PRODUCT_MOTOR}>
+                <AdminModulePage
+                  module={MODULES.MOTOR_VEHICLE_USE}
+                  permission="motor-vehicle-use.menu"
+                  productLine="Motor">
                   <VehicleUsePage />
                 </AdminModulePage>
               </S>
@@ -1089,7 +1152,10 @@ export const router = createBrowserRouter([
             path: "products/motor/add-on-benefits",
             element: (
               <S>
-                <AdminModulePage module={MODULES.PRODUCT_MOTOR}>
+                <AdminModulePage
+                  module={MODULES.MOTOR_ADDON_BENEFIT}
+                  permission="motor-addon-benefit.menu"
+                  productLine="Motor">
                   <MotorAddonBenefitsPage />
                 </AdminModulePage>
               </S>
@@ -1099,8 +1165,10 @@ export const router = createBrowserRouter([
             path: "products/motor/detailed-benefits",
             element: (
               <S>
-                <AdminModulePage 
-                module={MODULES.PRODUCT_MOTOR}>
+                <AdminModulePage
+                  module={MODULES.MOTOR_DETAIL_BENEFIT}
+                  permission="motor-detail-benefit.menu"
+                  productLine="Motor">
                   <MotorDetailedBenefitPage />
                 </AdminModulePage>
               </S>
@@ -1112,7 +1180,9 @@ export const router = createBrowserRouter([
             path: "products/travel",
             element: (
               <S>
-                <TravelProductsPage />
+                <AdminModulePage productLine="Travel">
+                  <TravelProductsPage />
+                </AdminModulePage>
               </S>
             ),
           },
@@ -1120,7 +1190,9 @@ export const router = createBrowserRouter([
             path: "products/travel/coverage",
             element: (
               <S>
-                <TravelCoveragePage />
+                <AdminModulePage productLine="Travel">
+                  <TravelCoveragePage />
+                </AdminModulePage>
               </S>
             ),
           },
@@ -1128,7 +1200,9 @@ export const router = createBrowserRouter([
             path: "products/travel/benefit-section",
             element: (
               <S>
-                <TravelBenefitSectionPage />
+                <AdminModulePage productLine="Travel">
+                  <TravelBenefitSectionPage />
+                </AdminModulePage>
               </S>
             ),
           },
@@ -1136,7 +1210,9 @@ export const router = createBrowserRouter([
             path: "products/travel/benefit-common",
             element: (
               <S>
-                <TravelBenefitCommonPage />
+                <AdminModulePage productLine="Travel">
+                  <TravelBenefitCommonPage />
+                </AdminModulePage>
               </S>
             ),
           },
@@ -1144,7 +1220,9 @@ export const router = createBrowserRouter([
             path: "products/travel/reason",
             element: (
               <S>
-                <TravelReasonPage />
+                <AdminModulePage productLine="Travel">
+                  <TravelReasonPage />
+                </AdminModulePage>
               </S>
             ),
           },
@@ -1152,7 +1230,9 @@ export const router = createBrowserRouter([
             path: "products/travel-rates/:productId",
             element: (
               <S>
-                <TravelProductRatesPage />
+                <AdminModulePage productLine="Travel">
+                  <TravelProductRatesPage />
+                </AdminModulePage>
               </S>
             ),
           },
@@ -1160,7 +1240,9 @@ export const router = createBrowserRouter([
             path: "products/travel-benefits/:productId",
             element: (
               <S>
-                <TravelProductBenefitsPage />
+                <AdminModulePage productLine="Travel">
+                  <TravelProductBenefitsPage />
+                </AdminModulePage>
               </S>
             ),
           },
@@ -1174,8 +1256,9 @@ export const router = createBrowserRouter([
             path: "finance/parameters",
             element: (
               <S>
-                <AdminModulePage 
-                module={MODULES.FINANCE}>
+                <AdminModulePage
+                module={MODULES.FINANCE_PARAMETER}
+                permission="finance-parameter.menu">
                   <FinanceParametersIndexPage />
                 </AdminModulePage>
               </S>
@@ -1185,7 +1268,10 @@ export const router = createBrowserRouter([
             path: "claims",
             element: (
               <S>
-                <AdminModulePage module={MODULES.CLAIMS}>
+                <AdminModulePage
+                  module={MODULES.CLAIMS}
+                  permission="claims.list"
+                  productLine="Motor">
                   <ClaimsMotorPage />
                 </AdminModulePage>
               </S>
@@ -1195,7 +1281,10 @@ export const router = createBrowserRouter([
             path: "claims/list",
             element: (
               <S>
-                <AdminModulePage module={MODULES.CLAIMS}>
+                <AdminModulePage
+                  module={MODULES.CLAIMS}
+                  permission="claims.list"
+                  productLine="Motor">
                   <ClaimsListPage />
                 </AdminModulePage>
               </S>
@@ -1205,7 +1294,10 @@ export const router = createBrowserRouter([
             path: "claims/new",
             element: (
               <S>
-                <AdminModulePage module={MODULES.CLAIMS}>
+                <AdminModulePage
+                  module={MODULES.CLAIMS}
+                  permission="claims.create"
+                  productLine="Motor">
                   <ClaimsNewPage />
                 </AdminModulePage>
               </S>
@@ -1215,7 +1307,10 @@ export const router = createBrowserRouter([
             path: "claims/settings",
             element: (
               <S>
-                <AdminModulePage module={MODULES.CLAIMS}>
+                <AdminModulePage
+                  module={MODULES.CLAIMS}
+                  permission="claims.settings"
+                  productLine="Motor">
                   <ClaimsSettingsPage />
                 </AdminModulePage>
               </S>
@@ -1225,7 +1320,10 @@ export const router = createBrowserRouter([
             path: "claims/:uuid",
             element: (
               <S>
-                <AdminModulePage module={MODULES.CLAIMS}>
+                <AdminModulePage
+                  module={MODULES.CLAIMS}
+                  permission="claims.read"
+                  productLine="Motor">
                   <ClaimsDetailPage />
                 </AdminModulePage>
               </S>
@@ -1235,8 +1333,9 @@ export const router = createBrowserRouter([
             path: "finance/invoices",
             element: (
               <S>
-                <AdminModulePage 
-                modules={[MODULES.FINANCE, MODULES.REPORT_MOTOR_INVOICE]}>
+                <AdminModulePage
+                modules={[MODULES.INVOICE, MODULES.REPORT_MOTOR_INVOICE]}
+                permission="invoice.menu">
                   <FinanceInvoicesPage />
                 </AdminModulePage>
               </S>
@@ -1246,8 +1345,9 @@ export const router = createBrowserRouter([
             path: "finance/receipts",
             element: (
               <S>
-                <AdminModulePage 
-                module={MODULES.REPORT_MOTOR_RECEIPT}>
+                <AdminModulePage
+                module={MODULES.REPORT_MOTOR_RECEIPT}
+                permission="report-motor-receipt.menu">
                   <FinanceReceiptsPage />
                 </AdminModulePage>
               </S>
@@ -1257,7 +1357,9 @@ export const router = createBrowserRouter([
             path: "finance/payments",
             element: (
               <S>
-                <AdminModulePage module={MODULES.FINANCE}>
+                <AdminModulePage
+                  module={MODULES.INVOICE}
+                  permission="invoice.payments">
                   <FinancePaymentsPage />
                 </AdminModulePage>
               </S>
@@ -1267,7 +1369,9 @@ export const router = createBrowserRouter([
             path: "finance/transactions",
             element: (
               <S>
-                <AdminModulePage module={MODULES.FINANCE}>
+                <AdminModulePage
+                  module={MODULES.INVOICE}
+                  permission="invoice.transactions">
                   <FinanceTransactionsPage />
                 </AdminModulePage>
               </S>
@@ -1340,18 +1444,21 @@ export const router = createBrowserRouter([
             path: "organization-roles",
             element: (
               <S>
-                <AdminModulePage module={MODULES.ROLE}>
+                <AdminModulePage
+                  module={MODULES.ROLE}
+                  permission="role.menu">
                   <OrganizationRolesPage />
                 </AdminModulePage>
               </S>
             ),
           },
           {
-            path: "organization-roles/:orgLocationId",
+            path: "organization-roles/:orgLocationSlug",
             element: (
               <S>
-                <AdminModulePage 
-                module={MODULES.ROLE}>
+                <AdminModulePage
+                module={MODULES.ROLE}
+                permission="role.menu">
                   <OrganizationRolesDetailPage />
                 </AdminModulePage>
               </S>
@@ -1362,8 +1469,9 @@ export const router = createBrowserRouter([
             path: "organization-members",
             element: (
               <S>
-                <AdminModulePage 
-                module={MODULES.ORGANIZATION_LOCATION_USER}>
+                <AdminModulePage
+                module={MODULES.ORGANIZATION_LOCATION_USER}
+                permission="organization-location-user.menu">
                   <OrganizationMembersPage />
                 </AdminModulePage>
               </S>
@@ -1373,8 +1481,9 @@ export const router = createBrowserRouter([
             path: "organization-members/:orgLocationId",
             element: (
               <S>
-                <AdminModulePage 
-                module={MODULES.ORGANIZATION_LOCATION_USER}>
+                <AdminModulePage
+                module={MODULES.ORGANIZATION_LOCATION_USER}
+                permission="organization-location-user.menu">
                   <OrganizationMembersDetailPage />
                 </AdminModulePage>
               </S>
@@ -1457,8 +1566,12 @@ export const router = createBrowserRouter([
             path: "credit/transactions",
             element: (
               <S>
-                <AdminModulePage 
-                module={MODULES.FINANCE_CONTROL}>
+                <AdminModulePage
+                module={MODULES.FINANCE_CONTROL}
+                permissions={[
+                  'finance-control.transactions',
+                  'finance-control.action',
+                ]}>
                   <CreditTransactionsPage />
                 </AdminModulePage>
               </S>
@@ -1468,8 +1581,10 @@ export const router = createBrowserRouter([
             path: "motor-certificates",
             element: (
               <S>
-                <AdminModulePage 
-                module={MODULES.DMVIC_CERTIFICATE}>
+                <AdminModulePage
+                  module={MODULES.DMVIC_CERTIFICATE}
+                  permission="dmvic-certificate.menu"
+                  productLine="Motor">
                   <MotorCertificatesPage />
                 </AdminModulePage>
               </S>
@@ -1479,8 +1594,9 @@ export const router = createBrowserRouter([
             path: "dmvic-stock",
             element: (
               <S>
-                <AdminModulePage 
-                module={MODULES.DMVIC_STOCK}>
+                <AdminModulePage
+                module={MODULES.DMVIC_STOCK}
+                permission="dmvic-stock.list">
                   <DmvicStockPage />
                 </AdminModulePage>
               </S>
@@ -1492,8 +1608,22 @@ export const router = createBrowserRouter([
             element: (
               <S>
                 <AdminModulePage
-                module={MODULES.DMVIC_STOCK}>
+                module={MODULES.DMVIC_STOCK}
+                permission="dmvic-stock.policies">
                   <DmvicStockPolicyNumbersPage />
+                </AdminModulePage>
+              </S>
+            ),
+          },
+          {
+            // Must be registered before dmvic-stock/:id so "settings" is not captured as an id.
+            path: "dmvic-stock/settings",
+            element: (
+              <S>
+                <AdminModulePage
+                module={MODULES.DMVIC_STOCK}
+                permission="dmvic-stock.settings">
+                  <DmvicStockSettingsPage />
                 </AdminModulePage>
               </S>
             ),
@@ -1502,8 +1632,9 @@ export const router = createBrowserRouter([
             path: "dmvic-stock/:id",
             element: (
               <S>
-                <AdminModulePage 
-                module={MODULES.DMVIC_STOCK}>
+                <AdminModulePage
+                module={MODULES.DMVIC_STOCK}
+                permission="dmvic-stock.read">
                   <DmvicStockDetailPage />
                 </AdminModulePage>
               </S>

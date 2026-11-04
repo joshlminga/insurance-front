@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CardFooter } from '@/components/ui/card'
+import { Checkbox } from '@/components/ui/checkbox'
 import { DmvicValidationOverrideDialog } from '@/components/shared'
-import { Button, ReuseableInput } from '@/dev/core'
+import { Button, ReusableSelect, ReuseableInput } from '@/dev/core'
 import {
     MOTOR_PURCHASE_URLS,
     motorInvoiceSummaryKey,
@@ -11,7 +12,12 @@ import {
 } from '@/app/customer/motor/motor-purchase-query'
 import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
 import { useQueryClient } from '@tanstack/react-query'
-import { InvoicePaymentSchema } from '@/types/form-schema'
+import {
+    InvoicePaymentSchema,
+    MOTOR_ISSUE_REASON_OPTIONS,
+    MOTOR_ISSUE_REASON_VALUES,
+    type MotorIssueReasonValue,
+} from '@/types/form-schema'
 import type { InvoicePaymentFormValues } from '@/types/schema'
 import type { BoxHeaderProps, SubmitResponse } from '@/types/types'
 import {
@@ -24,19 +30,25 @@ import {
     extractErrorMessage,
     getDmvicValidationOverrideError,
     isDmvicPolicyExhaustedError,
+    isShortMotorCover,
     maxCoverEndDate,
 } from '@/utils/helpers'
 import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowLeftCircle, ArrowRightCircle } from 'lucide-react'
 import React, { useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 import type { AdminMotorStepProps } from '../admin-step-props'
 import {
     readAdminMotorCustomerContact,
     readAdminMotorTargetInvoiceId,
     isAdminMotorIssueCoverFlow,
 } from '../admin-motor-session'
+import {
+    motorCheckboxLabelAccentClassName,
+    motorCheckboxLabelClassName,
+} from '../motor-field-styles'
+import { cn } from '@/lib/utils'
 
 const getTodayDateString = () => new Date().toISOString().split("T")[0]
 
@@ -47,6 +59,10 @@ const readPurchaseSessionId = () => {
         ?? sessionStorage.getItem(INVOICE_SESSION_STORAGE_KEY)
     )
 }
+
+const isMotorIssueReason = (value: unknown): value is MotorIssueReasonValue =>
+    typeof value === 'string'
+    && (MOTOR_ISSUE_REASON_VALUES as readonly string[]).includes(value)
 
 const BoxHeader = ({ title, description }: BoxHeaderProps) => (
     <div className="flex flex-col gap-0.5 pb-3">
@@ -89,13 +105,33 @@ export const AdminMotorInvoicePayment: React.FC<AdminMotorStepProps> = ({
             cover_end_date: "",
             policy_number: "",
             payment_plan: "Full",
+            reminders_enabled: false,
+            issue_reason: "",
+            other_reason: "",
         },
 
     })
 
     const coverStartDate = form.watch("cover_start_date")
+    const coverEndDate = form.watch("cover_end_date")
+    const issueReason = form.watch("issue_reason")
     // Max end = start + 12 months − 1 day (e.g. 18/09/2026 → 17/09/2027)
     const coverEndMaxDate = coverStartDate ? maxCoverEndDate(coverStartDate, 12) : undefined
+    // Short cover (≤ 30 days): show required "Reason to Issue 1 Month"
+    const showShortCoverReason = isShortMotorCover(coverStartDate, coverEndDate)
+
+    // When cover lengthens past 30 days, clear reason fields so they are not posted
+    React.useEffect(() => {
+        if (showShortCoverReason) {
+            return
+        }
+        if (form.getValues("issue_reason")) {
+            form.setValue("issue_reason", "")
+        }
+        if (form.getValues("other_reason")) {
+            form.setValue("other_reason", "")
+        }
+    }, [showShortCoverReason, form])
 
     const { data: summaryData } = UseApiQuery<SubmitResponse>({
         url: useInvoiceSummary
@@ -116,16 +152,33 @@ export const AdminMotorInvoicePayment: React.FC<AdminMotorStepProps> = ({
     const summary = summaryData?.data as MotorPurchaseSummaryData | undefined
 
     React.useEffect(() => {
-        const invoice = summaryData?.data?.invoice as Record<string, string | undefined> | undefined
-        if (!invoice) return
+        const data = summaryData?.data as MotorPurchaseSummaryData | undefined
+        const invoice = data?.invoice
+        if (!invoice && data?.reminders_enabled === undefined) return
 
-        if (invoice.name) form.setValue('name', invoice.name)
-        if (invoice.email) form.setValue('email', invoice.email)
-        if (invoice.phone) form.setValue('phone', invoice.phone)
-        if (invoice.cover_start_date) form.setValue('cover_start_date', invoice.cover_start_date)
-        if (invoice.cover_end_date) form.setValue('cover_end_date', invoice.cover_end_date)
-        if (invoice.policy_number) form.setValue('policy_number', invoice.policy_number)
-        if (invoice.payment_plan) form.setValue('payment_plan', invoice.payment_plan)
+        if (invoice?.name) form.setValue('name', invoice.name)
+        if (invoice?.email) form.setValue('email', invoice.email)
+        if (invoice?.phone) form.setValue('phone', invoice.phone)
+        if (invoice?.cover_start_date) form.setValue('cover_start_date', invoice.cover_start_date)
+        if (invoice?.cover_end_date) form.setValue('cover_end_date', invoice.cover_end_date)
+        if (invoice?.policy_number) form.setValue('policy_number', invoice.policy_number)
+        if (invoice?.payment_plan) form.setValue('payment_plan', invoice.payment_plan)
+
+        // Prefill reminders + short-cover reason from summary root or invoice
+        const remindersEnabled = data?.reminders_enabled ?? invoice?.reminders_enabled
+        if (typeof remindersEnabled === 'boolean') {
+            form.setValue('reminders_enabled', remindersEnabled)
+        }
+
+        const reason = data?.issue_reason ?? invoice?.issue_reason
+        if (isMotorIssueReason(reason)) {
+            form.setValue('issue_reason', reason)
+        }
+
+        const otherReason = data?.other_reason ?? invoice?.other_reason
+        if (typeof otherReason === 'string' && otherReason.trim()) {
+            form.setValue('other_reason', otherReason)
+        }
     }, [summaryData, form])
 
     const submitMutation = UseApiMutation<SubmitResponse, InvoicePaymentFormValues>({
@@ -167,13 +220,25 @@ export const AdminMotorInvoicePayment: React.FC<AdminMotorStepProps> = ({
     })
 
     const buildPayload = (data: InvoicePaymentFormValues): InvoicePaymentFormValues => {
-        const payload: InvoicePaymentFormValues = { ...data }
+        const payload: InvoicePaymentFormValues = {
+            ...data,
+            reminders_enabled: Boolean(data.reminders_enabled),
+        }
         if (!payload.cover_end_date?.trim()) {
             delete payload.cover_end_date
         }
         if (!payload.policy_number?.trim()) {
             delete payload.policy_number
         }
+
+        // Only send reason when this is still a short cover
+        if (!isShortMotorCover(payload.cover_start_date, payload.cover_end_date)) {
+            delete payload.issue_reason
+            delete payload.other_reason
+        } else if (payload.issue_reason !== 'other') {
+            delete payload.other_reason
+        }
+
         // Strip override flags on first submit; popup retry adds them back
         delete payload.validate_double_insurance
         delete payload.is_logbook_verified
@@ -323,7 +388,67 @@ export const AdminMotorInvoicePayment: React.FC<AdminMotorStepProps> = ({
                             <p className="mt-3 text-xs text-muted-foreground sm:text-sm">
                                 A custom cover end date defers DMVIC certificate issuance until cover is issued manually. Max cover is 12 months from the start date.
                             </p>
+
+                            <div className="mt-4 flex items-start gap-2">
+                                <Controller
+                                    control={form.control}
+                                    name="reminders_enabled"
+                                    render={({ field }) => (
+                                        <Checkbox
+                                            id="admin-reminders-enabled"
+                                            checked={Boolean(field.value)}
+                                            onCheckedChange={(checked) =>
+                                                field.onChange(Boolean(checked))
+                                            }
+                                            className="mt-0.5 w-3.75 h-3.75 rounded-[3px] border border-[#D9D9D9] data-[state=checked]:bg-[#C20C0C] data-[state=checked]:border-[#C20C0C]"
+                                        />
+                                    )}
+                                />
+                                <label
+                                    htmlFor="admin-reminders-enabled"
+                                    className={cn(motorCheckboxLabelClassName)}
+                                >
+                                    <span className={motorCheckboxLabelAccentClassName}>
+                                        Send cover expiry reminders
+                                    </span>
+                                    {' '}
+                                    (emails after the invoice is paid, based on cover length)
+                                </label>
+                            </div>
                         </div>
+
+                        {/* Short cover: admin must pick why this is a 1-month issue */}
+                        {showShortCoverReason ? (
+                            <div className="rounded-2xl border border-[#ADABAB]/35 bg-white/95 p-3 sm:p-5">
+                                <BoxHeader
+                                    title="Policy Clarification"
+                                    description="Tell us why this cover is being issued for one month."
+                                />
+                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 sm:gap-5">
+                                    <ReusableSelect
+                                        control={form.control}
+                                        name="issue_reason"
+                                        label="Reason to Issue 1 Month"
+                                        placeholder="Select a reason"
+                                        required
+                                        options={MOTOR_ISSUE_REASON_OPTIONS.map((option) => ({
+                                            value: option.value,
+                                            label: option.label,
+                                        }))}
+                                    />
+                                    {issueReason === 'other' ? (
+                                        <ReuseableInput
+                                            className="w-full h-10 rounded-[5px] border border-[#ADABAB]"
+                                            control={form.control}
+                                            name="other_reason"
+                                            label="Other reasons"
+                                            placeholder="Describe the reason"
+                                            required
+                                        />
+                                    ) : null}
+                                </div>
+                            </div>
+                        ) : null}
                     </div>
                 </div>
                 <CardFooter className="mt-4 w-full flex flex-col gap-3 px-0 sm:flex-row sm:items-center sm:justify-between">

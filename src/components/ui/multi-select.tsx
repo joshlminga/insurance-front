@@ -98,7 +98,8 @@ export function MultiSelect({
       }}
     >
       <Popover open={open} onOpenChange={setOpen} modal={true}>
-        {children}
+        {/* Keeps the control inside the form column so chips wrap down instead of widening the dialog. */}
+        <div className="w-full min-w-0">{children}</div>
       </Popover>
     </MultiSelectContext>
   )
@@ -122,8 +123,10 @@ export function MultiSelectTrigger({
         role={props.role ?? "combobox"}
         aria-expanded={props["aria-expanded"] ?? open}
         className={cn(
-          "flex h-auto min-h-9 w-fit items-center justify-between gap-2 overflow-hidden rounded-md border border-input bg-transparent px-3 py-1.5 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 data-placeholder:text-muted-foreground dark:bg-input/30 dark:hover:bg-input/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 [&_svg:not([class*='text-'])]:text-muted-foreground",
+          "flex w-full min-w-0 max-w-full items-center justify-between gap-2 overflow-hidden rounded-md border border-input bg-transparent px-3 py-1.5 text-left text-sm font-normal shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 data-placeholder:text-muted-foreground dark:bg-input/30 dark:hover:bg-input/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 [&_svg:not([class*='text-'])]:text-muted-foreground",
           className,
+          // Callers often pass h-10. That locks the field to one line, so chips push the control sideways.
+          "h-auto min-h-10 w-full max-w-full min-w-0 shrink whitespace-normal",
         )}
       >
         {children}
@@ -137,7 +140,7 @@ export function MultiSelectValue({
   placeholder,
   clickToRemove = true,
   className,
-  overflowBehavior = "wrap-when-open",
+  overflowBehavior = "wrap",
   ...props
 }: {
   placeholder?: string
@@ -165,6 +168,13 @@ export function MultiSelectValue({
 
     if (overflowElement != null) overflowElement.style.display = "none"
     items.forEach(child => child.style.removeProperty("display"))
+
+    // Wrapped chips stay visible and the field grows downward.
+    if (shouldWrap) {
+      setOverflowAmount(0)
+      return
+    }
+
     let amount = 0
     for (let i = items.length - 1; i >= 0; i--) {
       const child = items[i]!
@@ -176,7 +186,7 @@ export function MultiSelectValue({
       overflowElement?.style.removeProperty("display")
     }
     setOverflowAmount(amount)
-  }, [])
+  }, [shouldWrap])
 
   const handleResize = useCallback(
     (node: HTMLDivElement) => {
@@ -222,8 +232,8 @@ export function MultiSelectValue({
       {...props}
       ref={handleResize}
       className={cn(
-        "flex w-full gap-1.5 overflow-hidden",
-        shouldWrap && "h-full flex-wrap",
+        "flex min-w-0 flex-1 gap-1.5",
+        shouldWrap ? "h-auto flex-wrap" : "overflow-hidden",
         className,
       )}>
       {[...selectedValues]
@@ -232,7 +242,7 @@ export function MultiSelectValue({
           <Badge
             variant="outline"
             data-selected-item
-            className="group flex items-center gap-1"
+            className="group flex max-w-full items-center gap-1 whitespace-normal"
             key={value}
             onClick={
               clickToRemove

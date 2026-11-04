@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CardFooter } from '@/components/ui/card'
+import { Checkbox } from '@/components/ui/checkbox'
 import { DmvicValidationOverrideDialog } from '@/components/shared'
 import { Button, ReuseableInput } from '@/dev/core'
 import {
@@ -9,6 +10,7 @@ import {
     type MotorPurchaseSummaryData,
 } from '@/app/customer/motor/motor-purchase-query'
 import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
+import { cn } from '@/lib/utils'
 import { useQueryClient } from '@tanstack/react-query'
 import { InvoicePaymentSchema } from '@/types/form-schema'
 import type { InvoicePaymentFormValues } from '@/types/schema'
@@ -20,7 +22,7 @@ import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowLeftCircle, ArrowRightCircle } from 'lucide-react'
 import React, { useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 
 type BoxHeaderProps = {
     title: string
@@ -64,6 +66,7 @@ export const InvoicePayment: React.FC<CustomerVerificationDetailsProps> = ({ goT
             phone: "",
             cover_start_date: "",
             payment_plan: "Full",
+            reminders_enabled: false,
         },
 
     })
@@ -79,6 +82,23 @@ export const InvoicePayment: React.FC<CustomerVerificationDetailsProps> = ({ goT
     })
 
     const summary = summaryResponse?.data as MotorPurchaseSummaryData | undefined
+
+    // Prefill reminders checkbox when returning to this step
+    React.useEffect(() => {
+        const data = summaryResponse?.data as MotorPurchaseSummaryData | undefined
+        if (!data) return
+
+        const remindersEnabled = data.reminders_enabled ?? data.invoice?.reminders_enabled
+        if (typeof remindersEnabled === 'boolean') {
+            form.setValue('reminders_enabled', remindersEnabled)
+        }
+
+        const invoice = data.invoice
+        if (invoice?.name) form.setValue('name', invoice.name)
+        if (invoice?.email) form.setValue('email', invoice.email)
+        if (invoice?.phone) form.setValue('phone', invoice.phone)
+        if (invoice?.cover_start_date) form.setValue('cover_start_date', invoice.cover_start_date)
+    }, [summaryResponse, form])
 
     const submitMutation = UseApiMutation<SubmitResponse, InvoicePaymentFormValues>({
         url: `purchase/motor/${purchaseSessionId}/invoice`,
@@ -110,12 +130,25 @@ export const InvoicePayment: React.FC<CustomerVerificationDetailsProps> = ({ goT
         },
     })
 
-    const onSubmit = async (data: InvoicePaymentFormValues) => {
-        const payload: InvoicePaymentFormValues = { ...data }
+    const buildPayload = (data: InvoicePaymentFormValues): InvoicePaymentFormValues => {
+        const payload: InvoicePaymentFormValues = {
+            ...data,
+            reminders_enabled: Boolean(data.reminders_enabled),
+        }
+        // Customer form never collects short-cover reason
+        delete payload.issue_reason
+        delete payload.other_reason
+        delete payload.cover_end_date
+        delete payload.policy_number
         // Strip override flags on first submit; popup retry adds them back
         delete payload.validate_double_insurance
         delete payload.is_logbook_verified
         delete payload.additional_comments
+        return payload
+    }
+
+    const onSubmit = async (data: InvoicePaymentFormValues) => {
+        const payload = buildPayload(data)
 
         const registration =
             summary?.vehicle?.registration_number
@@ -160,7 +193,7 @@ export const InvoicePayment: React.FC<CustomerVerificationDetailsProps> = ({ goT
         is_logbook_verified: true
         additional_comments: string
     }) => {
-        const base = pendingOverridePayload ?? form.getValues()
+        const base = pendingOverridePayload ?? buildPayload(form.getValues())
         submitMutation.mutate({
             ...base,
             validate_double_insurance: true,
@@ -225,6 +258,33 @@ export const InvoicePayment: React.FC<CustomerVerificationDetailsProps> = ({ goT
                                     required
                                     min={todayMinDate}
                                 />
+                            </div>
+
+                            <div className="mt-4 flex items-start gap-2">
+                                <Controller
+                                    control={form.control}
+                                    name="reminders_enabled"
+                                    render={({ field }) => (
+                                        <Checkbox
+                                            id="customer-reminders-enabled"
+                                            checked={Boolean(field.value)}
+                                            onCheckedChange={(checked) =>
+                                                field.onChange(Boolean(checked))
+                                            }
+                                            className="mt-0.5 h-3.75 w-3.75 rounded-[3px] border border-[#D9D9D9] data-[state=checked]:border-[#C20C0C] data-[state=checked]:bg-[#C20C0C]"
+                                        />
+                                    )}
+                                />
+                                <label
+                                    htmlFor="customer-reminders-enabled"
+                                    className={cn(
+                                        'cursor-pointer text-xs font-semibold leading-snug text-neutral-800 sm:text-sm',
+                                    )}
+                                >
+                                    <span className="text-[#C20C0C]">Send cover expiry reminders</span>
+                                    {' '}
+                                    (optional emails before your cover expires)
+                                </label>
                             </div>
                         </div>
                     </div>

@@ -6,7 +6,7 @@ import { OrganizationQuotationReportColumns } from '@/dev/columns/admin/reports/
 export const OrganizationMotorQuotationsReportPage = () => (
   <OrganizationReportPage
     title="Motor quotations report"
-    description="Organization motor quotations and purchases. Rows processed by another organization are highlighted."
+    description="Organization motor quotations and purchases. A row shows the other organization's name when the quote belongs to them. Agency is used when set; otherwise the organization that processed it."
     listUrl="reports/motor/quotations"
     exportUrl="reports/motor/quotations/export"
     exportFilename="motor-quotation-report.xlsx"
@@ -15,12 +15,13 @@ export const OrganizationMotorQuotationsReportPage = () => (
     searchPlaceholder="Search quote code, customer, registration…"
     showSummary
     showAgentFilter
+    // Member list for who processed the quote (requires module.aggregate)
+    showProcessedByFilter
     // Report-scoped show (not quotation/motor/fetch) so report-only users can preview
     detailUrl={(row) => `reports/motor/quotations/${row.id}`}
     DetailDialog={MotorQuoteFetchDetailDialog}
     extraFilters={[
       { key: 'quote_code', label: 'Quote code', placeholder: 'Q-…' },
-      { key: 'processed_by_id', label: 'Processed by ID', type: 'number' },
       { key: 'referral_code', label: 'Referral code', placeholder: 'REF-…' },
       { key: 'insurer_id', label: 'Insurer ID', type: 'number' },
     ]}

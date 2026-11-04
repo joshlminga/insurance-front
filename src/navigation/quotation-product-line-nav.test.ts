@@ -24,6 +24,40 @@ describe('quotation product line nav', () => {
     ).toBeNull()
   })
 
+  it('maps report and catalog modules to product lines', () => {
+    expect(
+      requiredProductLineForNavItem({
+        module: MODULES.REPORT_ORG_MOTOR_VEHICLE,
+      }),
+    ).toBe('Motor')
+    expect(
+      requiredProductLineForNavItem({
+        module: MODULES.REPORT_ORG_TRAVEL_QUOTATION,
+      }),
+    ).toBe('Travel')
+    expect(
+      requiredProductLineForNavItem({ module: MODULES.PRODUCT_MOTOR }),
+    ).toBe('Motor')
+    expect(
+      requiredProductLineForNavItem({ module: MODULES.DMVIC_CERTIFICATE }),
+    ).toBe('Motor')
+    expect(
+      requiredProductLineForNavItem({ module: MODULES.CLAIMS }),
+    ).toBe('Motor')
+    expect(
+      requiredProductLineForNavItem({ module: MODULES.QUOTATION_MARINE }),
+    ).toBe('Marine')
+  })
+
+  it('prefers explicit productLine over mixed modules', () => {
+    expect(
+      requiredProductLineForNavItem({
+        modules: [MODULES.QUOTATION_TRAVEL, MODULES.REPORT_MOTOR_QUOTATION],
+        productLine: 'Travel',
+      }),
+    ).toBe('Travel')
+  })
+
   it('allows all lines when org context products are missing', () => {
     expect(hasOrgProductLineAccess('Travel', undefined)).toBe(true)
   })
@@ -86,5 +120,97 @@ describe('quotation product line nav', () => {
     )
 
     expect(visible[0]?.items?.map((item) => item.title)).toEqual(['Motor', 'Travel'])
+  })
+
+  it('motor-only context hides Reports Travel and Travel catalog, keeps Customers and Motor', () => {
+    const items: NavItem[] = [
+      {
+        title: 'Reports',
+        url: '/admin/reports/customers',
+        modules: [
+          MODULES.REPORT_CUSTOMER,
+          MODULES.REPORT_ORG_MOTOR_VEHICLE,
+          MODULES.REPORT_ORG_TRAVEL_QUOTATION,
+        ],
+        items: [
+          {
+            title: 'Customers',
+            url: '/admin/reports/customers',
+            module: MODULES.REPORT_CUSTOMER,
+          },
+          {
+            title: 'Motor',
+            url: '/admin/reports/motor/vehicles',
+            modules: [MODULES.REPORT_ORG_MOTOR_VEHICLE],
+            items: [
+              {
+                title: 'Vehicles',
+                url: '/admin/reports/motor/vehicles',
+                module: MODULES.REPORT_ORG_MOTOR_VEHICLE,
+              },
+            ],
+          },
+          {
+            title: 'Travel',
+            url: '/admin/reports/travel/quotations',
+            module: MODULES.REPORT_ORG_TRAVEL_QUOTATION,
+            items: [
+              {
+                title: 'Quotations',
+                url: '/admin/reports/travel/quotations',
+                module: MODULES.REPORT_ORG_TRAVEL_QUOTATION,
+              },
+            ],
+          },
+        ],
+      },
+      {
+        title: 'Travel',
+        url: '/admin/products/travel',
+        productLine: 'Travel',
+        items: [
+          {
+            title: 'Products',
+            url: '/admin/products/travel',
+          },
+        ],
+      },
+      {
+        title: 'Quotations',
+        url: '/admin/quotations/motor-quotations',
+        modules: [MODULES.QUOTATION_MOTOR, MODULES.QUOTATION_TRAVEL],
+        items: [
+          {
+            title: 'Motor',
+            url: '/admin/quotations/motor-quotations',
+            module: MODULES.QUOTATION_MOTOR,
+          },
+          {
+            title: 'Travel',
+            url: '/admin/quotations/travel-quotations',
+            modules: [MODULES.QUOTATION_TRAVEL, MODULES.REPORT_MOTOR_QUOTATION],
+            productLine: 'Travel',
+            items: [
+              {
+                title: 'Listed',
+                url: '/admin/reports/quotations/travel',
+                modules: [MODULES.QUOTATION_TRAVEL, MODULES.REPORT_MOTOR_QUOTATION],
+                productLine: 'Travel',
+              },
+            ],
+          },
+        ],
+      },
+    ]
+
+    const visible = filterNavItems(items, alwaysTrue, alwaysTrue, alwaysTrue, false, ['Motor'])
+
+    expect(visible.map((item) => item.title)).toEqual(['Reports', 'Quotations'])
+
+    const reports = visible.find((item) => item.title === 'Reports')
+    expect(reports?.items?.map((item) => item.title)).toEqual(['Customers', 'Motor'])
+
+    const quotations = visible.find((item) => item.title === 'Quotations')
+    expect(quotations?.items?.map((item) => item.title)).toEqual(['Motor'])
   })
 })

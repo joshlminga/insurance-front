@@ -24,6 +24,12 @@ export const OfficeCountrySelect = ({
         !value && defaultCountryName
             ? defaultCountryName
             : 'Select country...'
+    // The country list is paged, so the selected country may not be on page 1.
+    // Keep its name on the closed dropdown.
+    const selectedOption =
+        value && defaultCountryName
+            ? { value: String(value), label: defaultCountryName }
+            : undefined
 
     return (
         <ReusableSingleSelectApiInput
@@ -39,6 +45,7 @@ export const OfficeCountrySelect = ({
             disabled={disabled}
             placeholder={placeholder}
             className={className}
+            selectedOption={selectedOption}
         />
     )
 }

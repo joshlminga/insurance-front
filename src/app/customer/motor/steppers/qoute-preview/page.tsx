@@ -33,7 +33,8 @@ import {
     BENEFIT_TYPE_CONFIG,
     EMETHODS,
     MOTOR_QUOTE_SESSION_STORAGE_KEY,
-    PURCHASE_SESSION_STORAGE_KEY
+    PURCHASE_SESSION_STORAGE_KEY,
+    WHATSAPP_SHARE_ENABLED,
 } from "@/utils/constatnts";
 import { ShowToast } from "@/utils/utils";
 import { UseApiMutation } from "@/hooks/hooks";
@@ -226,10 +227,12 @@ export const QuotePreviewPage: React.FC<premiumPreview> = ({
                                     })
                                 }
                             },
-                            {
-                                label: "WhatsApp",
-                                icon: <Share2 className="w-4 h-4" />,
-                            },
+                            ...(WHATSAPP_SHARE_ENABLED
+                                ? [{
+                                    label: "WhatsApp",
+                                    icon: <Share2 className="w-4 h-4" />,
+                                }]
+                                : []),
                         ]}
                     />
                 </div>

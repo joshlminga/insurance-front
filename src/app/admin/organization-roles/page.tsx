@@ -16,7 +16,11 @@ import { EROUTES } from "@/utils/enums"
 import { useEffect, useMemo, useReducer } from "react"
 import { useNavigate } from "react-router-dom"
 
-import { extractOrgLocationsFromResponse, getOrgLocationId } from "./role-utils"
+import {
+  extractOrgLocationsFromResponse,
+  getOrgLocationId,
+  getOrgLocationSlug,
+} from "./role-utils"
 
 const OrganizationRolesPage = () => {
   const navigate = useNavigate()
@@ -60,9 +64,10 @@ const OrganizationRolesPage = () => {
     {
       label: "View Roles",
       onSelect: (rowData) => {
-        const orgLocationId = getOrgLocationId(rowData)
-        if (!orgLocationId) return
-        navigate(`${EROUTES.ORGANIZATION_ROLES}/${orgLocationId}`)
+        const orgLocationKey =
+          getOrgLocationSlug(rowData) ?? getOrgLocationId(rowData)
+        if (!orgLocationKey) return
+        navigate(`${EROUTES.ORGANIZATION_ROLES}/${orgLocationKey}`)
       },
       conditional: (rowData) => Boolean(getOrgLocationId(rowData)),
     },

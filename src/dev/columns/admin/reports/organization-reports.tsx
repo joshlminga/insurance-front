@@ -3,14 +3,24 @@ import { Badge } from '@/components/ui/badge'
 import { CopyCell } from '@/dev/columns'
 import { ColumnDef } from '@tanstack/table-core'
 
-const CrossOrgBadge = ({ flagged }: { flagged?: boolean }) => {
-  if (!flagged) return null
+/**
+ * Quote belongs to agency_location when that is set.
+ * When agency is missing, it belongs to processed_by_location.
+ * The badge only shows when that owner is not the report location, and it shows the owner name.
+ */
+function quoteOwnerLocation(row: any) {
+  return row?.agency_location ?? row?.processed_by_location ?? null
+}
+
+const CrossOrgBadge = ({ row }: { row: any }) => {
+  if (!row?.processed_by_other_organization) return null
+  const ownerName = quoteOwnerLocation(row)?.name?.trim() || 'Other org'
   return (
     <Badge
       variant="outline"
       className="rounded-full border-amber-500 text-amber-700"
     >
-      Other org
+      {ownerName}
     </Badge>
   )
 }
@@ -117,7 +127,7 @@ export const OrganizationQuotationReportColumns: ColumnDef<any>[] = [
             {row.original.vehicle.registration_number}
           </div>
         ) : null}
-        <CrossOrgBadge flagged={row.original.processed_by_other_organization} />
+        <CrossOrgBadge row={row.original} />
       </div>
     ),
   },
@@ -167,6 +177,25 @@ export const OrganizationQuotationReportColumns: ColumnDef<any>[] = [
       <div>{row.original.is_successful_purchase ? 'Yes' : 'No'}</div>
     ),
   },
+  {
+    id: 'issue_reason',
+    header: () => <div>Issue Reason</div>,
+    cell: ({ row }) => {
+      const label = row.original.issue_reason_label
+      const other = row.original.other_reason
+      if (!label) {
+        return <div>-</div>
+      }
+      return (
+        <div className="space-y-0.5">
+          <div>{label}</div>
+          {other ? (
+            <div className="text-xs text-muted-foreground">{other}</div>
+          ) : null}
+        </div>
+      )
+    },
+  },
 ]
 
 export const OrganizationCertificateReportColumns: ColumnDef<any>[] = [
@@ -176,7 +205,7 @@ export const OrganizationCertificateReportColumns: ColumnDef<any>[] = [
     cell: ({ row }) => (
       <div className="space-y-1">
         <div className="font-medium">{row.original.certificate_number ?? '-'}</div>
-        <CrossOrgBadge flagged={row.original.processed_by_other_organization} />
+        <CrossOrgBadge row={row.original} />
       </div>
     ),
   },

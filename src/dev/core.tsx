@@ -781,7 +781,7 @@ export const CustomDialogComponent = <T = TKeyValueStringType,>({
                 onOpenAutoFocus={(e) => e.preventDefault()}
                 aria-describedby={undefined}
                 className={cn(
-                    "select-none max-h-[80dvh] flex flex-col overflow-hidden p-0! m-0!",
+                    "select-none max-h-[80dvh] flex min-w-0 flex-col overflow-hidden p-0! m-0!",
                     className ?? ""
                 )}>
                 <DialogTitle className="sr-only">{title ?? "Dialog"}</DialogTitle>
@@ -792,7 +792,7 @@ export const CustomDialogComponent = <T = TKeyValueStringType,>({
                 */}
                 <div
                     {...{
-                        className: `relative w-full min-h-0 flex-1 overflow-y-auto py-5! px-5`,
+                        className: `relative w-full min-h-0 min-w-0 flex-1 overflow-y-auto py-5! px-5`,
                     }}>
                     {children}
                 </div>
@@ -1161,7 +1161,7 @@ export const ReusableCountriesInputMultiselect = ({
             <MultiSelect
                 values={value ?? []}
                 onValuesChange={(vals) => onChange?.(vals)} >
-                <MultiSelectTrigger className="w-full h-10 rounded-[5px] border border-[#ADABAB]">
+                <MultiSelectTrigger className="w-full rounded-[5px] border border-[#ADABAB]">
                     <MultiSelectValue placeholder={placeholder} />
                 </MultiSelectTrigger>
                 <MultiSelectContent>
@@ -1573,7 +1573,7 @@ export const ReusableOrganizationsInputMultiselect = ({
             <MultiSelect
                 values={value ?? []}
                 onValuesChange={(vals) => onChange?.(vals)} >
-                <MultiSelectTrigger className="w-full h-10 rounded-[5px] border border-[#ADABAB]">
+                <MultiSelectTrigger className="w-full rounded-[5px] border border-[#ADABAB]">
                     <MultiSelectValue placeholder={placeholder} />
                 </MultiSelectTrigger>
                 <MultiSelectContent>
@@ -1741,7 +1741,7 @@ export const ReusableCoveringInputMultiselect = ({
             <MultiSelect
                 values={value ?? []}
                 onValuesChange={(vals) => onChange?.(vals)} >
-                <MultiSelectTrigger className="w-full h-10 rounded-[5px] border border-[#ADABAB]">
+                <MultiSelectTrigger className="w-full rounded-[5px] border border-[#ADABAB]">
                     <MultiSelectValue placeholder={placeholder} />
                 </MultiSelectTrigger>
                 <MultiSelectContent>
@@ -2000,7 +2000,7 @@ export function ReusableApiMultiSelect({
             <MultiSelect
                 values={controlledValue}
                 onValuesChange={(vals) => onChange?.(vals)}>
-                <MultiSelectTrigger disabled={disabled} className="w-full h-10 rounded-[5px] border border-[#ADABAB]">
+                <MultiSelectTrigger disabled={disabled} className="w-full rounded-[5px] border border-[#ADABAB]">
                     <MultiSelectValue placeholder={placeholder} />
                 </MultiSelectTrigger>
                 <MultiSelectContent

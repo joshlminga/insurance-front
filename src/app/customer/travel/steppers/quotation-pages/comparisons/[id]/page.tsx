@@ -21,6 +21,7 @@ import {
 import { useCustomDialogContextFactory } from '@/hooks'
 import { cn } from '@/lib/utils'
 import type { premiumPreview } from '@/types/types'
+import { WHATSAPP_SHARE_ENABLED } from '@/utils/constatnts'
 import { TRAVEL_QUOTE_SESSION_STORAGE_KEY } from '@/utils/travel-enums'
 import { ShowToast } from '@/utils/utils'
 import { ArrowDown, Forward, Mail, Share2 } from 'lucide-react'
@@ -196,10 +197,12 @@ export const PostComparisonPage: React.FC<premiumPreview> = ({
                 })
               },
             },
-            {
-              label: 'WhatsApp',
-              icon: <Share2 className="h-4 w-4" />,
-            },
+            ...(WHATSAPP_SHARE_ENABLED
+              ? [{
+                  label: 'WhatsApp',
+                  icon: <Share2 className="h-4 w-4" />,
+                }]
+              : []),
           ]}
         />
         <Button

@@ -11,7 +11,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { Button } from "@/components/ui/button"
 import { buttonVariants } from "@/components/ui/button"
 import { ActionColumn } from "@/dev/columns"
 import {
@@ -28,16 +27,20 @@ import { EMETHODS } from "@/utils/constatnts"
 import { EROUTES } from "@/utils/enums"
 import { extractErrorMessage } from "@/utils/helpers"
 import { ShowToast } from "@/utils/utils"
-import { ArrowLeft, Plus } from "lucide-react"
-import { useMemo, useReducer, useState } from "react"
-import { Link, useParams } from "react-router-dom"
+import { isPlatformSuperAdmin } from "@/auth/org-context"
+import { useAuthStore } from "@/stores/auth-store"
+import { Plus } from "lucide-react"
+import { useEffect, useMemo, useReducer, useState } from "react"
+import { useNavigate, useParams } from "react-router-dom"
 
 import {
+  canChangeRole,
   extractRolesFromResponse,
+  getOrgLocationId,
   getRoleId,
   getRoleIsActive,
-  getRoleIsEditable,
   getRoleLabel,
+  isProtectedSuperAdminRole,
 } from "../role-utils"
 import AssignPermissionsModal from "../modals/assign-permissions"
 import CreateRoleModal from "../modals/create"
@@ -45,7 +48,11 @@ import EditRoleModal from "../modals/edit"
 import ViewRoleModal from "../modals/view"
 
 const OrganizationRolesDetailPage = () => {
-  const { orgLocationId } = useParams<{ orgLocationId: string }>()
+  const { orgLocationSlug } = useParams<{ orgLocationSlug: string }>()
+  const navigate = useNavigate()
+  const platformSuperAdmin = isPlatformSuperAdmin(useAuthStore((state) => state.abilities))
+  const roleCanChange = (rowData: Record<string, any>) =>
+    canChangeRole(rowData, platformSuperAdmin)
 
   const [expandedRoleId, setExpandedRoleId] = useState<string | number | null>(null)
 
@@ -73,9 +80,9 @@ const OrganizationRolesDetailPage = () => {
     }>()
 
   const { data: orgLocationData } = UseApiQuery<SubmitResponse>({
-    url: `organization-location/${orgLocationId}`,
+    url: `organization-location/${orgLocationSlug}`,
     queryOptions: {
-      enabled: Boolean(orgLocationId),
+      enabled: Boolean(orgLocationSlug),
     },
   })
 
@@ -83,6 +90,16 @@ const OrganizationRolesDetailPage = () => {
     const payload = (orgLocationData as any)?.data
     return payload?.location ?? payload ?? {}
   }, [orgLocationData])
+
+  // Roles APIs need a numeric organization_location_id; route may be slug or legacy id
+  const resolvedLocationId = getOrgLocationId(organizationLocation)
+
+  // Prefer slug in the URL once location is loaded (e.g. /organization-roles/1 -> /.../some-slug)
+  useEffect(() => {
+    const slug = organizationLocation?.slug
+    if (!slug || !orgLocationSlug || slug === orgLocationSlug) return
+    navigate(`${EROUTES.ORGANIZATION_ROLES}/${slug}`, { replace: true })
+  }, [organizationLocation?.slug, orgLocationSlug, navigate])
 
   const orgId =
     organizationLocation?.organization_id ??
@@ -100,13 +117,13 @@ const OrganizationRolesDetailPage = () => {
   const { data, isLoading, refetch, isError } = UseApiQuery<SubmitResponse>({
     url: "roles",
     params: {
-      organization_location_id: orgLocationId,
+      organization_location_id: resolvedLocationId,
       page: filter.page,
       pageSize: filter.pageSize,
       term: filter.term,
     },
     queryOptions: {
-      enabled: Boolean(orgLocationId),
+      enabled: Boolean(resolvedLocationId),
     },
   })
 
@@ -159,14 +176,14 @@ const OrganizationRolesDetailPage = () => {
           componentProps: {
             data: rowData,
             orgId,
-            organizationLocationId: orgLocationId,
+            organizationLocationId: resolvedLocationId,
             refetch,
           },
           Component: EditRoleModal,
         })
       },
       conditional: (rowData) =>
-        Boolean(getRoleId(rowData)) && getRoleIsEditable(rowData),
+        Boolean(getRoleId(rowData)) && roleCanChange(rowData),
     },
     {
       label: "Permission",
@@ -174,9 +191,9 @@ const OrganizationRolesDetailPage = () => {
         handleDialogContextSwitch({
           componentProps: {
             data: rowData,
-            organizationLocationId: orgLocationId,
+            organizationLocationId: resolvedLocationId,
             refetch,
-            readOnly: !getRoleIsEditable(rowData),
+            readOnly: !roleCanChange(rowData),
           },
           Component: AssignPermissionsModal,
         })
@@ -194,7 +211,9 @@ const OrganizationRolesDetailPage = () => {
         })
       },
       conditional: (rowData) =>
-        Boolean(getRoleId(rowData)) && getRoleIsEditable(rowData),
+        Boolean(getRoleId(rowData)) &&
+        roleCanChange(rowData) &&
+        !isProtectedSuperAdminRole(rowData),
     },
     {
       label: "Deactivate",
@@ -205,7 +224,7 @@ const OrganizationRolesDetailPage = () => {
       },
       conditional: (rowData) =>
         Boolean(getRoleId(rowData)) &&
-        getRoleIsEditable(rowData) &&
+        roleCanChange(rowData) &&
         Boolean(getRoleIsActive(rowData)),
     },
     {
@@ -217,7 +236,7 @@ const OrganizationRolesDetailPage = () => {
       },
       conditional: (rowData) =>
         Boolean(getRoleId(rowData)) &&
-        getRoleIsEditable(rowData) &&
+        roleCanChange(rowData) &&
         !Boolean(getRoleIsActive(rowData)),
     },
   ]
@@ -230,15 +249,6 @@ const OrganizationRolesDetailPage = () => {
 
   return (
     <div>
-      <div className="mb-4">
-        <Button variant="ghost" size="sm" asChild className="mb-2 -ml-2">
-          <Link to={EROUTES.ORGANIZATION_ROLES}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Organizations
-          </Link>
-        </Button>
-      </div>
-
       <PageHeader
         title={`Roles - ${orgLocationDisplayName}`}
         description="Manage roles and permissions for this organization"
@@ -251,7 +261,7 @@ const OrganizationRolesDetailPage = () => {
               handleDialogContextSwitch({
                 componentProps: {
                   orgId,
-                  organizationLocationId: orgLocationId,
+                  organizationLocationId: resolvedLocationId,
                   refetch,
                 },
                 Component: CreateRoleModal,

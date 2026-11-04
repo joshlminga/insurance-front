@@ -22,7 +22,12 @@ import type {
   TPaginationFilters,
 } from '@/types/types'
 import apiClient from '@/lib/api-client'
-import { EMETHODS, FILTEROPTIONS, ReusableReducer } from '@/utils/constatnts'
+import {
+  EMETHODS,
+  FILTEROPTIONS,
+  ReusableReducer,
+  WHATSAPP_SHARE_ENABLED,
+} from '@/utils/constatnts'
 import { EROUTES } from '@/utils/enums'
 import { extractErrorMessage } from '@/utils/helpers'
 import { useMotorDocumentDownload } from '@/utils/motor-document-download'
@@ -175,21 +180,23 @@ const TravelInvoiceTab = () => {
         })
       },
     },
-    {
-      label: 'WhatsApp',
-      onSelect: (row) => {
-        const phone = row?.payer_phone || row?.customer?.phone || ''
-        if (!row?.id) {
-          ShowToast.error('Invoice id missing on this row')
-          return
-        }
-        if (!String(phone).trim()) {
-          ShowToast.error('Payer phone missing on this invoice')
-          return
-        }
-        void sendTravelInvoiceWhatsApp(row.id, String(phone).trim())
-      },
-    },
+    ...(WHATSAPP_SHARE_ENABLED
+      ? [{
+          label: 'WhatsApp',
+          onSelect: (row: any) => {
+            const phone = row?.payer_phone || row?.customer?.phone || ''
+            if (!row?.id) {
+              ShowToast.error('Invoice id missing on this row')
+              return
+            }
+            if (!String(phone).trim()) {
+              ShowToast.error('Payer phone missing on this invoice')
+              return
+            }
+            void sendTravelInvoiceWhatsApp(row.id, String(phone).trim())
+          },
+        }]
+      : []),
     {
       label: 'Issue Cover',
       onSelect: (row) => {

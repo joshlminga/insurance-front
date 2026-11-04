@@ -72,3 +72,46 @@ describe('filterNavItems requireSuperAdmin', () => {
     ])
   })
 })
+
+describe('filterNavItems submenu permission', () => {
+  const creditItems: NavItem[] = [
+    {
+      title: 'Organization Credit',
+      url: '/dashboard/credit/wallet',
+      module: 'finance-control',
+      items: [
+        {
+          title: 'Transactions',
+          url: '/dashboard/credit/transactions',
+          module: 'finance-control',
+          permission: 'finance-control.transactions',
+        },
+        {
+          title: 'User Allocations',
+          url: '/dashboard/credit/setup/users',
+          module: 'finance-control',
+          permission: 'finance-control.list',
+        },
+      ],
+    },
+  ]
+
+  it('hides a child with permission when can() denies it, even if module.menu passes', () => {
+    const can = (permission: string) => permission === 'finance-control.list'
+    const visible = filterNavItems(creditItems, alwaysTrue, alwaysTrue, can, false)
+
+    expect(visible).toHaveLength(1)
+    expect(visible[0].items?.map((s) => s.title)).toEqual(['User Allocations'])
+  })
+
+  it('shows the child when can() grants its permission', () => {
+    const can = (permission: string) =>
+      permission === 'finance-control.transactions' || permission === 'finance-control.list'
+    const visible = filterNavItems(creditItems, alwaysTrue, alwaysTrue, can, false)
+
+    expect(visible[0].items?.map((s) => s.title)).toEqual([
+      'Transactions',
+      'User Allocations',
+    ])
+  })
+})

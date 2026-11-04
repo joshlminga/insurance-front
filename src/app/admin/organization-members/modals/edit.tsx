@@ -191,6 +191,9 @@ export const EditMemberModal = ({
                 organizationLocationId={organizationLocationId}
                 value={field.value ?? []}
                 onChange={field.onChange}
+                // Show Sales, not the global slug sales-1
+                labelKey="display_name"
+                searchKeys={["display_name", "name"]}
                 required
               />
             )}

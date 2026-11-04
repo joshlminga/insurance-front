@@ -6,7 +6,7 @@ import { UseApiMutation } from '@/hooks/hooks'
 import { InvoicePaymentSchema } from '@/types/form-schema'
 import type { InvoicePaymentFormValues } from '@/types/schema'
 import type { CustomerVerificationDetailsProps, SubmitResponse } from '@/types/types'
-import { EMETHODS } from '@/utils/constatnts'
+import { EMETHODS, WHATSAPP_SHARE_ENABLED } from '@/utils/constatnts'
 import { ShowToast } from '@/utils/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowLeftCircle, ArrowRightCircle, Eye, Mail, Share2 } from 'lucide-react'
@@ -120,10 +120,12 @@ export const InvoicePayment: React.FC<CustomerVerificationDetailsProps> = ({ goT
                             </Button>
                         }
                         items={[
-                            {
-                                label: "WhatsApp",
-                                icon: <Share2 className="w-4 h-4" />,
-                            },
+                            ...(WHATSAPP_SHARE_ENABLED
+                                ? [{
+                                    label: "WhatsApp",
+                                    icon: <Share2 className="w-4 h-4" />,
+                                }]
+                                : []),
                             {
                                 label: "Email",
                                 icon: <Mail className="w-4 h-4" />,

@@ -26,6 +26,7 @@ import { TravelSuccessPurchase } from "@/app/customer/travel/steppers/success-pu
 import { TravelInvoicesPage } from "@/app/customer/travel/steppers/travel-invoices";
 import { TravelPaymentOptionsPage } from "@/app/customer/travel/steppers/travel-payment-options";
 import { TravellerDetailsPage } from "@/app/customer/travel/steppers/traveller-details";
+import { CASH_PAYMENT_ENABLED } from "@/utils/constatnts";
 import { ArrowUpToLine, Download } from "lucide-react";
 
 export const getMotorSteps = (isAuthenticated: boolean) => {
@@ -198,11 +199,13 @@ export const EPAYMENTTABS = [
         image: '/paycredit.png',
         component: CreditTabPage,
     },
-    {
-        value: "cash",
-        image: '/paycash.png',
-        component: CashTabPage,
-    },
+    ...(CASH_PAYMENT_ENABLED
+        ? [{
+            value: "cash",
+            image: '/paycash.png',
+            component: CashTabPage,
+        }]
+        : []),
 ]
 /**
  * Customer-facing payment tabs: everything in EPAYMENTTABS except "credit".

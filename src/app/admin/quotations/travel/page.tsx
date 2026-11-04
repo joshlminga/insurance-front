@@ -1,5 +1,3 @@
-import { MODULES } from '@/auth/module-keys'
-import { useCan } from '@/auth/useCan'
 import { PageHeader } from '@/components/shared'
 import {
     AlertDialog,
@@ -50,6 +48,7 @@ import {
     motorFormFieldStyles,
     motorInputClassName,
 } from '@/app/admin/quotations/motor/motor-field-styles'
+import { useQuotationOfficeUseAccess } from '@/app/admin/quotations/office-use-access'
 import { OrganizationLocationInput } from '@/app/admin/quotations/motor/organization-location-input'
 import { OfficeCountrySelect } from '@/app/admin/quotations/motor/office-country-select'
 import { TravelCustomerDetailsSection } from './customer-details-section'
@@ -125,9 +124,15 @@ function isCreateAccountAgencyMissing(data: AdminTravelQuotationFormValues): boo
 
 export const TravelQuotationPage = () => {
     const navigate = useNavigate()
-    const { user } = UseAuth()
-    const { canModuleAction } = useCan()
-    const canTravelOverride = canModuleAction(MODULES.QUOTATION_TRAVEL, 'override')
+    const { user, resolvedOrganization } = UseAuth()
+    const orgCountryId =
+        resolvedOrganization?.country_id != null
+            ? String(resolvedOrganization.country_id)
+            : ''
+    const orgLocationId =
+        resolvedOrganization?.organization_location_id != null
+            ? String(resolvedOrganization.organization_location_id)
+            : ''
     const [adminOrganizationOverride, setAdminOrganizationOverride] = useState(false)
     const [showSelfCoverSubmitWarning, setShowSelfCoverSubmitWarning] = useState(false)
     const [pendingSubmitData, setPendingSubmitData] =
@@ -214,28 +219,60 @@ export const TravelQuotationPage = () => {
     const formCountryId = useWatch({ control: form.control, name: 'country_id' })
     const { bound, hasRouteRow, hasScheduleRow } = useTravelTripProgress(form.control)
 
-    // Profile country shows in the UI but is not written into RHF until the user
-    // touches the Country field — sync so payloads include country_id for guests.
-    useEffect(() => {
-        if (formCountryId) return
-        if (profileCountry?.id == null || profileCountry.id === '') return
-        // A quote-stage copy already chose a country. Do not replace it with the office country.
-        if (readAdminTravelDuplicateStartAt() === 'quote') {
-            const copiedCountry = readAdminTravelDuplicatePrefill()?.start_quote?.country_id
-            if (copiedCountry != null && String(copiedCountry) !== '') return
-        }
-        form.setValue('country_id', String(profileCountry.id), {
-            shouldValidate: true,
-        })
-    }, [form, formCountryId, profileCountry?.id])
-
     const effectiveCountryId = (() => {
         if (formCountryId) return formCountryId
+        if (orgCountryId) return orgCountryId
         if (profileCountry?.id != null && profileCountry.id !== '') {
             return String(profileCountry.id)
         }
         return ''
     })()
+
+    const {
+        countryLocked,
+        agencyLocked,
+        onBehalfLocked,
+        canAdminOverride,
+        sessionCountryId,
+        sessionLocationId,
+        agencyOptions,
+        onBehalfOptions,
+        isLoading: isOfficeUseLoading,
+    } = useQuotationOfficeUseAccess({
+        countryId: effectiveCountryId,
+        adminOverride: adminOrganizationOverride,
+        enabled: user?.id != null,
+    })
+
+    // Prefer tenant session country, then profile country, for empty office country.
+    useEffect(() => {
+        if (formCountryId) return
+        if (readAdminTravelDuplicateStartAt() === 'quote') {
+            const copiedCountry = readAdminTravelDuplicatePrefill()?.start_quote?.country_id
+            if (copiedCountry != null && String(copiedCountry) !== '') return
+        }
+        const countryDefault = sessionCountryId || orgCountryId
+        if (countryDefault) {
+            form.setValue('country_id', countryDefault, { shouldValidate: true })
+            return
+        }
+        if (profileCountry?.id == null || profileCountry.id === '') return
+        form.setValue('country_id', String(profileCountry.id), {
+            shouldValidate: true,
+        })
+    }, [form, formCountryId, sessionCountryId, orgCountryId, profileCountry?.id])
+
+    useEffect(() => {
+        if (!countryLocked || !sessionCountryId) return
+        if (form.getValues('country_id') === sessionCountryId) return
+        form.setValue('country_id', sessionCountryId, { shouldValidate: true })
+    }, [countryLocked, sessionCountryId, form])
+
+    useEffect(() => {
+        if (!canAdminOverride && adminOrganizationOverride) {
+            setAdminOrganizationOverride(false)
+        }
+    }, [canAdminOverride, adminOrganizationOverride])
 
     const { data: selectedCountryGeoData } = UseApiQuery<SubmitResponse>({
         url: 'taxonomies/geo/country',
@@ -255,8 +292,6 @@ export const TravelQuotationPage = () => {
     })()
 
     const canLoadOrganizations = Boolean(effectiveCountryId)
-    const effectiveAdminOrganizationOverride =
-        canTravelOverride && adminOrganizationOverride
 
     const handleCountryChange = (value: string) => {
         form.setValue('country_id', value, { shouldValidate: true, shouldDirty: true })
@@ -436,7 +471,11 @@ export const TravelQuotationPage = () => {
                                             defaultCountryName={profileCountry?.name}
                                             label="Country"
                                             required
-                                            disabled={isAdminProfileLoading}
+                                            disabled={
+                                                countryLocked ||
+                                                isAdminProfileLoading ||
+                                                isOfficeUseLoading
+                                            }
                                         />
                                     )}
                                 />
@@ -449,11 +488,20 @@ export const TravelQuotationPage = () => {
                                         <OrganizationLocationInput
                                             variant="agency"
                                             countryId={effectiveCountryId}
+                                            preferredLocationId={
+                                                sessionLocationId || orgLocationId
+                                            }
+                                            options={agencyOptions}
+                                            optionsLoading={isOfficeUseLoading}
                                             value={field.value}
                                             onChange={field.onChange}
                                             label="Your Agency"
                                             required
-                                            disabled={!canLoadOrganizations}
+                                            disabled={
+                                                agencyLocked ||
+                                                !canLoadOrganizations ||
+                                                isOfficeUseLoading
+                                            }
                                         />
                                     )}
                                 />
@@ -466,12 +514,17 @@ export const TravelQuotationPage = () => {
                                         <OrganizationLocationInput
                                             variant="onBehalf"
                                             countryId={effectiveCountryId}
-                                            override={effectiveAdminOrganizationOverride}
+                                            options={onBehalfOptions}
+                                            optionsLoading={isOfficeUseLoading}
                                             value={field.value}
                                             onChange={field.onChange}
                                             label="On behalf of"
                                             required={false}
-                                            disabled={!canLoadOrganizations}
+                                            disabled={
+                                                onBehalfLocked ||
+                                                !canLoadOrganizations ||
+                                                isOfficeUseLoading
+                                            }
                                         />
                                     )}
                                 />
@@ -486,7 +539,7 @@ export const TravelQuotationPage = () => {
                                 />
                             </div>
 
-                            {canTravelOverride && (
+                            {canAdminOverride && (
                                 <div className="flex items-start gap-2">
                                     <Checkbox
                                         id="admin-travel-organization-override"

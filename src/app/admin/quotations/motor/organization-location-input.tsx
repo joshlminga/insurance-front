@@ -6,13 +6,9 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
-import { UseApiQuery } from '@/hooks/hooks'
-import { serializeOrganizationLocationParams } from '@/lib/organization-location-params'
-import { UseAuth } from '@/stores/auth-store'
-import type { SubmitResponse } from '@/types/types'
-import { EORGANIZATIONTYPES } from '@/utils/constatnts'
+import type { OfficeUseLocationOption } from '@/app/admin/quotations/office-use-access'
 import { Loader2 } from 'lucide-react'
-import { useMemo } from 'react'
+import { useEffect } from 'react'
 import { motorSelectTriggerClassName } from './motor-field-styles'
 
 export type OrganizationLocationInputVariant = 'onBehalf' | 'agency'
@@ -20,78 +16,50 @@ export type OrganizationLocationInputVariant = 'onBehalf' | 'agency'
 type OrganizationLocationInputProps = {
     variant?: OrganizationLocationInputVariant
     countryId: string
-    /** Admin override - only used for onBehalf variant */
-    override?: boolean
     value?: string
     onChange?: (value: string) => void
+    /** Options from GET quotation/office-use (agency or on_behalf). */
+    options?: OfficeUseLocationOption[]
+    optionsLoading?: boolean
+    /** When this location is in the list and nothing is selected yet, select it. */
+    preferredLocationId?: string
     label?: string
     required?: boolean
     disabled?: boolean
     className?: string
 }
 
-const AGENCY_ORGANIZATION_TYPES = [
-    EORGANIZATIONTYPES.AGENT,
-    EORGANIZATIONTYPES.ORGANIZATION,
-] as const
-
 export const OrganizationLocationInput = ({
     variant = 'onBehalf',
     countryId,
-    override = false,
     value,
     onChange,
+    options = [],
+    optionsLoading = false,
+    preferredLocationId,
     label,
     required = false,
     disabled = false,
     className,
 }: OrganizationLocationInputProps) => {
-    const { user } = UseAuth()
     const canFetch = Boolean(countryId)
     const isAgency = variant === 'agency'
+    const isLoading = optionsLoading
 
-    const onBehalfParams = useMemo(() => {
-        const params: Record<string, string | number> = {
-            country_id: countryId,
-            direction: 'asc',
-        }
-        if (!override && user?.id != null) {
-            params.user_id = user.id
-        }
-        return params
-    }, [countryId, override, user?.id])
+    // Auto-pick the session location when the list loads and nothing is chosen yet.
+    useEffect(() => {
+        if (!isAgency || isLoading || !preferredLocationId || value) return
+        const match = options.some(
+            (org) => String(org.organization_location_id) === preferredLocationId
+        )
+        if (match) onChange?.(preferredLocationId)
+    }, [isAgency, isLoading, options, preferredLocationId, value, onChange])
 
-    const agencyParams = useMemo(() => {
-        const params: Record<string, string | number | string[]> = {
-            country_id: countryId,
-            direction: 'asc',
-            organization_type: [...AGENCY_ORGANIZATION_TYPES],
-        }
-        if (user?.id != null) {
-            params.user_id = user.id
-        }
-        return params
-    }, [countryId, user?.id])
-
-    const onBehalfQuery = UseApiQuery<SubmitResponse>({
-        url: `organization-location?exclude_organization_type=${EORGANIZATIONTYPES.INSURER}`,
-        params: onBehalfParams,
-        queryOptions: { enabled: canFetch && !isAgency },
-    })
-
-    const agencyQuery = UseApiQuery<SubmitResponse>({
-        url: 'organization-location',
-        params: agencyParams,
-        config: { paramsSerializer: serializeOrganizationLocationParams },
-        queryOptions: { enabled: canFetch && isAgency },
-    })
-
-    const { data, isLoading } = isAgency ? agencyQuery : onBehalfQuery
-
-    const organizations = (data?.data ?? []) as Array<{
-        organization_location_id?: number | string
-        organization_name?: string
-    }>
+    // Locked agency with exactly one option: keep it selected.
+    useEffect(() => {
+        if (!isAgency || isLoading || value || options.length !== 1) return
+        onChange?.(String(options[0].organization_location_id))
+    }, [isAgency, isLoading, options, value, onChange])
 
     const defaultLabel = isAgency ? 'Your Agency' : 'On behalf of'
     const displayLabel = label ?? defaultLabel
@@ -136,7 +104,7 @@ export const OrganizationLocationInput = ({
                     {!required && !isLoading && canFetch && (
                         <SelectItem value="__none__">None</SelectItem>
                     )}
-                    {organizations.map((org) => (
+                    {options.map((org) => (
                         <SelectItem
                             key={org.organization_location_id}
                             value={String(org.organization_location_id)}
@@ -144,7 +112,7 @@ export const OrganizationLocationInput = ({
                             {org.organization_name}
                         </SelectItem>
                     ))}
-                    {!isLoading && canFetch && organizations.length === 0 && (
+                    {!isLoading && canFetch && options.length === 0 && (
                         <div className="px-3 py-2 text-sm text-muted-foreground">
                             {isAgency ? 'No agencies found' : 'No organizations found'}
                         </div>

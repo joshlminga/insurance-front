@@ -30,6 +30,10 @@ export interface AbilityContext {
   permissions: string[]
   /** Active ProductType values for this org location, e.g. ["Motor", "Travel"] */
   products?: string[]
+  /** organizations.is_default for the active org context */
+  organization_is_default?: boolean
+  /** organization_location.is_default for the active location */
+  location_is_default?: boolean
 }
 
 export interface Abilities {

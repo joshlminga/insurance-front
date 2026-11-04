@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Badge } from '@/components/ui/badge'
+import { QuoteAgencyCell } from '@/dev/columns/admin/quotations/quote-agency-cell'
 import type { MotorQuoteFetchListRow } from '@/types/types'
 import { ColumnDef } from '@tanstack/table-core'
 
@@ -96,12 +97,29 @@ export const MotorQuoteFetchColumns: ColumnDef<MotorQuoteFetchListRow>[] = [
   {
     id: 'cover',
     header: () => <div>Cover</div>,
-    cell: ({ row }) => <div>{row.original.cover?.cover_type ?? '-'}</div>,
+    cell: ({ row }) => {
+      const cover = row.original.cover
+      return (
+        <div className="space-y-0.5">
+          {/* Cover type = Comprehensive / Third Party, etc. */}
+          <div>{cover?.cover_type ?? '-'}</div>
+          {/* Vehicle use from API used_for */}
+          {cover?.used_for ? (
+            <div className="text-xs text-muted-foreground">{cover.used_for}</div>
+          ) : null}
+        </div>
+      )
+    },
   },
   {
     id: 'agency',
     header: () => <div>Agency</div>,
-    cell: ({ row }) => <div>{row.original.agency?.name ?? '-'}</div>,
+    cell: ({ row }) => (
+      <QuoteAgencyCell
+        agencyName={row.original.agency?.name}
+        processedByName={row.original.processed_by_organization?.name}
+      />
+    ),
   },
   {
     accessorKey: 'started_at',

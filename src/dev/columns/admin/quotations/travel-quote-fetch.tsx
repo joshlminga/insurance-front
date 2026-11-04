@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Badge } from '@/components/ui/badge'
+import { QuoteAgencyCell } from '@/dev/columns/admin/quotations/quote-agency-cell'
 import type { TravelQuoteFetchListRow } from '@/types/types'
 import { ColumnDef } from '@tanstack/table-core'
 
@@ -106,6 +107,11 @@ export const TravelQuoteFetchColumns: ColumnDef<TravelQuoteFetchListRow>[] = [
   {
     id: 'agency',
     header: () => <div>Agency</div>,
-    cell: ({ row }) => <div>{row.original.agency?.name ?? '-'}</div>,
+    cell: ({ row }) => (
+      <QuoteAgencyCell
+        agencyName={row.original.agency?.name}
+        processedByName={row.original.processed_by_organization?.name}
+      />
+    ),
   },
 ]

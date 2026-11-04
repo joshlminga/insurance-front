@@ -244,7 +244,14 @@ export type TravelQuoteFetchListRow = {
     email?: string | null
     phone?: string | null
   } | null
+  /** Primary owner: agency_id, else processor, else country default */
   agency?: {
+    organization_id?: number
+    organization_location_id?: number
+    name?: string
+  } | null
+  /** Only set when processor differs from primary agency */
+  processed_by_organization?: {
     organization_id?: number
     organization_location_id?: number
     name?: string
@@ -363,7 +370,14 @@ export type MotorQuoteFetchListRow = {
     email?: string | null
     phone?: string | null
   } | null
+  /** Primary owner: agency_id, else processor, else country default */
   agency?: {
+    organization_id?: number
+    organization_location_id?: number
+    name?: string
+  } | null
+  /** Only set when processor differs from primary agency */
+  processed_by_organization?: {
     organization_id?: number
     organization_location_id?: number
     name?: string
@@ -417,6 +431,12 @@ export type MotorQuoteFetchDetail = {
   certificates?: Array<Record<string, unknown>>
   selected_benefit_ids?: number[]
   meta?: Record<string, unknown>
+  /** Present when a short-cover issue reason was saved for this quote */
+  issue_reason?: {
+    reason: string
+    reason_label: string
+    other_reason?: string | null
+  } | null
 }
 
 export type MotorQuoteDuplicatePayload = {
@@ -1693,6 +1713,27 @@ export type DmvicBrokerStockRow = {
   live_member_id?: number | null
   demo_member_id?: number | null
   is_active?: boolean
+  created_at?: string | null
+  updated_at?: string | null
+}
+
+/** DMVIC Settings: which org's stock/tokens this location uses per product. */
+export type DmvicOrganizationSettingRow = {
+  id: number
+  organization_location_id: number
+  product: string
+  is_self: boolean
+  use_dmvic_of_organization_id?: number | null
+  organization_location?: {
+    id: number
+    organization_id?: number | null
+    organization_name?: string | null
+  } | null
+  use_dmvic_of_organization?: {
+    id: number
+    organization_id?: number | null
+    organization_name?: string | null
+  } | null
   created_at?: string | null
   updated_at?: string | null
 }

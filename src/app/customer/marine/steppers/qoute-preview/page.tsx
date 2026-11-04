@@ -7,6 +7,7 @@ import { ArrowLeft, Download, Forward, Mail, Share2 } from "lucide-react";
 
 
 import type { TDialogComponentProps } from "@/types/types";
+import { WHATSAPP_SHARE_ENABLED } from "@/utils/constatnts";
 
 export const QuotePreviewPage = ({
   componentProps,
@@ -78,10 +79,12 @@ export const QuotePreviewPage = ({
                             label: "Email",
                             icon: <Mail className="w-4 h-4" />,
                         },
-                        {
-                            label: "WhatsApp",
-                            icon: <Share2 className="w-4 h-4" />,
-                        },
+                        ...(WHATSAPP_SHARE_ENABLED
+                            ? [{
+                                label: "WhatsApp",
+                                icon: <Share2 className="w-4 h-4" />,
+                            }]
+                            : []),
                     ]} />
             </CardFooter>
         </div>

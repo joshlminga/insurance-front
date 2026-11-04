@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { SUPER_ADMIN_ROLE } from "@/auth/constants"
 import { ROLE_GUARD_NAME, type RbacPermission, type RbacRole } from "@/types/rbac-roles"
 
 export const ROLE_PERMISSIONS_PAGE_SIZE = 100
@@ -42,18 +43,19 @@ export const mergePermissionsById = (
 export const getOrgLocationId = (rowData: Record<string, any>) =>
   rowData?.organization_location_id ?? rowData?.organizationLocationId ?? rowData?.id
 
+/** Prefer slug for role detail URLs; list payloads include slug from the API */
+export const getOrgLocationSlug = (rowData: Record<string, any>) =>
+  rowData?.slug ?? null
+
 /** Resolve role id from API row */
 export const getRoleId = (rowData: Record<string, any>) =>
   rowData?.id ?? rowData?.role_id ?? rowData?.roleId
 
-/** Human-readable role label - org roles use display_name; global/system use name */
+/** Human-readable role label. The slug in name stays fixed, so the screen shows display_name. */
 export const getRoleLabel = (
   rowData: Record<string, any>,
-  rolesBasePath = "roles"
-) =>
-  rolesBasePath === "roles"
-    ? (rowData?.display_name ?? "N/A")
-    : (rowData?.name ?? "N/A")
+  _rolesBasePath = "roles"
+) => rowData?.display_name ?? rowData?.name ?? "N/A"
 
 /** Whether a role row is active */
 export const getRoleIsActive = (rowData: Record<string, any>) => {
@@ -62,9 +64,25 @@ export const getRoleIsActive = (rowData: Record<string, any>) => {
   return Boolean(rowData?.is_active)
 }
 
-/** Whether a role is a general (system) role */
+/** The platform super_admin role is permanent and cannot be deleted. */
+export const isProtectedSuperAdminRole = (rowData: Record<string, any>) =>
+  rowData?.name === SUPER_ADMIN_ROLE
+
+/** Whether a role is a general template (owner, admin, manager, and the rest) */
 export const getRoleIsGeneral = (rowData: Record<string, any>) =>
   Boolean(rowData?.is_general)
+
+/**
+ * General roles can be changed only by a platform super admin.
+ * Other roles follow the API is_editable flag.
+ */
+export const canChangeRole = (
+  rowData: Record<string, any>,
+  platformSuperAdmin: boolean
+) => {
+  if (getRoleIsGeneral(rowData)) return platformSuperAdmin
+  return getRoleIsEditable(rowData)
+}
 
 /** Whether a role can be edited; defaults to true when field is absent */
 export const getRoleIsEditable = (rowData: Record<string, any>) => {
