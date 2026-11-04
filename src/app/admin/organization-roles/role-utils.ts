@@ -43,6 +43,10 @@ export const mergePermissionsById = (
 export const getOrgLocationId = (rowData: Record<string, any>) =>
   rowData?.organization_location_id ?? rowData?.organizationLocationId ?? rowData?.id
 
+/** Prefer slug for role detail URLs; list payloads include slug from the API */
+export const getOrgLocationSlug = (rowData: Record<string, any>) =>
+  rowData?.slug ?? null
+
 /** Resolve role id from API row */
 export const getRoleId = (rowData: Record<string, any>) =>
   rowData?.id ?? rowData?.role_id ?? rowData?.roleId
