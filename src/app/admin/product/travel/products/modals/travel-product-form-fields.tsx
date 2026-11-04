@@ -1,5 +1,6 @@
 import { FieldLabel } from "@/components/ui/field"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { useCanSetPublicProduct } from "@/auth/use-can-set-public-product"
 import {
   Button,
   ReusableSelect,
@@ -9,6 +10,7 @@ import {
 import type { TravelProductFormValues } from "@/types/schema"
 import { EORGANIZATIONTYPES } from "@/utils/constatnts"
 import { TRAVEL_BOUND, TRAVEL_BOUND_OPTIONS } from "@/utils/travel-enums"
+import { useEffect } from "react"
 import { Controller, useFieldArray, type Control, type UseFormReturn } from "react-hook-form"
 import type { TravelProductSelectLabels } from "./travel-product-form-utils"
 
@@ -48,6 +50,7 @@ function YesNoRadio({
   control,
   name,
   label,
+  disabled = false,
 }: {
   control: Control<TravelProductFormValues>
   name:
@@ -60,6 +63,7 @@ function YesNoRadio({
     | "payment_api"
     | "certificate_api"
   label: string
+  disabled?: boolean
 }) {
   const yesId = `${name}-yes`
   const noId = `${name}-no`
@@ -74,15 +78,16 @@ function YesNoRadio({
           <RadioGroup
             value={field.value}
             onValueChange={field.onChange}
+            disabled={disabled}
             className="flex flex-row flex-wrap gap-4">
             <div className="flex items-center gap-2">
-              <RadioGroupItem value="true" id={yesId} />
+              <RadioGroupItem value="true" id={yesId} disabled={disabled} />
               <FieldLabel htmlFor={yesId} className="font-normal">
                 Yes
               </FieldLabel>
             </div>
             <div className="flex items-center gap-2">
-              <RadioGroupItem value="false" id={noId} />
+              <RadioGroupItem value="false" id={noId} disabled={disabled} />
               <FieldLabel htmlFor={noId} className="font-normal">
                 No
               </FieldLabel>
@@ -90,6 +95,11 @@ function YesNoRadio({
           </RadioGroup>
         )}
       />
+      {disabled ? (
+        <p className="text-xs text-muted-foreground">
+          Locked to No — only the default organization can publish public products.
+        </p>
+      ) : null}
     </div>
   )
 }
@@ -98,6 +108,14 @@ export const TravelProductFormFields = ({
   form,
   selected,
 }: TravelProductFormFieldsProps) => {
+  const canSetPublicProduct = useCanSetPublicProduct()
+
+  useEffect(() => {
+    if (!canSetPublicProduct) {
+      form.setValue("for_public", "false")
+    }
+  }, [canSetPublicProduct, form])
+
   const { fields: coverageFields, append: appendCoverage, remove: removeCoverage } =
     useFieldArray({
       control: form.control,
@@ -195,6 +213,7 @@ export const TravelProductFormFields = ({
           control={form.control}
           name="for_public"
           label="Public Product (Accessible by All)"
+          disabled={!canSetPublicProduct}
         />
         <YesNoRadio
           control={form.control}

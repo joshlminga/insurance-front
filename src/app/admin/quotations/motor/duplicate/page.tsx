@@ -1,6 +1,4 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { QUOTATION_MOTOR_MODULES } from '@/auth/module-keys'
-import { useCan } from '@/auth/useCan'
 import { PageHeader } from '@/components/shared'
 import {
     AlertDialog,
@@ -65,6 +63,7 @@ import {
     motorFormFieldStyles,
     motorInputClassName,
 } from '../motor-field-styles'
+import { useQuotationOfficeUseAccess } from '@/app/admin/quotations/office-use-access'
 import { buildMotorQuotationPayload } from '../motor-quotation-payload'
 import { OrganizationLocationInput } from '../organization-location-input'
 import { OfficeCountrySelect } from '../office-country-select'
@@ -266,11 +265,15 @@ function AnimatedSection({ show, children, className }: AnimatedSectionProps) {
 
 export const AdminMotorDuplicateQuotationPage = () => {
     const navigate = useNavigate()
-    const { user } = UseAuth()
-    const { canModuleAction } = useCan()
-    const canMotorOverride = QUOTATION_MOTOR_MODULES.some((module) =>
-        canModuleAction(module, 'override')
-    )
+    const { user, resolvedOrganization } = UseAuth()
+    const orgCountryId =
+        resolvedOrganization?.country_id != null
+            ? String(resolvedOrganization.country_id)
+            : ''
+    const orgLocationId =
+        resolvedOrganization?.organization_location_id != null
+            ? String(resolvedOrganization.organization_location_id)
+            : ''
     const [selectedTabValue, setSelectedTabValue] = useState<string>('')
     const [adminOrganizationOverride, setAdminOrganizationOverride] = useState(false)
     const [showSelfCoverSubmitWarning, setShowSelfCoverSubmitWarning] = useState(false)
@@ -443,12 +446,41 @@ export const AdminMotorDuplicateQuotationPage = () => {
     // }, [formCountryId, profileCountry?.id])
 
     const effectiveCountryId = (() => {
-        if (formCountryId) return formCountryId;
+        if (formCountryId) return formCountryId
+        if (orgCountryId) return orgCountryId
         if (profileCountry?.id != null && profileCountry.id !== '') {
-            return String(profileCountry.id);
+            return String(profileCountry.id)
         }
-        return '';
-    })();
+        return ''
+    })()
+
+    const {
+        countryLocked,
+        agencyLocked,
+        onBehalfLocked,
+        canAdminOverride,
+        sessionCountryId,
+        sessionLocationId,
+        agencyOptions,
+        onBehalfOptions,
+        isLoading: isOfficeUseLoading,
+    } = useQuotationOfficeUseAccess({
+        countryId: effectiveCountryId,
+        adminOverride: adminOrganizationOverride,
+        enabled: user?.id != null,
+    })
+
+    useEffect(() => {
+        if (!canAdminOverride && adminOrganizationOverride) {
+            setAdminOrganizationOverride(false)
+        }
+    }, [canAdminOverride, adminOrganizationOverride])
+
+    useEffect(() => {
+        if (!countryLocked || !sessionCountryId) return
+        if (form.getValues('country_id') === sessionCountryId) return
+        form.setValue('country_id', sessionCountryId, { shouldValidate: true })
+    }, [countryLocked, sessionCountryId, form])
 
     const { data: selectedCountryGeoData } = UseApiQuery<SubmitResponse>({
         url: 'taxonomies/geo/country',
@@ -476,8 +508,6 @@ export const AdminMotorDuplicateQuotationPage = () => {
     const canLoadOrganizations = Boolean(effectiveCountryId)
     const hasSelectedClass = Boolean(selectedTabValue)
     const isClassTabsLoading = isVehicleClassesLoading
-    const effectiveAdminOrganizationOverride =
-        canMotorOverride && adminOrganizationOverride
 
     const handleClassChange = (value: string) => {
         setSelectedTabValue(value)
@@ -698,7 +728,11 @@ export const AdminMotorDuplicateQuotationPage = () => {
                                             defaultCountryName={profileCountry?.name}
                                             label="Country"
                                             required
-                                            disabled={isAdminProfileLoading}
+                                            disabled={
+                                                countryLocked ||
+                                                isAdminProfileLoading ||
+                                                isOfficeUseLoading
+                                            }
                                         />
                                     )}
                                 />
@@ -710,11 +744,20 @@ export const AdminMotorDuplicateQuotationPage = () => {
                                         <OrganizationLocationInput
                                             variant="agency"
                                             countryId={effectiveCountryId}
+                                            preferredLocationId={
+                                                sessionLocationId || orgLocationId
+                                            }
+                                            options={agencyOptions}
+                                            optionsLoading={isOfficeUseLoading}
                                             value={field.value}
                                             onChange={field.onChange}
                                             label="Your Agency"
                                             required
-                                            disabled={!canLoadOrganizations}
+                                            disabled={
+                                                agencyLocked ||
+                                                !canLoadOrganizations ||
+                                                isOfficeUseLoading
+                                            }
                                         />
                                     )}
                                 />
@@ -726,12 +769,17 @@ export const AdminMotorDuplicateQuotationPage = () => {
                                         <OrganizationLocationInput
                                             variant="onBehalf"
                                             countryId={effectiveCountryId}
-                                            override={effectiveAdminOrganizationOverride}
+                                            options={onBehalfOptions}
+                                            optionsLoading={isOfficeUseLoading}
                                             value={field.value}
                                             onChange={field.onChange}
                                             label="On behalf of"
                                             required={false}
-                                            disabled={!canLoadOrganizations}
+                                            disabled={
+                                                onBehalfLocked ||
+                                                !canLoadOrganizations ||
+                                                isOfficeUseLoading
+                                            }
                                         />
                                     )}
                                 />
@@ -746,7 +794,7 @@ export const AdminMotorDuplicateQuotationPage = () => {
                                 />
                             </div>
 
-                            {canMotorOverride && (
+                            {canAdminOverride && (
                                 <div className="flex items-start gap-2">
                                     <Checkbox
                                         id="admin-organization-override"
@@ -775,7 +823,7 @@ export const AdminMotorDuplicateQuotationPage = () => {
                                 </div>
                             )}
 
-                            {canMotorOverride && (
+                            {canAdminOverride && (
                                 <div className="rounded-2xl border border-[#ADABAB]/35 p-3 sm:p-5">
                                     <p className="text-xs font-semibold text-[#C20C0C]">Office Use:</p>
                                     <p className="mt-1 text-xs text-muted-foreground">

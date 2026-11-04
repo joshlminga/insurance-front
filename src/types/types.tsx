@@ -1697,6 +1697,27 @@ export type DmvicBrokerStockRow = {
   updated_at?: string | null
 }
 
+/** DMVIC Settings: which org's stock/tokens this location uses per product. */
+export type DmvicOrganizationSettingRow = {
+  id: number
+  organization_location_id: number
+  product: string
+  is_self: boolean
+  use_dmvic_of_organization_id?: number | null
+  organization_location?: {
+    id: number
+    organization_id?: number | null
+    organization_name?: string | null
+  } | null
+  use_dmvic_of_organization?: {
+    id: number
+    organization_id?: number | null
+    organization_name?: string | null
+  } | null
+  created_at?: string | null
+  updated_at?: string | null
+}
+
 
 export type DmvicPolicyNumberRuleRow = {
   id: number

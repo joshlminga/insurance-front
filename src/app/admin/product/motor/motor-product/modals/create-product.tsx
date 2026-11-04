@@ -20,8 +20,10 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { Input } from "@/components/ui/input"
+import { useCanSetPublicProduct } from "@/auth/use-can-set-public-product"
 import { CreateProductFormValues } from "@/types/schema"
 import { buildMotorProductFormData } from "./build-motor-product-form-data"
+import { useEffect } from "react"
 
 
 
@@ -29,6 +31,7 @@ export const CreateProductModal = ({ handleDialogContextSwitch, componentProps }
     handleDialogContextSwitch: (context?: any) => void
     componentProps?: any
 }) => {
+    const canSetPublicProduct = useCanSetPublicProduct()
     const [brochureInputs, setBrochureInputs] = useState<Array<{ id: number, file?: File }>>([
         { id: Date.now() },
     ])
@@ -48,6 +51,13 @@ export const CreateProductModal = ({ handleDialogContextSwitch, componentProps }
             organization_location_ids: '',
         },
     })
+
+    // Non-default orgs cannot publish public products — keep the field locked to No.
+    useEffect(() => {
+        if (!canSetPublicProduct) {
+            form.setValue("for_public", "false")
+        }
+    }, [canSetPublicProduct, form])
 
     const syncBrochures = (inputs: Array<{ id: number, file?: File }>) => {
         const files = inputs
@@ -100,7 +110,12 @@ export const CreateProductModal = ({ handleDialogContextSwitch, componentProps }
         },
     })
     const onSubmit = (data: CreateProductFormValues) => {
-        submitMutation.mutate(buildMotorProductFormData(data))
+        submitMutation.mutate(
+            buildMotorProductFormData({
+                ...data,
+                for_public: canSetPublicProduct ? data.for_public : "false",
+            }),
+        )
     }
 
     return (
@@ -162,13 +177,22 @@ export const CreateProductModal = ({ handleDialogContextSwitch, componentProps }
                     required
                     options={ACCESSLEVELSOPTIONS}
                 />
-                <ReusableSelect
-                    control={form.control}
-                    name="for_public"
-                    label="Public Product (Accessible by All)"
-                    required
-                    options={TARGET_AUDIENCE_OPTIONS}
-                />
+                {canSetPublicProduct ? (
+                    <ReusableSelect
+                        control={form.control}
+                        name="for_public"
+                        label="Public Product (Accessible by All)"
+                        required
+                        options={TARGET_AUDIENCE_OPTIONS}
+                    />
+                ) : (
+                    <div className="space-y-1">
+                        <p className="text-sm font-medium">Public Product (Accessible by All)</p>
+                        <p className="text-sm text-muted-foreground">
+                            Locked to No — only the default organization can publish public products.
+                        </p>
+                    </div>
+                )}
                 <ReuseableInput
                     control={form.control}
                     name="start_date"

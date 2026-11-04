@@ -64,6 +64,7 @@ import {
     TravelKycSchema,
     CreateDmvicStockSchema,
     EditDmvicStockSchema,
+    UpsertDmvicOrganizationSettingSchema,
     CreateDmvicPolicyNumberRuleSchema,
     EditDmvicPolicyNumberRuleSchema,
     CreateCurrencySchema,
@@ -169,6 +170,8 @@ export type CreateDmvicStockFormInput = z.input<typeof CreateDmvicStockSchema>
 export type CreateDmvicStockFormValues = z.output<typeof CreateDmvicStockSchema>
 
 export type EditDmvicStockFormValues = z.infer<typeof EditDmvicStockSchema>
+export type UpsertDmvicOrganizationSettingFormInput = z.input<typeof UpsertDmvicOrganizationSettingSchema>
+export type UpsertDmvicOrganizationSettingFormValues = z.output<typeof UpsertDmvicOrganizationSettingSchema>
 export type CreateDmvicPolicyNumberRuleFormInput = z.input<typeof CreateDmvicPolicyNumberRuleSchema>;
 export type CreateDmvicPolicyNumberRuleFormValues = z.output<typeof CreateDmvicPolicyNumberRuleSchema>;
 export type EditDmvicPolicyNumberRuleFormInput = z.input<typeof EditDmvicPolicyNumberRuleSchema>;

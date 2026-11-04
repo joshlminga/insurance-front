@@ -6,8 +6,27 @@ import {
   MAX_KYC_FILE_BYTES,
   PRODUCT_TYPE_VALUES,
 } from "@/utils/constatnts"
-import { maxCoverEndDate } from "@/utils/helpers"
+import { isShortMotorCover, maxCoverEndDate } from "@/utils/helpers"
 import { z } from "zod"
+
+/** Admin short-cover reasons on motor invoice (matches App\Enums\Ace\MotorIssueReason). */
+export const MOTOR_ISSUE_REASON_VALUES = [
+  "valuation_not_completed",
+  "payment_in_installments",
+  "no_logbook",
+  "not_the_owner",
+  "other",
+] as const
+
+export type MotorIssueReasonValue = (typeof MOTOR_ISSUE_REASON_VALUES)[number]
+
+export const MOTOR_ISSUE_REASON_OPTIONS: { value: MotorIssueReasonValue; label: string }[] = [
+  { value: "valuation_not_completed", label: "Valuation (not completed/done)" },
+  { value: "payment_in_installments", label: "Payment in Installments" },
+  { value: "no_logbook", label: "No Logbook" },
+  { value: "not_the_owner", label: "Not the Owner" },
+  { value: "other", label: "Other reasons" },
+]
 
 /** Shared KRA PIN rule used by motor / legacy KYC schemas. */
 const KraPinSchema = z
@@ -321,6 +340,11 @@ export const InvoicePaymentSchema = z.object({
   // Admin-only optional fields (not shown on customer checkout)
   cover_end_date: z.string().optional(),
   policy_number: z.string().optional(),
+  // Cover-expiry emails after invoice is paid (both admin + customer). Forms default to false.
+  reminders_enabled: z.boolean().optional(),
+  // Admin only when cover length is ≤ 30 days ("" = cleared / not shown)
+  issue_reason: z.union([z.enum(MOTOR_ISSUE_REASON_VALUES), z.literal("")]).optional(),
+  other_reason: z.string().optional(),
   // Set true after user confirms DMVIC ER007 gap override in the popup
   // (not the ValidateDoubleInsurance preflight — that runs separately before submit)
   validate_double_insurance: z.boolean().optional(),
@@ -331,33 +355,50 @@ export const InvoicePaymentSchema = z.object({
   // total_payable: z.string().min(1, "Total payable is required"),
 }).superRefine((data, ctx) => {
   const endDate = data.cover_end_date?.trim()
-  if (!endDate) {
-    return
-  }
-
   const startDate = data.cover_start_date
-  if (!startDate) {
-    return
+
+  if (endDate && startDate) {
+    if (endDate <= startDate) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Cover end date must be after the cover start date",
+        path: ["cover_end_date"],
+      })
+      return
+    }
+
+    // Same calendar day next year, minus 1 day (local YMD — avoids UTC off-by-one in Kenya)
+    const maxEndString = maxCoverEndDate(startDate, 12)
+
+    if (endDate > maxEndString) {
+      ctx.addIssue({
+        code: "custom",
+        message: `Cover end date must not exceed ${maxEndString}`,
+        path: ["cover_end_date"],
+      })
+      return
+    }
   }
 
-  if (endDate <= startDate) {
-    ctx.addIssue({
-      code: "custom",
-      message: "Cover end date must be after the cover start date",
-      path: ["cover_end_date"],
-    })
-    return
-  }
+  // Short cover (admin): require reason; "Other" needs free-text
+  if (isShortMotorCover(startDate, endDate)) {
+    const reason = data.issue_reason?.trim()
+    if (!reason) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Reason to Issue 1 Month is required for covers of 30 days or less",
+        path: ["issue_reason"],
+      })
+      return
+    }
 
-  // Same calendar day next year, minus 1 day (local YMD — avoids UTC off-by-one in Kenya)
-  const maxEndString = maxCoverEndDate(startDate, 12)
-
-  if (endDate > maxEndString) {
-    ctx.addIssue({
-      code: "custom",
-      message: `Cover end date must not exceed ${maxEndString}`,
-      path: ["cover_end_date"],
-    })
+    if (reason === "other" && !data.other_reason?.trim()) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Please describe the other reason",
+        path: ["other_reason"],
+      })
+    }
   }
 })
 
@@ -1588,6 +1629,28 @@ export const CreateDmvicStockSchema = z.object({
 })
 // Edit uses the same fields. Remaining stock is not part of this form.
 export const EditDmvicStockSchema = CreateDmvicStockSchema
+
+/** Per product: use own DMVIC stock/tokens, or another organization's. */
+export const UpsertDmvicOrganizationSettingSchema = z
+  .object({
+    product: z.string().min(1, 'Product is required'),
+    // true = this org's own DMVIC; false = borrow another org's
+    is_self: z.boolean(),
+    use_dmvic_of_organization_id: z.string().optional().nullable(),
+  })
+  .superRefine((data, ctx) => {
+    if (!data.is_self) {
+      const target = (data.use_dmvic_of_organization_id ?? '').trim()
+      if (!target) {
+        ctx.addIssue({
+          code: 'custom',
+          message: 'Select whose DMVIC credentials to use',
+          path: ['use_dmvic_of_organization_id'],
+        })
+      }
+    }
+  })
+
 const dmvicPolicyNumberRuleBase = z.object({
   template: z
     .string()

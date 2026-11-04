@@ -368,17 +368,18 @@ export function collectBenefitIdsFromValues(
             if (Number.isFinite(n)) ids.push(n)
         }
 
-        // Locked org-mandatory / insurer-locked benefits always stay in the request
+        // Only hard org-mandatory benefits (locked + org_mandatory + no unselect) stay forced
         for (const item of items) {
-            if (item.locked && Number.isFinite(item.id) && !ids.includes(item.id)) {
+            const hardOrgMandatory =
+                Boolean(item.locked) &&
+                Boolean(item.org_mandatory) &&
+                item.allow_unselect === false
+            if (hardOrgMandatory && Number.isFinite(item.id) && !ids.includes(item.id)) {
                 ids.push(item.id)
                 forcedLocked.push(item.id)
             }
         }
     }
-    // #region agent log
-    fetch('http://127.0.0.1:7410/ingest/d44f0587-d252-4b9d-983a-196162e430ad',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'6d317e'},body:JSON.stringify({sessionId:'6d317e',runId:'pre-fix',hypothesisId:'H2-H3',location:'helpers.tsx:collectBenefitIdsFromValues',message:'Frontend collected benefit ids',data:{ids,forcedLocked,lockedItems:groups.flatMap(g=>g.items.filter(i=>i.locked).map(i=>({id:i.id,name:i.name,org_mandatory:i.org_mandatory,allow_unselect:i.allow_unselect})))},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
     return ids
 }
 
@@ -458,6 +459,32 @@ export const toFormDate = (value: unknown): string => {
     return ""
   }
   return String(value).slice(0, 10)
+}
+
+/**
+ * Calendar-day gap between two YYYY-MM-DD dates (local), matching Carbon diffInDays for date-only values.
+ * Example: 2026-11-01 → 2026-12-01 = 30.
+ */
+export const coverDiffInDays = (startDateYmd: string, endDateYmd: string): number => {
+  const [sy, sm, sd] = startDateYmd.split("-").map(Number)
+  const [ey, em, ed] = endDateYmd.split("-").map(Number)
+  if (!sy || !sm || !sd || !ey || !em || !ed) {
+    return Number.NaN
+  }
+  const start = new Date(sy, sm - 1, sd)
+  const end = new Date(ey, em - 1, ed)
+  return Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))
+}
+
+/** Short cover for motor reminders / 1-month issue reason: end within 30 days of start. */
+export const isShortMotorCover = (startDateYmd?: string, endDateYmd?: string): boolean => {
+  const start = startDateYmd?.trim()
+  const end = endDateYmd?.trim()
+  if (!start || !end) {
+    return false
+  }
+  const days = coverDiffInDays(start, end)
+  return Number.isFinite(days) && days >= 0 && days <= 30
 }
 
 /**

@@ -101,6 +101,11 @@ const DmvicStockPolicyNumbersPage = lazy(() =>
     default: m.DmvicStockPolicyNumbersPage,
   })),
 )
+const DmvicStockSettingsPage = lazy(() =>
+  import("./app/admin/dmvic-stock/settings/page").then(m => ({
+    default: m.DmvicStockSettingsPage,
+  })),
+)
 const DmvicStockDetailPage = lazy(() => import("./app/admin/dmvic-stock/[id]/page").then(m => ({ default: m.DmvicStockDetailPage })))
 const CreditApprovalsPage = lazy(() => import("./app/admin/credit/approvals/page").then(m => ({ default: m.CreditApprovalsPage })))
 const CreditPendingPage = lazy(() => import("./app/admin/credit/pending/page").then(m => ({ default: m.CreditPendingPage })))
@@ -176,6 +181,11 @@ const AdminMotorQuotationPurchasePage = lazy(() =>
 const AdminMotorQuotationFetchPage = lazy(() =>
   import("./app/admin/quotations/motor/fetch/page").then(m => ({
     default: m.AdminMotorQuotationFetchPage,
+  }))
+)
+const AdminMotorRemindersPage = lazy(() =>
+  import("./app/admin/quotations/motor/reminders/page").then(m => ({
+    default: m.AdminMotorRemindersPage,
   }))
 )
 const AdminMotorQuotationDoublePage = lazy(() =>
@@ -853,6 +863,19 @@ export const router = createBrowserRouter([
                 permission="quotation-motor.read"
                 productLine="Motor">
                   <AdminMotorQuotationFetchPage />
+                </AdminModulePage>
+              </S>
+            ),
+          },
+          {
+            path: "quotations/motor-quotations/reminders",
+            element: (
+              <S>
+                <AdminModulePage
+                module={MODULES.QUOTATION_MOTOR}
+                permission="quotation-motor.read"
+                productLine="Motor">
+                  <AdminMotorRemindersPage />
                 </AdminModulePage>
               </S>
             ),
@@ -1579,6 +1602,19 @@ export const router = createBrowserRouter([
                 module={MODULES.DMVIC_STOCK}
                 permission="dmvic-stock.policies">
                   <DmvicStockPolicyNumbersPage />
+                </AdminModulePage>
+              </S>
+            ),
+          },
+          {
+            // Must be registered before dmvic-stock/:id so "settings" is not captured as an id.
+            path: "dmvic-stock/settings",
+            element: (
+              <S>
+                <AdminModulePage
+                module={MODULES.DMVIC_STOCK}
+                permission="dmvic-stock.settings">
+                  <DmvicStockSettingsPage />
                 </AdminModulePage>
               </S>
             ),

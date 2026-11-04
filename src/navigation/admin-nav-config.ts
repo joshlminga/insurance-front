@@ -154,6 +154,12 @@ export const adminNavConfig: NavItem[] = [
             permission: 'quotation-motor.read',
           },
           {
+            title: 'Reminders',
+            url: EROUTES.MOTOR_QUOTATION_REMINDERS,
+            module: MODULES.QUOTATION_MOTOR,
+            permission: 'quotation-motor.read',
+          },
+          {
             title: 'Listed',
             url: EROUTES.REPORT_QUOTATIONS_MOTOR,
             module: MODULES.REPORT_MOTOR_QUOTATION,
@@ -547,6 +553,12 @@ export const adminNavConfig: NavItem[] = [
         url: EROUTES.DMVIC_STOCK_POLICY_NUMBERS,
         module: MODULES.DMVIC_STOCK,
         permission: 'dmvic-stock.policies',
+      },
+      {
+        title: 'Settings',
+        url: EROUTES.DMVIC_STOCK_SETTINGS,
+        module: MODULES.DMVIC_STOCK,
+        permission: 'dmvic-stock.settings',
       },
     ],
   },

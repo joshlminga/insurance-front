@@ -21,6 +21,10 @@ export type MotorPurchaseSummaryData = {
     payment_plans_locked?: boolean
     lock_payment_plan?: boolean
     invoice_plan_type?: string
+    /** Prefill from purchase summary after invoice save */
+    reminders_enabled?: boolean
+    issue_reason?: string | null
+    other_reason?: string | null
     invoice?: {
         payment_plan?: string
         cover_start_date?: string
@@ -29,6 +33,9 @@ export type MotorPurchaseSummaryData = {
         email?: string
         phone?: string
         policy_number?: string
+        reminders_enabled?: boolean
+        issue_reason?: string | null
+        other_reason?: string | null
     }
     vehicle?: {
         registration_number?: string | null

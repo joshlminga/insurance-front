@@ -64,7 +64,12 @@ export function QuotationFiltersPanel({
                                 ...items.map((item) => ({
                                     value: String(item.id),
                                     label: benefitOptionLabel(item),
-                                    disabled: Boolean(item.locked && !item.org_mandatory),
+                                    // Soft/bleed "locked" without org_mandatory must stay selectable
+                                    disabled: Boolean(
+                                        item.locked &&
+                                            item.org_mandatory &&
+                                            item.allow_unselect === false
+                                    ),
                                 })),
                             ]
                             return (

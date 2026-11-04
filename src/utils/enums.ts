@@ -106,6 +106,7 @@ export const EROUTES = {
   MOTOR_CERTIFICATES: `/${EPREFIX.DASHBOARD}/motor-certificates`,
   DMVIC_STOCK: `/${EPREFIX.DASHBOARD}/dmvic-stock`,
   DMVIC_STOCK_POLICY_NUMBERS: `/${EPREFIX.DASHBOARD}/dmvic-stock/policy-numbers`,
+  DMVIC_STOCK_SETTINGS: `/${EPREFIX.DASHBOARD}/dmvic-stock/settings`,
   DMVIC_STOCK_DETAIL: `/${EPREFIX.DASHBOARD}/dmvic-stock/:id`,
 
   // Reports
@@ -133,6 +134,8 @@ export const EROUTES = {
   MOTOR_QUOTATION_RESULTS: `/${EPREFIX.DASHBOARD}/${EPREFIX.QUOTATIONS}/motor-quotations/results`,
   MOTOR_QUOTATION_DUPLICATE: `/${EPREFIX.DASHBOARD}/${EPREFIX.QUOTATIONS}/motor-quotations/duplicate`,
   MOTOR_QUOTATION_PURCHASE: `/${EPREFIX.DASHBOARD}/${EPREFIX.QUOTATIONS}/motor-quotations/purchase`,
+  /** Admin cover-expiry reminder settings + log */
+  MOTOR_QUOTATION_REMINDERS: `/${EPREFIX.DASHBOARD}/${EPREFIX.QUOTATIONS}/motor-quotations/reminders`,
 
   // Travel quotations (admin office process — New → Find → Listed / Results → Purchase)
   TRAVELQUOTATIONS: `/${EPREFIX.DASHBOARD}/${EPREFIX.QUOTATIONS}/travel-quotations`,

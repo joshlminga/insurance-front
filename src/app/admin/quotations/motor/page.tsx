@@ -1,6 +1,4 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { QUOTATION_MOTOR_MODULES } from '@/auth/module-keys'
-import { useCan } from '@/auth/useCan'
 import { PageHeader } from '@/components/shared'
 import {
     AlertDialog,
@@ -64,6 +62,7 @@ import {
     motorFormFieldStyles,
     motorInputClassName,
 } from './motor-field-styles'
+import { useQuotationOfficeUseAccess } from '@/app/admin/quotations/office-use-access'
 import { buildMotorQuotationPayload } from './motor-quotation-payload'
 import { OrganizationLocationInput } from './organization-location-input'
 import { OfficeCountrySelect } from './office-country-select'
@@ -260,11 +259,15 @@ function AnimatedSection({ show, children, className }: AnimatedSectionProps) {
 
 export const MotorQuotationPage = () => {
     const navigate = useNavigate()
-    const { user } = UseAuth()
-    const { canModuleAction } = useCan()
-    const canMotorOverride = QUOTATION_MOTOR_MODULES.some((module) =>
-        canModuleAction(module, 'override')
-    )
+    const { user, resolvedOrganization } = UseAuth()
+    const orgCountryId =
+        resolvedOrganization?.country_id != null
+            ? String(resolvedOrganization.country_id)
+            : ''
+    const orgLocationId =
+        resolvedOrganization?.organization_location_id != null
+            ? String(resolvedOrganization.organization_location_id)
+            : ''
     const [selectedTabValue, setSelectedTabValue] = useState<string>('')
     const [adminOrganizationOverride, setAdminOrganizationOverride] = useState(false)
     const [showSelfCoverSubmitWarning, setShowSelfCoverSubmitWarning] = useState(false)
@@ -356,12 +359,57 @@ export const MotorQuotationPage = () => {
     // }, [formCountryId, profileCountry?.id])
 
     const effectiveCountryId = (() => {
-        if (formCountryId) return formCountryId;
+        if (formCountryId) return formCountryId
+        if (orgCountryId) return orgCountryId
         if (profileCountry?.id != null && profileCountry.id !== '') {
-            return String(profileCountry.id);
+            return String(profileCountry.id)
         }
-        return '';
-    })();
+        return ''
+    })()
+
+    const {
+        countryLocked,
+        agencyLocked,
+        onBehalfLocked,
+        canAdminOverride,
+        sessionCountryId,
+        sessionLocationId,
+        agencyOptions,
+        onBehalfOptions,
+        isLoading: isOfficeUseLoading,
+    } = useQuotationOfficeUseAccess({
+        countryId: effectiveCountryId,
+        adminOverride: adminOrganizationOverride,
+        enabled: user?.id != null,
+    })
+
+    // Country and Your Agency start from the tenant organization location.
+    useEffect(() => {
+        const countryDefault = sessionCountryId || orgCountryId
+        if (countryDefault && !form.getValues('country_id')) {
+            form.setValue('country_id', countryDefault, { shouldValidate: true })
+        }
+        const agencyDefault = sessionLocationId || orgLocationId
+        if (agencyDefault && !form.getValues('processed_by_organization_id')) {
+            form.setValue('processed_by_organization_id', agencyDefault, {
+                shouldValidate: true,
+            })
+        }
+    }, [sessionCountryId, sessionLocationId, orgCountryId, orgLocationId, form])
+
+    // When country is locked, keep the form on the session country.
+    useEffect(() => {
+        if (!countryLocked || !sessionCountryId) return
+        if (form.getValues('country_id') === sessionCountryId) return
+        form.setValue('country_id', sessionCountryId, { shouldValidate: true })
+    }, [countryLocked, sessionCountryId, form])
+
+    // Clear Admin Override checkbox when the user is not a super_admin.
+    useEffect(() => {
+        if (!canAdminOverride && adminOrganizationOverride) {
+            setAdminOrganizationOverride(false)
+        }
+    }, [canAdminOverride, adminOrganizationOverride])
 
     const { data: selectedCountryGeoData } = UseApiQuery<SubmitResponse>({
         url: 'taxonomies/geo/country',
@@ -374,23 +422,15 @@ export const MotorQuotationPage = () => {
         | undefined
     const dialCode = resolveDialCode(selectedCountryGeo)
 
-    // const selectedCountryName = useMemo(() => {
-    //     if (selectedCountryGeo?.name) return selectedCountryGeo.name
-    //     if (!formCountryId && profileCountry?.name) return profileCountry.name
-    //     return 'selected country'
-    // }, [selectedCountryGeo?.name, formCountryId, profileCountry?.name])
-
     const selectedCountryName = (() => {
-        if (selectedCountryGeo?.name) return selectedCountryGeo.name;
-        if (!formCountryId && profileCountry?.name) return profileCountry.name;
-        return 'selected country';
-    })();
+        if (selectedCountryGeo?.name) return selectedCountryGeo.name
+        if (!formCountryId && profileCountry?.name) return profileCountry.name
+        return 'selected country'
+    })()
 
     const canLoadOrganizations = Boolean(effectiveCountryId)
     const hasSelectedClass = Boolean(selectedTabValue)
     const isClassTabsLoading = isVehicleClassesLoading
-    const effectiveAdminOrganizationOverride =
-        canMotorOverride && adminOrganizationOverride
 
     const handleClassChange = (value: string) => {
         setSelectedTabValue(value)
@@ -539,7 +579,11 @@ export const MotorQuotationPage = () => {
                                             defaultCountryName={profileCountry?.name}
                                             label="Country"
                                             required
-                                            disabled={isAdminProfileLoading}
+                                            disabled={
+                                                countryLocked ||
+                                                isAdminProfileLoading ||
+                                                isOfficeUseLoading
+                                            }
                                         />
                                     )}
                                 />
@@ -551,11 +595,20 @@ export const MotorQuotationPage = () => {
                                         <OrganizationLocationInput
                                             variant="agency"
                                             countryId={effectiveCountryId}
+                                            preferredLocationId={
+                                                sessionLocationId || orgLocationId
+                                            }
+                                            options={agencyOptions}
+                                            optionsLoading={isOfficeUseLoading}
                                             value={field.value}
                                             onChange={field.onChange}
                                             label="Your Agency"
                                             required
-                                            disabled={!canLoadOrganizations}
+                                            disabled={
+                                                agencyLocked ||
+                                                !canLoadOrganizations ||
+                                                isOfficeUseLoading
+                                            }
                                         />
                                     )}
                                 />
@@ -567,12 +620,17 @@ export const MotorQuotationPage = () => {
                                         <OrganizationLocationInput
                                             variant="onBehalf"
                                             countryId={effectiveCountryId}
-                                            override={effectiveAdminOrganizationOverride}
+                                            options={onBehalfOptions}
+                                            optionsLoading={isOfficeUseLoading}
                                             value={field.value}
                                             onChange={field.onChange}
                                             label="On behalf of"
                                             required={false}
-                                            disabled={!canLoadOrganizations}
+                                            disabled={
+                                                onBehalfLocked ||
+                                                !canLoadOrganizations ||
+                                                isOfficeUseLoading
+                                            }
                                         />
                                     )}
                                 />
@@ -587,7 +645,7 @@ export const MotorQuotationPage = () => {
                                 />
                             </div>
 
-                            {canMotorOverride && (
+                            {canAdminOverride && (
                                 <div className="flex items-start gap-2">
                                     <Checkbox
                                         id="admin-organization-override"
@@ -616,7 +674,7 @@ export const MotorQuotationPage = () => {
                                 </div>
                             )}
 
-                            {canMotorOverride && (
+                            {canAdminOverride && (
                                 <div className="rounded-2xl border border-[#ADABAB]/35 p-3 sm:p-5">
                                     <p className="text-xs font-semibold text-[#C20C0C]">Office Use:</p>
                                     <p className="mt-1 text-xs text-muted-foreground">
