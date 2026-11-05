@@ -615,6 +615,14 @@ export const router = createBrowserRouter([
               </S>
             ),
           },
+          {
+            path: "sure/chat/:sessionCode",
+            element: (
+              <S>
+                <SurePage />
+              </S>
+            ),
+          },
           // Members / Policyholders
           {
             path: "members",

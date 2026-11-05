@@ -1,4 +1,5 @@
 import { useEffect, useId, useMemo, useRef, useState, type RefObject } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import {
   ArrowUp,
   ChevronRight,
@@ -11,6 +12,7 @@ import {
   X,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import apiClient from '@/lib/api-client'
 import {
   Sheet,
   SheetContent,
@@ -18,6 +20,9 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet'
+import { EROUTES } from '@/utils/enums'
+import { extractErrorMessage } from '@/utils/helpers'
+import { ShowToast } from '@/utils/utils'
 
 type ChatRole = 'user' | 'assistant'
 
@@ -42,8 +47,30 @@ type SureConversation = {
   updatedAt: string
 }
 
+type SureApiEnvelope<T> = {
+  success?: boolean
+  message?: string
+  data?: T
+}
+
+type SureNewChatData = {
+  chat: string
+}
+
+type SureMessageData = {
+  chat: string
+  message_id: string
+  response: {
+    id: string
+  }
+}
+
 function makeId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
+}
+
+function sureChatPath(chatCode: string): string {
+  return EROUTES.SURE_CHAT.replace(':sessionCode', chatCode)
 }
 
 function buildEcho(text: string, attachmentNames: string[]): string {
@@ -88,6 +115,7 @@ function SureComposer({
   fileInputRef,
   fileInputId,
   centered,
+  disabled,
 }: {
   draft: string
   setDraft: (value: string) => void
@@ -98,6 +126,7 @@ function SureComposer({
   fileInputRef: RefObject<HTMLInputElement | null>
   fileInputId: string
   centered?: boolean
+  disabled?: boolean
 }) {
   const hasText = draft.trim().length > 0
   const hasAttachments = attachments.length > 0
@@ -125,6 +154,7 @@ function SureComposer({
                 onClick={() => onRemoveAttachment(file.id)}
                 className="rounded-full p-0.5 text-muted-foreground hover:bg-background hover:text-foreground"
                 aria-label={`Remove ${file.name}`}
+                disabled={disabled}
               >
                 <X className="size-3" />
               </button>
@@ -140,14 +170,15 @@ function SureComposer({
           // Enter sends; Shift+Enter keeps a newline
           if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault()
-            if (showSend) {
+            if (showSend && !disabled) {
               onSend()
             }
           }
         }}
         rows={centered ? 2 : 3}
         placeholder="Ask about Insurance"
-        className="w-full resize-none bg-transparent px-1 py-2 text-sm text-foreground placeholder:text-muted-foreground outline-none"
+        disabled={disabled}
+        className="w-full resize-none bg-transparent px-1 py-2 text-sm text-foreground placeholder:text-muted-foreground outline-none disabled:opacity-60"
       />
 
       <div className="mt-1 flex items-center justify-between gap-2">
@@ -158,6 +189,7 @@ function SureComposer({
             type="file"
             multiple
             className="sr-only"
+            disabled={disabled}
             onChange={(e) => {
               onPickFiles(e.target.files)
               e.target.value = ''
@@ -165,7 +197,10 @@ function SureComposer({
           />
           <label
             htmlFor={fileInputId}
-            className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm text-muted-foreground transition hover:bg-muted hover:text-foreground"
+            className={cn(
+              'inline-flex cursor-pointer items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm text-muted-foreground transition hover:bg-muted hover:text-foreground',
+              disabled && 'pointer-events-none opacity-60'
+            )}
           >
             <Paperclip className="size-4" />
             Attach
@@ -176,7 +211,8 @@ function SureComposer({
           <button
             type="button"
             onClick={onSend}
-            className="inline-flex size-9 items-center justify-center rounded-full bg-[#C20C0C] text-white transition hover:bg-[#a40a0a]"
+            disabled={disabled}
+            className="inline-flex size-9 items-center justify-center rounded-full bg-[#C20C0C] text-white transition hover:bg-[#a40a0a] disabled:opacity-60"
             aria-label="Send message"
           >
             <ArrowUp className="size-4" />
@@ -188,6 +224,7 @@ function SureComposer({
             aria-label="Voice input"
             // UI only for now — no recording
             onClick={() => undefined}
+            disabled={disabled}
           >
             <Mic className="size-4" />
           </button>
@@ -282,32 +319,34 @@ function SureConversationsSidebar({
 }
 
 export default function SurePage() {
+  const navigate = useNavigate()
+  // Chat ULID from /dashboard/sure/chat/:sessionCode (empty on /dashboard/sure)
+  const { sessionCode } = useParams<{ sessionCode?: string }>()
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [draft, setDraft] = useState('')
   const [attachments, setAttachments] = useState<ChatAttachment[]>([])
   const [isReplying, setIsReplying] = useState(false)
+  const [isStartingChat, setIsStartingChat] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [chatSearch, setChatSearch] = useState('')
-  // Placeholder until a backend exists
+  // Placeholder until a conversations list API exists
   const [conversations] = useState<SureConversation[]>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
   const fileInputId = useId()
   const bottomRef = useRef<HTMLDivElement>(null)
-  const echoTimerRef = useRef<number | null>(null)
+  // Keep the active ULID even while React Router catches up after navigate()
+  const chatCodeRef = useRef<string | null>(sessionCode ?? null)
 
   const hasMessages = messages.length > 0
+  const busy = isReplying || isStartingChat
+
+  useEffect(() => {
+    chatCodeRef.current = sessionCode ?? null
+  }, [sessionCode])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, isReplying])
-
-  useEffect(() => {
-    return () => {
-      if (echoTimerRef.current !== null) {
-        window.clearTimeout(echoTimerRef.current)
-      }
-    }
-  }, [])
 
   function pickFiles(files: FileList | null) {
     if (!files?.length) {
@@ -325,67 +364,150 @@ export default function SurePage() {
     setAttachments((prev) => prev.filter((file) => file.id !== id))
   }
 
-  function startNewChat() {
-    if (echoTimerRef.current !== null) {
-      window.clearTimeout(echoTimerRef.current)
-      echoTimerRef.current = null
+  // POST /vrm/sureai/new → save ULID session, then put it in the URL
+  async function createChatSession(): Promise<string> {
+    const response = await apiClient.post<SureApiEnvelope<SureNewChatData>>(
+      'vrm/sureai/new'
+    )
+    const chat = response.data?.data?.chat
+    if (!chat) {
+      throw new Error(response.data?.message || 'Could not start a Sure chat.')
     }
-    setMessages([])
-    setDraft('')
-    setAttachments([])
-    setIsReplying(false)
-    setSidebarOpen(false)
+    return chat
   }
 
-  function sendMessage() {
+  async function startNewChat() {
+    if (busy) {
+      return
+    }
+
+    setIsStartingChat(true)
+    setSidebarOpen(false)
+
+    try {
+      const chat = await createChatSession()
+      chatCodeRef.current = chat
+      setMessages([])
+      setDraft('')
+      setAttachments([])
+      setIsReplying(false)
+      navigate(sureChatPath(chat))
+    } catch (error) {
+      ShowToast.error(extractErrorMessage(error) || 'Could not start a new chat.')
+    } finally {
+      setIsStartingChat(false)
+    }
+  }
+
+  async function ensureChatCode(): Promise<string> {
+    const existing = chatCodeRef.current ?? sessionCode ?? null
+    if (existing) {
+      return existing
+    }
+
+    // First send from /dashboard/sure creates the session, then updates the URL
+    const chat = await createChatSession()
+    chatCodeRef.current = chat
+    navigate(sureChatPath(chat))
+    return chat
+  }
+
+  async function sendMessage() {
     const text = draft.trim()
-    if ((!text && attachments.length === 0) || isReplying) {
+    if ((!text && attachments.length === 0) || busy) {
       return
     }
 
     const attachmentNames = attachments.map((file) => file.name)
-    const userMessage: ChatMessage = {
-      id: makeId(),
-      role: 'user',
-      text: text || '(Attachment only)',
-      attachments: attachmentNames.length ? attachmentNames : undefined,
-    }
-
-    setMessages((prev) => [...prev, userMessage])
-    setDraft('')
-    setAttachments([])
     setIsReplying(true)
 
-    if (echoTimerRef.current !== null) {
-      window.clearTimeout(echoTimerRef.current)
-    }
+    try {
+      const chat = await ensureChatCode()
 
-    echoTimerRef.current = window.setTimeout(() => {
-      setMessages((prev) => [
-        ...prev,
+      // POST chat + message + attachment names; backend returns UUID ids
+      const response = await apiClient.post<SureApiEnvelope<SureMessageData>>(
+        'vrm/sureai/message',
         {
-          id: makeId(),
-          role: 'assistant',
-          text: buildEcho(text, attachmentNames),
-          feedback: null,
-        },
-      ])
+          chat,
+          message: text,
+          attachments: attachmentNames,
+        }
+      )
+
+      const payload = response.data?.data
+      if (!payload?.message_id || !payload.response?.id) {
+        throw new Error(response.data?.message || 'Sure did not return message ids.')
+      }
+
+      const userMessage: ChatMessage = {
+        id: payload.message_id,
+        role: 'user',
+        text: text || '(Attachment only)',
+        attachments: attachmentNames.length ? attachmentNames : undefined,
+      }
+
+      const assistantMessage: ChatMessage = {
+        id: payload.response.id,
+        role: 'assistant',
+        text: buildEcho(text, attachmentNames),
+        feedback: null,
+      }
+
+      setMessages((prev) => [...prev, userMessage, assistantMessage])
+      setDraft('')
+      setAttachments([])
+    } catch (error) {
+      // Keep the draft/attachments so the user can retry
+      ShowToast.error(extractErrorMessage(error) || 'Could not send your message.')
+    } finally {
       setIsReplying(false)
-      echoTimerRef.current = null
-    }, 600)
+    }
   }
 
-  function setMessageFeedback(messageId: string, value: 'up' | 'down') {
+  async function setMessageFeedback(messageId: string, value: 'up' | 'down') {
+    const target = messages.find(
+      (message) => message.id === messageId && message.role === 'assistant'
+    )
+    if (!target) {
+      return
+    }
+
+    // Same thumb again clears the reaction (null)
+    const next = target.feedback === value ? null : value
+    const chat = chatCodeRef.current ?? sessionCode
+
     setMessages((prev) =>
       prev.map((message) => {
         if (message.id !== messageId || message.role !== 'assistant') {
           return message
         }
-        // Toggle off if the same feedback is clicked again
-        const next = message.feedback === value ? null : value
         return { ...message, feedback: next }
       })
     )
+
+    if (!chat) {
+      return
+    }
+
+    try {
+      // POST reaction against the assistant message UUID from /message
+      await apiClient.post('vrm/sureai/reaction', {
+        chat,
+        message_id: messageId,
+        reaction: next,
+      })
+    } catch (error) {
+      // Roll local UI back if the API rejects the reaction
+      setMessages((prev) =>
+        prev.map((message) => {
+          if (message.id !== messageId || message.role !== 'assistant') {
+            return message
+          }
+          return { ...message, feedback: target.feedback ?? null }
+        })
+      )
+      ShowToast.error(extractErrorMessage(error) || 'Could not save your reaction.')
+    }
   }
 
   return (
@@ -434,6 +556,7 @@ export default function SurePage() {
             fileInputRef={fileInputRef}
             fileInputId={fileInputId}
             centered
+            disabled={busy}
           />
         </div>
       ) : (
@@ -525,6 +648,7 @@ export default function SurePage() {
                 onSend={sendMessage}
                 fileInputRef={fileInputRef}
                 fileInputId={`${fileInputId}-active`}
+                disabled={busy}
               />
             </div>
           </div>
