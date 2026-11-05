@@ -290,6 +290,7 @@ export const SearchTools = ({
     includeFilter = false,
     advancedHandler,
     onChange,
+    defaultValue,
 }: TSearchToolProps) => {
     const inputRef = useRef<HTMLInputElement>(null);
 
@@ -304,7 +305,7 @@ export const SearchTools = ({
 
     return (
         <div className='flex gap-4 flex-wrap items-center select-none'>
-            <ProductQueryField {...{ onChange, placeholder, className, inputRef }} />
+            <ProductQueryField {...{ onChange, placeholder, className, inputRef, defaultValue }} />
             {includeFilter && <ReusableFilterButton onClear={handleClearFilter} />}
         </div>
     );
@@ -314,9 +315,11 @@ export const ProductQueryField = ({
     className = 'bg-secondary border-primary',
     placeholder,
     onChange,
+    defaultValue,
     inputRef: externalInputRef,
 }: TQueryFieldProps & {
     inputRef?: RefObject<HTMLInputElement | null>;
+    defaultValue?: string;
 }) => {
     const localInputRef = useRef<HTMLInputElement>(null);
     const inputRef = externalInputRef ?? localInputRef;
@@ -332,6 +335,7 @@ export const ProductQueryField = ({
                     ref: inputRef,
                     placeholder,
                     type: 'text',
+                    defaultValue,
                 }}
             />
             <SearchIcon

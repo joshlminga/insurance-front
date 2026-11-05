@@ -8,6 +8,7 @@ import {
     formatMotorRateAge,
     formatMotorRateTonnage,
     formatMotorRateValue,
+    formatExactDecimal,
     formatOptionalDecimal,
     formatTaxonomyName,
     formatWholeNumber,
@@ -259,6 +260,24 @@ describe("formatTaxonomyName", () => {
     it("returns dash when name is missing", () => {
         expect(formatTaxonomyName(null)).toBe("-")
         expect(formatTaxonomyName({})).toBe("-")
+    })
+})
+
+describe("formatExactDecimal", () => {
+    it("keeps significant digits and drops only trailing zeros", () => {
+        expect(formatExactDecimal("0.0150000")).toBe("0.015")
+        expect(formatExactDecimal("0.023005000")).toBe("0.023005")
+        expect(formatExactDecimal("0.02000000")).toBe("0.02")
+        expect(formatExactDecimal("20000.00")).toBe("20000")
+        expect(formatExactDecimal("7500.50")).toBe("7500.5")
+        expect(formatExactDecimal("7500.05")).toBe("7500.05")
+    })
+
+    it("returns dash for null and empty values", () => {
+        expect(formatExactDecimal(null)).toBe("-")
+        expect(formatExactDecimal(undefined)).toBe("-")
+        expect(formatExactDecimal("")).toBe("-")
+        expect(formatExactDecimal("   ")).toBe("-")
     })
 })
 

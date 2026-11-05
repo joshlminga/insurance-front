@@ -9,7 +9,12 @@ export function serializeMotorPremiumParams(
   for (const [key, value] of Object.entries(params)) {
     if (value === undefined || value === null) continue
     if (key === 'benefit_ids' && Array.isArray(value)) {
-      if (value.length === 0) continue
+      // Empty array is sent as JSON [] (`benefit_ids=%5B%5D`).
+      // undefined/null is skipped above, so the first load can omit the key.
+      if (value.length === 0) {
+        parts.push(`${encodeURIComponent(key)}=${encodeURIComponent('[]')}`)
+        continue
+      }
       for (const id of value) {
         parts.push(
           `${encodeURIComponent('benefit_ids[]')}=${encodeURIComponent(String(id))}`

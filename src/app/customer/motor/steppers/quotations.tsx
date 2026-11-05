@@ -53,6 +53,10 @@ import {
     resolveListedBenefitValue,
 } from '@/utils/helpers'
 import { PostComparisonPage } from './comparisons/[id]/page'
+import {
+    clearUnlockedBenefitValues,
+    unlockedBenefitGroupsAreCleared,
+} from './components/clear-unlocked-benefits'
 import { QuotationFiltersPanel } from './components/quotation-filters-panel'
 import {
     Sheet,
@@ -69,7 +73,13 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
     const [quoteSessionId, setQuoteSessionId] = useState<number | null>(null)
     const [selectedQuotes, setSelectedQuotes] = useState<SelectedQuoteEntry[]>([])
     const [purchasingRateId, setPurchasingRateId] = useState<string | number | null>(null)
-    const [appliedBenefitIds, setAppliedBenefitIds] = useState<number[]>([])
+    // null omits benefit_ids (first load, so soft org defaults apply once).
+    // [] sends benefit_ids=[] after Clear Benefits. A filled list is a user pick.
+    // null, not undefined: React ignores setState(undefined) and would not reset this.
+    const [appliedBenefitIds, setAppliedBenefitIds] = useState<number[] | null>(null)
+    // Stays true while unlocked groups are "-- none --" after Clear Benefits,
+    // so the form watch does not put hard-locked ids back into the request.
+    const benefitsClearedRef = useRef(false)
     const [value, setValue] = useState([0, 100])
     const [filterSheetOpen, setFilterSheetOpen] = useState(false)
     const [isSidebarLayout, setIsSidebarLayout] = useState(() =>
@@ -119,7 +129,8 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
     }, [])
 
     useEffect(() => {
-        setAppliedBenefitIds([])
+        benefitsClearedRef.current = false
+        setAppliedBenefitIds(null)
     }, [quoteSessionId])
 
     const premiumUrl = useMemo(
@@ -133,7 +144,8 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
             per_page: filter.pageSize,
             sort_by: 'created_at',
             direction: 'asc' as const,
-            ...(appliedBenefitIds.length > 0 ? { benefit_ids: appliedBenefitIds } : {}),
+            // null = key omitted. [] is still included so the serializer emits benefit_ids=[].
+            ...(appliedBenefitIds !== null ? { benefit_ids: appliedBenefitIds } : {}),
         }),
         [filter.page, filter.pageSize, appliedBenefitIds]
     )
@@ -212,13 +224,20 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
 
     const applyBenefitIdsFromFormValues = useCallback(
         (values: FieldValues) => {
-            const ids = collectBenefitIdsFromValues(values, benefitGroups)
-            if (benefitIdsEqual(ids, appliedBenefitIds)) return
-
-            if (ids.length === 0) {
+            // Clear Benefits keeps an explicit [] until the user picks again.
+            // Hard-locked groups stay on screen; the API adds them back when the list is empty.
+            if (
+                benefitsClearedRef.current &&
+                unlockedBenefitGroupsAreCleared(values, benefitGroups)
+            ) {
+                if (appliedBenefitIds !== null && appliedBenefitIds.length === 0) return
                 setAppliedBenefitIds([])
                 return
             }
+            benefitsClearedRef.current = false
+            const ids = collectBenefitIdsFromValues(values, benefitGroups)
+            if (appliedBenefitIds !== null && benefitIdsEqual(ids, appliedBenefitIds)) return
+            // Always store the array after a user change, even when it is empty.
             setAppliedBenefitIds(ids)
         },
         [benefitGroups, appliedBenefitIds]
@@ -429,6 +448,12 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
         }
     }
 
+    const clearBenefits = useCallback(() => {
+        benefitsClearedRef.current = true
+        benefitForm.reset(clearUnlockedBenefitValues(benefitForm.getValues(), benefitGroups))
+        setAppliedBenefitIds([])
+    }, [benefitForm, benefitGroups])
+
     const filterPanelProps = {
         quoteSessionId,
         isPending,
@@ -438,6 +463,7 @@ export const QuotationsPage: React.FC<CustomerVerificationDetailsProps> = ({
         benefitFormControl: benefitForm.control,
         priceRange: value,
         onPriceRangeChange: setValue,
+        onClearBenefits: clearBenefits,
     }
 
     return (

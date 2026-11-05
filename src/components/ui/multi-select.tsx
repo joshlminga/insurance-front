@@ -273,6 +273,7 @@ export function MultiSelectValue({
 export function MultiSelectContent({
   children,
   search,
+  className,
   ...props
 }: {
   search?: boolean | {
@@ -282,6 +283,8 @@ export function MultiSelectContent({
     onValueChange?: (value: string) => void
   }
   children: ReactNode
+  /** Extra classes for the popover (e.g. z-[110] above full-screen overlays). */
+  className?: string
 } & Omit<ComponentPropsWithoutRef<typeof Command>, "children">) {
 
   const canSearch = Boolean(search)
@@ -294,7 +297,12 @@ export function MultiSelectContent({
           <CommandList>{children}</CommandList>
         </Command>
       </div>
-      <PopoverContent className="min-w-(--radix-popover-trigger-width) p-0">
+      <PopoverContent
+        className={cn(
+          "min-w-(--radix-popover-trigger-width) p-0",
+          className,
+        )}
+      >
         <Command {...props}>
           {canSearch ? (
             <CommandInput

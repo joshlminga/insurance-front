@@ -905,6 +905,8 @@ export type TSearchToolProps = {
   includeFilter?: boolean;
   placeholder?: string;
   title?: string;
+  /** Prefill the search box (e.g. email deep link ?term=quote_code). */
+  defaultValue?: string;
 } & Partial<TClassType> &
   Pick<TNavBarUrlType, 'Icon'>;
 
@@ -1630,6 +1632,7 @@ export type QuotationFiltersPanelProps = {
   benefitFormControl: Control<FieldValues>
   priceRange: number[]
   onPriceRangeChange: (value: number[]) => void
+  onClearBenefits: () => void
   className?: string
   [key: string]: any;
 }

@@ -1,4 +1,4 @@
-import { ReusableSelect } from '@/dev/core'
+import { Button, ReusableSelect } from '@/dev/core'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Slider } from '@/components/ui/slider'
@@ -9,6 +9,7 @@ import {
     benefitOptionLabel,
     isBenefitGroupLocked,
 } from '@/utils/helpers'
+import { Eraser } from 'lucide-react'
 import type { FieldValues, Path } from 'react-hook-form'
 
 export function QuotationFiltersPanel({
@@ -21,6 +22,7 @@ export function QuotationFiltersPanel({
     benefitFormControl,
     priceRange,
     onPriceRangeChange,
+    onClearBenefits,
     className,
 }: QuotationFiltersPanelProps) {
     const searchId = `${idPrefix}-insurer-search`
@@ -91,6 +93,17 @@ export function QuotationFiltersPanel({
                         })}
                     </div>
                 )}
+                {benefitGroups.length > 0 ? (
+                    <Button
+                        type="button"
+                        className="h-10 w-full bg-black text-white hover:bg-black/90"
+                        disabled={isFetching}
+                        onClick={onClearBenefits}
+                        leftIcon={<Eraser className="h-4 w-4" />}
+                    >
+                        Clear Benefits
+                    </Button>
+                ) : null}
             </form>
             <hr className="my-5" />
             <h2 className="mb-1 text-base font-semibold text-gray-900 sm:text-lg">

@@ -214,6 +214,86 @@ export function formatOptionalDecimal(value: number | string | null | undefined)
   return twoDecimalformatter(num)
 }
 
+/**
+ * Show a stored rate or minimum without rounding.
+ * Keeps every significant digit and drops only trailing zeros:
+ * "0.0150000" stays "0.015", "0.023005000" stays "0.023005", "20000.00" becomes "20000".
+ * Null, undefined, and "" show as "-".
+ *
+ * Reads the decimal text itself. It does not run that text through a float,
+ * so the digits on screen match what was stored.
+ */
+export function formatExactDecimal(value: number | string | null | undefined): string {
+  if (value === null || value === undefined) {
+    return '-'
+  }
+
+  const raw = typeof value === 'number' ? plainDecimalFromNumber(value) : value.trim()
+  if (raw === '') {
+    return '-'
+  }
+
+  const normalized = expandScientificNotation(raw)
+  const match = /^([+-])?(\d*)(?:\.(\d+))?$/.exec(normalized)
+  if (!match) {
+    return '-'
+  }
+
+  const sign = match[1] === '-' ? '-' : ''
+  let integer = match[2].replace(/^0+(?=\d)/, '')
+  if (integer === '') {
+    integer = '0'
+  }
+  const fraction = (match[3] ?? '').replace(/0+$/, '')
+
+  if (integer === '0' && fraction === '') {
+    return '0'
+  }
+
+  if (fraction === '') {
+    return `${sign}${integer}`
+  }
+
+  return `${sign}${integer}.${fraction}`
+}
+
+/** String form of a JS number, including values JS prints as "1e-7". */
+function plainDecimalFromNumber(value: number): string {
+  if (!Number.isFinite(value) || Object.is(value, -0)) {
+    return ''
+  }
+
+  return expandScientificNotation(String(value))
+}
+
+/**
+ * Turn "1.5e-4" into "0.00015" using the digit characters only.
+ * The exponent is an integer, so this does not re-parse the decimal through a float.
+ */
+function expandScientificNotation(raw: string): string {
+  const match = /^([+-])?(\d+)(?:\.(\d+))?[eE]([+-]?\d+)$/.exec(raw)
+  if (!match) {
+    return raw
+  }
+
+  const sign = match[1] === '-' ? '-' : ''
+  const digits = `${match[2]}${match[3] ?? ''}`
+  const exponent = Number(match[4])
+  if (!Number.isInteger(exponent)) {
+    return raw
+  }
+
+  const point = match[2].length + exponent
+  if (point <= 0) {
+    return `${sign}0.${'0'.repeat(-point)}${digits}`
+  }
+  if (point >= digits.length) {
+    return `${sign}${digits}${'0'.repeat(point - digits.length)}`
+  }
+
+  return `${sign}${digits.slice(0, point)}.${digits.slice(point)}`
+}
+
 /** Whole number with comma separators (no decimals) for vehicle value ranges */
 export function formatWholeNumber(value: number | string | null | undefined): string {
   if (value === null || value === undefined || value === '') {

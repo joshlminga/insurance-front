@@ -121,7 +121,7 @@ export const EditOrganizationModal = ({
                         )}
                     />
                 </div>
-                <div className="flex flex-col sm:flex-row justify-end gap-3 mt-2 px-0">
+                <div className="col-span-6 flex flex-col sm:flex-row justify-end gap-3 mt-2 px-0">
                     <Button
                         type="button"
                         className="w-full sm:w-auto rounded-sm border border-[#C20C0C] text-[#C20C0C] bg-transparent hover:bg-[#C20C0C]/10"
