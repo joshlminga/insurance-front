@@ -4,6 +4,8 @@ import { SuccessPurchase } from '@/app/customer/motor/steppers/success-purchase'
 import {
     ADMIN_MOTOR_PURCHASE_STEP_KEY,
 } from '@/app/payment/payment-session'
+import { useCan } from '@/auth/useCan'
+import { MODULES } from '@/auth/module-keys'
 import {
     INVOICE_SESSION_STORAGE_KEY,
     PURCHASE_SESSION_STORAGE_KEY,
@@ -15,6 +17,7 @@ import { UseAuth } from '@/stores/auth-store'
 import { resolveAdminMotorPayeeContact } from '../admin-motor-session'
 import { PURCHASE_STEPS } from '@/dev/steps'
 import { AdminMotorPaymentOptions } from '@/app/admin/quotations/motor/steppers/payment-options'
+import { AlertKycOperatorsOverlay } from './alert-kyc-operators-overlay'
 
 const readSessionValue = (key: string) => {
     if (typeof window === 'undefined') return null
@@ -35,9 +38,17 @@ const readStoredPurchaseStep = () => {
 
 export const AdminMotorQuotationPurchasePage = () => {
     const navigate = useNavigate()
-    const { user } = UseAuth()
+    const { user, abilities } = UseAuth()
+    const { canModuleAction } = useCan()
     const [step, setStep] = useState(readStoredPurchaseStep)
     const defaultCustomerContact = resolveAdminMotorPayeeContact(user)
+    // Admin KYC posts to alternative/purchase/motor/{id}/kyc
+    const canSubmitKyc = canModuleAction(
+        MODULES.PURCHASE_MOTOR_ALTERNATIVE_KYC,
+        'advance',
+    )
+    // Wait for abilities so we do not flash the alert while permissions load.
+    const showKycAlert = step === 1 && abilities != null && !canSubmitKyc
 
     useEffect(() => {
         sessionStorage.setItem(ADMIN_MOTOR_PURCHASE_STEP_KEY, String(step))
@@ -91,7 +102,8 @@ export const AdminMotorQuotationPurchasePage = () => {
                     description=""
                 />
             </div>
-            <StepComponent {...stepProps} />
+            {/* Block KYC form when the user cannot submit; overlay handles alerting. */}
+            {showKycAlert ? <AlertKycOperatorsOverlay /> : <StepComponent {...stepProps} />}
         </div>
     )
 }

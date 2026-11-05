@@ -36,18 +36,22 @@ import { extractErrorMessage } from '@/utils/helpers'
 import { ShowToast } from '@/utils/utils'
 import { Ban, Copy, Eye, Play } from 'lucide-react'
 import { useMemo, useReducer, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { UseAuth } from '@/stores/auth-store'
 import {
   persistAdminMotorResumeFromDetail,
 } from '../admin-motor-session'
 import { continueAdminMotorDuplicateFlow } from '../continue-duplicate-flow'
 import { MotorQuoteFetchDetailDialog } from './detail-dialog'
+import { motorFetchTermFromSearchParams } from './motor-fetch-term'
 
 type FetchFilters = TPaginationFilters & TFilterOptions
 
 export const AdminMotorQuotationFetchPage = () => {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  // Email deep links use ?term=quote_code so Resume lists the right quote.
+  const initialTerm = motorFetchTermFromSearchParams(searchParams)
   const { user } = UseAuth()
   const [filter, optionsDispatcher] = useReducer(
     ReusableReducer<FetchFilters>,
@@ -55,6 +59,7 @@ export const AdminMotorQuotationFetchPage = () => {
       ...FILTEROPTIONS,
       page: 1,
       pageSize: 10,
+      term: initialTerm,
     }
   )
   const optionsDispatcherDebounce = useDebounce({
@@ -232,6 +237,7 @@ export const AdminMotorQuotationFetchPage = () => {
             optionsDispatcher({ payload: { term: '', page: 1 }, type: 'term' }),
           placeholder: 'Quote code or session ID…',
           includeFilter: true,
+          defaultValue: initialTerm,
         }}
         columns={[...MotorQuoteFetchColumns, ActionColumn({ ActionsHandlerMapping })]}
         OtherTools={SearchTools}

@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import {
     formatMotorRateAge,
     formatMotorRateValue,
-    formatOptionalDecimal,
+    formatExactDecimal,
     formatTaxonomyName,
 } from "@/utils/helpers";
 import { ColumnDef } from "@tanstack/table-core";
@@ -86,7 +86,7 @@ export const MotorRateColumns: ColumnDef<any>[] = [
         header: () => <div>Rate</div>,
         cell: ({ row }) => {
             const rowData = row.original as any;
-            return <div>{formatOptionalDecimal(rowData?.rate)}</div>;
+            return <div>{formatExactDecimal(rowData?.rate)}</div>;
         },
     },
     {
@@ -94,7 +94,7 @@ export const MotorRateColumns: ColumnDef<any>[] = [
         header: () => <div>Minimum</div>,
         cell: ({ row }) => {
             const rowData = row.original as any;
-            return <div>{formatOptionalDecimal(rowData?.minimum)}</div>;
+            return <div>{formatExactDecimal(rowData?.minimum)}</div>;
         },
     },
     {

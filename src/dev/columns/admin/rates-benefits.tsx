@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Badge } from "@/components/ui/badge";
-import { twoDecimalformatter } from "@/utils/helpers";
+import { formatExactDecimal } from "@/utils/helpers";
 import { ColumnDef } from "@tanstack/table-core";
 
 export const MotorRateBenefitsColumns: ColumnDef<any>[] = [
@@ -24,16 +24,16 @@ export const MotorRateBenefitsColumns: ColumnDef<any>[] = [
         accessorKey: "rate",
         header: () => <div>Rate</div>,
         cell: ({ row }) => {
-            const rate: number = row.getValue("rate");
-            return <div>{twoDecimalformatter(rate)}</div>;
+            const rate: number | string | null | undefined = row.getValue("rate");
+            return <div>{formatExactDecimal(rate)}</div>;
         },
     },
     {
         accessorKey: "minimum",
         header: () => <div>Minimum</div>,
         cell: ({ row }) => {
-            const minimum: any = row.getValue("minimum");
-            return <div>{minimum}</div>;
+            const minimum: number | string | null | undefined = row.getValue("minimum");
+            return <div>{formatExactDecimal(minimum)}</div>;
         },
     },
     {
