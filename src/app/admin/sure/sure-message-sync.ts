@@ -5,6 +5,9 @@ export type SureChatRole = 'user' | 'assistant'
 /** One calculated premium card from get_motor_premium (mirrors Quote results). */
 export type SurePremiumOffer = {
   rate_id?: number | string | null
+  product_id?: number | string | null
+  organization_id?: number | string | null
+  organization_location_id?: number | string | null
   insurer?: string | null
   insurer_logo?: string | null
   covertype?: string | null
@@ -30,6 +33,11 @@ export type SurePremiumOffer = {
 export type SurePremiumOffersPayload = {
   quote_code?: string | null
   offers: SurePremiumOffer[]
+  filter?: {
+    organization_id?: number | null
+    organization_location_id?: number | null
+    insurer?: string | null
+  } | null
   pagination?: {
     page?: number
     per_page?: number
@@ -39,14 +47,25 @@ export type SurePremiumOffersPayload = {
   } | null
 }
 
+/** Meta so the UI can POST document/motor/comparison/{session} as a blob. */
+export type SureComparisonPdfPayload = {
+  session_id: number
+  quote_code?: string | null
+  filename?: string | null
+  download_path: string
+  products: Array<{ product_id: number; rate_id: number }>
+}
+
 export type SureChatMessage = {
   id: string
   role: SureChatRole
   text: string
   attachments?: string[]
   feedback?: 'up' | 'down' | null
-  /** Live premium cards from the message response (not persisted in chat history). */
+  /** Live premium cards from the message response / history meta. */
   offers?: SurePremiumOffersPayload | null
+  /** Comparison PDF download meta from tool / history. */
+  comparisonPdf?: SureComparisonPdfPayload | null
 }
 
 export type SureApiMessageRow = {
@@ -56,6 +75,7 @@ export type SureApiMessageRow = {
   attachments?: string[] | null
   /** Restored from assistant message meta when chat history reloads. */
   offers?: SurePremiumOffersPayload | null
+  comparison_pdf?: SureComparisonPdfPayload | null
   feedback?: 'up' | 'down' | null
 }
 
@@ -94,11 +114,16 @@ export function upsertMessages(
               message.feedback !== undefined
                 ? message.feedback
                 : existing.feedback,
-            // History reload has no offers — keep cards from the live POST
+            // History reload may omit live meta — keep cards / PDF chip from POST
             offers:
               message.offers !== undefined && message.offers !== null
                 ? message.offers
                 : existing.offers,
+            comparisonPdf:
+              message.comparisonPdf !== undefined &&
+              message.comparisonPdf !== null
+                ? message.comparisonPdf
+                : existing.comparisonPdf,
           }
         : message
     )
@@ -138,8 +163,9 @@ export function mapApiMessages(rows: SureApiMessageRow[]): SureChatMessage[] {
     attachments: message.attachments?.length
       ? message.attachments
       : undefined,
-    // History reload restores carousel cards from persisted premium_offers meta
+    // History reload restores carousel / PDF chip from persisted assistant meta
     offers: message.offers ?? null,
+    comparisonPdf: message.comparison_pdf ?? null,
     feedback: message.feedback ?? null,
   }))
 }

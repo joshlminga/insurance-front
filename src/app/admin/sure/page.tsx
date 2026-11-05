@@ -23,6 +23,7 @@ import {
 import { EROUTES } from '@/utils/enums'
 import { extractErrorMessage } from '@/utils/helpers'
 import { ShowToast } from '@/utils/utils'
+import { SureComparisonDownload } from './sure-comparison-download'
 import { SureMarkdownText } from './sure-markdown'
 import { SurePremiumCarousel } from './sure-premium-carousel'
 import {
@@ -31,6 +32,7 @@ import {
   upsertMessages,
   type SureChatMessage,
   type SureChatRole,
+  type SureComparisonPdfPayload,
   type SurePremiumOffersPayload,
 } from './sure-message-sync'
 
@@ -42,9 +44,14 @@ function shortPremiumIntro(
   const code = offers.quote_code?.trim()
   const page = offers.pagination?.page ?? 1
   const hasMore = offers.pagination?.has_more === true
-  const base = code
-    ? `Here are premium offers for ${code} (page ${page}).`
-    : `Here are premium offers (page ${page}).`
+  const insurer = offers.filter?.insurer?.trim()
+  const base = insurer
+    ? code
+      ? `Here are ${insurer} premium offers for ${code} (page ${page}).`
+      : `Here are ${insurer} premium offers (page ${page}).`
+    : code
+      ? `Here are premium offers for ${code} (page ${page}).`
+      : `Here are premium offers (page ${page}).`
   const more = hasMore
     ? ' Scroll the cards for this page, or ask for the next page.'
     : ' Scroll the cards to compare.'
@@ -95,6 +102,7 @@ type SureMessageData = {
     id: string
     text?: string
     offers?: SurePremiumOffersPayload | null
+    comparison_pdf?: SureComparisonPdfPayload | null
   }
 }
 
@@ -114,6 +122,7 @@ type SureChatShowData = {
     text: string
     attachments?: string[] | null
     offers?: SurePremiumOffersPayload | null
+    comparison_pdf?: SureComparisonPdfPayload | null
     feedback?: 'up' | 'down' | null
   }>
 }
@@ -662,6 +671,7 @@ export default function SurePage() {
         text: payload.response.text?.trim() || EMPTY_ASSISTANT,
         feedback: null,
         offers: payload.response.offers ?? null,
+        comparisonPdf: payload.response.comparison_pdf ?? null,
       }
 
       // Drop temp bubble, upsert server user + assistant by id
@@ -844,6 +854,9 @@ export default function SurePage() {
                     ) : (
                       <SureMarkdownText text={message.text} />
                     )}
+                    {message.comparisonPdf ? (
+                      <SureComparisonDownload payload={message.comparisonPdf} />
+                    ) : null}
                     <div className="flex flex-wrap items-center gap-2">
                       <button
                         type="button"
