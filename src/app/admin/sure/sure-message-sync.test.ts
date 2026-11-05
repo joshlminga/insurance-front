@@ -46,6 +46,21 @@ describe('upsertMessages', () => {
       { id: 'a1', role: 'assistant', text: 'Kept', feedback: 'up' },
     ])
   })
+
+  it('keeps live premium offers when history reload has none', () => {
+    const offers = {
+      quote_code: 'Q-1',
+      offers: [{ insurer: 'Demo', total_premium: 160760, currency: 'KES' }],
+    }
+    const prev: SureChatMessage[] = [
+      { id: 'a1', role: 'assistant', text: 'Here are offers', offers },
+    ]
+    const next: SureChatMessage[] = [
+      { id: 'a1', role: 'assistant', text: 'Here are offers' },
+    ]
+
+    expect(upsertMessages(prev, next)[0]?.offers).toEqual(offers)
+  })
 })
 
 describe('mapApiMessages', () => {
@@ -61,6 +76,7 @@ describe('mapApiMessages', () => {
         role: 'assistant',
         text: EMPTY_ASSISTANT,
         attachments: undefined,
+        offers: null,
         feedback: null,
       },
       {
@@ -68,6 +84,7 @@ describe('mapApiMessages', () => {
         role: 'user',
         text: 'Hi',
         attachments: undefined,
+        offers: null,
         feedback: null,
       },
     ])

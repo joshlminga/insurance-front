@@ -2,12 +2,51 @@
 
 export type SureChatRole = 'user' | 'assistant'
 
+/** One calculated premium card from get_motor_premium (mirrors Quote results). */
+export type SurePremiumOffer = {
+  rate_id?: number | string | null
+  insurer?: string | null
+  insurer_logo?: string | null
+  covertype?: string | null
+  currency?: string | null
+  /** Quote results "Basic Premium" = vehicle_premium */
+  vehicle_premium?: number | null
+  basic_premium?: number | null
+  total_duty?: number | null
+  total_premium?: number | null
+  benefit_rows?: Array<{
+    id: number
+    name: string
+    text: string
+    status: string
+  }>
+  benefits_optional?: Array<{
+    benefit_id?: number | null
+    name: string
+    premium?: number | null
+  }>
+}
+
+export type SurePremiumOffersPayload = {
+  quote_code?: string | null
+  offers: SurePremiumOffer[]
+  pagination?: {
+    page?: number
+    per_page?: number
+    total?: number
+    last_page?: number
+    has_more?: boolean
+  } | null
+}
+
 export type SureChatMessage = {
   id: string
   role: SureChatRole
   text: string
   attachments?: string[]
   feedback?: 'up' | 'down' | null
+  /** Live premium cards from the message response (not persisted in chat history). */
+  offers?: SurePremiumOffersPayload | null
 }
 
 export type SureApiMessageRow = {
@@ -15,6 +54,8 @@ export type SureApiMessageRow = {
   role: SureChatRole
   text: string
   attachments?: string[] | null
+  /** Restored from assistant message meta when chat history reloads. */
+  offers?: SurePremiumOffersPayload | null
   feedback?: 'up' | 'down' | null
 }
 
@@ -53,6 +94,11 @@ export function upsertMessages(
               message.feedback !== undefined
                 ? message.feedback
                 : existing.feedback,
+            // History reload has no offers — keep cards from the live POST
+            offers:
+              message.offers !== undefined && message.offers !== null
+                ? message.offers
+                : existing.offers,
           }
         : message
     )
@@ -92,6 +138,8 @@ export function mapApiMessages(rows: SureApiMessageRow[]): SureChatMessage[] {
     attachments: message.attachments?.length
       ? message.attachments
       : undefined,
+    // History reload restores carousel cards from persisted premium_offers meta
+    offers: message.offers ?? null,
     feedback: message.feedback ?? null,
   }))
 }

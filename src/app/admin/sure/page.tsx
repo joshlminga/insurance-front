@@ -24,13 +24,42 @@ import { EROUTES } from '@/utils/enums'
 import { extractErrorMessage } from '@/utils/helpers'
 import { ShowToast } from '@/utils/utils'
 import { SureMarkdownText } from './sure-markdown'
+import { SurePremiumCarousel } from './sure-premium-carousel'
 import {
   EMPTY_ASSISTANT,
   mapApiMessages,
   upsertMessages,
   type SureChatMessage,
   type SureChatRole,
+  type SurePremiumOffersPayload,
 } from './sure-message-sync'
+
+/** One short line above the carousel — never the old Rate-ID / product dump. */
+function shortPremiumIntro(
+  text: string | undefined,
+  offers: SurePremiumOffersPayload
+): string {
+  const code = offers.quote_code?.trim()
+  const page = offers.pagination?.page ?? 1
+  const hasMore = offers.pagination?.has_more === true
+  const base = code
+    ? `Here are premium offers for ${code} (page ${page}).`
+    : `Here are premium offers (page ${page}).`
+  const more = hasMore
+    ? ' Scroll the cards for this page, or ask for the next page.'
+    : ' Scroll the cards to compare.'
+  // Prefer our caption over Gemini’s long list (even if text already looks short).
+  const trimmed = text?.trim() ?? ''
+  if (
+    trimmed &&
+    trimmed.length < 180 &&
+    !/rate\s*id/i.test(trimmed) &&
+    !/\n\s*[-*]|\n\s*\d+\./.test(trimmed)
+  ) {
+    return trimmed
+  }
+  return base + more
+}
 
 type ChatRole = SureChatRole
 
@@ -65,6 +94,7 @@ type SureMessageData = {
   response: {
     id: string
     text?: string
+    offers?: SurePremiumOffersPayload | null
   }
 }
 
@@ -83,6 +113,7 @@ type SureChatShowData = {
     role: ChatRole
     text: string
     attachments?: string[] | null
+    offers?: SurePremiumOffersPayload | null
     feedback?: 'up' | 'down' | null
   }>
 }
@@ -630,6 +661,7 @@ export default function SurePage() {
         // POST response is the source of truth for this turn
         text: payload.response.text?.trim() || EMPTY_ASSISTANT,
         feedback: null,
+        offers: payload.response.offers ?? null,
       }
 
       // Drop temp bubble, upsert server user + assistant by id
@@ -801,8 +833,17 @@ export default function SurePage() {
                   </div>
                 ) : (
                   <div key={message.id} className="flex max-w-[95%] flex-col gap-2">
-                    {/* Gemini markdown → bold/italic/lists; user bubbles stay plain */}
-                    <SureMarkdownText text={message.text} />
+                    {/* When offer cards exist, skip Gemini’s long Rate-ID / product list */}
+                    {message.offers?.offers?.length ? (
+                      <>
+                        <p className="text-sm leading-relaxed text-foreground">
+                          {shortPremiumIntro(message.text, message.offers)}
+                        </p>
+                        <SurePremiumCarousel payload={message.offers} />
+                      </>
+                    ) : (
+                      <SureMarkdownText text={message.text} />
+                    )}
                     <div className="flex flex-wrap items-center gap-2">
                       <button
                         type="button"
