@@ -1,5 +1,5 @@
-import { useEffect, useId, useMemo, useRef, useState, type RefObject } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useCallback, useEffect, useId, useMemo, useRef, useState, type RefObject } from 'react'
+import { Outlet, useMatch, useNavigate, useParams } from 'react-router-dom'
 import {
   ArrowUp,
   ChevronRight,
@@ -40,7 +40,6 @@ type ChatMessage = {
   feedback?: 'up' | 'down' | null
 }
 
-/** Shape ready for a future conversations API */
 type SureConversation = {
   id: string
   title: string
@@ -55,14 +54,36 @@ type SureApiEnvelope<T> = {
 
 type SureNewChatData = {
   chat: string
+  title?: string | null
 }
 
 type SureMessageData = {
   chat: string
+  title?: string | null
   message_id: string
   response: {
     id: string
+    text?: string
   }
+}
+
+type SureChatListItem = {
+  chat: string
+  title?: string | null
+  updated_at?: string | null
+}
+
+type SureChatShowData = {
+  chat: string
+  title?: string | null
+  updated_at?: string | null
+  messages: Array<{
+    id: string
+    role: ChatRole
+    text: string
+    attachments?: string[] | null
+    feedback?: 'up' | 'down' | null
+  }>
 }
 
 function makeId(): string {
@@ -73,24 +94,9 @@ function sureChatPath(chatCode: string): string {
   return EROUTES.SURE_CHAT.replace(':sessionCode', chatCode)
 }
 
-function buildEcho(text: string, attachmentNames: string[]): string {
-  const quoted = text.trim()
-  const parts: string[] = []
-
-  if (quoted) {
-    parts.push(`Got it — you asked about “${quoted}”.`)
-  } else {
-    parts.push('Got it — I received your message.')
-  }
-
-  if (attachmentNames.length === 1) {
-    parts.push(`I can see the attached file: ${attachmentNames[0]}.`)
-  } else if (attachmentNames.length > 1) {
-    parts.push(`I can see the attached files: ${attachmentNames.join(', ')}.`)
-  }
-
-  parts.push('This is a beta stub reply — real insurance answers will land here soon.')
-  return parts.join(' ')
+function conversationTitle(title: string | null | undefined): string {
+  const trimmed = (title ?? '').trim()
+  return trimmed || 'New chat'
 }
 
 /** Logo with a Paramount-style moon arc (~30s per lap). */
@@ -240,14 +246,20 @@ function SureConversationsSidebar({
   search,
   onSearchChange,
   conversations,
+  activeChatId,
+  loading,
   onNewChat,
+  onSelectChat,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
   search: string
   onSearchChange: (value: string) => void
   conversations: SureConversation[]
+  activeChatId: string | null
+  loading: boolean
   onNewChat: () => void
+  onSelectChat: (chatId: string) => void
 }) {
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
@@ -293,22 +305,35 @@ function SureConversationsSidebar({
               Conversations
             </p>
 
-            {filtered.length === 0 ? (
+            {loading ? (
+              <p className="px-1 py-6 text-center text-sm text-muted-foreground">
+                Loading chats…
+              </p>
+            ) : filtered.length === 0 ? (
               <p className="px-1 py-6 text-center text-sm text-muted-foreground">
                 No conversations yet
               </p>
             ) : (
               <ul className="flex flex-col gap-1">
-                {filtered.map((chat) => (
-                  <li key={chat.id}>
-                    <button
-                      type="button"
-                      className="w-full truncate rounded-lg px-2.5 py-2 text-left text-sm text-foreground hover:bg-muted"
-                    >
-                      {chat.title}
-                    </button>
-                  </li>
-                ))}
+                {filtered.map((chat) => {
+                  const active = chat.id === activeChatId
+                  return (
+                    <li key={chat.id}>
+                      <button
+                        type="button"
+                        onClick={() => onSelectChat(chat.id)}
+                        className={cn(
+                          'w-full truncate rounded-lg px-2.5 py-2 text-left text-sm transition',
+                          active
+                            ? 'bg-[#C20C0C]/10 font-medium text-[#C20C0C]'
+                            : 'text-foreground hover:bg-muted'
+                        )}
+                      >
+                        {chat.title}
+                      </button>
+                    </li>
+                  )
+                })}
               </ul>
             )}
           </div>
@@ -320,25 +345,30 @@ function SureConversationsSidebar({
 
 export default function SurePage() {
   const navigate = useNavigate()
-  // Chat ULID from /dashboard/sure/chat/:sessionCode (empty on /dashboard/sure)
-  const { sessionCode } = useParams<{ sessionCode?: string }>()
+  // Nested under /dashboard/sure — also matches /dashboard/sure/chat/:sessionCode
+  const { sessionCode: paramCode } = useParams<{ sessionCode?: string }>()
+  const chatMatch = useMatch(EROUTES.SURE_CHAT)
+  const sessionCode = chatMatch?.params.sessionCode ?? paramCode
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [draft, setDraft] = useState('')
   const [attachments, setAttachments] = useState<ChatAttachment[]>([])
   const [isReplying, setIsReplying] = useState(false)
   const [isStartingChat, setIsStartingChat] = useState(false)
+  const [isLoadingChat, setIsLoadingChat] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [chatSearch, setChatSearch] = useState('')
-  // Placeholder until a conversations list API exists
-  const [conversations] = useState<SureConversation[]>([])
+  const [conversations, setConversations] = useState<SureConversation[]>([])
+  const [conversationsLoading, setConversationsLoading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const fileInputId = useId()
   const bottomRef = useRef<HTMLDivElement>(null)
   // Keep the active ULID even while React Router catches up after navigate()
   const chatCodeRef = useRef<string | null>(sessionCode ?? null)
+  // Skip reload when we just navigated after a local send
+  const skipNextLoadRef = useRef(false)
 
   const hasMessages = messages.length > 0
-  const busy = isReplying || isStartingChat
+  const busy = isReplying || isStartingChat || isLoadingChat
 
   useEffect(() => {
     chatCodeRef.current = sessionCode ?? null
@@ -347,6 +377,81 @@ export default function SurePage() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, isReplying])
+
+  const refreshConversations = useCallback(async () => {
+    setConversationsLoading(true)
+    try {
+      const response = await apiClient.get<
+        SureApiEnvelope<{ chats: SureChatListItem[] }>
+      >('vrm/sureai/chats')
+      const rows = response.data?.data?.chats ?? []
+      setConversations(
+        rows.map((row) => ({
+          id: row.chat,
+          title: conversationTitle(row.title),
+          updatedAt: row.updated_at ?? '',
+        }))
+      )
+    } catch (error) {
+      ShowToast.error(extractErrorMessage(error) || 'Could not load chats.')
+    } finally {
+      setConversationsLoading(false)
+    }
+  }, [])
+
+  // Load sidebar list whenever the sheet opens
+  useEffect(() => {
+    if (sidebarOpen) {
+      void refreshConversations()
+    }
+  }, [sidebarOpen, refreshConversations])
+
+  const loadChat = useCallback(
+    async (chatCode: string) => {
+      setIsLoadingChat(true)
+      try {
+        const response = await apiClient.get<SureApiEnvelope<SureChatShowData>>(
+          `vrm/sureai/chat/${chatCode}`
+        )
+        const payload = response.data?.data
+        if (!payload?.chat) {
+          throw new Error(response.data?.message || 'Chat not found.')
+        }
+
+        setMessages(
+          (payload.messages ?? []).map((message) => ({
+            id: message.id,
+            role: message.role,
+            text: message.text,
+            attachments: message.attachments?.length
+              ? message.attachments
+              : undefined,
+            feedback: message.feedback ?? null,
+          }))
+        )
+      } catch (error) {
+        ShowToast.error(extractErrorMessage(error) || 'Could not open this chat.')
+        setMessages([])
+      } finally {
+        setIsLoadingChat(false)
+      }
+    },
+    []
+  )
+
+  // When the URL chat code changes (reload or sidebar switch), load messages
+  useEffect(() => {
+    if (!sessionCode) {
+      return
+    }
+
+    if (skipNextLoadRef.current) {
+      skipNextLoadRef.current = false
+      return
+    }
+
+    void loadChat(sessionCode)
+  }, [sessionCode, loadChat])
 
   function pickFiles(files: FileList | null) {
     if (!files?.length) {
@@ -387,16 +492,31 @@ export default function SurePage() {
     try {
       const chat = await createChatSession()
       chatCodeRef.current = chat
+      skipNextLoadRef.current = true
       setMessages([])
       setDraft('')
       setAttachments([])
       setIsReplying(false)
       navigate(sureChatPath(chat))
+      void refreshConversations()
     } catch (error) {
       ShowToast.error(extractErrorMessage(error) || 'Could not start a new chat.')
     } finally {
       setIsStartingChat(false)
     }
+  }
+
+  async function selectChat(chatId: string) {
+    if (chatId === (chatCodeRef.current ?? sessionCode)) {
+      setSidebarOpen(false)
+      return
+    }
+
+    chatCodeRef.current = chatId
+    setSidebarOpen(false)
+    setDraft('')
+    setAttachments([])
+    navigate(sureChatPath(chatId))
   }
 
   async function ensureChatCode(): Promise<string> {
@@ -408,7 +528,8 @@ export default function SurePage() {
     // First send from /dashboard/sure creates the session, then updates the URL
     const chat = await createChatSession()
     chatCodeRef.current = chat
-    navigate(sureChatPath(chat))
+    skipNextLoadRef.current = true
+    navigate(sureChatPath(chat), { replace: true })
     return chat
   }
 
@@ -424,7 +545,7 @@ export default function SurePage() {
     try {
       const chat = await ensureChatCode()
 
-      // POST chat + message + attachment names; backend returns UUID ids
+      // POST chat + message + attachment names; backend persists + returns UUID ids
       const response = await apiClient.post<SureApiEnvelope<SureMessageData>>(
         'vrm/sureai/message',
         {
@@ -449,13 +570,17 @@ export default function SurePage() {
       const assistantMessage: ChatMessage = {
         id: payload.response.id,
         role: 'assistant',
-        text: buildEcho(text, attachmentNames),
+        text:
+          payload.response.text ||
+          'This is a beta stub reply — real insurance answers will land here soon.',
         feedback: null,
       }
 
+      // Same SurePage instance stays mounted, so this paints under the composer
       setMessages((prev) => [...prev, userMessage, assistantMessage])
       setDraft('')
       setAttachments([])
+      void refreshConversations()
     } catch (error) {
       // Keep the draft/attachments so the user can retry
       ShowToast.error(extractErrorMessage(error) || 'Could not send your message.')
@@ -512,6 +637,9 @@ export default function SurePage() {
 
   return (
     <div className="sure-chat relative flex min-h-[calc(100svh-5rem)] flex-col">
+      {/* Nested route outlet (chat/:sessionCode) — keeps one page instance */}
+      <Outlet />
+
       {/* Pull control — opens previous chats sidebar */}
       <button
         type="button"
@@ -529,7 +657,10 @@ export default function SurePage() {
         search={chatSearch}
         onSearchChange={setChatSearch}
         conversations={conversations}
+        activeChatId={sessionCode ?? chatCodeRef.current}
+        loading={conversationsLoading}
         onNewChat={startNewChat}
+        onSelectChat={selectChat}
       />
 
       {!hasMessages ? (
@@ -541,7 +672,9 @@ export default function SurePage() {
                 Sure by Acensure
               </h1>
               <p className="mt-2 text-sm text-muted-foreground">
-                Ask anything about policies, covers, or quotes — beta.
+                {isLoadingChat
+                  ? 'Loading chat…'
+                  : 'Ask anything about policies, covers, or quotes — beta.'}
               </p>
             </div>
           </div>

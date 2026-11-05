@@ -608,20 +608,17 @@ export const router = createBrowserRouter([
             element: <S><DashboardPage /></S>,
           },
           {
+            // One SurePage instance for /sure and /sure/chat/:sessionCode (avoids remount wiping messages)
             path: "sure",
             element: (
               <S>
                 <SurePage />
               </S>
             ),
-          },
-          {
-            path: "sure/chat/:sessionCode",
-            element: (
-              <S>
-                <SurePage />
-              </S>
-            ),
+            children: [
+              { index: true, element: <></> },
+              { path: "chat/:sessionCode", element: <></> },
+            ],
           },
           // Members / Policyholders
           {
