@@ -678,9 +678,8 @@ export const MotorQuotationPage = () => {
                                 <div className="rounded-2xl border border-[#ADABAB]/35 p-3 sm:p-5">
                                     <p className="text-xs font-semibold text-[#C20C0C]">Office Use:</p>
                                     <p className="mt-1 text-xs text-muted-foreground">
-                                        If the on-behalf organization is not in the list, enable admin
-                                        override. Your Agency is always limited to your Agent and
-                                        Organization locations.
+                                        As super admin you can pick any agency and any organization in
+                                        the selected country. Country must be chosen first.
                                     </p>
                                 </div>
                             )}
