@@ -161,7 +161,12 @@ export function shouldTrackActionWait(
     return false
   }
   const path = String(url ?? "")
-  if (path.includes("auth/check-auth") || path.includes("auth/refresh")) {
+  // Sure AI uses in-chat "Thinking…" — skip the global Please wait overlay
+  if (
+    path.includes("auth/check-auth") ||
+    path.includes("auth/refresh") ||
+    path.includes("sureai")
+  ) {
     return false
   }
   return true

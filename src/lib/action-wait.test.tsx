@@ -24,6 +24,8 @@ describe("shouldTrackActionWait", () => {
     expect(shouldTrackActionWait("get", "users")).toBe(false)
     expect(shouldTrackActionWait("post", "auth/check-auth")).toBe(false)
     expect(shouldTrackActionWait("post", "auth/refresh")).toBe(false)
+    expect(shouldTrackActionWait("post", "vrm/sureai/message")).toBe(false)
+    expect(shouldTrackActionWait("post", "vrm/sureai/new")).toBe(false)
   })
 
   it("still tracks login and logout", () => {

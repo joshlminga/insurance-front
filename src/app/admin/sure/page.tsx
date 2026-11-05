@@ -23,22 +23,23 @@ import {
 import { EROUTES } from '@/utils/enums'
 import { extractErrorMessage } from '@/utils/helpers'
 import { ShowToast } from '@/utils/utils'
+import { SureMarkdownText } from './sure-markdown'
+import {
+  EMPTY_ASSISTANT,
+  mapApiMessages,
+  upsertMessages,
+  type SureChatMessage,
+  type SureChatRole,
+} from './sure-message-sync'
 
-type ChatRole = 'user' | 'assistant'
+type ChatRole = SureChatRole
 
 type ChatAttachment = {
   id: string
   name: string
 }
 
-type ChatMessage = {
-  id: string
-  role: ChatRole
-  text: string
-  attachments?: string[]
-  /** Local UI feedback on assistant replies */
-  feedback?: 'up' | 'down' | null
-}
+type ChatMessage = SureChatMessage
 
 type SureConversation = {
   id: string
@@ -364,8 +365,14 @@ export default function SurePage() {
   const bottomRef = useRef<HTMLDivElement>(null)
   // Keep the active ULID even while React Router catches up after navigate()
   const chatCodeRef = useRef<string | null>(sessionCode ?? null)
-  // Skip reload when we just navigated after a local send
+  // Skip one URL-driven load when we navigated after creating a chat locally
   const skipNextLoadRef = useRef(false)
+  // Stays true from first-send create until send finishes (survives Strict Mode)
+  const suppressLoadChatRef = useRef(false)
+  // Ignore stale loadChat responses that finish after a newer load/send
+  const loadSeqRef = useRef(0)
+  // Sidebar/chat switch: next successful GET replaces local thread
+  const replaceOnNextLoadRef = useRef(false)
 
   const hasMessages = messages.length > 0
   const busy = isReplying || isStartingChat || isLoadingChat
@@ -406,38 +413,54 @@ export default function SurePage() {
     }
   }, [sidebarOpen, refreshConversations])
 
-  const loadChat = useCallback(
-    async (chatCode: string) => {
-      setIsLoadingChat(true)
-      try {
-        const response = await apiClient.get<SureApiEnvelope<SureChatShowData>>(
-          `vrm/sureai/chat/${chatCode}`
-        )
-        const payload = response.data?.data
-        if (!payload?.chat) {
-          throw new Error(response.data?.message || 'Chat not found.')
-        }
+  const loadChat = useCallback(async (chatCode: string) => {
+    // First-send path owns local messages until POST /message finishes
+    if (suppressLoadChatRef.current) {
+      return
+    }
 
-        setMessages(
-          (payload.messages ?? []).map((message) => ({
-            id: message.id,
-            role: message.role,
-            text: message.text,
-            attachments: message.attachments?.length
-              ? message.attachments
-              : undefined,
-            feedback: message.feedback ?? null,
-          }))
-        )
-      } catch (error) {
-        ShowToast.error(extractErrorMessage(error) || 'Could not open this chat.')
+    const seq = ++loadSeqRef.current
+    const forceReplace = replaceOnNextLoadRef.current
+    replaceOnNextLoadRef.current = false
+    setIsLoadingChat(true)
+    try {
+      const response = await apiClient.get<SureApiEnvelope<SureChatShowData>>(
+        `vrm/sureai/chat/${chatCode}`
+      )
+
+      // Drop this result if a newer load started, or send still owns the thread
+      if (seq !== loadSeqRef.current || suppressLoadChatRef.current) {
+        return
+      }
+
+      const payload = response.data?.data
+      if (!payload?.chat) {
+        throw new Error(response.data?.message || 'Chat not found.')
+      }
+
+      const mapped = mapApiMessages(payload.messages ?? [])
+
+      // Cold load / chat switch → replace; otherwise merge by id (keep POST reply)
+      setMessages((prev) => {
+        if (forceReplace || prev.length === 0) {
+          return mapped
+        }
+        return upsertMessages(prev, mapped)
+      })
+    } catch (error) {
+      if (seq !== loadSeqRef.current || suppressLoadChatRef.current) {
+        return
+      }
+      ShowToast.error(extractErrorMessage(error) || 'Could not open this chat.')
+      if (forceReplace) {
         setMessages([])
-      } finally {
+      }
+    } finally {
+      if (seq === loadSeqRef.current) {
         setIsLoadingChat(false)
       }
-    },
-    []
-  )
+    }
+  }, [])
 
   // When the URL chat code changes (reload or sidebar switch), load messages
   useEffect(() => {
@@ -445,7 +468,8 @@ export default function SurePage() {
       return
     }
 
-    if (skipNextLoadRef.current) {
+    // Local create/send already has the thread — don't fetch over it
+    if (suppressLoadChatRef.current || skipNextLoadRef.current) {
       skipNextLoadRef.current = false
       return
     }
@@ -492,7 +516,11 @@ export default function SurePage() {
     try {
       const chat = await createChatSession()
       chatCodeRef.current = chat
+      // Empty new chat — skip one navigate load; allow later sidebar/reload loads
       skipNextLoadRef.current = true
+      suppressLoadChatRef.current = false
+      replaceOnNextLoadRef.current = false
+      loadSeqRef.current += 1
       setMessages([])
       setDraft('')
       setAttachments([])
@@ -512,7 +540,13 @@ export default function SurePage() {
       return
     }
 
+    // Switching chats must replace local thread from the API
+    suppressLoadChatRef.current = false
+    skipNextLoadRef.current = false
+    replaceOnNextLoadRef.current = true
+    loadSeqRef.current += 1
     chatCodeRef.current = chatId
+    setMessages([])
     setSidebarOpen(false)
     setDraft('')
     setAttachments([])
@@ -529,6 +563,9 @@ export default function SurePage() {
     const chat = await createChatSession()
     chatCodeRef.current = chat
     skipNextLoadRef.current = true
+    // Hold off GET /chat until this send paints the API reply
+    suppressLoadChatRef.current = true
+    loadSeqRef.current += 1
     navigate(sureChatPath(chat), { replace: true })
     return chat
   }
@@ -540,7 +577,27 @@ export default function SurePage() {
     }
 
     const attachmentNames = attachments.map((file) => file.name)
+    const userBody = text || '(Attachment only)'
+    // Temp id so the user bubble shows while Gemini is still working
+    const tempUserId = `temp-${makeId()}`
+
     setIsReplying(true)
+    // Block URL-driven loads for the whole turn (new or existing chat)
+    suppressLoadChatRef.current = true
+    loadSeqRef.current += 1
+
+    setMessages((prev) =>
+      upsertMessages(prev, [
+        {
+          id: tempUserId,
+          role: 'user',
+          text: userBody,
+          attachments: attachmentNames.length ? attachmentNames : undefined,
+        },
+      ])
+    )
+    setDraft('')
+    setAttachments([])
 
     try {
       const chat = await ensureChatCode()
@@ -563,27 +620,42 @@ export default function SurePage() {
       const userMessage: ChatMessage = {
         id: payload.message_id,
         role: 'user',
-        text: text || '(Attachment only)',
+        text: userBody,
         attachments: attachmentNames.length ? attachmentNames : undefined,
       }
 
       const assistantMessage: ChatMessage = {
         id: payload.response.id,
         role: 'assistant',
-        text:
-          payload.response.text ||
-          'This is a beta stub reply — real insurance answers will land here soon.',
+        // POST response is the source of truth for this turn
+        text: payload.response.text?.trim() || EMPTY_ASSISTANT,
         feedback: null,
       }
 
-      // Same SurePage instance stays mounted, so this paints under the composer
-      setMessages((prev) => [...prev, userMessage, assistantMessage])
-      setDraft('')
-      setAttachments([])
+      // Drop temp bubble, upsert server user + assistant by id
+      setMessages((prev) =>
+        upsertMessages(
+          prev.filter((message) => message.id !== tempUserId),
+          [userMessage, assistantMessage]
+        )
+      )
       void refreshConversations()
+
+      // Soft reconcile from DB (merge-only) after paint
+      suppressLoadChatRef.current = false
+      void loadChat(chat)
     } catch (error) {
-      // Keep the draft/attachments so the user can retry
+      // Remove optimistic bubble and restore composer so the user can retry
+      setMessages((prev) => prev.filter((message) => message.id !== tempUserId))
+      setDraft(text)
+      setAttachments(
+        attachmentNames.map((name) => ({
+          id: makeId(),
+          name,
+        }))
+      )
       ShowToast.error(extractErrorMessage(error) || 'Could not send your message.')
+      suppressLoadChatRef.current = false
     } finally {
       setIsReplying(false)
     }
@@ -676,6 +748,10 @@ export default function SurePage() {
                   ? 'Loading chat…'
                   : 'Ask anything about policies, covers, or quotes — beta.'}
               </p>
+              {/* First-send has no thread yet — show progress under the hero */}
+              {isReplying ? (
+                <p className="mt-3 text-sm text-muted-foreground">Thinking…</p>
+              ) : null}
             </div>
           </div>
 
@@ -725,10 +801,8 @@ export default function SurePage() {
                   </div>
                 ) : (
                   <div key={message.id} className="flex max-w-[95%] flex-col gap-2">
-                    {/* Plain page background — no reply bubble */}
-                    <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">
-                      {message.text}
-                    </p>
+                    {/* Gemini markdown → bold/italic/lists; user bubbles stay plain */}
+                    <SureMarkdownText text={message.text} />
                     <div className="flex flex-wrap items-center gap-2">
                       <button
                         type="button"
