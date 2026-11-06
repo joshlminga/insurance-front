@@ -26,6 +26,7 @@ import { ShowToast } from '@/utils/utils'
 import { SureComparisonDownload } from './sure-comparison-download'
 import { SureMarkdownText } from './sure-markdown'
 import { SurePremiumCarousel } from './sure-premium-carousel'
+import { SureProcessLinks } from './sure-process-links'
 import {
   EMPTY_ASSISTANT,
   mapApiMessages,
@@ -132,7 +133,13 @@ function makeId(): string {
 }
 
 function sureChatPath(chatCode: string): string {
-  return EROUTES.SURE_CHAT.replace(':sessionCode', chatCode)
+  // Public chat ULIDs are always lowercase in the URL
+  return EROUTES.SURE_CHAT.replace(':sessionCode', chatCode.toLowerCase())
+}
+
+/** Normalize chat ULID from URL/API so comparisons and requests stay lowercase. */
+function normalizeChatCode(chatCode: string): string {
+  return chatCode.toLowerCase()
 }
 
 function conversationTitle(title: string | null | undefined): string {
@@ -389,7 +396,9 @@ export default function SurePage() {
   // Nested under /dashboard/sure — also matches /dashboard/sure/chat/:sessionCode
   const { sessionCode: paramCode } = useParams<{ sessionCode?: string }>()
   const chatMatch = useMatch(EROUTES.SURE_CHAT)
-  const sessionCode = chatMatch?.params.sessionCode ?? paramCode
+  // Lowercase so URL casing never breaks active-chat match or API lookup
+  const sessionCodeRaw = chatMatch?.params.sessionCode ?? paramCode
+  const sessionCode = sessionCodeRaw ? normalizeChatCode(sessionCodeRaw) : undefined
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [draft, setDraft] = useState('')
   const [attachments, setAttachments] = useState<ChatAttachment[]>([])
@@ -434,7 +443,7 @@ export default function SurePage() {
       const rows = response.data?.data?.chats ?? []
       setConversations(
         rows.map((row) => ({
-          id: row.chat,
+          id: normalizeChatCode(row.chat),
           title: conversationTitle(row.title),
           updatedAt: row.updated_at ?? '',
         }))
@@ -459,13 +468,14 @@ export default function SurePage() {
       return
     }
 
+    const normalizedCode = normalizeChatCode(chatCode)
     const seq = ++loadSeqRef.current
     const forceReplace = replaceOnNextLoadRef.current
     replaceOnNextLoadRef.current = false
     setIsLoadingChat(true)
     try {
       const response = await apiClient.get<SureApiEnvelope<SureChatShowData>>(
-        `vrm/sureai/chat/${chatCode}`
+        `vrm/sureai/chat/${normalizedCode}`
       )
 
       // Drop this result if a newer load started, or send still owns the thread
@@ -542,7 +552,7 @@ export default function SurePage() {
     if (!chat) {
       throw new Error(response.data?.message || 'Could not start a Sure chat.')
     }
-    return chat
+    return normalizeChatCode(chat)
   }
 
   async function startNewChat() {
@@ -575,7 +585,8 @@ export default function SurePage() {
   }
 
   async function selectChat(chatId: string) {
-    if (chatId === (chatCodeRef.current ?? sessionCode)) {
+    const normalizedId = normalizeChatCode(chatId)
+    if (normalizedId === (chatCodeRef.current ?? sessionCode)) {
       setSidebarOpen(false)
       return
     }
@@ -585,18 +596,18 @@ export default function SurePage() {
     skipNextLoadRef.current = false
     replaceOnNextLoadRef.current = true
     loadSeqRef.current += 1
-    chatCodeRef.current = chatId
+    chatCodeRef.current = normalizedId
     setMessages([])
     setSidebarOpen(false)
     setDraft('')
     setAttachments([])
-    navigate(sureChatPath(chatId))
+    navigate(sureChatPath(normalizedId))
   }
 
   async function ensureChatCode(): Promise<string> {
     const existing = chatCodeRef.current ?? sessionCode ?? null
     if (existing) {
-      return existing
+      return normalizeChatCode(existing)
     }
 
     // First send from /dashboard/sure creates the session, then updates the URL
@@ -672,6 +683,7 @@ export default function SurePage() {
         feedback: null,
         offers: payload.response.offers ?? null,
         comparisonPdf: payload.response.comparison_pdf ?? null,
+        processLinks: payload.response.process_links ?? null,
       }
 
       // Drop temp bubble, upsert server user + assistant by id
@@ -713,7 +725,11 @@ export default function SurePage() {
 
     // Same thumb again clears the reaction (null)
     const next = target.feedback === value ? null : value
-    const chat = chatCodeRef.current ?? sessionCode
+    const chatRaw = chatCodeRef.current ?? sessionCode
+    if (!chatRaw) {
+      return
+    }
+    const chat = normalizeChatCode(chatRaw)
 
     setMessages((prev) =>
       prev.map((message) => {
@@ -723,10 +739,6 @@ export default function SurePage() {
         return { ...message, feedback: next }
       })
     )
-
-    if (!chat) {
-      return
-    }
 
     try {
       // POST reaction against the assistant message UUID from /message
@@ -846,16 +858,29 @@ export default function SurePage() {
                     {/* When offer cards exist, skip Gemini’s long Rate-ID / product list */}
                     {message.offers?.offers?.length ? (
                       <>
-                        <p className="text-sm leading-relaxed text-foreground">
-                          {shortPremiumIntro(message.text, message.offers)}
-                        </p>
+                        {message.comparisonPdf ? (
+                          <SureMarkdownText text={message.text} />
+                        ) : (
+                          <p className="text-sm leading-relaxed text-foreground">
+                            {shortPremiumIntro(message.text, message.offers)}
+                          </p>
+                        )}
+                        {/* PDF comparison first, then rate cards */}
+                        {message.comparisonPdf ? (
+                          <SureComparisonDownload payload={message.comparisonPdf} />
+                        ) : null}
                         <SurePremiumCarousel payload={message.offers} />
                       </>
                     ) : (
-                      <SureMarkdownText text={message.text} />
+                      <>
+                        <SureMarkdownText text={message.text} />
+                        {message.comparisonPdf ? (
+                          <SureComparisonDownload payload={message.comparisonPdf} />
+                        ) : null}
+                      </>
                     )}
-                    {message.comparisonPdf ? (
-                      <SureComparisonDownload payload={message.comparisonPdf} />
+                    {message.processLinks?.length ? (
+                      <SureProcessLinks links={message.processLinks} />
                     ) : null}
                     <div className="flex flex-wrap items-center gap-2">
                       <button

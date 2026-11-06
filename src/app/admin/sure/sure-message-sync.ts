@@ -54,6 +54,19 @@ export type SureComparisonPdfPayload = {
   filename?: string | null
   download_path: string
   products: Array<{ product_id: number; rate_id: number }>
+  /** Human label e.g. "Motor cover comparison for APA, CIC". */
+  label?: string | null
+  /** Named insurers included in the comparison PDF. */
+  insurers?: string[] | null
+}
+
+/** Deep-link into admin quotation / resume screens for manual processing. */
+export type SureProcessLink = {
+  label: string
+  /** App path, may include ?term=quote_code for pre-filtered resume. */
+  path: string
+  hint?: string | null
+  term?: string | null
 }
 
 export type SureChatMessage = {
@@ -66,6 +79,8 @@ export type SureChatMessage = {
   offers?: SurePremiumOffersPayload | null
   /** Comparison PDF download meta from tool / history. */
   comparisonPdf?: SureComparisonPdfPayload | null
+  /** Manual process deep-links (results + resume). */
+  processLinks?: SureProcessLink[] | null
 }
 
 export type SureApiMessageRow = {
@@ -76,6 +91,7 @@ export type SureApiMessageRow = {
   /** Restored from assistant message meta when chat history reloads. */
   offers?: SurePremiumOffersPayload | null
   comparison_pdf?: SureComparisonPdfPayload | null
+  process_links?: SureProcessLink[] | null
   feedback?: 'up' | 'down' | null
 }
 
@@ -124,6 +140,11 @@ export function upsertMessages(
               message.comparisonPdf !== null
                 ? message.comparisonPdf
                 : existing.comparisonPdf,
+            processLinks:
+              message.processLinks !== undefined &&
+              message.processLinks !== null
+                ? message.processLinks
+                : existing.processLinks,
           }
         : message
     )
@@ -163,9 +184,10 @@ export function mapApiMessages(rows: SureApiMessageRow[]): SureChatMessage[] {
     attachments: message.attachments?.length
       ? message.attachments
       : undefined,
-    // History reload restores carousel / PDF chip from persisted assistant meta
+    // History reload restores carousel / PDF / process links from persisted assistant meta
     offers: message.offers ?? null,
     comparisonPdf: message.comparison_pdf ?? null,
+    processLinks: message.process_links ?? null,
     feedback: message.feedback ?? null,
   }))
 }

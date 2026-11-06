@@ -97,6 +97,7 @@ describe('mapApiMessages', () => {
         attachments: undefined,
         offers: null,
         comparisonPdf: null,
+        processLinks: null,
         feedback: null,
       },
       {
@@ -106,6 +107,7 @@ describe('mapApiMessages', () => {
         attachments: undefined,
         offers: null,
         comparisonPdf: null,
+        processLinks: null,
         feedback: null,
       },
     ])
@@ -131,5 +133,26 @@ describe('mapApiMessages', () => {
         },
       ])[0]?.comparisonPdf
     ).toEqual(comparison_pdf)
+  })
+
+  it('restores process_links from api history rows', () => {
+    const process_links = [
+      {
+        label: 'Resume quotation',
+        path: '/dashboard/reports/quotations/motor?term=Q-1',
+        hint: 'Click Resume on the row',
+      },
+    ]
+
+    expect(
+      mapApiMessages([
+        {
+          id: 'a1',
+          role: 'assistant',
+          text: 'Manual links',
+          process_links,
+        },
+      ])[0]?.processLinks
+    ).toEqual(process_links)
   })
 })

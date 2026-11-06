@@ -9,12 +9,13 @@ import type { SingleActionsHandler, SubmitResponse, TFilterOptions, TPaginationF
 import { FILTEROPTIONS, ReusableReducer } from '@/utils/constatnts'
 import { EROUTES } from '@/utils/enums'
 import { useReducer } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Eye } from 'lucide-react'
 import { MotorQuoteFetchDetailDialog } from '@/app/admin/quotations/motor/fetch/detail-dialog'
 import {
   persistAdminMotorResumeFromDetail,
 } from '@/app/admin/quotations/motor/admin-motor-session'
+import { motorFetchTermFromSearchParams } from '@/app/admin/quotations/motor/fetch/motor-fetch-term'
 import apiClient from '@/lib/api-client'
 import { ShowToast } from '@/utils/utils'
 import { extractErrorMessage } from '@/utils/helpers'
@@ -22,9 +23,12 @@ import type { MotorQuoteFetchDetail, MotorQuoteFetchListRow } from '@/types/type
 
 export const QuotationReportsMotorPage = () => {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  // Sure AI / deep links use ?term=quote_code so Resume is one click away.
+  const initialTerm = motorFetchTermFromSearchParams(searchParams)
   const [filter, optionsDispatcher] = useReducer(
     ReusableReducer<TPaginationFilters & TFilterOptions>,
-    { ...FILTEROPTIONS, page: 1, pageSize: 10 }
+    { ...FILTEROPTIONS, page: 1, pageSize: 10, term: initialTerm }
   )
   const optionsDispatcherDebounce = useDebounce({
     debounceCallback: optionsDispatcher,

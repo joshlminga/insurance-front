@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Download } from 'lucide-react'
+import { Download, FileText } from 'lucide-react'
 import apiClient from '@/lib/api-client'
 import { ShowToast } from '@/utils/utils'
 import type { SureComparisonPdfPayload } from './sure-message-sync'
@@ -9,7 +9,7 @@ type Props = {
 }
 
 /**
- * Download chip for Sure AI comparison PDF meta.
+ * Clear comparison PDF download card for Sure AI.
  * Posts the same document/motor/comparison endpoint Quote steppers use.
  */
 export function SureComparisonDownload({ payload }: Props) {
@@ -20,6 +20,18 @@ export function SureComparisonDownload({ payload }: Props) {
   if (!sessionId || products.length < 2) {
     return null
   }
+
+  const insurers =
+    Array.isArray(payload.insurers) && payload.insurers.length > 0
+      ? payload.insurers.join(', ')
+      : null
+  const documentLabel =
+    payload.label?.trim() ||
+    (insurers
+      ? `Motor cover comparison for ${insurers}`
+      : payload.quote_code?.trim()
+        ? `Motor cover comparison for ${payload.quote_code}`
+        : 'Motor cover comparison')
 
   async function download() {
     if (busy) {
@@ -57,14 +69,47 @@ export function SureComparisonDownload({ payload }: Props) {
   }
 
   return (
-    <button
-      type="button"
-      onClick={() => void download()}
-      disabled={busy}
-      className="inline-flex items-center gap-1.5 rounded-full border border-border bg-white px-3 py-1.5 text-xs font-medium text-zinc-900 shadow-sm transition hover:bg-zinc-100 disabled:opacity-50 dark:border-zinc-300 dark:bg-white dark:text-zinc-900"
-    >
-      <Download className="size-3.5" />
-      {busy ? 'Preparing PDF…' : 'Download comparison'}
-    </button>
+    <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+      <div className="border-b border-border bg-muted/40 px-3.5 py-2.5">
+        <p className="text-sm font-medium text-foreground">
+          Comparison PDF ready
+        </p>
+        <p className="mt-0.5 text-xs text-muted-foreground">
+          The comparison is prepared as a PDF document. Click the red Download
+          button to open it.
+        </p>
+      </div>
+
+      {/* Simple two-column row: document label | red download action */}
+      <div className="grid grid-cols-1 items-stretch sm:grid-cols-[1fr_auto]">
+        <div className="flex items-start gap-2.5 px-3.5 py-3">
+          <FileText className="mt-0.5 size-4 shrink-0 text-[#C20C0C]" />
+          <div className="min-w-0">
+            <p className="text-sm font-medium leading-snug text-foreground">
+              {documentLabel}
+              <span className="font-normal text-muted-foreground">
+                {' '}
+                — click to download
+              </span>
+            </p>
+            {payload.filename ? (
+              <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                {payload.filename}
+              </p>
+            ) : null}
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => void download()}
+          disabled={busy}
+          className="inline-flex items-center justify-center gap-2 bg-[#C20C0C] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#a40a0a] disabled:opacity-60 sm:min-w-[9.5rem]"
+        >
+          <Download className="size-4 shrink-0" />
+          {busy ? 'Preparing…' : 'Download'}
+        </button>
+      </div>
+    </div>
   )
 }
