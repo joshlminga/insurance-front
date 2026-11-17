@@ -506,6 +506,45 @@ export function canPurchaseCover(item: { allow_purchase?: boolean } | null | und
     return item?.allow_purchase === true
 }
 
+type TravelOfferLike = {
+    allow_purchase?: boolean
+    is_external?: boolean
+    external?: {
+        payload_prefix?: string | null
+        payment_methods?: string[] | null
+    } | null
+} | null | undefined
+
+/** CannonKE external travel offer (insurer-direct checkout). */
+export function isCannonTravelOffer(item: TravelOfferLike): boolean {
+    return item?.is_external === true && item?.external?.payload_prefix === 'CannonKE'
+}
+
+/**
+ * Local travel offers: purchasable unless allow_purchase is explicitly false.
+ * CannonKE: only when allow_purchase is true (payment_api + M-Pesa configured).
+ * Other externals: blocked until their checkout exists.
+ */
+export function canPurchaseTravelCover(item: TravelOfferLike): boolean {
+    if (item == null) {
+        return false
+    }
+
+    if (isCannonTravelOffer(item)) {
+        return item.allow_purchase === true
+    }
+
+    if (item.is_external === true) {
+        return false
+    }
+
+    if (item.allow_purchase === false) {
+        return false
+    }
+
+    return true
+}
+
 export const installmentText = (invoice: MotorUserCoverInvoice) =>
     `Installment ${invoice.installment_number} of ${invoice.total_installments}`
 

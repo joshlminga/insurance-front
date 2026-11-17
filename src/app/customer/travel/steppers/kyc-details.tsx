@@ -9,10 +9,14 @@ import { Separator } from '@/components/ui/separator'
 import { TravelerNationalitySelect } from '@/app/customer/travel/steppers/traveler-nationality-select'
 import {
   Button,
+  ReusableSelect,
   ReuseableInput,
 } from '@/dev/core'
 import { UseApiMutation } from '@/hooks/hooks'
-import { TravelKycSchema } from '@/types/form-schema'
+import {
+  refineTravelKycPrincipalSelf,
+  TravelKycSchema,
+} from '@/types/form-schema'
 import type { TravelKycFormValues } from '@/types/schema'
 import type {
   CustomerVerificationDetailsProps,
@@ -51,7 +55,26 @@ const inputClassName =
 
 const FILE_FIELDS = new Set(['passport_attachment', 'tax_certificate'])
 
-const blankKycTraveler = (): TravelKycFormValues['travelers'][number] => ({
+const GENDER_OPTIONS = [
+  { label: 'Male', value: 'Male' },
+  { label: 'Female', value: 'Female' },
+]
+
+const RELATIONSHIP_OPTIONS = [
+  { label: 'Self', value: 'Self' },
+  { label: 'Husband', value: 'Husband' },
+  { label: 'Wife', value: 'Wife' },
+  { label: 'Parent', value: 'Parent' },
+  { label: 'Child', value: 'Child' },
+]
+
+const MEDICAL_CONDITION_OPTIONS = [
+  { label: 'None', value: 'None' },
+]
+
+const blankKycTraveler = (
+  isPrincipal = false,
+): TravelKycFormValues['travelers'][number] => ({
   first_name: '',
   middle_name: '',
   surname: '',
@@ -60,6 +83,12 @@ const blankKycTraveler = (): TravelKycFormValues['travelers'][number] => ({
   date_of_birth: '',
   nationality: '',
   passport_number: '',
+  gender: undefined as unknown as TravelKycFormValues['travelers'][number]['gender'],
+  // Principal defaults to Self for Cannon policyholder mapping
+  relationship: isPrincipal
+    ? 'Self'
+    : (undefined as unknown as TravelKycFormValues['travelers'][number]['relationship']),
+  medical_condition: 'None',
   tax_number: '',
   next_of_kin_name: '',
   next_of_kin_phone: '',
@@ -71,25 +100,26 @@ const blankKycTraveler = (): TravelKycFormValues['travelers'][number] => ({
 /** Prefill KYC travellers from the quote form saved in sessionStorage. */
 function readTravelersFromSession(): TravelKycFormValues['travelers'] {
   if (typeof window === 'undefined') {
-    return [blankKycTraveler()]
+    return [blankKycTraveler(true)]
   }
 
   try {
     const raw = sessionStorage.getItem(TRAVEL_QUOTATION_FORM_SESSION_KEY)
     if (!raw) {
-      return [blankKycTraveler()]
+      return [blankKycTraveler(true)]
     }
 
     const parsed = JSON.parse(raw) as {
       travelers?: Array<Record<string, unknown>>
+      travel_as?: string
     }
     const travelers = Array.isArray(parsed?.travelers) ? parsed.travelers : []
 
     if (travelers.length === 0) {
-      return [blankKycTraveler()]
+      return [blankKycTraveler(true)]
     }
 
-    return travelers.map((traveler) => ({
+    return travelers.map((traveler, index) => ({
       first_name: String(traveler?.first_name ?? ''),
       middle_name: String(traveler?.middle_name ?? ''),
       surname: String(traveler?.surname ?? ''),
@@ -98,6 +128,11 @@ function readTravelersFromSession(): TravelKycFormValues['travelers'] {
       date_of_birth: String(traveler?.date_of_birth ?? ''),
       nationality: String(traveler?.nationality ?? ''),
       passport_number: '',
+      gender: undefined as unknown as TravelKycFormValues['travelers'][number]['gender'],
+      relationship: index === 0
+        ? 'Self'
+        : (undefined as unknown as TravelKycFormValues['travelers'][number]['relationship']),
+      medical_condition: 'None' as const,
       tax_number: '',
       next_of_kin_name: '',
       next_of_kin_phone: '',
@@ -107,7 +142,19 @@ function readTravelersFromSession(): TravelKycFormValues['travelers'] {
       tax_certificate: undefined as unknown as File,
     }))
   } catch {
-    return [blankKycTraveler()]
+    return [blankKycTraveler(true)]
+  }
+}
+
+function readTravelAsFromSession(): string {
+  if (typeof window === 'undefined') return 'Individual'
+  try {
+    const raw = sessionStorage.getItem(TRAVEL_QUOTATION_FORM_SESSION_KEY)
+    if (!raw) return 'Individual'
+    const parsed = JSON.parse(raw) as { travel_as?: string }
+    return String(parsed?.travel_as ?? 'Individual')
+  } catch {
+    return 'Individual'
   }
 }
 
@@ -191,9 +238,16 @@ export const TravelKycDetailsPage: React.FC<CustomerVerificationDetailsProps> = 
     readSessionValue(PURCHASE_SESSION_STORAGE_KEY),
   )
   const [defaultTravelers] = useState(() => readTravelersFromSession())
+  const [travelAs] = useState(() => readTravelAsFromSession())
+
+  // Individual covers require principal relationship = Self (API enforces too)
+  const kycSchema = React.useMemo(
+    () => refineTravelKycPrincipalSelf(TravelKycSchema, travelAs),
+    [travelAs],
+  )
 
   const form = useForm<TravelKycFormValues>({
-    resolver: zodResolver(TravelKycSchema),
+    resolver: zodResolver(kycSchema),
     defaultValues: {
       travelers: defaultTravelers,
     },
@@ -364,6 +418,30 @@ export const TravelKycDetailsPage: React.FC<CustomerVerificationDetailsProps> = 
                   label="Passport Number"
                   required
                 />
+                <ReusableSelect
+                  control={form.control}
+                  name={`travelers.${index}.gender`}
+                  label="Gender"
+                  placeholder="Select gender..."
+                  options={GENDER_OPTIONS}
+                  required
+                />
+                <ReusableSelect
+                  control={form.control}
+                  name={`travelers.${index}.relationship`}
+                  label="Relationship"
+                  placeholder="Select relationship..."
+                  options={RELATIONSHIP_OPTIONS}
+                  required
+                />
+                <ReusableSelect
+                  control={form.control}
+                  name={`travelers.${index}.medical_condition`}
+                  label="Medical Condition"
+                  placeholder="Select medical condition..."
+                  options={MEDICAL_CONDITION_OPTIONS}
+                  required
+                />
                 <ReuseableInput
                   className={inputClassName}
                   control={form.control}
@@ -415,14 +493,17 @@ export const TravelKycDetailsPage: React.FC<CustomerVerificationDetailsProps> = 
 
               <div>
                 <h3 className="mb-3 text-sm font-semibold sm:text-base">
-                  Next of Kin
+                  Emergency Contact (Next of Kin)
                 </h3>
+                <p className="mb-3 text-xs text-muted-foreground">
+                  Used as the emergency contact on the travel policy.
+                </p>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
                   <ReuseableInput
                     className={inputClassName}
                     control={form.control}
                     name={`travelers.${index}.next_of_kin_name`}
-                    label="Next of Kin Name"
+                    label="Emergency Contact Name"
                     required
                   />
                   <ReuseableInput
@@ -430,7 +511,7 @@ export const TravelKycDetailsPage: React.FC<CustomerVerificationDetailsProps> = 
                     control={form.control}
                     type="tel"
                     name={`travelers.${index}.next_of_kin_phone`}
-                    label="Next of Kin Phone"
+                    label="Emergency Contact Phone"
                     required
                   />
                 </div>

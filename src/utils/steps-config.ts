@@ -23,8 +23,8 @@ import { TravelKycDetailsPage } from "@/app/customer/travel/steppers/kyc-details
 import OTPTravelVerificationPage from "@/app/customer/travel/steppers/otp-verification";
 import { TravelQuotationsPage } from "@/app/customer/travel/steppers/quotations";
 import { TravelSuccessPurchase } from "@/app/customer/travel/steppers/success-purchase";
-import { TravelInvoicesPage } from "@/app/customer/travel/steppers/travel-invoices";
-import { TravelPaymentOptionsPage } from "@/app/customer/travel/steppers/travel-payment-options";
+import { TravelInvoiceGatePage } from "@/app/customer/travel/steppers/travel-invoice-gate";
+import { TravelPaymentGatePage } from "@/app/customer/travel/steppers/travel-payment-gate";
 import { TravellerDetailsPage } from "@/app/customer/travel/steppers/traveller-details";
 import { CASH_PAYMENT_ENABLED } from "@/utils/constatnts";
 import { ArrowUpToLine, Download } from "lucide-react";
@@ -149,12 +149,12 @@ export const getTravelSteps = (isAuthenticated: boolean) => {
         {
             disabled: false,
             title: "",
-            content: TravelInvoicesPage,
+            content: TravelInvoiceGatePage,
         },
         {
             disabled: false,
             title: "",
-            content: TravelPaymentOptionsPage,
+            content: TravelPaymentGatePage,
         },
         {
             disabled: false,

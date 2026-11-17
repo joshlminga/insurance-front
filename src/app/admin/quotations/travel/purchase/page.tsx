@@ -1,8 +1,10 @@
 import { PageHeader } from '@/components/shared'
 import { TravelKycDetailsPage } from '@/app/customer/travel/steppers/kyc-details'
-import { TravelPaymentOptionsPage } from '@/app/customer/travel/steppers/travel-payment-options'
+import { TravelPaymentGatePage } from '@/app/customer/travel/steppers/travel-payment-gate'
 import { TravelSuccessPurchase } from '@/app/customer/travel/steppers/success-purchase'
+import { TravelInvoiceGatePage } from '@/app/customer/travel/steppers/travel-invoice-gate'
 import { AdminTravelInvoicePayment } from '@/app/admin/quotations/travel/steppers/invoice-payment'
+import { TRAVEL_CANNON_CHECKOUT_KEY } from '@/utils/constatnts'
 import {
     ADMIN_TRAVEL_PURCHASE_STEP_KEY,
 } from '@/app/payment/payment-session'
@@ -11,16 +13,28 @@ import {
     PURCHASE_SESSION_STORAGE_KEY,
 } from '@/utils/constatnts'
 import { EROUTES } from '@/utils/enums'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { UseAuth } from '@/stores/auth-store'
 import { resolveAdminTravelPayeeContact } from '../admin-travel-session'
 
 /** Admin travel purchase: KYC → Invoice → Payment → Success (same order as customer, no register/OTP). */
+const AdminTravelInvoiceGate = (props: React.ComponentProps<typeof AdminTravelInvoicePayment>) => {
+    const isCannon =
+        typeof window !== 'undefined' &&
+        sessionStorage.getItem(TRAVEL_CANNON_CHECKOUT_KEY) === '1'
+
+    if (isCannon) {
+        return <TravelInvoiceGatePage {...props} />
+    }
+
+    return <AdminTravelInvoicePayment {...props} />
+}
+
 const TRAVEL_PURCHASE_STEPS = [
     { title: 'KYC', Component: TravelKycDetailsPage },
-    { title: 'Invoice', Component: AdminTravelInvoicePayment },
-    { title: 'Payment', Component: TravelPaymentOptionsPage },
+    { title: 'Invoice', Component: AdminTravelInvoiceGate },
+    { title: 'Payment', Component: TravelPaymentGatePage },
     { title: 'Success', Component: TravelSuccessPurchase },
 ] as const
 
@@ -56,7 +70,12 @@ export const AdminTravelQuotationPurchasePage = () => {
             navigate(EROUTES.TRAVEL_QUOTATION_RESULTS, { replace: true })
             return
         }
-        if (step >= 2 && !hasSessionValue(INVOICE_SESSION_STORAGE_KEY)) {
+        // Cannon skips Acensure invoice but KYC still stamps INVOICE_SESSION_STORAGE_KEY.
+        if (
+            step >= 2 &&
+            !hasSessionValue(INVOICE_SESSION_STORAGE_KEY) &&
+            sessionStorage.getItem(TRAVEL_CANNON_CHECKOUT_KEY) !== '1'
+        ) {
             navigate(EROUTES.TRAVEL_QUOTATION_RESULTS, { replace: true })
         }
     }, [step, navigate])
@@ -87,8 +106,9 @@ export const AdminTravelQuotationPurchasePage = () => {
             ? { goToPrevStep, goToNextStep }
             : { goToPrevStep, goToNextStep, defaultCustomerContact }
 
+    // Payment step uses TravelPaymentGatePage (Cannon M-Pesa or normal options).
     const stepProps =
-        current.Component === TravelPaymentOptionsPage
+        current.Component === TravelPaymentGatePage
             ? {
                   ...baseProps,
                   goToKyc,
