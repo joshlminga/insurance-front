@@ -19,6 +19,7 @@ import {
   INVOICE_SESSION_STORAGE_KEY,
   PURCHASE_SESSION_STORAGE_KEY,
 } from '@/utils/constatnts'
+import { useTravelCannonCheckout } from '@/hooks/use-travel-cannon-checkout'
 import {
   extractTravelDocumentErrorMessage,
   formatTravelPolicyScheduleWait,
@@ -96,6 +97,13 @@ type TravelSummaryPaidFields = {
   invoice_breakdown?: {
     items?: Array<{ paid_at?: string | null }>
   }
+  checkout?: {
+    provider?: string
+  }
+  cover?: {
+    policy_reference?: string | null
+    insurer_name?: string | null
+  }
 }
 
 export const TravelSuccessPurchase: React.FC<CustomerVerificationDetailsProps> = ({
@@ -104,6 +112,8 @@ export const TravelSuccessPurchase: React.FC<CustomerVerificationDetailsProps> =
 }) => {
   const [purchaseSessionId] = React.useState(readPurchaseSessionId)
   const [nowMs, setNowMs] = React.useState(() => Date.now())
+  // CannonKE: insurer-direct checkout — no Acensure invoice receipt; use certificate API.
+  const { isCannon } = useTravelCannonCheckout()
 
   const { data: SummaryData } = UseApiQuery<SubmitResponse>({
     url: purchaseSessionId ? `purchase/travel/${purchaseSessionId}/summary` : '',
@@ -114,6 +124,9 @@ export const TravelSuccessPurchase: React.FC<CustomerVerificationDetailsProps> =
   })
 
   const summary = (SummaryData?.data ?? null) as TravelSummaryPaidFields | null
+  const isCannonCheckout =
+    isCannon || summary?.checkout?.provider === 'cannonke'
+  const insurerName = summary?.cover?.insurer_name?.trim() || 'Cannon Insurance'
   const summaryPaidAt =
     summary?.paid_at ?? summary?.invoice_breakdown?.items?.[0]?.paid_at ?? null
 
@@ -195,6 +208,26 @@ export const TravelSuccessPurchase: React.FC<CustomerVerificationDetailsProps> =
     },
   })
 
+  // Cannon insurer certificate — GET /v1/policies/{policyReference}/certificate via our proxy
+  const certificateMutation = UseApiMutation<Blob, void>({
+    url: purchaseSessionId
+      ? `purchase/travel/${purchaseSessionId}/cannon/certificate`
+      : 'purchase/travel/0/cannon/certificate',
+    method: EMETHODS.GET,
+    config: {
+      responseType: 'blob',
+    },
+    mutationOptions: {
+      onSuccess: (data) => openPdfPreview(data, `${insurerName} Certificate`),
+      onError: (error: unknown) => {
+        // #region agent log
+        fetch('http://127.0.0.1:7410/ingest/d44f0587-d252-4b9d-983a-196162e430ad',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'722dc8'},body:JSON.stringify({sessionId:'722dc8',runId:'embassy-docs',hypothesisId:'H6',location:'success-purchase.tsx:certificate',message:'certificate download failed',data:{purchaseSessionId,policyReference:summary?.cover?.policy_reference??null},timestamp:Date.now()})}).catch(()=>{})
+        // #endregion
+        void showDocError(error)
+      },
+    },
+  })
+
   const downloadReceipt = () => {
     if (!purchaseSessionId) {
       ShowToast.error('No purchase found.')
@@ -208,7 +241,21 @@ export const TravelSuccessPurchase: React.FC<CustomerVerificationDetailsProps> =
       ShowToast.error('No purchase found.')
       return
     }
+    // #region agent log
+    fetch('http://127.0.0.1:7410/ingest/d44f0587-d252-4b9d-983a-196162e430ad',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'722dc8'},body:JSON.stringify({sessionId:'722dc8',runId:'embassy-docs',hypothesisId:'H1',location:'success-purchase.tsx:embassy',message:'embassy download clicked',data:{purchaseSessionId,isCannonCheckout},timestamp:Date.now()})}).catch(()=>{})
+    // #endregion
     embassyMutation.mutate()
+  }
+
+  const downloadCertificate = () => {
+    if (!purchaseSessionId) {
+      ShowToast.error('No purchase found.')
+      return
+    }
+    // #region agent log
+    fetch('http://127.0.0.1:7410/ingest/d44f0587-d252-4b9d-983a-196162e430ad',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'722dc8'},body:JSON.stringify({sessionId:'722dc8',runId:'embassy-docs',hypothesisId:'H6',location:'success-purchase.tsx:certificate',message:'certificate download clicked',data:{purchaseSessionId,policyReference:summary?.cover?.policy_reference??null},timestamp:Date.now()})}).catch(()=>{})
+    // #endregion
+    certificateMutation.mutate()
   }
 
   const downloadPolicySchedule = () => {
@@ -234,8 +281,9 @@ export const TravelSuccessPurchase: React.FC<CustomerVerificationDetailsProps> =
             Payment <span className="text-[#C20C0C]">Success</span>
           </h1>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground sm:text-base">
-            Your travel cover payment is complete. Download your receipt and embassy letter now.
-            Your policy schedule will be ready in about 5 minutes.
+            {isCannonCheckout
+              ? `Your travel cover payment is complete. Download your embassy letter and ${insurerName} certificate now. Policy schedule unlocks shortly after payment.`
+              : 'Your travel cover payment is complete. Download your receipt and embassy letter now. Your policy schedule will be ready in about 5 minutes.'}
           </p>
         </div>
 
@@ -255,26 +303,53 @@ export const TravelSuccessPurchase: React.FC<CustomerVerificationDetailsProps> =
           <div className="rounded-2xl border border-[#ADABAB]/35 bg-white/95 p-3 sm:p-5">
             <BoxHeader
               title="Your Documents"
-              description="Receipt and embassy letter are ready now. Policy schedule unlocks shortly after payment."
+              description={
+                isCannonCheckout
+                  ? `Embassy letter and ${insurerName} certificate are ready when issuance allows. Policy schedule unlocks shortly after payment.`
+                  : 'Receipt and embassy letter are ready now. Policy schedule unlocks shortly after payment.'
+              }
             />
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 sm:gap-5">
-              <div className="flex flex-col items-center rounded-xl border border-[#ADABAB]/40 bg-neutral-50/80 px-4 py-6 text-center">
-                <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full border border-[#ADABAB]/50 bg-white">
-                  <Receipt className="h-6 w-6 text-[#C20C0C]" />
+              {isCannonCheckout ? (
+                <div className="flex flex-col items-center rounded-xl border border-[#ADABAB]/40 bg-neutral-50/80 px-4 py-6 text-center">
+                  <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full border border-[#ADABAB]/50 bg-white">
+                    <Shield className="h-6 w-6 text-[#C20C0C]" />
+                  </div>
+                  <h3 className="text-base font-semibold">Certificate</h3>
+                  <p className="mb-4 text-xs text-muted-foreground sm:text-sm">
+                    From {insurerName}
+                    {summary?.cover?.policy_reference
+                      ? ` · ${summary.cover.policy_reference}`
+                      : ''}
+                  </p>
+                  <Button
+                    className={primaryButtonClassName}
+                    onClick={downloadCertificate}
+                    loading={certificateMutation.isPending}
+                    disabled={!purchaseSessionId}
+                  >
+                    Download Certificate
+                  </Button>
                 </div>
-                <h3 className="text-base font-semibold">Receipt</h3>
-                <p className="mb-4 text-xs text-muted-foreground sm:text-sm">
-                  Ready to download
-                </p>
-                <Button
-                  className={primaryButtonClassName}
-                  onClick={downloadReceipt}
-                  loading={receiptMutation.isPending}
-                  disabled={!purchaseSessionId}
-                >
-                  Download Receipt
-                </Button>
-              </div>
+              ) : (
+                <div className="flex flex-col items-center rounded-xl border border-[#ADABAB]/40 bg-neutral-50/80 px-4 py-6 text-center">
+                  <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full border border-[#ADABAB]/50 bg-white">
+                    <Receipt className="h-6 w-6 text-[#C20C0C]" />
+                  </div>
+                  <h3 className="text-base font-semibold">Receipt</h3>
+                  <p className="mb-4 text-xs text-muted-foreground sm:text-sm">
+                    Ready to download
+                  </p>
+                  <Button
+                    className={primaryButtonClassName}
+                    onClick={downloadReceipt}
+                    loading={receiptMutation.isPending}
+                    disabled={!purchaseSessionId}
+                  >
+                    Download Receipt
+                  </Button>
+                </div>
+              )}
               <div className="flex flex-col items-center rounded-xl border border-[#ADABAB]/40 bg-neutral-50/80 px-4 py-6 text-center">
                 <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full border border-[#ADABAB]/50 bg-white">
                   <FileText className="h-6 w-6 text-[#C20C0C]" />
