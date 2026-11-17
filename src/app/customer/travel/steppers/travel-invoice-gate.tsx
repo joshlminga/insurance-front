@@ -27,11 +27,8 @@ export const TravelInvoiceGatePage: React.FC<CustomerVerificationDetailsProps> =
     url: `purchase/travel/${purchaseId}/cannon/draft-policy`,
     method: EMETHODS.POST,
     mutationOptions: {
-      onSuccess: (data) => {
+      onSuccess: () => {
         setDraftReady(true)
-        // #region agent log
-        fetch('http://127.0.0.1:7410/ingest/d44f0587-d252-4b9d-983a-196162e430ad',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'722dc8'},body:JSON.stringify({sessionId:'722dc8',runId:'payment-skip',hypothesisId:'H1',location:'travel-invoice-gate.tsx:onSuccess',message:'draft ok → advance to payment',data:{purchaseId,policyFromResponse:(data as any)?.data?.policy_reference ?? (data as any)?.policy_reference ?? null,existingPolicyReference:existingPolicyReference||null},timestamp:Date.now()})}).catch(()=>{})
-        // #endregion
         props.goToNextStep?.()
       },
       onError: (error: unknown) => {
@@ -39,9 +36,6 @@ export const TravelInvoiceGatePage: React.FC<CustomerVerificationDetailsProps> =
         const detail =
           extractErrorMessage(error) ||
           `Could not create ${insurerName} draft policy. Retry after fixing the insurer error.`
-        // #region agent log
-        fetch('http://127.0.0.1:7410/ingest/d44f0587-d252-4b9d-983a-196162e430ad',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'722dc8'},body:JSON.stringify({sessionId:'722dc8',runId:'payment-skip',hypothesisId:'H2',location:'travel-invoice-gate.tsx:onError',message:'draft failed',data:{purchaseId,detail:String(detail).slice(0,240),existingPolicyReference:existingPolicyReference||null},timestamp:Date.now()})}).catch(()=>{})
-        // #endregion
         ShowToast.error(`${insurerName} error (not Acensure): ${detail}`)
       },
     },
@@ -57,9 +51,6 @@ export const TravelInvoiceGatePage: React.FC<CustomerVerificationDetailsProps> =
     }
     // Already have a Cannon draft on this purchase — go straight to M-Pesa
     if (existingPolicyReference) {
-      // #region agent log
-      fetch('http://127.0.0.1:7410/ingest/d44f0587-d252-4b9d-983a-196162e430ad',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'722dc8'},body:JSON.stringify({sessionId:'722dc8',runId:'payment-skip',hypothesisId:'H3',location:'travel-invoice-gate.tsx:reuse-policy',message:'reuse existing policy_reference → payment',data:{purchaseId,existingPolicyReference},timestamp:Date.now()})}).catch(()=>{})
-      // #endregion
       setDraftReady(true)
       props.goToNextStep?.()
       return
@@ -111,12 +102,7 @@ export const TravelInvoiceGatePage: React.FC<CustomerVerificationDetailsProps> =
                 type="button"
                 disabled={draftMutation.isPending}
                 className="w-full min-w-[12rem] rounded-full border border-[#C20C0C] bg-transparent px-8 text-[#C20C0C] hover:bg-[#C20C0C]/10 sm:w-auto"
-                onClick={() => {
-                  // #region agent log
-                  fetch('http://127.0.0.1:7410/ingest/d44f0587-d252-4b9d-983a-196162e430ad',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'722dc8'},body:JSON.stringify({sessionId:'722dc8',runId:'payment-skip',hypothesisId:'H4',location:'travel-invoice-gate.tsx:continue-with-policy',message:'continue to payment with existing policy',data:{purchaseId,existingPolicyReference},timestamp:Date.now()})}).catch(()=>{})
-                  // #endregion
-                  props.goToNextStep?.()
-                }}
+                onClick={() => props.goToNextStep?.()}
               >
                 Continue to payment
               </Button>

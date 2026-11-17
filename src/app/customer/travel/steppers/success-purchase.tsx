@@ -220,9 +220,6 @@ export const TravelSuccessPurchase: React.FC<CustomerVerificationDetailsProps> =
     mutationOptions: {
       onSuccess: (data) => openPdfPreview(data, `${insurerName} Certificate`),
       onError: (error: unknown) => {
-        // #region agent log
-        fetch('http://127.0.0.1:7410/ingest/d44f0587-d252-4b9d-983a-196162e430ad',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'722dc8'},body:JSON.stringify({sessionId:'722dc8',runId:'embassy-docs',hypothesisId:'H6',location:'success-purchase.tsx:certificate',message:'certificate download failed',data:{purchaseSessionId,policyReference:summary?.cover?.policy_reference??null},timestamp:Date.now()})}).catch(()=>{})
-        // #endregion
         void showDocError(error)
       },
     },
@@ -241,9 +238,6 @@ export const TravelSuccessPurchase: React.FC<CustomerVerificationDetailsProps> =
       ShowToast.error('No purchase found.')
       return
     }
-    // #region agent log
-    fetch('http://127.0.0.1:7410/ingest/d44f0587-d252-4b9d-983a-196162e430ad',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'722dc8'},body:JSON.stringify({sessionId:'722dc8',runId:'embassy-docs',hypothesisId:'H1',location:'success-purchase.tsx:embassy',message:'embassy download clicked',data:{purchaseSessionId,isCannonCheckout},timestamp:Date.now()})}).catch(()=>{})
-    // #endregion
     embassyMutation.mutate()
   }
 
@@ -252,9 +246,6 @@ export const TravelSuccessPurchase: React.FC<CustomerVerificationDetailsProps> =
       ShowToast.error('No purchase found.')
       return
     }
-    // #region agent log
-    fetch('http://127.0.0.1:7410/ingest/d44f0587-d252-4b9d-983a-196162e430ad',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'722dc8'},body:JSON.stringify({sessionId:'722dc8',runId:'embassy-docs',hypothesisId:'H6',location:'success-purchase.tsx:certificate',message:'certificate download clicked',data:{purchaseSessionId,policyReference:summary?.cover?.policy_reference??null},timestamp:Date.now()})}).catch(()=>{})
-    // #endregion
     certificateMutation.mutate()
   }
 

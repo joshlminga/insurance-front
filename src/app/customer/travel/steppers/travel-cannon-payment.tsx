@@ -192,9 +192,6 @@ export const TravelCannonPaymentPage: React.FC<CustomerVerificationDetailsProps>
       return
     }
 
-    // #region agent log
-    fetch('http://127.0.0.1:7410/ingest/d44f0587-d252-4b9d-983a-196162e430ad',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'722dc8'},body:JSON.stringify({sessionId:'722dc8',runId:'payment-skip',hypothesisId:'H5',location:'travel-cannon-payment.tsx:onSubmit',message:'user started Cannon M-Pesa',data:{purchaseId,hasPolicyReference:Boolean(summary?.cover?.policy_reference),policyReference:summary?.cover?.policy_reference??null,phoneSuffix:phone.slice(-4)},timestamp:Date.now()})}).catch(()=>{})
-    // #endregion
     paymentMutation.mutate({ phone })
   }
 
