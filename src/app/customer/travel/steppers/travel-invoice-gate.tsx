@@ -3,96 +3,136 @@
  * and create the Cannon draft policy before the M-Pesa payment step.
  */
 import { TravelInvoicesPage } from '@/app/customer/travel/steppers/travel-invoices'
+import { Button } from '@/dev/core'
 import { UseApiMutation } from '@/hooks/hooks'
+import { useTravelCannonCheckout } from '@/hooks/use-travel-cannon-checkout'
 import type { CustomerVerificationDetailsProps, SubmitResponse } from '@/types/types'
-import {
-  EMETHODS,
-  PURCHASE_SESSION_STORAGE_KEY,
-  TRAVEL_CANNON_CHECKOUT_KEY,
-} from '@/utils/constatnts'
+import { EMETHODS } from '@/utils/constatnts'
 import { extractErrorMessage } from '@/utils/helpers'
 import { ShowToast } from '@/utils/utils'
 import React from 'react'
 
-const isCannonCheckout = () => {
-  if (typeof window === 'undefined') return false
-  return sessionStorage.getItem(TRAVEL_CANNON_CHECKOUT_KEY) === '1'
-}
-
-const readPurchaseId = () => {
-  if (typeof window === 'undefined') return null
-  return sessionStorage.getItem(PURCHASE_SESSION_STORAGE_KEY)
-}
-
 export const TravelInvoiceGatePage: React.FC<CustomerVerificationDetailsProps> = (props) => {
-  const [purchaseId] = React.useState(() => readPurchaseId())
+  const { purchaseId, isCannon, isResolving, summary } = useTravelCannonCheckout()
   const [draftReady, setDraftReady] = React.useState(false)
   const [draftFailed, setDraftFailed] = React.useState(false)
-  const cannon = isCannonCheckout()
+  // Prefer live insurer name from purchase summary; fall back for CannonKE checkout
+  const insurerName =
+    summary?.cover?.insurer_name?.trim() || (isCannon ? 'Cannon Insurance' : 'the insurer')
 
-  // Create Cannon draft once when leaving KYC so payment page has policyReference
+  const existingPolicyReference = summary?.cover?.policy_reference?.trim() || ''
+
+  // Create Cannon draft once so payment page has policyReference
   const draftMutation = UseApiMutation<SubmitResponse, Record<string, never>>({
     url: `purchase/travel/${purchaseId}/cannon/draft-policy`,
     method: EMETHODS.POST,
     mutationOptions: {
-      onSuccess: () => {
+      onSuccess: (data) => {
         setDraftReady(true)
+        // #region agent log
+        fetch('http://127.0.0.1:7410/ingest/d44f0587-d252-4b9d-983a-196162e430ad',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'722dc8'},body:JSON.stringify({sessionId:'722dc8',runId:'payment-skip',hypothesisId:'H1',location:'travel-invoice-gate.tsx:onSuccess',message:'draft ok → advance to payment',data:{purchaseId,policyFromResponse:(data as any)?.data?.policy_reference ?? (data as any)?.policy_reference ?? null,existingPolicyReference:existingPolicyReference||null},timestamp:Date.now()})}).catch(()=>{})
+        // #endregion
         props.goToNextStep?.()
       },
       onError: (error: unknown) => {
         setDraftFailed(true)
-        ShowToast.error(
+        const detail =
           extractErrorMessage(error) ||
-            'Could not create Cannon draft policy. You can retry or continue — payment will try again.',
-        )
+          `Could not create ${insurerName} draft policy. Retry after fixing the insurer error.`
+        // #region agent log
+        fetch('http://127.0.0.1:7410/ingest/d44f0587-d252-4b9d-983a-196162e430ad',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'722dc8'},body:JSON.stringify({sessionId:'722dc8',runId:'payment-skip',hypothesisId:'H2',location:'travel-invoice-gate.tsx:onError',message:'draft failed',data:{purchaseId,detail:String(detail).slice(0,240),existingPolicyReference:existingPolicyReference||null},timestamp:Date.now()})}).catch(()=>{})
+        // #endregion
+        ShowToast.error(`${insurerName} error (not Acensure): ${detail}`)
       },
     },
   })
 
   React.useEffect(() => {
-    if (!cannon || draftReady || draftFailed) {
+    if (!isCannon || isResolving || draftReady || draftFailed) {
       return
     }
     if (!purchaseId) {
-      // Still advance — payment step can draft if needed
+      props.goToNextStep?.()
+      return
+    }
+    // Already have a Cannon draft on this purchase — go straight to M-Pesa
+    if (existingPolicyReference) {
+      // #region agent log
+      fetch('http://127.0.0.1:7410/ingest/d44f0587-d252-4b9d-983a-196162e430ad',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'722dc8'},body:JSON.stringify({sessionId:'722dc8',runId:'payment-skip',hypothesisId:'H3',location:'travel-invoice-gate.tsx:reuse-policy',message:'reuse existing policy_reference → payment',data:{purchaseId,existingPolicyReference},timestamp:Date.now()})}).catch(()=>{})
+      // #endregion
+      setDraftReady(true)
       props.goToNextStep?.()
       return
     }
     draftMutation.mutate({} as Record<string, never>)
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- run once on mount for Cannon
-  }, [cannon, purchaseId])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run once when Cannon resolved
+  }, [isCannon, isResolving, purchaseId, existingPolicyReference])
 
-  if (cannon) {
+  if (isResolving) {
+    return (
+      <div className="mx-auto w-full max-w-lg py-10 text-center text-sm text-muted-foreground">
+        Checking checkout type…
+      </div>
+    )
+  }
+
+  if (isCannon) {
+    if (draftFailed) {
+      return (
+        <div className="mx-auto w-full max-w-lg space-y-4 py-10">
+          <div
+            role="alert"
+            className="rounded-md border border-[#C20C0C]/40 bg-[#FFF5F5] px-4 py-4 text-left text-sm text-[#7A0A0A]"
+          >
+            <p className="text-base font-semibold text-[#C20C0C]">
+              {insurerName} error — not an Acensure error
+            </p>
+            <p className="mt-1 text-[#7A0A0A]">
+              Draft creation failed at {insurerName}. M-Pesa cannot start without a draft policy
+              reference. Retry with a free KRA PIN, or resume the purchase that already owns this
+              KRA and complete payment there.
+            </p>
+          </div>
+          <div className="flex w-full flex-col gap-3 sm:flex-row sm:justify-center">
+            <Button
+              type="button"
+              loading={draftMutation.isPending}
+              disabled={draftMutation.isPending}
+              className="w-full min-w-[12rem] rounded-full bg-[#C20C0C]/90 px-8 text-white hover:bg-[#C20C0C] sm:w-auto"
+              onClick={() => {
+                setDraftFailed(false)
+                draftMutation.mutate({} as Record<string, never>)
+              }}
+            >
+              Retry draft
+            </Button>
+            {existingPolicyReference ? (
+              <Button
+                type="button"
+                disabled={draftMutation.isPending}
+                className="w-full min-w-[12rem] rounded-full border border-[#C20C0C] bg-transparent px-8 text-[#C20C0C] hover:bg-[#C20C0C]/10 sm:w-auto"
+                onClick={() => {
+                  // #region agent log
+                  fetch('http://127.0.0.1:7410/ingest/d44f0587-d252-4b9d-983a-196162e430ad',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'722dc8'},body:JSON.stringify({sessionId:'722dc8',runId:'payment-skip',hypothesisId:'H4',location:'travel-invoice-gate.tsx:continue-with-policy',message:'continue to payment with existing policy',data:{purchaseId,existingPolicyReference},timestamp:Date.now()})}).catch(()=>{})
+                  // #endregion
+                  props.goToNextStep?.()
+                }}
+              >
+                Continue to payment
+              </Button>
+            ) : null}
+          </div>
+        </div>
+      )
+    }
+
     return (
       <div className="mx-auto w-full max-w-lg space-y-4 py-10 text-center text-sm text-muted-foreground">
         <p>
           {draftMutation.isPending
             ? 'Creating Cannon draft policy…'
-            : draftFailed
-              ? 'Draft creation failed. Continuing to payment…'
-              : 'Preparing Cannon payment…'}
+            : 'Preparing Cannon payment…'}
         </p>
-        {draftFailed ? (
-          <button
-            type="button"
-            className="text-[#C20C0C] underline"
-            onClick={() => {
-              setDraftFailed(false)
-              draftMutation.mutate({} as Record<string, never>)
-            }}
-          >
-            Retry draft
-          </button>
-        ) : null}
-        {draftFailed ? (
-          <button
-            type="button"
-            className="ml-4 text-muted-foreground underline"
-            onClick={() => props.goToNextStep?.()}
-          >
-            Continue anyway
-          </button>
-        ) : null}
       </div>
     )
   }

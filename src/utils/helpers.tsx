@@ -22,6 +22,15 @@ export const currentDate = (): string => {
 export const extractErrorMessage = (error: any): string => {
   const response = error?.response?.data;
   if (response?.errors && typeof response.errors === "object") {
+    // Prefer Cannon/domain messages when present (avoid joining empty helper keys).
+    const cannon = response.errors.cannon
+    if (Array.isArray(cannon) && cannon.filter(Boolean).length > 0) {
+      return cannon.filter(Boolean).join("\n")
+    }
+    if (typeof cannon === "string" && cannon.trim() !== "") {
+      return cannon
+    }
+
     return Object.values(response.errors)
       .flat()
       .filter(Boolean)

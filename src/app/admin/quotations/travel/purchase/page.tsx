@@ -4,6 +4,7 @@ import { TravelPaymentGatePage } from '@/app/customer/travel/steppers/travel-pay
 import { TravelSuccessPurchase } from '@/app/customer/travel/steppers/success-purchase'
 import { TravelInvoiceGatePage } from '@/app/customer/travel/steppers/travel-invoice-gate'
 import { AdminTravelInvoicePayment } from '@/app/admin/quotations/travel/steppers/invoice-payment'
+import { useTravelCannonCheckout } from '@/hooks/use-travel-cannon-checkout'
 import { TRAVEL_CANNON_CHECKOUT_KEY } from '@/utils/constatnts'
 import {
     ADMIN_TRAVEL_PURCHASE_STEP_KEY,
@@ -20,9 +21,16 @@ import { resolveAdminTravelPayeeContact } from '../admin-travel-session'
 
 /** Admin travel purchase: KYC → Invoice → Payment → Success (same order as customer, no register/OTP). */
 const AdminTravelInvoiceGate = (props: React.ComponentProps<typeof AdminTravelInvoicePayment>) => {
-    const isCannon =
-        typeof window !== 'undefined' &&
-        sessionStorage.getItem(TRAVEL_CANNON_CHECKOUT_KEY) === '1'
+    // Resolve from purchase summary when session flag was lost (e.g. resume).
+    const { isCannon, isResolving } = useTravelCannonCheckout()
+
+    if (isResolving) {
+        return (
+            <div className="mx-auto w-full max-w-lg py-10 text-center text-sm text-muted-foreground">
+                Checking checkout type…
+            </div>
+        )
+    }
 
     if (isCannon) {
         return <TravelInvoiceGatePage {...props} />

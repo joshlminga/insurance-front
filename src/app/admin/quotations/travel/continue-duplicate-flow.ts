@@ -55,8 +55,18 @@ export function buildTravelDuplicateStartQuoteBody(
 
     const existingUserId = sourceUserId ?? (isSelf ? authId : null)
 
+    // Office-use validation requires country_id. Travel duplicate start_quote may omit it
+    // (sessions store country_id null); fall back to departure country.
+    const countryId =
+        sq.country_id != null && Number(sq.country_id) > 0
+            ? Number(sq.country_id)
+            : sq.country_of_departure != null && Number(sq.country_of_departure) > 0
+              ? Number(sq.country_of_departure)
+              : null
+
     return {
         ...sq,
+        country_id: countryId,
         quote_duplicate: payload.source_quote_session_id,
         user_id: existingUserId,
         is_guest: existingUserId == null,

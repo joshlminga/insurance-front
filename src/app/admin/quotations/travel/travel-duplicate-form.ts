@@ -49,8 +49,13 @@ export function travelFormValuesFromDuplicate(
             ? sq.travelers.map((traveler) => mapTraveler(traveler))
             : [blankTraveler()]
 
+    // Prefer explicit office country; else departure (travel sessions often leave country_id null).
     const quoteCountry =
-        sq.country_id != null && text(sq.country_id) !== '' ? text(sq.country_id) : ''
+        sq.country_id != null && text(sq.country_id) !== ''
+            ? text(sq.country_id)
+            : sq.country_of_departure != null && text(sq.country_of_departure) !== ''
+              ? text(sq.country_of_departure)
+              : ''
 
     return {
         full_name: fullName,

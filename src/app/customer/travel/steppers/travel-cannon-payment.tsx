@@ -2,9 +2,14 @@
 /**
  * Cannon Travel M-Pesa payment — insurer-direct STK (no Acensure invoice/Pesapal).
  * Shows amount due / quote summary, then payment/travel/{id}/cannon/payment + status poll.
+ *
+ * Phone UI: fixed +254 prefix | local digits. Leading 0 is stripped; API gets 2547XXXXXXXX.
  */
+import { normalizeLocalPhoneDigits } from '@/app/admin/quotations/motor/customer-lookup-utils'
 import { CardFooter } from '@/components/ui/card'
-import { Button, ReuseableInput } from '@/dev/core'
+import { Field, FieldError, FieldLabel } from '@/components/ui/field'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/dev/core'
 import { UseApiMutation, UseApiQuery } from '@/hooks/hooks'
 import { useActionWaitHold } from '@/hooks/use-action-wait-hold'
 import type { CustomerVerificationDetailsProps, SubmitResponse } from '@/types/types'
@@ -15,12 +20,22 @@ import {
 } from '@/utils/constatnts'
 import { extractErrorMessage } from '@/utils/helpers'
 import { ShowToast } from '@/utils/utils'
-import { ArrowLeftCircle, ArrowRightCircle } from 'lucide-react'
+import { ArrowLeftCircle } from 'lucide-react'
 import React from 'react'
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 
 type CannonPaymentForm = {
-  phone: string
+  /** Local KE digits only (no leading 0) — e.g. 708549604 */
+  phoneLocal: string
+}
+
+const KE_DIAL = '254'
+const KE_LOCAL_MAX = 9
+
+/** Build Cannon payload phone: 254XXXXXXXX (no +). */
+function toCannonMpesaPhone(localDigits: string): string {
+  const local = normalizeLocalPhoneDigits(localDigits)
+  return local ? `${KE_DIAL}${local}` : ''
 }
 
 type TravelSummaryData = {
@@ -93,7 +108,7 @@ export const TravelCannonPaymentPage: React.FC<CustomerVerificationDetailsProps>
 
   const form = useForm<CannonPaymentForm>({
     defaultValues: {
-      phone: '',
+      phoneLocal: '',
     },
   })
 
@@ -120,7 +135,7 @@ export const TravelCannonPaymentPage: React.FC<CustomerVerificationDetailsProps>
   const amountDue =
     summary?.cover?.premium?.total_premium ?? summary?.total_premium ?? null
 
-  const paymentMutation = UseApiMutation<SubmitResponse, CannonPaymentForm>({
+  const paymentMutation = UseApiMutation<SubmitResponse, { phone: string }>({
     url: `purchase/travel/${purchaseId}/cannon/payment`,
     method: EMETHODS.POST,
     mutationOptions: {
@@ -166,7 +181,21 @@ export const TravelCannonPaymentPage: React.FC<CustomerVerificationDetailsProps>
       ShowToast.error('No active purchase session found.')
       return
     }
-    paymentMutation.mutate({ phone: data.phone })
+
+    const phone = toCannonMpesaPhone(data.phoneLocal)
+    // KE mobile local part is 9 digits (7xxxxxxxx) → full 254 + 9 = 12
+    if (!/^254[17]\d{8}$/.test(phone)) {
+      form.setError('phoneLocal', {
+        type: 'manual',
+        message: 'Enter a valid M-Pesa number (e.g. 708549604).',
+      })
+      return
+    }
+
+    // #region agent log
+    fetch('http://127.0.0.1:7410/ingest/d44f0587-d252-4b9d-983a-196162e430ad',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'722dc8'},body:JSON.stringify({sessionId:'722dc8',runId:'payment-skip',hypothesisId:'H5',location:'travel-cannon-payment.tsx:onSubmit',message:'user started Cannon M-Pesa',data:{purchaseId,hasPolicyReference:Boolean(summary?.cover?.policy_reference),policyReference:summary?.cover?.policy_reference??null,phoneSuffix:phone.slice(-4)},timestamp:Date.now()})}).catch(()=>{})
+    // #endregion
+    paymentMutation.mutate({ phone })
   }
 
   return (
@@ -234,13 +263,56 @@ export const TravelCannonPaymentPage: React.FC<CustomerVerificationDetailsProps>
         </div>
 
         <div className="max-w-md space-y-4">
-          <ReuseableInput
-            className="h-10 w-full rounded-[5px] border border-[#ADABAB]"
+          {/* +254 | local number — same idea as admin motor phone input */}
+          <Controller
             control={form.control}
-            name="phone"
-            label="M-Pesa phone number"
-            placeholder="2547XXXXXXXX"
-            required
+            name="phoneLocal"
+            rules={{ required: 'M-Pesa phone number is required' }}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel>
+                  M-Pesa phone number
+                  <span className="ml-1 text-red-500">*</span>
+                </FieldLabel>
+                <div
+                  className={`flex h-10 w-full overflow-hidden rounded-[5px] border border-[#ADABAB] bg-white ${
+                    fieldState.invalid ? 'border-red-500' : ''
+                  }`}
+                >
+                  <span
+                    className="flex shrink-0 items-center border-r border-[#ADABAB] bg-neutral-50 px-3 text-xs font-medium text-muted-foreground"
+                    aria-hidden
+                  >
+                    +{KE_DIAL}
+                  </span>
+                  <Input
+                    {...field}
+                    type="tel"
+                    inputMode="numeric"
+                    autoComplete="tel-national"
+                    placeholder="7XX XXX XXX"
+                    aria-invalid={fieldState.invalid}
+                    className="h-full min-w-0 flex-1 rounded-none border-0 text-sm shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                    value={field.value ?? ''}
+                    onChange={(e) => {
+                      // Digits only; strip leading 0 (07… → 7…)
+                      const digits = normalizeLocalPhoneDigits(
+                        e.target.value.replace(/\D/g, ''),
+                      )
+                      field.onChange(digits.slice(0, KE_LOCAL_MAX))
+                    }}
+                  />
+                </div>
+                <p className="mt-1 text-xs italic text-muted-foreground">
+                  Enter the number without country code. A leading 0 is removed automatically.
+                </p>
+                {fieldState.invalid && fieldState.error ? (
+                  <FieldError className="mt-1 text-sm text-red-500">
+                    {fieldState.error.message}
+                  </FieldError>
+                ) : null}
+              </Field>
+            )}
           />
 
           {paymentStarted ? (
@@ -250,24 +322,23 @@ export const TravelCannonPaymentPage: React.FC<CustomerVerificationDetailsProps>
           ) : null}
         </div>
 
-        <CardFooter className="mt-6 flex flex-col gap-3 px-0 sm:flex-row sm:justify-between">
+        <CardFooter className="mt-6 flex w-full flex-col gap-3 px-0 sm:flex-row sm:justify-between">
           <Button
             type="button"
-            variant="outline"
+            className="w-full min-w-[12rem] rounded-full border border-[#C20C0C] bg-transparent px-8 text-[#C20C0C] hover:bg-[#C20C0C]/10 sm:w-auto"
+            leftIcon={<ArrowLeftCircle />}
             onClick={() => goToPrevStep?.()}
-            className="w-full sm:w-auto"
+            disabled={paymentMutation.isPending}
           >
-            <ArrowLeftCircle className="mr-2 h-4 w-4" />
             Previous
           </Button>
           <Button
             type="submit"
             loading={paymentMutation.isPending}
             disabled={paymentMutation.isPending || paymentStarted}
-            className="w-full bg-[#C20C0C] text-white hover:bg-[#C20C0C]/90 sm:w-auto"
+            className="w-full min-w-[12rem] rounded-full bg-[#C20C0C]/90 px-8 text-white hover:bg-[#C20C0C] sm:w-auto"
           >
             {paymentStarted ? 'Waiting for PIN…' : 'Pay with M-Pesa'}
-            <ArrowRightCircle className="ml-2 h-4 w-4" />
           </Button>
         </CardFooter>
       </div>

@@ -1,10 +1,11 @@
 /**
  * Travel payment step gate — CannonKE uses insurer M-Pesa page; others use shared payment options.
+ * Detects Cannon from session flag OR purchase summary (so resume/admin still works).
  */
 import { TravelCannonPaymentPage } from '@/app/customer/travel/steppers/travel-cannon-payment'
 import { TravelPaymentOptionsPage } from '@/app/customer/travel/steppers/travel-payment-options'
+import { useTravelCannonCheckout } from '@/hooks/use-travel-cannon-checkout'
 import type { CustomerVerificationDetailsProps } from '@/types/types'
-import { TRAVEL_CANNON_CHECKOUT_KEY } from '@/utils/constatnts'
 import React from 'react'
 
 type TravelPaymentGateProps = CustomerVerificationDetailsProps & {
@@ -12,13 +13,18 @@ type TravelPaymentGateProps = CustomerVerificationDetailsProps & {
   includeCreditPayment?: boolean
 }
 
-const isCannonCheckout = () => {
-  if (typeof window === 'undefined') return false
-  return sessionStorage.getItem(TRAVEL_CANNON_CHECKOUT_KEY) === '1'
-}
-
 export const TravelPaymentGatePage: React.FC<TravelPaymentGateProps> = (props) => {
-  if (isCannonCheckout()) {
+  const { isCannon, isResolving } = useTravelCannonCheckout()
+
+  if (isResolving) {
+    return (
+      <div className="mx-auto w-full max-w-lg py-10 text-center text-sm text-muted-foreground">
+        Checking payment options…
+      </div>
+    )
+  }
+
+  if (isCannon) {
     return <TravelCannonPaymentPage {...props} />
   }
 
