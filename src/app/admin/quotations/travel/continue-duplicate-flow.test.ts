@@ -88,6 +88,8 @@ describe('continueAdminTravelDuplicateFlow', () => {
                 user_id: 9,
                 is_guest: false,
                 bound: 'Outbound',
+                // Office-use requires country_id; falls back from country_of_departure
+                country_id: 1,
             })
         )
         expect(result).toEqual({

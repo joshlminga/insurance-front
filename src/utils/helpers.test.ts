@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import { BENEFIT_SELECT_NONE } from "./constatnts"
 import {
     canPurchaseCover,
+    canPurchaseTravelCover,
     collectBenefitIdsFromValues,
     defaultBenefitSelectValue,
     formatAllOrRange,
@@ -249,6 +250,40 @@ describe("canPurchaseCover", () => {
         expect(canPurchaseCover({})).toBe(false)
         expect(canPurchaseCover(null)).toBe(false)
         expect(canPurchaseCover(undefined)).toBe(false)
+    })
+})
+
+describe("canPurchaseTravelCover", () => {
+    it("allows local offers by default", () => {
+        expect(canPurchaseTravelCover({})).toBe(true)
+        expect(canPurchaseTravelCover({ allow_purchase: false })).toBe(false)
+    })
+
+    it("allows CannonKE only when allow_purchase is true", () => {
+        expect(
+            canPurchaseTravelCover({
+                is_external: true,
+                allow_purchase: true,
+                external: { payload_prefix: "CannonKE" },
+            }),
+        ).toBe(true)
+        expect(
+            canPurchaseTravelCover({
+                is_external: true,
+                allow_purchase: false,
+                external: { payload_prefix: "CannonKE" },
+            }),
+        ).toBe(false)
+    })
+
+    it("blocks other external offers", () => {
+        expect(
+            canPurchaseTravelCover({
+                is_external: true,
+                allow_purchase: true,
+                external: { payload_prefix: "BritamKE" },
+            }),
+        ).toBe(false)
     })
 })
 

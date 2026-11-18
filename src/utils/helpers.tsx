@@ -22,6 +22,15 @@ export const currentDate = (): string => {
 export const extractErrorMessage = (error: any): string => {
   const response = error?.response?.data;
   if (response?.errors && typeof response.errors === "object") {
+    // Prefer Cannon/domain messages when present (avoid joining empty helper keys).
+    const cannon = response.errors.cannon
+    if (Array.isArray(cannon) && cannon.filter(Boolean).length > 0) {
+      return cannon.filter(Boolean).join("\n")
+    }
+    if (typeof cannon === "string" && cannon.trim() !== "") {
+      return cannon
+    }
+
     return Object.values(response.errors)
       .flat()
       .filter(Boolean)
@@ -504,6 +513,45 @@ export function benefitIdsEqual(a: number[], b: number[]): boolean {
 /** API sets allow_purchase on premium/comparison rows when DMVIC stock is ready for this insurer office. */
 export function canPurchaseCover(item: { allow_purchase?: boolean } | null | undefined): boolean {
     return item?.allow_purchase === true
+}
+
+type TravelOfferLike = {
+    allow_purchase?: boolean
+    is_external?: boolean
+    external?: {
+        payload_prefix?: string | null
+        payment_methods?: string[] | null
+    } | null
+} | null | undefined
+
+/** CannonKE external travel offer (insurer-direct checkout). */
+export function isCannonTravelOffer(item: TravelOfferLike): boolean {
+    return item?.is_external === true && item?.external?.payload_prefix === 'CannonKE'
+}
+
+/**
+ * Local travel offers: purchasable unless allow_purchase is explicitly false.
+ * CannonKE: only when allow_purchase is true (payment_api + M-Pesa configured).
+ * Other externals: blocked until their checkout exists.
+ */
+export function canPurchaseTravelCover(item: TravelOfferLike): boolean {
+    if (item == null) {
+        return false
+    }
+
+    if (isCannonTravelOffer(item)) {
+        return item.allow_purchase === true
+    }
+
+    if (item.is_external === true) {
+        return false
+    }
+
+    if (item.allow_purchase === false) {
+        return false
+    }
+
+    return true
 }
 
 export const installmentText = (invoice: MotorUserCoverInvoice) =>

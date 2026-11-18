@@ -18,7 +18,6 @@ import { Slider } from '@/components/ui/slider'
 import {
   Button,
   CustomDialogComponent,
-  EmptyState,
   ReusableCard,
   ReusablePagination,
   SkeletonCard,
@@ -36,8 +35,13 @@ import {
   MAX_COMPARISONS,
   PURCHASE_SESSION_STORAGE_KEY,
   ReusableReducer,
+  TRAVEL_CANNON_CHECKOUT_KEY,
 } from '@/utils/constatnts'
-import { extractErrorMessage } from '@/utils/helpers'
+import {
+  canPurchaseTravelCover,
+  extractErrorMessage,
+  isCannonTravelOffer,
+} from '@/utils/helpers'
 import {
   buildTravelComparisonRequest,
   nextTravelQuoteSelection,
@@ -453,7 +457,7 @@ export const TravelQuotationsPage: React.FC<
     appliedPriceRange,
   ])
 
-  const { data, isPending, isFetching } = UseApiQuery<SubmitResponse>({
+  const { data, isPending, isFetching, isError, error } = UseApiQuery<SubmitResponse>({
     url: premiumUrl,
     params: premiumQueryParams as Record<string, unknown>,
     queryOptions: {
@@ -509,16 +513,28 @@ export const TravelQuotationsPage: React.FC<
     },
   })
 
-  const onPurchase = (productId: number | string, rateId: number | string) => {
+  const onPurchase = (item: any) => {
     if (!quoteSessionId) {
       ShowToast.error('No active quote session found.')
       return
     }
+    const productId = item?.product_id ?? item?.product?.id
+    const rateId = item?.rate_id ?? item?.id
     if (productId == null || rateId == null) {
       ShowToast.error('Missing product or rate for this offer.')
       return
     }
+    if (!canPurchaseTravelCover(item)) {
+      ShowToast.error('Purchase is not available for this offer yet.')
+      return
+    }
     setPurchasingRateId(rateId)
+    // Remember Cannon-direct checkout so invoice/payment steps can divert.
+    if (isCannonTravelOffer(item)) {
+      sessionStorage.setItem(TRAVEL_CANNON_CHECKOUT_KEY, '1')
+    } else {
+      sessionStorage.removeItem(TRAVEL_CANNON_CHECKOUT_KEY)
+    }
     // Admin duplicate stores the source session id. Customer quotes never set that key.
     const quoteDuplicate = readAdminTravelDuplicateSourceId()
     submitPurchaseMutation.mutate({
@@ -869,6 +885,7 @@ export const TravelQuotationsPage: React.FC<
                   className="flex w-full items-center justify-center gap-2 sm:w-auto"
                   onClick={() => setFilterSheetOpen(true)}
                   leftIcon={<ListFilter className="h-4 w-4" />}
+                  disabled={isFetching || !quoteSessionId}
                 >
                   Filters
                 </Button>
@@ -881,7 +898,11 @@ export const TravelQuotationsPage: React.FC<
                   submitComparisonMutation.isPending ||
                   submitComparisonDownloadMutation.isPending
                 }
-                disabled={selectedQuotes.length < 2 || !quoteSessionId}
+                disabled={
+                  isFetching ||
+                  selectedQuotes.length < 2 ||
+                  !quoteSessionId
+                }
               >
                 Generate Comparison
                 {selectedQuotes.length > 0 &&
@@ -897,7 +918,19 @@ export const TravelQuotationsPage: React.FC<
                 ))
               : quotationItems.length === 0
                 ? (
-                    <EmptyState />
+                    <div className="col-span-full flex flex-col items-center justify-center gap-2 py-16 text-center">
+                      <p className="text-sm font-medium text-gray-700">
+                        {isError
+                          ? 'Unable to load travel quotations'
+                          : 'No quotations available'}
+                      </p>
+                      <p className="max-w-sm text-xs text-gray-500">
+                        {isError
+                          ? extractErrorMessage(error) ||
+                            'Check the quote session and try again.'
+                          : 'Complete trip details and start a quotation to see travel premiums.'}
+                      </p>
+                    </div>
                   )
                 : quotationItems.map((item: any, itemIndex: number) => {
                     const logo = insurerLogo(item)
@@ -970,7 +1003,7 @@ export const TravelQuotationsPage: React.FC<
                             <Button
                               type="button"
                               variant="outline"
-                              onClick={() => onPurchase(productId, rateId)}
+                              onClick={() => onPurchase(item)}
                               loading={
                                 submitPurchaseMutation.isPending &&
                                 purchasingRateId === rateId
@@ -979,8 +1012,7 @@ export const TravelQuotationsPage: React.FC<
                                 !quoteSessionId ||
                                 productId == null ||
                                 rateId == null ||
-                                item?.is_external === true ||
-                                item?.allow_purchase === false ||
+                                !canPurchaseTravelCover(item) ||
                                 (submitPurchaseMutation.isPending &&
                                   purchasingRateId !== rateId)
                               }

@@ -87,9 +87,9 @@ export const AdminTravelInvoicePayment: React.FC<AdminTravelStepProps> = ({
     >
       <div className="rounded-2xl border border-[#ADABAB]/50 bg-linear-to-b from-white to-neutral-50/90 p-4 shadow-sm sm:p-6">
         <div className="flex flex-col gap-0.5 pb-3">
-          <h2 className="text-base font-semibold sm:text-lg">Invoice details</h2>
+          <h2 className="text-base font-semibold sm:text-lg">Payment details</h2>
           <p className="text-xs text-muted-foreground sm:text-sm">
-            Confirm who receives the invoice and when cover starts.
+            Enter Payer information, the invoice will be under these details.
           </p>
         </div>
 

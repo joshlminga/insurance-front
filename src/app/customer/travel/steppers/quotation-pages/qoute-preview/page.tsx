@@ -22,9 +22,10 @@ import type { SubmitResponse } from '@/types/types'
 import {
   EMETHODS,
   PURCHASE_SESSION_STORAGE_KEY,
+  TRAVEL_CANNON_CHECKOUT_KEY,
   WHATSAPP_SHARE_ENABLED,
 } from '@/utils/constatnts'
-import { extractErrorMessage } from '@/utils/helpers'
+import { extractErrorMessage, isCannonTravelOffer } from '@/utils/helpers'
 import { TRAVEL_QUOTE_SESSION_STORAGE_KEY } from '@/utils/travel-enums'
 import {
   clearAdminTravelDuplicatePrefill,
@@ -153,6 +154,12 @@ export const TravelQuotePreviewPage = ({
     if (payload.product_id == null || payload.rate_id == null) {
       ShowToast.error('Missing product or rate for this offer.')
       return
+    }
+    // Same as results-card purchase: mark Cannon-direct checkout for invoice/payment gates.
+    if (isCannonTravelOffer(item)) {
+      sessionStorage.setItem(TRAVEL_CANNON_CHECKOUT_KEY, '1')
+    } else {
+      sessionStorage.removeItem(TRAVEL_CANNON_CHECKOUT_KEY)
     }
     const quoteDuplicate = readAdminTravelDuplicateSourceId()
     submitPurchaseMutation.mutate({

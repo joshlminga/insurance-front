@@ -1590,16 +1590,32 @@ const TravelKycTravelerSchema = z.object({
     .min(2, "Passport number is required")
     .max(30, "Passport number cannot exceed 30 characters"),
 
-  // Mandatory next of kin (per traveller)
+  // Cannon policy enums (also used for non-Cannon; harmless extras)
+  gender: z.enum(["Male", "Female"], {
+    required_error: "Gender is required",
+    invalid_type_error: "Gender must be Male or Female",
+  }),
+
+  relationship: z.enum(["Self", "Husband", "Wife", "Parent", "Child"], {
+    required_error: "Relationship is required",
+    invalid_type_error: "Select a valid relationship",
+  }),
+
+  medical_condition: z.enum(["None"], {
+    required_error: "Medical condition is required",
+    invalid_type_error: "Medical condition must be None for now",
+  }),
+
+  // Emergency contact for Cannon (next of kin)
   next_of_kin_name: z
     .string()
-    .min(2, "Next of kin name is required")
-    .max(191, "Next of kin name cannot exceed 191 characters"),
+    .min(2, "Emergency contact name is required")
+    .max(191, "Emergency contact name cannot exceed 191 characters"),
 
   next_of_kin_phone: z
     .string()
-    .min(1, "Next of kin phone is required")
-    .max(50, "Next of kin phone cannot exceed 50 characters"),
+    .min(1, "Emergency contact phone is required")
+    .max(50, "Emergency contact phone cannot exceed 50 characters"),
 
   // Mandatory Personal KRA PIN (same format rule as Motor KYC)
   tax_number: KraPinSchema,
@@ -1620,6 +1636,31 @@ export const TravelKycSchema = z.object({
     .array(TravelKycTravelerSchema)
     .min(1, "At least one traveller is required"),
 })
+
+/**
+ * When travel_as is Individual, principal relationship must be Self.
+ * Call from the KYC page with travel_as from the quote session.
+ */
+export const refineTravelKycPrincipalSelf = (
+  schema: typeof TravelKycSchema,
+  travelAs: string | null | undefined,
+) => {
+  const normalized = String(travelAs ?? "individual").trim().toLowerCase()
+  if (normalized === "family" || normalized === "group") {
+    return schema
+  }
+
+  return schema.superRefine((data, ctx) => {
+    const principal = data.travelers[0]
+    if (principal && principal.relationship !== "Self") {
+      ctx.addIssue({
+        code: "custom",
+        message: "The principal traveller relationship must be Self",
+        path: ["travelers", 0, "relationship"],
+      })
+    }
+  })
+}
 export const CreateDmvicStockSchema = z.object({
   // Insurer office (API field insurer_location_id). Broker org comes from X-Organization-Location-Id.
   // Stock is not typed here. The API sets the starting count.
